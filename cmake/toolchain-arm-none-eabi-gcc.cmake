@@ -1,22 +1,11 @@
 cmake_minimum_required(VERSION 3.13)
-include(FetchContent)
-
-FetchContent_Declare(
-    gcc-arm-none-eabi
-    URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2
-    URL_HASH SHA256=5adc2ee03904571c2de79d5cfc0f7fe2a5c5f54f44da5b645c17ee57b217f11f
-)
-FetchContent_GetProperties(gcc-arm-none-eabi)
-if (NOT gcc-arm-none-eabi_POPULATED)
-    FetchContent_Populate(gcc-arm-none-eabi)
-endif()
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-get_filename_component(CMAKE_C_COMPILER ${gcc-arm-none-eabi_SOURCE_DIR}/bin/arm-none-eabi-gcc REALPATH)
-get_filename_component(CMAKE_CXX_COMPILER ${gcc-arm-none-eabi_SOURCE_DIR}/bin/arm-none-eabi-g++ REALPATH)
+get_filename_component(CMAKE_C_COMPILER ${CMAKE_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH)
+get_filename_component(CMAKE_CXX_COMPILER ${CMAKE_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH)
 
 execute_process(
     COMMAND ${CMAKE_C_COMPILER} -print-libgcc-file-name

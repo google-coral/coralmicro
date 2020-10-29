@@ -7,3 +7,6 @@
 [submodule "third_party/nxp/rt1176-sdk"]
 	path = third_party/nxp/rt1176-sdk
 	url = https://github.com/google-coral/coralmicro-rt1176-sdk
+[submodule "third_party/toolchain"]
+	path = third_party/toolchain
+	url = https://spacepark.googlesource.com/valiant/toolchain
