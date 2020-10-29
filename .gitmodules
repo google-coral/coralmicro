@@ -4,3 +4,6 @@
 [submodule "third_party/CMSIS"]
 	path = third_party/CMSIS
 	url = https://github.com/ARM-software/CMSIS_5.git
+[submodule "third_party/nxp/rt1176-sdk"]
+	path = third_party/nxp/rt1176-sdk
+	url = https://github.com/google-coral/coralmicro-rt1176-sdk
