@@ -7,6 +7,8 @@
 
 #include "clock_config.h"
 #include "fsl_iomuxc.h"
+#include "fsl_dcdc.h"
+#include "fsl_pmu.h"
 #include "board.h"
 
 /*******************************************************************************
@@ -31,55 +33,15 @@ void BOARD_InitBootClocks(void)
  ********************** Configuration BOARD_BootClockRUN ***********************
  ******************************************************************************/
 
-#ifndef SKIP_DCDC_ADJUSTMENT
-#if __CORTEX_M == 4
+#ifndef SKIP_POWER_ADJUSTMENT
+#if __CORTEX_M == 7
+#define BYPASS_LDO_LPSR 1
+#define SKIP_LDO_ADJUSTMENT 1
+#elif __CORTEX_M == 4
 #define SKIP_DCDC_ADJUSTMENT 1
+#define SKIP_FBB_ENABLE 1
 #endif
 #endif
-
-/* 1.0 v */
-#define DCDC_TARGET_VOLTAGE_1V 1000
-/* 1.15 v */
-#define DCDC_TARGET_VOLTAGE_1P15V 1150
-
-#ifndef DCDC_TARGET_VOLTAGE
-#define DCDC_TARGET_VOLTAGE DCDC_TARGET_VOLTAGE_1P15V
-#endif
-
-/*
- * TODO:
- *   replace the following two dcdc function with SDK DCDC driver when it's
- * ready
- */
-/*******************************************************************************
- * Code for getting current DCDC voltage setting
- ******************************************************************************/
-uint32_t dcdc_get_target_voltage()
-{
-    uint32_t temp = DCDC->CTRL1;
-    temp          = (temp & DCDC_CTRL1_VDD1P0CTRL_TRG_MASK) >> DCDC_CTRL1_VDD1P0CTRL_TRG_SHIFT;
-    return (temp * 25 + 600);
-}
-
-/*******************************************************************************
- * Code for setting DCDC to target voltage
- ******************************************************************************/
-void dcdc_trim_target_1p0(uint32_t target_voltage)
-{
-    uint8_t trim_value;
-    uint32_t temp;
-
-    trim_value = (target_voltage - 600) / 25;
-    temp       = DCDC->CTRL1;
-    if ((temp & DCDC_CTRL1_VDD1P0CTRL_TRG(trim_value)) == DCDC_CTRL1_VDD1P0CTRL_TRG(trim_value))
-    {
-        return;
-    }
-
-    temp &= ~DCDC_CTRL1_VDD1P0CTRL_TRG_MASK;
-    temp |= DCDC_CTRL1_VDD1P0CTRL_TRG(trim_value);
-    DCDC->CTRL1 = temp;
-}
 
 /*******************************************************************************
  * Code for BOARD_BootClockRUN configuration
@@ -89,20 +51,37 @@ void BOARD_BootClockRUN(void)
     clock_root_config_t rootCfg = {0};
 
 #if !defined(SKIP_DCDC_ADJUSTMENT) || (!SKIP_DCDC_ADJUSTMENT)
-    dcdc_trim_target_1p0(DCDC_TARGET_VOLTAGE);
+    DCDC_SetVDD1P0BuckModeTargetVoltage(DCDC, kDCDC_1P0BuckTarget1P15V);
+#endif
+
+#if !defined(SKIP_FBB_ENABLE) || (!SKIP_FBB_ENABLE)
+    pmu_static_body_bias_config_t config;
+    
+    PMU_StaticGetCm7FBBDefaultConfig(&config);
+    PMU_StaticCm7FBBInit(ANADIG_PMU, &config);
 #endif
 
 #if defined(BYPASS_LDO_LPSR) && BYPASS_LDO_LPSR
-    CLOCK_ANATOP_LdoLpsrAnaBypassOn();
-    CLOCK_ANATOP_LdoLpsrDigBypassOn();
+    PMU_StaticSetLpsrAnaLdoBypassMode(ANADIG_LDO_SNVS, kPMU_LpsrAnaLdoBypassMode1);
+    PMU_StaticEnableLpsrDigLdoBypassMode(ANADIG_LDO_SNVS, true);
 #endif
 
-#if __CORTEX_M == 7
-    /* ARM PLL 996 MHz. */
-    const clock_arm_pll_config_t armPllConfig = {
-        .postDivider = kCLOCK_PllPostDiv2,
-        .loopDivider = 166,
-    };
+#if !defined(SKIP_LDO_ADJUSTMENT) || (!SKIP_LDO_ADJUSTMENT)
+    pmu_static_lpsr_ana_ldo_config_t lpsrAnaConfig;
+    pmu_static_lpsr_dig_config_t lpsrDigConfig;
+
+    if((ANADIG_LDO_SNVS->PMU_LDO_LPSR_ANA & ANADIG_LDO_SNVS_PMU_LDO_LPSR_ANA_BYPASS_MODE_EN_MASK) == 0UL)
+    {
+        PMU_StaticGetLpsrAnaLdoDefaultConfig(&lpsrAnaConfig);
+        PMU_StaticLpsrAnaLdoInit(ANADIG_LDO_SNVS, &lpsrAnaConfig);
+    }
+
+    if((ANADIG_LDO_SNVS->PMU_LDO_LPSR_DIG & ANADIG_LDO_SNVS_PMU_LDO_LPSR_DIG_BYPASS_MODE_MASK) == 0UL)
+    {
+        PMU_StaticGetLpsrDigLdoDefaultConfig(&lpsrDigConfig);
+        lpsrDigConfig.targetVoltage = kPMU_LpsrDigTargetStableVoltage1P117V;
+        PMU_StaticLpsrDigLdoInit(ANADIG_LDO_SNVS, &lpsrDigConfig);
+    }
 #endif
 
     /* SYS PLL2 528MHz. */
@@ -122,20 +101,23 @@ void BOARD_BootClockRUN(void)
 
 #if __CORTEX_M == 7
     rootCfg.mux = kCLOCK_M7_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_M7, &rootCfg);
     CLOCK_SetRootClock(kCLOCK_Root_M7_Systick, &rootCfg);
 
-    /* ARMPll: 996M */
-    CLOCK_InitArmPll(&armPllConfig);
+#if defined(CONSUMER_SERIES)
+    CLOCK_InitArmPllWithFreq(1000);
+#elif defined(AUTOMOTIVE_SERIES) || defined(INDUSTRIAL_SERIES)
+    CLOCK_InitArmPllWithFreq(800);
+#endif
     /* Configure M7 */
     rootCfg.mux = kCLOCK_M7_ClockRoot_MuxArmPllOut;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_M7, &rootCfg);
 
     /* Configure M7 Systick running at 10K */
     rootCfg.mux = kCLOCK_M7_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 239;
+    rootCfg.div = 240;
     CLOCK_SetRootClock(kCLOCK_Root_M7_Systick, &rootCfg);
 #endif
     CLOCK_InitSysPll2(&sysPllConfig);
@@ -143,17 +125,17 @@ void BOARD_BootClockRUN(void)
 
 #if __CORTEX_M == 4
     rootCfg.mux = kCLOCK_M4_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_M4, &rootCfg);
     CLOCK_SetRootClock(kCLOCK_Root_Bus_Lpsr, &rootCfg);
 
     CLOCK_InitPfd(kCLOCK_PllSys3, kCLOCK_Pfd3, 22);
     /* Configure M4 using SysPll3Pfd3 divided by 1 */
     rootCfg.mux = kCLOCK_M4_ClockRoot_MuxSysPll3Pfd3;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_M4, &rootCfg);
 
-    /* SysPll3 divide by 4 */
+    /* SysPll3 divide by 3 */
     rootCfg.mux = kCLOCK_BUS_LPSR_ClockRoot_MuxSysPll3Out;
     rootCfg.div = 3;
     CLOCK_SetRootClock(kCLOCK_Root_Bus_Lpsr, &rootCfg);
@@ -162,12 +144,12 @@ void BOARD_BootClockRUN(void)
 #if DEBUG_CONSOLE_UART_INDEX == 1
     /* Configure Lpuart1 using SysPll2*/
     rootCfg.mux = kCLOCK_LPUART1_ClockRoot_MuxSysPll2Out;
-    rootCfg.div = 21;
+    rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart1, &rootCfg);
 #else
     /* Configure Lpuart2 using SysPll2*/
     rootCfg.mux = kCLOCK_LPUART2_ClockRoot_MuxSysPll2Out;
-    rootCfg.div = 21;
+    rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart2, &rootCfg);
 #endif
 
@@ -175,48 +157,48 @@ void BOARD_BootClockRUN(void)
     CLOCK_InitPfd(kCLOCK_PllSys2, kCLOCK_Pfd1, 16);
     /* Configure Semc using SysPll2Pfd1 divided by 3 */
     rootCfg.mux = kCLOCK_SEMC_ClockRoot_MuxSysPll2Pfd1;
-    rootCfg.div = 2;
+    rootCfg.div = 3;
     CLOCK_SetRootClock(kCLOCK_Root_Semc, &rootCfg);
 #endif
 
-    /* Configure Bus using SysPll3 divided by 4 */
+    /* Configure Bus using SysPll3 divided by 2 */
     rootCfg.mux = kCLOCK_BUS_ClockRoot_MuxSysPll3Out;
-    rootCfg.div = 1;
+    rootCfg.div = 2;
     CLOCK_SetRootClock(kCLOCK_Root_Bus, &rootCfg);
 
     /* Configure Lpi2c1 using Osc48MDiv2 */
     rootCfg.mux = kCLOCK_LPI2C1_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Lpi2c1, &rootCfg);
 
     /* Configure Lpi2c5 using Osc48MDiv2 */
     rootCfg.mux = kCLOCK_LPI2C5_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Lpi2c5, &rootCfg);
 
     /* Configure gpt timer using Osc48MDiv2 */
     rootCfg.mux = kCLOCK_GPT1_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Gpt1, &rootCfg);
 
     /* Configure gpt timer using Osc48MDiv2 */
     rootCfg.mux = kCLOCK_GPT2_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Gpt2, &rootCfg);
 
     /* Configure lpspi using Osc48MDiv2 */
     rootCfg.mux = kCLOCK_LPSPI1_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Lpspi1, &rootCfg);
 
     /* Configure flexio using Osc48MDiv2 */
     rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Flexio2, &rootCfg);
 
     /* Configure emvsim using Osc48MDiv2 */
     rootCfg.mux = kCLOCK_EMV1_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 0;
+    rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Emv1, &rootCfg);
 
 #if __CORTEX_M == 7

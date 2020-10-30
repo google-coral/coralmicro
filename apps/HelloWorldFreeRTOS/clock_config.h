@@ -13,6 +13,26 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#if (defined(CPU_MIMXRT1171AVM8A) ||                                           \
+     defined(CPU_MIMXRT1172AVM8A) ||                                           \
+     defined(CPU_MIMXRT1175AVM8A_cm7) || defined(CPU_MIMXRT1175AVM8A_cm4) ||   \
+     defined(CPU_MIMXRT1176AVM8A_cm7) || defined(CPU_MIMXRT1176AVM8A_cm4))
+#define AUTOMOTIVE_SERIES
+#elif (defined(CPU_MIMXRT1171CVM8A) ||                                         \
+       defined(CPU_MIMXRT1172CVM8A) ||                                         \
+       defined(CPU_MIMXRT1173CVM8A_cm7) || defined(CPU_MIMXRT1173CVM8A_cm4) || \
+       defined(CPU_MIMXRT1175CVM8A_cm7) || defined(CPU_MIMXRT1175CVM8A_cm4) || \
+       defined(CPU_MIMXRT1176CVM8A_cm7) || defined(CPU_MIMXRT1176CVM8A_cm4))
+#define INDUSTRIAL_SERIES
+#elif (defined(CPU_MIMXRT1171DVMAA) ||                                         \
+       defined(CPU_MIMXRT1172DVMAA) ||                                         \
+       defined(CPU_MIMXRT1175DVMAA_cm7) || defined(CPU_MIMXRT1175DVMAA_cm4) || \
+       defined(CPU_MIMXRT1176DVMAA_cm7) || defined(CPU_MIMXRT1176DVMAA_cm4))
+#define CONSUMER_SERIES
+#else
+#error "No valid CPU defined!"
+#endif
+
 #define BOARD_XTAL0_CLK_HZ 24000000U /*!< Board xtal0 frequency in Hz */
 
 #define BOARD_XTAL32K_CLK_HZ 32768U /*!< Board xtal32k frequency in Hz */
