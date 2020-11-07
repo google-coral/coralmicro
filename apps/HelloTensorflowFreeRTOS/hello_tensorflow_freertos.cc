@@ -3,20 +3,21 @@
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/examples/hello_world/model.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tensorflow/tensorflow/lite/version.h"
 
+#include <cstdio>
+
 // Run Tensorflow's DebugLog to the debug console.
 extern "C" void DebugLog(const char *s) {
-    PRINTF(s);
+    printf(s);
 }
 
 extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    PRINTF("Stack overflow in %s\r\n", pcTaskName);
+    printf("Stack overflow in %s\r\n", pcTaskName);
 }
 
 namespace {
@@ -62,7 +63,7 @@ static void loop() {
     }
 }
 static void hello_task(void *param) {
-    PRINTF("Starting inference task...\r\n");
+    printf("Starting inference task...\r\n");
     while (true) {
         loop();
         taskYIELD();
@@ -106,7 +107,7 @@ int main(int argc, char** argv) {
     // Set our stack size sufficiently large to accomodate.
     ret = xTaskCreate(hello_task, "HelloTask", configMINIMAL_STACK_SIZE * 3, NULL, configMAX_PRIORITIES - 1, NULL);
     if (ret != pdPASS) {
-        PRINTF("Failed to start HelloTask\r\n");
+        printf("Failed to start HelloTask\r\n");
     }
 
     vTaskStartScheduler();

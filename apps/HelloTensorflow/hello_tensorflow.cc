@@ -1,7 +1,6 @@
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/peripherals.h"
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/examples/hello_world/model.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
@@ -10,7 +9,7 @@
 
 // Run Tensorflow's DebugLog to the debug console.
 extern "C" void DebugLog(const char *s) {
-    PRINTF(s);
+    printf(s);
 }
 
 namespace {

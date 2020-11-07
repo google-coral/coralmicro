@@ -6,6 +6,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.h"
 
 #include <algorithm>
+#include <cstdio>
 
 static usb_host_instance_t* gHostInstance = nullptr;
 static usb_device_handle gDFUDeviceHandle;
@@ -65,7 +66,7 @@ usb_status_t USB_DFUHostEvent(usb_host_handle host_handle, usb_device_handle dev
             return kStatus_USB_Success;
         case kUSB_HostEventDetach:
             gDFUState = DFU_STATE_UNATTACHED;
-            PRINTF("Detached DFU\r\n");
+            printf("Detached DFU\r\n");
             return kStatus_USB_Success;
         default:
             return kStatus_USB_Success;
@@ -77,7 +78,7 @@ static void USB_DFUSetInterfaceCallback(void *param,
                                         uint32_t data_length,
                                         usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUSetInterface\r\n");
+        printf("Error in DFUSetInterface\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -89,7 +90,7 @@ static void USB_DFUGetStatusCallback(void *param,
                                      uint32_t data_length,
                                      usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUGetStatus\r\n");
+        printf("Error in DFUGetStatus\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -106,7 +107,7 @@ static void USB_DFUTransferCallback(void *param,
                                     uint32_t data_length,
                                     usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUTransfer\r\n");
+        printf("Error in DFUTransfer\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -114,7 +115,7 @@ static void USB_DFUTransferCallback(void *param,
     gDFUCurrentBlockNum++;
     gDFUBytesTransferred += data_length;
     if (gDFUCurrentBlockNum % 10 == 0 || gDFUBytesTransferred == gDFUBytesToTransfer) {
-        PRINTF("Transferred %d bytes\r\n", gDFUBytesTransferred);
+        printf("Transferred %d bytes\r\n", gDFUBytesTransferred);
     }
     gDFUState = DFU_STATE_GET_STATUS;
 }
@@ -124,7 +125,7 @@ static void USB_DFUZeroLengthTransferCallback(void *param,
                                               uint32_t data_length,
                                               usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUZeroLengthTransfer\r\n");
+        printf("Error in DFUZeroLengthTransfer\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -139,7 +140,7 @@ static void USB_DFUReadBackCallback(void *param,
                                     uint32_t data_length,
                                     usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUReadBack\r\n");
+        printf("Error in DFUReadBack\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -147,7 +148,7 @@ static void USB_DFUReadBackCallback(void *param,
     gDFUCurrentBlockNum++;
     gDFUBytesTransferred += data_length;
     if (gDFUCurrentBlockNum % 10 == 0 || gDFUBytesTransferred == gDFUBytesToTransfer) {
-        PRINTF("Read back %d bytes\r\n", gDFUBytesTransferred);
+        printf("Read back %d bytes\r\n", gDFUBytesTransferred);
     }
     gDFUState = DFU_STATE_GET_STATUS_READ;
 }
@@ -157,7 +158,7 @@ static void USB_DFUGetStatusReadCallback(void *param,
                                          uint32_t data_length,
                                          usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUGetStatusRead\r\n");
+        printf("Error in DFUGetStatusRead\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -166,7 +167,7 @@ static void USB_DFUGetStatusReadCallback(void *param,
         gDFUState = DFU_STATE_READ_BACK;
     } else {
         if (memcmp(apex_latest_single_ep_bin, gDFUReadBackData, apex_latest_single_ep_bin_len) != 0) {
-            PRINTF("Read back firmware does not match!\r\n");
+            printf("Read back firmware does not match!\r\n");
             gDFUState = DFU_STATE_ERROR;
         } else {
             gDFUState = DFU_STATE_DETACH;
@@ -183,7 +184,7 @@ static void USB_DFUDetachCallback(void *param,
                                   uint32_t data_length,
                                   usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUDetach\r\n");
+        printf("Error in DFUDetach\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -195,7 +196,7 @@ static void USB_DFUCheckStatusCallback(void *param,
                                        uint32_t data_length,
                                        usb_status_t status) {
     if (status != kStatus_USB_Success) {
-        PRINTF("Error in DFUCheckStatus\r\n");
+        printf("Error in DFUCheckStatus\r\n");
         gDFUState = DFU_STATE_ERROR;
         return;
     }
@@ -304,11 +305,11 @@ void USB_DFUTask() {
         case DFU_STATE_WAIT:
             break;
         case DFU_STATE_ERROR:
-            PRINTF("DFU error\r\n");
+            printf("DFU error\r\n");
             while (true);
             break;
         default:
-            PRINTF("Unhandled DFU state %d\r\n", gDFUState);
+            printf("Unhandled DFU state %d\r\n", gDFUState);
             while (true);
             break;
     }

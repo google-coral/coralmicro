@@ -4,10 +4,11 @@
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/MIMXRT1176_cm7.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.h"
+
+#include <cstdio>
 
 constexpr int kUSBControllerId = kUSB_ControllerEhci0;
 static usb_host_handle gUSBHostHandle;
@@ -23,7 +24,7 @@ static usb_status_t USB_HostEvent(usb_device_handle device_handle,
     uint32_t vid, pid;
     USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDeviceVID, &vid);
     USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDevicePID, &pid);
-    PRINTF("USB_HostEvent event_code: %d vid: 0x%x pid: 0x%x\r\n",
+    printf("USB_HostEvent event_code: %lu vid: 0x%lx pid: 0x%lx\r\n",
            event_code, vid, pid);
     usb_status_t ret = kStatus_USB_Error;
     switch (event_code) {
@@ -65,7 +66,7 @@ static void USB_HostApplicationInit() {
 
     status = USB_HostInit(kUSBControllerId, &gUSBHostHandle, USB_HostEvent);
     if (status != kStatus_USB_Success) {
-        PRINTF("USB_HostInit failed\r\n");
+        printf("USB_HostInit failed\r\n");
         return;
     }
 
@@ -75,7 +76,7 @@ static void USB_HostApplicationInit() {
 
     uint32_t usb_version;
     USB_HostGetVersion(&usb_version);
-    PRINTF("USB host stack version: %d.%d.%d\r\n", (usb_version >> 16) & 0xFF, (usb_version >> 8) & 0xFF, usb_version & 0xFF);
+    printf("USB host stack version: %lu.%lu.%lu\r\n", (usb_version >> 16) & 0xFF, (usb_version >> 8) & 0xFF, usb_version & 0xFF);
 }
 
 int main(int argc, char** argv) {
