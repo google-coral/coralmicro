@@ -1,6 +1,6 @@
-#include "apps/HelloWorld/board.h"
-#include "apps/HelloWorld/peripherals.h"
-#include "apps/HelloWorld/pin_mux.h"
+#include "libs/nxp/rt1176-sdk/board.h"
+#include "libs/nxp/rt1176-sdk/peripherals.h"
+#include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 
 int main(int argc, char** argv) {
