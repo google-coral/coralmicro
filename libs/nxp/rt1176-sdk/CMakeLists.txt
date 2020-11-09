@@ -4,9 +4,11 @@ enable_language(ASM)
 
 set(libs_nxp_rt1176-sdk_SOURCES
     board.c
+    board_hardware.c
     clock_config.c
     peripherals.c
     pin_mux.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_port_uart.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/uart/fsl_adapter_lpuart.c
@@ -33,6 +35,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
 )
 
 set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
+    OSA_USED
     SDK_DEBUGCONSOLE_UART
     SERIAL_PORT_TYPE_UART=1
     USB_HOST_CONFIG_DFU
@@ -41,6 +44,7 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
 set(libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES
     ${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/xip
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/common_task
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager

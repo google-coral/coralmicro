@@ -3,6 +3,7 @@
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/examples/hello_world/model.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
@@ -70,12 +71,7 @@ static void hello_task(void *param) {
     }
 }
 
-int main(int argc, char** argv) {
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
-    BOARD_InitDebugConsole();
-
+extern "C" void main_task(osa_task_param_t *arg) {
     static tflite::MicroErrorReporter micro_error_reporter;
     error_reporter = &micro_error_reporter;
     TF_LITE_REPORT_ERROR(error_reporter, "HelloTensorflowFreeRTOS!");
@@ -85,7 +81,7 @@ int main(int argc, char** argv) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",
             model->version(), TFLITE_SCHEMA_VERSION);
-        return -1;
+        return;
     }
 
     static tflite::AllOpsResolver resolver;
@@ -96,7 +92,7 @@ int main(int argc, char** argv) {
     TfLiteStatus allocate_status = interpreter->AllocateTensors();
     if (allocate_status != kTfLiteOk) {
         TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors failed.");
-        return -2;
+        return;
     }
 
     input = interpreter->input(0);
@@ -109,8 +105,7 @@ int main(int argc, char** argv) {
     if (ret != pdPASS) {
         printf("Failed to start HelloTask\r\n");
     }
-
-    vTaskStartScheduler();
-    while (true);
-    return 0;
+    while (true) {
+        taskYIELD();
+    }
 }

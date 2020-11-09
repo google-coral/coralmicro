@@ -1,15 +1,7 @@
-#include "libs/nxp/rt1176-sdk/board.h"
-#include "libs/nxp/rt1176-sdk/peripherals.h"
-#include "libs/nxp/rt1176-sdk/pin_mux.h"
-
+#include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include <cstdio>
 
-int main(int argc, char** argv) {
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
-    BOARD_InitDebugConsole();
+extern "C" void main_task(osa_task_param_t arg) {
     printf("Hello world.\r\n");
-    while (true);
-    return 0;
+    while(true);
 }

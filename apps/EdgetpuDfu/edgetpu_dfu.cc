@@ -1,8 +1,7 @@
 #include "apps/EdgetpuDfu/dfu.h"
 #include "libs/nxp/rt1176-sdk/board.h"
-#include "libs/nxp/rt1176-sdk/peripherals.h"
-#include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
+#include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/MIMXRT1176_cm7.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
@@ -79,17 +78,11 @@ static void USB_HostApplicationInit() {
     printf("USB host stack version: %lu.%lu.%lu\r\n", (usb_version >> 16) & 0xFF, (usb_version >> 8) & 0xFF, usb_version & 0xFF);
 }
 
-int main(int argc, char** argv) {
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
-    BOARD_InitDebugConsole();
-
+extern "C" void main_task(osa_task_param_t arg) {
     USB_HostApplicationInit();
 
     while (true) {
         USB_HostEhciTaskFunction(gUSBHostHandle);
         USB_DFUTask();
     }
-    return 0;
 }
