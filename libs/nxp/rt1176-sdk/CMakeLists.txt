@@ -70,6 +70,7 @@ add_library(libs_nxp_rt1176-sdk_bm OBJECT
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk_bm PUBLIC
+    FSL_OSA_BM_TIMER_CONFIG=FSL_OSA_BM_TIMER_SYSTICK
     ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
 )
 

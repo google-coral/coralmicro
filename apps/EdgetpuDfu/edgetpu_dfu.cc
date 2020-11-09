@@ -79,6 +79,7 @@ static void USB_HostApplicationInit() {
 }
 
 extern "C" void main_task(osa_task_param_t arg) {
+    USB_DFUTaskInit();
     USB_HostApplicationInit();
 
     while (true) {

@@ -11,6 +11,7 @@ extern unsigned char apex_latest_single_ep_bin[];
 extern unsigned int apex_latest_single_ep_bin_len;
 
 void USB_DFUTask();
+void USB_DFUTaskInit();
 
 usb_status_t USB_DFUHostEvent(usb_host_handle host_handle, usb_device_handle device_handle,
                               usb_host_configuration_handle config_handle,
