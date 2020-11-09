@@ -28,19 +28,19 @@ static usb_status_t USB_HostEvent(usb_device_handle device_handle,
     usb_status_t ret = kStatus_USB_Error;
     switch (event_code) {
         case kUSB_HostEventAttach:
-            ret = USB_DFUHostEvent(gUSBHostHandle, device_handle, config_handle, event_code);
+            ret = valiant::EdgeTpuDfuTask::GetSingleton()->USB_DFUHostEvent(gUSBHostHandle, device_handle, config_handle, event_code);
             if (ret == kStatus_USB_Success) {
                 device_class = 1;
             }
             return ret;
         case kUSB_HostEventEnumerationDone:
             if (device_class == 1) {
-                ret = USB_DFUHostEvent(gUSBHostHandle, device_handle, config_handle, event_code);
+                ret = valiant::EdgeTpuDfuTask::GetSingleton()->USB_DFUHostEvent(gUSBHostHandle, device_handle, config_handle, event_code);
             }
             return ret;
         case kUSB_HostEventDetach:
             if (device_class == 1) {
-                ret = USB_DFUHostEvent(gUSBHostHandle, device_handle, config_handle, event_code);
+                ret = valiant::EdgeTpuDfuTask::GetSingleton()->USB_DFUHostEvent(gUSBHostHandle, device_handle, config_handle, event_code);
             }
             device_class = 0;
             return ret;
@@ -79,11 +79,10 @@ static void USB_HostApplicationInit() {
 }
 
 extern "C" void main_task(osa_task_param_t arg) {
-    USB_DFUTaskInit();
     USB_HostApplicationInit();
 
     while (true) {
         USB_HostEhciTaskFunction(gUSBHostHandle);
-        USB_DFUTask();
+        valiant::EdgeTpuDfuTask::GetSingleton()->USB_DFUTask();
     }
 }
