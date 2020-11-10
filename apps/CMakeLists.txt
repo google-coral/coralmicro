@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 add_subdirectory(EdgetpuDfu)
+add_subdirectory(EdgetpuDfuFreeRTOS)
 add_subdirectory(HelloTensorflow)
 add_subdirectory(HelloTensorflowFreeRTOS)
 add_subdirectory(HelloWorld)
