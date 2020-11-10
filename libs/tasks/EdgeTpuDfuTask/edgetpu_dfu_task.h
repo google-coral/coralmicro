@@ -1,5 +1,5 @@
-#ifndef _APPS_EDGETPUDFU_DFU_H_
-#define _APPS_EDGETPUDFU_DFU_H_
+#ifndef _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
+#define _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
 
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"

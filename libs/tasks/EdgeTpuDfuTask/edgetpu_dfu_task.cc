@@ -1,4 +1,4 @@
-#include "apps/EdgetpuDfu/dfu.h"
+#include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
 #include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
