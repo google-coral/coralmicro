@@ -41,7 +41,7 @@ class EdgeTpuDfuTask {
         return &task;
     }
 
-    void USB_DFUTask();
+    void EdgeTpuDfuTaskFn();
 
     // USB event handler
     usb_status_t USB_DFUHostEvent(usb_host_handle host_handle, usb_device_handle device_handle,

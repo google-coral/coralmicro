@@ -1,4 +1,5 @@
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
+#include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
@@ -7,6 +8,9 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <functional>
+
+using namespace std::placeholders;
 
 namespace valiant {
 
@@ -193,9 +197,11 @@ void EdgeTpuDfuTask::CheckStatusCallback(void *param,
 
 EdgeTpuDfuTask::EdgeTpuDfuTask() {
     OSA_MsgQCreate((osa_msgq_handle_t)message_queue_, 1U, sizeof(uint32_t));
+    valiant::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(kDfuVid, kDfuPid,
+            std::bind(&EdgeTpuDfuTask::USB_DFUHostEvent, this, _1, _2, _3, _4));
 }
 
-void EdgeTpuDfuTask::USB_DFUTask() {
+void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
     usb_status_t ret;
     uint32_t transfer_length;
     enum dfu_state next_state;

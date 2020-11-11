@@ -13,5 +13,6 @@ target_include_directories(EdgetpuDfuFreeRTOS PRIVATE
 target_link_libraries(EdgetpuDfuFreeRTOS
     libs_nxp_rt1176-sdk_freertos
     libs_tasks_EdgeTpuDfuTask_freertos
+    libs_tasks_UsbHostTask_freertos
 )
 target_sources(EdgetpuDfuFreeRTOS PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)
