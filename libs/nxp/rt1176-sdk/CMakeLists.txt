@@ -6,6 +6,8 @@ set(libs_nxp_rt1176-sdk_SOURCES
     board.c
     board_hardware.c
     clock_config.c
+    evkmimxrt1170_flexspi_nor_config.c
+    fsl_flexspi_nor_boot.c
     peripherals.c
     pin_mux.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
