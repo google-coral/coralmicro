@@ -7,9 +7,9 @@
 
 #include <cstdio>
 
-constexpr int kUSBControllerId = kUSB_ControllerEhci0;
+constexpr int kUSBControllerId = kUSB_ControllerEhci1;
 
-extern "C" void USB_OTG1_IRQHandler(void) {
+extern "C" void USB_OTG2_IRQHandler(void) {
     USB_HostEhciIsrFunction(valiant::UsbHostTask::GetSingleton()->host_handle());
 }
 
@@ -58,7 +58,7 @@ void UsbHostTask::RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid, usb_h
     uint32_t vidpid = vidpid_to_key(vid, pid);
     host_event_callbacks_[vidpid] = fn;
 
-    IRQn_Type irqNumber = USB_OTG1_IRQn;
+    IRQn_Type irqNumber = USB_OTG2_IRQn;
     NVIC_SetPriority(irqNumber, 6);
     NVIC_EnableIRQ(irqNumber);
 }
@@ -72,8 +72,8 @@ UsbHostTask::UsbHostTask() {
         BOARD_USB_PHY_TXCAL45DM,
     };
 
-    CLOCK_EnableUsbhs0PhyPllClock(kCLOCK_Usbphy480M, usbClockFreq);
-    CLOCK_EnableUsbhs0Clock(kCLOCK_Usb480M, usbClockFreq);
+    CLOCK_EnableUsbhs1PhyPllClock(kCLOCK_Usbphy480M, usbClockFreq);
+    CLOCK_EnableUsbhs1Clock(kCLOCK_Usb480M, usbClockFreq);
     USB_EhciPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phyConfig);
 
     status = USB_HostInit(kUSBControllerId, &host_handle_, USB_HostEvent);
