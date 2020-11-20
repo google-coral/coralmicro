@@ -129,7 +129,11 @@ void vGenerateSecondaryToPrimaryInterrupt(void*);
 #if defined(__ICCARM__)||defined(__CC_ARM)||defined(__GNUC__)
     /* in Kinetis SDK, this contains the system core clock frequency */
     #include <stdint.h>
+#if defined(__cplusplus)
+    extern "C" uint32_t SystemCoreClock;
+#else
     extern uint32_t SystemCoreClock;
+#endif
 #endif
 
 /* Interrupt nesting behaviour configuration. Cortex-M specific. */

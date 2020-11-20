@@ -220,7 +220,7 @@ void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
             }
             break;
         case DFU_STATE_SET_INTERFACE:
-            ret = USB_HostDfuSetInterface(class_handle(), 
+            ret = USB_HostDfuSetInterface(class_handle(),
                                           interface_handle(),
                                           0,
                                           EdgeTpuDfuTask::SetInterfaceCallback,
@@ -289,7 +289,7 @@ void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
             }
             break;
         case DFU_STATE_COMPLETE:
-            USB_HostDfuDeinit(device_handle(), class_handle());
+            ret = USB_HostDfuDeinit(device_handle(), class_handle());
             SetClassHandle(nullptr);
             USB_HostEhciResetBus((usb_host_ehci_instance_t*)host_instance()->controllerHandle);
             USB_HostTriggerReEnumeration(device_handle());

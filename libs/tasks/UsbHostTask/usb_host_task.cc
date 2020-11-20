@@ -3,6 +3,7 @@
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
 #include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.h"
 
 #include <cstdio>
@@ -28,12 +29,11 @@ usb_status_t UsbHostTask::HostEvent(usb_device_handle device_handle,
                                   usb_host_configuration_handle config_handle,
                                   uint32_t event_code) {
     uint32_t vid, pid, vidpid;
-    usb_status_t ret = kStatus_USB_Error;
 
     USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDeviceVID, &vid);
     USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDevicePID, &pid);
-    printf("USB_HostEvent event_code: %lu vid: 0x%lx pid: 0x%lx\r\n",
-           event_code, vid, pid);
+    printf("USB_HostEvent event_code: %lu status: %lu vid: 0x%lx pid: 0x%lx\r\n",
+           event_code & 0xFFFF, event_code >> 16, vid, pid);
 
     vidpid = vidpid_to_key(vid, pid);
     if (host_event_callbacks_.find(vidpid) == host_event_callbacks_.end()) {
@@ -41,17 +41,7 @@ usb_status_t UsbHostTask::HostEvent(usb_device_handle device_handle,
     }
     usb_host_event_callback callback_fn = host_event_callbacks_[vidpid];
 
-    switch (event_code) {
-        case kUSB_HostEventAttach:
-            ret = callback_fn(host_handle(), device_handle, config_handle, event_code);
-        case kUSB_HostEventEnumerationDone:
-            ret = callback_fn(host_handle(), device_handle, config_handle, event_code);
-        case kUSB_HostEventDetach:
-            ret = callback_fn(host_handle(), device_handle, config_handle, event_code);
-        default:
-            break;
-    }
-    return ret;
+    return callback_fn(host_handle(), device_handle, config_handle, event_code);
 }
 
 void UsbHostTask::RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid, usb_host_event_callback fn) {

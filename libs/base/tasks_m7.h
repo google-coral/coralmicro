@@ -1,6 +1,7 @@
 #ifndef __LIBS_BASE_TASKS_M7_H__
 #define __LIBS_BASE_TASKS_M7_H__
 
+#include "libs/FreeRTOS/FreeRTOSConfig.h"
 #define IPC_TASK_PRIORITY           (configMAX_PRIORITIES - 1)
 #define CONSOLE_TASK_PRIORITY       (configMAX_PRIORITIES - 2)
 #define APP_TASK_PRIORITY           (configMAX_PRIORITIES - 2)

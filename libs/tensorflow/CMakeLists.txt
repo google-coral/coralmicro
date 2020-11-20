@@ -89,3 +89,9 @@ add_library_m7(libs_tensorflow_model_hello_world STATIC
 target_include_directories(libs_tensorflow_model_hello_world PUBLIC
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow
 )
+
+add_library_m7(libs_tensorflow_model_testconv1 STATIC
+    testconv1_edgetpu.c
+    testconv1_expected_output.c
+    testconv1_test_input.c
+)

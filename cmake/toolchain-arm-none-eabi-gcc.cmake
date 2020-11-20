@@ -30,6 +30,7 @@ find_program(CMAKE_XXD_PROGRAM xxd REQUIRED)
 
 set(COMMON_C_FLAGS
     "-Wall"
+    "-Wno-psabi"
     "-mthumb"
     "-fno-common"
     "-ffunction-sections"
@@ -99,7 +100,7 @@ unset(CMAKE_EXE_LINKER_FLAGS)
 set(CMAKE_C_FLAGS "${COMMON_C_FLAGS_STR} -std=gnu99" CACHE STRING "" FORCE)
 set(CMAKE_C_FLAGS_DEBUG "${COMMON_C_FLAGS_DEBUG_STR}" CACHE STRING "" FORCE)
 set(CMAKE_C_FLAGS_RELEASE "${COMMON_C_FLAGS_RELEASE_STR}" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS "${COMMON_C_FLAGS_STR} -fno-rtti -fno-exceptions -std=gnu++11" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "${COMMON_C_FLAGS_STR} -fno-rtti -fno-exceptions -std=gnu++14" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_C_FLAGS_DEBUG_STR}" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_C_FLAGS_RELEASE_STR}" CACHE STRING "" FORCE)
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_LINK_FLAGS_STR} -Xlinker --gc-sections -Xlinker -Map=output.map" CACHE STRING "" FORCE)

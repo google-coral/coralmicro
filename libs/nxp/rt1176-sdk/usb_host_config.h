@@ -63,7 +63,7 @@
  * @brief the max endpoint for one interface.
  * the max endpoint descriptor number that one interface descriptor contain.
  */
-#define USB_HOST_CONFIG_INTERFACE_MAX_EP (4U)
+#define USB_HOST_CONFIG_INTERFACE_MAX_EP (6U)
 
 /*!
  * @brief the max interface for one configuration.

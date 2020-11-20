@@ -2,6 +2,7 @@
 #ifndef _USB_HOST_EDGETPU_H_
 #define _USB_HOST_EDGETPU_H_
 #include "usb.h"
+#include "usb_host_config.h"
 #include "usb_host.h"
 #include "usb_spec.h"
 

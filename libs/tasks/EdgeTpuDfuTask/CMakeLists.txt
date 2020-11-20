@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(libs_tasks_EdgeTpuDfuTask_SOURCES
+    apex_latest_single_ep_bin.c
     edgetpu_dfu_task.cc
 )
 
