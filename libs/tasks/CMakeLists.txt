@@ -1,3 +1,4 @@
 cmake_minimum_required(VERSION 3.13)
 add_subdirectory(EdgeTpuDfuTask)
+add_subdirectory(UsbDeviceTask)
 add_subdirectory(UsbHostTask)

@@ -25,6 +25,8 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/system_MIMXRT1176_cm7.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/str/fsl_str.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_dci.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_ehci.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_hub.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_hub_app.c
@@ -32,6 +34,9 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_ehci.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_framework.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/usb_device_ch9.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.c
     ${libs_CMSIS_SOURCES}
 )
@@ -41,6 +46,7 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
     SDK_DEBUGCONSOLE_UART
     SERIAL_PORT_TYPE_UART=1
     USB_HOST_CONFIG_DFU
+    __STARTUP_CLEAR_BSS
 )
 
 set(libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES
@@ -56,9 +62,12 @@ set(libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/str
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/xip
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/include
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/phy
 )
 
