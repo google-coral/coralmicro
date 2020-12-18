@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-add_library(libs_tensorflow STATIC
+add_library_m7(libs_tensorflow STATIC
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/c/common.c
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/error_reporter.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/flatbuffer_conversions.cc
@@ -62,7 +62,7 @@ target_link_libraries(libs_tensorflow
     libs_ruy
 )
 
-add_library(libs_tensorflow_model_hello_world STATIC
+add_library_m7(libs_tensorflow_model_hello_world STATIC
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/examples/hello_world/model.cc
 )
 target_include_directories(libs_tensorflow_model_hello_world PUBLIC

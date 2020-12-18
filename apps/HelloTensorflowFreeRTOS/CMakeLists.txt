@@ -3,7 +3,7 @@ project(HelloTensorflowFreeRTOS)
 
 include_directories(.)
 
-add_executable(HelloTensorflowFreeRTOS
+add_executable_m7(HelloTensorflowFreeRTOS
     hello_tensorflow_freertos.cc
 )
 

@@ -3,7 +3,7 @@ project(HelloWorldFreeRTOS)
 
 include_directories(.)
 
-add_executable(HelloWorldFreeRTOS
+add_executable_m7(HelloWorldFreeRTOS
     hello_world_freertos.cc
 )
 

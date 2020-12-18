@@ -9,7 +9,7 @@ It's recommended to have CMake put all artifacts into a build directory to not d
 ```
 mkdir -p build
 cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-arm-none-eabi-gcc.cmake ..
+cmake ..
 make
 ```
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(CdcAcm)
 
-add_executable(CdcAcm
+add_executable_m7(CdcAcm
     cdc_acm.cc
 )
 

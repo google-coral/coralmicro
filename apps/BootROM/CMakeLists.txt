@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(BootROM)
 
-add_executable(BootROM
+add_executable_m7(BootROM
     boot_rom.cc
 )
 

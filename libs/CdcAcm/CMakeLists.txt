@@ -4,14 +4,14 @@ set(libs_CdcAcm_SOURCES
     cdc_acm.cc
 )
 
-# add_library(libs_CdcAcm_bm STATIC
+# add_library_m7(libs_CdcAcm_bm STATIC
 #     ${libs_CdcAcm_SOURCES}
 # )
 # target_link_libraries(libs_CdcAcm_bm
 #     libs_nxp_rt1176-sdk_bm
 # )
 
-add_library(libs_CdcAcm_freertos STATIC
+add_library_m7(libs_CdcAcm_freertos STATIC
     ${libs_CdcAcm_SOURCES}
 )
 target_link_libraries(libs_CdcAcm_freertos
