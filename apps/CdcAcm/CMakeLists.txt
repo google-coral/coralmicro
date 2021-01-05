@@ -10,8 +10,8 @@ target_include_directories(CdcAcm PRIVATE
 )
 
 target_link_libraries(CdcAcm
-    libs_CdcAcm_freertos
     libs_nxp_rt1176-sdk_freertos
+    libs_CdcAcm_freertos
     libs_tasks_UsbDeviceTask_freertos
 )
 target_sources(CdcAcm PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)

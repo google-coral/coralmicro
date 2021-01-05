@@ -125,6 +125,9 @@ function(add_executable_m4)
         DEPENDS ${ARGV0}
         BYPRODUCTS ${ARGV0}.bin ${ARGV0}.obj
     )
+    add_custom_command(OUTPUT ${ARGV0}.obj
+        DEPENDS ${ARGV0}
+    )
 endfunction()
 
 function(add_library_m4)
