@@ -61,6 +61,11 @@ set(CM7_C_FLAGS
 )
 list(JOIN CM7_C_FLAGS " " CM7_C_FLAGS_STR)
 
+set(COMMON_LINK_FLAGS
+    "-Xlinker" "--defsym=__use_shmem__=1"
+)
+list(JOIN COMMON_LINK_FLAGS " " COMMON_LINK_FLAGS_STR)
+
 set(CM7_LINK_FLAGS
     "-mcpu=cortex-m7"
     "-mfloat-abi=hard"
@@ -97,7 +102,7 @@ set(CMAKE_C_FLAGS_RELEASE "${COMMON_C_FLAGS_RELEASE_STR}" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS "${COMMON_C_FLAGS_STR} -fno-rtti -fno-exceptions -std=gnu++11" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_C_FLAGS_DEBUG_STR}" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_C_FLAGS_RELEASE_STR}" CACHE STRING "" FORCE)
-set(CMAKE_EXE_LINKER_FLAGS "-Xlinker --gc-sections -Xlinker -Map=output.map" CACHE STRING "" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS "${COMMON_LINK_FLAGS_STR} -Xlinker --gc-sections -Xlinker -Map=output.map" CACHE STRING "" FORCE)
 
 function(add_executable_m7)
     add_executable(${ARGV})

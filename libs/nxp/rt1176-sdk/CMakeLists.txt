@@ -63,6 +63,7 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
     USB_HOST_CONFIG_DFU
     __STARTUP_CLEAR_BSS
     __STARTUP_INITIALIZE_NONCACHEDATA
+    __USE_SHMEM
 )
 
 set(libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS
@@ -158,9 +159,22 @@ add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
     ${libs_FreeRTOS_SOURCES}
 )
 
+add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
+    ${libs_nxp_rt1176-sdk-m4_SOURCES}
+    ${libs_nxp_rt1176-sdk_SOURCES}
+    ${libs_FreeRTOS-m4_SOURCES}
+)
+
 target_compile_definitions(libs_nxp_rt1176-sdk_freertos PUBLIC
     FSL_RTOS_FREE_RTOS
     ${libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS}
+    ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
+)
+
+target_compile_definitions(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC
+    FSL_RTOS_FREE_RTOS
+    ${libs_nxp_rt1176-sdk-m4_COMPILE_DEFINITIONS}
     ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
 )
 
@@ -169,8 +183,20 @@ target_include_directories(libs_nxp_rt1176-sdk_freertos PUBLIC
     ${libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES}
 )
 
+target_include_directories(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC
+    ${libs_nxp_rt1176-sdk-m4_TARGET_INCLUDE_DIRECTORIES}
+    ${libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES}
+)
+
 target_link_libraries(libs_nxp_rt1176-sdk_freertos
     libs_FreeRTOS
     ${libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES}
 )
+
+target_link_libraries(libs_nxp_rt1176-sdk_freertos-m4
+    libs_FreeRTOS-m4
+    ${libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES}
+)
+
 target_sources(libs_nxp_rt1176-sdk_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
+target_sources(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS-m4>)
