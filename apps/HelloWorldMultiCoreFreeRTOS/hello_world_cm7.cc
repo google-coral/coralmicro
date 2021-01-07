@@ -1,9 +1,9 @@
 #include "apps/HelloWorldMultiCoreFreeRTOS/message_buffer.h"
-#include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/message_buffer.h"
 #include <cstdio>
+#include <cstring>
 
 #define CORE1_BOOT_ADDRESS 0x20200000
 
@@ -35,7 +35,7 @@ static void FreeRtosMessageEventHandler(uint16_t eventData, void *context) {
     portYIELD_FROM_ISR(higher_priority_woken);
 }
 
-extern "C" void main_task(osa_task_param_t arg) {
+extern "C" void app_main(void *param) {
     printf("Hello world from M7.\r\n");
     p2s_message_buffer = reinterpret_cast<valiant::MessageBuffer*>(p2s_message_buffer_storage);
     p2s_message_buffer->message_buffer = xMessageBufferCreateStatic(kP2SBufferBytes, p2s_message_buffer->message_buffer_storage, &p2s_message_buffer->static_message_buffer);

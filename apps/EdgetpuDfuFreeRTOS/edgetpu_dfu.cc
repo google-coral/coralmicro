@@ -2,7 +2,6 @@
 #include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 
 #include <cstdio>
 
@@ -22,7 +21,7 @@ void USB_DfuTask(void *param) {
     }
 }
 
-extern "C" void main_task(osa_task_param_t arg) {
+extern "C" void app_main(void *param) {
     int ret;
 
     ret = xTaskCreate(USB_HostTask, "USB_HostTask", configMINIMAL_STACK_SIZE * 3, NULL, configMAX_PRIORITIES - 1, NULL);

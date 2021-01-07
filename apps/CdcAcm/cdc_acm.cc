@@ -46,7 +46,7 @@ static void usb_device_task(void *param) {
     }
 }
 
-extern "C" void main_task(osa_task_param_t arg) {
+extern "C" void app_main(void *param) {
     int ret;
     printf("CdcAcm\r\n");
     ret = xTaskCreate(usb_device_task, "UsbDeviceTask", configMINIMAL_STACK_SIZE * 10, NULL, configMAX_PRIORITIES - 1, NULL);

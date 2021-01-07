@@ -297,15 +297,11 @@ void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
             break;
         case DFU_STATE_ERROR:
             printf("DFU error\r\n");
-            while (true) {
-                OSA_TaskYield();
-            }
+            while (true) {}
             break;
         default:
             printf("Unhandled DFU state %d\r\n", next_state);
-            while (true) {
-                OSA_TaskYield();
-            }
+            while (true) {}
             break;
     }
 }

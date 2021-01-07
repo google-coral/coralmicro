@@ -1,13 +1,13 @@
-#include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 #include <cstdio>
+#include <cstring>
 
 #define CORE1_BOOT_ADDRESS 0x20200000
 
 extern char _binary_HelloWorldMultiCoreM4_bin_size;
 extern char _binary_HelloWorldMultiCoreM4_bin_start;
 
-extern "C" void main_task(osa_task_param_t arg) {
+extern "C" void app_main(void *param) {
     printf("Hello world from M7.\r\n");
     uint32_t m4_start = (uint32_t)&_binary_HelloWorldMultiCoreM4_bin_start;
     uint32_t m4_size = (uint32_t)&_binary_HelloWorldMultiCoreM4_bin_size;
