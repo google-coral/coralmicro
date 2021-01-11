@@ -12,6 +12,5 @@ target_include_directories(HelloWorldFreeRTOS PRIVATE
 )
 
 target_link_libraries(HelloWorldFreeRTOS
-    libs_nxp_rt1176-sdk_freertos
+    libs_base-m7_freertos
 )
-target_sources(HelloWorldFreeRTOS PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)

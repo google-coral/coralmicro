@@ -3,6 +3,7 @@
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/message_buffer.h"
+#include "third_party/freertos_kernel/include/stream_buffer.h"
 
 namespace valiant {
 
@@ -11,6 +12,13 @@ struct MessageBuffer {
     StaticMessageBuffer_t static_message_buffer;
     size_t len;
     uint8_t message_buffer_storage[];
+};
+
+struct StreamBuffer {
+    StreamBufferHandle_t stream_buffer;
+    StaticStreamBuffer_t static_stream_buffer;
+    size_t len;
+    uint8_t stream_buffer_storage[];
 };
 
 }  // namespace valiant

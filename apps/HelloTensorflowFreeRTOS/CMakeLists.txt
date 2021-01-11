@@ -12,8 +12,7 @@ target_include_directories(HelloTensorflowFreeRTOS PRIVATE
 )
 
 target_link_libraries(HelloTensorflowFreeRTOS
-    libs_nxp_rt1176-sdk_freertos
+    libs_base-m7_freertos
     libs_tensorflow
     libs_tensorflow_model_hello_world
 )
-target_sources(HelloTensorflowFreeRTOS PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)

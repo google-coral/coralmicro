@@ -110,14 +110,12 @@ set(libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_bm OBJECT
-    main_bm.cc
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
 )
 
 add_library_m4(libs_nxp_rt1176-sdk_bm-m4 OBJECT
-    main_bm.cc
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
@@ -154,7 +152,6 @@ target_link_libraries(libs_nxp_rt1176-sdk_bm-m4
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
-    main_freertos.cc
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
@@ -162,7 +159,6 @@ add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
 )
 
 add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
-    main_freertos.cc
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}

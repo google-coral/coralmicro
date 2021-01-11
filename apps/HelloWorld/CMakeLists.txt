@@ -10,6 +10,5 @@ target_include_directories(HelloWorld PRIVATE
 )
 
 target_link_libraries(HelloWorld
-    libs_nxp_rt1176-sdk_bm
+    libs_base-m7_bm
 )
-target_sources(HelloWorld PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_bm>)

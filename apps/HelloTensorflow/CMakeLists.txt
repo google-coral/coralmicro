@@ -10,8 +10,7 @@ target_include_directories(HelloTensorflow PRIVATE
 )
 
 target_link_libraries(HelloTensorflow
-    libs_nxp_rt1176-sdk_bm
+    libs_base-m7_bm
     libs_tensorflow
     libs_tensorflow_model_hello_world
 )
-target_sources(HelloTensorflow PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_bm>)

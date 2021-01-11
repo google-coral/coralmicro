@@ -10,6 +10,5 @@ target_include_directories(BootROM PRIVATE
 )
 
 target_link_libraries(BootROM
-    libs_nxp_rt1176-sdk_bm
+    libs_base-m7_bm
 )
-target_sources(BootROM PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_bm>)

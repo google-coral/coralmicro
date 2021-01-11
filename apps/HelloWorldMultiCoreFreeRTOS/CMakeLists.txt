@@ -11,9 +11,8 @@ target_include_directories(HelloWorldMultiCoreFreeRTOS PRIVATE
 )
 
 target_link_libraries(HelloWorldMultiCoreFreeRTOS
-    libs_nxp_rt1176-sdk_freertos
+    libs_base-m7_freertos
 )
-target_sources(HelloWorldMultiCoreFreeRTOS PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)
 
 add_executable_m4(HelloWorldMultiCoreFreeRTOSM4
     hello_world_cm4.cc
@@ -23,6 +22,5 @@ target_include_directories(HelloWorldMultiCoreFreeRTOSM4 PRIVATE
 )
 
 target_link_libraries(HelloWorldMultiCoreFreeRTOSM4
-    libs_nxp_rt1176-sdk_freertos-m4
+    libs_base-m4_freertos
 )
-target_sources(HelloWorldMultiCoreFreeRTOSM4 PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos-m4>)

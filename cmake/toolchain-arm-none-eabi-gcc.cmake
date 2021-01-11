@@ -126,7 +126,14 @@ function(add_executable_m4)
     target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS})
     add_custom_command(TARGET ${ARGV0} POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary ${ARGV0} ${ARGV0}.bin
-        COMMAND ${CMAKE_OBJCOPY} -I binary --rename-section .data=.core1_code -O elf32-littlearm ${ARGV0}.bin ${ARGV0}.obj
+        COMMAND ${CMAKE_OBJCOPY}
+            -I binary
+            --rename-section .data=.core1_code
+            -O elf32-littlearm
+            --redefine-sym _binary_${ARGV0}_bin_start=m4_binary_start
+            --redefine-sym _binary_${ARGV0}_bin_end=m4_binary_end
+            --redefine-sym _binary_${ARGV0}_bin_size=m4_binary_size
+            ${ARGV0}.bin ${ARGV0}.obj
         DEPENDS ${ARGV0}
         BYPRODUCTS ${ARGV0}.bin ${ARGV0}.obj
     )
