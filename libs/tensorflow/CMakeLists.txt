@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-add_library_m7(libs_tensorflow STATIC
+set(libs_tensorflow_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/c/common.c
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/error_reporter.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/flatbuffer_conversions.cc
@@ -49,14 +49,35 @@ add_library_m7(libs_tensorflow STATIC
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_allocator.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.cc
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_optional_debug_tools.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_string.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_utils.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/simple_memory_allocator.cc
 )
-target_include_directories(libs_tensorflow PUBLIC
+
+add_library_m7(libs_tensorflow-m7 STATIC
+    ${libs_tensorflow_SOURCES}
+)
+
+target_include_directories(libs_tensorflow-m7 PUBLIC
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow
 )
-target_link_libraries(libs_tensorflow
+
+target_link_libraries(libs_tensorflow-m7
+    libs_flatbuffers
+    libs_gemmlowp
+    libs_ruy
+)
+
+add_library_m4(libs_tensorflow-m4 STATIC
+    ${libs_tensorflow_SOURCES}
+)
+
+target_include_directories(libs_tensorflow-m4 PUBLIC
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow
+)
+
+target_link_libraries(libs_tensorflow-m4
     libs_flatbuffers
     libs_gemmlowp
     libs_ruy
