@@ -42,6 +42,7 @@ MEMORY
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00040000
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
   m_core1_image         (RX)  : ORIGIN = 0x30DC0000, LENGTH = 0x00060000
+  m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x02000000
 }
 
 /* Define output sections */
@@ -228,12 +229,19 @@ SECTIONS
     __noncachedata_end__ = .;     /* define a global symbol at ncache data end */
   } > m_data
 
-  __DATA_END = __NDATA_ROM + (__noncachedata_init_end__ - __noncachedata_start__);
-  text_end = ORIGIN(m_text) + LENGTH(m_text);
-  ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
+  __SDRAM_ROM = __NDATA_ROM + (__noncachedata_init_end__ - __noncachedata_start__);
+  .sdram_data : AT(__SDRAM_ROM)
+  {
+    . = ALIGN(4);
+    __sdram_data_start__ = .;
+    KEEP(*(.sdram_data*))
+    . = ALIGN(4);
+    __sdram_data_end__ = .;
+  } > m_sdram
 
   /* Uninitialized data section */
-  .bss :
+  __BSS_MAP = __SDRAM_ROM + (__sdram_data_end__ - __sdram_data_start__);
+  .bss : AT(__BSS_MAP)
   {
     /* This is used by the startup in order to initialize the .bss section */
     . = ALIGN(4);
@@ -247,6 +255,19 @@ SECTIONS
     __bss_end__ = .;
     __END_BSS = .;
   } > m_data
+
+  __DATA_END = __BSS_MAP + (__bss_end__ - __bss_start__);
+  text_end = ORIGIN(m_text) + LENGTH(m_text);
+  ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
+
+  .sdram_bss (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __sdram_bss_start__ = .;
+    *(.sdram_bss*)
+    . = ALIGN(4);
+    __sdram_bss_end__ = .;
+  } > m_sdram
 
   .heap :
   {
