@@ -22,3 +22,6 @@
 [submodule "third_party/ruy"]
 	path = third_party/ruy
 	url = https://github.com/google/ruy
+[submodule "third_party/nxp/blhost"]
+	path = third_party/nxp/blhost
+	url = https://github.com/google-coral/coralmicro-blhost
