@@ -13,8 +13,6 @@ extern "C" int _write(int handle, char *buffer, int size) {
     if (console_buffer) {
         xStreamBufferSend(console_buffer->stream_buffer, buffer, size, portMAX_DELAY);
     }
-    // TODO(atv): sad
-    vTaskDelay(pdMS_TO_TICKS(10));
 
     return size;
 }

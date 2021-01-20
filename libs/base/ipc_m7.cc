@@ -85,7 +85,7 @@ void ipc_task(void *param) {
         printf("Failed to send s2p buffer address\r\n");
     }
 
-    valiant::StreamBuffer *m4_console_buffer = valiant::GetM4ConsoleBufferPtr();
+    valiant::StreamBuffer *m4_console_buffer = valiant::ConsoleM7::GetSingleton()->GetM4ConsoleBufferPtr();
     tx_bytes = xMessageBufferSend(p2s_message_buffer->message_buffer, &m4_console_buffer, sizeof(m4_console_buffer), portMAX_DELAY);
     if (tx_bytes == 0) {
         printf("Failed to send console buffer address\r\n");
@@ -93,6 +93,10 @@ void ipc_task(void *param) {
 
     while (!xMessageBufferIsEmpty(p2s_message_buffer->message_buffer)) { taskYIELD(); }
 
+    // TODO(atv): We don't do anything else here, at the moment, so let's suspend.
+    // In the future, this task should have some sort of queue that it blocks on that accepts
+    // messages for the other core.
+    vTaskSuspend(NULL);
     while (true) {
         taskYIELD();
     }

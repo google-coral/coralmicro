@@ -11,6 +11,4 @@ target_include_directories(CdcAcm PRIVATE
 
 target_link_libraries(CdcAcm
     libs_base-m7_freertos
-    libs_CdcAcm_freertos
-    libs_tasks_UsbDeviceTask_freertos
 )

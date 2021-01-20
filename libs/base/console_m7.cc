@@ -1,25 +1,23 @@
+#include "libs/base/console_m7.h"
 #include "libs/base/message_buffer.h"
 #include "libs/base/tasks_m7.h"
+#include "libs/tasks/UsbDeviceTask/usb_device_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
-#include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/semphr.h"
 #include <cstdio>
+#include <functional>
 #include <unistd.h>
 
-SemaphoreHandle_t console_mtx;
+using namespace std::placeholders;
+
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
 extern "C" int _write(int handle, char *buffer, int size) {
     if ((handle != STDOUT_FILENO) && (handle != STDERR_FILENO)) {
         return -1;
     }
 
-    if (xSemaphoreTake(console_mtx, portMAX_DELAY) == pdTRUE) {
-        DbgConsole_SendDataReliable((uint8_t*)buffer, size);
-        xSemaphoreGive(console_mtx);
-        return size;
-    }
+    valiant::ConsoleM7::GetSingleton()->Write(buffer, size);
 
-    return -1;
+    return size;
 }
 
 extern "C" int _read(int handle, char *buffer, int size) {
@@ -32,33 +30,82 @@ extern "C" int _read(int handle, char *buffer, int size) {
 
 namespace valiant {
 
-static constexpr size_t kM4ConsoleBufferBytes = 128;
-static StreamBuffer *m4_console_buffer = nullptr;
-static uint8_t m4_console_buffer_storage[sizeof(StreamBuffer) + kM4ConsoleBufferBytes] __attribute__((section(".noinit.$rpmsg_sh_mem")));
+uint8_t ConsoleM7::m4_console_buffer_storage_[kM4ConsoleBufferSize] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
-void console_task(void *param) {
+void ConsoleM7::Write(char *buffer, int size) {
+    ConsoleMessage msg = {
+        size, (uint8_t*)malloc(size),
+    };
+    memcpy(msg.str, buffer, size);
+    xQueueSend(console_queue_, &msg, portMAX_DELAY);
+}
+
+void ConsoleM7::StaticM4ConsoleTaskFn(void *param) {
+    GetSingleton()->M4ConsoleTaskFn(param);
+}
+
+void ConsoleM7::M4ConsoleTaskFn(void *param) {
     size_t rx_bytes;
     char buf[16];
     while (true) {
-        rx_bytes = xStreamBufferReceive(m4_console_buffer->stream_buffer, buf, sizeof(buf), pdMS_TO_TICKS(10));
+        rx_bytes = xStreamBufferReceive(m4_console_buffer_->stream_buffer, buf, sizeof(buf), pdMS_TO_TICKS(10));
         if (rx_bytes > 0) {
-            for (size_t i = 0; i < rx_bytes; ++i) {
-                putchar(buf[i]);
-            }
+            fwrite(buf, 1, rx_bytes, stdout);
         }
     }
 }
 
-void ConsoleInit() {
-    m4_console_buffer = reinterpret_cast<StreamBuffer*>(m4_console_buffer_storage);
-    m4_console_buffer->stream_buffer =
-        xStreamBufferCreateStatic(kM4ConsoleBufferBytes, 1, m4_console_buffer->stream_buffer_storage, &m4_console_buffer->static_stream_buffer);
-    console_mtx = xSemaphoreCreateMutex();
-    xTaskCreate(console_task, "console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+void ConsoleM7::StaticM7ConsoleTaskFn(void *param) {
+    GetSingleton()->M7ConsoleTaskFn(param);
 }
 
-StreamBuffer* GetM4ConsoleBufferPtr() {
-    return m4_console_buffer;
+void ConsoleM7::M7ConsoleTaskFn(void *param) {
+    while (true) {
+        ConsoleMessage msg;
+        if (xQueueReceive(console_queue_, &msg, portMAX_DELAY) == pdTRUE) {
+            DbgConsole_SendDataReliable((uint8_t*)msg.str, msg.len);
+            cdc_acm_.Transmit((uint8_t*)msg.str, msg.len);
+            free(msg.str);
+        }
+    }
+}
+
+void usb_device_task(void *param) {
+    while (true) {
+        valiant::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
+        taskYIELD();
+    }
+}
+
+void ConsoleM7::Init() {
+    m4_console_buffer_ = reinterpret_cast<StreamBuffer*>(m4_console_buffer_storage_);
+    m4_console_buffer_->stream_buffer =
+        xStreamBufferCreateStatic(kM4ConsoleBufferBytes, 1, m4_console_buffer_->stream_buffer_storage, &m4_console_buffer_->static_stream_buffer);
+
+    cdc_acm_.Init(
+            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            valiant::UsbDeviceTask::GetSingleton()->next_interface_value(),
+            valiant::UsbDeviceTask::GetSingleton()->next_interface_value(),
+            nullptr /*ReceiveHandler*/);
+    valiant::UsbDeviceTask::GetSingleton()->Init(cdc_acm_.config_data(),
+            std::bind(&valiant::CdcAcm::SetClassHandle, &cdc_acm_, _1),
+            std::bind(&valiant::CdcAcm::HandleEvent, &cdc_acm_, _1, _2));
+
+    console_queue_ = xQueueCreate(16, sizeof(ConsoleMessage));
+    if (!console_queue_) {
+        DbgConsole_Printf("Failed to create console_queue\r\n");
+        vTaskSuspend(NULL);
+    }
+
+    xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, NULL);
+    xTaskCreate(StaticM7ConsoleTaskFn, "m7_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+    xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+}
+
+StreamBuffer* ConsoleM7::GetM4ConsoleBufferPtr() {
+    return m4_console_buffer_;
 }
 
 }  // namespace valiant

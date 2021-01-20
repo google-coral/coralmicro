@@ -1,19 +1,21 @@
 #ifndef __LIBS_BASE_TASKS_M7_H__
 #define __LIBS_BASE_TASKS_M7_H__
 
-#define IPC_TASK_PRIORITY       (configMAX_PRIORITIES - 1)
-#define CONSOLE_TASK_PRIORITY   (configMAX_PRIORITIES - 1)
-#define APP_TASK_PRIORITY       (configMAX_PRIORITIES - 1)
+#define IPC_TASK_PRIORITY           (configMAX_PRIORITIES - 1)
+#define CONSOLE_TASK_PRIORITY       (configMAX_PRIORITIES - 2)
+#define APP_TASK_PRIORITY           (configMAX_PRIORITIES - 2)
+#define USB_DEVICE_TASK_PRIORITY    (configMAX_PRIORITIES - 1)
 
 #if defined(__cplusplus)
-static_assert(IPC_TASK_PRIORITY < configMAX_PRIORITIES);
-static_assert(IPC_TASK_PRIORITY >= 0);
+#define VALIDATE_TASK_PRIORITY(prio) \
+    static_assert(prio < configMAX_PRIORITIES); \
+    static_assert(prio >= 0);
 
-static_assert(CONSOLE_TASK_PRIORITY < configMAX_PRIORITIES);
-static_assert(CONSOLE_TASK_PRIORITY >= 0);
+VALIDATE_TASK_PRIORITY(IPC_TASK_PRIORITY);
+VALIDATE_TASK_PRIORITY(CONSOLE_TASK_PRIORITY);
+VALIDATE_TASK_PRIORITY(APP_TASK_PRIORITY);
+VALIDATE_TASK_PRIORITY(USB_DEVICE_TASK_PRIORITY);
 
-static_assert(APP_TASK_PRIORITY < configMAX_PRIORITIES);
-static_assert(APP_TASK_PRIORITY >= 0);
 #endif
 
 #endif  // __LIBS_BASE_TASKS_M7_H__

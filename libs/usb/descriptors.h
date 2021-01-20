@@ -103,8 +103,8 @@ struct CdcClassDescriptor {
     EndpointDescriptor cmd_ep;
     // Data
     InterfaceDescriptor data_iface;
-    EndpointDescriptor out_ep;
     EndpointDescriptor in_ep;
+    EndpointDescriptor out_ep;
 } __attribute__((packed));
 
 struct CompositeDescriptor {

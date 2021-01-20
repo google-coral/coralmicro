@@ -24,6 +24,8 @@ add_library_m7(libs_base-m7_freertos STATIC
 
 target_link_libraries(libs_base-m7_freertos
     libs_nxp_rt1176-sdk_freertos
+    libs_CdcAcm_freertos
+    libs_tasks_UsbDeviceTask_freertos
 )
 
 add_library_m4(libs_base-m4_freertos STATIC

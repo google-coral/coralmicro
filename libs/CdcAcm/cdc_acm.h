@@ -5,7 +5,8 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h" // Must be above other class headers.
+#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 
 #include <functional>
 #include <map>
@@ -16,16 +17,19 @@ namespace valiant {
 class CdcAcm {
   using RxHandler = std::function<void(const uint8_t*, const uint32_t)>;
   public:
-    CdcAcm(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t comm_iface, uint8_t data_iface, RxHandler rx_handler);
+    CdcAcm();
     CdcAcm(const CdcAcm&) = delete;
     CdcAcm& operator=(const CdcAcm&) = delete;
+    void Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t comm_iface, uint8_t data_iface, RxHandler rx_handler);
     usb_device_class_config_struct_t* config_data() { return &config_; }
     // TODO(atv): Make me private
     void SetClassHandle(class_handle_t class_handle);
     bool HandleEvent(uint32_t event, void *param);
     bool Transmit(const uint8_t *buffer, const size_t length);
   private:
+    bool can_transmit_ = false;
     void SetConfiguration();
+    usb_status_t SetControlLineState(usb_device_cdc_acm_request_param_struct_t* acm_param);
     static usb_status_t Handler(class_handle_t class_handle, uint32_t event, void *param);
     usb_status_t Handler(uint32_t event, void *param);
     usb_device_endpoint_struct_t cdc_acm_comm_endpoints_[1] = {
@@ -103,10 +107,20 @@ class CdcAcm {
 
     uint8_t tx_buffer_[512];
     uint8_t rx_buffer_[512];
+    uint8_t serial_state_buffer_[10];
     SemaphoreHandle_t tx_semaphore_;
     uint8_t interrupt_in_ep_, bulk_in_ep_, bulk_out_ep_;
     RxHandler rx_handler_;
     class_handle_t class_handle_;
+    uint8_t line_coding_[7] = {
+      (115200 >> 0) & 0xFF,
+      (115200 >> 8) & 0xFF,
+      (115200 >> 16) & 0xFF,
+      (115200 >> 24) & 0xFF,
+      0x00, // 1 stop bit
+      0x00, // no parity
+      0x08  // 8 data bits
+    };
 
     static std::map<class_handle_t, CdcAcm*> handle_map_;
 };

@@ -26,8 +26,16 @@ class UsbDeviceTask {
     }
     void UsbDeviceTaskFn();
 
+    uint8_t next_descriptor_value() { return ++next_descriptor_value_; }
+    uint8_t next_interface_value() {
+      uint8_t next_interface = next_interface_value_;
+      composite_descriptor_.conf.num_interfaces = ++next_interface_value_;
+      return next_interface;
+    }
     usb_device_handle device_handle() { return device_handle_; }
   private:
+    uint8_t next_descriptor_value_ = 0;
+    uint8_t next_interface_value_ = 0;
     DeviceDescriptor device_descriptor_ = {
         sizeof(DeviceDescriptor), 0x01, 0x0200,
         0xEF, 0x02, 0x01, 0x40,
@@ -39,7 +47,7 @@ class UsbDeviceTask {
             sizeof(ConfigurationDescriptor),
             0x02,
             sizeof(CompositeDescriptor),
-            2, // num_interfaces
+            0, // Managed by next_interface_value
             1,
             0,
             0x80, // kUsb11AndHigher
@@ -82,7 +90,7 @@ class UsbDeviceTask {
             {
                 sizeof(EndpointDescriptor),
                 0x05,
-                2 | 0x80, 0x03, 8, 0x10,
+                1 | 0x80, 0x03, 10, 9,
             }, // EndpointDescriptor
 
             {
@@ -94,12 +102,12 @@ class UsbDeviceTask {
             {
                 sizeof(EndpointDescriptor),
                 0x05,
-                1 & 0x7F, 0x02, 512, 0,
+                2 | 0x80, 0x02, 512, 0,
             }, // EndpointDescriptor
             {
                 sizeof(EndpointDescriptor),
                 0x05,
-                1 | 0x80, 0x02, 512, 0,
+                3 & 0x7F, 0x02, 512, 0,
             }, // EndpointDescriptor
         }, // CdcClassDescriptor
     };
