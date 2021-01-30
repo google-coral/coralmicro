@@ -6,6 +6,8 @@
 #define CONSOLE_TASK_PRIORITY       (configMAX_PRIORITIES - 2)
 #define APP_TASK_PRIORITY           (configMAX_PRIORITIES - 2)
 #define USB_DEVICE_TASK_PRIORITY    (configMAX_PRIORITIES - 1)
+#define USB_HOST_TASK_PRIORITY      (configMAX_PRIORITIES - 1)
+#define EDGETPU_DFU_TASK_PRIORITY   (configMAX_PRIORITIES - 2)
 
 #if defined(__cplusplus)
 #define VALIDATE_TASK_PRIORITY(prio) \

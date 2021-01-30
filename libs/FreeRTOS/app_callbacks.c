@@ -19,3 +19,8 @@ void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
     *ppxTimerTaskStackBuffer = timer_task_stack;
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
+
+void vApplicationMallocFailedHook(void) {
+    DbgConsole_Printf("malloc failed, spin...\r\n");
+    while (1) {}
+}

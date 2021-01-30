@@ -6,6 +6,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     board.c
     board_hardware.c
     clock_config.c
+    dlmalloc.c
     evkmimxrt1170_flexspi_nor_config.c
     fsl_flexspi_nor_boot.c
     peripherals.c
@@ -46,6 +47,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
 )
 
 set(libs_nxp_rt1176-sdk-m7_SOURCES
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7/fsl_cache.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/gcc/startup_MIMXRT1176_cm7.S
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/system_MIMXRT1176_cm7.c
 )
@@ -57,6 +59,12 @@ set(libs_nxp_rt1176-sdk-m4_SOURCES
 )
 
 set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
+    # dlmalloc defines
+    HAVE_MMAP=0
+    ONLY_MSPACES
+    USE_DL_PREFIX
+    malloc_getpagesize=0x800
+    # Other defines
     MCMGR_HANDLE_EXCEPTIONS=1
     SDK_DEBUGCONSOLE_UART
     SERIAL_PORT_TYPE_UART=1

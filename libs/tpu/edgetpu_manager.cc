@@ -20,7 +20,7 @@ void EdgeTpuManager::NotifyConnected(usb_host_edgetpu_instance_t* usb_instance) 
 
 bool EdgeTpuManager::OpenDevice() {
     while (!usb_instance_) {
-        OSA_TimeDelay(200);
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
     return tpu_driver_.Initialize(usb_instance_);
 }
@@ -94,11 +94,19 @@ TfLiteStatus EdgeTpuManager::Invoke(EdgeTpuPackage* package, TfLiteContext *cont
     if (package->parameter_caching_exe()) {
         auto token = package->parameter_caching_exe()->ParameterCachingToken();
         if (token != current_parameter_caching_token_) {
-            printf("Unimplemented at %s:%d\r\n", __func__, __LINE__);
-            assert(false);
+            cached_packages_.fill(nullptr);
+            package->parameter_caching_exe()->Invoke(tpu_driver_, context, node);
+            current_parameter_caching_token_ = token;
+            cached_packages_[0] = package;
         } else {
-            printf("Unimplemented at %s:%d\r\n", __func__, __LINE__);
-            assert(false);
+            for (unsigned int i = 0; i < cached_packages_.size(); ++i) {
+                if (cached_packages_[i] == package) {
+                    break;
+                } else if (cached_packages_[i] == nullptr) {
+                    package->parameter_caching_exe()->Invoke(tpu_driver_, context, node);
+                    cached_packages_[i] = package;
+                }
+            }
         }
     } else {
         current_parameter_caching_token_ = 0;

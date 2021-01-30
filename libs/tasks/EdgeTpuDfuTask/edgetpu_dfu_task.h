@@ -2,6 +2,8 @@
 #define _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
 
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/queue.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.h"
@@ -157,7 +159,7 @@ class EdgeTpuDfuTask {
     size_t current_block_number_ = 0;
     uint8_t *read_back_data_ = nullptr;
 
-    OSA_MSGQ_HANDLE_DEFINE(message_queue_, 1, sizeof(uint32_t));
+    QueueHandle_t message_queue_;
 };
 
 }  // namespace valiant

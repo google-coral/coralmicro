@@ -15,7 +15,7 @@ using namespace std::placeholders;
 namespace valiant {
 
 void EdgeTpuDfuTask::SetNextState(enum dfu_state next_state) {
-    OSA_MsgQPut(message_queue_, &next_state);
+    xQueueSend(message_queue_, &next_state, portMAX_DELAY);
 }
 
 usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(usb_host_handle host_handle,
@@ -51,6 +51,7 @@ usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(usb_host_handle host_handle,
         case kUSB_HostEventDetach:
             SetNextState(DFU_STATE_UNATTACHED);
             printf("Detached DFU\r\n");
+            // USB_HostTriggerReEnumeration(device_handle);
             return kStatus_USB_Success;
         default:
             return kStatus_USB_Success;
@@ -162,7 +163,7 @@ void EdgeTpuDfuTask::GetStatusReadCallback(void *param,
         } else {
             task->SetNextState(DFU_STATE_DETACH);
         }
-        OSA_MemoryFree(task->read_back_data());
+        free(task->read_back_data());
         task->SetReadBackData(nullptr);
         task->SetCurrentBlockNumber(0);
         task->SetBytesTransferred(0);
@@ -179,7 +180,8 @@ void EdgeTpuDfuTask::DetachCallback(void *param,
         task->SetNextState(DFU_STATE_ERROR);
         return;
     }
-    task->SetNextState(DFU_STATE_CHECK_STATUS);
+    // task->SetNextState(DFU_STATE_CHECK_STATUS);
+    task->SetNextState(DFU_STATE_COMPLETE);
 }
 
 void EdgeTpuDfuTask::CheckStatusCallback(void *param,
@@ -196,7 +198,7 @@ void EdgeTpuDfuTask::CheckStatusCallback(void *param,
 }
 
 EdgeTpuDfuTask::EdgeTpuDfuTask() {
-    OSA_MsgQCreate((osa_msgq_handle_t)message_queue_, 1U, sizeof(uint32_t));
+    message_queue_ = xQueueCreate(1, sizeof(uint32_t));
     valiant::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(kDfuVid, kDfuPid,
             std::bind(&EdgeTpuDfuTask::USB_DFUHostEvent, this, _1, _2, _3, _4));
 }
@@ -205,7 +207,7 @@ void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
     usb_status_t ret;
     uint32_t transfer_length;
     enum dfu_state next_state;
-    if (OSA_MsgQGet(message_queue_, &next_state, osaWaitForever_c) != KOSA_StatusSuccess) {
+    if (xQueueReceive(message_queue_, &next_state, portMAX_DELAY) == pdFALSE) {
         return;
     }
     switch (next_state) {
@@ -260,7 +262,7 @@ void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
             break;
         case DFU_STATE_READ_BACK:
             if (!read_back_data()) {
-                SetReadBackData((uint8_t*)OSA_MemoryAllocate(apex_latest_single_ep_bin_len));
+                SetReadBackData((uint8_t*)malloc(apex_latest_single_ep_bin_len));
             }
             transfer_length = std::min(256U /* get from descriptor */,
                                        apex_latest_single_ep_bin_len - bytes_transferred());

@@ -6,7 +6,7 @@
 // Valiant has 64 MB.
 // EVK claims to have 64MB as well, but seems to wrap at 32MB.
 // Leave 1MB for a fixed pattern test.
-#define SDRAM_SIZE (31 << 20)
+#define SDRAM_SIZE (30 << 20)
 
 uint8_t sdram[SDRAM_SIZE] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 const uint8_t sdram_pattern[128] __attribute__((section(".sdram_data"))) = {

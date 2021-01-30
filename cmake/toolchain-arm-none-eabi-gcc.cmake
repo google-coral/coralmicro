@@ -40,6 +40,7 @@ set(COMMON_C_FLAGS
     "-mapcs-frame"
     "--specs=nano.specs"
     "--specs=nosys.specs"
+    "-u _printf_float"
 )
 list(JOIN COMMON_C_FLAGS " " COMMON_C_FLAGS_STR)
 

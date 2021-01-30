@@ -7,6 +7,9 @@
 
 #include <cassert>
 
+constexpr uint32_t kMaxBulkBufferSize = 32 * 1024;
+static uint8_t BulkTransferBuffer[kMaxBulkBufferSize];
+
 namespace valiant {
 
 namespace registers = platforms::darwinn::driver::config::registers;
@@ -71,8 +74,13 @@ bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance) {
     assert(Read32(chip_config_.GetScuCsrOffsets().scu_ctrl_3, &scu_ctrl_3_reg));
     scu_ctrl_3.set_raw(scu_ctrl_3_reg);
     scu_ctrl_3.set_rg_force_sleep(0x2);
-    scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k500MHZ);
-    scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k250MHZ);
+    // Max
+    // scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k500MHZ);
+    // scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k250MHZ);
+    // scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k500MHZ);
+    // High
+    scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k250MHZ);
+    scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k125MHZ);
     scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k500MHZ);
     assert(Write32(chip_config_.GetScuCsrOffsets().scu_ctrl_3, scu_ctrl_3.raw()));
 
@@ -240,13 +248,13 @@ exit:
 }
 
 bool TpuDriver::BulkOutTransfer(const uint8_t *data, uint32_t data_length) const {
-    constexpr uint32_t kMaxBufferSize = 32 * 1024;
     uint8_t *current_chunk = const_cast<uint8_t*>(data);
     uint32_t bytes_left = data_length;
 
     while (bytes_left > 0) {
-        uint32_t chunk_size = std::min(kMaxBufferSize, bytes_left);
-        if (BulkOutTransferInternal(kSingleBulkOutEndpoint, current_chunk, chunk_size)) {
+        uint32_t chunk_size = std::min(kMaxBulkBufferSize, bytes_left);
+        memcpy(BulkTransferBuffer, current_chunk, chunk_size);
+        if (BulkOutTransferInternal(kSingleBulkOutEndpoint, BulkTransferBuffer, chunk_size)) {
             current_chunk += chunk_size;
             bytes_left -= chunk_size;
         } else {
@@ -289,12 +297,12 @@ exit:
 }
 
 bool TpuDriver::BulkInTransfer(uint8_t *data, uint32_t data_length) const {
-    constexpr uint32_t kMaxBufferSize = 32 * 1024;
     uint8_t *current_chunk = data;
     uint32_t bytes_left = data_length;
     while (bytes_left > 0) {
-        uint32_t chunk_size = std::min(kMaxBufferSize, bytes_left);
-        if (BulkInTransferInternal(kSingleBulkOutEndpoint, current_chunk, chunk_size)) {
+        uint32_t chunk_size = std::min(kMaxBulkBufferSize, bytes_left);
+        if (BulkInTransferInternal(kSingleBulkOutEndpoint, BulkTransferBuffer, chunk_size)) {
+            memcpy(current_chunk, BulkTransferBuffer, chunk_size);
             current_chunk += chunk_size;
             bytes_left -= chunk_size;
         } else {
@@ -326,7 +334,7 @@ bool TpuDriver::WriteHeader(DescriptorTag tag, uint32_t length) const {
 bool TpuDriver::ReadEvent() const {
     bool ret = false;
     constexpr size_t kEventSizeBytes = 16;
-    uint8_t *buf = (uint8_t*)malloc(kEventSizeBytes);
+    uint8_t *buf = (uint8_t*)OSA_MemoryAllocate(kEventSizeBytes);
     SemaphoreHandle_t sema = xSemaphoreCreateBinary();
     usb_status_t bulk_status = USB_HostEdgeTpuBulkInRecv(usb_instance_,
             kEventInEndpoint,
@@ -354,7 +362,7 @@ bool TpuDriver::ReadEvent() const {
     ret = true;
 exit:
     vSemaphoreDelete(sema);
-    free(buf);
+    OSA_MemoryFree(buf);
     return ret;
 }
 

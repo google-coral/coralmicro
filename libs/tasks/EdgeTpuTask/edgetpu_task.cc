@@ -45,6 +45,7 @@ usb_status_t EdgeTpuTask::USBHostEvent(
             SetNextState(EDGETPU_STATE_ATTACHED);
             return kStatus_USB_Success;
         case kUSB_HostEventDetach:
+            printf("EdgeTPU went away...\r\n");
             SetNextState(EDGETPU_STATE_UNATTACHED);
             return kStatus_USB_Success;
         default:

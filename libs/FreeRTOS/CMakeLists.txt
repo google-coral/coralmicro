@@ -6,11 +6,11 @@ set(libs_FreeRTOS_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/event_groups.c
     ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/list.c
     ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/portable/GCC/ARM_CM4F/port.c
-    ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/portable/MemMang/heap_4.c
     ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/queue.c
     ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/stream_buffer.c
     ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/tasks.c
     ${CMAKE_SOURCE_DIR}/third_party/freertos_kernel/timers.c
+    ${CMAKE_SOURCE_DIR}/third_party/FreeRTOS_helpers/heap_useNewlib_NXP.c
 )
 
 set(libs_FreeRTOS_INCLUDE_DIRECTORIES_PUBLIC

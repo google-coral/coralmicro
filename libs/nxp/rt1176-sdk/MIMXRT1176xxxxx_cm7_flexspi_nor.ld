@@ -27,7 +27,7 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x0400;
+HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x100000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
 RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
 VECTOR_RAM_SIZE = DEFINED(__ram_vector_table__) ? 0x00000400 : 0;
@@ -41,7 +41,7 @@ MEMORY
   m_text                (RX)  : ORIGIN = 0x30002400, LENGTH = 0x00FBDC00
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00040000
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
-  m_core1_image         (RX)  : ORIGIN = 0x30DC0000, LENGTH = 0x00060000
+  m_core1_image         (RX)  : ORIGIN = 0x30DC0000, LENGTH = 0x00080000
   m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x02000000
 }
 
@@ -278,7 +278,7 @@ SECTIONS
     . += HEAP_SIZE;
     __HeapLimit = .;
     __heap_limit = .; /* Add for _sbrk */
-  } > m_data
+  } > m_sdram
 
   .stack :
   {
@@ -292,7 +292,5 @@ SECTIONS
   PROVIDE(__stack = __StackTop);
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
-
-  ASSERT(__StackLimit >= __HeapLimit, "region m_data overflowed with stack and heap")
 }
 

@@ -97,7 +97,7 @@
 
 /*! @brief Whether the transfer buffer is cache-enabled or not. */
 #ifndef USB_HOST_CONFIG_BUFFER_PROPERTY_CACHEABLE
-#define USB_HOST_CONFIG_BUFFER_PROPERTY_CACHEABLE (0U)
+#define USB_HOST_CONFIG_BUFFER_PROPERTY_CACHEABLE (1U)
 #endif
 /*! @brief if 1, enable usb compliance test codes; if 0, disable usb compliance test codes. */
 #define USB_HOST_CONFIG_COMPLIANCE_TEST (0U)
