@@ -25,3 +25,6 @@
 [submodule "third_party/nxp/blhost"]
 	path = third_party/nxp/blhost
 	url = https://github.com/google-coral/coralmicro-blhost
+[submodule "third_party/FreeRTOS_helpers"]
+	path = third_party/FreeRTOS_helpers
+	url = https://github.com/DRNadler/FreeRTOS_helpers.git
