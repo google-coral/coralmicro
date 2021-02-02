@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 add_subdirectory(BootROM)
 add_subdirectory(CdcAcm)
+add_subdirectory(DMATest)
 add_subdirectory(EdgetpuDfuFreeRTOS)
 add_subdirectory(HelloTensorflow)
 add_subdirectory(HelloTensorflowFreeRTOS)
