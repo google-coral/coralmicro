@@ -11,8 +11,15 @@
 #include <functional>
 #include <map>
 
-namespace valiant {
+typedef struct _usb_host_cdc_line_coding_struct
+{
+    uint32_t dwDTERate;  /*!< Data terminal rate, in bits per second*/
+    uint8_t bCharFormat; /*!< Stop bits*/
+    uint8_t bParityType; /*!< Parity*/
+    uint8_t bDataBits;   /*!< Data bits (5, 6, 7, 8 or 16).*/
+} __attribute__((packed)) usb_host_cdc_line_coding_struct_t;
 
+namespace valiant {
 
 class CdcAcm {
   using RxHandler = std::function<void(const uint8_t*, const uint32_t)>;
@@ -112,15 +119,7 @@ class CdcAcm {
     uint8_t interrupt_in_ep_, bulk_in_ep_, bulk_out_ep_;
     RxHandler rx_handler_;
     class_handle_t class_handle_;
-    uint8_t line_coding_[7] = {
-      (115200 >> 0) & 0xFF,
-      (115200 >> 8) & 0xFF,
-      (115200 >> 16) & 0xFF,
-      (115200 >> 24) & 0xFF,
-      0x00, // 1 stop bit
-      0x00, // no parity
-      0x08  // 8 data bits
-    };
+    usb_host_cdc_line_coding_struct_t line_coding_;
 
     static std::map<class_handle_t, CdcAcm*> handle_map_;
 };

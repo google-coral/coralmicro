@@ -15,5 +15,5 @@ add_library_m7(libs_CdcAcm_freertos STATIC
     ${libs_CdcAcm_SOURCES}
 )
 target_link_libraries(libs_CdcAcm_freertos
-    libs_nxp_rt1176-sdk_freertos
+    libs_base-m7_freertos
 )

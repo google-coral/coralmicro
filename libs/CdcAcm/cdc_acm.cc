@@ -1,4 +1,5 @@
 #include "libs/CdcAcm/cdc_acm.h"
+#include "libs/base/reset.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 
 #include <cstdio>
@@ -37,20 +38,19 @@ usb_status_t CdcAcm::SetControlLineState(usb_device_cdc_acm_request_param_struct
     uint8_t dte_status = acm_param->setupValue;
     uint16_t uart_state = 0;
 
-    if (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_CARRIER_ACTIVATION) {
+    uint8_t dte_present = (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE);
+    uint8_t carrier_present = (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_CARRIER_ACTIVATION);
+    if (carrier_present) {
         uart_state |= USB_DEVICE_CDC_UART_STATE_TX_CARRIER;
     } else {
         uart_state &= ~USB_DEVICE_CDC_UART_STATE_TX_CARRIER;
     }
 
-    if (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE) {
+    if (dte_present) {
         uart_state |= USB_DEVICE_CDC_UART_STATE_RX_CARRIER;
     } else {
         uart_state &= ~USB_DEVICE_CDC_UART_STATE_RX_CARRIER;
     }
-
-    uint8_t dte_present = (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE);
-    (void)dte_present;
 
     serial_state_buffer_[0] = 0xA1; // NotifyRequestType
     serial_state_buffer_[1] = USB_DEVICE_CDC_NOTIF_SERIAL_STATE;
@@ -77,6 +77,10 @@ usb_status_t CdcAcm::SetControlLineState(usb_device_cdc_acm_request_param_struct
     }
 
     can_transmit_ =(dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE) > 0;
+
+    if (!carrier_present && !dte_present && line_coding_.dwDTERate == 1200) {
+        ResetToBootloader();
+    }
 
     return ret;
 }
@@ -165,10 +169,8 @@ usb_status_t CdcAcm::Handler(uint32_t event, void *param) {
             ret = kStatus_USB_Success;
             break;
         case kUSB_DeviceCdcEventSetLineCoding:
-            if (1 == acm_param->isSetup) {
-                *(acm_param->buffer) = line_coding_;
-            } else {
-                *(acm_param->length) = 0;
+            if (*(acm_param->length) == sizeof(line_coding_)) {
+                memcpy(&line_coding_, *(acm_param->buffer), sizeof(line_coding_));
             }
             ret = kStatus_USB_Success;
             break;

@@ -20,6 +20,7 @@ add_library_m7(libs_base-m7_freertos STATIC
     console_m7.cc
     ipc_m7.cc
     main_freertos_m7.cc
+    reset.cc
 )
 
 target_link_libraries(libs_base-m7_freertos
