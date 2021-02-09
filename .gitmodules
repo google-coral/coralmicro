@@ -28,3 +28,6 @@
 [submodule "third_party/FreeRTOS_helpers"]
 	path = third_party/FreeRTOS_helpers
 	url = https://github.com/DRNadler/FreeRTOS_helpers.git
+[submodule "third_party/FreeRTOS-Plus-TCP"]
+	path = third_party/FreeRTOS-Plus-TCP
+	url = https://github.com/FreeRTOS/FreeRTOS-Plus-TCP.git
