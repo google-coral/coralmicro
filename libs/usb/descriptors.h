@@ -93,7 +93,7 @@ struct CdcUnionFunctionalDescriptor {
     uint8_t peripheral_iface0;
 } __attribute__((packed));
 
-struct CdcClassDescriptor {
+struct CdcAcmClassDescriptor {
     // Command
     InterfaceDescriptor cmd_iface;
     CdcHeaderFunctionalDescriptor cmd_hdr_fd;
@@ -107,10 +107,17 @@ struct CdcClassDescriptor {
     EndpointDescriptor out_ep;
 } __attribute__((packed));
 
+struct CdcEemClassDescriptor {
+    InterfaceDescriptor iface;
+    EndpointDescriptor in_ep;
+    EndpointDescriptor out_ep;
+} __attribute__((packed));
+
 struct CompositeDescriptor {
     ConfigurationDescriptor conf;
     InterfaceAssociationDescriptor iad0;
-    CdcClassDescriptor iface0;
+    CdcAcmClassDescriptor iface0;
+    CdcEemClassDescriptor iface1;
 } __attribute__((packed));
 
 struct LangIdDescriptor {

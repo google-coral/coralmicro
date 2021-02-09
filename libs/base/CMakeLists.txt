@@ -20,12 +20,14 @@ add_library_m7(libs_base-m7_freertos STATIC
     console_m7.cc
     ipc_m7.cc
     main_freertos_m7.cc
+    network.cc
     reset.cc
 )
 
 target_link_libraries(libs_base-m7_freertos
     libs_nxp_rt1176-sdk_freertos
     libs_CdcAcm_freertos
+    libs_CdcEem_freertos
     libs_tasks_UsbDeviceTask_freertos
 )
 

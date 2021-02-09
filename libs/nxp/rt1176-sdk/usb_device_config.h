@@ -51,6 +51,9 @@
 /*! @brief CDC ACM instance count */
 #define USB_DEVICE_CONFIG_CDC_ACM (1U)
 
+/*! @brief CDC EEM instance count */
+#define USB_DEVICE_CONFIG_CDC_EEM (1U)
+
 /*! @brief CDC RNDIS instance count */
 #define USB_DEVICE_CONFIG_CDC_RNDIS (0U)
 
@@ -81,7 +84,7 @@
 #define USB_DEVICE_CONFIG_SELF_POWER (1U)
 
 /*! @brief How many endpoints are supported in the stack. */
-#define USB_DEVICE_CONFIG_ENDPOINTS (4U)
+#define USB_DEVICE_CONFIG_ENDPOINTS (6U)
 
 /*! @brief Whether the device task is enabled. */
 #define USB_DEVICE_CONFIG_USE_TASK (1U)

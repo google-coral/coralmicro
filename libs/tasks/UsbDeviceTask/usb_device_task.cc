@@ -106,19 +106,30 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
                 ret = kStatus_USB_Success;
             }
             break;
+        case kUSB_DeviceEventSetInterface:
+            ret = kStatus_USB_Success;
+            for (size_t i = 0; i < handle_event_callbacks_.size(); i++) {
+                event_ret &= handle_event_callbacks_[i](event, param);
+            }
+            if (event_ret) {
+                ret = kStatus_USB_Success;
+            }
+            break;
         default:
             printf("%s event unhandled 0x%lx\r\n", __func__, event);
     }
     return ret;
 }
 
-// TODO(atv): Support more than one config here.
-bool UsbDeviceTask::Init(usb_device_class_config_struct_t* config, usb_set_handle_callback sh_cb,
+void UsbDeviceTask::AddDevice(usb_device_class_config_struct_t* config, usb_set_handle_callback sh_cb,
         usb_handle_event_callback he_cb) {
-    usb_status_t ret;
     configs_.push_back(*config);
     set_handle_callbacks_.push_back(sh_cb);
     handle_event_callbacks_.push_back(he_cb);
+}
+
+bool UsbDeviceTask::Init() {
+    usb_status_t ret;
     config_list_ = { configs_.data(), &UsbDeviceTask::StaticHandler, (uint8_t)configs_.size() };
     ret = USB_DeviceClassInit(kUSBControllerId, &config_list_, &device_handle_);
     if (ret != kStatus_USB_Success) {

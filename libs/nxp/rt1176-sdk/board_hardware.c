@@ -1,6 +1,7 @@
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/peripherals.h"
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_semc.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 
@@ -13,12 +14,14 @@ extern uint32_t __sdram_data_start__;
 extern uint32_t __sdram_data_end__;
 extern uint32_t __sdram_bss_start__;
 extern uint32_t __sdram_bss_end__;
+static caam_job_ring_interface_t caam_job_ring_0;
 #endif
 
 void SystemInitHook(void) {
     MCMGR_EarlyInit();
 }
 
+#if __CORTEX_M == 7
 /* Copied in from SDK sample for EVK. */
 bool BOARD_InitSEMC(void) {
     semc_config_t config;
@@ -61,6 +64,14 @@ bool BOARD_InitSEMC(void) {
     return SEMC_ConfigureSDRAM(SEMC, kSEMC_SDRAM_CS0, &sdramconfig, clockFrq) == kStatus_Success;
 }
 
+void BOARD_InitCAAM(void) {
+    caam_config_t config;
+    CAAM_GetDefaultConfig(&config);
+    config.jobRingInterface[0] = &caam_job_ring_0;
+    CAAM_Init(CAAM, &config);
+}
+#endif  // __CORTEX_M == 7
+
 void BOARD_InitHardware(void) {
     MCMGR_Init();
     BOARD_InitBootPins();
@@ -83,5 +94,7 @@ void BOARD_InitHardware(void) {
     uint32_t sdram_bss_size = sdram_bss_end - sdram_bss_start;
     memcpy(sdram_data, sdram_rom, sdram_data_size);
     memset((uint8_t*)sdram_bss, 0x0, sdram_bss_size);
+
+    BOARD_InitCAAM();
 #endif
 }

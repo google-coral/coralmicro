@@ -23,6 +23,10 @@
 #include "usb_device_cdc_acm.h"
 #endif
 
+#if ((defined(USB_DEVICE_CONFIG_CDC_EEM)) && (USB_DEVICE_CONFIG_CDC_EEM > 0U))
+#include "usb_device_cdc_eem.h"
+#endif
+
 #if ((defined(USB_DEVICE_CONFIG_MSC)) && (USB_DEVICE_CONFIG_MSC > 0U))
 #include "usb_device_msc.h"
 #endif
@@ -81,6 +85,10 @@ static const usb_device_class_map_t s_UsbDeviceClassInterfaceMap[] = {
 
 #if ((defined(USB_DEVICE_CONFIG_CDC_ACM)) && (USB_DEVICE_CONFIG_CDC_ACM > 0U))
     {USB_DeviceCdcAcmInit, USB_DeviceCdcAcmDeinit, USB_DeviceCdcAcmEvent, kUSB_DeviceClassTypeCdc},
+#endif
+
+#if ((defined(USB_DEVICE_CONFIG_CDC_EEM)) && (USB_DEVICE_CONFIG_CDC_EEM > 0U))
+    {USB_DeviceCdcEemInit, USB_DeviceCdcEemDeinit, USB_DeviceCdcEemEvent, kUSB_DeviceClassTypeEem},
 #endif
 
 #if ((defined(USB_DEVICE_CONFIG_MSC)) && (USB_DEVICE_CONFIG_MSC > 0U))

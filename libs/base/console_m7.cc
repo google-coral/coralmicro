@@ -89,7 +89,7 @@ void ConsoleM7::Init() {
             valiant::UsbDeviceTask::GetSingleton()->next_interface_value(),
             valiant::UsbDeviceTask::GetSingleton()->next_interface_value(),
             nullptr /*ReceiveHandler*/);
-    valiant::UsbDeviceTask::GetSingleton()->Init(cdc_acm_.config_data(),
+    valiant::UsbDeviceTask::GetSingleton()->AddDevice(cdc_acm_.config_data(),
             std::bind(&valiant::CdcAcm::SetClassHandle, &cdc_acm_, _1),
             std::bind(&valiant::CdcAcm::HandleEvent, &cdc_acm_, _1, _2));
 

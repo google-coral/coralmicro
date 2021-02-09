@@ -19,7 +19,8 @@ class UsbDeviceTask {
     UsbDeviceTask(const UsbDeviceTask&) = delete;
     UsbDeviceTask &operator=(const UsbDeviceTask&) = delete;
 
-    bool Init(usb_device_class_config_struct_t* config, usb_set_handle_callback sh_cb, usb_handle_event_callback he_cb);
+    void AddDevice(usb_device_class_config_struct_t* config, usb_set_handle_callback sh_cb, usb_handle_event_callback he_cb);
+    bool Init();
     static UsbDeviceTask* GetSingleton() {
         static UsbDeviceTask task;
         return &task;
@@ -109,7 +110,25 @@ class UsbDeviceTask {
                 0x05,
                 3 & 0x7F, 0x02, 512, 0,
             }, // EndpointDescriptor
-        }, // CdcClassDescriptor
+        }, // CdcAcmClassDescriptor
+        {
+            {
+                sizeof(InterfaceDescriptor),
+                0x4,
+                2,
+                0, 2, 0x2, 0xC, 0x7, 0,
+            }, // InterfaceDescriptor
+            {
+                sizeof(EndpointDescriptor),
+                0x05,
+                4 | 0x80, 0x02, 512, 0
+            }, // EndpointDescriptor
+            {
+                sizeof(EndpointDescriptor),
+                0x05,
+                5 & 0x7F, 0x02, 512, 0
+            }, // EndpointDescriptor
+        }, // CdcEemClassDescriptor
     };
 
     LangIdDescriptor lang_id_desc_ = {

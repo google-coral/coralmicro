@@ -17,8 +17,8 @@ void CdcAcm::Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_
         RxHandler rx_handler) {
     interrupt_in_ep_ = interrupt_in_ep;
     bulk_in_ep_ = bulk_in_ep;
-    bulk_out_ep_ =bulk_out_ep;
-    rx_handler_ =rx_handler;
+    bulk_out_ep_ = bulk_out_ep;
+    rx_handler_ = rx_handler;
     cdc_acm_comm_endpoints_[0].endpointAddress = interrupt_in_ep | (USB_IN << 7);
     cdc_acm_data_endpoints_[DATA_IN].endpointAddress = bulk_in_ep | (USB_IN << 7);
     cdc_acm_data_endpoints_[DATA_OUT].endpointAddress = bulk_out_ep | (USB_OUT << 7);
@@ -125,6 +125,8 @@ bool CdcAcm::HandleEvent(uint32_t event, void *param) {
     switch (event) {
         case kUSB_DeviceEventSetConfiguration:
             SetConfiguration();
+            break;
+        case kUSB_DeviceEventSetInterface:
             break;
         default:
             DbgConsole_Printf("%s: unhandled event %lu\r\n", __PRETTY_FUNCTION__, event);
