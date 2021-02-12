@@ -15,6 +15,9 @@ extern uint32_t __sdram_data_end__;
 extern uint32_t __sdram_bss_start__;
 extern uint32_t __sdram_bss_end__;
 static caam_job_ring_interface_t caam_job_ring_0;
+static caam_job_ring_interface_t caam_job_ring_1;
+static caam_job_ring_interface_t caam_job_ring_2;
+static caam_job_ring_interface_t caam_job_ring_3;
 #endif
 
 void SystemInitHook(void) {
@@ -68,6 +71,9 @@ void BOARD_InitCAAM(void) {
     caam_config_t config;
     CAAM_GetDefaultConfig(&config);
     config.jobRingInterface[0] = &caam_job_ring_0;
+    config.jobRingInterface[1] = &caam_job_ring_1;
+    config.jobRingInterface[2] = &caam_job_ring_2;
+    config.jobRingInterface[3] = &caam_job_ring_3;
     CAAM_Init(CAAM, &config);
 }
 #endif  // __CORTEX_M == 7

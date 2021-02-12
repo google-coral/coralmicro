@@ -18,12 +18,15 @@ extern "C" void app_main(void *param) {
     xBindAddress.sin_port = (uint16_t)31337;
     xBindAddress.sin_port = FreeRTOS_htons(xBindAddress.sin_port);
     FreeRTOS_bind(xListeningSocket, &xBindAddress, sizeof(xBindAddress));
-    FreeRTOS_listen(xListeningSocket, 20);
+    FreeRTOS_listen(xListeningSocket, 1);
 
+    const char *fixed_str = "Hello socket.\r\n";
+    uint8_t dummy;
     while (true) {
-        const char *fixed_str = "Hello socket.\r\n";
         Socket_t xConnectedSocket = FreeRTOS_accept(xListeningSocket, &xClient, &xSize);
         FreeRTOS_send(xConnectedSocket, fixed_str, strlen(fixed_str), 0);
+        FreeRTOS_shutdown(xConnectedSocket, FREERTOS_SHUT_RDWR);
+        while (FreeRTOS_recv(xConnectedSocket, &dummy, sizeof(dummy), 0) >= 0) {}
         FreeRTOS_closesocket(xConnectedSocket);
         taskYIELD();
     }
