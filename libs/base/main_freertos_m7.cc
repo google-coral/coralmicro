@@ -1,6 +1,7 @@
 #include "libs/base/console_m7.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/network.h"
+#include "libs/base/random.h"
 #include "libs/base/tasks_m7.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -19,6 +20,7 @@ extern "C" void BOARD_InitHardware();
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware();
+    valiant::Random::GetSingleton()->Init();
     valiant::ConsoleM7::GetSingleton()->Init();
     valiant::IPCInit();
     valiant::InitializeNetworkEEM();

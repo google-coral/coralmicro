@@ -91,7 +91,7 @@ extern "C" BaseType_t xNetworkInterfaceOutput(
 }
 
 extern "C" BaseType_t xApplicationGetRandomNumber(uint32_t * pulNumber) {
-    return GetRandomNumber(pulNumber, sizeof(*pulNumber)) ? pdTRUE : pdFALSE;
+    return valiant::Random::GetSingleton()->GetRandomNumber(pulNumber, sizeof(*pulNumber)) ? pdTRUE : pdFALSE;
 }
 
 // TODO(atv): Implement something similar to suggestions in RFC6528
