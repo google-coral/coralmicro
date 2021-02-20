@@ -42,6 +42,11 @@ set(COMMON_C_FLAGS
     "--specs=nosys.specs"
     "-u _printf_float"
 )
+if (VALIANT_BOARD_REVISION STREQUAL EVK)
+    list(APPEND COMMON_C_FLAGS "-DBOARD_REVISION_EVK")
+elseif (VALIANT_BOARD_REVISION STREQUAL P0)
+    list(APPEND COMMON_C_FLAGS "-DBOARD_REVISION_P0")
+endif()
 list(JOIN COMMON_C_FLAGS " " COMMON_C_FLAGS_STR)
 
 set(COMMON_C_FLAGS_DEBUG
@@ -72,8 +77,13 @@ set(CM7_LINK_FLAGS
     "-mcpu=cortex-m7"
     "-mfloat-abi=hard"
     "-mfpu=fpv5-d16"
-    "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_flexspi_nor.ld"
 )
+if (VALIANT_BOARD_REVISION STREQUAL EVK)
+    list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_flexspi_nor.ld")
+elseif (VALIANT_BOARD_REVISION STREQUAL P0)
+    # list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_flexspi_nand.ld")
+    list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_ram.ld")
+endif()
 list(JOIN CM7_LINK_FLAGS " " CM7_LINK_FLAGS_STR)
 
 set(CM4_C_FLAGS

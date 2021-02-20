@@ -5,7 +5,11 @@ if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type" FORCE)
+endif()
+
+if (NOT DEFINED VALIANT_BOARD_REVISION)
+    set(VALIANT_BOARD_REVISION EVK CACHE STRING "Board Revision" FORCE)
 endif()
 
 project(valiant)

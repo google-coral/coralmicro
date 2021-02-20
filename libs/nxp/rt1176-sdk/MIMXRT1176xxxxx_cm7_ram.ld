@@ -27,16 +27,17 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x0400;
+HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x100000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
 
 /* Specify the memory areas */
 MEMORY
 {
   m_interrupts          (RX)  : ORIGIN = 0x00000000, LENGTH = 0x00000400
-  m_text                (RX)  : ORIGIN = 0x00000400, LENGTH = 0x0003FC00
+  m_text                (RX)  : ORIGIN = 0x00000400, LENGTH = 0x0007FC00
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00040000
   m_data2               (RW)  : ORIGIN = 0x202C0000, LENGTH = 0x00080000
+  m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x02000000
 }
 
 /* Define output sections */
@@ -174,13 +175,19 @@ SECTIONS
     . = ALIGN(4);
     __noncachedata_end__ = .;     /* define a global symbol at ncache data end */
   } > m_data
-
-  __DATA_END = __NDATA_ROM + (__noncachedata_init_end__ - __noncachedata_start__);
-  text_end = ORIGIN(m_text) + LENGTH(m_text);
-  ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
+  __SDRAM_ROM = __NDATA_ROM + (__noncachedata_init_end__ - __noncachedata_start__);
+  .sdram_data : AT(__SDRAM_ROM)
+  {
+    . = ALIGN(4);
+    __sdram_data_start__ = .;
+    KEEP(*(.sdram_data*))
+    . = ALIGN(4);
+    __sdram_data_end__ = .;
+  } > m_sdram
 
   /* Uninitialized data section */
-  .bss :
+  __BSS_MAP = __SDRAM_ROM + (__sdram_data_end__ - __sdram_data_start__);
+  .bss : AT(__BSS_MAP)
   {
     /* This is used by the startup in order to initialize the .bss section */
     . = ALIGN(4);
@@ -194,6 +201,18 @@ SECTIONS
     __bss_end__ = .;
     __END_BSS = .;
   } > m_data
+  __DATA_END = __BSS_MAP + (__bss_end__ - __bss_start__);
+  text_end = ORIGIN(m_text) + LENGTH(m_text);
+  ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
+  
+  .sdram_bss (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __sdram_bss_start__ = .;
+    *(.sdram_bss*)
+    . = ALIGN(4);
+    __sdram_bss_end__ = .;
+  } > m_sdram
 
   .heap :
   {
@@ -204,7 +223,7 @@ SECTIONS
     . += HEAP_SIZE;
     __HeapLimit = .;
     __heap_limit = .; /* Add for _sbrk */
-  } > m_data
+  } > m_sdram
 
   .stack :
   {
@@ -218,7 +237,5 @@ SECTIONS
   PROVIDE(__stack = __StackTop);
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
-
-  ASSERT(__StackLimit >= __HeapLimit, "region m_data overflowed with stack and heap")
 }
 

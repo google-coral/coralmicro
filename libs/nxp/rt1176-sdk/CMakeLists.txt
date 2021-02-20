@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.13)
 
 enable_language(ASM)
 
+if(VALIANT_BOARD_REVISION STREQUAL EVK)
+    set(libs_nxp_rt1176-sdk_SOURCES_REVISION
+        pin_mux_evk.c
+    )
+elseif(VALIANT_BOARD_REVISION STREQUAL P0)
+    set(libs_nxp_rt1176-sdk_SOURCES_REVISION
+        pin_mux_p0.c
+    )
+else()
+    message(FATAL_ERROR "No revision selected.")
+endif()
+
 set(libs_nxp_rt1176-sdk_SOURCES
     board.c
     board_hardware.c
@@ -10,9 +22,9 @@ set(libs_nxp_rt1176-sdk_SOURCES
     evkmimxrt1170_flexspi_nor_config.c
     fsl_flexspi_nor_boot.c
     peripherals.c
-    pin_mux.c
     usb_device_class.c
     usb_device_cdc_eem.c
+    ${libs_nxp_rt1176-sdk_SOURCES_REVISION}
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_port_uart.c
@@ -24,6 +36,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dmamux.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_edma.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_flexspi.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_mu.c

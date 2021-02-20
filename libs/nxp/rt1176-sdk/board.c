@@ -26,13 +26,7 @@
 /* Get debug console frequency. */
 uint32_t BOARD_DebugConsoleSrcFreq(void)
 {
-#if DEBUG_CONSOLE_UART_INDEX == 1
-    return CLOCK_GetRootClockFreq(kCLOCK_Root_Lpuart1);
-#elif DEBUG_CONSOLE_UART_INDEX == 12
-    return CLOCK_GetRootClockFreq(kCLOCK_Root_Lpuart12);
-#else
-    return CLOCK_GetRootClockFreq(kCLOCK_Root_Lpuart2);
-#endif
+    return CLOCK_GetRootClockFreq(BOARD_UART_CLOCK_ROOT);
 }
 
 /* Initialize debug console. */
@@ -42,259 +36,14 @@ void BOARD_InitDebugConsole(void)
     DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
 }
 
-#if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
-void BOARD_LPI2C_Init(LPI2C_Type *base, uint32_t clkSrc_Hz)
-{
-    lpi2c_master_config_t lpi2cConfig = {0};
-
-    /*
-     * lpi2cConfig.debugEnable = false;
-     * lpi2cConfig.ignoreAck = false;
-     * lpi2cConfig.pinConfig = kLPI2C_2PinOpenDrain;
-     * lpi2cConfig.baudRate_Hz = 100000U;
-     * lpi2cConfig.busIdleTimeout_ns = 0;
-     * lpi2cConfig.pinLowTimeout_ns = 0;
-     * lpi2cConfig.sdaGlitchFilterWidth_ns = 0;
-     * lpi2cConfig.sclGlitchFilterWidth_ns = 0;
-     */
-    LPI2C_MasterGetDefaultConfig(&lpi2cConfig);
-    LPI2C_MasterInit(base, &lpi2cConfig, clkSrc_Hz);
-}
-
-status_t BOARD_LPI2C_Send(LPI2C_Type *base,
-                          uint8_t deviceAddress,
-                          uint32_t subAddress,
-                          uint8_t subAddressSize,
-                          uint8_t *txBuff,
-                          uint8_t txBuffSize)
-{
-    lpi2c_master_transfer_t xfer;
-
-    xfer.flags          = kLPI2C_TransferDefaultFlag;
-    xfer.slaveAddress   = deviceAddress;
-    xfer.direction      = kLPI2C_Write;
-    xfer.subaddress     = subAddress;
-    xfer.subaddressSize = subAddressSize;
-    xfer.data           = txBuff;
-    xfer.dataSize       = txBuffSize;
-
-    return LPI2C_MasterTransferBlocking(base, &xfer);
-}
-
-status_t BOARD_LPI2C_Receive(LPI2C_Type *base,
-                             uint8_t deviceAddress,
-                             uint32_t subAddress,
-                             uint8_t subAddressSize,
-                             uint8_t *rxBuff,
-                             uint8_t rxBuffSize)
-{
-    lpi2c_master_transfer_t xfer;
-
-    xfer.flags          = kLPI2C_TransferDefaultFlag;
-    xfer.slaveAddress   = deviceAddress;
-    xfer.direction      = kLPI2C_Read;
-    xfer.subaddress     = subAddress;
-    xfer.subaddressSize = subAddressSize;
-    xfer.data           = rxBuff;
-    xfer.dataSize       = rxBuffSize;
-
-    return LPI2C_MasterTransferBlocking(base, &xfer);
-}
-
-status_t BOARD_LPI2C_SendSCCB(LPI2C_Type *base,
-                              uint8_t deviceAddress,
-                              uint32_t subAddress,
-                              uint8_t subAddressSize,
-                              uint8_t *txBuff,
-                              uint8_t txBuffSize)
-{
-    lpi2c_master_transfer_t xfer;
-
-    xfer.flags          = kLPI2C_TransferDefaultFlag;
-    xfer.slaveAddress   = deviceAddress;
-    xfer.direction      = kLPI2C_Write;
-    xfer.subaddress     = subAddress;
-    xfer.subaddressSize = subAddressSize;
-    xfer.data           = txBuff;
-    xfer.dataSize       = txBuffSize;
-
-    return LPI2C_MasterTransferBlocking(base, &xfer);
-}
-
-status_t BOARD_LPI2C_ReceiveSCCB(LPI2C_Type *base,
-                                 uint8_t deviceAddress,
-                                 uint32_t subAddress,
-                                 uint8_t subAddressSize,
-                                 uint8_t *rxBuff,
-                                 uint8_t rxBuffSize)
-{
-    status_t status;
-    lpi2c_master_transfer_t xfer;
-
-    xfer.flags          = kLPI2C_TransferDefaultFlag;
-    xfer.slaveAddress   = deviceAddress;
-    xfer.direction      = kLPI2C_Write;
-    xfer.subaddress     = subAddress;
-    xfer.subaddressSize = subAddressSize;
-    xfer.data           = NULL;
-    xfer.dataSize       = 0;
-
-    status = LPI2C_MasterTransferBlocking(base, &xfer);
-
-    if (kStatus_Success == status)
-    {
-        xfer.subaddressSize = 0;
-        xfer.direction      = kLPI2C_Read;
-        xfer.data           = rxBuff;
-        xfer.dataSize       = rxBuffSize;
-
-        status = LPI2C_MasterTransferBlocking(base, &xfer);
-    }
-
-    return status;
-}
-
-void BOARD_Accel_I2C_Init(void)
-{
-    BOARD_LPI2C_Init(BOARD_ACCEL_I2C_BASEADDR, BOARD_ACCEL_I2C_CLOCK_FREQ);
-}
-
-status_t BOARD_Accel_I2C_Send(uint8_t deviceAddress, uint32_t subAddress, uint8_t subaddressSize, uint32_t txBuff)
-{
-    uint8_t data = (uint8_t)txBuff;
-
-    return BOARD_LPI2C_Send(BOARD_ACCEL_I2C_BASEADDR, deviceAddress, subAddress, subaddressSize, &data, 1);
-}
-
-status_t BOARD_Accel_I2C_Receive(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subaddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
-{
-    return BOARD_LPI2C_Receive(BOARD_ACCEL_I2C_BASEADDR, deviceAddress, subAddress, subaddressSize, rxBuff, rxBuffSize);
-}
-
-void BOARD_Codec_I2C_Init(void)
-{
-    BOARD_LPI2C_Init(BOARD_CODEC_I2C_BASEADDR, BOARD_CODEC_I2C_CLOCK_FREQ);
-}
-
-status_t BOARD_Codec_I2C_Send(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize)
-{
-    return BOARD_LPI2C_Send(BOARD_CODEC_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, (uint8_t *)txBuff,
-                            txBuffSize);
-}
-
-status_t BOARD_Codec_I2C_Receive(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
-{
-    return BOARD_LPI2C_Receive(BOARD_CODEC_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff, rxBuffSize);
-}
-
-void BOARD_Camera_I2C_Init(void)
-{
-    const clock_root_config_t lpi2cClockConfig = {
-        .clockOff = false,
-        .mfn      = 0,
-        .mfd      = 0,
-        .mux      = BOARD_CAMERA_I2C_CLOCK_SOURCE,
-        .div      = BOARD_CAMERA_I2C_CLOCK_DIVIDER,
-    };
-
-    CLOCK_SetRootClock(BOARD_CAMERA_I2C_CLOCK_ROOT, &lpi2cClockConfig);
-
-    BOARD_LPI2C_Init(BOARD_CAMERA_I2C_BASEADDR, CLOCK_GetRootClockFreq(BOARD_CAMERA_I2C_CLOCK_ROOT));
-}
-
-status_t BOARD_Camera_I2C_Send(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize)
-{
-    return BOARD_LPI2C_Send(BOARD_CAMERA_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, (uint8_t *)txBuff,
-                            txBuffSize);
-}
-
-status_t BOARD_Camera_I2C_Receive(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
-{
-    return BOARD_LPI2C_Receive(BOARD_CAMERA_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff,
-                               rxBuffSize);
-}
-
-status_t BOARD_Camera_I2C_SendSCCB(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize)
-{
-    return BOARD_LPI2C_SendSCCB(BOARD_CAMERA_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, (uint8_t *)txBuff,
-                                txBuffSize);
-}
-
-status_t BOARD_Camera_I2C_ReceiveSCCB(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
-{
-    return BOARD_LPI2C_ReceiveSCCB(BOARD_CAMERA_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff,
-                                   rxBuffSize);
-}
-
-void BOARD_MIPIPanelTouch_I2C_Init(void)
-{
-    const clock_root_config_t lpi2cClockConfig = {
-        .clockOff = false,
-        .mfn      = 0,
-        .mfd      = 0,
-        .mux      = BOARD_MIPI_PANEL_TOUCH_I2C_CLOCK_SOURCE,
-        .div      = BOARD_MIPI_PANEL_TOUCH_I2C_CLOCK_DIVIDER,
-    };
-
-    CLOCK_SetRootClock(BOARD_MIPI_PANEL_TOUCH_I2C_CLOCK_ROOT, &lpi2cClockConfig);
-
-    BOARD_LPI2C_Init(BOARD_MIPI_PANEL_TOUCH_I2C_BASEADDR,
-                     CLOCK_GetRootClockFreq(BOARD_MIPI_PANEL_TOUCH_I2C_CLOCK_ROOT));
-}
-
-status_t BOARD_MIPIPanelTouch_I2C_Send(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize)
-{
-    return BOARD_LPI2C_Send(BOARD_MIPI_PANEL_TOUCH_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize,
-                            (uint8_t *)txBuff, txBuffSize);
-}
-
-status_t BOARD_MIPIPanelTouch_I2C_Receive(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
-{
-    return BOARD_LPI2C_Receive(BOARD_MIPI_PANEL_TOUCH_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff,
-                               rxBuffSize);
-}
-#endif /* SDK_I2C_BASED_COMPONENT_USED */
-
 /* MPU configuration. */
 #if __CORTEX_M == 7
 void BOARD_ConfigMPU(void)
 {
-#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
-    extern uint32_t Image$$RW_m_ncache$$Base[];
-    /* RW_m_ncache_unused is a auxiliary region which is used to get the whole size of noncache section */
-    extern uint32_t Image$$RW_m_ncache_unused$$Base[];
-    extern uint32_t Image$$RW_m_ncache_unused$$ZI$$Limit[];
-    uint32_t nonCacheStart = (uint32_t)Image$$RW_m_ncache$$Base;
-    uint32_t size          = ((uint32_t)Image$$RW_m_ncache_unused$$Base == nonCacheStart) ?
-                        0 :
-                        ((uint32_t)Image$$RW_m_ncache_unused$$ZI$$Limit - nonCacheStart);
-#elif defined(__MCUXPRESSO)
-#if defined(__USE_SHMEM)
-    extern uint32_t __base_rpmsg_sh_mem;
-    extern uint32_t __top_rpmsg_sh_mem;
-    uint32_t nonCacheStart = (uint32_t)(&__base_rpmsg_sh_mem);
-    uint32_t size          = (uint32_t)(&__top_rpmsg_sh_mem) - nonCacheStart;
-#else
-    extern uint32_t __base_NCACHE_REGION;
-    extern uint32_t __top_NCACHE_REGION;
-    uint32_t nonCacheStart = (uint32_t)(&__base_NCACHE_REGION);
-    uint32_t size          = (uint32_t)(&__top_NCACHE_REGION) - nonCacheStart;
-#endif
-#elif defined(__ICCARM__) || defined(__GNUC__)
     extern uint32_t __NCACHE_REGION_START[];
     extern uint32_t __NCACHE_REGION_SIZE[];
     uint32_t nonCacheStart = (uint32_t)__NCACHE_REGION_START;
     uint32_t size          = (uint32_t)__NCACHE_REGION_SIZE;
-#endif
     uint32_t i = 0;
 
 #if defined(__ICACHE_PRESENT) && __ICACHE_PRESENT
@@ -448,47 +197,15 @@ void BOARD_ConfigMPU(void)
 #elif __CORTEX_M == 4
 void BOARD_ConfigMPU(void)
 {
-#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
-    extern uint32_t Image$$RW_m_ncache$$Base[];
-    /* RW_m_ncache_unused is a auxiliary region which is used to get the whole size of noncache section */
-    extern uint32_t Image$$RW_m_ncache_unused$$Base[];
-    extern uint32_t Image$$RW_m_ncache_unused$$ZI$$Limit[];
-    uint32_t nonCacheStart = (uint32_t)Image$$RW_m_ncache$$Base;
-    uint32_t nonCacheSize = ((uint32_t)Image$$RW_m_ncache_unused$$Base == nonCacheStart) ?
-                                0 :
-                                ((uint32_t)Image$$RW_m_ncache_unused$$ZI$$Limit - nonCacheStart);
-#elif defined(__MCUXPRESSO)
-    extern uint32_t __base_NCACHE_REGION;
-    extern uint32_t __top_NCACHE_REGION;
-    uint32_t nonCacheStart = (uint32_t)(&__base_NCACHE_REGION);
-    uint32_t nonCacheSize  = (uint32_t)(&__top_NCACHE_REGION) - nonCacheStart;
-#elif defined(__ICCARM__) || defined(__GNUC__)
     extern uint32_t __NCACHE_REGION_START[];
     extern uint32_t __NCACHE_REGION_SIZE[];
     uint32_t nonCacheStart = (uint32_t)__NCACHE_REGION_START;
     uint32_t nonCacheSize  = (uint32_t)__NCACHE_REGION_SIZE;
-#endif
 #if defined(__USE_SHMEM)
-#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
-    extern uint32_t Image$$RPMSG_SH_MEM$$Base[];
-    /* RPMSG_SH_MEM_unused is a auxiliary region which is used to get the whole size of RPMSG_SH_MEM section */
-    extern uint32_t Image$$RPMSG_SH_MEM_unused$$Base[];
-    extern uint32_t Image$$RPMSG_SH_MEM_unused$$ZI$$Limit[];
-    uint32_t rpmsgShmenStart = (uint32_t)Image$$RPMSG_SH_MEM$$Base;
-    uint32_t rpmsgShmenSize = ((uint32_t)Image$$RPMSG_SH_MEM_unused$$Base == rpmsgShmenStart) ?
-                                  0 :
-                                  ((uint32_t)Image$$RPMSG_SH_MEM_unused$$ZI$$Limit - rpmsgShmenStart);
-#elif defined(__MCUXPRESSO)
-    extern uint32_t __base_rpmsg_sh_mem;
-    extern uint32_t __top_rpmsg_sh_mem;
-    uint32_t rpmsgShmenStart = (uint32_t)(&__base_rpmsg_sh_mem);
-    uint32_t rpmsgShmenSize  = (uint32_t)(&__top_rpmsg_sh_mem) - rpmsgShmenStart;
-#elif defined(__ICCARM__) || defined(__GNUC__)
     extern uint32_t __RPMSG_SH_MEM_START[];
     extern uint32_t __RPMSG_SH_MEM_SIZE[];
     uint32_t rpmsgShmenStart = (uint32_t)__RPMSG_SH_MEM_START;
     uint32_t rpmsgShmenSize  = (uint32_t)__RPMSG_SH_MEM_SIZE;
-#endif
 #endif
     uint32_t i = 0;
 
@@ -542,11 +259,3 @@ void BOARD_ConfigMPU(void)
     ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk);
 }
 #endif
-
-void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength)
-{
-}
-
-void BOARD_MMC_Pin_Config(uint32_t speed, uint32_t strength)
-{
-}
