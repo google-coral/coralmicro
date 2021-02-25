@@ -70,6 +70,59 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_EMC_B2_13_GPIO8_IO23,
       0U);
 
+  // LED pins (don't work because of tamper protect?)
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06, 1U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06,
+      0x2U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05, 1U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05,
+      0x2U);
+
+  // Crypto RST
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_LPSR_08_GPIO12_IO08, 0U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_LPSR_08_GPIO12_IO08,
+      0xCU);
+
+  // DMIC
+  IOMUXC_SetPinMux(
+    IOMUXC_GPIO_LPSR_00_MIC_CLK, 0U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_LPSR_00_MIC_CLK,
+      0U);
+
+  // I2C5
+  /* From freertos_lpi2c sample */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_LPSR_04_LPI2C5_SDA,         /* GPIO_LPSR_04 is configured as LPI2C5_SDA */
+      1U);                                    /* Software Input On Field: Force input path of pad GPIO_LPSR_04 */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_LPSR_05_LPI2C5_SCL,         /* GPIO_LPSR_05 is configured as LPI2C5_SCL */
+      1U);                                    /* Software Input On Field: Force input path of pad GPIO_LPSR_05 */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_LPSR_04_LPI2C5_SDA,         /* GPIO_LPSR_04 PAD functional properties : */
+      0x20U);                                 /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: normal driver
+                                                 Pull / Keep Select Field: Pull Disable
+                                                 Pull Up / Down Config. Field: Weak pull down
+                                                 Open Drain LPSR Field: Enabled
+                                                 Domain write protection: Both cores are allowed
+                                                 Domain write protection lock: Neither of DWP bits is locked */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_LPSR_05_LPI2C5_SCL,         /* GPIO_LPSR_05 PAD functional properties : */
+      0x20U);                                 /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: normal driver
+                                                 Pull / Keep Select Field: Pull Disable
+                                                 Pull Up / Down Config. Field: Weak pull down
+                                                 Open Drain LPSR Field: Enabled
+                                                 Domain write protection: Both cores are allowed
+                                                 Domain write protection lock: Neither of DWP bits is locked */
+
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_AD_24_LPUART1_TXD,          /* GPIO_AD_24 is configured as LPUART1_TXD */
       0U);                                    /* Software Input On Field: Input Path is determined by functionality */

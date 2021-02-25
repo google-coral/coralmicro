@@ -4,6 +4,8 @@ enable_language(ASM)
 
 if(VALIANT_BOARD_REVISION STREQUAL EVK)
     set(libs_nxp_rt1176-sdk_SOURCES_REVISION
+        evkmimxrt1170_flexspi_nor_config.c
+        fsl_flexspi_nor_boot.c
         pin_mux_evk.c
     )
 elseif(VALIANT_BOARD_REVISION STREQUAL P0)
@@ -19,8 +21,6 @@ set(libs_nxp_rt1176-sdk_SOURCES
     board_hardware.c
     clock_config.c
     dlmalloc.c
-    evkmimxrt1170_flexspi_nor_config.c
-    fsl_flexspi_nor_boot.c
     peripherals.c
     usb_device_class.c
     usb_device_cdc_eem.c
@@ -38,6 +38,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_edma.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_flexspi.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_mu.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pmu.c
@@ -180,6 +181,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_bm-m4
 
 add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
     ${libs_FreeRTOS_SOURCES}

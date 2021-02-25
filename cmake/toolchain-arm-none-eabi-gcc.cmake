@@ -81,7 +81,6 @@ set(CM7_LINK_FLAGS
 if (VALIANT_BOARD_REVISION STREQUAL EVK)
     list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_flexspi_nor.ld")
 elseif (VALIANT_BOARD_REVISION STREQUAL P0)
-    # list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_flexspi_nand.ld")
     list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_ram.ld")
 endif()
 list(JOIN CM7_LINK_FLAGS " " CM7_LINK_FLAGS_STR)

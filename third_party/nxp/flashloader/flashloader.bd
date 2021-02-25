@@ -1,0 +1,17 @@
+options {
+    flags = 0x00;
+    startAddress = 0x2024ff00;
+    ivtOffset = 0x0;
+    initialLoadSize = 0x2000;
+    # Note: This is required if the default entrypoint is not the Reset_Handler 
+    #       Please set the entryPointAddress to Reset_Handler address 
+    entryPointAddress = 0x20250000;
+}
+
+sources {
+    elfFile = extern(0);
+}
+
+section (0)
+{
+}
