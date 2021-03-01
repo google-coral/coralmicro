@@ -25,11 +25,18 @@ add_library_m7(libs_base-m7_freertos STATIC
     reset.cc
 )
 
+if (VALIANT_BOARD_REVISION STREQUAL P0)
+    set(libs_base-m7_freertos_LINK_LIBRARIES_REVISION
+        libs_tasks_PmicTask_freertos
+    )
+endif()
+
 target_link_libraries(libs_base-m7_freertos
     libs_nxp_rt1176-sdk_freertos
     libs_CdcAcm_freertos
     libs_CdcEem_freertos
     libs_tasks_UsbDeviceTask_freertos
+    ${libs_base-m7_freertos_LINK_LIBRARIES_REVISION}
 )
 
 add_library_m4(libs_base-m4_freertos STATIC
