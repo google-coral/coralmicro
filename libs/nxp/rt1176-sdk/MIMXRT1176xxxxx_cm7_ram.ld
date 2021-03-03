@@ -197,8 +197,7 @@ SECTIONS
   } > m_sdram
 
   /* Uninitialized data section */
-  __BSS_MAP = __SDRAM_ROM + (__sdram_data_end__ - __sdram_data_start__);
-  .bss : AT(__BSS_MAP)
+  .bss :
   {
     /* This is used by the startup in order to initialize the .bss section */
     . = ALIGN(4);
@@ -212,10 +211,10 @@ SECTIONS
     __bss_end__ = .;
     __END_BSS = .;
   } > m_data
-  __DATA_END = __BSS_MAP + (__bss_end__ - __bss_start__);
+  __DATA_END = __SDRAM_ROM;
   text_end = ORIGIN(m_text) + LENGTH(m_text);
   ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
-  
+
   .sdram_bss (NOLOAD) :
   {
     . = ALIGN(4);

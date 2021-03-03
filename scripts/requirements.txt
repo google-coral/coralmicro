@@ -1,3 +1,2 @@
 pyserial
-pyelftools
-retry
+pyusb

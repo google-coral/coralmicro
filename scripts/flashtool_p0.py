@@ -1,11 +1,11 @@
 #!/usr/bin/python3
-from retry import retry
-from elftools.elf.elffile import ELFFile
+from enum import Enum, auto
 import argparse
 import os
-import re
+import serial
 import subprocess
 import tempfile
+import time
 import usb.core
 
 SDP_VID = 0x1fc9
@@ -14,9 +14,10 @@ SDP_PID = 0x013d
 FLASHLOADER_VID = 0x15a2
 FLASHLOADER_PID = 0x0073
 
-FLASH_BASE_ADDRESS = 0x30000000
+VALIANT_VID = 0x18d1
+VALIANT_PID = 0x93ff
 
-MEMORY_SIZE_RE = re.compile('Total Size = ([0-9]+) MB')
+VALIANT_UART_PATH = '/dev/valiant_UART'
 
 def sdp_vidpid():
     return '{},{}'.format(hex(SDP_VID), hex(SDP_PID))
@@ -24,73 +25,118 @@ def sdp_vidpid():
 def flashloader_vidpid():
     return '{},{}'.format(hex(FLASHLOADER_VID), hex(FLASHLOADER_PID))
 
-
-@retry(tries=10, delay=1)
-def load_flashloader(blhost_path, flashloader_path):
-    subprocess.check_call([blhost_path, '-u', sdp_vidpid(), '--', 'load-image', flashloader_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def is_valiant_connected():
+    for device in usb.core.find(find_all=True):
+        if device.idVendor == VALIANT_VID and device.idProduct == VALIANT_PID:
+            return True
+    return False
 
 def is_sdp_connected():
-    return usb.core.find(idVendor=SDP_VID, idProduct=SDP_PID) is not None
+    for device in usb.core.find(find_all=True):
+        if device.idVendor == SDP_VID and device.idProduct == SDP_PID:
+            return True
+    return False
 
-@retry(tries=10, delay=1)
 def is_flashloader_connected():
-    flashloader = usb.core.find(idVendor=FLASHLOADER_VID, idProduct=FLASHLOADER_PID)
-    if flashloader is None:
-        raise ValueError
-    return flashloader
+    for device in usb.core.find(find_all=True):
+        if device.idVendor == FLASHLOADER_VID and device.idProduct == FLASHLOADER_PID:
+            return True
+    return False
 
-@retry(tries=10, delay=1)
-def prepare_flash(blhost_path):
-    subprocess.check_call([blhost_path, '-u', flashloader_vidpid(), '--timeout=30000', 'fill-memory', '0x2000', '4', '0xc0000007'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.check_call([blhost_path, '-u', flashloader_vidpid(), '--timeout=30000', 'configure-memory', '0x9', '0x2000'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def CreateSbFile(workdir, elftosb_path, srec_path, itcm_bdfile_path, spinand_bdfile_path):
+    ivt_bin_path = os.path.join(workdir, 'ivt_program.bin')
+    sbfile_path = os.path.join(workdir, 'program.sb')
+    subprocess.check_call([elftosb_path, '-f', 'imx', '-V', '-c', itcm_bdfile_path, '-o', ivt_bin_path, srec_path])
+    subprocess.check_call([elftosb_path, '-f', 'kinetis', '-V', '-c', spinand_bdfile_path, '-o', sbfile_path, ivt_bin_path])
+    return sbfile_path
 
-def get_memory_size(blhost_path):
-    handle = subprocess.Popen([blhost_path, '-u', flashloader_vidpid(), 'list-memory'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    (stdout, _) = handle.communicate()
-    for line in stdout.decode().splitlines():
-        match = MEMORY_SIZE_RE.search(line)
-        if match:
-            return int(match.group(1)) * 1024 * 1024
-    return 0
+class FlashtoolStates(Enum):
+    DONE = auto()
+    ERROR = auto()
+    CHECK_FOR_ANY = auto()
+    CHECK_FOR_VALIANT = auto()
+    RESET_TO_SDP = auto()
+    CHECK_FOR_SDP = auto()
+    LOAD_FLASHLOADER = auto()
+    CHECK_FOR_FLASHLOADER = auto()
+    PROGRAM = auto()
+    RESET = auto()
 
-def erase_flash(blhost_path):
-    print('Erasing all flash (may take a bit, please be patient!)')
-    subprocess.check_call([blhost_path, '-u', flashloader_vidpid(), '--timeout=2000000', 'flash-erase-all', '0x9'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def FlashtoolError(**kwargs):
+    return FlashtoolStates.DONE
 
-def flash_image(blhost_path, binary_to_flash):
-    subprocess.check_call([blhost_path, '-u', flashloader_vidpid(), '--timeout=60000', 'flash-image', binary_to_flash])
+def CheckForAny(**kwargs):
+    if is_valiant_connected():
+        return FlashtoolStates.CHECK_FOR_VALIANT
+    if is_sdp_connected():
+        return FlashtoolStates.CHECK_FOR_SDP
+    if is_flashloader_connected():
+        return FlashtoolStates.CHECK_FOR_FLASHLOADER
+    return FlashtoolStates.ERROR
 
-def flash_binary(blhost_path, binary_to_flash):
-    print('Flashing device with {}'.format(binary_to_flash))
-    flash_image(blhost_path, binary_to_flash)
+def CheckForValiant(**kwargs):
+    if is_valiant_connected():
+        return FlashtoolStates.RESET_TO_SDP
+    # If we don't see Valiant on the bus, just check for SDP.
+    return FlashtoolStates.CHECK_FOR_SDP
 
-def elf_to_binary(toolchain_path, elf_to_flash):
-    binary = tempfile.NamedTemporaryFile(suffix='.hex')
-    subprocess.check_call([os.path.join(toolchain_path, 'arm-none-eabi-objcopy'), '-O', 'ihex', elf_to_flash, binary.name])
-    return binary
+def ResetToSdp(**kwargs):
+    try:
+        s = serial.Serial(VALIANT_UART_PATH, baudrate=1200)
+        s.dtr = False
+        s.close()
+        return FlashtoolStates.CHECK_FOR_SDP
+    except Exception:
+        print('Unable to open %s' % VALIANT_UART_PATH)
+        return FlashtoolStates.ERROR
 
-def flash_elf(blhost_path, toolchain_path, elf_to_flash):
-    with elf_to_binary(toolchain_path, elf_to_flash) as binary_to_flash:
-      flash_binary(blhost_path, binary_to_flash.name)
-    # subprocess.check_call(['pyocd', 'reset'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def CheckForSdp(**kwargs):
+    for i in range(10):
+        if is_sdp_connected():
+            return FlashtoolStates.LOAD_FLASHLOADER
+        time.sleep(1)
+    return FlashtoolStates.ERROR
 
-def jump_to_reset(blhost_path, elf_to_flash):
-    with open(elf_to_flash, 'rb') as f:
-        elf = ELFFile(f)
-        symtab = elf.get_section_by_name('.symtab')
-        reset = symtab.get_symbol_by_name('Reset_Handler')[0]['st_value']
-    subprocess.call([blhost_path, '-u', flashloader_vidpid(), 'call', str(hex(reset)), '0'])
+def LoadFlashloader(**kwargs):
+    subprocess.check_call([kwargs['blhost_path'], '-u', sdp_vidpid(), '--', 'load-image', kwargs['flashloader_path']], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return FlashtoolStates.CHECK_FOR_FLASHLOADER
+
+def CheckForFlashloader(**kwargs):
+    for i in range(10):
+        if is_flashloader_connected():
+            return FlashtoolStates.PROGRAM
+        time.sleep(1)
+    return FlashtoolStates.ERROR
+
+def Program(**kwargs):
+    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'receive-sb-file', kwargs['sbfile_path']])
+    return FlashtoolStates.RESET
+
+def Reset(**kwargs):
+    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'reset'])
+    return FlashtoolStates.DONE
+
+state_handlers = {
+    FlashtoolStates.ERROR: FlashtoolError,
+    FlashtoolStates.CHECK_FOR_ANY: CheckForAny,
+    FlashtoolStates.CHECK_FOR_VALIANT: CheckForValiant,
+    FlashtoolStates.RESET_TO_SDP: ResetToSdp,
+    FlashtoolStates.CHECK_FOR_SDP: CheckForSdp,
+    FlashtoolStates.LOAD_FLASHLOADER: LoadFlashloader,
+    FlashtoolStates.CHECK_FOR_FLASHLOADER: CheckForFlashloader,
+    FlashtoolStates.PROGRAM: Program,
+    FlashtoolStates.RESET: Reset,
+}
 
 def main():
     parser = argparse.ArgumentParser(description='Valiant flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    erase_parser = parser.add_mutually_exclusive_group(required=False)
-    erase_parser.add_argument('--erase', dest='erase', action='store_true')
-    erase_parser.add_argument('--noerase', dest='erase', action='store_false')
-    parser.add_argument('--elf', type=str)
-    parser.set_defaults(erase=False)
+    parser.add_argument('--srec', type=str, required=True)
     args = parser.parse_args()
 
+    if not os.path.exists(args.srec):
+        print('SREC does not exist!')
+        return
     blhost_path = os.path.join(os.path.dirname(__file__), '..', 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     if not os.path.exists(blhost_path):
         print('Unable to locate blhost!')
@@ -99,34 +145,27 @@ def main():
     if not os.path.exists(flashloader_path):
         print('Unable to locate flashloader!')
         return
-    toolchain_path = os.path.join(os.path.dirname(__file__), '..', 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
-    if not os.path.exists(toolchain_path):
-        print('Unable to locate toolchain!')
+    elftosb_path = os.path.join(os.path.dirname(__file__), '..', 'third_party', 'nxp', 'elftosb', 'elftosb')
+    if not os.path.exists(elftosb_path):
+        print('Unable to locate elftosb!')
+        return
+    itcm_bdfile_path = os.path.join(os.path.dirname(__file__), '..', 'third_party', 'nxp', 'elftosb', 'imx-itcm-unsigned.bd')
+    if not os.path.exists(itcm_bdfile_path):
+        print('Unable to locate ITCM bdfile!')
+        return
+    spinand_bdfile_path = os.path.join(os.path.dirname(__file__), '..', 'third_party', 'nxp', 'elftosb', 'program_flexspinand_image.bd')
+    if not os.path.exists(spinand_bdfile_path):
+        print('Unable to locate SPI NAND bdfile!')
         return
 
-    if is_sdp_connected():
-        print('Found SDP, load flashloader')
-        load_flashloader(blhost_path, flashloader_path)
-
-    if is_flashloader_connected():
-        print('Found flashloader, prepare to flash')
-        # prepare_flash(blhost_path)
-        # memory_size = get_memory_size(blhost_path)
-    else:
-        print('No flashloader found.')
-        return
-
-    if args.erase:
-        erase_flash(blhost_path)
-
-    if args.elf:
-        if os.path.exists(args.elf):
-            elf_to_flash = args.elf
-        else:
-            print('{} not found'.format(args.elf))
-
-        flash_elf(blhost_path, toolchain_path, elf_to_flash)
-        jump_to_reset(blhost_path, elf_to_flash)
+    with tempfile.TemporaryDirectory() as workdir:
+        sbfile_path = CreateSbFile(workdir, elftosb_path, args.srec, itcm_bdfile_path, spinand_bdfile_path)
+        state = FlashtoolStates.CHECK_FOR_ANY
+        while True:
+            print(state)
+            state = state_handlers[state](blhost_path=blhost_path, flashloader_path=flashloader_path, sbfile_path=sbfile_path)
+            if state is FlashtoolStates.DONE:
+                break
 
 if __name__ == '__main__':
     main()
