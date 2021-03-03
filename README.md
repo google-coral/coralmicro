@@ -2,10 +2,9 @@
 
 - Valiant is a device based on RT1176.
 - This repository contains a CMake-based build system for the device.
-- At the moment, all samples target the RT1170-EVK.
 
 ## CMake setup
-It's recommended to have CMake put all artifacts into a build directory to not dirty the tree.
+It's recommended to have CMake put all artifacts into a build directory to not dirty the tree. By default, this will build for P0 in Release mode.
 ```
 mkdir -p build
 cd build
@@ -13,19 +12,35 @@ cmake ..
 make
 ```
 
-## Deploying an app to the RT1170-EVK
-- The simplest way to deploy to the EVK is with the mass storage device.
-- Ensure that the micro-USB port for debug (this is on the same side as the power connector) is attached to your workstation.
-- A mass storage device should enumerate, note the location it is mounted to.
-- We must convert the application to the ihex format, as well.
+## Loading code to the P0 device (uses HelloWorldFreeRTOS as example)
+flashtool_p0 only operates (correctly) on srec files. These are generated for you automatically by the build system.
+
+### Install prerequisites
+Before running the script for the first time, be sure to install the required Python modules:
 ```
-arm-none-eabi-objcopy -O ihex /path/to/build/apps/HelloWorld/HelloWorld /path/to/build/image.hex
-cp /path/to/build/image.hex /path/to/mass-storage
-sync
-umount /path/to/mass-storage
+python3 -m pip install scripts/requirements.txt
 ```
 
-- Hopefully the LED near the debug port does a good bit of blinking.
-- Afterwards, the mass-storage device should re-appear, and no longer contain image.hex.
-- If FAIL.TXT is present, something went wrong. It occasionally flakes, so try again at least once.
-- To see output, open the ttyACM that the debug port exposes. You likely will have to press the reset button on the EVK to start the program.
+Also, be sure to setup udev rules, or the scripts will have permission and path issues:
+```
+sudo cp scripts/99-valiant.rules /etc/udev/rules.d
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+### Loading code to RAM
+This is not persistent, and will be lost on a power cycle.
+```
+python3 scripts/flashtool_p0.py --srec build/apps/HelloWorldFreeRTOS/image.srec --ram
+```
+
+### Loading code to NAND
+This is persistent. To boot from NAND, the switch on the underside of the board must be set in the position that is nearer to the center of the board.
+```
+python3 scripts/flashtool_p0.py --srec build/apps/HelloWorldFreeRTOS/image.srec
+```
+
+## Recovering P0 from a bad state
+If you run code on P0 that puts it in a bad state (e.g. crashes at startup), it can be recovered by putting the device into serial download mode and loading new code. To do so, set the switch on the underside of the board to the position that is nearer the edge of the board, and press the reset button.
+
+It will boot in serial download mode, and the above flash instructions can be used to put working code on the device.
