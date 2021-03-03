@@ -29,22 +29,33 @@ ENTRY(Reset_Handler)
 
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x100000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
+RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
 
 /* Specify the memory areas */
 MEMORY
 {
   m_interrupts          (RX)  : ORIGIN = 0x00000800, LENGTH = 0x00000400
-  m_text                (RX)  : ORIGIN = 0x00000c00, LENGTH = 0x0001FC00
-  m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00040000
-  m_data2               (RW)  : ORIGIN = 0x202C0000, LENGTH = 0x00080000
+  m_text                (RX)  : ORIGIN = 0x00000c00, LENGTH = 0x0003FC00
+  m_stack               (RX)  : ORIGIN = 0x20000000, LENGTH = STACK_SIZE
+  m_data                (RW)  : ORIGIN = 0x20000000 + STACK_SIZE, LENGTH = 0x00040000 - STACK_SIZE
+  rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
   m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x02000000
 }
 
 /* Define output sections */
 SECTIONS
 {
-  __NCACHE_REGION_START = ORIGIN(m_data2);
-  __NCACHE_REGION_SIZE  = 0;
+  __NCACHE_REGION_START = ORIGIN(rpmsg_sh_mem);
+  __NCACHE_REGION_SIZE  = LENGTH(rpmsg_sh_mem);
+
+  /* NOINIT section for rpmsg_sh_mem */
+  .noinit_rpmsg_sh_mem (NOLOAD) : ALIGN(4)
+  {
+     __RPMSG_SH_MEM_START__ = .;
+     *(.noinit.$rpmsg_sh_mem*)
+     . = ALIGN(4) ;
+     __RPMSG_SH_MEM_END__ = .;
+  } > rpmsg_sh_mem
 
   /* The startup code goes first into internal RAM */
   .interrupts :
@@ -229,10 +240,10 @@ SECTIONS
   {
     . = ALIGN(8);
     . += STACK_SIZE;
-  } > m_data
+  } > m_stack
 
   /* Initializes stack on the end of block */
-  __StackTop   = ORIGIN(m_data) + LENGTH(m_data);
+  __StackTop   = ORIGIN(m_stack) + LENGTH(m_stack);
   __StackLimit = __StackTop - STACK_SIZE;
   PROVIDE(__stack = __StackTop);
 

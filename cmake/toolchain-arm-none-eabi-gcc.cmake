@@ -123,6 +123,10 @@ function(add_executable_m7)
         COMMAND ${CMAKE_OBJCOPY} -O ihex ${ARGV0} image.hex
         DEPENDS ${ARGV0}
     )
+    add_custom_command(TARGET ${ARGV0} POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O srec ${ARGV0} image.srec
+        DEPENDS ${ARGV0}
+    )
 endfunction()
 
 function(add_library_m7)
