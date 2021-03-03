@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from enum import Enum, auto
 import argparse
+import hexformat
 import os
 import serial
 import subprocess
@@ -109,8 +110,14 @@ def CheckForFlashloader(**kwargs):
     return FlashtoolStates.ERROR
 
 def Program(**kwargs):
-    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'receive-sb-file', kwargs['sbfile_path']])
-    return FlashtoolStates.RESET
+    if kwargs['ram']:
+        start_address = hexformat.srecord.SRecord.fromsrecfile(kwargs['srec_path']).startaddress
+        subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'flash-image', kwargs['srec_path']])
+        subprocess.call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'call', hex(start_address), '0'])
+        return FlashtoolStates.DONE
+    else:
+        subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'receive-sb-file', kwargs['sbfile_path']])
+        return FlashtoolStates.RESET
 
 def Reset(**kwargs):
     subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'reset'])
@@ -132,6 +139,9 @@ def main():
     parser = argparse.ArgumentParser(description='Valiant flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--srec', type=str, required=True)
+    parser.add_argument('--ram', dest='ram', action='store_true')
+    parser.add_argument('--noram', dest='ram', action='store_false')
+    parser.set_defaults(ram=False)
     args = parser.parse_args()
 
     if not os.path.exists(args.srec):
@@ -163,7 +173,7 @@ def main():
         state = FlashtoolStates.CHECK_FOR_ANY
         while True:
             print(state)
-            state = state_handlers[state](blhost_path=blhost_path, flashloader_path=flashloader_path, sbfile_path=sbfile_path)
+            state = state_handlers[state](blhost_path=blhost_path, flashloader_path=flashloader_path, sbfile_path=sbfile_path, ram=args.ram, srec_path=args.srec)
             if state is FlashtoolStates.DONE:
                 break
 
