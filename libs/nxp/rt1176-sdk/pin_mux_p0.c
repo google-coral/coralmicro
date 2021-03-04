@@ -390,6 +390,40 @@ void BOARD_InitPins(void) {
       0x0AU);                                 /* PDRV Field: normal driver
                                                  Pull Down Pull Up Field: PD
                                                  Open Drain Field: Disabled */
+
+  // CAM_INT
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_04_GPIO9_IO03, 0U);
+  // CAM_TRIG
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_EMC_B2_17_GPIO8_IO27, 0U);
+
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_14_VIDEO_MUX_CSI_VSYNC, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_15_VIDEO_MUX_CSI_HSYNC, 0U);
+
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_16_VIDEO_MUX_CSI_DATA09, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_17_VIDEO_MUX_CSI_DATA08, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_18_VIDEO_MUX_CSI_DATA07, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_19_VIDEO_MUX_CSI_DATA06, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_20_VIDEO_MUX_CSI_DATA05, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_21_VIDEO_MUX_CSI_DATA04, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_22_VIDEO_MUX_CSI_DATA03, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_23_VIDEO_MUX_CSI_DATA02, 0U);
+
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_13_VIDEO_MUX_CSI_MCLK, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_12_VIDEO_MUX_CSI_PIXCLK, 0U);
 #endif
 }
 

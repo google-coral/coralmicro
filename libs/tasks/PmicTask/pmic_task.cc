@@ -10,7 +10,6 @@ constexpr const uint8_t kPmicAddress = 0x58;
 constexpr const char kPmicTaskName[] = "pmic_task";
 
 void PmicTask::Read(PmicRegisters reg, uint8_t *val) {
-    printf("Read 0x%x\r\n", static_cast<uint16_t>(reg));
     uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
 
     SetPage(static_cast<uint16_t>(reg));
@@ -22,12 +21,10 @@ void PmicTask::Read(PmicRegisters reg, uint8_t *val) {
     transfer.subaddressSize = sizeof(uint8_t);
     transfer.data = val;
     transfer.dataSize = sizeof(*val);
-    status_t status = LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
-    printf("I2C read status: %ld 0x%x\r\n", status, *val);
+    /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
 }
 
 void PmicTask::Write(PmicRegisters reg, uint8_t val) {
-    printf("Write [0x%x]<-0x%x\r\n", static_cast<uint16_t>(reg), val);
     uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
 
     SetPage(static_cast<uint16_t>(reg));
@@ -39,8 +36,7 @@ void PmicTask::Write(PmicRegisters reg, uint8_t val) {
     transfer.subaddressSize = sizeof(uint8_t);
     transfer.data = &val;
     transfer.dataSize = sizeof(val);
-    status_t status = LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
-    printf("I2C write status: %ld\r\n", status);
+    /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
 }
 
 void PmicTask::SetPage(uint16_t reg) {
@@ -55,8 +51,7 @@ void PmicTask::SetPage(uint16_t reg) {
     transfer.subaddressSize = sizeof(uint8_t);
     transfer.data = &page_con_reg;
     transfer.dataSize = sizeof(page_con_reg);
-    status_t status = LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
-    printf("I2C set page status: %ld\r\n", status);
+    /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
 }
 
 void PmicTask::Init(lpi2c_rtos_handle_t *i2c_handle) {
