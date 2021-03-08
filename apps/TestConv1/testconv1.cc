@@ -82,7 +82,7 @@ static bool setup() {
         return false;
     }
 
-    static tflite::AllOpsResolver resolver;
+    static tflite::MicroMutableOpResolver<1> resolver;
     resolver.AddCustom("edgetpu-custom-op", valiant::RegisterCustomOp());
     static tflite::MicroInterpreter static_interpreter(
         model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
@@ -109,36 +109,8 @@ static bool setup() {
     return true;
 }
 
-extern "C" void GPIO13_Combined_0_31_IRQHandler(void) {
-    DbgConsole_Printf("irq\r\n");
-}
-
 extern "C" void app_main(void *param) {
     int ret;
-
-    gpio_pin_config_t boot_fail_config = {kGPIO_DigitalInput, 0, kGPIO_IntRisingOrFallingEdge};
-    EnableIRQ(GPIO13_Combined_0_31_IRQn);
-    GPIO_PinInit(GPIO8, 23, &boot_fail_config);
-    GPIO_PortEnableInterrupts(GPIO8, 1 << 23);
-
-    gpio_pin_config_t pgood_config = {kGPIO_DigitalInput, 0, kGPIO_IntRisingOrFallingEdge};
-    EnableIRQ(GPIO13_Combined_0_31_IRQn);
-    GPIO_PinInit(GPIO8, 26, &pgood_config);
-    GPIO_PortEnableInterrupts(GPIO8, 1 << 26);
-    printf("PGOOD: %d\r\n", GPIO_PinRead(GPIO8, 26));
-
-    gpio_pin_config_t rst_config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO8, 24, &rst_config);
-    GPIO_PinWrite(GPIO8, 24, 0);
-
-    gpio_pin_config_t pmic_config = {kGPIO_DigitalOutput, 1, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO8, 25, &pmic_config);
-    GPIO_PinWrite(GPIO8, 25, 1);
-
-    vTaskDelay(10);
-
-    printf("PGOOD: %d\r\n", GPIO_PinRead(GPIO8, 26));
-    GPIO_PinWrite(GPIO8, 24, 1);
 
     ret = xTaskCreate(UsbHostTask, "UsbHostTask", configMINIMAL_STACK_SIZE * 10, NULL, APP_TASK_PRIORITY + 1, NULL);
     if (ret != pdPASS) {
@@ -151,17 +123,48 @@ extern "C" void app_main(void *param) {
         printf("Failed to start DfuTask\r\n");
         return;
     }
+
     ret = xTaskCreate(EdgeTpuTask, "EdgeTpuTask", configMINIMAL_STACK_SIZE * 10, NULL, APP_TASK_PRIORITY, NULL);
     if (ret != pdPASS) {
         printf("Failed to start EdgeTpuTask\r\n");
         return;
     }
-    printf("hi\r\n");
-    while (true);
-/*
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    // Can't interrupt on 8/23
+    gpio_pin_config_t boot_fail_config = {kGPIO_DigitalInput, 0, kGPIO_NoIntmode};
+    GPIO_PinInit(GPIO8, 23, &boot_fail_config);
+
+    // Can't interrupt on 8/26
+    gpio_pin_config_t pgood_config = {kGPIO_DigitalInput, 0, kGPIO_NoIntmode};
+    GPIO_PinInit(GPIO8, 26, &pgood_config);
+
+    gpio_pin_config_t rst_config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
+    GPIO_PinInit(GPIO8, 24, &rst_config);
+    GPIO_PinWrite(GPIO8, 24, 0);
+
+    gpio_pin_config_t pmic_config = {kGPIO_DigitalOutput, 1, kGPIO_NoIntmode};
+    GPIO_PinInit(GPIO8, 25, &pmic_config);
+    GPIO_PinWrite(GPIO8, 25, 0);
+    vTaskDelay(pdMS_TO_TICKS(10));
+
+    GPIO_PinWrite(GPIO8, 25, 1);
+    vTaskDelay(pdMS_TO_TICKS(10));
+
+    bool pgood;
+    do {
+        pgood = !!GPIO_PinRead(GPIO8, 26);
+    } while (!pgood);
+    printf("PGOOD is up\r\n");
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    GPIO_PinWrite(GPIO8, 24, 1);
+    printf("Released reset\r\n");
 
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
     setup();
+
     bool run = true;
     size_t counter = 0;
     while (true) {
@@ -173,5 +176,4 @@ extern "C" void app_main(void *param) {
             }
         }
     }
-    */
 }
