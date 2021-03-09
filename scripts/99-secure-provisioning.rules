@@ -1,0 +1,24 @@
+#
+# Copyright 2019 NXP
+# Author: Libor Ukropec
+#
+# This file will be placed at /etc/udev/rules.d by installing of MCUX Secure Provisioning tools
+# It ensures all users have read-write access to the HID devices and serial ports created by the connected board
+#
+
+ACTION!="add",SUBSYSTEM!="usb_device",GOTO="secprov_rules_hidraw"
+
+# make sure serial port is accessible by any user for R/W access
+KERNEL=="ttyACM[0-9]*",MODE="0666"
+KERNEL=="ttyUSB[0-9]*",MODE="0666"
+
+LABEL="secprov_rules_hidraw"
+ACTION!="add",SUBSYSTEM!="hidraw",GOTO="secprov_rules_end"
+
+# make sure the Freescale and NXP VIDs are accessible by any user for R/W access
+# NXP
+ATTRS{idVendor}=="1fc9",MODE="666"
+# Freescale
+ATTRS{idVendor}=="15a2",MODE="666"
+
+LABEL="secprov_rules_end"
