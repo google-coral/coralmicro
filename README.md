@@ -3,13 +3,19 @@
 - Valiant is a device based on RT1176.
 - This repository contains a CMake-based build system for the device.
 
+## Initialize submodules
+Before you try and build anything, be sure to initialize the submodules!
+
+```
+git submodule update --init
+```
+
 ## CMake setup
 It's recommended to have CMake put all artifacts into a build directory to not dirty the tree. By default, this will build for P0 in Release mode.
 ```
 mkdir -p build
-cd build
-cmake ..
-make
+pushd build; cmake ..; popd
+make -C build
 ```
 
 ## Loading code to the P0 device (uses HelloWorldFreeRTOS as example)
@@ -18,12 +24,12 @@ flashtool_p0 only operates (correctly) on srec files. These are generated for yo
 ### Install prerequisites
 Before running the script for the first time, be sure to install the required Python modules:
 ```
-python3 -m pip install scripts/requirements.txt
+python3 -m pip install -r scripts/requirements.txt
 ```
 
 Also, be sure to setup udev rules, or the scripts will have permission and path issues:
 ```
-sudo cp scripts/99-valiant.rules /etc/udev/rules.d
+sudo cp scripts/99-valiant.rules scripts/50-cmsis-dap.rules scripts/99-secure-provisioning.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```
