@@ -31,3 +31,6 @@
 [submodule "third_party/FreeRTOS-Plus-TCP"]
 	path = third_party/FreeRTOS-Plus-TCP
 	url = https://github.com/FreeRTOS/FreeRTOS-Plus-TCP.git
+[submodule "third_party/kissfft"]
+	path = third_party/kissfft
+	url = https://spacepark.googlesource.com/valiant/kissfft

@@ -3,6 +3,7 @@
 #include "libs/base/network.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks_m7.h"
+#include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
@@ -40,6 +41,7 @@ extern "C" int main(int argc, char **argv) {
 
     valiant::PmicTask::GetSingleton()->Init(&i2c5_handle);
     valiant::CameraTask::GetSingleton()->Init(&i2c5_handle);
+    valiant::AudioTask::GetSingleton()->Init();
 #endif
 
     FreeRTOS_IPInit(ucIPAddress, ucNetMask, ucGatewayAddress, ucDNSServerAddress, ucMACAddress);

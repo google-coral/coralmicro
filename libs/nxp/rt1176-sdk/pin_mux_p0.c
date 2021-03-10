@@ -94,7 +94,11 @@ void BOARD_InitPins(void) {
     IOMUXC_GPIO_LPSR_00_MIC_CLK, 0U);
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_LPSR_00_MIC_CLK,
-      0U);
+      3U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_LPSR_01_MIC_BITSTREAM0, 0U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_LPSR_01_MIC_BITSTREAM0, 3U);
 
   // I2C5
   /* From freertos_lpi2c sample */

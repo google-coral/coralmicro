@@ -201,6 +201,9 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Emv1, &rootCfg);
 
+    CLOCK_InitAudioPllWithFreq(96);
+    CLOCK_SetRootClockMux(kCLOCK_Root_Mic, 6); // Audio PLL
+
 #if __CORTEX_M == 7
     SystemCoreClock = CLOCK_GetRootClockFreq(kCLOCK_Root_M7);
 #else

@@ -6,6 +6,21 @@ set(libs_tensorflow_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/flatbuffer_conversions.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/op_resolver.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/tensor_utils.cc
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/fft.cc
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/frontend.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/window.c
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/window_util.c
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/kernels/internal/quantization_util.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/kernels/kernel_util.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.cc
@@ -66,6 +81,7 @@ target_include_directories(libs_tensorflow-m7 PUBLIC
 target_link_libraries(libs_tensorflow-m7
     libs_flatbuffers
     libs_gemmlowp
+    libs_kissfft
     libs_ruy
 )
 
