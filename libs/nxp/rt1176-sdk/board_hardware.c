@@ -2,6 +2,7 @@
 #include "libs/nxp/rt1176-sdk/peripherals.h"
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_semc.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 
@@ -78,6 +79,26 @@ void BOARD_InitCAAM(void) {
 }
 #endif  // __CORTEX_M == 7
 
+#if defined(BOARD_REVISION_P0)
+void BOARD_FuseTamper(void) {
+    status_t status;
+    uint32_t fuse_val;
+    OCOTP_Init(OCOTP, 0);
+    status = OCOTP_ReadFuseShadowRegisterExt(OCOTP, 0x6, &fuse_val, 1);
+    if (status != kStatus_Success) {
+        goto exit;
+    }
+
+    uint32_t tamper_disable_mask = 0xC000;
+    if (!(fuse_val & tamper_disable_mask)) {
+        fuse_val |= tamper_disable_mask;
+        status = OCOTP_WriteFuseShadowRegister(OCOTP, 0x6, fuse_val);
+    }
+exit:
+    OCOTP_Deinit(OCOTP);
+}
+#endif
+
 void BOARD_InitHardware(void) {
     MCMGR_Init();
     BOARD_InitBootPins();
@@ -102,5 +123,10 @@ void BOARD_InitHardware(void) {
     memset((uint8_t*)sdram_bss, 0x0, sdram_bss_size);
 
     BOARD_InitCAAM();
+
+#if defined(BOARD_REVISION_P0)
+    BOARD_FuseTamper();
+#endif
+
 #endif
 }
