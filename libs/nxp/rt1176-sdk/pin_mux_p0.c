@@ -147,6 +147,30 @@ void BOARD_InitPins(void) {
                                                  Pull / Keep Select Field: Pull Disable, Highz
                                                  Pull Up / Down Config. Field: Weak pull down
                                                  Open Drain Field: Disabled */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_EMC_B2_00_LPUART6_CTS_B, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_EMC_B2_01_LPUART6_RTS_B, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_EMC_B1_40_LPUART6_TXD,
+      0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_EMC_B1_41_LPUART6_RXD,
+      0U);
+
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_EMC_B2_00_LPUART6_CTS_B,
+      0x0EU);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_EMC_B2_01_LPUART6_RTS_B,
+      0x0EU);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_EMC_B1_40_LPUART6_TXD,
+      0x0EU);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_EMC_B1_41_LPUART6_RXD,
+      0x0EU);
+
 #if __CORTEX_M == 7
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B1_00_SEMC_DATA00,      /* GPIO_EMC_B1_00 is configured as SEMC_DATA00 */
@@ -268,12 +292,12 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B1_39_SEMC_DQS,         /* GPIO_EMC_B1_39 is configured as SEMC_DQS */
       1U);                                    /* Software Input On Field: Force input path of pad GPIO_EMC_B1_39 */
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_EMC_B1_40_SEMC_RDY,         /* GPIO_EMC_B1_40 is configured as SEMC_RDY */
-      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_EMC_B1_41_SEMC_CSX00,       /* GPIO_EMC_B1_41 is configured as SEMC_CSX00 */
-      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+  // IOMUXC_SetPinMux(
+  //     IOMUXC_GPIO_EMC_B1_40_SEMC_RDY,         /* GPIO_EMC_B1_40 is configured as SEMC_RDY */
+  //     0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+  // IOMUXC_SetPinMux(
+  //     IOMUXC_GPIO_EMC_B1_41_SEMC_CSX00,       /* GPIO_EMC_B1_41 is configured as SEMC_CSX00 */
+  //     0U);                                    /* Software Input On Field: Input Path is determined by functionality */
   // IOMUXC_SetPinMux(
   //     IOMUXC_GPIO_EMC_B2_00_SEMC_DATA16,      /* GPIO_EMC_B2_00 is configured as SEMC_DATA16 */
   //     0U);                                    /* Software Input On Field: Input Path is determined by functionality */

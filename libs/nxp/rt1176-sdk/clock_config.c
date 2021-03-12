@@ -146,11 +146,11 @@ void BOARD_BootClockRUN(void)
     rootCfg.mux = kCLOCK_LPUART1_ClockRoot_MuxSysPll2Out;
     rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart1, &rootCfg);
-#else
-    /* Configure Lpuart2 using SysPll2*/
-    rootCfg.mux = kCLOCK_LPUART2_ClockRoot_MuxSysPll2Out;
+#elif DEBUG_CONSOLE_UART_INDEX == 6
+    /* Configure Lpuart6 using SysPll2*/
+    rootCfg.mux = kCLOCK_LPUART6_ClockRoot_MuxSysPll2Out;
     rootCfg.div = 22;
-    CLOCK_SetRootClock(kCLOCK_Root_Lpuart2, &rootCfg);
+    CLOCK_SetRootClock(kCLOCK_Root_Lpuart6, &rootCfg);
 #endif
 
 #ifndef SKIP_SEMC_INIT
