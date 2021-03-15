@@ -12,6 +12,7 @@ namespace valiant {
 enum class PmicRequestType : uint8_t {
     Rail,
     Gpio,
+    ChipId,
 };
 
 enum class Rail : uint8_t {
@@ -42,13 +43,20 @@ struct GpioRequest {
     bool enable;
 };
 
+struct PmicResponse {
+    PmicRequestType type;
+    union {
+        uint8_t chip_id;
+    } response;
+};
+
 struct PmicRequest {
     PmicRequestType type;
     union {
         RailRequest rail;
         GpioRequest gpio;
     } request;
-    std::function<void()> callback;
+    std::function<void(PmicResponse)> callback;
 };
 
 enum class PmicRegisters : uint16_t {
@@ -72,11 +80,14 @@ class PmicTask : public QueueTask<PmicRequest, kPmicTaskName, kPmicTaskStackDept
         return &pmic;
     }
     void SetRailState(Rail rail, bool enable);
+    uint8_t GetChipId();
   private:
     void TaskInit() override;
+    PmicResponse SendRequest(PmicRequest& req);
     void MessageHandler(PmicRequest *req) override;
     void HandleRailRequest(const RailRequest& rail);
     void HandleGpioRequest(const GpioRequest& gpio);
+    uint8_t HandleChipIdRequest();
     void SetPage(uint16_t reg);
     void Read(PmicRegisters reg, uint8_t *val);
     void Write(PmicRegisters reg, uint8_t val);
