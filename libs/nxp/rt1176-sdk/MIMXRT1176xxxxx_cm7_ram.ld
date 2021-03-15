@@ -31,6 +31,14 @@ HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x100000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
 RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
 
+/*
+ * Valid memory regions:
+ * 0x00000000 - 0x0003FFFF (256KB)
+ * 0x20000000 - 0x2003FFFF (256KB)
+ * 0x20240000 - 0x202BFFFF (512KB)
+ * 0x202C0000 - 0x2033FFFF (512KB)
+ */
+
 /* Specify the memory areas */
 MEMORY
 {
@@ -39,6 +47,7 @@ MEMORY
   m_stack               (RX)  : ORIGIN = 0x20000000, LENGTH = STACK_SIZE
   m_data                (RW)  : ORIGIN = 0x20000000 + STACK_SIZE, LENGTH = 0x00040000 - STACK_SIZE
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
+  m_core1_image         (RX)  : ORIGIN = 0x202C0000 + RPMSG_SHMEM_SIZE, LENGTH = 0x80000 - RPMSG_SHMEM_SIZE
   m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x02000000
 }
 
@@ -56,6 +65,15 @@ SECTIONS
      . = ALIGN(4) ;
      __RPMSG_SH_MEM_END__ = .;
   } > rpmsg_sh_mem
+
+  /* section for storing the secondary core image */
+  .core1_code :
+  {
+     . = ALIGN(4) ;
+    KEEP (*(.core1_code))
+     *(.core1_code*)
+     . = ALIGN(4) ;
+  } > m_core1_image
 
   /* The startup code goes first into internal RAM */
   .interrupts :

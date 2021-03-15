@@ -169,7 +169,9 @@ def main():
         return
 
     with tempfile.TemporaryDirectory() as workdir:
-        sbfile_path = CreateSbFile(workdir, elftosb_path, args.srec, itcm_bdfile_path, spinand_bdfile_path)
+        sbfile_path = None
+        if not args.ram:
+            sbfile_path = CreateSbFile(workdir, elftosb_path, args.srec, itcm_bdfile_path, spinand_bdfile_path)
         state = FlashtoolStates.CHECK_FOR_ANY
         while True:
             print(state)

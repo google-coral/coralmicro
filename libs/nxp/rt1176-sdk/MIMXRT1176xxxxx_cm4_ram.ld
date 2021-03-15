@@ -30,14 +30,15 @@ ENTRY(Reset_Handler)
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x8000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
 RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
+NCACHE_SIZE = 0x400;
 
 /* Specify the memory areas */
 MEMORY
 {
   m_interrupts          (RX)  : ORIGIN = 0x20200000, LENGTH = 0x00000400
-  m_text                (RX)  : ORIGIN = 0x20200400, LENGTH = 0x0007FC00
-  m_ncache              (RW)  : ORIGIN = 0x20280000, LENGTH = 0x00040000
-  m_data                (RW)  : ORIGIN = 0x202C0000 + RPMSG_SHMEM_SIZE, LENGTH = 0x00080000 - RPMSG_SHMEM_SIZE
+  m_text                (RX)  : ORIGIN = 0x20200400, LENGTH = 0x0001FC00
+  m_ncache              (RW)  : ORIGIN = 0x20220000, LENGTH = NCACHE_SIZE
+  m_data                (RW)  : ORIGIN = 0x20220000 + NCACHE_SIZE, LENGTH = 0x00020000 - NCACHE_SIZE
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
 }
 

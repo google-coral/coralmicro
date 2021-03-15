@@ -86,7 +86,7 @@ void BOARD_FuseTamper(void) {
     OCOTP_Init(OCOTP, 0);
     status = OCOTP_ReadFuseShadowRegisterExt(OCOTP, 0x6, &fuse_val, 1);
     if (status != kStatus_Success) {
-        goto exit;
+        return;
     }
 
     uint32_t tamper_disable_mask = 0xC000;
@@ -94,8 +94,6 @@ void BOARD_FuseTamper(void) {
         fuse_val |= tamper_disable_mask;
         status = OCOTP_WriteFuseShadowRegister(OCOTP, 0x6, fuse_val);
     }
-exit:
-    OCOTP_Deinit(OCOTP);
 }
 #endif
 

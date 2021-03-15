@@ -71,10 +71,10 @@ void ipc_task(void *param) {
     // Provide the address of the P->S message queue so that the remote core can
     // receive messages from this core.
     printf("Starting M4\r\n");
-    MCMGR_StartCore(kMCMGR_Core1, (void*)CORE1_BOOT_ADDRESS, reinterpret_cast<uint32_t>(p2s_message_buffer), kMCMGR_Start_Synchronous);
+    MCMGR_StartCore(kMCMGR_Core1, (void*)CORE1_BOOT_ADDRESS, reinterpret_cast<uint32_t>(p2s_message_buffer), kMCMGR_Start_Asynchronous);
 
     // Wait for the first event from the remote core.
-    while (!remote_alive) {}
+    while (!remote_alive) { vTaskDelay(pdMS_TO_TICKS(500)); }
     printf("M4 started\r\n");
 
     // Send the address of the S->P message queue through the P->S queue.
