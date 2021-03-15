@@ -60,7 +60,6 @@ void ipc_task(void *param) {
     // Load the remote core's memory space with the program binary.
     uint32_t m4_start = (uint32_t)&m4_binary_start;
     uint32_t m4_size = (uint32_t)&m4_binary_size;
-    printf("CM4 binary is %lu bytes at 0x%lx\r\n", m4_size, m4_start);
     memcpy((void*)CORE1_BOOT_ADDRESS, (void*)m4_start, m4_size);
 
     // Register callbacks for communication with the other core.
@@ -70,12 +69,10 @@ void ipc_task(void *param) {
     // Start up the remote core.
     // Provide the address of the P->S message queue so that the remote core can
     // receive messages from this core.
-    printf("Starting M4\r\n");
     MCMGR_StartCore(kMCMGR_Core1, (void*)CORE1_BOOT_ADDRESS, reinterpret_cast<uint32_t>(p2s_message_buffer), kMCMGR_Start_Asynchronous);
 
     // Wait for the first event from the remote core.
     while (!remote_alive) { vTaskDelay(pdMS_TO_TICKS(500)); }
-    printf("M4 started\r\n");
 
     // Send the address of the S->P message queue through the P->S queue.
     // That'll let the remote core send messages back to us.
@@ -103,6 +100,23 @@ void ipc_task(void *param) {
 }
 
 namespace valiant {
+
+bool M4IsAlive(uint32_t millis) {
+    constexpr int kSleepMs = 100;
+    uint32_t time_left = millis;
+    do {
+        if (remote_alive) {
+            return true;
+        }
+        if (time_left < kSleepMs) {
+            time_left = 0;
+        } else {
+            time_left -= kSleepMs;
+        }
+        vTaskDelay(pdMS_TO_TICKS(kSleepMs));
+    } while (time_left);
+    return false;
+}
 
 void IPCInit() {
     if (m4_binary_start != 0xdeadbeef) {
