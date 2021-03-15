@@ -15,6 +15,7 @@ namespace audio {
 enum class AudioRequestType : uint8_t {
     Power,
     Enable,
+    Disable,
     SetCallback,
     SetBuffer,
 };
@@ -23,9 +24,10 @@ struct PowerRequest {
    bool enable;
 };
 
-typedef uint32_t* (*AudioTaskCallback)();
+typedef uint32_t* (*AudioTaskCallback)(void *);
 struct SetCallbackRequest {
     AudioTaskCallback callback;
+    void *callback_param;
 };
 
 struct SetBufferRequest {
@@ -64,7 +66,8 @@ class AudioTask : public QueueTask<audio::AudioRequest, kAudioTaskName, kAudioTa
     }
     void SetPower(bool enable);
     void Enable();
-    void SetCallback(audio::AudioTaskCallback cb);
+    void Disable();
+    void SetCallback(audio::AudioTaskCallback cb, void *param);
     void SetBuffer(uint32_t* buffer, size_t bytes);
   private:
     static void StaticPdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t status, void *userData);
@@ -74,6 +77,7 @@ class AudioTask : public QueueTask<audio::AudioRequest, kAudioTaskName, kAudioTa
     void MessageHandler(audio::AudioRequest *req) override;
     void HandlePowerRequest(audio::PowerRequest& power);
     void HandleEnableRequest();
+    void HandleDisableRequest();
     void HandleSetCallback(audio::SetCallbackRequest& set_callback);
     void HandleSetBuffer(audio::SetBufferRequest& set_buffer);
 

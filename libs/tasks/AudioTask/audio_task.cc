@@ -61,7 +61,7 @@ void AudioTask::StaticPdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, sta
 void AudioTask::PdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t status) {
     BaseType_t reschedule = pdFALSE;
     if (status == kStatus_PDM_Idle && callback_) {
-        uint32_t* next_buffer = callback_();
+        uint32_t* next_buffer = callback_(callback_param_);
 
         if (next_buffer) {
             SetBufferRequest set_buffer;
@@ -103,8 +103,8 @@ void AudioTask::TaskInit() {
     channel_config_.gain = kPDM_DfOutputGain6;
     PDM_TransferSetChannelConfigEDMA(PDM, &pdm_edma_handle_, 0 /* left */, &channel_config_);
     // TODO(atv): Parametrize sampling rate?
-    status_t status = PDM_SetSampleRateConfig(PDM, 96000000 /* PDM_CLK */, 16000 /* Sample rate */);
-    printf("PDM_SetSampleRateConfig success? %s\r\n", (status == kStatus_Success) ? "yes" : "no");
+    /* status_t status = */ PDM_SetSampleRateConfig(PDM, 96000000 /* PDM_CLK */, 16000 /* Sample rate */);
+    // printf("PDM_SetSampleRateConfig success? %s\r\n", (status == kStatus_Success) ? "yes" : "no");
     PDM_Reset(PDM);
     PDM_EnableInterrupts(PDM, kPDM_ErrorInterruptEnable);
     // TODO(atv): Make a header with these priorities
@@ -118,11 +118,14 @@ void AudioTask::TaskInit() {
 void AudioTask::HandleEnableRequest() {
     // TODO(atv): How much of TaskInit should move in here?
     // TODO(atv): add disable (test via keyword in microspeech)
-    memset(rx_buffer_, 0, rx_buffer_bytes_);
     pdm_transfer_.data = reinterpret_cast<uint8_t*>(rx_buffer_);
     pdm_transfer_.dataSize = rx_buffer_bytes_;
     pdm_transfer_.linkTransfer = NULL;
     PDM_TransferReceiveEDMA(PDM, &pdm_edma_handle_, &pdm_transfer_);
+}
+
+void AudioTask::HandleDisableRequest() {
+    PDM_Deinit(PDM);
 }
 
 void AudioTask::HandlePowerRequest(PowerRequest& power) {
@@ -132,6 +135,7 @@ void AudioTask::HandlePowerRequest(PowerRequest& power) {
 
 void AudioTask::HandleSetCallback(SetCallbackRequest& set_callback) {
     callback_ = set_callback.callback;
+    callback_param_ = set_callback.callback_param;
 }
 
 void AudioTask::HandleSetBuffer(SetBufferRequest& set_buffer) {
@@ -148,6 +152,9 @@ void AudioTask::MessageHandler(AudioRequest *req) {
             break;
         case AudioRequestType::Enable:
             HandleEnableRequest();
+            break;
+        case AudioRequestType::Disable:
+            HandleDisableRequest();
             break;
         case AudioRequestType::SetCallback:
             HandleSetCallback(req->request.set_callback);
@@ -173,10 +180,17 @@ void AudioTask::Enable() {
     SendRequest(req);
 }
 
-void AudioTask::SetCallback(AudioTaskCallback cb) {
+void AudioTask::Disable() {
+    AudioRequest req;
+    req.type = AudioRequestType::Disable;
+    SendRequest(req);
+}
+
+void AudioTask::SetCallback(AudioTaskCallback cb, void *param) {
     AudioRequest req;
     req.type = AudioRequestType::SetCallback;
     req.request.set_callback.callback = cb;
+    req.request.set_callback.callback_param = param;
     SendRequest(req);
 }
 
