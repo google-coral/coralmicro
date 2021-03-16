@@ -1,14 +1,11 @@
 #include "third_party/freertos_kernel/include/projdefs.h"
 #include "libs/base/tasks_m7.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
-#include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "libs/tensorflow/testconv1_edgetpu.h"
 #include "libs/tensorflow/testconv1_expected_output.h"
 #include "libs/tensorflow/testconv1_test_input.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
@@ -31,29 +28,6 @@ const int kExtraArenaSize = 32768;
 const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
 }  // namespace
-
-// Measured stack usage: 242 words
-void UsbHostTask(void *param) {
-    while (true) {
-        valiant::UsbHostTask::GetSingleton()->UsbHostTaskFn();
-        taskYIELD();
-    }
-}
-
-// Measured stack usage: 146 words
-void DfuTask(void *param) {
-    while (true) {
-        valiant::EdgeTpuDfuTask::GetSingleton()->EdgeTpuDfuTaskFn();
-        taskYIELD();
-    }
-}
-
-void EdgeTpuTask(void *param) {
-    while (true) {
-        valiant::EdgeTpuTask::GetSingleton()->EdgeTpuTaskFn();
-        taskYIELD();
-    }
-}
 
 bool loop() {
     memset(output->data.uint8, 0, output->bytes);
@@ -110,59 +84,9 @@ static bool setup() {
 }
 
 extern "C" void app_main(void *param) {
-    int ret;
-
-    ret = xTaskCreate(UsbHostTask, "UsbHostTask", configMINIMAL_STACK_SIZE * 10, NULL, APP_TASK_PRIORITY + 1, NULL);
-    if (ret != pdPASS) {
-        printf("Failed to start UsbHostTask\r\n");
-        return;
-    }
-
-    ret = xTaskCreate(DfuTask, "DfuTask", configMINIMAL_STACK_SIZE * 3, NULL, APP_TASK_PRIORITY, NULL);
-    if (ret != pdPASS) {
-        printf("Failed to start DfuTask\r\n");
-        return;
-    }
-
-    ret = xTaskCreate(EdgeTpuTask, "EdgeTpuTask", configMINIMAL_STACK_SIZE * 10, NULL, APP_TASK_PRIORITY, NULL);
-    if (ret != pdPASS) {
-        printf("Failed to start EdgeTpuTask\r\n");
-        return;
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(1000));
-
-    // Can't interrupt on 8/23
-    gpio_pin_config_t boot_fail_config = {kGPIO_DigitalInput, 0, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO8, 23, &boot_fail_config);
-
-    // Can't interrupt on 8/26
-    gpio_pin_config_t pgood_config = {kGPIO_DigitalInput, 0, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO8, 26, &pgood_config);
-
-    gpio_pin_config_t rst_config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO8, 24, &rst_config);
-    GPIO_PinWrite(GPIO8, 24, 0);
-
-    gpio_pin_config_t pmic_config = {kGPIO_DigitalOutput, 1, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO8, 25, &pmic_config);
-    GPIO_PinWrite(GPIO8, 25, 0);
-    vTaskDelay(pdMS_TO_TICKS(10));
-
-    GPIO_PinWrite(GPIO8, 25, 1);
-    vTaskDelay(pdMS_TO_TICKS(10));
-
-    bool pgood;
-    do {
-        pgood = !!GPIO_PinRead(GPIO8, 26);
-    } while (!pgood);
-    printf("PGOOD is up\r\n");
-
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    GPIO_PinWrite(GPIO8, 24, 1);
-    printf("Released reset\r\n");
-
+    valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+
     setup();
 
     bool run = true;

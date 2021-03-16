@@ -1,3 +1,4 @@
+#include "libs/base/tasks_m7.h"
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/clock_config.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
@@ -32,8 +33,10 @@ usb_status_t UsbHostTask::HostEvent(usb_device_handle device_handle,
 
     USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDeviceVID, &vid);
     USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDevicePID, &pid);
+#if 0
     printf("USB_HostEvent event_code: %lu status: %lu vid: 0x%lx pid: 0x%lx\r\n",
            event_code & 0xFFFF, event_code >> 16, vid, pid);
+#endif
 
     vidpid = vidpid_to_key(vid, pid);
     if (host_event_callbacks_.find(vidpid) == host_event_callbacks_.end()) {
@@ -51,6 +54,20 @@ void UsbHostTask::RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid, usb_h
     IRQn_Type irqNumber = USB_OTG2_IRQn;
     NVIC_SetPriority(irqNumber, 6);
     NVIC_EnableIRQ(irqNumber);
+}
+
+void UsbHostTask::StaticTaskMain(void *param) {
+    reinterpret_cast<UsbHostTask*>(param)->TaskMain();
+}
+
+void UsbHostTask::TaskMain() {
+    while (true) {
+        USB_HostEhciTaskFunction(host_handle());
+    }
+}
+
+void UsbHostTask::Init() {
+    xTaskCreate(UsbHostTask::StaticTaskMain, "UsbHostTask", configMINIMAL_STACK_SIZE * 10, this, USB_HOST_TASK_PRIORITY, NULL);
 }
 
 UsbHostTask::UsbHostTask() {
@@ -72,13 +89,11 @@ UsbHostTask::UsbHostTask() {
         return;
     }
 
+#if 0
     uint32_t usb_version;
     USB_HostGetVersion(&usb_version);
     printf("USB host stack version: %lu.%lu.%lu\r\n", (usb_version >> 16) & 0xFF, (usb_version >> 8) & 0xFF, usb_version & 0xFF);
-}
-
-void UsbHostTask::UsbHostTaskFn() {
-    USB_HostEhciTaskFunction(host_handle());
+#endif
 }
 
 }  // namespace valiant

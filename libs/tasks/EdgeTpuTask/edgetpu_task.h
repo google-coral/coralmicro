@@ -1,15 +1,21 @@
 #ifndef _LIBS_TASKS_EDGETPUTASK_EDGETPU_TASK_H_
 #define _LIBS_TASKS_EDGETPUTASK_EDGETPU_TASK_H_
 
+#include "libs/base/queue_task.h"
+#include "libs/base/tasks_m7.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
+#include <functional>
 
 namespace valiant {
 
 constexpr int kEdgeTpuVid = 0x18d1;
 constexpr int kEdgeTpuPid = 0x9302;
+
+namespace edgetpu {
 
 enum edgetpu_state {
     EDGETPU_STATE_UNATTACHED = 0,
@@ -20,13 +26,43 @@ enum edgetpu_state {
     EDGETPU_STATE_ERROR,
 };
 
-class EdgeTpuTask {
-  public:
-    EdgeTpuTask();
-    EdgeTpuTask(const EdgeTpuTask&) = delete;
-    EdgeTpuTask& operator=(const EdgeTpuTask&) = delete;
+enum class RequestType : uint8_t {
+    NEXT_STATE,
+    POWER,
+};
 
-    void EdgeTpuTaskFn();
+struct NextStateRequest {
+    edgetpu_state state;
+};
+
+struct PowerRequest {
+    bool enable;
+};
+
+struct Response {
+    RequestType type;
+};
+
+struct Request {
+    RequestType type;
+    union {
+        NextStateRequest next_state;
+        PowerRequest power;
+    } request;
+    std::function<void(Response)> callback;
+};
+
+}  // namespace edgetpu
+
+static constexpr size_t kEdgeTpuTaskStackDepth = configMINIMAL_STACK_SIZE * 3;
+static constexpr UBaseType_t kEdgeTpuTaskQueueLength = 4;
+extern const char kEdgeTpuTaskName[];
+
+class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeTpuTaskName,
+                                     kEdgeTpuTaskStackDepth, EDGETPU_TASK_PRIORITY, kEdgeTpuTaskQueueLength> {
+  public:
+    void Init() override;
+    void SetPower(bool enable);
     static EdgeTpuTask* GetSingleton() {
         static EdgeTpuTask task;
         return &task;
@@ -53,7 +89,11 @@ class EdgeTpuTask {
       return class_handle_;
     }
   private:
-    void SetNextState(enum edgetpu_state next_state);
+    void TaskInit() override;
+    void RequestHandler(edgetpu::Request *req) override;
+    void HandleNextState(edgetpu::NextStateRequest& req);
+    void HandlePowerRequest(edgetpu::PowerRequest& req);
+    void SetNextState(enum edgetpu::edgetpu_state next_state);
     static void SetInterfaceCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status);
     static void GetStatusCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status);
     usb_status_t USBHostEvent(
@@ -67,7 +107,9 @@ class EdgeTpuTask {
     usb_host_class_handle class_handle_;
     uint8_t status_;
 
-    OSA_MSGQ_HANDLE_DEFINE(message_queue_, 1, sizeof(uint32_t));
+    gpio_pin_config_t pgood_config_;
+    gpio_pin_config_t reset_config_;
+    gpio_pin_config_t pmic_config_;
 };
 }  // namespace valiant
 

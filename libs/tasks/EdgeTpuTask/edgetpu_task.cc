@@ -10,8 +10,20 @@ using namespace std::placeholders;
 
 namespace valiant {
 
+using namespace edgetpu;
+constexpr const char kEdgeTpuTaskName[] = "edgetpu";
+static GPIO_Type* kPgoodGpioBase = GPIO8;
+static const uint32_t kPgoodGpioPin = 26;
+static GPIO_Type* kResetGpioBase = GPIO8;
+static const uint32_t kResetGpioPin = 24;
+static GPIO_Type* kPmicGpioBase = GPIO8;
+static const uint32_t kPmicGpioPin = 25;
+
 void EdgeTpuTask::SetNextState(enum edgetpu_state next_state) {
-    OSA_MsgQPut(message_queue_, &next_state);
+    Request req;
+    req.type = RequestType::NEXT_STATE;
+    req.request.next_state.state = next_state;
+    SendRequestAsync(req);
 }
 
 usb_status_t EdgeTpuTask::USBHostEvent(
@@ -45,7 +57,9 @@ usb_status_t EdgeTpuTask::USBHostEvent(
             SetNextState(EDGETPU_STATE_ATTACHED);
             return kStatus_USB_Success;
         case kUSB_HostEventDetach:
+#if 0
             printf("EdgeTPU went away...\r\n");
+#endif
             SetNextState(EDGETPU_STATE_UNATTACHED);
             return kStatus_USB_Success;
         default:
@@ -73,18 +87,51 @@ void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data, uint32_t data_le
     task->SetNextState(EDGETPU_STATE_CONNECTED);
 }
 
-EdgeTpuTask::EdgeTpuTask() {
-    OSA_MsgQCreate((osa_msgq_handle_t)message_queue_, 1U, sizeof(uint32_t));
+void EdgeTpuTask::Init() {
+    pgood_config_.direction = kGPIO_DigitalInput;
+    pgood_config_.outputLogic = 0;
+    pgood_config_.interruptMode = kGPIO_NoIntmode;
+    GPIO_PinInit(kPgoodGpioBase, kPgoodGpioPin, &pgood_config_);
+
+    reset_config_.direction = kGPIO_DigitalOutput;
+    reset_config_.outputLogic = 0;
+    reset_config_.interruptMode = kGPIO_NoIntmode;
+    GPIO_PinInit(kResetGpioBase, kResetGpioPin, &reset_config_);
+
+    pmic_config_.direction = kGPIO_DigitalOutput;
+    pmic_config_.outputLogic = 0;
+    pmic_config_.interruptMode = kGPIO_NoIntmode;
+    GPIO_PinInit(kPmicGpioBase, kPmicGpioPin, &pmic_config_);
+
+    QueueTask::Init();
+}
+
+void EdgeTpuTask::TaskInit() {
     valiant::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(
             kEdgeTpuVid, kEdgeTpuPid, std::bind(&EdgeTpuTask::USBHostEvent, this, _1, _2, _3, _4));
 }
 
-void EdgeTpuTask::EdgeTpuTaskFn() {
-    usb_status_t ret;
-    enum edgetpu_state next_state;
-    if (OSA_MsgQGet(message_queue_, &next_state, osaWaitForever_c) != KOSA_StatusSuccess) {
-        return;
+void EdgeTpuTask::HandlePowerRequest(PowerRequest& req) {
+#if defined(BOARD_REVISION_P0)
+    GPIO_PinWrite(kPmicGpioBase, kPmicGpioPin, req.enable);
+
+    if (req.enable) {
+        bool pgood;
+        do {
+            pgood = !!GPIO_PinRead(kPgoodGpioBase, kPgoodGpioPin);
+            taskYIELD();
+        } while (!pgood);
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
+
+    GPIO_PinWrite(kResetGpioBase, kResetGpioPin, req.enable);
+#endif
+}
+
+void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
+    usb_status_t ret;
+    enum edgetpu_state next_state = req.state;
 
     switch (next_state) {
         case EDGETPU_STATE_UNATTACHED:
@@ -128,6 +175,30 @@ void EdgeTpuTask::EdgeTpuTaskFn() {
                 taskYIELD();
             }
             break;
+    }
+}
+
+void EdgeTpuTask::SetPower(bool enable) {
+    Request req;
+    req.type = RequestType::POWER;
+    req.request.power.enable = enable;
+    SendRequest(req);
+}
+
+void EdgeTpuTask::RequestHandler(Request *req) {
+    Response resp;
+    resp.type = req->type;
+    switch (req->type) {
+        case RequestType::NEXT_STATE:
+            HandleNextState(req->request.next_state);
+            break;
+        case RequestType::POWER:
+            HandlePowerRequest(req->request.power);
+            break;
+    }
+
+    if (req->callback) {
+        req->callback(resp);
     }
 }
 

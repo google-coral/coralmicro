@@ -5,8 +5,11 @@
 #include "libs/base/tasks_m7.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
+#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
+#include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/FreeRTOS-Plus-TCP/include/FreeRTOS_IP.h"
@@ -31,6 +34,9 @@ extern "C" int main(int argc, char **argv) {
     valiant::IPCInit();
     valiant::InitializeNetworkEEM();
     valiant::UsbDeviceTask::GetSingleton()->Init();
+    valiant::UsbHostTask::GetSingleton()->Init();
+    valiant::EdgeTpuDfuTask::GetSingleton()->Init();
+    valiant::EdgeTpuTask::GetSingleton()->Init();
 
 #if defined(BOARD_REVISION_P0)
     // Initialize I2C5 state

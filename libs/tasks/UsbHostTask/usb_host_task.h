@@ -19,7 +19,7 @@ class UsbHostTask {
       static UsbHostTask task;
         return &task;
     }
-    void UsbHostTaskFn();
+    void Init();
 
     using usb_host_event_callback = std::function<usb_status_t(usb_host_handle, usb_device_handle, usb_host_configuration_handle, uint32_t)>;
     void RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid, usb_host_event_callback fn);
@@ -31,6 +31,8 @@ class UsbHostTask {
       return host_handle_;
     }
   private:
+    static void StaticTaskMain(void *param);
+    void TaskMain();
     usb_host_handle host_handle_;
 
     // Map from VID/PID to callback

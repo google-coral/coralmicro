@@ -1,13 +1,14 @@
 #ifndef _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
 #define _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
 
+#include "libs/base/queue_task.h"
+#include "libs/base/tasks_m7.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
-#include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/queue.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
+#include <functional>
 
 extern unsigned char apex_latest_single_ep_bin[];
 extern unsigned int apex_latest_single_ep_bin_len;
@@ -16,6 +17,8 @@ namespace valiant {
 
 constexpr int kDfuVid = 0x1A6E;
 constexpr int kDfuPid = 0x089A;
+
+namespace edgetpu_dfu {
 
 enum dfu_state {
     DFU_STATE_UNATTACHED = 0,
@@ -32,18 +35,39 @@ enum dfu_state {
     DFU_STATE_ERROR,
 };
 
-class EdgeTpuDfuTask {
-  public:
-    EdgeTpuDfuTask();
-    EdgeTpuDfuTask(const EdgeTpuDfuTask&) = delete;
-    EdgeTpuDfuTask &operator=(const EdgeTpuDfuTask&) = delete;
+enum class RequestType : uint8_t {
+    NEXT_STATE,
+};
 
+struct NextStateRequest {
+    dfu_state state;
+};
+
+struct Response {
+    RequestType type;
+};
+
+struct Request {
+    RequestType type;
+    union {
+        NextStateRequest next_state;
+    } request;
+    std::function<void(Response)> callback;
+};
+
+}  // namespace edgetpu_dfu
+
+static constexpr size_t kEdgeTpuDfuTaskStackDepth = configMINIMAL_STACK_SIZE * 3;
+static constexpr UBaseType_t kEdgeTpuDfuTaskQueueLength = 4;
+extern const char kEdgeTpuDfuTaskName[];
+
+class EdgeTpuDfuTask : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Response, kEdgeTpuDfuTaskName,
+                                        kEdgeTpuDfuTaskStackDepth, EDGETPU_DFU_TASK_PRIORITY, kEdgeTpuDfuTaskQueueLength> {
+  public:
     static EdgeTpuDfuTask* GetSingleton() {
         static EdgeTpuDfuTask task;
         return &task;
     }
-
-    void EdgeTpuDfuTaskFn();
 
     // USB event handler
     usb_status_t USB_DFUHostEvent(usb_host_handle host_handle, usb_device_handle device_handle,
@@ -147,7 +171,10 @@ class EdgeTpuDfuTask {
     }
 
   private:
-    void SetNextState(enum dfu_state next_state);
+    void TaskInit() override;
+    void RequestHandler(edgetpu_dfu::Request *req) override;
+    void HandleNextState(edgetpu_dfu::NextStateRequest& req);
+    void SetNextState(enum edgetpu_dfu::dfu_state next_state);
 
     usb_host_instance_t* host_instance_;
     usb_device_handle device_handle_;
@@ -158,8 +185,6 @@ class EdgeTpuDfuTask {
     size_t bytes_to_transfer_ = apex_latest_single_ep_bin_len;
     size_t current_block_number_ = 0;
     uint8_t *read_back_data_ = nullptr;
-
-    QueueHandle_t message_queue_;
 };
 
 }  // namespace valiant

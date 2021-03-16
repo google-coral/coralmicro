@@ -1,7 +1,5 @@
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
 #include "libs/tasks/UsbHostTask/usb_host_task.h"
-#include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_devices.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_ehci.h"
@@ -14,8 +12,14 @@ using namespace std::placeholders;
 
 namespace valiant {
 
+using namespace edgetpu_dfu;
+constexpr const char kEdgeTpuDfuTaskName[] = "edgetpu_dfu";
+
 void EdgeTpuDfuTask::SetNextState(enum dfu_state next_state) {
-    xQueueSend(message_queue_, &next_state, portMAX_DELAY);
+    Request req;
+    req.type = RequestType::NEXT_STATE;
+    req.request.next_state.state = next_state;
+    SendRequestAsync(req);
 }
 
 usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(usb_host_handle host_handle,
@@ -51,7 +55,6 @@ usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(usb_host_handle host_handle,
         case kUSB_HostEventDetach:
             SetNextState(DFU_STATE_UNATTACHED);
             printf("Detached DFU\r\n");
-            // USB_HostTriggerReEnumeration(device_handle);
             return kStatus_USB_Success;
         default:
             return kStatus_USB_Success;
@@ -102,9 +105,11 @@ void EdgeTpuDfuTask::TransferCallback(void *param,
 
     task->SetCurrentBlockNumber(task->current_block_number() + 1);
     task->SetBytesTransferred(task->bytes_transferred() + data_length);
+#if 0
     if (task->current_block_number() % 10 == 0 || task->bytes_transferred() == task->bytes_to_transfer()) {
         printf("Transferred %d bytes\r\n", task->bytes_transferred());
     }
+#endif
     task->SetNextState(DFU_STATE_GET_STATUS);
 }
 
@@ -137,9 +142,11 @@ void EdgeTpuDfuTask::ReadBackCallback(void *param,
 
     task->SetCurrentBlockNumber(task->current_block_number() + 1);
     task->SetBytesTransferred(task->bytes_transferred() + data_length);
+#if 0
     if (task->current_block_number() % 10 == 0 || task->bytes_transferred() == task->bytes_to_transfer()) {
         printf("Read back %d bytes\r\n", task->bytes_transferred());
     }
+#endif
     task->SetNextState(DFU_STATE_GET_STATUS_READ);
 }
 
@@ -197,19 +204,15 @@ void EdgeTpuDfuTask::CheckStatusCallback(void *param,
     task->SetNextState(DFU_STATE_COMPLETE);
 }
 
-EdgeTpuDfuTask::EdgeTpuDfuTask() {
-    message_queue_ = xQueueCreate(1, sizeof(uint32_t));
+void EdgeTpuDfuTask::TaskInit() {
     valiant::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(kDfuVid, kDfuPid,
             std::bind(&EdgeTpuDfuTask::USB_DFUHostEvent, this, _1, _2, _3, _4));
 }
 
-void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
+void EdgeTpuDfuTask::HandleNextState(NextStateRequest& req) {
     usb_status_t ret;
     uint32_t transfer_length;
-    enum dfu_state next_state;
-    if (xQueueReceive(message_queue_, &next_state, portMAX_DELAY) == pdFALSE) {
-        return;
-    }
+    enum dfu_state next_state = req.state;
     switch (next_state) {
         case DFU_STATE_UNATTACHED:
             break;
@@ -295,16 +298,27 @@ void EdgeTpuDfuTask::EdgeTpuDfuTaskFn() {
             SetClassHandle(nullptr);
             USB_HostEhciResetBus((usb_host_ehci_instance_t*)host_instance()->controllerHandle);
             USB_HostTriggerReEnumeration(device_handle());
-            SetNextState(DFU_STATE_UNATTACHED);
             break;
         case DFU_STATE_ERROR:
             printf("DFU error\r\n");
-            while (true) {}
             break;
         default:
             printf("Unhandled DFU state %d\r\n", next_state);
-            while (true) {}
             break;
+    }
+}
+
+void EdgeTpuDfuTask::RequestHandler(Request *req) {
+    Response resp;
+    resp.type = req->type;
+    switch (req->type) {
+        case RequestType::NEXT_STATE:
+            HandleNextState(req->request.next_state);
+            break;
+    }
+
+    if (req->callback) {
+        req->callback(resp);
     }
 }
 

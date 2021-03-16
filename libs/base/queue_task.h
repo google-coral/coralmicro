@@ -36,6 +36,10 @@ class QueueTask {
         return resp;
     }
 
+    void SendRequestAsync(Request& req) {
+        xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200));
+    }
+
     const size_t stack_depth_ = StackDepth;
     StaticTask_t task_;
     StackType_t task_stack_[StackDepth];

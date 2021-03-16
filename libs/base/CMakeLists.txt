@@ -37,7 +37,10 @@ target_link_libraries(libs_base-m7_freertos
     libs_nxp_rt1176-sdk_freertos
     libs_CdcAcm_freertos
     libs_CdcEem_freertos
+    libs_tasks_EdgeTpuTask_freertos
+    libs_tasks_EdgeTpuDfuTask_freertos
     libs_tasks_UsbDeviceTask_freertos
+    libs_tasks_UsbHostTask_freertos
     ${libs_base-m7_freertos_LINK_LIBRARIES_REVISION}
 )
 
