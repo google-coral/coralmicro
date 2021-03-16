@@ -43,7 +43,7 @@ RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
 MEMORY
 {
   m_interrupts          (RX)  : ORIGIN = 0x00000800, LENGTH = 0x00000400
-  m_text                (RX)  : ORIGIN = 0x00000c00, LENGTH = 0x0003FC00
+  m_text                (RX)  : ORIGIN = 0x00000c00, LENGTH = 0x0003F400
   m_stack               (RX)  : ORIGIN = 0x20000000, LENGTH = STACK_SIZE
   m_data                (RW)  : ORIGIN = 0x20000000 + STACK_SIZE, LENGTH = 0x00040000 - STACK_SIZE
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
