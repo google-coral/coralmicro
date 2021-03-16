@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
+add_subdirectory(BFT)
 add_subdirectory(BootROM)
 add_subdirectory(CameraTest)
 add_subdirectory(CdcAcm)
