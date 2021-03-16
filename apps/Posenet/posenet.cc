@@ -2,8 +2,6 @@
 #include "libs/base/tasks_m7.h"
 #include "libs/posenet/posenet_decoder_op.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
-#include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "libs/tensorflow/posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.h"
 #include "libs/tensorflow/posenet_test_input.h"
 #include "libs/tpu/edgetpu_manager.h"
@@ -29,29 +27,6 @@ const int kExtraArenaSize = 1 * 1024 * 1024;
 const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 }  // namespace
-
-// Measured stack usage: 242 words
-void UsbHostTask(void *param) {
-    while (true) {
-        valiant::UsbHostTask::GetSingleton()->UsbHostTaskFn();
-        taskYIELD();
-    }
-}
-
-// Measured stack usage: 146 words
-void DfuTask(void *param) {
-    while (true) {
-        valiant::EdgeTpuDfuTask::GetSingleton()->EdgeTpuDfuTaskFn();
-        taskYIELD();
-    }
-}
-
-void EdgeTpuTask(void *param) {
-    while (true) {
-        valiant::EdgeTpuTask::GetSingleton()->EdgeTpuTaskFn();
-        taskYIELD();
-    }
-}
 
 const char* const KeypointTypes[] = {
     "NOSE",
@@ -146,26 +121,7 @@ static bool setup() {
 }
 
 extern "C" void app_main(void *param) {
-    int ret;
-
-    ret = xTaskCreate(UsbHostTask, "UsbHostTask", configMINIMAL_STACK_SIZE * 10, NULL, USB_HOST_TASK_PRIORITY, NULL);
-    if (ret != pdPASS) {
-        printf("Failed to start UsbHostTask\r\n");
-        return;
-    }
-
-    ret = xTaskCreate(DfuTask, "DfuTask", configMINIMAL_STACK_SIZE * 3, NULL, EDGETPU_DFU_TASK_PRIORITY, NULL);
-    if (ret != pdPASS) {
-        printf("Failed to start DfuTask\r\n");
-        return;
-    }
-
-    ret = xTaskCreate(EdgeTpuTask, "EdgeTpuTask", configMINIMAL_STACK_SIZE * 10, NULL, APP_TASK_PRIORITY, NULL);
-    if (ret != pdPASS) {
-        printf("Failed to start EdgeTpuTask\r\n");
-        return;
-    }
-
+    valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
     setup();
     loop();

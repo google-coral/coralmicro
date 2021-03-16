@@ -96,6 +96,7 @@ target_include_directories(libs_tensorflow-m4 PUBLIC
 target_link_libraries(libs_tensorflow-m4
     libs_flatbuffers
     libs_gemmlowp
+    libs_kissfft
     libs_ruy
 )
 

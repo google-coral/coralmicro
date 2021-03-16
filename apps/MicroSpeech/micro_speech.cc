@@ -38,14 +38,14 @@ int32_t LatestAudioTimestamp() {
 }
 
 TfLiteStatus InitAudioRecording() {
-    valiant::AudioTask::GetSingleton()->SetCallback([]() {
+    valiant::AudioTask::GetSingleton()->SetCallback([](void *param) {
         CaptureSamples(reinterpret_cast<int32_t*>(audio_sample_data[queued_buffer]));
         queued_buffer++;
         if (queued_buffer == kNumberOfBuffers) {
             queued_buffer = 0;
         }
         return audio_sample_data[queued_buffer];
-    });
+    }, NULL);
     valiant::AudioTask::GetSingleton()->SetPower(true);
     valiant::AudioTask::GetSingleton()->SetBuffer(reinterpret_cast<uint32_t*>(audio_sample_data[queued_buffer]), sizeof(audio_sample_data[queued_buffer]));
     valiant::AudioTask::GetSingleton()->Enable();

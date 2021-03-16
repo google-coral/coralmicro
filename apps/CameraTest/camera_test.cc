@@ -15,7 +15,7 @@ extern "C" void app_main(void *param) {
     valiant::CameraTask::GetSingleton()->SetPower(true);
     valiant::CameraTask::GetSingleton()->Enable();
     valiant::CameraTask::GetSingleton()->SetTestPattern(
-            valiant::TestPattern::WALKING_ONES);
+            valiant::camera::TestPattern::WALKING_ONES);
 
     // Get and discard some frames to let the sensor stabilize.
     uint8_t *buffer = nullptr;
