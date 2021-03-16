@@ -55,14 +55,19 @@ void BOARD_BootClockRUN(void)
 #endif
 
 #if !defined(SKIP_FBB_ENABLE) || (!SKIP_FBB_ENABLE)
-    pmu_static_body_bias_config_t config;
-    
-    PMU_StaticGetCm7FBBDefaultConfig(&config);
-    PMU_StaticCm7FBBInit(ANADIG_PMU, &config);
+    /* Check if FBB need to be enabled in OverDrive(OD) mode */
+    if(((OCOTP->FUSEN[7].FUSE & 0x10U) >> 4U) != 1)
+    {
+        PMU_EnableBodyBias(ANADIG_PMU, kPMU_FBB_CM7, true);
+    }
+    else
+    {
+        PMU_EnableBodyBias(ANADIG_PMU, kPMU_FBB_CM7, false);
+    }
 #endif
 
 #if defined(BYPASS_LDO_LPSR) && BYPASS_LDO_LPSR
-    PMU_StaticSetLpsrAnaLdoBypassMode(ANADIG_LDO_SNVS, kPMU_LpsrAnaLdoBypassMode1);
+    PMU_StaticEnableLpsrAnaLdoBypassMode(ANADIG_LDO_SNVS, true);
     PMU_StaticEnableLpsrDigLdoBypassMode(ANADIG_LDO_SNVS, true);
 #endif
 
@@ -84,20 +89,14 @@ void BOARD_BootClockRUN(void)
     }
 #endif
 
-    /* SYS PLL2 528MHz. */
-    const clock_sys_pll_config_t sysPllConfig = {
-        .loopDivider = 1,
-        /* Using 24Mhz OSC */
-        .mfn = 0,
-        .mfi = 22,
-    };
-
-    const clock_sys_pll3_config_t sysPll3Config = {
-        .divSelect = 3,
+    const clock_sys_pll2_config_t sysPll2Config = {
+        .mfd = 268435455,                         /* Denominator of spread spectrum */
+        .ss = NULL,                               /* Spread spectrum parameter */
+        .ssEnable = false,                        /* Enable spread spectrum or not */
     };
 
     /* PLL LDO shall be enabled first before enable PLLs */
-    CLOCK_EnableOsc24M();
+    CLOCK_OSC_EnableOsc24M();
 
 #if __CORTEX_M == 7
     rootCfg.mux = kCLOCK_M7_ClockRoot_MuxOscRc48MDiv2;
@@ -120,8 +119,8 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 240;
     CLOCK_SetRootClock(kCLOCK_Root_M7_Systick, &rootCfg);
 #endif
-    CLOCK_InitSysPll2(&sysPllConfig);
-    CLOCK_InitSysPll3(&sysPll3Config);
+    CLOCK_InitSysPll2(&sysPll2Config);
+    CLOCK_InitSysPll3();
 
 #if __CORTEX_M == 4
     rootCfg.mux = kCLOCK_M4_ClockRoot_MuxOscRc48MDiv2;
@@ -201,7 +200,7 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Emv1, &rootCfg);
 
-    CLOCK_InitAudioPllWithFreq(96);
+    CLOCK_InitAudioPllWithFreq(96, false, 0, 0);
     CLOCK_SetRootClockMux(kCLOCK_Root_Mic, 6); // Audio PLL
 
 #if __CORTEX_M == 7
