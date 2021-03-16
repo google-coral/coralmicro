@@ -7,6 +7,8 @@
 
 namespace valiant {
 
+using namespace camera;
+
 static constexpr int kFramebufferCount = 4;
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")))
 __attribute__((aligned(64)))
@@ -71,10 +73,10 @@ void CameraTask::Init(lpi2c_rtos_handle_t *i2c_handle) {
 }
 
 int CameraTask::GetFrame(uint8_t** buffer, bool block) {
-    CameraRequest req;
-    req.type = CameraRequestType::Frame;
+    Request req;
+    req.type = RequestType::Frame;
     req.request.frame.index = -1;
-    CameraResponse resp;
+    Response resp;
     do {
         resp = SendRequest(req);
     } while (block && resp.response.frame.index == -1);
@@ -83,52 +85,36 @@ int CameraTask::GetFrame(uint8_t** buffer, bool block) {
 }
 
 void CameraTask::ReturnFrame(int index) {
-    CameraRequest req;
-    req.type = CameraRequestType::Frame;
+    Request req;
+    req.type = RequestType::Frame;
     req.request.frame.index = index;
     SendRequest(req);
 }
 
 void CameraTask::Enable() {
-    CameraRequest req;
-    req.type = CameraRequestType::Enable;
+    Request req;
+    req.type = RequestType::Enable;
     SendRequest(req);
 }
 
 void CameraTask::Disable() {
-    CameraRequest req;
-    req.type = CameraRequestType::Disable;
+    Request req;
+    req.type = RequestType::Disable;
     SendRequest(req);
 }
 
 void CameraTask::SetPower(bool enable) {
-    CameraRequest req;
-    req.type = CameraRequestType::Power;
+    Request req;
+    req.type = RequestType::Power;
     req.request.power.enable = enable;
     SendRequest(req);
 }
 
 void CameraTask::SetTestPattern(TestPattern pattern) {
-    CameraRequest req;
-    req.type = CameraRequestType::TestPattern;
+    Request req;
+    req.type = RequestType::TestPattern;
     req.request.test_pattern.pattern = pattern;
     SendRequest(req);
-}
-
-CameraResponse CameraTask::SendRequest(CameraRequest& req) {
-    CameraResponse resp;
-    resp.type = static_cast<CameraRequestType>(0xff);
-    SemaphoreHandle_t req_semaphore = xSemaphoreCreateBinary();
-    req.callback =
-        [req_semaphore, &resp](CameraResponse cb_resp) {
-            xSemaphoreGive(req_semaphore);
-            resp = cb_resp;
-        };
-    xQueueSend(message_queue_, &req, pdMS_TO_TICKS(200));
-    xSemaphoreTake(req_semaphore, pdMS_TO_TICKS(200));
-    vSemaphoreDelete(req_semaphore);
-
-    return resp;
 }
 
 void CameraTask::TaskInit() {
@@ -207,10 +193,10 @@ void CameraTask::HandleDisableRequest() {
 }
 
 void CameraTask::HandlePowerRequest(const PowerRequest& power) {
-    valiant::PmicTask::GetSingleton()->SetRailState(
-            valiant::Rail::CAM_2V8, power.enable);
-    valiant::PmicTask::GetSingleton()->SetRailState(
-            valiant::Rail::CAM_1V8, power.enable);
+    PmicTask::GetSingleton()->SetRailState(
+            pmic::Rail::CAM_2V8, power.enable);
+    PmicTask::GetSingleton()->SetRailState(
+            pmic::Rail::CAM_1V8, power.enable);
     vTaskDelay(pdMS_TO_TICKS(10));
 }
 
@@ -237,23 +223,23 @@ void CameraTask::HandleTestPatternRequest(const TestPatternRequest& test_pattern
     Write(CameraRegisters::TEST_PATTERN_MODE, static_cast<uint8_t>(test_pattern.pattern));
 }
 
-void CameraTask::MessageHandler(CameraRequest *req) {
-    CameraResponse resp;
+void CameraTask::RequestHandler(Request *req) {
+    Response resp;
     resp.type = req->type;
     switch (req->type) {
-        case CameraRequestType::Enable:
+        case RequestType::Enable:
             resp.response.enable = HandleEnableRequest();
             break;
-        case CameraRequestType::Disable:
+        case RequestType::Disable:
             HandleDisableRequest();
             break;
-        case CameraRequestType::Power:
+        case RequestType::Power:
             HandlePowerRequest(req->request.power);
             break;
-        case CameraRequestType::Frame:
+        case RequestType::Frame:
             resp.response.frame = HandleFrameRequest(req->request.frame);
             break;
-        case CameraRequestType::TestPattern:
+        case RequestType::TestPattern:
             HandleTestPatternRequest(req->request.test_pattern);
             break;
     }

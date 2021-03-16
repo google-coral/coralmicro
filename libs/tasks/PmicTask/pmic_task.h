@@ -9,7 +9,9 @@
 
 namespace valiant {
 
-enum class PmicRequestType : uint8_t {
+namespace pmic {
+
+enum class RequestType : uint8_t {
     Rail,
     Gpio,
     ChipId,
@@ -43,20 +45,20 @@ struct GpioRequest {
     bool enable;
 };
 
-struct PmicResponse {
-    PmicRequestType type;
+struct Response {
+    RequestType type;
     union {
         uint8_t chip_id;
     } response;
 };
 
-struct PmicRequest {
-    PmicRequestType type;
+struct Request {
+    RequestType type;
     union {
         RailRequest rail;
         GpioRequest gpio;
     } request;
-    std::function<void(PmicResponse)> callback;
+    std::function<void(Response)> callback;
 };
 
 enum class PmicRegisters : uint16_t {
@@ -68,29 +70,30 @@ enum class PmicRegisters : uint16_t {
     UNKNOWN = 0xFFF,
 };
 
+}  // namespace pmic
+
 static constexpr size_t kPmicTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
 static constexpr UBaseType_t kPmicTaskQueueLength = 4;
 extern const char kPmicTaskName[];
 
-class PmicTask : public QueueTask<PmicRequest, kPmicTaskName, kPmicTaskStackDepth, PMIC_TASK_PRIORITY, kPmicTaskQueueLength> {
+class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName, kPmicTaskStackDepth, PMIC_TASK_PRIORITY, kPmicTaskQueueLength> {
   public:
     void Init(lpi2c_rtos_handle_t *i2c_handle);
     static PmicTask *GetSingleton() {
         static PmicTask pmic;
         return &pmic;
     }
-    void SetRailState(Rail rail, bool enable);
+    void SetRailState(pmic::Rail rail, bool enable);
     uint8_t GetChipId();
   private:
     void TaskInit() override;
-    PmicResponse SendRequest(PmicRequest& req);
-    void MessageHandler(PmicRequest *req) override;
-    void HandleRailRequest(const RailRequest& rail);
-    void HandleGpioRequest(const GpioRequest& gpio);
+    void RequestHandler(pmic::Request *req) override;
+    void HandleRailRequest(const pmic::RailRequest& rail);
+    void HandleGpioRequest(const pmic::GpioRequest& gpio);
     uint8_t HandleChipIdRequest();
     void SetPage(uint16_t reg);
-    void Read(PmicRegisters reg, uint8_t *val);
-    void Write(PmicRegisters reg, uint8_t val);
+    void Read(pmic::PmicRegisters reg, uint8_t *val);
+    void Write(pmic::PmicRegisters reg, uint8_t val);
 
     lpi2c_rtos_handle_t* i2c_handle_;
 };

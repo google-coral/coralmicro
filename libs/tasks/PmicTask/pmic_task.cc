@@ -6,6 +6,8 @@
 
 namespace valiant {
 
+using namespace pmic;
+
 constexpr const uint8_t kPmicAddress = 0x58;
 constexpr const char kPmicTaskName[] = "pmic_task";
 
@@ -94,17 +96,17 @@ uint8_t PmicTask::HandleChipIdRequest() {
     return device_id;
 }
 
-void PmicTask::MessageHandler(PmicRequest *req) {
-    PmicResponse resp;
+void PmicTask::RequestHandler(Request *req) {
+    Response resp;
     resp.type = req->type;
     switch (req->type) {
-        case PmicRequestType::Rail:
+        case RequestType::Rail:
             HandleRailRequest(req->request.rail);
             break;
-        case PmicRequestType::Gpio:
+        case RequestType::Gpio:
             HandleGpioRequest(req->request.gpio);
             break;
-        case PmicRequestType::ChipId:
+        case RequestType::ChipId:
             resp.response.chip_id = HandleChipIdRequest();
             break;
     }
@@ -112,33 +114,18 @@ void PmicTask::MessageHandler(PmicRequest *req) {
         req->callback(resp);
 }
 
-PmicResponse PmicTask::SendRequest(PmicRequest& req) {
-    PmicResponse resp;
-    resp.type = static_cast<PmicRequestType>(0xff);
-    SemaphoreHandle_t req_semaphore = xSemaphoreCreateBinary();
-    req.callback =
-        [req_semaphore, &resp](PmicResponse cb_resp) {
-            resp = cb_resp;
-            xSemaphoreGive(req_semaphore);
-        };
-    xQueueSend(message_queue_, &req, pdMS_TO_TICKS(200));
-    xSemaphoreTake(req_semaphore, pdMS_TO_TICKS(200));
-    vSemaphoreDelete(req_semaphore);
-    return resp;
-}
-
 void PmicTask::SetRailState(Rail rail, bool enable) {
-    PmicRequest req;
-    req.type = PmicRequestType::Rail;
+    Request req;
+    req.type = RequestType::Rail;
     req.request.rail.rail = rail;
     req.request.rail.enable = enable;
     SendRequest(req);
 }
 
 uint8_t PmicTask::GetChipId() {
-    PmicRequest req;
-    req.type = PmicRequestType::ChipId;
-    PmicResponse resp = SendRequest(req);
+    Request req;
+    req.type = RequestType::ChipId;
+    Response resp = SendRequest(req);
     return resp.response.chip_id;
 }
 

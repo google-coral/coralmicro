@@ -37,22 +37,6 @@ void AudioTask::Init() {
     QueueTask::Init();
 }
 
-AudioResponse AudioTask::SendRequest(AudioRequest& req) {
-    AudioResponse resp;
-    resp.type = static_cast<AudioRequestType>(0xff);
-    SemaphoreHandle_t req_semaphore = xSemaphoreCreateBinary();
-    req.callback =
-        [req_semaphore, &resp](AudioResponse cb_resp) {
-            resp = cb_resp;
-            xSemaphoreGive(req_semaphore);
-        };
-    xQueueSend(message_queue_, &req, pdMS_TO_TICKS(200));
-    xSemaphoreTake(req_semaphore, pdMS_TO_TICKS(200));
-    vSemaphoreDelete(req_semaphore);
-
-    return resp;
-}
-
 void AudioTask::StaticPdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t status, void *userData) {
     AudioTask *task = static_cast<AudioTask*>(userData);
     task->PdmCallback(base, handle, status);
@@ -69,10 +53,10 @@ void AudioTask::PdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t 
             set_buffer.bytes = rx_buffer_bytes_;
             HandleSetBuffer(set_buffer);
 
-            AudioRequest req;
-            req.type = AudioRequestType::Enable;
+            Request req;
+            req.type = RequestType::Enable;
             req.callback = nullptr;
-            xQueueSendFromISR(message_queue_, &req, &reschedule);
+            xQueueSendFromISR(request_queue_, &req, &reschedule);
         }
     }
     __DSB();
@@ -130,7 +114,7 @@ void AudioTask::HandleDisableRequest() {
 
 void AudioTask::HandlePowerRequest(PowerRequest& power) {
     PmicTask::GetSingleton()->SetRailState(
-            Rail::MIC_1V8, power.enable);
+            pmic::Rail::MIC_1V8, power.enable);
 }
 
 void AudioTask::HandleSetCallback(SetCallbackRequest& set_callback) {
@@ -143,23 +127,23 @@ void AudioTask::HandleSetBuffer(SetBufferRequest& set_buffer) {
     rx_buffer_bytes_ = set_buffer.bytes;
 }
 
-void AudioTask::MessageHandler(AudioRequest *req) {
-    AudioResponse resp;
+void AudioTask::RequestHandler(Request *req) {
+    Response resp;
     resp.type = req->type;
     switch (req->type) {
-        case AudioRequestType::Power:
+        case RequestType::Power:
             HandlePowerRequest(req->request.power);
             break;
-        case AudioRequestType::Enable:
+        case RequestType::Enable:
             HandleEnableRequest();
             break;
-        case AudioRequestType::Disable:
+        case RequestType::Disable:
             HandleDisableRequest();
             break;
-        case AudioRequestType::SetCallback:
+        case RequestType::SetCallback:
             HandleSetCallback(req->request.set_callback);
             break;
-        case AudioRequestType::SetBuffer:
+        case RequestType::SetBuffer:
             HandleSetBuffer(req->request.set_buffer);
             break;
     }
@@ -168,35 +152,35 @@ void AudioTask::MessageHandler(AudioRequest *req) {
 }
 
 void AudioTask::SetPower(bool enable) {
-    AudioRequest req;
-    req.type = AudioRequestType::Power;
+    Request req;
+    req.type = RequestType::Power;
     req.request.power.enable = enable;
     SendRequest(req);
 }
 
 void AudioTask::Enable() {
-    AudioRequest req;
-    req.type = AudioRequestType::Enable;
+    Request req;
+    req.type = RequestType::Enable;
     SendRequest(req);
 }
 
 void AudioTask::Disable() {
-    AudioRequest req;
-    req.type = AudioRequestType::Disable;
+    Request req;
+    req.type = RequestType::Disable;
     SendRequest(req);
 }
 
 void AudioTask::SetCallback(AudioTaskCallback cb, void *param) {
-    AudioRequest req;
-    req.type = AudioRequestType::SetCallback;
+    Request req;
+    req.type = RequestType::SetCallback;
     req.request.set_callback.callback = cb;
     req.request.set_callback.callback_param = param;
     SendRequest(req);
 }
 
 void AudioTask::SetBuffer(uint32_t* buffer, size_t bytes) {
-    AudioRequest req;
-    req.type = AudioRequestType::SetBuffer;
+    Request req;
+    req.type = RequestType::SetBuffer;
     req.request.set_buffer.buffer = buffer;
     req.request.set_buffer.bytes = bytes;
     SendRequest(req);

@@ -3,28 +3,43 @@
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/queue.h"
+#include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace valiant {
 
 constexpr size_t kDefaultTaskStackDepth = configMINIMAL_STACK_SIZE;
-template <typename Message, const char *Name, size_t StackDepth, UBaseType_t Priority, UBaseType_t QueueLength>
+template <typename Request, typename Response, const char *Name, size_t StackDepth, UBaseType_t Priority, UBaseType_t QueueLength>
 class QueueTask {
   public:
     // Initialization function for the QueueTask.
     // If overridden, implementors should ensure that the super method is still called.
     // Initialized any needed data here, but beware that the FreeRTOS scheduler may not yet be running.
     virtual void Init() {
-        message_queue_ = xQueueCreate(QueueLength, sizeof(Message));
+        request_queue_ = xQueueCreate(QueueLength, sizeof(Request));
         xTaskCreateStatic(
                 StaticTaskMain, Name, stack_depth_, this,
                 Priority, task_stack_, &task_);
     }
   protected:
+    Response SendRequest(Request& req) {
+        Response resp;
+        SemaphoreHandle_t req_semaphore = xSemaphoreCreateBinary();
+        req.callback =
+            [req_semaphore, &resp](Response cb_resp) {
+                resp = cb_resp;
+                xSemaphoreGive(req_semaphore);
+            };
+        xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200));
+        xSemaphoreTake(req_semaphore, pdMS_TO_TICKS(200));
+        vSemaphoreDelete(req_semaphore);
+        return resp;
+    }
+
     const size_t stack_depth_ = StackDepth;
     StaticTask_t task_;
     StackType_t task_stack_[StackDepth];
-    QueueHandle_t message_queue_;
+    QueueHandle_t request_queue_;
   private:
     static void StaticTaskMain(void *param) {
         ((QueueTask*)param)->TaskMain();
@@ -37,10 +52,10 @@ class QueueTask {
     void TaskMain() {
         TaskInit();
 
-        Message msg;
+        Request msg;
         while (true) {
-            if (xQueueReceive(message_queue_, &msg, portMAX_DELAY) == pdTRUE) {
-                MessageHandler(&msg);
+            if (xQueueReceive(request_queue_, &msg, portMAX_DELAY) == pdTRUE) {
+                RequestHandler(&msg);
             }
         }
     }
@@ -50,7 +65,7 @@ class QueueTask {
     virtual void TaskInit() {};
 
     // Implementation-specific handler for messages coming from the queue.
-    virtual void MessageHandler(Message* msg) = 0;
+    virtual void RequestHandler(Request* msg) = 0;
 };
 
 }  // namespace valiant

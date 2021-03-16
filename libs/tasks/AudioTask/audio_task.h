@@ -12,7 +12,7 @@ namespace valiant {
 
 namespace audio {
 
-enum class AudioRequestType : uint8_t {
+enum class RequestType : uint8_t {
     Power,
     Enable,
     Disable,
@@ -35,20 +35,20 @@ struct SetBufferRequest {
     size_t bytes;
 };
 
-struct AudioResponse {
-    AudioRequestType type;
+struct Response {
+    RequestType type;
     union {
     } response;
 };
 
-struct AudioRequest {
-    AudioRequestType type;
+struct Request {
+    RequestType type;
     union {
         PowerRequest power;
         SetCallbackRequest set_callback;
         SetBufferRequest set_buffer;
     } request;
-    std::function<void(AudioResponse)> callback;
+    std::function<void(Response)> callback;
 };
 
 }  // namespace audio
@@ -57,7 +57,7 @@ static constexpr size_t kAudioTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
 static constexpr UBaseType_t kAudioTaskQueueLength = 4;
 extern const char kAudioTaskName[];
 
-class AudioTask : public QueueTask<audio::AudioRequest, kAudioTaskName, kAudioTaskStackDepth, AUDIO_TASK_PRIORITY, kAudioTaskQueueLength> {
+class AudioTask : public QueueTask<audio::Request, audio::Response, kAudioTaskName, kAudioTaskStackDepth, AUDIO_TASK_PRIORITY, kAudioTaskQueueLength> {
   public:
     void Init() override;
     static AudioTask* GetSingleton() {
@@ -73,8 +73,7 @@ class AudioTask : public QueueTask<audio::AudioRequest, kAudioTaskName, kAudioTa
     static void StaticPdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t status, void *userData);
     void PdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t status);
     void TaskInit() override;
-    audio::AudioResponse SendRequest(audio::AudioRequest& req);
-    void MessageHandler(audio::AudioRequest *req) override;
+    void RequestHandler(audio::Request *req) override;
     void HandlePowerRequest(audio::PowerRequest& power);
     void HandleEnableRequest();
     void HandleDisableRequest();

@@ -10,7 +10,9 @@
 
 namespace valiant {
 
-enum class CameraRequestType : uint8_t {
+namespace camera {
+
+enum class RequestType : uint8_t {
     Enable,
     Disable,
     Frame,
@@ -44,22 +46,22 @@ struct TestPatternRequest {
     TestPattern pattern;
 };
 
-struct CameraResponse {
-  CameraRequestType type;
+struct Response {
+  RequestType type;
   union {
       FrameResponse frame;
       EnableResponse enable;
   } response;
 };
 
-struct CameraRequest {
-    CameraRequestType type;
+struct Request {
+    RequestType type;
     union {
         FrameRequest frame;
         PowerRequest power;
         TestPatternRequest test_pattern;
     } request;
-    std::function<void(CameraResponse)> callback;
+    std::function<void(Response)> callback;
 };
 
 enum class CameraRegisters : uint16_t {
@@ -78,11 +80,13 @@ enum class CameraRegisters : uint16_t {
     OSC_CLK_DIV = 0x3060,
 };
 
+}  // namespace camera
+
 static constexpr size_t kCameraTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
 static constexpr UBaseType_t kCameraTaskQueueLength = 4;
 extern const char kCameraTaskName[];
 
-class CameraTask : public QueueTask<CameraRequest, kCameraTaskName, kCameraTaskStackDepth, CAMERA_TASK_PRIORITY, kCameraTaskQueueLength> {
+class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTaskName, kCameraTaskStackDepth, CAMERA_TASK_PRIORITY, kCameraTaskQueueLength> {
   public:
     void Init(lpi2c_rtos_handle_t *i2c_handle);
     static CameraTask *GetSingleton() {
@@ -94,7 +98,7 @@ class CameraTask : public QueueTask<CameraRequest, kCameraTaskName, kCameraTaskS
     int GetFrame(uint8_t **buffer, bool block);
     void ReturnFrame(int index);
     void SetPower(bool enable);
-    void SetTestPattern(TestPattern pattern);
+    void SetTestPattern(camera::TestPattern pattern);
 
     // CSI driver wants width to be divisible by 8, and 324 is not.
     // 324 * 324 == 13122 * 8 -- this makes the CSI driver happy!
@@ -104,15 +108,14 @@ class CameraTask : public QueueTask<CameraRequest, kCameraTaskName, kCameraTaskS
     static constexpr size_t kHeight = 324;
   private:
     void TaskInit() override;
-    CameraResponse SendRequest(CameraRequest& req);
-    void MessageHandler(CameraRequest *req) override;
-    EnableResponse HandleEnableRequest();
+    void RequestHandler(camera::Request *req) override;
+    camera::EnableResponse HandleEnableRequest();
     void HandleDisableRequest();
-    void HandlePowerRequest(const PowerRequest& power);
-    FrameResponse HandleFrameRequest(const FrameRequest& frame);
-    void HandleTestPatternRequest(const TestPatternRequest& test_pattern);
-    bool Read(CameraRegisters reg, uint8_t *val);
-    bool Write(CameraRegisters reg, uint8_t val);
+    void HandlePowerRequest(const camera::PowerRequest& power);
+    camera::FrameResponse HandleFrameRequest(const camera::FrameRequest& frame);
+    void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
+    bool Read(camera::CameraRegisters reg, uint8_t *val);
+    bool Write(camera::CameraRegisters reg, uint8_t val);
 
     static constexpr uint8_t kModelIdHExpected = 0x01;
     static constexpr uint8_t kModelIdLExpected = 0xB0;
