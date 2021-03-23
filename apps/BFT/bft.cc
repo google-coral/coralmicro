@@ -6,6 +6,7 @@
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
+#include "libs/tasks/PowerMonitorTask/power_monitor_task.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -40,6 +41,18 @@ TF_LITE_MICRO_TESTS_BEGIN
 
 TF_LITE_MICRO_TEST(MulticoreTest_CheckM4) {
     TF_LITE_MICRO_EXPECT(valiant::M4IsAlive(1000 /* ms */));
+}
+
+TF_LITE_MICRO_TEST(PowerMonitorTest_CheckChipId) {
+    const char* kMfrModel = "INA233";
+    valiant::power_monitor::ChipIdResponse chip_id =
+        valiant::PowerMonitorTask::GetSingleton()->GetChipId();
+    TF_LITE_MICRO_EXPECT_EQ(memcmp(kMfrModel, chip_id.mfr_model, strlen(kMfrModel)), 0);
+    valiant::power_monitor::MeasurementResponse measurement =
+        valiant::PowerMonitorTask::GetSingleton()->GetMeasurement();
+    // TODO(atv): This should probably be a higher value: if we get back 2V it's probably an error.
+    TF_LITE_MICRO_EXPECT_GE(measurement.voltage, 2.0f);
+    TF_LITE_MICRO_EXPECT_LE(measurement.voltage, 5.2f);
 }
 
 TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {

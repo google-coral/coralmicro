@@ -8,6 +8,7 @@
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
+#include "libs/tasks/PowerMonitorTask/power_monitor_task.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
 #include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -46,6 +47,7 @@ extern "C" int main(int argc, char **argv) {
     LPI2C_RTOS_Init(&i2c5_handle, (LPI2C_Type*)LPI2C5_BASE, &config, CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
     valiant::PmicTask::GetSingleton()->Init(&i2c5_handle);
+    valiant::PowerMonitorTask::GetSingleton()->Init(&i2c5_handle);
     valiant::CameraTask::GetSingleton()->Init(&i2c5_handle);
     valiant::AudioTask::GetSingleton()->Init();
 #endif
