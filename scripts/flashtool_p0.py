@@ -44,11 +44,11 @@ def is_flashloader_connected():
             return True
     return False
 
-def CreateSbFile(workdir, elftosb_path, srec_path, itcm_bdfile_path, spinand_bdfile_path):
+def CreateSbFile(workdir, elftosb_path, srec_path, itcm_bdfile_path, spinand_bdfile_path, wifi_firmware_path, wifi_clm_blob_path):
     ivt_bin_path = os.path.join(workdir, 'ivt_program.bin')
     sbfile_path = os.path.join(workdir, 'program.sb')
     subprocess.check_call([elftosb_path, '-f', 'imx', '-V', '-c', itcm_bdfile_path, '-o', ivt_bin_path, srec_path])
-    subprocess.check_call([elftosb_path, '-f', 'kinetis', '-V', '-c', spinand_bdfile_path, '-o', sbfile_path, ivt_bin_path])
+    subprocess.check_call([elftosb_path, '-f', 'kinetis', '-V', '-c', spinand_bdfile_path, '-o', sbfile_path, ivt_bin_path, wifi_firmware_path, wifi_clm_blob_path])
     return sbfile_path
 
 class FlashtoolStates(Enum):
@@ -167,11 +167,19 @@ def main():
     if not os.path.exists(spinand_bdfile_path):
         print('Unable to locate SPI NAND bdfile!')
         return
+    wifi_firmware_path = os.path.join(os.path.dirname(__file__), '..', 'third_party', 'firmware', 'cypress', '43455C0.bin')
+    if not os.path.exists(wifi_firmware_path):
+        print('Unable to locate SPI NAND bdfile!')
+        return
+    wifi_clm_blob_path = os.path.join(os.path.dirname(__file__), '..', 'third_party', 'firmware', 'cypress', '43455C0.clm_blob')
+    if not os.path.exists(wifi_clm_blob_path):
+        print('Unable to locate SPI NAND bdfile!')
+        return
 
     with tempfile.TemporaryDirectory() as workdir:
         sbfile_path = None
         if not args.ram:
-            sbfile_path = CreateSbFile(workdir, elftosb_path, args.srec, itcm_bdfile_path, spinand_bdfile_path)
+            sbfile_path = CreateSbFile(workdir, elftosb_path, args.srec, itcm_bdfile_path, spinand_bdfile_path, wifi_firmware_path, wifi_clm_blob_path)
         state = FlashtoolStates.CHECK_FOR_ANY
         while True:
             print(state)

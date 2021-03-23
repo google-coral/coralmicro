@@ -2,6 +2,7 @@
 #define _LIBS_TASKS_USBDEVICETASK_USBDEVICETASK_H_
 
 #include "libs/usb/descriptors.h"
+#include "libs/CdcEem/cdc_eem.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"
@@ -58,7 +59,7 @@ class UsbDeviceTask {
             sizeof(InterfaceAssociationDescriptor),
             0x0B,
             0, // first iface num
-            2, // total num ifaces
+            1, // total num ifaces
             0x02, 0x02, 0x01, 0,
         }, // InterfaceAssociationDescriptor
         {
@@ -146,6 +147,8 @@ class UsbDeviceTask {
 
     std::vector<usb_set_handle_callback> set_handle_callbacks_;
     std::vector<usb_handle_event_callback> handle_event_callbacks_;
+
+    CdcEem cdc_eem_;
 };
 
 }  // namespace valiant

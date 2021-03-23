@@ -452,6 +452,73 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_AD_13_VIDEO_MUX_CSI_MCLK, 0U);
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_AD_12_VIDEO_MUX_CSI_PIXCLK, 0U);
+
+  /* WLAN */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_00_USDHC1_CMD, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_01_USDHC1_CLK, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_02_USDHC1_DATA0, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_03_USDHC1_DATA1, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_04_USDHC1_DATA2, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_05_USDHC1_DATA3, 1U);
+  // WL_REG_ON
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_34_GPIO10_IO01, 0U);
+  // WL_HOST_WAKE
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_07_GPIO11_IO08, 0U);
+  // WL_RST#
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_06_GPIO11_IO07, 0U);
+  // WIFI_P_EN
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SNVS_09_DIG_GPIO13_IO12, 0U);
+  // BT_REG_ON
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_35_GPIO10_IO02, 0U);
+
+
+  // Pull-up
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_00_USDHC1_CMD, 0x4U);
+  // no-pull
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_01_USDHC1_CLK, 0xCU);
+  // Pull-up
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_02_USDHC1_DATA0, 0x4U);
+  // Pull-up
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_03_USDHC1_DATA1, 0x4U);
+  // Pull-up
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_04_USDHC1_DATA2, 0x4U);
+  // Pull-up
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_05_USDHC1_DATA3, 0x4U);
+  // WL_REG_ON
+  // Module has internal pull-down
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_34_GPIO10_IO01, 0U);
+  // WL_HOST_WAKE
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_07_GPIO11_IO08, 0x0U);
+  // WL_RST#
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_06_GPIO11_IO07, 0U);
+  // WIFI_P_EN
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SNVS_09_DIG_GPIO13_IO12, 0x2U);
+  // BT_REG_ON
+  // Module has internal pull-down
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_35_GPIO10_IO02, 0U);
+
 #endif
 }
 

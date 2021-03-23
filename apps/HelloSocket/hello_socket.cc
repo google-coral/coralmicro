@@ -1,33 +1,33 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/FreeRTOS-Plus-TCP/include/FreeRTOS_IP.h"
-#include "third_party/FreeRTOS-Plus-TCP/include/FreeRTOS_Sockets.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
 #include <cstdio>
 
 extern "C" void app_main(void *param) {
     printf("Hello socket.\r\n");
 
-    struct freertos_sockaddr xBindAddress, xClient;
-    socklen_t xSize = sizeof(xClient);
-    Socket_t xListeningSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_STREAM, FREERTOS_IPPROTO_TCP);
+    int listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    TickType_t xReceiveTimeOut = portMAX_DELAY;
-    FreeRTOS_setsockopt(xListeningSocket, 0, FREERTOS_SO_RCVTIMEO, &xReceiveTimeOut, sizeof(xReceiveTimeOut));
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    setsockopt(listening_socket, 0, SO_RCVTIMEO, &tv, sizeof(tv));
 
-    xBindAddress.sin_port = (uint16_t)31337;
-    xBindAddress.sin_port = FreeRTOS_htons(xBindAddress.sin_port);
-    FreeRTOS_bind(xListeningSocket, &xBindAddress, sizeof(xBindAddress));
-    FreeRTOS_listen(xListeningSocket, 1);
+    struct sockaddr_in bind_address;
+    bind_address.sin_family = AF_INET;
+    bind_address.sin_port = PP_HTONS(31337);
+    bind_address.sin_addr.s_addr = PP_HTONL(INADDR_ANY);
+
+    bind(listening_socket, reinterpret_cast<struct sockaddr*>(&bind_address), sizeof(bind_address));
+    listen(listening_socket, 1);
 
     const char *fixed_str = "Hello socket.\r\n";
-    uint8_t dummy;
     while (true) {
-        Socket_t xConnectedSocket = FreeRTOS_accept(xListeningSocket, &xClient, &xSize);
-        FreeRTOS_send(xConnectedSocket, fixed_str, strlen(fixed_str), 0);
-        FreeRTOS_shutdown(xConnectedSocket, FREERTOS_SHUT_RDWR);
-        while (FreeRTOS_recv(xConnectedSocket, &dummy, sizeof(dummy), 0) >= 0) {}
-        FreeRTOS_closesocket(xConnectedSocket);
-        taskYIELD();
+        int accepted_socket = accept(listening_socket, nullptr, nullptr);
+        send(accepted_socket, fixed_str, strlen(fixed_str), 0);
+        closesocket(accepted_socket);
     }
+
+    vTaskSuspend(NULL);
 }

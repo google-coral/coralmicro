@@ -1,5 +1,10 @@
 #include "libs/CdcEem/cdc_eem.h"
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/netif/ethernet.h"
+
+extern "C" {
+#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/app/dhcp_server.h"
+}
 
 #define DATA_OUT (1)
 #define DATA_IN  (0)
@@ -17,6 +22,59 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
     cdc_eem_data_endpoints_[DATA_OUT].endpointAddress = bulk_out_ep | (USB_OUT << 7);
     cdc_eem_interfaces_[0].interfaceNumber = data_iface;
     tx_semaphore_ = xSemaphoreCreateBinary();
+
+
+    IP4_ADDR(&netif_ipaddr_, 10, 10, 10, 1);
+    IP4_ADDR(&netif_netmask_, 255, 255, 255, 0);
+    IP4_ADDR(&netif_gw_, 0, 0, 0, 0);
+    netifapi_netif_add(&netif_, &netif_ipaddr_, &netif_netmask_, &netif_gw_, this, CdcEem::StaticNetifInit, ethernet_input);
+    netifapi_netif_set_default(&netif_);
+    netifapi_netif_set_link_up(&netif_);
+    netifapi_netif_set_up(&netif_);
+    start_dhcp_server(netif_ipaddr_.addr);
+}
+
+err_t CdcEem::StaticNetifInit(struct netif *netif) {
+    CdcEem *instance = reinterpret_cast<CdcEem*>(netif->state);
+    return instance->NetifInit(netif);
+}
+
+err_t CdcEem::NetifInit(struct netif *netif) {
+    netif->name[0] = 'u';
+    netif->name[1] = 's';
+    netif->output = etharp_output;
+    netif->linkoutput = CdcEem::StaticTxFunc;
+    netif->mtu = 1500;
+    netif->hwaddr_len = 6;
+    netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+
+    netif->hwaddr[0] = 0x00;
+    netif->hwaddr[1] = 0x1A;
+    netif->hwaddr[2] = 0x11;
+    netif->hwaddr[3] = 0xBA;
+    netif->hwaddr[4] = 0xDF;
+    netif->hwaddr[5] = 0xAD;
+
+    return ERR_OK;
+}
+
+err_t CdcEem::StaticTxFunc(struct netif *netif, struct pbuf *p) {
+    CdcEem *instance = reinterpret_cast<CdcEem*>(netif->state);
+    return instance->TxFunc(netif, p);
+}
+
+err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
+    uint8_t *tx_ptr = nullptr;
+    uint32_t tx_len = 0;
+    if ((p->next == NULL) && (p->tot_len == p->len)) {
+        tx_ptr = reinterpret_cast<uint8_t*>(p->payload);
+        tx_len = p->tot_len;
+    } else {
+        printf("We don't handle pbuf chains yet\r\n");
+        return ERR_ARG;
+    }
+
+    return TransmitFrame(tx_ptr, tx_len);
 }
 
 void CdcEem::SetClassHandle(class_handle_t class_handle) {
@@ -24,23 +82,47 @@ void CdcEem::SetClassHandle(class_handle_t class_handle) {
     class_handle_ = class_handle;
 }
 
-bool CdcEem::TransmitFrame(uint8_t* buffer, uint32_t length) {
+err_t CdcEem::TransmitFrame(uint8_t* buffer, uint32_t length) {
     usb_status_t status;
-    uint32_t crc = FreeRTOS_htonl(0xdeadbeef);
+    uint32_t crc = PP_HTONL(0xdeadbeef);
     uint16_t *header = (uint16_t*)tx_buffer_;
     *header = (0 << EEM_DATA_CRC_SHIFT) | ((length + sizeof(uint32_t)) & EEM_DATA_LEN_MASK);
     memcpy(tx_buffer_ + sizeof(uint16_t), buffer, length);
     memcpy(tx_buffer_ + sizeof(uint16_t) + length, &crc, sizeof(uint32_t));
     status = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, tx_buffer_, sizeof(uint16_t) + length + sizeof(uint32_t));
     if (status != kStatus_USB_Success) {
-        return false;
+        return ERR_IF;
     }
 
     if (xSemaphoreTake(tx_semaphore_, pdMS_TO_TICKS(200)) == pdFALSE) {
         status = kStatus_USB_Error;
     }
 
-    return (status == kStatus_USB_Success);
+    return (status == kStatus_USB_Success) ? ERR_OK : ERR_IF;
+}
+
+err_t CdcEem::ReceiveFrame(uint8_t *buffer, uint32_t length) {
+    struct netif *tmp_netif;
+    for (tmp_netif = netif_list; (tmp_netif != NULL) && (tmp_netif->state != this); tmp_netif = tmp_netif->next) {}
+    if (!tmp_netif) {
+        printf("Couldn't find EEM interface\r\n");
+        return ERR_IF;
+    }
+
+    struct pbuf *frame = pbuf_alloc(PBUF_RAW, length, PBUF_POOL);
+    if (!frame) {
+        printf("Failed to allocate pbuf\r\n");
+        return ERR_BUF;
+    }
+
+    memcpy(frame->payload, buffer, length);
+    if (tcpip_input(frame, tmp_netif)) {
+        printf("Failed to ethernet_input\r\n");
+        pbuf_free(frame);
+        return ERR_IF;
+    }
+
+    return ERR_OK;
 }
 
 usb_status_t CdcEem::Transmit(uint8_t* buffer, uint32_t length) {
@@ -96,7 +178,7 @@ void CdcEem::ProcessPacket() {
         uint16_t data_len = len - sizeof(uint32_t);
         // TODO(atv): We should validate checksum. But we won't (for now). See if the stack handles that?
         (void)checksum;
-        NetworkInterface::ReceiveFrame(data, data_len);
+        ReceiveFrame(data, data_len);
     }
 }
 
@@ -107,6 +189,7 @@ bool CdcEem::HandleEvent(uint32_t event, void *param) {
             break;
         case kUSB_DeviceEventSetInterface:
             initialized_ = true;
+            USB_DeviceCdcEemRecv(class_handle_, bulk_out_ep_, rx_buffer_, cdc_eem_data_endpoints_[DATA_OUT].maxPacketSize);
             break;
         default:
             DbgConsole_Printf("%s unhandled event %d\r\n", __PRETTY_FUNCTION__, event);

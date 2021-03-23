@@ -1,4 +1,5 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/task.h"
 
 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
         StackType_t **ppxIdleTaskStackBuffer,

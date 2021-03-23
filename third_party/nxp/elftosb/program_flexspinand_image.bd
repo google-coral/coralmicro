@@ -1,6 +1,8 @@
 # The source block assign file name to identifiers
 sources {
  myBootImageFile = extern (0);
+ wifiFirmware = extern (1);
+ wifiFirmwareClm = extern (2);
 }
 
 # The section block specifies the sequence of boot commands to be written to the SB file
@@ -61,7 +63,12 @@ section (0) {
     # Erase firmware0 region
     erase spinand 0x4..0x8;
     # Erase firmware1 region
-    erase spinand 0x8..0xc;    
+    erase spinand 0x8..0xc;
+
+    # 5 blocks for wifi firmware
+    erase spinand 0xd..0x12;
+    # 1 block for wifi clm
+    erase spinand 0x12..0x13;
     
     #3. Program image
     # Load to firmware0 region
@@ -70,6 +77,9 @@ section (0) {
     # Load to firmware1 region
     load spinand myBootImageFile > 0x8;
     
+    load spinand wifiFirmware > 0xd;
+
+    load spinand wifiFirmwareClm > 0x12;
     #4. Program Fuse (optional), remove '#' to make it effective
     # Please refer to Fusemap for more details
     # Boot device: FlexSPI NAND, Column address width:12 bits, CS_Interval: 100ns, Safe Freq: 50MHz, Search Stride: 64 pages, Search Count:2

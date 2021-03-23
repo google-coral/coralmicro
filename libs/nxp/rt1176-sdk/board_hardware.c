@@ -1,6 +1,8 @@
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/peripherals.h"
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
+#include "third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.h"
+#include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_semc.h"
@@ -10,6 +12,7 @@
 #include <string.h>
 
 #if __CORTEX_M == 7
+static nand_handle_t nand_handle;
 extern uint32_t __SDRAM_ROM;
 extern uint32_t __sdram_data_start__;
 extern uint32_t __sdram_data_end__;
@@ -19,6 +22,11 @@ static caam_job_ring_interface_t caam_job_ring_0;
 static caam_job_ring_interface_t caam_job_ring_1;
 static caam_job_ring_interface_t caam_job_ring_2;
 static caam_job_ring_interface_t caam_job_ring_3;
+
+nand_handle_t* BOARD_GetNANDHandle(void) {
+    return &nand_handle;
+}
+
 #endif
 
 void SystemInitHook(void) {
@@ -77,6 +85,44 @@ void BOARD_InitCAAM(void) {
     config.jobRingInterface[3] = &caam_job_ring_3;
     CAAM_Init(CAAM, &config);
 }
+
+void BOARD_InitNAND(void) {
+    flexspi_mem_config_t mem_config = {
+        .deviceConfig = {
+            .flexspiRootClk       = CLOCK_GetRootClockFreq(kCLOCK_Root_Flexspi1),
+            .flashSize            = 0x20000,
+            .CSIntervalUnit       = kFLEXSPI_CsIntervalUnit1SckCycle,
+            .CSInterval           = 2,
+            .CSHoldTime           = 3,
+            .CSSetupTime          = 3,
+            .dataValidTime        = 0,
+            .columnspace          = 12,
+            .enableWordAddress    = 0,
+            .AWRSeqIndex          = 0,
+            .AWRSeqNumber         = 0,
+            .ARDSeqIndex          = 0,
+            .ARDSeqNumber         = 0,
+            .AHBWriteWaitUnit     = kFLEXSPI_AhbWriteWaitUnit2AhbCycle,
+            .AHBWriteWaitInterval = 0,
+        },
+        .devicePort = kFLEXSPI_PortA1,
+        .dataBytesPerPage = 2048,
+        .bytesInPageSpareArea = 128,
+        .pagesPerBlock = 64,
+        .busyOffset = 0,
+        .busyBitPolarity = 0,
+        .eccStatusMask = 0x30,
+        .eccFailureMask = 0x20,
+    };
+    nand_config_t nand_config = {
+        .memControlConfig = &mem_config,
+        .driverBaseAddr = FLEXSPI1,
+    };
+    flexspi_config_t flexspi_config;
+    FLEXSPI_GetDefaultConfig(&flexspi_config);
+    FLEXSPI_Init(FLEXSPI1, &flexspi_config);
+    Nand_Flash_Init(&nand_config, &nand_handle);
+}
 #endif  // __CORTEX_M == 7
 
 #if defined(BOARD_REVISION_P0)
@@ -124,6 +170,7 @@ void BOARD_InitHardware(void) {
 
 #if defined(BOARD_REVISION_P0)
     BOARD_FuseTamper();
+    BOARD_InitNAND();
 #endif
 
 #endif

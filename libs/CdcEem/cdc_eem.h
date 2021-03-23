@@ -4,14 +4,14 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h" // Must be above other class headers.
-#include "libs/base/network.h"
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 
 #include <map>
 
 namespace valiant {
 
-class CdcEem : public NetworkInterface {
+class CdcEem {
   public:
     CdcEem();
     CdcEem(const CdcEem&) = delete;
@@ -21,14 +21,22 @@ class CdcEem : public NetworkInterface {
     void SetClassHandle(class_handle_t class_handle);
     bool HandleEvent(uint32_t event, void *param);
     usb_status_t Transmit(uint8_t *buffer, uint32_t length);
-    bool TransmitFrame(uint8_t *buffer, uint32_t length);
     bool Initialized() { return initialized_; }
-    void NetworkEvent(eIPCallbackEvent_t eNetworkEvent) {}
   private:
+
     void ProcessPacket();
     usb_status_t SendEchoRequest();
     static usb_status_t Handler(class_handle_t class_handle, uint32_t event, void *param);
     usb_status_t Handler(uint32_t event, void *param);
+
+    // LwIP hooks
+    static err_t StaticNetifInit(struct netif *netif);
+    err_t NetifInit(struct netif *netif);
+    static err_t StaticTxFunc(struct netif *netif, struct pbuf *p);
+    err_t TxFunc(struct netif *netif, struct pbuf *p);
+    err_t TransmitFrame(uint8_t *buffer, uint32_t length);
+    err_t ReceiveFrame(uint8_t *buffer, uint32_t length);
+
     usb_device_endpoint_struct_t cdc_eem_data_endpoints_[2] = {
         {
             0, // set in constructor
@@ -84,6 +92,9 @@ class CdcEem : public NetworkInterface {
     class_handle_t class_handle_;
 
     static std::map<class_handle_t, CdcEem*> handle_map_;
+
+    ip4_addr_t netif_ipaddr_, netif_netmask_, netif_gw_;
+    struct netif netif_;
 };
 
 }  // namespace valiant

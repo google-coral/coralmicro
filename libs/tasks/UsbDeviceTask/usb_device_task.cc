@@ -6,7 +6,9 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.h"
 
 #include <cstdio>
+#include <functional>
 
+using namespace std::placeholders;
 constexpr int kUSBControllerId = kUSB_ControllerEhci0;
 
 extern "C" void USB_OTG1_IRQHandler(void) {
@@ -130,6 +132,15 @@ void UsbDeviceTask::AddDevice(usb_device_class_config_struct_t* config, usb_set_
 
 bool UsbDeviceTask::Init() {
     usb_status_t ret;
+
+    cdc_eem_.Init(
+            next_descriptor_value(),
+            next_descriptor_value(),
+            next_interface_value());
+    AddDevice(cdc_eem_.config_data(),
+            std::bind(&valiant::CdcEem::SetClassHandle, &cdc_eem_, _1),
+            std::bind(&valiant::CdcEem::HandleEvent, &cdc_eem_, _1, _2));
+
     config_list_ = { configs_.data(), &UsbDeviceTask::StaticHandler, (uint8_t)configs_.size() };
     ret = USB_DeviceClassInit(kUSBControllerId, &config_list_, &device_handle_);
     if (ret != kStatus_USB_Success) {

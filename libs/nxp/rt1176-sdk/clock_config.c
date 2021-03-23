@@ -203,6 +203,14 @@ void BOARD_BootClockRUN(void)
     CLOCK_InitAudioPllWithFreq(96, false, 0, 0);
     CLOCK_SetRootClockMux(kCLOCK_Root_Mic, 6); // Audio PLL
 
+    rootCfg.mux = kCLOCK_FLEXSPI1_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Flexspi1, &rootCfg);
+
+    rootCfg.mux = kCLOCK_USDHC1_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Usdhc1, &rootCfg);
+
 #if __CORTEX_M == 7
     SystemCoreClock = CLOCK_GetRootClockFreq(kCLOCK_Root_M7);
 #else
