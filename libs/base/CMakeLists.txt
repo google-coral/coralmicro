@@ -18,6 +18,7 @@ target_link_libraries(libs_base-m4_bm
 
 add_library_m7(libs_base-m7_freertos STATIC
     console_m7.cc
+    filesystem.cc
     ipc_m7.cc
     main_freertos_m7.cc
     random.cc
@@ -29,6 +30,7 @@ if (VALIANT_BOARD_REVISION STREQUAL P0)
         libs_tasks_AudioTask_freertos
         libs_tasks_CameraTask_freertos
         libs_tasks_PmicTask_freertos
+        libs_nxp_rt1176-sdk_littlefs
         libs_nxp_rt1176-sdk_lwip
     )
 endif()

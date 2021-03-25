@@ -1,4 +1,5 @@
 #include "libs/base/console_m7.h"
+#include "libs/base/filesystem.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks_m7.h"
@@ -24,6 +25,7 @@ extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware();
     valiant::Random::GetSingleton()->Init();
     valiant::ConsoleM7::GetSingleton()->Init();
+    valiant::filesystem::Init();
     valiant::IPCInit();
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);

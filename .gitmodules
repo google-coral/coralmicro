@@ -31,3 +31,6 @@
 [submodule "third_party/kissfft"]
 	path = third_party/kissfft
 	url = https://spacepark.googlesource.com/valiant/kissfft
+[submodule "third_party/mklfs"]
+	path = third_party/mklfs
+	url = https://spacepark.googlesource.com/valiant/mklfs

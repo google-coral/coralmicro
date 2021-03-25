@@ -251,6 +251,15 @@ target_link_libraries(libs_nxp_rt1176-sdk_sdmmc
     libs_nxp_rt1176-sdk_freertos
 )
 
+add_library_m7(libs_nxp_rt1176-sdk_littlefs
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
+)
+
+target_include_directories(libs_nxp_rt1176-sdk_littlefs PUBLIC
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
+)
+
 add_library_m7(libs_nxp_rt1176-sdk_lwip
     dhcp_server.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/sys_arch.c
@@ -297,7 +306,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_lwip
 
 add_library_m7(libs_nxp_rt1176-sdk_wiced
     WICED/WWD/internal/chips/43455/resources.c
-    WICED/platform/MCU/LPC/WWD/wwd_platform.c
+    WICED/platform/MCU/LPC/WWD/wwd_platform.cc
     rtos/freertos/vendors/nxp/wifi/wiced/iot_wifi.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD/wwd_rtos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/SDIO/wwd_bus_protocol.c
