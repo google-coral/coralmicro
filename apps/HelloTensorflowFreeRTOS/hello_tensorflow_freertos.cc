@@ -80,10 +80,13 @@ extern "C" void app_main(void *param) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",
             model->version(), TFLITE_SCHEMA_VERSION);
-        return;
+        vTaskSuspend(NULL);
     }
 
-    static tflite::AllOpsResolver resolver;
+    static tflite::MicroMutableOpResolver<3> resolver(error_reporter);
+    resolver.AddQuantize();
+    resolver.AddDequantize();
+    resolver.AddFullyConnected();
     static tflite::MicroInterpreter static_interpreter(
         model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
     interpreter = &static_interpreter;
@@ -91,7 +94,7 @@ extern "C" void app_main(void *param) {
     TfLiteStatus allocate_status = interpreter->AllocateTensors();
     if (allocate_status != kTfLiteOk) {
         TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors failed.");
-        return;
+        vTaskSuspend(NULL);
     }
 
     input = interpreter->input(0);

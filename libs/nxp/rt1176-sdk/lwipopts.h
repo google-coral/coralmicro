@@ -86,6 +86,8 @@ void sys_mark_tcpip_thread(void);
 #define MEM_SIZE (22 * 1024)
 #endif
 
+#define MEM_LIBC_MALLOC 1
+
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this
    should be set high. */
