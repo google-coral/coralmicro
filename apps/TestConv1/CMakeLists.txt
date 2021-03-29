@@ -15,6 +15,5 @@ target_link_libraries(TestConv1
     libs_tasks_EdgeTpuDfuTask_freertos
     libs_tasks_UsbHostTask_freertos
     libs_tensorflow-m7
-    libs_tensorflow_model_testconv1
     libs_tpu_freertos
 )

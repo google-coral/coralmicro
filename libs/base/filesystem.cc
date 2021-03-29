@@ -104,6 +104,42 @@ bool Close(lfs_file_t* handle) {
     return (ret == LFS_ERR_OK) ? true : false;
 }
 
+uint8_t* ReadToMemory(const char *path, size_t* size_bytes) {
+    lfs_file_t handle;
+    lfs_soff_t file_size;
+    uint8_t *data;
+    if (!Open(&handle, path)) {
+        goto fail;
+    }
+
+    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
+    file_size = lfs_file_size(&lfs_handle_, &handle);
+    xSemaphoreGive(lfs_semaphore_);
+
+    data = reinterpret_cast<uint8_t*>(malloc(file_size));
+    if (!data) {
+        goto fail_close;
+    }
+
+    if (Read(&handle, data, file_size) < 0) {
+        goto fail_close;
+    }
+
+    Close(&handle);
+    if (size_bytes) {
+        *size_bytes = file_size;
+    }
+    return data;
+
+fail_close:
+    Close(&handle);
+fail:
+    if (size_bytes) {
+        *size_bytes = 0;
+    }
+    return nullptr;
+}
+
 }  // namespace filesystem
 
 }  // namespace valiant

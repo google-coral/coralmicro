@@ -1,9 +1,7 @@
 #include "third_party/freertos_kernel/include/projdefs.h"
+#include "libs/base/filesystem.h"
 #include "libs/base/tasks_m7.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/tensorflow/testconv1_edgetpu.h"
-#include "libs/tensorflow/testconv1_expected_output.h"
-#include "libs/tensorflow/testconv1_test_input.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
@@ -27,6 +25,11 @@ const int kModelArenaSize = 32768;
 const int kExtraArenaSize = 32768;
 const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
+
+size_t testconv1_edgetpu_tflite_len, testconv1_test_input_bin_len, testconv1_expected_output_bin_len;
+const uint8_t *testconv1_edgetpu_tflite;
+const uint8_t *testconv1_expected_output_bin;
+const uint8_t *testconv1_test_input_bin;
 }  // namespace
 
 bool loop() {
@@ -47,6 +50,23 @@ static bool setup() {
     static tflite::MicroErrorReporter micro_error_reporter;
     error_reporter = &micro_error_reporter;
     TF_LITE_REPORT_ERROR(error_reporter, "TestConv1!");
+
+    testconv1_edgetpu_tflite = valiant::filesystem::ReadToMemory("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite_len);
+    testconv1_expected_output_bin = valiant::filesystem::ReadToMemory("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin_len);
+    testconv1_test_input_bin = valiant::filesystem::ReadToMemory("/models/testconv1-test-input.bin", &testconv1_test_input_bin_len);
+
+    if (!testconv1_edgetpu_tflite || testconv1_edgetpu_tflite_len == 0) {
+        TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
+        return false;
+    }
+    if (!testconv1_expected_output_bin || testconv1_expected_output_bin_len == 0) {
+        TF_LITE_REPORT_ERROR(error_reporter, "Failed to load expected output!");
+        return false;
+    }
+    if (!testconv1_test_input_bin || testconv1_test_input_bin_len == 0) {
+        TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
+        return false;
+    }
 
     model = tflite::GetModel(testconv1_edgetpu_tflite);
     if (model->version() != TFLITE_SCHEMA_VERSION) {
@@ -72,11 +92,11 @@ static bool setup() {
     output = interpreter->output(0);
 
     if (input->bytes != testconv1_test_input_bin_len) {
-        printf("Input tensor length doesn't match canned input\r\n");
+        TF_LITE_REPORT_ERROR(error_reporter, "Input tensor length doesn't match canned input");
         return false;
     }
     if (output->bytes != testconv1_expected_output_bin_len) {
-        printf("Output tensor length doesn't match canned output\r\n");
+        TF_LITE_REPORT_ERROR(error_reporter, "Output tensor length doesn't match canned output");
         return false;
     }
     memcpy(input->data.uint8, testconv1_test_input_bin, testconv1_test_input_bin_len);
@@ -87,7 +107,10 @@ extern "C" void app_main(void *param) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
 
-    setup();
+    if (!setup()) {
+        printf("setup() failed\r\n");
+        vTaskSuspend(NULL);
+    }
 
     bool run = true;
     size_t counter = 0;
@@ -100,4 +123,5 @@ extern "C" void app_main(void *param) {
             }
         }
     }
+    vTaskSuspend(NULL);
 }

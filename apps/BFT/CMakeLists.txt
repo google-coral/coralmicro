@@ -11,7 +11,6 @@ add_executable_m7(BFT
 target_link_libraries(BFT
     libs_base-m7_freertos
     libs_tensorflow-m7
-    libs_tensorflow_model_testconv1
 )
 
 add_executable_m4(BFTM4

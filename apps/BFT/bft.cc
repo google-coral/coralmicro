@@ -1,13 +1,11 @@
 #include "apps/BFT/micro_test.h"
+#include "libs/base/filesystem.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/random.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
-#include "libs/tensorflow/testconv1_edgetpu.h"
-#include "libs/tensorflow/testconv1_expected_output.h"
-#include "libs/tensorflow/testconv1_test_input.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -27,6 +25,10 @@ namespace testing {
 static tflite::MicroMutableOpResolver<1> resolver;
 constexpr size_t kTensorArenaSize = 1024 * 10 * 2;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
+size_t testconv1_edgetpu_tflite_len, testconv1_test_input_bin_len, testconv1_expected_output_bin_len;
+const uint8_t *testconv1_edgetpu_tflite;
+const uint8_t *testconv1_expected_output_bin;
+const uint8_t *testconv1_test_input_bin;
 
 constexpr size_t sdram_memory_size = 1024 * 1024;
 static uint8_t sdram_memory[sdram_memory_size] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
@@ -43,6 +45,23 @@ TF_LITE_MICRO_TEST(MulticoreTest_CheckM4) {
 TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+
+    testconv1_edgetpu_tflite = valiant::filesystem::ReadToMemory("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite_len);
+    testconv1_expected_output_bin = valiant::filesystem::ReadToMemory("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin_len);
+    testconv1_test_input_bin = valiant::filesystem::ReadToMemory("/models/testconv1-test-input.bin", &testconv1_test_input_bin_len);
+
+    if (!testconv1_edgetpu_tflite || testconv1_edgetpu_tflite_len == 0) {
+        TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load model!");
+        return false;
+    }
+    if (!testconv1_expected_output_bin || testconv1_expected_output_bin_len == 0) {
+        TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load expected output!");
+        return false;
+    }
+    if (!testconv1_test_input_bin || testconv1_test_input_bin_len == 0) {
+        TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load test input!");
+        return false;
+    }
 
     const tflite::Model *model = tflite::GetModel(testconv1_edgetpu_tflite);
     TF_LITE_MICRO_EXPECT_EQ(static_cast<int>(model->version()), TFLITE_SCHEMA_VERSION);
@@ -150,11 +169,6 @@ TF_LITE_MICRO_TEST(SDRAMTest_CheckReadWrite) {
     for (size_t i = 0; i < sdram_memory_size; ++i) {
         TF_LITE_MICRO_EXPECT_EQ(sdram_memory[i], (i % 256));
     }
-}
-
-TF_LITE_MICRO_TEST(NANDTest_CheckSomething) {
-    // Maybe read back the beginning of our binary and compare it?
-    micro_test::reporter->Report("\t - NANDTest_CheckSomething unimplemented");
 }
 
 TF_LITE_MICRO_TEST(PmicTest_CheckChipId) {

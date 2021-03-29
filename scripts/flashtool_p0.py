@@ -29,6 +29,9 @@ BLOCK_COUNT = 32
 FILESYSTEM_FILES = {
     os.path.join('third_party', 'firmware', 'cypress', '43455C0.bin'): os.path.join('firmware', '43455C0.bin'),
     os.path.join('third_party', 'firmware', 'cypress', '43455C0.clm_blob'): os.path.join('firmware', '43455C0.clm_blob'),
+    os.path.join('models', 'testconv1-edgetpu.tflite'): os.path.join('models', 'testconv1-edgetpu.tflite'),
+    os.path.join('models', 'testconv1-expected-output.bin'): os.path.join('models', 'testconv1-expected-output.bin'),
+    os.path.join('models', 'testconv1-test-input.bin'): os.path.join('models', 'testconv1-test-input.bin'),
 }
 
 def sdp_vidpid():
