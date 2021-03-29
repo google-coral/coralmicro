@@ -241,9 +241,6 @@ static void dhcp_thread( void * thread_input )
                         option_ptr += 6;
                         memcpy( option_ptr, subnet_option_buff, 6 );           /* Subnet Mask */
                         option_ptr += 6;
-                        memcpy( option_ptr, server_ip_addr_option_buff, 6 );   /* Router (gateway) */
-                        option_ptr[0] = 3; /* Router id */
-                        option_ptr += 6;
                         memcpy( option_ptr, dns_server_ip_addr_option_buff, 6 );   /* DNS server */
                         option_ptr[0] = 6; /* DNS server id */
                         option_ptr += 6;
@@ -314,9 +311,6 @@ static void dhcp_thread( void * thread_input )
                             memcpy( option_ptr, lease_time_option_buff, 6 );     /* Lease Time */
                             option_ptr += 6;
                             memcpy( option_ptr, subnet_option_buff, 6 );         /* Subnet Mask */
-                            option_ptr += 6;
-                            memcpy( option_ptr, server_ip_addr_option_buff, 6 ); /* Router (gateway) */
-                            option_ptr[0] = 3; /* Router id */
                             option_ptr += 6;
                             memcpy( option_ptr, dns_server_ip_addr_option_buff, 6 ); /* DNS server */
                             option_ptr[0] = 6; /* DNS server id */
