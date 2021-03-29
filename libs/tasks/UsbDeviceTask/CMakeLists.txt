@@ -8,3 +8,4 @@ target_link_libraries(libs_tasks_UsbDeviceTask_freertos
     libs_nxp_rt1176-sdk_freertos
     libs_CdcEem_freertos
 )
+target_sources(libs_tasks_UsbDeviceTask_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)
