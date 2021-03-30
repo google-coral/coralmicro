@@ -18,11 +18,16 @@ void EdgeTpuManager::NotifyConnected(usb_host_edgetpu_instance_t* usb_instance) 
     usb_instance_ = usb_instance;
 }
 
-bool EdgeTpuManager::OpenDevice() {
+
+bool EdgeTpuManager::OpenDevice(const PerformanceMode mode) {
     while (!usb_instance_) {
         vTaskDelay(pdMS_TO_TICKS(200));
     }
-    return tpu_driver_.Initialize(usb_instance_);
+    return tpu_driver_.Initialize(usb_instance_, mode);
+}
+
+bool EdgeTpuManager::OpenDevice() {
+    return OpenDevice(PerformanceMode::kHigh);
 }
 
 EdgeTpuPackage* EdgeTpuManager::RegisterPackage(const char *package_content, size_t length) {

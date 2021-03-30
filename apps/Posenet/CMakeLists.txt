@@ -16,6 +16,5 @@ target_link_libraries(Posenet
     libs_tasks_UsbHostTask_freertos
     libs_posenet
     libs_tensorflow-m7
-    libs_tensorflow_model_posenet
     libs_tpu_freertos
 )

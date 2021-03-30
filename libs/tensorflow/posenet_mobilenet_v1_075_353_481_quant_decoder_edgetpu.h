@@ -1,7 +1,0 @@
-#ifndef _LIBS_TENSORFLOW_POSENET_MOBILENET_V1_075_353_481_QUANT_DECODER_EDGETPU_H_
-#define _LIBS_TENSORFLOW_POSENET_MOBILENET_V1_075_353_481_QUANT_DECODER_EDGETPU_H_
-
-extern const unsigned char posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite[];
-extern const unsigned int posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len;
-
-#endif  // _LIBS_TENSORFLOW_POSENET_MOBILENET_V1_075_353_481_QUANT_DECODER_EDGETPU_H_

@@ -17,7 +17,7 @@ namespace registers = platforms::darwinn::driver::config::registers;
 TpuDriver::TpuDriver() {
 }
 
-bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance) {
+bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance, PerformanceMode mode) {
     if (usb_instance == nullptr) {
         return false;
     }
@@ -69,19 +69,32 @@ bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance) {
         assert(Write32(chip_config_.GetCbBridgeCsrOffsets().gcbb_credit0, 0x0));
     }
 
-    // TODO(atv): Support something besides MAX
     // Set performance mode and exit reset.
     assert(Read32(chip_config_.GetScuCsrOffsets().scu_ctrl_3, &scu_ctrl_3_reg));
     scu_ctrl_3.set_raw(scu_ctrl_3_reg);
     scu_ctrl_3.set_rg_force_sleep(0x2);
-    // Max
-    // scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k500MHZ);
-    // scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k250MHZ);
-    // scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k500MHZ);
-    // High
-    scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k250MHZ);
-    scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k125MHZ);
-    scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k500MHZ);
+    switch (mode) {
+        case PerformanceMode::kMax:
+            scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k500MHZ);
+            scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k250MHZ);
+            scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k500MHZ);
+            break;
+        case PerformanceMode::kHigh:
+            scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k250MHZ);
+            scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k125MHZ);
+            scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k500MHZ);
+            break;
+        case PerformanceMode::kMedium:
+            scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k125MHZ);
+            scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k125MHZ);
+            scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k500MHZ);
+            break;
+        case PerformanceMode::kLow:
+            scu_ctrl_3.set_gcb_clock_rate(registers::ScuCtrl3::GcbClock::k63MHZ);
+            scu_ctrl_3.set_axi_clock_rate(registers::ScuCtrl3::AxiClock::k125MHZ);
+            scu_ctrl_3.set_usb_8051_clock_rate(registers::ScuCtrl3::Usb8051Clock::k250MHZ);
+            break;
+    }
     assert(Write32(chip_config_.GetScuCsrOffsets().scu_ctrl_3, scu_ctrl_3.raw()));
 
     do {

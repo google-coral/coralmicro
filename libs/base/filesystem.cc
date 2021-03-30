@@ -23,12 +23,23 @@ static int LfsRead(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
         return LFS_ERR_IO;
     }
 
-    assert((off % kPageSize) == 0);
-    int page_offset = off / kPageSize;
-    status_t status = Nand_Flash_Read_Page_Partial(nand_handle, kFilesystemBasePage + (block * kPagesPerBlock) + page_offset, 0, reinterpret_cast<uint8_t*>(buffer), size);
-    if (status != kStatus_Success) {
-        return LFS_ERR_IO;
-    }
+    lfs_size_t remaining_bytes = size;
+    lfs_off_t current_offset = off;
+    lfs_off_t memory_offset = 0;
+    do {
+        lfs_size_t this_page_size = MIN(kPageSize, remaining_bytes);
+        int base_offset = off / kPageSize;
+        int page_offset = (current_offset - off) / kPageSize;
+        status_t status = Nand_Flash_Read_Page_Partial(
+                nand_handle, kFilesystemBasePage + (block * kPagesPerBlock) + base_offset + page_offset, 0,
+                reinterpret_cast<uint8_t*>(buffer) + memory_offset, this_page_size);
+        if (status != kStatus_Success) {
+            return LFS_ERR_IO;
+        }
+        memory_offset += this_page_size;
+        current_offset += this_page_size;
+        remaining_bytes -= this_page_size;
+    } while (remaining_bytes);
 
     return LFS_ERR_OK;
 }

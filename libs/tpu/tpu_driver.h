@@ -14,6 +14,13 @@ static const uint8_t kSingleBulkOutEndpoint = 1;
 static const uint8_t kEventInEndpoint = 2;
 static const uint8_t kInterruptInEndpoint = 3;
 
+enum class PerformanceMode {
+    kLow,
+    kMedium,
+    kHigh,
+    kMax,
+};
+
 enum class DescriptorTag {
     kUnknown = -1,
     kInstructions = 0,
@@ -31,7 +38,7 @@ class TpuDriver {
     TpuDriver();
     TpuDriver(const TpuDriver&) = delete;
     TpuDriver& operator=(const TpuDriver&) = delete;
-    bool Initialize(usb_host_edgetpu_instance_t *usb_instance);
+    bool Initialize(usb_host_edgetpu_instance_t *usb_instance, PerformanceMode mode);
     bool SendParameters(const uint8_t *data, uint32_t length) const;
     bool SendInputs(const uint8_t *data, uint32_t length) const;
     bool SendInstructions(const uint8_t *data, uint32_t length) const;

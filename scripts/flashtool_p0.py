@@ -32,6 +32,8 @@ FILESYSTEM_FILES = {
     os.path.join('models', 'testconv1-edgetpu.tflite'): os.path.join('models', 'testconv1-edgetpu.tflite'),
     os.path.join('models', 'testconv1-expected-output.bin'): os.path.join('models', 'testconv1-expected-output.bin'),
     os.path.join('models', 'testconv1-test-input.bin'): os.path.join('models', 'testconv1-test-input.bin'),
+    os.path.join('models', 'posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite'): os.path.join('models', 'posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite'),
+    os.path.join('models', 'posenet_test_input.bin'): os.path.join('models', 'posenet_test_input.bin'),
 }
 
 def sdp_vidpid():

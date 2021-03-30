@@ -1,9 +1,8 @@
 #include "third_party/freertos_kernel/include/projdefs.h"
+#include "libs/base/filesystem.h"
 #include "libs/base/tasks_m7.h"
 #include "libs/posenet/posenet_decoder_op.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/tensorflow/posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.h"
-#include "libs/tensorflow/posenet_test_input.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
 #include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
@@ -26,6 +25,10 @@ const int kModelArenaSize = 1 * 1024 * 1024;
 const int kExtraArenaSize = 1 * 1024 * 1024;
 const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+
+size_t posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len, posenet_test_input_bin_len;
+uint8_t *posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
+uint8_t *posenet_test_input_bin;
 }  // namespace
 
 const char* const KeypointTypes[] = {
@@ -89,6 +92,22 @@ static bool setup() {
     error_reporter = &micro_error_reporter;
     TF_LITE_REPORT_ERROR(error_reporter, "Posenet!");
 
+    posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite = valiant::filesystem::ReadToMemory(
+            "/models/posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite",
+            &posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len);
+    posenet_test_input_bin = valiant::filesystem::ReadToMemory(
+            "/models/posenet_test_input.bin", &posenet_test_input_bin_len);
+
+    if (!posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite ||
+        posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len == 0) {
+        TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
+        return false;
+    }
+    if (!posenet_test_input_bin || posenet_test_input_bin_len == 0) {
+        TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
+        return false;
+    }
+
     model = tflite::GetModel(posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite);
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
@@ -97,7 +116,7 @@ static bool setup() {
         return false;
     }
 
-    static tflite::AllOpsResolver resolver;
+    static tflite::MicroMutableOpResolver<2> resolver;
     resolver.AddCustom("edgetpu-custom-op", valiant::RegisterCustomOp());
     resolver.AddCustom(coral::kPosenetDecoderOp, coral::RegisterPosenetDecoderOp());
     static tflite::MicroInterpreter static_interpreter(
@@ -113,7 +132,7 @@ static bool setup() {
     input = interpreter->input(0);
 
     if (input->bytes != posenet_test_input_bin_len) {
-        printf("Input tensor length doesn't match canned input\r\n");
+        TF_LITE_REPORT_ERROR(error_reporter, "Input tensor length doesn't match canned input\r\n");
         return false;
     }
     memcpy(input->data.uint8, posenet_test_input_bin, posenet_test_input_bin_len);
@@ -122,8 +141,12 @@ static bool setup() {
 
 extern "C" void app_main(void *param) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
-    valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
-    setup();
+    valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kLow);
+    if (!setup()) {
+        printf("setup() failed\r\n");
+        vTaskSuspend(NULL);
+    }
     loop();
-    while (true) { taskYIELD(); }
+    printf("Posenet test finished.\r\n");
+    vTaskSuspend(NULL);
 }

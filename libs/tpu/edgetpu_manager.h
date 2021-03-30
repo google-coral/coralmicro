@@ -46,6 +46,7 @@ class EdgeTpuManager {
 
     EdgeTpuPackage* RegisterPackage(const char* package_content, size_t length);
     TfLiteStatus Invoke(EdgeTpuPackage* package, TfLiteContext *context, TfLiteNode *node);
+    bool OpenDevice(const PerformanceMode mode);
     bool OpenDevice();
     void NotifyConnected(usb_host_edgetpu_instance_t* usb_instance);
 
