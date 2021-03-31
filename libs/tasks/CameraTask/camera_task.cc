@@ -5,6 +5,8 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7/fsl_cache.h"
 
+#include <memory>
+
 namespace valiant {
 
 using namespace camera;
@@ -30,6 +32,210 @@ int FramebufferPtrToIndex(uint8_t* framebuffer_ptr) {
     }
     return -1;
 }
+}
+
+extern "C" void PXP_IRQHandler(void) {
+    CameraTask::GetSingleton()->PXP_IRQHandler();
+}
+
+void CameraTask::PXP_IRQHandler() {
+    if (kPXP_CompleteFlag & PXP_GetStatusFlags(PXP)) {
+        BaseType_t reschedule = pdFALSE;
+        PXP_ClearStatusFlags(PXP, kPXP_CompleteFlag);
+        xSemaphoreGiveFromISR(pxp_semaphore_, &reschedule);
+        portYIELD_FROM_ISR(reschedule);
+    }
+}
+
+bool CameraTask::GetFrame(const FrameFormat& fmt, uint8_t *buffer) {
+    bool ret = true;
+    uint8_t *raw = nullptr;
+    int index = GetSingleton()->GetFrame(&raw, true);
+    if (!raw) {
+        return false;
+    }
+
+    switch (fmt.fmt) {
+        case Format::RGB: {
+                if (fmt.width == kWidth && fmt.width == kHeight) {
+                    BayerToRGB(raw, buffer, fmt.width, fmt.height);
+                } else {
+                    std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
+                    BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
+                    PXPConfiguration input;
+                    input.data = buffer_rgba.get();
+                    input.fmt = Format::RGBA;
+                    input.width = kWidth;
+                    input.height = kHeight;
+                    PXPConfiguration output;
+                    output.data = buffer;
+                    output.fmt = Format::RGB;
+                    output.width = fmt.width;
+                    output.height = fmt.height;
+                    ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
+                }
+            }
+            break;
+        case Format::Y8: {
+                std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
+                if (!buffer_rgba) {
+                    ret = false;
+                    break;
+                }
+                BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
+                PXPConfiguration input;
+                input.data = buffer_rgba.get();
+                input.fmt = Format::RGBA;
+                input.width = kWidth;
+                input.height = kHeight;
+                PXPConfiguration output;
+                output.data = buffer;
+                output.fmt = Format::Y8;
+                output.width = fmt.width;
+                output.height = fmt.height;
+                ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
+            }
+            break;
+        default:
+            ret = false;
+    }
+
+    GetSingleton()->ReturnFrame(index);
+    return ret;
+}
+
+namespace {
+void BayerInternal(const uint8_t *camera_raw, int width, int height, std::function<void(int x, int y, uint8_t r, uint8_t g, uint8_t b)> callback) {
+    bool blue = true, green = false;
+    for (int y = 2; y < height - 2; y++) {
+        int start = green ? 3 : 2;
+        for (int x = start; x < width - 2; x += 2) {
+            int g1x = x + 1, g1y = y;
+            int g2x = x + 2, g2y = y + 1;
+            int r1x, r1y, r2x, r2y;
+            int b1x, b1y, b2x, b2y;
+            if (blue) {
+                r1x = r2x = x + 1;
+                r1y = r2y = y + 1;
+                b1x = x;
+                b1y = y;
+                b2x = x + 2;
+                b2y = y;
+            } else {
+                r1x = x;
+                r1y = y;
+                r2x = x + 2;
+                r2y = y;
+                b1x = b2x = x + 1;
+                b1y = b2y = y + 1;
+            }
+            uint8_t r1 = camera_raw[r1x + (r1y * width)];
+            uint8_t g1 = camera_raw[g1x + (g1y * width)];
+            uint8_t b1 = camera_raw[b1x + (b1y * width)];
+            uint8_t r2 = camera_raw[r2x + (r2y * width)];
+            uint8_t g2 = camera_raw[g2x + (g2y * width)];
+            uint8_t b2 = camera_raw[b2x + (b2y * width)];
+            callback(x, y, r1, g1, b1);
+            callback(x + 1, y, r2, g2, b2);
+        }
+        blue = !blue;
+        green = !green;
+    }
+}
+}  // namespace
+
+void CameraTask::BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height) {
+    memset(camera_rgb, 0, width * height * 3);
+    BayerInternal(camera_raw, width, height, [camera_rgb, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+        camera_rgb[(x * 3) + (y * width * 3) + 0] = r;
+        camera_rgb[(x * 3) + (y * width * 3) + 1] = g;
+        camera_rgb[(x * 3) + (y * width * 3) + 2] = b;
+    });
+}
+
+void CameraTask::BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgba, int width, int height) {
+    memset(camera_rgba, 0, width * height * 4);
+    BayerInternal(camera_raw, width, height, [camera_rgba, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+            camera_rgba[(x * 4) + (y * width * 4) + 0] = r;
+            camera_rgba[(x * 4) + (y * width * 4) + 1] = g;
+            camera_rgba[(x * 4) + (y * width * 4) + 2] = b;
+    });
+}
+
+int CameraTask::FormatToBPP(Format fmt) {
+    switch (fmt) {
+        case Format::RGBA:
+            return 4;
+        case Format::RGB:
+            return 3;
+        case Format::Y8:
+            return 1;
+    }
+    return 0;
+}
+
+pxp_ps_pixel_format_t CameraTask::FormatToPXPPSFormat(Format fmt) {
+    switch (fmt) {
+        case Format::RGBA:
+            return kPXP_PsPixelFormatRGB888;
+        case Format::Y8:
+            return kPXP_PsPixelFormatY8;
+        default:
+            assert(false);
+    }
+}
+
+pxp_output_pixel_format_t CameraTask::FormatToPXPOutputFormat(Format fmt) {
+    switch (fmt) {
+        case Format::RGBA:
+            return kPXP_OutputPixelFormatRGB888;
+        case Format::RGB:
+            return kPXP_OutputPixelFormatRGB888P;
+        case Format::Y8:
+            return kPXP_OutputPixelFormatY8;
+        default:
+            assert(false);
+    }
+}
+
+bool CameraTask::PXPOperation(const PXPConfiguration& input, const PXPConfiguration& output, bool preserve_ratio) {
+    int output_width = output.width, output_height = output.height;
+    if (preserve_ratio) {
+        float ratio_width = (float)output.width / (float)input.width;
+        float ratio_height = (float)output.height / (float)input.height;
+        float scaling_ratio = MIN(ratio_width, ratio_height);
+        output_width = (int)((float)input.width * scaling_ratio);
+        output_height = (int)((float)input.height * scaling_ratio);
+    }
+    int input_bpp = FormatToBPP(input.fmt);
+    int output_bpp = FormatToBPP(output.fmt);
+    pxp_ps_buffer_config_t ps_buffer_config;
+    ps_buffer_config.pixelFormat = FormatToPXPPSFormat(input.fmt);
+    ps_buffer_config.swapByte = false;
+    ps_buffer_config.bufferAddr = reinterpret_cast<uint32_t>(input.data);
+    ps_buffer_config.bufferAddrU = 0;
+    ps_buffer_config.bufferAddrV = 0;
+    ps_buffer_config.pitchBytes = input.width * input_bpp;
+
+    pxp_output_buffer_config_t output_buffer_config;
+    output_buffer_config.pixelFormat = FormatToPXPOutputFormat(output.fmt);
+    output_buffer_config.interlacedMode = kPXP_OutputProgressive;
+    output_buffer_config.buffer0Addr = reinterpret_cast<uint32_t>(output.data);
+    output_buffer_config.buffer1Addr = 0;
+    output_buffer_config.pitchBytes = output.width * output_bpp;
+    output_buffer_config.width = output_width;
+    output_buffer_config.height = output_height;
+
+    PXP_SetProcessSurfaceScaler(PXP, input.width, input.height, output_width, output_height);
+    PXP_SetProcessSurfacePosition(PXP, 0, 0, output_width - 1, output_height - 1);
+    PXP_SetProcessSurfaceBufferConfig(PXP, &ps_buffer_config);
+    PXP_SetOutputBufferConfig(PXP, &output_buffer_config);
+    PXP_Start(PXP);
+    if (xSemaphoreTake(pxp_semaphore_, pdMS_TO_TICKS(200)) == pdFALSE) {
+        return false;
+    }
+
+    return true;
 }
 
 constexpr const uint8_t kCameraAddress = 0x24;
@@ -70,6 +276,7 @@ bool CameraTask::Write(CameraRegisters reg, uint8_t val) {
 void CameraTask::Init(lpi2c_rtos_handle_t *i2c_handle) {
     QueueTask::Init();
     i2c_handle_ = i2c_handle;
+    pxp_semaphore_ = xSemaphoreCreateBinary();
 }
 
 int CameraTask::GetFrame(uint8_t** buffer, bool block) {
@@ -147,6 +354,68 @@ void CameraTask::TaskInit() {
     PowerRequest req;
     req.enable = false;
     HandlePowerRequest(req);
+
+    PXP_Init(PXP);
+    NVIC_SetPriority(PXP_IRQn, 5);
+    NVIC_EnableIRQ(PXP_IRQn);
+    PXP_EnableInterrupts(PXP, kPXP_CompleteInterruptEnable);
+    PXP_SetProcessSurfaceBackGroundColor(PXP, 0xF04A00FF);
+    PXP_SetAlphaSurfacePosition(PXP, 0xFFFF, 0xFFFF, 0, 0);
+    PXP_EnableCsc1(PXP, false);
+}
+
+void CameraTask::SetDefaultRegisters() {
+    // Taken from Tensorflow's configuration in the person detection sample
+    /* Analog settings */
+    Write(CameraRegisters::BLC_TGT, 0x08);
+    Write(CameraRegisters::BLC2_TGT, 0x08);
+    /* These registers are RESERVED in the datasheet,
+     * but without them the picture is bad. */
+    Write(static_cast<CameraRegisters>(0x3044), 0x0A);
+    Write(static_cast<CameraRegisters>(0x3045), 0x00);
+    Write(static_cast<CameraRegisters>(0x3047), 0x0A);
+    Write(static_cast<CameraRegisters>(0x3050), 0xC0);
+    Write(static_cast<CameraRegisters>(0x3051), 0x42);
+    Write(static_cast<CameraRegisters>(0x3052), 0x50);
+    Write(static_cast<CameraRegisters>(0x3053), 0x00);
+    Write(static_cast<CameraRegisters>(0x3054), 0x03);
+    Write(static_cast<CameraRegisters>(0x3055), 0xF7);
+    Write(static_cast<CameraRegisters>(0x3056), 0xF8);
+    Write(static_cast<CameraRegisters>(0x3057), 0x29);
+    Write(static_cast<CameraRegisters>(0x3058), 0x1F);
+    Write(CameraRegisters::BIT_CONTROL, 0x1E);
+    /* Digital settings */
+    Write(CameraRegisters::BLC_CFG, 0x43);
+    Write(CameraRegisters::BLC_DITHER, 0x40);
+    Write(CameraRegisters::BLC_DARKPIXEL, 0x32);
+    Write(CameraRegisters::DGAIN_CONTROL, 0x7F);
+    Write(CameraRegisters::BLI_EN, 0x01);
+    Write(CameraRegisters::DPC_CTRL, 0x00);
+    Write(CameraRegisters::CLUSTER_THR_HOT, 0xA0);
+    Write(CameraRegisters::CLUSTER_THR_COLD, 0x60);
+    Write(CameraRegisters::SINGLE_THR_HOT, 0x90);
+    Write(CameraRegisters::SINGLE_THR_COLD, 0x40);
+    /* AE settings */
+    Write(CameraRegisters::AE_CTRL, 0x01);
+    Write(CameraRegisters::AE_TARGET_MEAN, 0x5F);
+    Write(CameraRegisters::AE_MIN_MEAN, 0x0A);
+    Write(CameraRegisters::CONVERGE_IN_TH, 0x03);
+    Write(CameraRegisters::CONVERGE_OUT_TH, 0x05);
+    Write(CameraRegisters::MAX_INTG_H, 0x02);
+    Write(CameraRegisters::MAX_INTG_L, 0x14);
+    Write(CameraRegisters::MIN_INTG, 0x02);
+    Write(CameraRegisters::MAX_AGAIN_FULL, 0x03);
+    Write(CameraRegisters::MAX_AGAIN_BIN2, 0x03);
+    Write(CameraRegisters::MIN_AGAIN, 0x00);
+    Write(CameraRegisters::MAX_DGAIN, 0x80);
+    Write(CameraRegisters::MIN_DGAIN, 0x40);
+    Write(CameraRegisters::DAMPING_FACTOR, 0x20);
+    /* 60Hz flicker */
+    Write(CameraRegisters::FS_CTRL, 0x03);
+    Write(CameraRegisters::FS_60HZ_H, 0x00);
+    Write(CameraRegisters::FS_60HZ_L, 0x85);
+    Write(CameraRegisters::FS_50HZ_H, 0x00);
+    Write(CameraRegisters::FS_50HZ_L, 0xA0);
 }
 
 EnableResponse CameraTask::HandleEnableRequest() {
@@ -167,14 +436,7 @@ EnableResponse CameraTask::HandleEnableRequest() {
     osc_clk_div |= 1 << 5;
     Write(CameraRegisters::OSC_CLK_DIV, osc_clk_div);
 
-    // Quality type registers
-    // Taken from Tensorflow's configuration in the person detection sample
-    Write(CameraRegisters::AE_CTRL, 0x00);
-    Write(CameraRegisters::BLC_CFG, 0x00);
-    Write(CameraRegisters::DPC_CTRL, 0x00);
-    Write(CameraRegisters::ANALOG_GAIN, 0x00);
-    Write(CameraRegisters::DIGITAL_GAIN_H, 0x01);
-    Write(CameraRegisters::DIGITAL_GAIN_L, 0x00);
+    SetDefaultRegisters();
 
     // Shifting
     Write(CameraRegisters::VSYNC_HSYNC_PIXEL_SHIFT_EN, 0x0);
@@ -220,6 +482,16 @@ FrameResponse CameraTask::HandleFrameRequest(const FrameRequest& frame) {
 }
 
 void CameraTask::HandleTestPatternRequest(const TestPatternRequest& test_pattern) {
+    if (test_pattern.pattern == TestPattern::NONE) {
+        SetDefaultRegisters();
+    } else {
+        Write(CameraRegisters::AE_CTRL, 0x00);
+        Write(CameraRegisters::BLC_CFG, 0x00);
+        Write(CameraRegisters::DPC_CTRL, 0x00);
+        Write(CameraRegisters::ANALOG_GAIN, 0x00);
+        Write(CameraRegisters::DIGITAL_GAIN_H, 0x01);
+        Write(CameraRegisters::DIGITAL_GAIN_L, 0x00);
+    }
     Write(CameraRegisters::TEST_PATTERN_MODE, static_cast<uint8_t>(test_pattern.pattern));
 }
 

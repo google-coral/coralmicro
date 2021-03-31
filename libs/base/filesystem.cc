@@ -66,7 +66,7 @@ bool Init() {
     lfs_config_.read_size = 2048;
     lfs_config_.prog_size = 2048;
     lfs_config_.block_size = 131072;
-    lfs_config_.block_count = 32;
+    lfs_config_.block_count = 64;
     lfs_config_.block_cycles = -1;
     lfs_config_.cache_size = 2048;
     lfs_config_.lookahead_size = 2048;

@@ -6,6 +6,8 @@ extern "C" {
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/app/dhcp_server.h"
 }
 
+#include <memory>
+
 #define DATA_OUT (1)
 #define DATA_IN  (0)
 
@@ -44,7 +46,7 @@ err_t CdcEem::NetifInit(struct netif *netif) {
     netif->name[1] = 's';
     netif->output = etharp_output;
     netif->linkoutput = CdcEem::StaticTxFunc;
-    netif->mtu = 1500;
+    netif->mtu = 300;
     netif->hwaddr_len = 6;
     netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
 
@@ -64,14 +66,23 @@ err_t CdcEem::StaticTxFunc(struct netif *netif, struct pbuf *p) {
 }
 
 err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
+    std::unique_ptr<uint8_t> combined_pbuf(nullptr);
     uint8_t *tx_ptr = nullptr;
-    uint32_t tx_len = 0;
+    uint32_t tx_len = p->tot_len;
     if ((p->next == NULL) && (p->tot_len == p->len)) {
         tx_ptr = reinterpret_cast<uint8_t*>(p->payload);
-        tx_len = p->tot_len;
     } else {
-        printf("We don't handle pbuf chains yet\r\n");
-        return ERR_ARG;
+        combined_pbuf.reset(reinterpret_cast<uint8_t*>(malloc(p->tot_len)));
+        tx_ptr = combined_pbuf.get();
+        struct pbuf *tmp_p = p;
+        int offset = 0;
+        do {
+            memcpy(tx_ptr + offset, reinterpret_cast<uint8_t*>(tmp_p->payload), tmp_p->len);
+            offset += tmp_p->len;
+            tmp_p = tmp_p->next;
+            if (!tmp_p)
+                break;
+        } while (true);
     }
 
     return TransmitFrame(tx_ptr, tx_len);
@@ -86,6 +97,7 @@ err_t CdcEem::TransmitFrame(uint8_t* buffer, uint32_t length) {
     usb_status_t status;
     uint32_t crc = PP_HTONL(0xdeadbeef);
     uint16_t *header = (uint16_t*)tx_buffer_;
+    // printf("TransmitFrame %p\r\n", length);
     *header = (0 << EEM_DATA_CRC_SHIFT) | ((length + sizeof(uint32_t)) & EEM_DATA_LEN_MASK);
     memcpy(tx_buffer_ + sizeof(uint16_t), buffer, length);
     memcpy(tx_buffer_ + sizeof(uint16_t) + length, &crc, sizeof(uint32_t));
@@ -116,8 +128,8 @@ err_t CdcEem::ReceiveFrame(uint8_t *buffer, uint32_t length) {
     }
 
     memcpy(frame->payload, buffer, length);
-    if (tcpip_input(frame, tmp_netif)) {
-        printf("Failed to ethernet_input\r\n");
+    err_t ret = tcpip_input(frame, tmp_netif);
+    if (ret != ERR_OK) {
         pbuf_free(frame);
         return ERR_IF;
     }

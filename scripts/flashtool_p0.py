@@ -22,13 +22,14 @@ VALIANT_PID = 0x93ff
 
 VALIANT_UART_PATH = '/dev/valiant_UART'
 BLOCK_SIZE = 2048 * 64
-BLOCK_COUNT = 32
+BLOCK_COUNT = 64
 
 # Key: path in Valiant source tree
 # Value: path in on-device filesystem
 FILESYSTEM_FILES = {
     os.path.join('third_party', 'firmware', 'cypress', '43455C0.bin'): os.path.join('firmware', '43455C0.bin'),
     os.path.join('third_party', 'firmware', 'cypress', '43455C0.clm_blob'): os.path.join('firmware', '43455C0.clm_blob'),
+    os.path.join('models', 'person_detect_model.tflite'): os.path.join('models', 'person_detect_model.tflite'),
     os.path.join('models', 'testconv1-edgetpu.tflite'): os.path.join('models', 'testconv1-edgetpu.tflite'),
     os.path.join('models', 'testconv1-expected-output.bin'): os.path.join('models', 'testconv1-expected-output.bin'),
     os.path.join('models', 'testconv1-test-input.bin'): os.path.join('models', 'testconv1-test-input.bin'),

@@ -14,8 +14,11 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 
 lpi2c_rtos_handle_t i2c5_handle;
+
+extern "C" void httpd_init(void) __attribute__((weak));
 
 extern "C" void app_main(void *param);
 extern "C" void BOARD_InitHardware();
@@ -29,6 +32,7 @@ extern "C" int main(int argc, char **argv) {
     valiant::IPCInit();
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);
+    httpd_init();
     valiant::UsbDeviceTask::GetSingleton()->Init();
     valiant::UsbHostTask::GetSingleton()->Init();
     valiant::EdgeTpuDfuTask::GetSingleton()->Init();

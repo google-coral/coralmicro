@@ -2,6 +2,7 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/tasks_m7.h"
 #include "libs/posenet/posenet_decoder_op.h"
+#include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
@@ -12,7 +13,7 @@
 
 // Run Tensorflow's DebugLog to the debug console.
 extern "C" void DebugLog(const char *s) {
-    DbgConsole_Printf(s);
+    printf(s);
 }
 
 namespace {
@@ -58,6 +59,7 @@ void PrintOutput() {
     float *num_poses = tflite::GetTensorData<float>(interpreter->output(3));
 
     int poses_count = static_cast<int>(num_poses[0]);
+    printf("Poses: %d\r\n", poses_count);
     for (int i = 0; i < poses_count; ++i) {
         float pose_score = pose_scores[i];
         if (pose_score < 0.4) {
@@ -140,6 +142,10 @@ static bool setup() {
 }
 
 extern "C" void app_main(void *param) {
+    valiant::CameraTask::GetSingleton()->SetPower(false);
+    vTaskDelay(pdMS_TO_TICKS(500));
+    valiant::CameraTask::GetSingleton()->SetPower(true);
+    valiant::CameraTask::GetSingleton()->Enable();
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kLow);
     if (!setup()) {
@@ -147,6 +153,26 @@ extern "C" void app_main(void *param) {
         vTaskSuspend(NULL);
     }
     loop();
-    printf("Posenet test finished.\r\n");
+    printf("Posenet static datatest finished.\r\n");
+
+    uint8_t *buffer = nullptr;
+    int index = -1;
+    for (int i = 0; i < 100; ++i) {
+        index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+        valiant::CameraTask::GetSingleton()->ReturnFrame(index);
+    }
+
+    while (true) {
+        TfLiteTensor *input = interpreter->input(0);
+        valiant::camera::FrameFormat fmt;
+        fmt.width = input->dims->data[2];
+        fmt.height = input->dims->data[1];
+        fmt.fmt = valiant::camera::Format::RGB;
+        fmt.preserve_ratio = false;
+        valiant::CameraTask::GetFrame(fmt, tflite::GetTensorData<uint8_t>(input));
+        loop();
+    }
+    valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
+    valiant::CameraTask::GetSingleton()->SetPower(false);
     vTaskSuspend(NULL);
 }
