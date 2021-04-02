@@ -48,7 +48,7 @@ MEMORY
   m_data                (RW)  : ORIGIN = 0x20000000 + STACK_SIZE, LENGTH = 0x00040000 - STACK_SIZE
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
   m_core1_image         (RX)  : ORIGIN = 0x202C0000 + RPMSG_SHMEM_SIZE, LENGTH = 0x80000 - RPMSG_SHMEM_SIZE
-  m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x02000000
+  m_sdram               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x08000000
 }
 
 /* Define output sections */
