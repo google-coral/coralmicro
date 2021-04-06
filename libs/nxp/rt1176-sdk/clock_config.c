@@ -151,6 +151,9 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart6, &rootCfg);
 #endif
+    rootCfg.mux = kCLOCK_LPUART2_ClockRoot_MuxSysPll2Out;
+    rootCfg.div = 22;
+    CLOCK_SetRootClock(kCLOCK_Root_Lpuart2, &rootCfg);
 
 #ifndef SKIP_SEMC_INIT
     CLOCK_InitPfd(kCLOCK_PllSys2, kCLOCK_Pfd1, 16);

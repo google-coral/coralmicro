@@ -151,6 +151,44 @@ fail:
     return nullptr;
 }
 
+bool ReadToMemory(const char *path, uint8_t* data, size_t* size_bytes) {
+    lfs_file_t handle;
+    lfs_soff_t file_size;
+
+    if (!data || !size_bytes) {
+        return false;
+    }
+
+    if (!Open(&handle, path)) {
+        goto fail;
+    }
+
+    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
+    file_size = lfs_file_size(&lfs_handle_, &handle);
+    xSemaphoreGive(lfs_semaphore_);
+
+    if (static_cast<size_t>(file_size) > *size_bytes) {
+        goto fail_close;
+    }
+
+    if (Read(&handle, data, file_size) < 0) {
+        goto fail_close;
+    }
+
+    Close(&handle);
+    if (size_bytes) {
+        *size_bytes = file_size;
+    }
+    return true;
+
+fail_close:
+    Close(&handle);
+fail:
+    if (size_bytes) {
+        *size_bytes = 0;
+    }
+    return false;
+}
 }  // namespace filesystem
 
 }  // namespace valiant

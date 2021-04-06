@@ -189,6 +189,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_bm-m4
 add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
     ${libs_FreeRTOS_SOURCES}
@@ -306,9 +307,13 @@ target_link_libraries(libs_nxp_rt1176-sdk_lwip
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_wiced
+    bt_firmware_controller.c
     WICED/WWD/internal/chips/43455/resources.c
     WICED/platform/MCU/LPC/WWD/wwd_platform.cc
     rtos/freertos/vendors/nxp/wifi/wiced/iot_wifi.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_bluetooth.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_imxrt.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/wiced_rtos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD/wwd_rtos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/SDIO/wwd_bus_protocol.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/wwd_bus_common.c
@@ -333,6 +338,11 @@ add_library_m7(libs_nxp_rt1176-sdk_wiced
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/bt_app_inc
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Components/stack/include
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Projects/bte/main
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/WICED
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include
@@ -353,10 +363,19 @@ target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk_wiced PUBLIC
+    # Wi-Fi
     WLAN_ARM_CR4
     USES_RESOURCES_IN_EXTERNAL_STORAGE
     HIGH_SPEED_SDIO_CLOCK
     WPRINT_PLATFORM_PERMISSION
+
+    # Bluetooth
+    WICED_BLUETOOTH_PLATFORM
+    BOARD_BT_UART_BASEADDR=LPUART2
+    BOARD_BT_UART_IRQ=LPUART2_IRQn
+    BOARD_INITPINS_BT_REG_ON_GPIO=GPIO10
+    BOARD_INITPINS_BT_REG_ON_PIN=2
+    BOARD_BT_UART_CLK_FREQ=CLOCK_GetRootClockFreq\(kCLOCK_Root_Lpuart2\)
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_wiced

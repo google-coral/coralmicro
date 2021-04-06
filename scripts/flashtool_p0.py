@@ -29,6 +29,7 @@ BLOCK_COUNT = 64
 FILESYSTEM_FILES = {
     os.path.join('third_party', 'firmware', 'cypress', '43455C0.bin'): os.path.join('firmware', '43455C0.bin'),
     os.path.join('third_party', 'firmware', 'cypress', '43455C0.clm_blob'): os.path.join('firmware', '43455C0.clm_blob'),
+    os.path.join('third_party', 'cyw-bt-patch', 'BCM4345C0_003.001.025.0144.0266.1MW.hcd'): os.path.join('firmware', 'BCM4345C0_003.001.025.0144.0266.1MW.hcd'),
     os.path.join('models', 'person_detect_model.tflite'): os.path.join('models', 'person_detect_model.tflite'),
     os.path.join('models', 'testconv1-edgetpu.tflite'): os.path.join('models', 'testconv1-edgetpu.tflite'),
     os.path.join('models', 'testconv1-expected-output.bin'): os.path.join('models', 'testconv1-expected-output.bin'),

@@ -13,6 +13,7 @@ int Read(lfs_file_t *handle, void *buffer, size_t size);
 bool Seek(lfs_file_t *handle, size_t off, int whence);
 bool Close(lfs_file_t *handle);
 uint8_t *ReadToMemory(const char *path, size_t* size_bytes);
+bool ReadToMemory(const char *path, uint8_t* data, size_t* size_bytes);
 
 }  // namespace filesystem
 }  // namespace valiant

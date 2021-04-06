@@ -34,3 +34,6 @@
 [submodule "third_party/mklfs"]
 	path = third_party/mklfs
 	url = https://spacepark.googlesource.com/valiant/mklfs
+[submodule "third_party/cyw-bt-patch"]
+	path = third_party/cyw-bt-patch
+	url = https://github.com/murata-wireless/cyw-bt-patch.git

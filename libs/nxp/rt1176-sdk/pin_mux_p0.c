@@ -481,6 +481,21 @@ void BOARD_InitPins(void) {
   // BT_REG_ON
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_AD_35_GPIO10_IO02, 0U);
+  // BT_DEV_WAKE
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_14_GPIO11_IO15, 0U);
+  // BT_HOST_WAKE
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_15_GPIO11_IO16, 0U);
+  // LPUART2 for BT
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_10_LPUART2_TXD, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_11_LPUART2_RXD, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_12_LPUART2_CTS_B, 1U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_13_LPUART2_RTS_B, 1U);
 
 
   // Pull-up
@@ -518,6 +533,22 @@ void BOARD_InitPins(void) {
   // Module has internal pull-down
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_AD_35_GPIO10_IO02, 0U);
+  // BT_DEV_WAKE
+  // Pull-up
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_14_GPIO11_IO15, 0xCU);
+  // BT_HOST_WAKE
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_15_GPIO11_IO16, 0xCU);
+  // LPUART2 for BT
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_10_LPUART2_TXD, 0U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_11_LPUART2_RXD, 0U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_12_LPUART2_CTS_B, 0U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_13_LPUART2_RTS_B, 0U);
 
 #endif
 }
