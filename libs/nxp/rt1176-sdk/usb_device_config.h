@@ -46,7 +46,7 @@
  */
 
 /*! @brief HID instance count */
-#define USB_DEVICE_CONFIG_HID (0U)
+#define USB_DEVICE_CONFIG_HID (1U)
 
 /*! @brief CDC ACM instance count */
 #define USB_DEVICE_CONFIG_CDC_ACM (1U)

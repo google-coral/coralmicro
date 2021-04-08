@@ -51,9 +51,6 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_semc.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/str/fsl_str.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_internal_core_api_imxrt1170.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_mu_internal.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_dci.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_ehci.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.c
@@ -64,6 +61,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_framework.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_hid.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/usb_device_ch9.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.c
     ${libs_CMSIS_SOURCES}
@@ -89,7 +87,6 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
     malloc_getpagesize=0x800
     # Other defines
     DRIVER_CACHE_CONTROL=1
-    MCMGR_HANDLE_EXCEPTIONS=1
     SDK_DEBUGCONSOLE_UART
     SERIAL_PORT_TYPE_UART=1
     USB_HOST_CONFIG_DFU
@@ -142,6 +139,26 @@ set(libs_nxp_rt1176-sdk-m4_TARGET_INCLUDE_DIRECTORIES
 
 set(libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES
     libs_CMSIS
+)
+
+set(libs_nxp_rt1176-sdk-mcmgr_SOURCES
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_internal_core_api_imxrt1170.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_mu_internal.c
+)
+
+set(libs_nxp_rt1176-sdk-mcmgr_COMPILE_DEFINITIONS
+    MCMGR_HANDLE_EXCEPTIONS=1
+)
+
+add_library_m7(libs_nxp_rt1176-sdk-mcmgr_m7 OBJECT
+    ${libs_nxp_rt1176-sdk-mcmgr_SOURCES}
+)
+target_compile_definitions(libs_nxp_rt1176-sdk-mcmgr_m7 PUBLIC
+    ${libs_nxp_rt1176-sdk-mcmgr_COMPILE_DEFINITIONS}
+)
+target_link_libraries(libs_nxp_rt1176-sdk-mcmgr_m7 PUBLIC
+    libs_nxp_rt1176-sdk_freertos
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_bm OBJECT
@@ -199,6 +216,7 @@ add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
+    ${libs_nxp_rt1176-sdk-mcmgr_SOURCES}
     ${libs_FreeRTOS-m4_SOURCES}
 )
 
@@ -212,6 +230,7 @@ target_compile_definitions(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC
     FSL_RTOS_FREE_RTOS
     ${libs_nxp_rt1176-sdk-m4_COMPILE_DEFINITIONS}
     ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
+    ${libs_nxp_rt1176-sdk-mcmgr_COMPILE_DEFINITIONS}
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_freertos PUBLIC

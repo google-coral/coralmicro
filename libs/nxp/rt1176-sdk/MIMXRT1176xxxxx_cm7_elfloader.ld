@@ -27,9 +27,10 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
+TEXT_SIZE = 0x1fc00;
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x01000000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
-RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
+RPMSG_SHMEM_SIZE = 0;
 
 /*
  * Valid memory regions:
@@ -42,14 +43,13 @@ RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
 /* Specify the memory areas */
 MEMORY
 {
-  m_interrupts          (RX)  : ORIGIN = 0x00000800, LENGTH = 0x00000400
-  m_text                (RX)  : ORIGIN = 0x00000c00, LENGTH = 0x0003F400
+  m_interrupts          (RX)  : ORIGIN = 0x202C0800, LENGTH = 0x00000400
+  m_text                (RX)  : ORIGIN = 0x202C0C00, LENGTH = TEXT_SIZE
+  m_data                (RW)  : ORIGIN = 0x20000000 + STACK_SIZE, LENGTH = 0x00010000
   m_stack               (RX)  : ORIGIN = 0x20000000, LENGTH = STACK_SIZE
-  m_data                (RW)  : ORIGIN = 0x20000000 + STACK_SIZE, LENGTH = 0x00040000 - STACK_SIZE
-  m_ocram               (RX)  : ORIGIN = 0x20240000, LENGTH = 0x00080000
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
   m_heap                (RW)  : ORIGIN = 0x80000000, LENGTH = HEAP_SIZE
-  m_sdram               (RX)  : ORIGIN = 0x80000000 + HEAP_SIZE, LENGTH = 0x04000000 - HEAP_SIZE
+  m_sdram               (RW)  : ORIGIN = 0x80000000 + HEAP_SIZE, LENGTH = 0x04000000 - HEAP_SIZE
 }
 
 /* Define output sections */
@@ -67,15 +67,6 @@ SECTIONS
      __RPMSG_SH_MEM_END__ = .;
   } > rpmsg_sh_mem
 
-  /* section for storing the secondary core image */
-  .core1_code :
-  {
-     . = ALIGN(4) ;
-    KEEP (*(.core1_code))
-     *(.core1_code*)
-     . = ALIGN(4) ;
-  } > m_sdram
-
   /* The startup code goes first into internal RAM */
   .interrupts :
   {
@@ -85,43 +76,6 @@ SECTIONS
     KEEP(*(.isr_vector))     /* Startup code */
     . = ALIGN(4);
   } > m_interrupts
-
-  .lwip :
-  {
-     . = ALIGN(4);
-     __lwip_start = .;
-     *liblibs_nxp_rt1176-sdk_lwip.a:*(.text .text*)
-     *liblibs_nxp_rt1176-sdk_lwip.a:*(.data .data*)
-     *liblibs_nxp_rt1176-sdk_lwip.a:*(.rodata .rodata*)
-     __lwip_end = .;
-     . = ALIGN(4);
-  } > m_ocram
-
-  .wiced :
-  {
-     . = ALIGN(4);
-     __wiced_start = .;
-     *liblibs_nxp_rt1176-sdk_wiced.a:*(.text .text*)
-     *liblibs_nxp_rt1176-sdk_wiced.a:*(.data .data*)
-     *liblibs_nxp_rt1176-sdk_wiced.a:*(.rodata .rodata*)
-     *libwicedble.a:*(.text .text*)
-     *libwicedble.a:*(.data .data*)
-     *libwicedble.a:*(.rodata .rodata*)
-     __wiced_end = .;
-     . = ALIGN(4);
-  } > m_ocram
-
-  .tensorflow :
-  {
-     . = ALIGN(4);
-     __tensorflow_start = .;
-     *liblibs_tensorflow-m7.a:*(.text .text*)
-     *liblibs_tensorflow-m7.a:*(.data .data*)
-     *liblibs_tensorflow-m7.a:*(.rodata .rodata*)
-     __tensorflow_end = .;
-     . = ALIGN(4);
-  } > m_ocram
-
 
   /* The program code and other data goes into internal RAM */
   .text :

@@ -57,6 +57,7 @@ set(COMMON_C_FLAGS_DEBUG
 list(JOIN COMMON_C_FLAGS_DEBUG " " COMMON_C_FLAGS_DEBUG_STR)
 
 set(COMMON_C_FLAGS_RELEASE
+    "-g"
     "-Os"
 )
 list(JOIN COMMON_C_FLAGS_RELEASE " " COMMON_C_FLAGS_RELEASE_STR)
@@ -78,11 +79,6 @@ set(CM7_LINK_FLAGS
     "-mfloat-abi=hard"
     "-mfpu=fpv5-d16"
 )
-if (VALIANT_BOARD_REVISION STREQUAL EVK)
-    list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_flexspi_nor.ld")
-elseif (VALIANT_BOARD_REVISION STREQUAL P0)
-    list(APPEND CM7_LINK_FLAGS "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_ram.ld")
-endif()
 list(JOIN CM7_LINK_FLAGS " " CM7_LINK_FLAGS_STR)
 
 set(CM4_C_FLAGS
@@ -96,7 +92,6 @@ set(CM4_LINK_FLAGS
     "-mcpu=cortex-m4"
     "-mfloat-abi=hard"
     "-mfpu=fpv4-sp-d16"
-    "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm4_ram.ld"
 )
 list(JOIN CM4_LINK_FLAGS " " CM4_LINK_FLAGS_STR)
 
@@ -116,15 +111,25 @@ set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_C_FLAGS_RELEASE_STR}" CACHE STRING "" FORC
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_LINK_FLAGS_STR} -Xlinker --gc-sections -Xlinker -Map=output.map" CACHE STRING "" FORCE)
 
 function(add_executable_m7)
-    add_executable(${ARGV})
+    set(oneValueArgs LINKER_SCRIPT)
+    cmake_parse_arguments(ADD_EXECUTABLE_M7 "" "${oneValueArgs}" "" ${ARGN})
+    set(LINKER_SCRIPT "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_ram.ld")
+    if (ADD_EXECUTABLE_M7_LINKER_SCRIPT)
+        set(LINKER_SCRIPT "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_elfloader.ld")
+    endif ()
+    add_executable(${ADD_EXECUTABLE_M7_UNPARSED_ARGUMENTS})
     target_compile_options(${ARGV0} PUBLIC ${CM7_C_FLAGS})
-    target_link_options(${ARGV0} PUBLIC ${CM7_LINK_FLAGS})
+    target_link_options(${ARGV0} PUBLIC ${CM7_LINK_FLAGS} ${LINKER_SCRIPT})
     add_custom_command(TARGET ${ARGV0} POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O ihex ${ARGV0} image.hex
         DEPENDS ${ARGV0}
     )
     add_custom_command(TARGET ${ARGV0} POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O srec ${ARGV0} image.srec
+        DEPENDS ${ARGV0}
+    )
+    add_custom_command(TARGET ${ARGV0} POST_BUILD
+        COMMAND ${CMAKE_STRIP} -s ${ARGV0} -o ${ARGV0}.stripped
         DEPENDS ${ARGV0}
     )
 endfunction()
@@ -138,7 +143,7 @@ endfunction()
 function(add_executable_m4)
     add_executable(${ARGV})
     target_compile_options(${ARGV0} PUBLIC ${CM4_C_FLAGS})
-    target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS})
+    target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS} "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm4_ram.ld")
     add_custom_command(TARGET ${ARGV0} POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary ${ARGV0} ${ARGV0}.bin
         COMMAND ${CMAKE_OBJCOPY}

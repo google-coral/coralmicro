@@ -1,6 +1,7 @@
 #ifndef __LIBS_CDCACM_CDC_ACM_H_
 #define __LIBS_CDCACM_CDC_ACM_H_
 
+#include "libs/usb/descriptors.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
@@ -29,6 +30,8 @@ class CdcAcm {
     CdcAcm& operator=(const CdcAcm&) = delete;
     void Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t comm_iface, uint8_t data_iface, RxHandler rx_handler);
     usb_device_class_config_struct_t* config_data() { return &config_; }
+    void *descriptor_data() { return &descriptor_; }
+    size_t descriptor_data_size() { return sizeof(descriptor_); }
     // TODO(atv): Make me private
     void SetClassHandle(class_handle_t class_handle);
     bool HandleEvent(uint32_t event, void *param);
@@ -111,6 +114,56 @@ class CdcAcm {
         nullptr,
         &class_struct_,
     };
+    CdcAcmClassDescriptor descriptor_ = {
+        {
+            sizeof(InterfaceDescriptor),
+            0x04,
+            0, // iface num
+            0, 1, 0x02, 0x02, 0x01, 0,
+        }, // InterfaceDescriptor
+        {
+            sizeof(CdcHeaderFunctionalDescriptor),
+            0x24,
+            0x00, 0x0110,
+        }, // CdcHeaderFunctionalDescriptor
+        {
+            sizeof(CdcCallManagementFunctionalDescriptor),
+            0x24,
+            0x01, 0, 1,
+        }, // CdcCallManagementFunctionalDescriptor
+        {
+            sizeof(CdcAcmFunctionalDescriptor),
+            0x24,
+            0x02, 2,
+        }, // CdcAcmFunctionalDescriptor
+        {
+            sizeof(CdcUnionFunctionalDescriptor),
+            0x24,
+            0x06, 0, 1
+        }, // CdcUnionFunctionalDescriptor
+        {
+            sizeof(EndpointDescriptor),
+            0x05,
+            1 | 0x80, 0x03, 10, 9,
+        }, // EndpointDescriptor
+
+        {
+            sizeof(InterfaceDescriptor),
+            0x04,
+            1,
+            0, 2, 0x0A, 0x00, 0x00, 0,
+        }, // InterfaceDescriptor
+        {
+            sizeof(EndpointDescriptor),
+            0x05,
+            2 | 0x80, 0x02, 512, 0,
+        }, // EndpointDescriptor
+        {
+            sizeof(EndpointDescriptor),
+            0x05,
+            3 & 0x7F, 0x02, 512, 0,
+        }, // EndpointDescriptor
+    }; // CdcAcmClassDescriptor
 
     uint8_t tx_buffer_[512];
     uint8_t rx_buffer_[512];

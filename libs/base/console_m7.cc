@@ -91,7 +91,8 @@ void ConsoleM7::Init() {
             nullptr /*ReceiveHandler*/);
     valiant::UsbDeviceTask::GetSingleton()->AddDevice(cdc_acm_.config_data(),
             std::bind(&valiant::CdcAcm::SetClassHandle, &cdc_acm_, _1),
-            std::bind(&valiant::CdcAcm::HandleEvent, &cdc_acm_, _1, _2));
+            std::bind(&valiant::CdcAcm::HandleEvent, &cdc_acm_, _1, _2),
+            cdc_acm_.descriptor_data(), cdc_acm_.descriptor_data_size());
 
     console_queue_ = xQueueCreate(16, sizeof(ConsoleMessage));
     if (!console_queue_) {

@@ -1,6 +1,8 @@
 #ifndef __LIBS_USB_DESCRIPTORS_H__
 #define __LIBS_USB_DESCRIPTORS_H__
 
+#include <cstdint>
+
 namespace valiant {
 
 struct DeviceDescriptor {
@@ -113,11 +115,26 @@ struct CdcEemClassDescriptor {
     EndpointDescriptor out_ep;
 } __attribute__((packed));
 
+struct HidDescriptor {
+    uint8_t length;
+    uint8_t type;
+    uint16_t bcd_hid;
+    uint8_t country_code;
+    uint8_t num_descriptors;
+    uint8_t descriptor_type;
+    uint16_t descriptor_len;
+} __attribute__((packed));
+
+struct HidClassDescriptor {
+    InterfaceDescriptor iface;
+    HidDescriptor hid;
+    EndpointDescriptor in_ep;
+    EndpointDescriptor out_ep;
+} __attribute__((packed));
+
 struct CompositeDescriptor {
     ConfigurationDescriptor conf;
     InterfaceAssociationDescriptor iad0;
-    CdcAcmClassDescriptor iface0;
-    CdcEemClassDescriptor iface1;
 } __attribute__((packed));
 
 struct LangIdDescriptor {

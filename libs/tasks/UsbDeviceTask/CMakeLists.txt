@@ -5,7 +5,5 @@ add_library_m7(libs_tasks_UsbDeviceTask_freertos STATIC
 )
 
 target_link_libraries(libs_tasks_UsbDeviceTask_freertos
-    libs_nxp_rt1176-sdk_freertos
-    libs_CdcEem_freertos
+    libs_base-m7_freertos
 )
-target_sources(libs_tasks_UsbDeviceTask_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)

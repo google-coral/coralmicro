@@ -1,6 +1,7 @@
 #ifndef __LIBS_CDCEEM_CDC_EEM_H_
 #define __LIBS_CDCEEM_CDC_EEM_H_
 
+#include "libs/usb/descriptors.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h" // Must be above other class headers.
@@ -18,6 +19,8 @@ class CdcEem {
     CdcEem& operator=(const CdcEem&) = delete;
     void Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface);
     usb_device_class_config_struct_t* config_data() { return &config_; }
+    void *descriptor_data() { return &descriptor_; }
+    size_t descriptor_data_size() { return sizeof(descriptor_); }
     void SetClassHandle(class_handle_t class_handle);
     bool HandleEvent(uint32_t event, void *param);
     usb_status_t Transmit(uint8_t *buffer, uint32_t length);
@@ -83,6 +86,24 @@ class CdcEem {
         nullptr,
         &class_struct_,
     };
+    CdcEemClassDescriptor descriptor_ = {
+        {
+            sizeof(InterfaceDescriptor),
+            0x4,
+            2,
+            0, 2, 0x2, 0xC, 0x7, 0,
+        }, // InterfaceDescriptor
+        {
+            sizeof(EndpointDescriptor),
+            0x05,
+            4 | 0x80, 0x02, 512, 0
+        }, // EndpointDescriptor
+        {
+            sizeof(EndpointDescriptor),
+            0x05,
+            5 & 0x7F, 0x02, 512, 0
+        }, // EndpointDescriptor
+    }; // CdcEemClassDescriptor
 
     bool initialized_ = false;
     uint8_t tx_buffer_[512];

@@ -3,6 +3,7 @@
 #include "libs/base/ipc_m7.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks_m7.h"
+#include "libs/CdcEem/cdc_eem.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
@@ -16,14 +17,26 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
+#include <functional>
+using namespace std::placeholders;
 
 lpi2c_rtos_handle_t i2c5_handle;
+static valiant::CdcEem cdc_eem;
+
+void InitializeCDCEEM() {
+    cdc_eem.Init(
+            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            valiant::UsbDeviceTask::GetSingleton()->next_interface_value());
+    valiant::UsbDeviceTask::GetSingleton()->AddDevice(cdc_eem.config_data(),
+            std::bind(&valiant::CdcEem::SetClassHandle, &cdc_eem, _1),
+            std::bind(&valiant::CdcEem::HandleEvent, &cdc_eem, _1, _2),
+            cdc_eem.descriptor_data(), cdc_eem.descriptor_data_size());
+}
 
 extern "C" void httpd_init(void) __attribute__((weak));
-
 extern "C" void app_main(void *param);
 extern "C" void BOARD_InitHardware();
-
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware();
@@ -34,6 +47,7 @@ extern "C" int main(int argc, char **argv) {
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);
     httpd_init();
+    InitializeCDCEEM();
     valiant::UsbDeviceTask::GetSingleton()->Init();
     valiant::UsbHostTask::GetSingleton()->Init();
     valiant::EdgeTpuDfuTask::GetSingleton()->Init();

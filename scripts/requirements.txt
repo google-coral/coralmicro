@@ -1,3 +1,4 @@
 hexformat
+hidapi
 pyserial
 pyusb

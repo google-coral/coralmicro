@@ -29,6 +29,9 @@ nand_handle_t* BOARD_GetNANDHandle(void) {
 
 #endif
 
+extern mcmgr_status_t MCMGR_EarlyInit(void) __attribute__((weak));
+extern mcmgr_status_t MCMGR_Init(void) __attribute__((weak));
+
 void SystemInitHook(void) {
     MCMGR_EarlyInit();
 }

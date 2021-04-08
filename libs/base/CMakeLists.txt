@@ -38,6 +38,7 @@ endif()
 
 target_link_libraries(libs_base-m7_freertos
     libs_nxp_rt1176-sdk_freertos
+    libs_nxp_rt1176-sdk-mcmgr_m7
     libs_CdcAcm_freertos
     libs_CdcEem_freertos
     libs_tasks_EdgeTpuTask_freertos
@@ -63,3 +64,4 @@ target_sources(libs_base-m7_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk
 target_sources(libs_base-m4_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos-m4>)
 target_sources(libs_base-m7_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
 target_sources(libs_base-m4_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS-m4>)
+target_sources(libs_base-m7_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk-mcmgr_m7>)

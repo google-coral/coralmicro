@@ -6,9 +6,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.h"
 
 #include <cstdio>
-#include <functional>
 
-using namespace std::placeholders;
 constexpr int kUSBControllerId = kUSB_ControllerEhci0;
 
 extern "C" void USB_OTG1_IRQHandler(void) {
@@ -61,8 +59,8 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
             break;
         case kUSB_DeviceEventGetConfigurationDescriptor:
             config_desc = (usb_device_get_configuration_descriptor_struct_t*)param;
-            config_desc->buffer = (uint8_t*)&composite_descriptor_;
-            config_desc->length = sizeof(composite_descriptor_);
+            config_desc->buffer = composite_descriptor_.data();
+            config_desc->length = composite_descriptor_.size();
             ret = kStatus_USB_Success;
             break;
         case kUSB_DeviceEventGetStringDescriptor:
@@ -109,6 +107,7 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
             }
             break;
         case kUSB_DeviceEventSetInterface:
+        case kUSB_DeviceEventGetHidReportDescriptor:
             ret = kStatus_USB_Success;
             for (size_t i = 0; i < handle_event_callbacks_.size(); i++) {
                 event_ret &= handle_event_callbacks_[i](event, param);
@@ -124,22 +123,21 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
 }
 
 void UsbDeviceTask::AddDevice(usb_device_class_config_struct_t* config, usb_set_handle_callback sh_cb,
-        usb_handle_event_callback he_cb) {
+        usb_handle_event_callback he_cb, void *descriptor_data, size_t descriptor_data_size) {
     configs_.push_back(*config);
     set_handle_callbacks_.push_back(sh_cb);
     handle_event_callbacks_.push_back(he_cb);
+
+    size_t old_size = composite_descriptor_size_;
+    composite_descriptor_size_ += descriptor_data_size;
+    memcpy(composite_descriptor_.data() + old_size, descriptor_data, descriptor_data_size);
+
+    CompositeDescriptor *p_composite_descriptor = reinterpret_cast<CompositeDescriptor*>(composite_descriptor_.data());
+    p_composite_descriptor->conf.total_length = composite_descriptor_size_;
 }
 
 bool UsbDeviceTask::Init() {
     usb_status_t ret;
-
-    cdc_eem_.Init(
-            next_descriptor_value(),
-            next_descriptor_value(),
-            next_interface_value());
-    AddDevice(cdc_eem_.config_data(),
-            std::bind(&valiant::CdcEem::SetClassHandle, &cdc_eem_, _1),
-            std::bind(&valiant::CdcEem::HandleEvent, &cdc_eem_, _1, _2));
 
     config_list_ = { configs_.data(), &UsbDeviceTask::StaticHandler, (uint8_t)configs_.size() };
     ret = USB_DeviceClassInit(kUSBControllerId, &config_list_, &device_handle_);
@@ -170,6 +168,28 @@ UsbDeviceTask::UsbDeviceTask() {
     IRQn_Type irqNumber = USB_OTG1_IRQn;
     NVIC_SetPriority(irqNumber, 6);
     NVIC_EnableIRQ(irqNumber);
+    CompositeDescriptor composite_descriptor = {
+        {
+            sizeof(ConfigurationDescriptor),
+            0x02,
+            sizeof(CompositeDescriptor),
+            0, // Managed by next_interface_value
+            1,
+            0,
+            0x80, // kUsb11AndHigher
+            250, // kUses500mA
+        }, // ConfigurationDescriptor
+        {
+            sizeof(InterfaceAssociationDescriptor),
+            0x0B,
+            0, // first iface num
+            1, // total num ifaces
+            0x02, 0x02, 0x01, 0,
+        }, // InterfaceAssociationDescriptor
+    };
+    composite_descriptor_size_ = sizeof(composite_descriptor);
+    // composite_descriptor_.resize(sizeof(composite_descriptor));
+    memcpy(composite_descriptor_.data(), &composite_descriptor, sizeof(composite_descriptor));
 }
 
 void UsbDeviceTask::UsbDeviceTaskFn() {
