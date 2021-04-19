@@ -12,7 +12,7 @@
 #include <memory>
 
 void RespondToDetection(tflite::ErrorReporter* error_reporter,
-                        uint8_t person_score, uint8_t no_person_score){
+                        int8_t person_score, int8_t no_person_score){
     TF_LITE_REPORT_ERROR(error_reporter,
             "person_score: %d no_person_score: %d",
             person_score, no_person_score);

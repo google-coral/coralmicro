@@ -1,4 +1,5 @@
 #include "libs/tpu/edgetpu_executable.h"
+#include "third_party/tensorflow/tensorflow/lite/kernels/kernel_util.h"
 
 namespace valiant {
 
@@ -31,7 +32,10 @@ EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe) 
     } while (0);
 
 TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContext* context, TfLiteNode *node) {
-    TfLiteTensor *input_tensor = &context->tensors[node->inputs->data[0]];
+    const TfLiteTensor *input_tensor = tflite::GetInput(context, node, 0);
+    if (!input_tensor) {
+        return kTfLiteError;
+    }
 
     const platforms::darwinn::DmaDescriptorHint* dma_hint;
     const char *name;
@@ -83,7 +87,10 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
 
     if (!output_layers_.empty()) {
         for (int i = 0; i < node->outputs->size; ++i) {
-            TfLiteTensor *output_tensor = &context->tensors[node->outputs->data[i]];
+            const TfLiteTensor *output_tensor = tflite::GetOutput(context, node, i);
+            if (!output_tensor) {
+                return kTfLiteError;
+            }
             name = executable_->output_layers()->Get(i)->name()->c_str();
             key = hash(name);
 

@@ -105,7 +105,7 @@ def CreateSbFile(workdir, elftosb_path, srec_path, itcm_bdfile_path, filesystem_
         spinand_bdfile.write('erase spinand 0x4..0x8;\n')
         spinand_bdfile.write('erase spinand 0x8..0xc;\n')
         if filesystem_path:
-            spinand_bdfile.write('erase spinand 0xc..0x2c;\n')
+            spinand_bdfile.write('erase spinand 0xc..0x4c;\n')
         spinand_bdfile.write('load spinand bootImageFile > 0x4;\n')
         spinand_bdfile.write('load spinand bootImageFile > 0x8;\n')
         if filesystem_path:

@@ -67,22 +67,12 @@ TfLiteStatus PrepTempTensor(TfLiteContext *context, void **temp_tensor_ptr,
   for (int i = 0; i < dims->size; ++i) {
     bytes *= dims->data[i];
   }
-  return context->AllocatePersistentBuffer(context, bytes, temp_tensor_ptr);
-}
-
-TfLiteStatus PrepOutputTensor(TfLiteContext* context,
-                              TfLiteTensor* output_tensor,
-                              std::initializer_list<int> dims) {
-  output_tensor->type = kTfLiteFloat32;
-  TfLiteIntArray* size = TfLiteIntArrayCreate(dims.size());
-  std::copy(std::begin(dims), std::end(dims), size->data);
-  output_tensor->dims = size;
-  output_tensor->bytes = sizeof(float);
-  for (int i = 0; i < size->size; ++i) {
-    output_tensor->bytes *= size->data[i];
+  *temp_tensor_ptr = context->AllocatePersistentBuffer(context, bytes);
+  if (*temp_tensor_ptr) {
+    return kTfLiteOk;
+  } else {
+    return kTfLiteError;
   }
-  TfLiteStatus ret = context->AllocatePersistentBuffer(context, output_tensor->bytes, (void**)&output_tensor->data);
-  return ret;
 }
 
 void DequantizeTensor(const TfLiteTensor* src, void* dst,
@@ -145,36 +135,6 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_OK(
       context, PrepTempTensor(context, &op_data->mids_float_ptr, mids->dims));
 
-  // Output tensor 0 to be max_detections*kNumKeypoints*2
-  // The last dimension has the x and y coordinates of each keypoint.
-  TF_LITE_ENSURE_OK(
-      context,
-      PrepOutputTensor(context,
-                       GetOutput(context, node, kOutputTensorPoseKeypoints),
-                       {1, op_data->max_detections, kNumKeypoints, 2}));
-
-  // Output tensor 1 to be size max_detections*kNumKeypoints and contain
-  // keypoints scores in the range [0,1].
-  TF_LITE_ENSURE_OK(
-      context,
-      PrepOutputTensor(
-          context, GetOutput(context, node, kOutputTensorPoseKeypointScores),
-          {1, op_data->max_detections, kNumKeypoints}));
-
-  // Output tensor 2 to be size max_detections and contain
-  // pose scores in the range [0,1].
-  TF_LITE_ENSURE_OK(
-      context, PrepOutputTensor(
-                   context, GetOutput(context, node, kOutputTensorPoseScores),
-                   {1, op_data->max_detections}));
-
-  // Output Tensor 3 is an int32 scalar, the number of detected poses.
-  // Currently only float output tensors are supported so save this as a float.
-  TF_LITE_ENSURE_OK(
-      context,
-      PrepOutputTensor(context,
-                       GetOutput(context, node, kOutputTensorPoseCount), {1}));
-
   if (compute_masks) {
     const TfLiteTensor* longs =
         GetInput(context, node, kInputTensorLongOffsets);
@@ -188,14 +148,6 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
     TF_LITE_ENSURE_OK(
         context,
         PrepTempTensor(context, &op_data->longs_float_ptr, longs->dims));
-
-    // Output tensor 4 to be max_detections*33*33 (where long_offsets is 33x33)
-    // and contain max_detections of 33x33 person instance segmentation masks.
-    TF_LITE_ENSURE_OK(
-        context,
-        PrepOutputTensor(context,
-                         GetOutput(context, node, kOutputTensorInstanceMasks),
-                         {1, op_data->max_detections, 33, 33}));
   }
 
   return kTfLiteOk;

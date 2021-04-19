@@ -13,18 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "libs/base/filesystem.h"
 #include "tensorflow/lite/micro/examples/person_detection/main_functions.h"
 
+#include "libs/base/filesystem.h"
 #include "tensorflow/lite/micro/examples/person_detection/detection_responder.h"
 #include "tensorflow/lite/micro/examples/person_detection/image_provider.h"
 #include "tensorflow/lite/micro/examples/person_detection/model_settings.h"
-#include "tensorflow/lite/micro/kernels/micro_ops.h"
+#include "tensorflow/lite/micro/examples/person_detection/person_detect_model_data.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/version.h"
 
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
@@ -33,15 +33,23 @@ const tflite::Model* model = nullptr;
 tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input = nullptr;
 
-// An area of memory to use for input, output, and intermediate arrays.
-constexpr int kTensorArenaSize = 93 * 1024;
-static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
+// In order to use optimized tensorflow lite kernels, a signed int8_t quantized
+// model is preferred over the legacy unsigned model format. This means that
+// throughout this project, input images must be converted from unisgned to
+// signed format. The easiest and quickest way to convert from unsigned to
+// signed 8-bit integers is to subtract 128 from the unsigned value to get a
+// signed value.
 
-uint8_t *g_person_detect_model_data;
+uint8_t *g_person_detect_model_data_fs;
+// An area of memory to use for input, output, and intermediate arrays.
+constexpr int kTensorArenaSize = 136 * 1024;
+static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
+  tflite::InitializeTarget();
+
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -50,8 +58,8 @@ void setup() {
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  g_person_detect_model_data = valiant::filesystem::ReadToMemory("/models/person_detect_model.tflite", nullptr);
-  model = tflite::GetModel(g_person_detect_model_data);
+  g_person_detect_model_data_fs = valiant::filesystem::ReadToMemory("/models/person_detect_model.tflite", nullptr);
+  model = tflite::GetModel(g_person_detect_model_data_fs);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
                          "Model provided is schema version %d not equal "
@@ -68,12 +76,15 @@ void setup() {
   //
   // tflite::AllOpsResolver resolver;
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<3> micro_op_resolver;
+  static tflite::MicroMutableOpResolver<5> micro_op_resolver;
   micro_op_resolver.AddAveragePool2D();
   micro_op_resolver.AddConv2D();
   micro_op_resolver.AddDepthwiseConv2D();
+  micro_op_resolver.AddReshape();
+  micro_op_resolver.AddSoftmax();
 
   // Build an interpreter to run the model with.
+  // NOLINTNEXTLINE(runtime-global-variables)
   static tflite::MicroInterpreter static_interpreter(
       model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
@@ -93,7 +104,7 @@ void setup() {
 void loop() {
   // Get image from provider.
   if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels,
-                            input->data.uint8)) {
+                            input->data.int8)) {
     TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
   }
 
@@ -105,7 +116,7 @@ void loop() {
   TfLiteTensor* output = interpreter->output(0);
 
   // Process the inference results.
-  uint8_t person_score = output->data.uint8[kPersonIndex];
-  uint8_t no_person_score = output->data.uint8[kNotAPersonIndex];
+  int8_t person_score = output->data.uint8[kPersonIndex];
+  int8_t no_person_score = output->data.uint8[kNotAPersonIndex];
   RespondToDetection(error_reporter, person_score, no_person_score);
 }

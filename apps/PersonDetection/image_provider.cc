@@ -10,13 +10,17 @@
 #include <memory>
 
 TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
-                      int image_height, int channels, uint8_t* image_data) {
+                      int image_height, int channels, int8_t* image_data) {
 
+    std::unique_ptr<uint8_t[]> unsigned_image_data(reinterpret_cast<uint8_t*>(malloc(image_width * image_height)));
     valiant::camera::FrameFormat fmt;
     fmt.width = image_width;
     fmt.height = image_height;
     fmt.fmt = valiant::camera::Format::Y8;
     fmt.preserve_ratio = false;
-    bool ret = valiant::CameraTask::GetFrame(fmt, image_data);
+    bool ret = valiant::CameraTask::GetFrame(fmt, unsigned_image_data.get());
+    for (int i = 0; i < image_width * image_height; ++i) {
+        image_data[i] = unsigned_image_data[i] - 128;
+    }
     return ret ? kTfLiteOk : kTfLiteError;
 }
