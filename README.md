@@ -19,8 +19,6 @@ make -C build
 ```
 
 ## Loading code to the P0 device (uses HelloWorldFreeRTOS as example)
-flashtool_p0 only operates (correctly) on srec files. These are generated for you automatically by the build system.
-
 ### Install prerequisites
 Before running the script for the first time, be sure to install the required Python modules:
 ```
@@ -38,20 +36,14 @@ sudo udevadm trigger
 ### Loading code to RAM
 This is not persistent, and will be lost on a power cycle.
 ```
-python3 scripts/flashtool_p0.py --srec build/apps/HelloWorldFreeRTOS/image.srec --ram
+python3 scripts/flashtool.py --build_dir ~/src/valiant/build --app HelloWorldFreeRTOS --ram
 ```
 
 ### Loading code AND filesystem to NAND
 This is persistent. To boot from NAND, the switch on the underside of the board must be set in the position that is nearer to the center of the board.
 This will load both the code and the filesystem to the NAND. As it loads the filesystem, you should always do this step once on a fresh board (or if you change the filesystem contents).
 ```
-python3 scripts/flashtool_p0.py --srec build/apps/HelloWorldFreeRTOS/image.srec
-```
-
-### Loading code to NAND (no filesystem)
-Same as above, but skips the filesystem. Much faster if you didn't make any changes to the filesystem.
-```
-python3 scripts/flashtool_p0.py --srec build/apps/HelloWorldFreeRTOS/image.srec --nofs
+python3 scripts/flashtool.py --build_dir ~/src/valiant/build --app HelloWorldFreeRTOS
 ```
 
 ## Recovering P0 from a bad state
