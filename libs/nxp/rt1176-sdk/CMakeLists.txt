@@ -138,7 +138,6 @@ set(libs_nxp_rt1176-sdk-m4_TARGET_INCLUDE_DIRECTORIES
 )
 
 set(libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES
-    libs_CMSIS
 )
 
 set(libs_nxp_rt1176-sdk-mcmgr_SOURCES
@@ -196,10 +195,12 @@ target_include_directories(libs_nxp_rt1176-sdk_bm-m4 PUBLIC
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_bm
+    libs_CMSIS-m7
     ${libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES}
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_bm-m4
+    libs_CMSIS-m4
     ${libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES}
 )
 
@@ -245,11 +246,13 @@ target_include_directories(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC
 
 target_link_libraries(libs_nxp_rt1176-sdk_freertos
     libs_FreeRTOS
+    libs_CMSIS-m7
     ${libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES}
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_freertos-m4
     libs_FreeRTOS-m4
+    libs_CMSIS-m4
     ${libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES}
 )
 
