@@ -215,6 +215,8 @@ add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
 
 add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
     ${libs_nxp_rt1176-sdk-mcmgr_SOURCES}
@@ -281,6 +283,15 @@ add_library_m7(libs_nxp_rt1176-sdk_littlefs
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_littlefs PUBLIC
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
+)
+
+add_library_m4(libs_nxp_rt1176-sdk_littlefs-m4
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
+)
+
+target_include_directories(libs_nxp_rt1176-sdk_littlefs-m4 PUBLIC
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
 )
 

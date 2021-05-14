@@ -49,7 +49,7 @@ MEMORY
   m_ocram               (RX)  : ORIGIN = 0x20240000, LENGTH = 0x00080000
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
   m_heap                (RW)  : ORIGIN = 0x80000000, LENGTH = HEAP_SIZE
-  m_sdram               (RX)  : ORIGIN = 0x80000000 + HEAP_SIZE, LENGTH = 0x04000000 - HEAP_SIZE
+  m_sdram               (RX)  : ORIGIN = 0x80000000 + HEAP_SIZE, LENGTH = 0x03000000 - HEAP_SIZE
 }
 
 /* Define output sections */

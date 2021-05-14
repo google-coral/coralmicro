@@ -49,7 +49,7 @@ MEMORY
   m_stack               (RX)  : ORIGIN = 0x20000000, LENGTH = STACK_SIZE
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
   m_heap                (RW)  : ORIGIN = 0x80000000, LENGTH = HEAP_SIZE
-  m_sdram               (RW)  : ORIGIN = 0x80000000 + HEAP_SIZE, LENGTH = 0x04000000 - HEAP_SIZE
+  m_sdram               (RW)  : ORIGIN = 0x80000000 + HEAP_SIZE, LENGTH = 0x03000000 - HEAP_SIZE
 }
 
 /* Define output sections */

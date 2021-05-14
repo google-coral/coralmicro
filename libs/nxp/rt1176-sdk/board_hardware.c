@@ -12,7 +12,6 @@
 #include <string.h>
 
 #if __CORTEX_M == 7
-static nand_handle_t nand_handle;
 extern uint32_t __SDRAM_ROM;
 extern uint32_t __sdram_data_start__;
 extern uint32_t __sdram_data_end__;
@@ -22,12 +21,13 @@ static caam_job_ring_interface_t caam_job_ring_0;
 static caam_job_ring_interface_t caam_job_ring_1;
 static caam_job_ring_interface_t caam_job_ring_2;
 static caam_job_ring_interface_t caam_job_ring_3;
+#endif
 
+static nand_handle_t nand_handle;
 nand_handle_t* BOARD_GetNANDHandle(void) {
     return &nand_handle;
 }
 
-#endif
 
 extern mcmgr_status_t MCMGR_EarlyInit(void) __attribute__((weak));
 extern mcmgr_status_t MCMGR_Init(void) __attribute__((weak));
@@ -88,6 +88,7 @@ void BOARD_InitCAAM(void) {
     config.jobRingInterface[3] = &caam_job_ring_3;
     CAAM_Init(CAAM, &config);
 }
+#endif  // __CORTEX_M == 7
 
 void BOARD_InitNAND(void) {
     flexspi_mem_config_t mem_config = {
@@ -126,7 +127,6 @@ void BOARD_InitNAND(void) {
     FLEXSPI_Init(FLEXSPI1, &flexspi_config);
     Nand_Flash_Init(&nand_config, &nand_handle);
 }
-#endif  // __CORTEX_M == 7
 
 #if defined(BOARD_REVISION_P0)
 void BOARD_FuseTamper(void) {
@@ -173,8 +173,10 @@ void BOARD_InitHardware(void) {
 
 #if defined(BOARD_REVISION_P0)
     BOARD_FuseTamper();
-    BOARD_InitNAND();
 #endif
+#endif  // __CORTEX_M == 7
 
+#if defined(BOARD_REVISION_P0)
+    BOARD_InitNAND();
 #endif
 }

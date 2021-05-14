@@ -51,6 +51,7 @@ target_link_libraries(libs_base-m7_freertos
 
 add_library_m4(libs_base-m4_freertos STATIC
     console_m4.cc
+    filesystem.cc
     ipc.cc
     ipc_m4.cc
     main_freertos_m4.cc
@@ -58,6 +59,9 @@ add_library_m4(libs_base-m4_freertos STATIC
 
 target_link_libraries(libs_base-m4_freertos
     libs_nxp_rt1176-sdk_freertos-m4
+    libs_tasks_CameraTask_freertos-m4
+    libs_tasks_PmicTask_freertos-m4
+    libs_nxp_rt1176-sdk_littlefs-m4
 )
 
 target_sources(libs_base-m7_bm PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_bm>)

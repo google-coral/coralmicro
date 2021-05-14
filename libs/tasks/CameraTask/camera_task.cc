@@ -3,7 +3,12 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
+
+#if (__CORTEX_M == 7)
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7/fsl_cache.h"
+#elif (__CORTEX_M == 4)
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm4/fsl_cache.h"
+#endif
 
 #include <memory>
 
@@ -339,29 +344,9 @@ void CameraTask::TaskInit() {
         return;
     }
 
-    status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
-    if (status != kStatus_Success) {
-        return;
-    }
-
-    for (int i = 0; i < kFramebufferCount; i++) {
-        status = CSI_TransferSubmitEmptyBuffer(CSI, &csi_handle_, reinterpret_cast<uint32_t>(framebuffers[i]));
-        if (status != kStatus_Success) {
-            return;
-        }
-    }
-
     PowerRequest req;
     req.enable = false;
     HandlePowerRequest(req);
-
-    PXP_Init(PXP);
-    NVIC_SetPriority(PXP_IRQn, 5);
-    NVIC_EnableIRQ(PXP_IRQn);
-    PXP_EnableInterrupts(PXP, kPXP_CompleteInterruptEnable);
-    PXP_SetProcessSurfaceBackGroundColor(PXP, 0xF04A00FF);
-    PXP_SetAlphaSurfacePosition(PXP, 0xFFFF, 0xFFFF, 0, 0);
-    PXP_EnableCsc1(PXP, false);
 }
 
 void CameraTask::SetDefaultRegisters() {
@@ -420,6 +405,7 @@ void CameraTask::SetDefaultRegisters() {
 
 EnableResponse CameraTask::HandleEnableRequest() {
     EnableResponse resp;
+    status_t status;
     uint8_t model_id_h = 0xff, model_id_l = 0xff;
     Read(CameraRegisters::MODEL_ID_H, &model_id_h);
     Read(CameraRegisters::MODEL_ID_L, &model_id_l);
@@ -441,10 +427,23 @@ EnableResponse CameraTask::HandleEnableRequest() {
     // Shifting
     Write(CameraRegisters::VSYNC_HSYNC_PIXEL_SHIFT_EN, 0x0);
 
-    // Streaming
-    status_t status = CSI_TransferStart(CSI, &csi_handle_);
-    Write(CameraRegisters::MODE_SELECT, 1);
+    status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
 
+    for (int i = 0; i < kFramebufferCount; i++) {
+        status = CSI_TransferSubmitEmptyBuffer(CSI, &csi_handle_, reinterpret_cast<uint32_t>(framebuffers[i]));
+    }
+
+    PXP_Init(PXP);
+    NVIC_SetPriority(PXP_IRQn, 5);
+    NVIC_EnableIRQ(PXP_IRQn);
+    PXP_EnableInterrupts(PXP, kPXP_CompleteInterruptEnable);
+    PXP_SetProcessSurfaceBackGroundColor(PXP, 0xF04A00FF);
+    PXP_SetAlphaSurfacePosition(PXP, 0xFFFF, 0xFFFF, 0, 0);
+    PXP_EnableCsc1(PXP, false);
+
+    // Streaming
+    status = CSI_TransferStart(CSI, &csi_handle_);
+    Write(CameraRegisters::MODE_SELECT, 1);
     resp.success = (status == kStatus_Success);
     return resp;
 }
@@ -452,6 +451,7 @@ EnableResponse CameraTask::HandleEnableRequest() {
 void CameraTask::HandleDisableRequest() {
     Write(CameraRegisters::MODE_SELECT, 0);
     CSI_TransferStop(CSI, &csi_handle_);
+    NVIC_DisableIRQ(PXP_IRQn);
 }
 
 void CameraTask::HandlePowerRequest(const PowerRequest& power) {
