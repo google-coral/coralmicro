@@ -1,6 +1,6 @@
 #include "libs/base/console_m4.h"
 #include "libs/base/ipc_m4.h"
-#include "libs/base/tasks_m4.h"
+#include "libs/base/tasks.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include <cstdio>

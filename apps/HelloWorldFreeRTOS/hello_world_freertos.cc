@@ -1,4 +1,4 @@
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"

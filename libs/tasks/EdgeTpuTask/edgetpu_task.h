@@ -2,7 +2,7 @@
 #define _LIBS_TASKS_EDGETPUTASK_EDGETPU_TASK_H_
 
 #include "libs/base/queue_task.h"
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"

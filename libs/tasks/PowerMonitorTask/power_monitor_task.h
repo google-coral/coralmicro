@@ -2,7 +2,7 @@
 #define _LIBS_TASKS_POWER_MONITOR_TASK_POWER_MONITOR_TASK_H_
 
 #include "libs/base/queue_task.h"
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 #include <functional>

@@ -1,6 +1,6 @@
 #include "third_party/freertos_kernel/include/projdefs.h"
 #include "libs/base/filesystem.h"
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"

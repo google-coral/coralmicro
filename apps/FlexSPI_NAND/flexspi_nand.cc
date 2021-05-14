@@ -1,5 +1,5 @@
 #include "apps/FlexSPI_NAND/flexspi_nand_lut.h"
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"

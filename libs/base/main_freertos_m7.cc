@@ -2,7 +2,7 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/random.h"
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "libs/CdcEem/cdc_eem.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"

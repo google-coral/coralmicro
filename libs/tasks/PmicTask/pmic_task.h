@@ -1,7 +1,7 @@
 #ifndef _LIBS_TASKS_PMIC_TASK_H_
 #define _LIBS_TASKS_PMIC_TASK_H_
 
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "libs/base/queue_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 

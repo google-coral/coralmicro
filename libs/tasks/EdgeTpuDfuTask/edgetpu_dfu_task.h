@@ -2,7 +2,7 @@
 #define _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
 
 #include "libs/base/queue_task.h"
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"

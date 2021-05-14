@@ -1,6 +1,6 @@
 #include "libs/base/console_m7.h"
 #include "libs/base/message_buffer.h"
-#include "libs/base/tasks_m7.h"
+#include "libs/base/tasks.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include <cstdio>

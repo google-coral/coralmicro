@@ -1,6 +1,5 @@
 #include "third_party/freertos_kernel/include/projdefs.h"
 #include "libs/base/filesystem.h"
-#include "libs/base/tasks_m7.h"
 #include "libs/posenet/posenet_decoder_op.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
