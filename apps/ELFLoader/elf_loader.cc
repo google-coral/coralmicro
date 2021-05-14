@@ -147,7 +147,7 @@ extern "C" int main(int argc, char **argv) {
 
     TaskHandle_t usb_task;
     xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, &usb_task);
-    usb_timer = xTimerCreate("usb_timer", pdMS_TO_TICKS(500), pdFALSE, usb_task, usb_timer_callback);
+    usb_timer = xTimerCreate("usb_timer", pdMS_TO_TICKS(1000), pdFALSE, usb_task, usb_timer_callback);
     xTimerStart(usb_timer, 0);
 
     elfloader_hid_endpoints[0].endpointAddress =
