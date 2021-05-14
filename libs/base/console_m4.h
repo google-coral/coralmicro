@@ -6,7 +6,7 @@
 namespace valiant {
 
 void ConsoleInit();
-void SetM4ConsoleBufferPtr(StreamBuffer* buffer);
+void SetM4ConsoleBufferPtr(ipc::StreamBuffer* buffer);
 
 }  // namespace valiant
 

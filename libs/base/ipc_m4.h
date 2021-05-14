@@ -1,8 +1,18 @@
 #ifndef __LIBS_BASE_IPC_M4_H__
 #define __LIBS_BASE_IPC_M4_H__
 
+#include "libs/base/ipc.h"
+#include <functional>
+
 namespace valiant {
-void IPCInit();
-}
+class IPCM4 : public IPC {
+  public:
+    void Init() override;
+  protected:
+    void RxTaskFn(void *param) override;
+  private:
+    void HandleSystemMessage(const ipc::SystemMessage& message) override;
+};
+}  // namespace valiant
 
 #endif  // __LIBS_BASE_IPC_M4_H__

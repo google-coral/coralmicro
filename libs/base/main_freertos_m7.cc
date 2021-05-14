@@ -1,6 +1,6 @@
 #include "libs/base/console_m7.h"
 #include "libs/base/filesystem.h"
-#include "libs/base/ipc_m7.h"
+#include "libs/base/ipc.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks.h"
 #include "libs/CdcEem/cdc_eem.h"
@@ -40,10 +40,10 @@ extern "C" void BOARD_InitHardware();
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware();
+    valiant::IPC::GetSingleton()->Init();
     valiant::Random::GetSingleton()->Init();
     valiant::ConsoleM7::GetSingleton()->Init();
     valiant::filesystem::Init();
-    valiant::IPCInit();
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);
     httpd_init();

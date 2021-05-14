@@ -122,7 +122,7 @@ void vGeneratePrimaryToSecondaryInterrupt(void*);
 void vGenerateSecondaryToPrimaryInterrupt(void*);
 #define sbSEND_COMPLETED( pxStreamBuffer ) vGenerateSecondaryToPrimaryInterrupt( pxStreamBuffer )
 #endif
-
+#define configTASK_NOTIFICATION_ARRAY_ENTRIES (2)
 
 #if defined(__ICCARM__)||defined(__CC_ARM)||defined(__GNUC__)
     /* in Kinetis SDK, this contains the system core clock frequency */

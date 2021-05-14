@@ -3,10 +3,10 @@
 
 #if __CORTEX_M == 7
 void vGeneratePrimaryToSecondaryInterrupt(void* pxStreamBuffer) {
-    MCMGR_TriggerEventForce(kMCMGR_FreeRtosMessageBuffersEvent, 0);
+    MCMGR_TriggerEventForce(kMCMGR_FreeRtosMessageBuffersEvent, (uint32_t)pxStreamBuffer & 0xFFFF);
 }
 #else
 void vGenerateSecondaryToPrimaryInterrupt(void* pxStreamBuffer) {
-    MCMGR_TriggerEventForce(kMCMGR_FreeRtosMessageBuffersEvent, 0);
+    MCMGR_TriggerEventForce(kMCMGR_FreeRtosMessageBuffersEvent, (uint32_t)pxStreamBuffer & 0xFFFF);
 }
 #endif

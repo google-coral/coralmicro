@@ -4,7 +4,7 @@
 #include "libs/base/console_m4.h"
 #include <unistd.h>
 
-static valiant::StreamBuffer *console_buffer = nullptr;
+static valiant::ipc::StreamBuffer *console_buffer = nullptr;
 
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
 extern "C" int _write(int handle, char *buffer, int size) {
@@ -33,7 +33,7 @@ namespace valiant {
 void ConsoleInit() {
 }
 
-void SetM4ConsoleBufferPtr(StreamBuffer* buffer) {
+void SetM4ConsoleBufferPtr(ipc::StreamBuffer* buffer) {
     console_buffer = buffer;
 }
 

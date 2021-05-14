@@ -14,7 +14,7 @@ class ConsoleM7 {
         return &console;
     }
     void Init();
-    StreamBuffer* GetM4ConsoleBufferPtr();
+    ipc::StreamBuffer* GetM4ConsoleBufferPtr();
     void Write(char *buffer, int size);
   private:
     struct ConsoleMessage {
@@ -34,9 +34,9 @@ class ConsoleM7 {
     QueueHandle_t console_queue_ = nullptr;
     CdcAcm cdc_acm_;
 
-    StreamBuffer *m4_console_buffer_ = nullptr;
+    ipc::StreamBuffer *m4_console_buffer_ = nullptr;
     static constexpr size_t kM4ConsoleBufferBytes = 128;
-    static constexpr size_t kM4ConsoleBufferSize = kM4ConsoleBufferBytes + sizeof(StreamBuffer);
+    static constexpr size_t kM4ConsoleBufferSize = kM4ConsoleBufferBytes + sizeof(ipc::StreamBuffer);
     static uint8_t m4_console_buffer_storage_[kM4ConsoleBufferSize];
 };
 

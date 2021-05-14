@@ -1,4 +1,5 @@
 #include "libs/base/console_m7.h"
+#include "libs/base/ipc_m7.h"
 #include "libs/base/message_buffer.h"
 #include "libs/base/tasks.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
@@ -45,6 +46,12 @@ void ConsoleM7::StaticM4ConsoleTaskFn(void *param) {
 }
 
 void ConsoleM7::M4ConsoleTaskFn(void *param) {
+    ipc::Message m4_console_buffer_msg;
+    m4_console_buffer_msg.type = ipc::MessageType::SYSTEM;
+    m4_console_buffer_msg.message.system.type = ipc::SystemMessageType::CONSOLE_BUFFER_PTR;
+    m4_console_buffer_msg.message.system.message.console_buffer_ptr = GetM4ConsoleBufferPtr();
+    IPC::GetSingleton()->SendMessage(m4_console_buffer_msg);
+
     size_t rx_bytes;
     char buf[16];
     while (true) {
@@ -78,7 +85,7 @@ void usb_device_task(void *param) {
 }
 
 void ConsoleM7::Init() {
-    m4_console_buffer_ = reinterpret_cast<StreamBuffer*>(m4_console_buffer_storage_);
+    m4_console_buffer_ = reinterpret_cast<ipc::StreamBuffer*>(m4_console_buffer_storage_);
     m4_console_buffer_->stream_buffer =
         xStreamBufferCreateStatic(kM4ConsoleBufferBytes, 1, m4_console_buffer_->stream_buffer_storage, &m4_console_buffer_->static_stream_buffer);
 
@@ -102,10 +109,12 @@ void ConsoleM7::Init() {
 
     xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, NULL);
     xTaskCreate(StaticM7ConsoleTaskFn, "m7_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
-    xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+    if (IPCM7::HasM4Application()) {
+        xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+    }
 }
 
-StreamBuffer* ConsoleM7::GetM4ConsoleBufferPtr() {
+ipc::StreamBuffer* ConsoleM7::GetM4ConsoleBufferPtr() {
     return m4_console_buffer_;
 }
 

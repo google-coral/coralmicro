@@ -36,7 +36,11 @@ static uint16_t audio_samples[kAudioSamples];
 TF_LITE_MICRO_TESTS_BEGIN
 
 TF_LITE_MICRO_TEST(MulticoreTest_CheckM4) {
-    TF_LITE_MICRO_EXPECT(valiant::M4IsAlive(1000 /* ms */));
+    valiant::IPCM7* ipc = static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton());
+    TF_LITE_MICRO_EXPECT_NE(ipc, nullptr);
+    ipc->StartM4();
+    TF_LITE_MICRO_EXPECT(
+        ipc->M4IsAlive(1000 /* ms */));
 }
 
 TF_LITE_MICRO_TEST(PowerMonitorTest_CheckChipId) {
