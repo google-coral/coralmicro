@@ -4,11 +4,6 @@
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tensorflow/tensorflow/lite/version.h"
 
-// Run Tensorflow's DebugLog to the debug console.
-extern "C" void DebugLog(const char *s) {
-    printf(s);
-}
-
 namespace {
 tflite::ErrorReporter *error_reporter = nullptr;
 const tflite::Model *model = nullptr;

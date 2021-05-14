@@ -17,10 +17,6 @@
 #include "third_party/tensorflow/tensorflow/lite/version.h"
 #include <cstdio>
 
-extern "C" void DebugLog(const char *s) {
-    printf(s);
-}
-
 namespace testing {
 
 static tflite::MicroMutableOpResolver<1> resolver;

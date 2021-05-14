@@ -85,10 +85,6 @@ void RespondToCommand(tflite::ErrorReporter* error_reporter,
     }
 }
 
-extern "C" void DebugLog(const char *s) {
-    printf("%s", s);
-}
-
 extern "C" void app_main(void *param) {
     printf("Micro speech\r\n");
     setup();

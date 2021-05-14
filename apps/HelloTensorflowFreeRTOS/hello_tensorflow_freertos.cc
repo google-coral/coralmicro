@@ -11,11 +11,6 @@
 
 #include <cstdio>
 
-// Run Tensorflow's DebugLog to the debug console.
-extern "C" void DebugLog(const char *s) {
-    printf(s);
-}
-
 extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     printf("Stack overflow in %s\r\n", pcTaskName);
 }

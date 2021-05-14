@@ -21,10 +21,6 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
     GPIO_PinWrite(GPIO13, 6, person_score > no_person_score);
 }
 
-extern "C" void DebugLog(const char *s) {
-    printf(s);
-}
-
 extern "C" void app_main(void *param) {
     valiant::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));
