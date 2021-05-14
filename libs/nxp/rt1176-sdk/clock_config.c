@@ -140,17 +140,17 @@ void BOARD_BootClockRUN(void)
     CLOCK_SetRootClock(kCLOCK_Root_Bus_Lpsr, &rootCfg);
 #endif
 
-#if DEBUG_CONSOLE_UART_INDEX == 1
-    /* Configure Lpuart1 using SysPll2*/
-    rootCfg.mux = kCLOCK_LPUART1_ClockRoot_MuxSysPll2Out;
+    // CM4 UART
+    rootCfg.mux = kCLOCK_LPUART3_ClockRoot_MuxSysPll2Out;
     rootCfg.div = 22;
-    CLOCK_SetRootClock(kCLOCK_Root_Lpuart1, &rootCfg);
-#elif DEBUG_CONSOLE_UART_INDEX == 6
-    /* Configure Lpuart6 using SysPll2*/
+    CLOCK_SetRootClock(kCLOCK_Root_Lpuart3, &rootCfg);
+
+    // CM7 UART
     rootCfg.mux = kCLOCK_LPUART6_ClockRoot_MuxSysPll2Out;
     rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart6, &rootCfg);
-#endif
+
+    // BT UART
     rootCfg.mux = kCLOCK_LPUART2_ClockRoot_MuxSysPll2Out;
     rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart2, &rootCfg);

@@ -26,14 +26,27 @@
 /* Get debug console frequency. */
 uint32_t BOARD_DebugConsoleSrcFreq(void)
 {
-    return CLOCK_GetRootClockFreq(BOARD_UART_CLOCK_ROOT);
+#if __CORTEX_M == 7
+    return CLOCK_GetRootClockFreq(BOARD_UART_CLOCK_ROOT_M7);
+#elif __CORTEX_M == 4
+    return CLOCK_GetRootClockFreq(BOARD_UART_CLOCK_ROOT_M4);
+#else
+#error "Invalid CORTEX_M value"
+#endif
+    return -1;
 }
 
 /* Initialize debug console. */
 void BOARD_InitDebugConsole(void)
 {
     uint32_t uartClkSrcFreq = BOARD_DebugConsoleSrcFreq();
-    DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
+#if __CORTEX_M == 7
+    DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE_M7, BOARD_DEBUG_UART_BAUDRATE_M7, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
+#elif __CORTEX_M == 4
+    DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE_M4, BOARD_DEBUG_UART_BAUDRATE_M4, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
+#else
+#error "Invalid CORTEX_M value"
+#endif
 }
 
 /* MPU configuration. */

@@ -16,34 +16,17 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-/*! @brief The board name */
-#ifndef DEBUG_CONSOLE_UART_INDEX
-#define DEBUG_CONSOLE_UART_INDEX 6
-#endif
-
 /* The UART to use for debug messages. */
 #define BOARD_DEBUG_UART_TYPE     kSerialPort_Uart
 #define BOARD_DEBUG_UART_CLK_FREQ 24000000
 
-#if DEBUG_CONSOLE_UART_INDEX == 1
-#define BOARD_DEBUG_UART_BASEADDR (uint32_t) LPUART1
-#define BOARD_DEBUG_UART_INSTANCE 1U
-#define BOARD_UART_IRQ            LPUART1_IRQn
-#define BOARD_UART_IRQ_HANDLER    LPUART1_IRQHandler
-#define BOARD_UART_CLOCK_ROOT     kCLOCK_Root_Lpuart1
-#elif DEBUG_CONSOLE_UART_INDEX == 6
-#define BOARD_DEBUG_UART_BASEADDR (uint32_t) LPUART6
-#define BOARD_DEBUG_UART_INSTANCE 6U
-#define BOARD_UART_IRQ            LPUART6_IRQn
-#define BOARD_UART_IRQ_HANDLER    LPUART6_IRQHandler
-#define BOARD_UART_CLOCK_ROOT     kCLOCK_Root_Lpuart6
-#else
-#error "Unsupported UART"
-#endif
+#define BOARD_DEBUG_UART_INSTANCE_M7 6U
+#define BOARD_UART_CLOCK_ROOT_M7     kCLOCK_Root_Lpuart6
+#define BOARD_DEBUG_UART_BAUDRATE_M7 (115200U)
 
-#ifndef BOARD_DEBUG_UART_BAUDRATE
-#define BOARD_DEBUG_UART_BAUDRATE (115200U)
-#endif /* BOARD_DEBUG_UART_BAUDRATE */
+#define BOARD_DEBUG_UART_INSTANCE_M4 3U
+#define BOARD_UART_CLOCK_ROOT_M4     kCLOCK_Root_Lpuart3
+#define BOARD_DEBUG_UART_BAUDRATE_M4 (115200U)
 
 /* Definitions for eRPC MU transport layer */
 #if defined(FSL_FEATURE_MU_SIDE_A)

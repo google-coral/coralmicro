@@ -151,8 +151,8 @@ void BOARD_InitHardware(void) {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
-#if __CORTEX_M == 7
     BOARD_InitDebugConsole();
+#if __CORTEX_M == 7
     if (!BOARD_InitSEMC()) {
         printf("Failed to initialize SDRAM.\r\n");
     }

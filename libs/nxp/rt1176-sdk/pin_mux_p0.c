@@ -171,6 +171,23 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_EMC_B1_41_LPUART6_RXD,
       0x0EU);
 
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_30_LPUART3_TXD,
+      0U
+  );
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_31_LPUART3_RXD,
+      0U
+  );
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_30_LPUART3_TXD,
+      0U
+  );
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_31_LPUART3_RXD,
+      0U
+  );
+
 #if __CORTEX_M == 7
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B1_00_SEMC_DATA00,      /* GPIO_EMC_B1_00 is configured as SEMC_DATA00 */
