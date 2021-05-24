@@ -1,3 +1,4 @@
+#include "libs/base/gpio.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "libs/tpu/edgetpu_manager.h"
@@ -12,12 +13,6 @@ namespace valiant {
 
 using namespace edgetpu;
 constexpr const char kEdgeTpuTaskName[] = "edgetpu";
-static GPIO_Type* kPgoodGpioBase = GPIO8;
-static const uint32_t kPgoodGpioPin = 26;
-static GPIO_Type* kResetGpioBase = GPIO8;
-static const uint32_t kResetGpioPin = 24;
-static GPIO_Type* kPmicGpioBase = GPIO8;
-static const uint32_t kPmicGpioPin = 25;
 
 void EdgeTpuTask::SetNextState(enum edgetpu_state next_state) {
     Request req;
@@ -87,25 +82,6 @@ void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data, uint32_t data_le
     task->SetNextState(EDGETPU_STATE_CONNECTED);
 }
 
-void EdgeTpuTask::Init() {
-    pgood_config_.direction = kGPIO_DigitalInput;
-    pgood_config_.outputLogic = 0;
-    pgood_config_.interruptMode = kGPIO_NoIntmode;
-    GPIO_PinInit(kPgoodGpioBase, kPgoodGpioPin, &pgood_config_);
-
-    reset_config_.direction = kGPIO_DigitalOutput;
-    reset_config_.outputLogic = 0;
-    reset_config_.interruptMode = kGPIO_NoIntmode;
-    GPIO_PinInit(kResetGpioBase, kResetGpioPin, &reset_config_);
-
-    pmic_config_.direction = kGPIO_DigitalOutput;
-    pmic_config_.outputLogic = 0;
-    pmic_config_.interruptMode = kGPIO_NoIntmode;
-    GPIO_PinInit(kPmicGpioBase, kPmicGpioPin, &pmic_config_);
-
-    QueueTask::Init();
-}
-
 void EdgeTpuTask::TaskInit() {
     valiant::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(
             kEdgeTpuVid, kEdgeTpuPid, std::bind(&EdgeTpuTask::USBHostEvent, this, _1, _2, _3, _4));
@@ -113,19 +89,19 @@ void EdgeTpuTask::TaskInit() {
 
 void EdgeTpuTask::HandlePowerRequest(PowerRequest& req) {
 #if defined(BOARD_REVISION_P0)
-    GPIO_PinWrite(kPmicGpioBase, kPmicGpioPin, req.enable);
+    gpio::SetGpio(gpio::Gpio::kEdgeTpuPmic, req.enable);
 
     if (req.enable) {
         bool pgood;
         do {
-            pgood = !!GPIO_PinRead(kPgoodGpioBase, kPgoodGpioPin);
+            pgood = gpio::GetGpio(gpio::Gpio::kEdgeTpuPgood);
             taskYIELD();
         } while (!pgood);
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
-    GPIO_PinWrite(kResetGpioBase, kResetGpioPin, req.enable);
+    gpio::SetGpio(gpio::Gpio::kEdgeTpuReset, req.enable);
 #endif
 }
 

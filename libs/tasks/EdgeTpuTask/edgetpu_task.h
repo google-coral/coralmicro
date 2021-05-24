@@ -61,7 +61,6 @@ extern const char kEdgeTpuTaskName[];
 class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeTpuTaskName,
                                      kEdgeTpuTaskStackDepth, EDGETPU_TASK_PRIORITY, kEdgeTpuTaskQueueLength> {
   public:
-    void Init() override;
     void SetPower(bool enable);
     static EdgeTpuTask* GetSingleton() {
         static EdgeTpuTask task;
@@ -106,10 +105,6 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeT
     usb_host_interface_handle interface_handle_;
     usb_host_class_handle class_handle_;
     uint8_t status_;
-
-    gpio_pin_config_t pgood_config_;
-    gpio_pin_config_t reset_config_;
-    gpio_pin_config_t pmic_config_;
 };
 }  // namespace valiant
 

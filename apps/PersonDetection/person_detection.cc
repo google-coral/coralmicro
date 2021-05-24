@@ -1,4 +1,5 @@
 #include "libs/base/filesystem.h"
+#include "libs/base/gpio.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -17,8 +18,9 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
             "person_score: %d no_person_score: %d",
             person_score, no_person_score);
 
-    GPIO_PinWrite(GPIO13, 5, person_score > no_person_score);
-    GPIO_PinWrite(GPIO13, 6, person_score > no_person_score);
+    bool person_detected = person_score > no_person_score;
+    valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, person_detected);
+    valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, person_detected);
 }
 
 extern "C" void app_main(void *param) {
@@ -26,10 +28,6 @@ extern "C" void app_main(void *param) {
     vTaskDelay(pdMS_TO_TICKS(100));
     valiant::CameraTask::GetSingleton()->SetPower(true);
     valiant::CameraTask::GetSingleton()->Enable();
-    gpio_pin_config_t user_led = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO13, 6, &user_led);
-    gpio_pin_config_t pwr_led = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
-    GPIO_PinInit(GPIO13, 5, &pwr_led);
 
     setup();
     while (true) {

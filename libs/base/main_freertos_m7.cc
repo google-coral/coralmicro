@@ -1,5 +1,6 @@
 #include "libs/base/console_m7.h"
 #include "libs/base/filesystem.h"
+#include "libs/base/gpio.h"
 #include "libs/base/ipc.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks.h"
@@ -40,6 +41,7 @@ extern "C" void BOARD_InitHardware();
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware();
+    valiant::gpio::Init();
     valiant::IPC::GetSingleton()->Init();
     valiant::Random::GetSingleton()->Init();
     valiant::ConsoleM7::GetSingleton()->Init();
