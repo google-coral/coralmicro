@@ -1,3 +1,4 @@
+#include "libs/base/mutex.h"
 #include "libs/base/filesystem.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -81,38 +82,39 @@ bool Init() {
 
 bool Open(lfs_file_t* handle, const char *path) {
     int ret;
-    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
+    MutexLock lock(lfs_semaphore_);
     ret = lfs_file_open(&lfs_handle_, handle, path, LFS_O_RDONLY);
-    xSemaphoreGive(lfs_semaphore_);
 
     return (ret == LFS_ERR_OK) ? true : false;
 }
 
 int Read(lfs_file_t* handle, void *buffer, size_t size) {
     int ret;
-    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
+    MutexLock lock(lfs_semaphore_);
     ret = lfs_file_read(&lfs_handle_, handle, buffer, size);
-    xSemaphoreGive(lfs_semaphore_);
 
     return ret;
 }
 
 bool Seek(lfs_file_t* handle, size_t off, int whence) {
     int ret;
-    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
+    MutexLock lock(lfs_semaphore_);
     ret = lfs_file_seek(&lfs_handle_, handle, off, whence);
-    xSemaphoreGive(lfs_semaphore_);
 
     return (ret >= 0) ? true : false;
 }
 
 bool Close(lfs_file_t* handle) {
     int ret;
-    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
+    MutexLock lock(lfs_semaphore_);
     ret = lfs_file_close(&lfs_handle_, handle);
-    xSemaphoreGive(lfs_semaphore_);
 
     return (ret == LFS_ERR_OK) ? true : false;
+}
+
+lfs_soff_t Size(lfs_file_t* handle) {
+    MutexLock lock(lfs_semaphore_);
+    return lfs_file_size(&lfs_handle_, handle);
 }
 
 uint8_t* ReadToMemory(const char *path, size_t* size_bytes) {
@@ -123,9 +125,7 @@ uint8_t* ReadToMemory(const char *path, size_t* size_bytes) {
         goto fail;
     }
 
-    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
-    file_size = lfs_file_size(&lfs_handle_, &handle);
-    xSemaphoreGive(lfs_semaphore_);
+    file_size = Size(&handle);
 
     data = reinterpret_cast<uint8_t*>(malloc(file_size));
     if (!data) {
@@ -163,9 +163,7 @@ bool ReadToMemory(const char *path, uint8_t* data, size_t* size_bytes) {
         goto fail;
     }
 
-    xSemaphoreTake(lfs_semaphore_, portMAX_DELAY);
-    file_size = lfs_file_size(&lfs_handle_, &handle);
-    xSemaphoreGive(lfs_semaphore_);
+    file_size = Size(&handle);
 
     if (static_cast<size_t>(file_size) > *size_bytes) {
         goto fail_close;

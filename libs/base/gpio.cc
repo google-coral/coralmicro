@@ -1,3 +1,4 @@
+#include "libs/base/mutex.h"
 #include "libs/base/gpio.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -73,21 +74,17 @@ void Init() {
 }
 
 void SetGpio(Gpio gpio, bool enable) {
-    xSemaphoreTake(gpio_semaphore, portMAX_DELAY);
+    MutexLock lock(gpio_semaphore);
     GPIO_PinWrite(
         PinNameToModule[gpio],
         PinNameToPin[gpio],
         enable
     );
-    xSemaphoreGive(gpio_semaphore);
 }
 
 bool GetGpio(Gpio gpio) {
-    bool ret;
-    xSemaphoreTake(gpio_semaphore, portMAX_DELAY);
-    ret = !!GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
-    xSemaphoreGive(gpio_semaphore);
-    return ret;
+    MutexLock lock(gpio_semaphore);
+    return !!GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
 }
 
 }  // namespace gpio
