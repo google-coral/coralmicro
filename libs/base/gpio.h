@@ -16,6 +16,9 @@ enum Gpio {
     kUserButton,
     kCameraTrigger,
     kAntennaSelect,
+    kBtHostWake,
+    kEthPhyRst,
+    kBufferEnable,
 
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     kArduinoD0,

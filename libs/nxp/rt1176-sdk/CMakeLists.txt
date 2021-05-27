@@ -27,6 +27,8 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${libs_nxp_rt1176-sdk_SOURCES_REVISION}
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_port_uart.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/uart/fsl_adapter_lpuart.c
@@ -38,6 +40,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dmamux.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_edma.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_enet.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_flexspi.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.c
@@ -93,6 +96,7 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
     # Other defines
     DEBUG_CONSOLE_TRANSFER_NON_BLOCKING
     DRIVER_CACHE_CONTROL=1
+    LWIP_ENET_FLEXIBLE_CONFIGURATION
     SDK_DEBUGCONSOLE_UART
     SDK_DELAY_USE_DWT
     SERIAL_PORT_TYPE_UART=1
@@ -120,6 +124,7 @@ set(libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/uart
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176
@@ -232,6 +237,7 @@ add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 STATIC
 
 target_compile_definitions(libs_nxp_rt1176-sdk_freertos PUBLIC
     FSL_RTOS_FREE_RTOS
+    USE_RTOS=1
     ${libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS}
     ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
 )
@@ -304,6 +310,8 @@ target_include_directories(libs_nxp_rt1176-sdk_littlefs-m4 PUBLIC
 
 add_library_m7(libs_nxp_rt1176-sdk_lwip
     dhcp_server.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif_kinetis.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/sys_arch.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_lib.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_msg.c
@@ -312,9 +320,11 @@ add_library_m7(libs_nxp_rt1176-sdk_lwip
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netifapi.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/sockets.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/tcpip.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/raw.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/def.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/dns.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/inet_chksum.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/sys.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/init.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ip.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/acd.c

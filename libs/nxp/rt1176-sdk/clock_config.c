@@ -89,6 +89,10 @@ void BOARD_BootClockRUN(void)
     }
 #endif
 
+    const clock_sys_pll1_config_t sysPll1Config = {
+        .pllDiv2En = true,
+    };
+
     const clock_sys_pll2_config_t sysPll2Config = {
         .mfd = 268435455,                         /* Denominator of spread spectrum */
         .ss = NULL,                               /* Spread spectrum parameter */
@@ -119,6 +123,7 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 240;
     CLOCK_SetRootClock(kCLOCK_Root_M7_Systick, &rootCfg);
 #endif
+    CLOCK_InitSysPll1(&sysPll1Config);
     CLOCK_InitSysPll2(&sysPll2Config);
     CLOCK_InitSysPll3();
 
@@ -202,6 +207,42 @@ void BOARD_BootClockRUN(void)
     rootCfg.mux = kCLOCK_EMV1_ClockRoot_MuxOscRc48MDiv2;
     rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Emv1, &rootCfg);
+
+    /* Configure ENET1 using OSC_RC_48M_DIV2 */
+    rootCfg.mux = kCLOCK_ENET1_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Enet1, &rootCfg);
+
+    /* Configure ENET2 using SYS_PLL1_DIV2 */
+    /* SYS_PLL1_DIV2 is 500MHz, divide by 4 to get 125MHz */
+    rootCfg.mux = kCLOCK_ENET2_ClockRoot_MuxSysPll1Div2;
+    rootCfg.div = 4;
+    CLOCK_SetRootClock(kCLOCK_Root_Enet2, &rootCfg);
+
+    /* Configure ENET_QOS using OSC_RC_48M_DIV2 */
+    rootCfg.mux = kCLOCK_ENET_QOS_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Enet_Qos, &rootCfg);
+
+    /* Configure ENET_25M using OSC_RC_48M_DIV2 */
+    rootCfg.mux = kCLOCK_ENET_25M_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Enet_25m, &rootCfg);
+
+    /* Configure ENET_TIMER1 using OSC_RC_48M_DIV2 */
+    rootCfg.mux = kCLOCK_ENET_TIMER1_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Enet_Timer1, &rootCfg);
+
+    /* Configure ENET_TIMER2 using OSC_RC_48M_DIV2 */
+    rootCfg.mux = kCLOCK_ENET_TIMER2_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Enet_Timer2, &rootCfg);
+
+    /* Configure ENET_TIMER3 using OSC_RC_48M_DIV2 */
+    rootCfg.mux = kCLOCK_ENET_TIMER3_ClockRoot_MuxOscRc48MDiv2;
+    rootCfg.div = 1;
+    CLOCK_SetRootClock(kCLOCK_Root_Enet_Timer3, &rootCfg);
 
     CLOCK_InitAudioPllWithFreq(96, false, 0, 0);
     CLOCK_SetRootClockMux(kCLOCK_Root_Mic, 6); // Audio PLL

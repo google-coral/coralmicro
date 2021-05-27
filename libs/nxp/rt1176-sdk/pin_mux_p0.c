@@ -113,6 +113,29 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_LPSR_01_MIC_BITSTREAM0, 3U);
 
+  // Ethernet
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_00_ENET_1G_RX_EN, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_01_ENET_1G_RX_CLK, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_02_ENET_1G_RX_DATA00, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_03_ENET_1G_RX_DATA01, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_04_ENET_1G_RX_DATA02, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_05_ENET_1G_RX_DATA03, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_06_ENET_1G_TX_DATA03, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_07_ENET_1G_TX_DATA02, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_08_ENET_1G_TX_DATA01, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_09_ENET_1G_TX_DATA00, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_10_ENET_1G_TX_EN, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_DISP_B1_11_ENET_1G_TX_CLK_IO, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_EMC_B2_19_ENET_1G_MDC, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_EMC_B2_20_ENET_1G_MDIO, 0U);
+  IOMUXC_SetPinMux(IOMUXC_GPIO_EMC_B2_02_GPIO8_IO12, 0U); // RGMII_PHY_INTB
+  IOMUXC_SetPinMux(IOMUXC_GPIO_EMC_B2_03_GPIO8_IO13, 0U); // ETHPHY_RST_B
+  IOMUXC_SetPinMux(IOMUXC_GPIO_AD_05_GPIO9_IO04, 0U); // Buffer
+
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_EMC_B2_02_GPIO8_IO12, 0x4U); // RGMII_PHY_INTB
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_EMC_B2_03_GPIO8_IO13, 0x4U); // ETHPHY_RST_B
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_05_GPIO9_IO04, 2U);
+
   // I2C5
   /* From freertos_lpi2c sample */
   IOMUXC_SetPinMux(
@@ -384,12 +407,6 @@ void BOARD_InitPins(void) {
   //     0U);                                    /* Software Input On Field: Input Path is determined by functionality */
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B2_18_SEMC_DQS4,        /* GPIO_EMC_B2_18 is configured as SEMC_DQS4 */
-      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_EMC_B2_19_SEMC_CLKX00,      /* GPIO_EMC_B2_19 is configured as SEMC_CLKX00 */
-      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_EMC_B2_20_SEMC_CLKX01,      /* GPIO_EMC_B2_20 is configured as SEMC_CLKX01 */
       0U);                                    /* Software Input On Field: Input Path is determined by functionality */
 
   // IOMUXC_SetPinMux(

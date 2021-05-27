@@ -5,6 +5,7 @@
 #include "third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.h"
 #include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_enet.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_semc.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
@@ -29,6 +30,9 @@ nand_handle_t* BOARD_GetNANDHandle(void) {
     return &nand_handle;
 }
 
+void BOARD_ENETFlexibleConfigure(enet_config_t *config) {
+    config->miiMode = kENET_RgmiiMode;
+}
 
 extern mcmgr_status_t MCMGR_EarlyInit(void) __attribute__((weak));
 extern mcmgr_status_t MCMGR_Init(void) __attribute__((weak));

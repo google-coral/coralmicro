@@ -40,6 +40,9 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kUserButton] = GPIO13,
     [Gpio::kCameraTrigger] = GPIO8,
     [Gpio::kAntennaSelect] = GPIO11,
+    [Gpio::kBtHostWake] = GPIO11,
+    [Gpio::kEthPhyRst] = GPIO8,
+    [Gpio::kBufferEnable] = GPIO9,
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = GPIO12,
 #endif
@@ -55,6 +58,9 @@ static uint32_t PinNameToPin[Gpio::kCount] = {
     [Gpio::kUserButton] = 3,
     [Gpio::kCameraTrigger] = 27,
     [Gpio::kAntennaSelect] = 7,
+    [Gpio::kBtHostWake] = 16,
+    [Gpio::kEthPhyRst] = 13,
+    [Gpio::kBufferEnable] = 4,
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = 7,
 #endif
@@ -106,6 +112,21 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
     },
+    [Gpio::kBtHostWake] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kEthPhyRst] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kBufferEnable] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 1,
+        .interruptMode = kGPIO_NoIntmode,
+    },
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = {
         .direction = kGPIO_DigitalOutput,
@@ -125,6 +146,9 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kUserButton] = GPIO13_Combined_0_31_IRQn,
     [Gpio::kCameraTrigger] = HardFault_IRQn,
     [Gpio::kAntennaSelect] = HardFault_IRQn,
+    [Gpio::kBtHostWake] = HardFault_IRQn,
+    [Gpio::kEthPhyRst] = HardFault_IRQn,
+    [Gpio::kBufferEnable] = HardFault_IRQn,
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = HardFault_IRQn,
 #endif
