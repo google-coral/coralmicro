@@ -33,7 +33,7 @@ extern "C" void app_main(void *param) {
     GPIO_PinWrite(GPIO13, 6, 1);
     while (true) {
         printf("M4 main loop\r\n");
-        valiant::CameraTask::GetSingleton()->Enable();
+        valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
         gpio_pin_config_t user_led = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
         GPIO_PinInit(GPIO13, 6, &user_led);
 

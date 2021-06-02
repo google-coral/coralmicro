@@ -27,7 +27,7 @@ extern "C" void app_main(void *param) {
     valiant::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));
     valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable();
+    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
 
     setup();
     while (true) {

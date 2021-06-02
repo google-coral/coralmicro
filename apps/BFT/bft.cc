@@ -100,7 +100,7 @@ TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
 
 TF_LITE_MICRO_TEST(CameraTest_CheckTestPattern) {
     valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable();
+    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
     valiant::CameraTask::GetSingleton()->SetTestPattern(
             valiant::camera::TestPattern::WALKING_ONES);
 

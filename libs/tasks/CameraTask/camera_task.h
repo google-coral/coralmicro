@@ -8,10 +8,17 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pxp.h"
 
 #include <functional>
+#include <list>
 
 namespace valiant {
 
 namespace camera {
+
+enum class Mode : uint8_t {
+    STANDBY = 0,
+    STREAMING = 1,
+    TRIGGER = 5,
+};
 
 enum class RequestType : uint8_t {
     Enable,
@@ -61,6 +68,7 @@ struct Request {
         FrameRequest frame;
         PowerRequest power;
         TestPatternRequest test_pattern;
+        Mode mode;
     } request;
     std::function<void(Response)> callback;
 };
@@ -121,6 +129,7 @@ struct FrameFormat {
     int width;
     int height;
     bool preserve_ratio;
+    uint8_t *buffer;
 };
 
 }  // namespace camera
@@ -136,14 +145,15 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
         static CameraTask pmic;
         return &pmic;
     }
-    void Enable();
+    void Enable(camera::Mode mode);
     void Disable();
     // TODO(atv): Convert this to return a class that cleans up?
     int GetFrame(uint8_t **buffer, bool block);
-    static bool GetFrame(const camera::FrameFormat& fmt, uint8_t *buffer);
+    static bool GetFrame(std::list<camera::FrameFormat> fmts);
     void ReturnFrame(int index);
     void SetPower(bool enable);
     void SetTestPattern(camera::TestPattern pattern);
+    void Trigger();
 
     // CSI driver wants width to be divisible by 8, and 324 is not.
     // 324 * 324 == 13122 * 8 -- this makes the CSI driver happy!
@@ -156,11 +166,12 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
   private:
     void TaskInit() override;
     void RequestHandler(camera::Request *req) override;
-    camera::EnableResponse HandleEnableRequest();
+    camera::EnableResponse HandleEnableRequest(const camera::Mode& mode);
     void HandleDisableRequest();
     void HandlePowerRequest(const camera::PowerRequest& power);
     camera::FrameResponse HandleFrameRequest(const camera::FrameRequest& frame);
     void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
+    void SetMode(const camera::Mode& mode);
     bool Read(camera::CameraRegisters reg, uint8_t *val);
     bool Write(camera::CameraRegisters reg, uint8_t val);
     void SetDefaultRegisters();
@@ -183,6 +194,7 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     csi_handle_t csi_handle_;
     csi_config_t csi_config_;
     SemaphoreHandle_t pxp_semaphore_;
+    camera::Mode mode_;
 };
 
 }  // namespace valiant

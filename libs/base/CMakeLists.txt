@@ -53,6 +53,7 @@ target_link_libraries(libs_base-m7_freertos
 add_library_m4(libs_base-m4_freertos STATIC
     console_m4.cc
     filesystem.cc
+    gpio.cc
     ipc.cc
     ipc_m4.cc
     main_freertos_m4.cc

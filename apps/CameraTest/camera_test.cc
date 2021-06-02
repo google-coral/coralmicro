@@ -1,4 +1,4 @@
-#include "libs/base/tasks.h"
+#include "libs/base/gpio.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -57,12 +57,41 @@ extern "C" void fs_close_custom(struct fs_file *file) {
     (void)file;
 }
 
+void GetFrame() {
+    valiant::camera::FrameFormat fmt_rgb, fmt_rgb_posenet, fmt_grayscale, fmt_grayscale_small;
+    fmt_rgb.fmt = valiant::camera::Format::RGB;
+    fmt_rgb.width = valiant::CameraTask::kWidth;
+    fmt_rgb.height = valiant::CameraTask::kHeight;
+    fmt_rgb.preserve_ratio = false;
+    fmt_rgb.buffer = camera_rgb;
+
+    fmt_rgb_posenet.fmt = valiant::camera::Format::RGB;
+    fmt_rgb_posenet.width = kPosenetWidth;
+    fmt_rgb_posenet.height = kPosenetHeight;
+    fmt_rgb_posenet.preserve_ratio = false;
+    fmt_rgb_posenet.buffer = camera_rgb_posenet;
+
+    fmt_grayscale.fmt = valiant::camera::Format::Y8;
+    fmt_grayscale.width = valiant::CameraTask::kWidth;
+    fmt_grayscale.height = valiant::CameraTask::kHeight;
+    fmt_grayscale.preserve_ratio = false;
+    fmt_grayscale.buffer = camera_grayscale;
+
+    fmt_grayscale_small.fmt = valiant::camera::Format::Y8;
+    fmt_grayscale_small.width = 96;
+    fmt_grayscale_small.height = 96;
+    fmt_grayscale_small.preserve_ratio = false;
+    fmt_grayscale_small.buffer = camera_grayscale_small;
+
+    valiant::CameraTask::GetFrame({fmt_rgb, fmt_rgb_posenet, fmt_grayscale, fmt_grayscale_small});
+}
+
 extern "C" void app_main(void *param) {
     printf("Camera test\r\n");
 
     // Enable Power, Streaming, and enable test pattern.
     valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable();
+    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
     valiant::CameraTask::GetSingleton()->SetTestPattern(
             valiant::camera::TestPattern::WALKING_ONES);
 
@@ -101,30 +130,27 @@ extern "C" void app_main(void *param) {
         index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
         valiant::CameraTask::GetSingleton()->ReturnFrame(index);
     }
-    valiant::camera::FrameFormat fmt;
-    fmt.fmt = valiant::camera::Format::RGB;
-    fmt.width = valiant::CameraTask::kWidth;
-    fmt.height = valiant::CameraTask::kHeight;
-    fmt.preserve_ratio = false;
-    valiant::CameraTask::GetFrame(fmt, camera_rgb);
+    GetFrame();
 
-    fmt.fmt = valiant::camera::Format::RGB;
-    fmt.width = kPosenetWidth;
-    fmt.height = kPosenetHeight;
-    fmt.preserve_ratio = false;
-    valiant::CameraTask::GetFrame(fmt, camera_rgb_posenet);
+    // Switch to triggered mode, the button press will capture and convert a new frame.
+    valiant::CameraTask::GetSingleton()->Disable();
+    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::TRIGGER);
 
-    fmt.fmt = valiant::camera::Format::Y8;
-    fmt.width = valiant::CameraTask::kWidth;
-    fmt.height = valiant::CameraTask::kHeight;
-    fmt.preserve_ratio = false;
-    valiant::CameraTask::GetFrame(fmt, camera_grayscale);
-
-    fmt.fmt = valiant::camera::Format::Y8;
-    fmt.width = 96;
-    fmt.height = 96;
-    fmt.preserve_ratio = false;
-    valiant::CameraTask::GetFrame(fmt, camera_grayscale_small);
+    TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
+    valiant::gpio::RegisterIRQHandler(valiant::gpio::Gpio::kUserButton, [current_task]() {
+        static TickType_t last_wake = 0;
+        TickType_t now = xTaskGetTickCountFromISR();
+        if ((now - last_wake) < pdMS_TO_TICKS(200)) {
+            return;
+        }
+        last_wake = now;
+        xTaskResumeFromISR(current_task);
+    });
+    while (true) {
+        valiant::CameraTask::GetSingleton()->Trigger();
+        GetFrame();
+        vTaskSuspend(NULL);
+    }
 
     // Disable streaming, and turn the power off.
     valiant::CameraTask::GetSingleton()->Disable();

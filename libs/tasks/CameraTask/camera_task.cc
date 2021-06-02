@@ -1,3 +1,4 @@
+#include "libs/base/gpio.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.h"
@@ -52,20 +53,45 @@ void CameraTask::PXP_IRQHandler() {
     }
 }
 
-bool CameraTask::GetFrame(const FrameFormat& fmt, uint8_t *buffer) {
+bool CameraTask::GetFrame(std::list<camera::FrameFormat> fmts) {
     bool ret = true;
     uint8_t *raw = nullptr;
     int index = GetSingleton()->GetFrame(&raw, true);
     if (!raw) {
         return false;
     }
+    if (GetSingleton()->mode_ == Mode::TRIGGER) {
+        gpio::SetGpio(gpio::Gpio::kCameraTrigger, false);
+    }
 
-    switch (fmt.fmt) {
-        case Format::RGB: {
-                if (fmt.width == kWidth && fmt.width == kHeight) {
-                    BayerToRGB(raw, buffer, fmt.width, fmt.height);
-                } else {
+    for (const camera::FrameFormat& fmt : fmts) {
+        switch (fmt.fmt) {
+            case Format::RGB: {
+                    if (fmt.width == kWidth && fmt.width == kHeight) {
+                        BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height);
+                    } else {
+                        std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
+                        BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
+                        PXPConfiguration input;
+                        input.data = buffer_rgba.get();
+                        input.fmt = Format::RGBA;
+                        input.width = kWidth;
+                        input.height = kHeight;
+                        PXPConfiguration output;
+                        output.data = fmt.buffer;
+                        output.fmt = Format::RGB;
+                        output.width = fmt.width;
+                        output.height = fmt.height;
+                        ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
+                    }
+                }
+                break;
+            case Format::Y8: {
                     std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
+                    if (!buffer_rgba) {
+                        ret = false;
+                        break;
+                    }
                     BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
                     PXPConfiguration input;
                     input.data = buffer_rgba.get();
@@ -73,36 +99,16 @@ bool CameraTask::GetFrame(const FrameFormat& fmt, uint8_t *buffer) {
                     input.width = kWidth;
                     input.height = kHeight;
                     PXPConfiguration output;
-                    output.data = buffer;
-                    output.fmt = Format::RGB;
+                    output.data = fmt.buffer;
+                    output.fmt = Format::Y8;
                     output.width = fmt.width;
                     output.height = fmt.height;
                     ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
                 }
-            }
-            break;
-        case Format::Y8: {
-                std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
-                if (!buffer_rgba) {
-                    ret = false;
-                    break;
-                }
-                BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
-                PXPConfiguration input;
-                input.data = buffer_rgba.get();
-                input.fmt = Format::RGBA;
-                input.width = kWidth;
-                input.height = kHeight;
-                PXPConfiguration output;
-                output.data = buffer;
-                output.fmt = Format::Y8;
-                output.width = fmt.width;
-                output.height = fmt.height;
-                ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
-            }
-            break;
-        default:
-            ret = false;
+                break;
+            default:
+                ret = false;
+        }
     }
 
     GetSingleton()->ReturnFrame(index);
@@ -282,6 +288,7 @@ void CameraTask::Init(lpi2c_rtos_handle_t *i2c_handle) {
     QueueTask::Init();
     i2c_handle_ = i2c_handle;
     pxp_semaphore_ = xSemaphoreCreateBinary();
+    mode_ = Mode::STANDBY;
 }
 
 int CameraTask::GetFrame(uint8_t** buffer, bool block) {
@@ -303,9 +310,10 @@ void CameraTask::ReturnFrame(int index) {
     SendRequest(req);
 }
 
-void CameraTask::Enable() {
+void CameraTask::Enable(Mode mode) {
     Request req;
     req.type = RequestType::Enable;
+    req.request.mode = mode;
     SendRequest(req);
 }
 
@@ -327,6 +335,10 @@ void CameraTask::SetTestPattern(TestPattern pattern) {
     req.type = RequestType::TestPattern;
     req.request.test_pattern.pattern = pattern;
     SendRequest(req);
+}
+
+void CameraTask::Trigger() {
+    gpio::SetGpio(gpio::Gpio::kCameraTrigger, true);
 }
 
 void CameraTask::TaskInit() {
@@ -403,18 +415,9 @@ void CameraTask::SetDefaultRegisters() {
     Write(CameraRegisters::FS_50HZ_L, 0xA0);
 }
 
-EnableResponse CameraTask::HandleEnableRequest() {
+EnableResponse CameraTask::HandleEnableRequest(const Mode& mode) {
     EnableResponse resp;
     status_t status;
-    uint8_t model_id_h = 0xff, model_id_l = 0xff;
-    Read(CameraRegisters::MODEL_ID_H, &model_id_h);
-    Read(CameraRegisters::MODEL_ID_L, &model_id_l);
-    Write(CameraRegisters::SW_RESET, 0x00);
-    if (model_id_h != kModelIdHExpected || model_id_l != kModelIdLExpected) {
-        printf("Camera model id not as expected: 0x%02x%02x\r\n", model_id_h, model_id_l);
-        resp.success = false;
-        return resp;
-    }
 
     // Gated clock mode
     uint8_t osc_clk_div;
@@ -429,7 +432,11 @@ EnableResponse CameraTask::HandleEnableRequest() {
 
     status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
 
-    for (int i = 0; i < kFramebufferCount; i++) {
+    int framebuffer_count = kFramebufferCount;
+    if (mode == Mode::TRIGGER) {
+        framebuffer_count = 2;
+    }
+    for (int i = 0; i < framebuffer_count; i++) {
         status = CSI_TransferSubmitEmptyBuffer(CSI, &csi_handle_, reinterpret_cast<uint32_t>(framebuffers[i]));
     }
 
@@ -443,13 +450,13 @@ EnableResponse CameraTask::HandleEnableRequest() {
 
     // Streaming
     status = CSI_TransferStart(CSI, &csi_handle_);
-    Write(CameraRegisters::MODE_SELECT, 1);
+    SetMode(mode);
     resp.success = (status == kStatus_Success);
     return resp;
 }
 
 void CameraTask::HandleDisableRequest() {
-    Write(CameraRegisters::MODE_SELECT, 0);
+    SetMode(Mode::STANDBY);
     CSI_TransferStop(CSI, &csi_handle_);
     NVIC_DisableIRQ(PXP_IRQn);
 }
@@ -460,6 +467,18 @@ void CameraTask::HandlePowerRequest(const PowerRequest& power) {
     PmicTask::GetSingleton()->SetRailState(
             pmic::Rail::CAM_1V8, power.enable);
     vTaskDelay(pdMS_TO_TICKS(10));
+
+    if (power.enable) {
+        uint8_t model_id_h = 0xff, model_id_l = 0xff;
+        Read(CameraRegisters::MODEL_ID_H, &model_id_h);
+        Read(CameraRegisters::MODEL_ID_L, &model_id_l);
+        Write(CameraRegisters::SW_RESET, 0x00);
+        if (model_id_h != kModelIdHExpected || model_id_l != kModelIdLExpected) {
+            printf("Camera model id not as expected: 0x%02x%02x\r\n", model_id_h, model_id_l);
+            // resp.success = false;
+            // return resp;
+        }
+    }
 }
 
 FrameResponse CameraTask::HandleFrameRequest(const FrameRequest& frame) {
@@ -495,12 +514,17 @@ void CameraTask::HandleTestPatternRequest(const TestPatternRequest& test_pattern
     Write(CameraRegisters::TEST_PATTERN_MODE, static_cast<uint8_t>(test_pattern.pattern));
 }
 
+void CameraTask::SetMode(const Mode& mode) {
+    Write(CameraRegisters::MODE_SELECT, static_cast<uint8_t>(mode));
+    mode_ = mode;
+}
+
 void CameraTask::RequestHandler(Request *req) {
     Response resp;
     resp.type = req->type;
     switch (req->type) {
         case RequestType::Enable:
-            resp.response.enable = HandleEnableRequest();
+            resp.response.enable = HandleEnableRequest(req->request.mode);
             break;
         case RequestType::Disable:
             HandleDisableRequest();

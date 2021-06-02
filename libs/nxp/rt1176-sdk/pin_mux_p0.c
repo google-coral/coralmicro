@@ -70,17 +70,28 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_EMC_B2_13_GPIO8_IO23,
       0U);
 
-  // LED pins (don't work because of tamper protect?)
+  // LED pins
   IOMUXC_SetPinMux(
-      IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06, 1U);
+      IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06, 0U);
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06,
       0x2U);
   IOMUXC_SetPinMux(
-      IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05, 1U);
+      IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05, 0U);
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05,
       0x2U);
+
+  // User button (pulled-up, input)
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SNVS_00_DIG_GPIO13_IO03,
+      1U
+  );
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SNVS_00_DIG_GPIO13_IO03,
+      0xCU
+  );
+
 
   // Crypto RST
   IOMUXC_SetPinMux(
@@ -469,6 +480,8 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_AD_13_VIDEO_MUX_CSI_MCLK, 0U);
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_AD_12_VIDEO_MUX_CSI_PIXCLK, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_EMC_B2_17_GPIO8_IO27, 0U);
 
   /* WLAN */
   IOMUXC_SetPinMux(

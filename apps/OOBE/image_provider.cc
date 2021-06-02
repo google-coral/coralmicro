@@ -17,7 +17,8 @@ TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
     fmt.height = image_height;
     fmt.fmt = valiant::camera::Format::Y8;
     fmt.preserve_ratio = false;
-    bool ret = valiant::CameraTask::GetFrame(fmt, unsigned_image_data.get());
+    fmt.buffer = unsigned_image_data.get();
+    bool ret = valiant::CameraTask::GetFrame({fmt});
     for (int i = 0; i < image_width * image_height; ++i) {
         image_data[i] = unsigned_image_data[i] - 128;
     }

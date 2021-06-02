@@ -9,7 +9,7 @@ extern "C" void app_main(void *param) {
     valiant::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(500));
     valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable();
+    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
     if (!valiant::posenet::setup()) {
@@ -33,7 +33,8 @@ extern "C" void app_main(void *param) {
         fmt.height = input->dims->data[1];
         fmt.fmt = valiant::camera::Format::RGB;
         fmt.preserve_ratio = false;
-        valiant::CameraTask::GetFrame(fmt, tflite::GetTensorData<uint8_t>(input));
+        fmt.buffer = tflite::GetTensorData<uint8_t>(input);
+        valiant::CameraTask::GetFrame({fmt});
         valiant::posenet::loop(&output);
     }
     valiant::EdgeTpuTask::GetSingleton()->SetPower(false);

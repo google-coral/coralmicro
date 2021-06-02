@@ -27,7 +27,7 @@ extern "C" void app_main(void *param) {
         printf("CM7 awoken\r\n");
 
         valiant::posenet::Output output;
-        valiant::CameraTask::GetSingleton()->Enable();
+        valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
 
         TickType_t last_good_pose = xTaskGetTickCount();
         while (true) {
@@ -37,7 +37,8 @@ extern "C" void app_main(void *param) {
             fmt.height = input->dims->data[1];
             fmt.fmt = valiant::camera::Format::RGB;
             fmt.preserve_ratio = false;
-            valiant::CameraTask::GetFrame(fmt, tflite::GetTensorData<uint8_t>(input));
+            fmt.buffer = tflite::GetTensorData<uint8_t>(input);
+            valiant::CameraTask::GetFrame({fmt});
             valiant::posenet::loop(&output);
 
             bool good_pose = false;
