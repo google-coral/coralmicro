@@ -9,6 +9,7 @@ import serial
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 import time
 import usb.core
@@ -307,34 +308,49 @@ state_handlers = {
 }
 
 def main():
+    # Check if we're running from inside a pyinstaller binary.
+    # The true branch is pyinstaller, false branch is executing directly.
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        root_dir = os.path.abspath(os.path.dirname(__file__))
+    else:
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     parser = argparse.ArgumentParser(description='Valiant flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--build_dir', type=str, required=True)
+    parser.add_argument('--build_dir', type=str)
     parser.add_argument('--app', type=str, required=True)
     parser.add_argument('--ram', dest='ram', action='store_true')
     parser.add_argument('--noram', dest='ram', action='store_false')
+    parser.add_argument('--elf_path', type=str, required=False)
+    parser.add_argument('--elfloader_path', type=str, required=False)
+    parser.add_argument('--strip', dest='strip', action='store_true')
+    parser.add_argument('--toolchain', type=str, required=False)
     parser.set_defaults(ram=False)
+    parser.set_defaults(strip=False)
     args = parser.parse_args()
 
-    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    build_dir = os.path.abspath(args.build_dir)
-    app_dir = os.path.join(build_dir, 'apps', args.app)
-    elf_path = os.path.join(app_dir, args.app + '.stripped')
-    elfloader_path = os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
+    build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
+    app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir else None
+    elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, args.app + '.stripped')
+    elfloader_path = args.elfloader_path if args.elfloader_path else os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
     elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb')
     mklfs_path = os.path.join(root_dir, 'third_party', 'mklfs', 'mklfs')
+    toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
-        build_dir,
-        app_dir,
         elf_path,
         elfloader_path,
         blhost_path,
         flashloader_path,
         elftosb_path,
         mklfs_path,
+        toolchain_path,
     ]
+
+    if not args.elfloader_path or not args.elf_path:
+        paths_to_check.append(build_dir)
+        paths_to_check.append(app_dir)
+
     all_paths_exist = True
     for path in paths_to_check:
         if not os.path.exists(path):
@@ -342,6 +358,10 @@ def main():
             all_paths_exist = False
     if not all_paths_exist:
         return
+
+    if args.strip:
+        subprocess.check_call([os.path.join(toolchain_path, 'arm-none-eabi-strip'), '-s', elf_path, '-o', elf_path + '.stripped'])
+        elf_path = elf_path + '.stripped'
 
     with tempfile.TemporaryDirectory() as workdir:
         sbfile_path = None

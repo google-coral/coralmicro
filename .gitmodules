@@ -37,3 +37,6 @@
 [submodule "third_party/cyw-bt-patch"]
 	path = third_party/cyw-bt-patch
 	url = https://github.com/murata-wireless/cyw-bt-patch.git
+[submodule "third_party/ArduinoCore-API"]
+	path = third_party/ArduinoCore-API
+	url = https://github.com/arduino/ArduinoCore-API

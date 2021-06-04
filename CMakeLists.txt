@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
+include(${CMAKE_SOURCE_DIR}/cmake/bundle_static_library.cmake)
+
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain-arm-none-eabi-gcc.cmake)
 endif()
