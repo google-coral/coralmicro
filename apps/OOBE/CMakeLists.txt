@@ -3,7 +3,8 @@ project(OOBE)
 
 add_executable_m7(OOBE
     oobe_cm7.cc
-    OOBEM4.obj
+    M4_EXECUTABLE
+    OOBEM4
 )
 
 target_link_libraries(OOBE
@@ -15,6 +16,8 @@ add_executable_m4(OOBEM4
     image_provider.cc
     oobe_cm4.cc
     main_functions.cc
+    DATA
+    ${CMAKE_SOURCE_DIR}/models/person_detect_model.tflite
 )
 
 target_link_libraries(OOBEM4

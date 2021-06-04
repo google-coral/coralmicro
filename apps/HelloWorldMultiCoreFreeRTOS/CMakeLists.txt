@@ -3,7 +3,8 @@ project(HelloWorldMultiCoreFreeRTOS)
 
 add_executable_m7(HelloWorldMultiCoreFreeRTOS
     hello_world_cm7.cc
-    HelloWorldMultiCoreFreeRTOSM4.obj
+    M4_EXECUTABLE
+    HelloWorldMultiCoreFreeRTOSM4
 )
 
 target_include_directories(HelloWorldMultiCoreFreeRTOS PRIVATE

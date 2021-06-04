@@ -5,7 +5,12 @@ include_directories(.)
 
 add_executable_m7(BFT
     bft.cc
-    BFTM4.obj
+    M4_EXECUTABLE
+    BFTM4
+    DATA
+    ${CMAKE_SOURCE_DIR}/models/testconv1-edgetpu.tflite
+    ${CMAKE_SOURCE_DIR}/models/testconv1-expected-output.bin
+    ${CMAKE_SOURCE_DIR}/models/testconv1-test-input.bin
 )
 
 target_link_libraries(BFT

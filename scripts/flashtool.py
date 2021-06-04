@@ -30,20 +30,6 @@ ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
 ELFLOADER_DONE = 2
 
-# Key: path in Valiant source tree
-# Value: path in on-device filesystem
-FILESYSTEM_FILES = {
-    os.path.join('third_party', 'firmware', 'cypress', '43455C0.bin'): os.path.join('firmware', '43455C0.bin'),
-    os.path.join('third_party', 'firmware', 'cypress', '43455C0.clm_blob'): os.path.join('firmware', '43455C0.clm_blob'),
-    os.path.join('third_party', 'cyw-bt-patch', 'BCM4345C0_003.001.025.0144.0266.1MW.hcd'): os.path.join('firmware', 'BCM4345C0_003.001.025.0144.0266.1MW.hcd'),
-    os.path.join('models', 'person_detect_model.tflite'): os.path.join('models', 'person_detect_model.tflite'),
-    os.path.join('models', 'testconv1-edgetpu.tflite'): os.path.join('models', 'testconv1-edgetpu.tflite'),
-    os.path.join('models', 'testconv1-expected-output.bin'): os.path.join('models', 'testconv1-expected-output.bin'),
-    os.path.join('models', 'testconv1-test-input.bin'): os.path.join('models', 'testconv1-test-input.bin'),
-    os.path.join('models', 'posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite'): os.path.join('models', 'posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite'),
-    os.path.join('models', 'posenet_test_input.bin'): os.path.join('models', 'posenet_test_input.bin'),
-}
-
 def sdp_vidpid():
     return '{},{}'.format(hex(SDP_VID), hex(SDP_PID))
 
@@ -68,21 +54,69 @@ def is_flashloader_connected():
             return True
     return False
 
-def CreateFilesystem(workdir, root_dir, mklfs_path, files, elf_path):
+"""
+Gets the full set of libraries that comprise a target executable.
+
+Args:
+  build_dir: path to CMake output directory
+  libs_path: path to .libs file of target executable
+  scanned: set of already scanned libraries. Pass set() for initial call,
+           recursive calls use this data to break cycles.
+
+Returns:
+  A set containing .libs file of all library dependencies
+"""
+def GetLibs(build_dir, libs_path, scanned):
+    libs_found = set()
+    with open(libs_path, 'r') as f:
+        libs = f.readline().split(';')
+        for lib in libs:
+            for root, dirs, files in os.walk(build_dir):
+                for file in files:
+                    libs_path = os.path.join(root, file)
+                    if libs_path in scanned:
+                        continue
+                    if (file == lib + '.libs'):
+                        libs_found.add(libs_path)
+    sublibs = set()
+    for lib in libs_found:
+        sublibs |= GetLibs(build_dir, lib, scanned | libs_found)
+    return libs_found | sublibs
+
+def CreateFilesystem(workdir, root_dir, build_dir, mklfs_path, elf_path):
+    libs_path = os.path.splitext(elf_path)[0] + '.libs'
+    m4_exe_path = os.path.splitext(elf_path)[0] + '.m4_executable'
+    libs = GetLibs(build_dir, libs_path, set())
+    libs.add(libs_path)
+    if os.path.exists(m4_exe_path):
+        with open(m4_exe_path) as f:
+            m4_exe = f.readline()
+        m4_exe_libs = os.path.join(os.path.dirname(m4_exe_path), m4_exe) + '.libs'
+        libs |= GetLibs(build_dir,
+                           m4_exe_libs,
+                           set())
+        libs.add(m4_exe_libs)
+    data_files = set()
+    for lib in libs:
+        data_path = os.path.splitext(lib)[0] + '.data'
+        with open(data_path, 'r') as f:
+            data_files |= set(f.readline().split(';'))
+    data_files.remove('')
+
     filesystem_dir = os.path.join(workdir, 'filesystem')
     filesystem_bin = os.path.join(workdir, 'filesystem.bin')
     all_files_exist = True
-    for k, _ in files.items():
-        path = os.path.join(root_dir, k)
+    for file in data_files:
+        path = os.path.join(root_dir, file)
         if not os.path.exists(path):
             print('%s does not exist!' % path)
             all_files_exist = False
     if not all_files_exist:
         return None
 
-    for k, v in files.items():
-        source_path = os.path.join(root_dir, k)
-        target_path = os.path.join(filesystem_dir, v)
+    for file in data_files:
+        source_path = file
+        target_path = file.replace(root_dir, filesystem_dir)
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         shutil.copyfile(source_path, target_path)
     shutil.copyfile(elf_path, os.path.join(filesystem_dir, 'default.elf'))
@@ -311,7 +345,7 @@ def main():
     with tempfile.TemporaryDirectory() as workdir:
         sbfile_path = None
         if not args.ram:
-            filesystem_path = CreateFilesystem(workdir, root_dir, mklfs_path, FILESYSTEM_FILES, elf_path)
+            filesystem_path = CreateFilesystem(workdir, root_dir, build_dir, mklfs_path, elf_path)
             if not filesystem_path:
                 print('Creating filesystem failed, exit')
                 return
