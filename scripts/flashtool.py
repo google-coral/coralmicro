@@ -114,6 +114,7 @@ def CreateFilesystem(workdir, root_dir, build_dir, mklfs_path, elf_path):
     if not all_files_exist:
         return None
 
+    os.makedirs(filesystem_dir)
     for file in data_files:
         source_path = file
         target_path = file.replace(root_dir, filesystem_dir)
