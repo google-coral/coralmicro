@@ -3,6 +3,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
 
 namespace valiant {
 namespace gpio {
@@ -113,6 +114,61 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kAntennaSelect] = HardFault_IRQn,
 };
 
+static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
+    [Gpio::kPowerLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
+    [Gpio::kUserLED] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
+    [Gpio::kEdgeTpuPgood] = {IOMUXC_GPIO_EMC_B2_16_GPIO8_IO26},
+    [Gpio::kEdgeTpuReset] = {IOMUXC_GPIO_EMC_B2_14_GPIO8_IO24},
+    [Gpio::kEdgeTpuPmic] = {IOMUXC_GPIO_EMC_B2_15_GPIO8_IO25},
+    [Gpio::kBtRegOn] = {IOMUXC_GPIO_AD_35_GPIO10_IO02},
+    [Gpio::kUserButton] = {IOMUXC_GPIO_SNVS_00_DIG_GPIO13_IO03},
+    [Gpio::kCameraTrigger] = {IOMUXC_GPIO_EMC_B2_17_GPIO8_IO27},
+};
+
+static uint32_t PinNameToPullMask[Gpio::kCount] = {
+    [Gpio::kPowerLED] = 0x0000000C,
+    [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kEdgeTpuPgood] = 0x0000000C,
+    [Gpio::kEdgeTpuReset] = 0x0000000C,
+    [Gpio::kEdgeTpuPmic] = 0x0000000C,
+    [Gpio::kBtRegOn] = 0x0000000C,
+    [Gpio::kUserButton] = 0x0000000C,
+    [Gpio::kCameraTrigger] = 0x0000000C,
+};
+
+static uint32_t PinNameToNoPull[Gpio::kCount] = {
+    [Gpio::kPowerLED] = 0x0000000C,
+    [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kEdgeTpuPgood] = 0x0000000C,
+    [Gpio::kEdgeTpuReset] = 0x0000000C,
+    [Gpio::kEdgeTpuPmic] = 0x0000000C,
+    [Gpio::kBtRegOn] = 0x00000000,
+    [Gpio::kUserButton] = 0x00000000,
+    [Gpio::kCameraTrigger] = 0x0000000C,
+};
+
+static uint32_t PinNameToPullUp[Gpio::kCount] = {
+    [Gpio::kPowerLED] = 0x0000000C,
+    [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kEdgeTpuPgood] = 0x00000004,
+    [Gpio::kEdgeTpuReset] = 0x00000004,
+    [Gpio::kEdgeTpuPmic] = 0x00000004,
+    [Gpio::kBtRegOn] = 0x0000000C,
+    [Gpio::kUserButton] = 0x0000000C,
+    [Gpio::kCameraTrigger] = 0x00000004,
+};
+
+static uint32_t PinNameToPullDown[Gpio::kCount] = {
+    [Gpio::kPowerLED] = 0x00000004,
+    [Gpio::kUserLED] = 0x00000004,
+    [Gpio::kEdgeTpuPgood] = 0x00000008,
+    [Gpio::kEdgeTpuReset] = 0x00000008,
+    [Gpio::kEdgeTpuPmic] = 0x00000008,
+    [Gpio::kBtRegOn] = 0x00000008,
+    [Gpio::kUserButton] = 0x00000004,
+    [Gpio::kCameraTrigger] = 0x00000008,
+};
+
 static GpioCallback IRQHandlers[Gpio::kCount];
 
 void Init() {
@@ -146,6 +202,25 @@ void SetGpio(Gpio gpio, bool enable) {
 bool GetGpio(Gpio gpio) {
     MutexLock lock(gpio_semaphore);
     return !!GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
+}
+
+void SetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
+    auto *config = &PinNameToConfig[gpio];
+    config->direction = input ? kGPIO_DigitalInput : kGPIO_DigitalOutput;
+    GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
+    auto iomuxc = PinNameToIOMUXC[gpio];
+    uint32_t pin_config = *((volatile uint32_t*)iomuxc[4]);
+    pin_config &= ~PinNameToPullMask[gpio];
+    if (pull) {
+        if (pull_direction) {// up
+            pin_config |= PinNameToPullUp[gpio];
+        } else {
+            pin_config |= PinNameToPullDown[gpio];
+        }
+    } else {
+        pin_config |= PinNameToNoPull[gpio];
+    }
+    IOMUXC_SetPinConfig(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4], pin_config);
 }
 
 void RegisterIRQHandler(Gpio gpio, GpioCallback cb) {
