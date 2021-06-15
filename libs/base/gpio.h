@@ -15,6 +15,7 @@ enum Gpio {
     kBtRegOn,
     kUserButton,
     kCameraTrigger,
+    kAntennaSelect,
     kCount
 };
 using GpioCallback = std::function<void()>;

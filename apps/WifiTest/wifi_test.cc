@@ -1,3 +1,4 @@
+#include "libs/base/gpio.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include <cstdio>
@@ -13,6 +14,9 @@ extern "C" void app_main(void *param) {
     const uint8_t ucNumNetworks = 50;
     WIFIScanResult_t xScanResults[ucNumNetworks] = {0};
 
+    // Uncomment me to use the external antenna.
+    // valiant::gpio::SetGpio(valiant::gpio::Gpio::kAntennaSelect, true);
+
     do {
         xWifiStatus = WIFI_On();
         if (xWifiStatus != eWiFiSuccess) {
@@ -26,7 +30,7 @@ extern "C" void app_main(void *param) {
         }
 
         for (int i = 0; i < ucNumNetworks; ++i) {
-            printf("cSSID: %s\r\n", xScanResults[i].cSSID);
+            printf("cSSID: %s RSSI: %d\r\n", xScanResults[i].cSSID, xScanResults[i].cRSSI);
         }
 
         WIFINetworkParams_t xNetworkParams;

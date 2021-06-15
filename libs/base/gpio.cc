@@ -38,6 +38,7 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kBtRegOn] = GPIO10,
     [Gpio::kUserButton] = GPIO13,
     [Gpio::kCameraTrigger] = GPIO8,
+    [Gpio::kAntennaSelect] = GPIO11,
 };
 
 static uint32_t PinNameToPin[Gpio::kCount] = {
@@ -49,6 +50,7 @@ static uint32_t PinNameToPin[Gpio::kCount] = {
     [Gpio::kBtRegOn] = 2,
     [Gpio::kUserButton] = 3,
     [Gpio::kCameraTrigger] = 27,
+    [Gpio::kAntennaSelect] = 7,
 };
 
 static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
@@ -92,6 +94,11 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
     },
+    [Gpio::kAntennaSelect] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
 };
 
 static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
@@ -103,6 +110,7 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kBtRegOn] = HardFault_IRQn,
     [Gpio::kUserButton] = GPIO13_Combined_0_31_IRQn,
     [Gpio::kCameraTrigger] = HardFault_IRQn,
+    [Gpio::kAntennaSelect] = HardFault_IRQn,
 };
 
 static GpioCallback IRQHandlers[Gpio::kCount];
