@@ -150,7 +150,7 @@ set(libs_nxp_rt1176-sdk-mcmgr_COMPILE_DEFINITIONS
     MCMGR_HANDLE_EXCEPTIONS=1
 )
 
-add_library_m7(libs_nxp_rt1176-sdk-mcmgr_m7 OBJECT
+add_library_m7(libs_nxp_rt1176-sdk-mcmgr_m7 STATIC
     ${libs_nxp_rt1176-sdk-mcmgr_SOURCES}
 )
 target_compile_definitions(libs_nxp_rt1176-sdk-mcmgr_m7 PUBLIC
@@ -160,13 +160,13 @@ target_link_libraries(libs_nxp_rt1176-sdk-mcmgr_m7 PUBLIC
     libs_nxp_rt1176-sdk_freertos
 )
 
-add_library_m7(libs_nxp_rt1176-sdk_bm OBJECT
+add_library_m7(libs_nxp_rt1176-sdk_bm STATIC
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
 )
 
-add_library_m4(libs_nxp_rt1176-sdk_bm-m4 OBJECT
+add_library_m4(libs_nxp_rt1176-sdk_bm-m4 STATIC
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
@@ -204,7 +204,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_bm-m4
     ${libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES}
 )
 
-add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
+add_library_m7(libs_nxp_rt1176-sdk_freertos STATIC
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
@@ -213,7 +213,7 @@ add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
     ${libs_FreeRTOS_SOURCES}
 )
 
-add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
+add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 STATIC
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
@@ -420,6 +420,3 @@ target_link_libraries(libs_nxp_rt1176-sdk_wiced
     libs_nxp_rt1176-sdk_lwip
     libs_nxp_rt1176-sdk_sdmmc
 )
-
-target_sources(libs_nxp_rt1176-sdk_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
-target_sources(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS-m4>)
