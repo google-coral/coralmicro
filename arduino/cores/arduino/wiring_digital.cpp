@@ -11,6 +11,8 @@ static valiant::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
             return valiant::gpio::Gpio::kUserLED;
         case PIN_BTN:
             return valiant::gpio::Gpio::kUserButton;
+        case D0:
+            return valiant::gpio::Gpio::kArduinoD0;
         default:
             assert(false);
             return valiant::gpio::Gpio::kCount;

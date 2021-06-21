@@ -16,6 +16,11 @@ enum Gpio {
     kUserButton,
     kCameraTrigger,
     kAntennaSelect,
+
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    kArduinoD0,
+#endif
+
     kCount
 };
 using GpioCallback = std::function<void()>;

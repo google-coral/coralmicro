@@ -1,7 +1,13 @@
 #include "Arduino.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.h"
 
 void delay(unsigned long ms) {
     vTaskDelay(pdMS_TO_TICKS(ms));
+}
+
+void delayMicroseconds(unsigned int us) {
+    SDK_DelayAtLeastUs(us, CLOCK_GetFreq(kCLOCK_CpuClk));
 }

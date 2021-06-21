@@ -7,4 +7,6 @@
 #define LED_BUILTIN (PIN_LED)
 #define LEDG (PIN_LED)
 
+#define D0 (0U)
+
 #endif  // __PINS_ARDUINO_H__

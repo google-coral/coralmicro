@@ -26,6 +26,11 @@ if (NOT DEFINED WIFI_PSK)
 endif()
 ADD_DEFINITIONS(-DWIFI_PSK="${WIFI_PSK}")
 
+if (NOT DEFINED VALIANT_ARDUINO)
+    SET(VALIANT_ARDUINO 0)
+endif()
+ADD_DEFINITIONS(-DVALIANT_ARDUINO=${VALIANT_ARDUINO})
+
 project(valiant)
 include_directories(.)
 add_subdirectory(apps)

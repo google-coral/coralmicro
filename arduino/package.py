@@ -33,7 +33,7 @@ def main():
         # and build the arduino library bundle.
         build_dir = os.path.join(tmpdir, 'build')
         os.makedirs(build_dir)
-        subprocess.check_call(['cmake', root_dir], cwd=build_dir)
+        subprocess.check_call(['cmake', root_dir, '-DVALIANT_ARDUINO=1'], cwd=build_dir)
         subprocess.check_call(['make', '-C', build_dir, '-j', str(multiprocessing.cpu_count()), 'bundling_target', 'ELFLoader'])
         libs_dir = os.path.join(core_out_dir, 'variants', 'VALIANT', 'libs')
         os.makedirs(libs_dir, exist_ok=True)

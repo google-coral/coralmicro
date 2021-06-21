@@ -1,0 +1,1 @@
+../../../../../../../../../third_party/nxp/rt1176-sdk/devices/MIMXRT1176/MIMXRT1176_cm7.h

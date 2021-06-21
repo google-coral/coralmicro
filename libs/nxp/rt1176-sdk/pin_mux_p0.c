@@ -25,6 +25,8 @@ processor_version: 0.0.2
 #include "fsl_iomuxc.h"
 #include "pin_mux.h"
 
+void InitArduinoPins(void);
+
 /* FUNCTION ************************************************************************************************************
  * 
  * Function Name : BOARD_InitBootPins
@@ -581,7 +583,17 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_DISP_B2_13_LPUART2_RTS_B, 0U);
 
 #endif
+
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    InitArduinoPins();
+#endif
 }
+
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+void InitArduinoPins(void) {
+    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_07_GPIO12_IO07, 0U);
+}
+#endif
 
 /***********************************************************************************************************************
  * EOF
