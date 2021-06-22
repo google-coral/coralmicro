@@ -25,6 +25,7 @@ add_library_m7(libs_base-m7_freertos STATIC
     main_freertos_m7.cc
     random.cc
     reset.cc
+    timer.cc
 )
 
 if (VALIANT_BOARD_REVISION STREQUAL P0)

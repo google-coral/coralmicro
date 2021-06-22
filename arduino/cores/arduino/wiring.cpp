@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "libs/base/timer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.h"
@@ -10,4 +11,12 @@ void delay(unsigned long ms) {
 
 void delayMicroseconds(unsigned int us) {
     SDK_DelayAtLeastUs(us, CLOCK_GetFreq(kCLOCK_CpuClk));
+}
+
+unsigned long millis() {
+    return valiant::timer::millis();
+}
+
+unsigned long micros() {
+    return valiant::timer::micros();
 }

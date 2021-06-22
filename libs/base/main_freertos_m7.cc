@@ -4,6 +4,7 @@
 #include "libs/base/ipc.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks.h"
+#include "libs/base/timer.h"
 #include "libs/CdcEem/cdc_eem.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
@@ -41,6 +42,7 @@ extern "C" void BOARD_InitHardware();
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware();
+    valiant::timer::Init();
     valiant::gpio::Init();
     valiant::IPC::GetSingleton()->Init();
     valiant::Random::GetSingleton()->Init();
