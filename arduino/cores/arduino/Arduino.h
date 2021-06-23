@@ -2,8 +2,12 @@
 #define Arduino_h
 
 #include <api/ArduinoAPI.h>
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "HardwareSerial.h"
 #include "pins_arduino.h"
+
+#define interrupts() portENABLE_INTERRUPTS()
+#define noInterrupts() portDISABLE_INTERRUPTS()
 
 extern valiant::arduino::HardwareSerial Serial;
 
