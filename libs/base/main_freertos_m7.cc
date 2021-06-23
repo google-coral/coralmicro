@@ -6,6 +6,7 @@
 #include "libs/base/tasks.h"
 #include "libs/base/timer.h"
 #include "libs/CdcEem/cdc_eem.h"
+#include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
@@ -38,10 +39,9 @@ void InitializeCDCEEM() {
 
 extern "C" void httpd_init(void) __attribute__((weak));
 extern "C" void app_main(void *param);
-extern "C" void BOARD_InitHardware();
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
-    BOARD_InitHardware();
+    BOARD_InitHardware(true);
     valiant::timer::Init();
     valiant::gpio::Init();
     valiant::IPC::GetSingleton()->Init();

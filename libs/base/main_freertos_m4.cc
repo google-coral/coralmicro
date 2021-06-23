@@ -2,6 +2,7 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/ipc.h"
 #include "libs/base/tasks.h"
+#include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -13,11 +14,10 @@
 
 lpi2c_rtos_handle_t i2c5_handle;
 extern "C" void app_main(void *param);
-extern "C" void BOARD_InitHardware();
 
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
-    BOARD_InitHardware();
+    BOARD_InitHardware(true);
     valiant::IPC::GetSingleton()->Init();
     valiant::ConsoleInit();
     valiant::filesystem::Init();

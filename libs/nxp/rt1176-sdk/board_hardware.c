@@ -1,4 +1,5 @@
 #include "libs/nxp/rt1176-sdk/board.h"
+#include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/nxp/rt1176-sdk/peripherals.h"
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.h"
@@ -146,12 +147,14 @@ void BOARD_FuseTamper(void) {
 }
 #endif
 
-void BOARD_InitHardware(void) {
+void BOARD_InitHardware(bool init_console) {
     MCMGR_Init();
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
-    BOARD_InitDebugConsole();
+    if (init_console) {
+        BOARD_InitDebugConsole();
+    }
 #if __CORTEX_M == 7
     if (!BOARD_InitSEMC()) {
         printf("Failed to initialize SDRAM.\r\n");

@@ -1,12 +1,12 @@
 #include "apps/ELFLoader/elf_loader.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/tasks.h"
+#include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
 #include "libs/usb/descriptors.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/freertos_kernel/include/timers.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include <elf.h>
 #include <memory>
 
@@ -140,9 +140,8 @@ static void usb_timer_callback(TimerHandle_t timer) {
     xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, nullptr, APP_TASK_PRIORITY, NULL);
 }
 
-extern "C" void BOARD_InitHardware();
 extern "C" int main(int argc, char **argv) {
-    BOARD_InitHardware();
+    BOARD_InitHardware(false);
     valiant::filesystem::Init();
 
     TaskHandle_t usb_task;
