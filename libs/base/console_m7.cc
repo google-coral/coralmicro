@@ -1,6 +1,7 @@
 #include "libs/base/console_m7.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/message_buffer.h"
+#include "libs/base/mutex.h"
 #include "libs/base/tasks.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
@@ -26,7 +27,8 @@ extern "C" int _read(int handle, char *buffer, int size) {
         return -1;
     }
 
-    return -1;
+    int bytes_read = valiant::ConsoleM7::GetSingleton()->Read(buffer, size);
+    return bytes_read > 0 ? bytes_read : -1;
 }
 
 namespace valiant {
@@ -39,6 +41,30 @@ void ConsoleM7::Write(char *buffer, int size) {
     };
     memcpy(msg.str, buffer, size);
     xQueueSend(console_queue_, &msg, portMAX_DELAY);
+}
+
+int ConsoleM7::Read(char *buffer, int size) {
+    MutexLock lock(rx_mutex_);
+    int bytes_to_return = std::min(size, static_cast<int>(rx_buffer_available_));
+
+    if (!bytes_to_return) {
+        return -1;
+    }
+
+    int bytes_to_read = bytes_to_return;
+    if (rx_buffer_read_ > rx_buffer_write_) {
+        memcpy(buffer, &rx_buffer_[rx_buffer_read_], kRxBufferSize - rx_buffer_read_);
+        bytes_to_read -= kRxBufferSize - rx_buffer_read_;
+        if (bytes_to_read) {
+            memcpy(buffer + (bytes_to_return - bytes_to_read), &rx_buffer_[0], bytes_to_read);
+        }
+    } else {
+        memcpy(buffer, &rx_buffer_[rx_buffer_read_], bytes_to_read);
+    }
+    rx_buffer_available_ -= bytes_to_return;
+    rx_buffer_read_ = (rx_buffer_read_ + bytes_to_return) % kRxBufferSize;
+
+    return bytes_to_return;
 }
 
 void ConsoleM7::StaticM4ConsoleTaskFn(void *param) {
@@ -62,11 +88,35 @@ void ConsoleM7::M4ConsoleTaskFn(void *param) {
     }
 }
 
-void ConsoleM7::StaticM7ConsoleTaskFn(void *param) {
-    GetSingleton()->M7ConsoleTaskFn(param);
+void ConsoleM7::StaticM7ConsoleTaskRxFn(void *param) {
+    GetSingleton()->M7ConsoleTaskRxFn(param);
 }
 
-void ConsoleM7::M7ConsoleTaskFn(void *param) {
+// TODO(atv): At the moment, this only reads from DbgConsole, not USB.
+void ConsoleM7::M7ConsoleTaskRxFn(void *param) {
+    while (true) {
+        uint8_t ch = static_cast<uint8_t>(DbgConsole_Getchar());
+        MutexLock lock(rx_mutex_);
+        assert(rx_buffer_write_ < kRxBufferSize);
+        rx_buffer_[rx_buffer_write_] = ch;
+        rx_buffer_write_ = (rx_buffer_write_ + 1) % kRxBufferSize;
+        if (rx_buffer_write_ == rx_buffer_read_) {
+            rx_buffer_read_ = (rx_buffer_read_ + 1) % kRxBufferSize;
+            assert(rx_buffer_read_ < kRxBufferSize);
+        } else {
+            ++rx_buffer_available_;
+            if (rx_buffer_available_ > kRxBufferSize) {
+            }
+            assert(rx_buffer_available_ <= kRxBufferSize);
+        }
+    }
+}
+
+void ConsoleM7::StaticM7ConsoleTaskTxFn(void *param) {
+    GetSingleton()->M7ConsoleTaskTxFn(param);
+}
+
+void ConsoleM7::M7ConsoleTaskTxFn(void *param) {
     while (true) {
         ConsoleMessage msg;
         if (xQueueReceive(console_queue_, &msg, portMAX_DELAY) == pdTRUE) {
@@ -107,8 +157,11 @@ void ConsoleM7::Init() {
         vTaskSuspend(NULL);
     }
 
+    rx_mutex_ = xSemaphoreCreateMutex();
+
     xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, NULL);
-    xTaskCreate(StaticM7ConsoleTaskFn, "m7_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+    xTaskCreate(StaticM7ConsoleTaskTxFn, "m7_console_task_tx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+    xTaskCreate(StaticM7ConsoleTaskRxFn, "m7_console_task_rx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
     if (IPCM7::HasM4Application()) {
         xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
     }

@@ -6,6 +6,7 @@ extern "C" void app_main(void *param) {
     setup();
     while (true) {
         loop();
+        portYIELD();
     }
     vTaskSuspend(NULL);
 }
