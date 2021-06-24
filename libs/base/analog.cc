@@ -1,0 +1,76 @@
+#include "libs/base/analog.h"
+
+#include <cstdio>
+
+namespace valiant {
+namespace analog {
+
+static constexpr int kLPADC1ChannelCount = 6;
+static constexpr int kLPADC2ChannelCount = 7;
+
+static ADC_Type* DeviceToADC(Device d) {
+    switch (d) {
+        case Device::ADC1:
+            return LPADC1;
+        case Device::ADC2:
+            return LPADC2;
+    }
+    assert(false);
+}
+
+void Init(Device device) {
+    lpadc_config_t config;
+    LPADC_GetDefaultConfig(&config);
+    LPADC_Init(DeviceToADC(device), &config);
+}
+
+static void GetDefaultConfig(ADCConfig& config) {
+    LPADC_GetDefaultConvCommandConfig(&config.conv_config);
+    LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
+}
+
+void CreateConfig(ADCConfig& config, Device device, int channel, Side primary_side, bool differential) {
+    GetDefaultConfig(config);
+    config.device = DeviceToADC(device);
+
+    if (differential) {
+        switch (primary_side) {
+            case Side::A:
+                config.conv_config.sampleChannelMode = kLPADC_SampleChannelDiffBothSideAB;
+            case Side::B:
+                config.conv_config.sampleChannelMode = kLPADC_SampleChannelDiffBothSideBA;
+        }
+    } else {
+        switch (primary_side) {
+            case Side::A:
+                config.conv_config.sampleChannelMode = kLPADC_SampleChannelSingleEndSideA;
+            case Side::B:
+                config.conv_config.sampleChannelMode = kLPADC_SampleChannelSingleEndSideB;
+        }
+    }
+
+    if (device == Device::ADC1) {
+        assert(channel < kLPADC1ChannelCount);
+    }
+    if (device == Device::ADC2) {
+        assert(channel < kLPADC2ChannelCount);
+    }
+
+    config.conv_config.channelNumber = channel;
+    config.trigger_config.targetCommandId = 1;
+    config.trigger_config.enableHardwareTrigger = false;
+}
+
+uint16_t ReadADC(const ADCConfig& config) {
+    lpadc_conv_result_t result;
+
+    LPADC_SetConvCommandConfig(config.device, 1, &config.conv_config);
+    LPADC_SetConvTriggerConfig(config.device, 0, &config.trigger_config);
+    LPADC_DoSoftwareTrigger(config.device, 1);
+    while (!LPADC_GetConvResult(config.device, &result)) {}
+
+    return (result.convValue >> 3) & 0xFFF;
+}
+
+}  // namespace analog
+}  // namespace valiant

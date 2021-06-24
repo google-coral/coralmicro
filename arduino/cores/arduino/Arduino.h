@@ -9,6 +9,9 @@
 #define interrupts() portENABLE_INTERRUPTS()
 #define noInterrupts() portDISABLE_INTERRUPTS()
 
+void analogReadResolution(int bits);
+void analogWriteResolution(int bits);
+
 extern valiant::arduino::HardwareSerial Serial;
 
 #endif  // Arduino_h

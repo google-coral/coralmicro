@@ -592,6 +592,8 @@ void BOARD_InitPins(void) {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
 void InitArduinoPins(void) {
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_07_GPIO12_IO07, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_06_FLEXPWM1_PWM0_X, 1U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_07_FLEXPWM1_PWM1_X, 1U);
 }
 #endif
 

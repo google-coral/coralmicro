@@ -17,6 +17,7 @@ target_link_libraries(libs_base-m4_bm
 )
 
 add_library_m7(libs_base-m7_freertos STATIC
+    analog.cc
     console_m7.cc
     filesystem.cc
     gpio.cc
