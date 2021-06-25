@@ -7,8 +7,8 @@ Pin (Analog) | Silk label | Silk label | Pin (Analog)
 
 -              VSYS         SCL1         16
 0              SCL6         SDA1         15
-1              PWM0         SDA6         14
-2              PWM1         DAC          13 (A2)
+1 (A3)         PWM0         SDA6         14
+2 (A4)         PWM1         DAC          13 (A2)
 3              RTS          SDI          12
 4              CTS          SDO          11
 5              RXD          SCK          10
@@ -32,6 +32,9 @@ Pin (Analog) | Silk label | Silk label | Pin (Analog)
 
 #define A0 (7U)
 #define A1 (8U)
+#define A2 (13U)
+#define A3 (1U)
+#define A4 (2U)
 
 #define DAC0 (13U)
 

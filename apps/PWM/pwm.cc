@@ -1,0 +1,27 @@
+#include "libs/base/pwm.h"
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/task.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
+
+#include <cstdio>
+
+extern "C" void app_main(void *param) {
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_00_FLEXPWM1_PWM0_A, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_FLEXPWM1_PWM0_B, 0U);
+    printf("i'm so pwm\r\n");
+    valiant::pwm::PwmModuleConfig config;
+    memset(&config, 0, sizeof(config));
+    config.base = PWM1;
+    config.module = kPWM_Module_0;
+    config.A.enabled = true;
+    config.A.duty_cycle = 20;
+    config.B.enabled = true;
+    config.B.duty_cycle = 80;
+    valiant::pwm::Init(config);
+    while (true) {
+        valiant::pwm::Enable(config, true);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        valiant::pwm::Enable(config, false);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
