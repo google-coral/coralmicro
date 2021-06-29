@@ -27,6 +27,9 @@ void Init(Device device);
 void CreateConfig(ADCConfig& config, Device device, int channel, Side primary_side, bool differential);
 uint16_t ReadADC(const ADCConfig& config);
 
+void EnableDAC(bool enable);
+void WriteDAC(uint16_t counts);
+
 }  // namespace analog
 }  // namespace valiant
 

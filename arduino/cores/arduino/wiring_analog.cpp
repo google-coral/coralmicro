@@ -51,6 +51,18 @@ const ADCConfig& pinToADCConfig(pin_size_t pinNumber) {
     assert(false);
 }
 
+static void analogWriteDAC(pin_size_t pinNumber, int value) {
+    assert(pinNumber == DAC0);
+    int dac_shift = kDacFullResolutionBits - dac_resolution_bits;
+    int shift_value = dac_resolution_bits;
+    if (value) {
+        valiant::analog::EnableDAC(true);
+        valiant::analog::WriteDAC(value << dac_shift);
+    } else {
+        valiant::analog::EnableDAC(false);
+    }
+}
+
 int analogRead(pin_size_t pinNumber) {
     int adc_shift = kAdcFullResolutionBits - adc_resolution_bits;
     const ADCConfig& config = pinToADCConfig(pinNumber);
@@ -66,6 +78,9 @@ void analogWrite(pin_size_t pinNumber, int value) {
         pin_config = &pwm_config.A;
     } else if (pinNumber == A4) {
         pin_config = &pwm_config.B;
+    } else if (pinNumber == DAC0) {
+        analogWriteDAC(pinNumber, value);
+        return;
     } else {
         assert(false);
     }

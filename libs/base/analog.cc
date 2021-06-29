@@ -1,4 +1,5 @@
 #include "libs/base/analog.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.h"
 
 #include <cstdio>
 
@@ -19,9 +20,14 @@ static ADC_Type* DeviceToADC(Device d) {
 }
 
 void Init(Device device) {
-    lpadc_config_t config;
-    LPADC_GetDefaultConfig(&config);
-    LPADC_Init(DeviceToADC(device), &config);
+    lpadc_config_t adc_config;
+    LPADC_GetDefaultConfig(&adc_config);
+    LPADC_Init(DeviceToADC(device), &adc_config);
+
+    dac12_config_t dac_config;
+    DAC12_GetDefaultConfig(&dac_config);
+    dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
+    DAC12_Init(DAC, &dac_config);
 }
 
 static void GetDefaultConfig(ADCConfig& config) {
@@ -70,6 +76,16 @@ uint16_t ReadADC(const ADCConfig& config) {
     while (!LPADC_GetConvResult(config.device, &result)) {}
 
     return (result.convValue >> 3) & 0xFFF;
+}
+
+void EnableDAC(bool enable) {
+    DAC12_Enable(DAC, enable);
+}
+
+void WriteDAC(uint16_t counts) {
+    // 12-bit DAC, values range from 0 - 4095.
+    assert(counts <= 4095);
+    DAC12_SetData(DAC, counts);
 }
 
 }  // namespace analog

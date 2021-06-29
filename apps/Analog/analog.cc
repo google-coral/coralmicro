@@ -13,8 +13,10 @@ extern "C" void app_main(void *param) {
         valiant::analog::Side::B,
         false
     );
+    valiant::analog::EnableDAC(true);
     while (true) {
         uint16_t val = valiant::analog::ReadADC(config);
+        valiant::analog::WriteDAC(val);
         printf("ADC val: %u\r\n", val);
     }
 }
