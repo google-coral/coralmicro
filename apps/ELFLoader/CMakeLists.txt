@@ -8,8 +8,13 @@ add_executable_m7(ELFLoader
     elf_loader.cc
     usb_data.cc
     ${CMAKE_SOURCE_DIR}/libs/base/filesystem.cc
+    ${CMAKE_SOURCE_DIR}/libs/base/reset.cc
     ${CMAKE_SOURCE_DIR}/libs/base/utils.cc
     ${CMAKE_SOURCE_DIR}/libs/tasks/UsbDeviceTask/usb_device_task.cc
+)
+
+target_compile_definitions(ELFLoader PUBLIC
+    ELFLOADER
 )
 
 target_include_directories(ELFLoader PRIVATE

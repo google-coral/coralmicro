@@ -13,6 +13,13 @@ enum class ElfloaderCommand : uint8_t {
     SetSize = 0,
     Bytes = 1,
     Done = 2,
+    Reset = 3,
+};
+
+enum BootModes {
+    kFuse = 0,
+    kSerialDownloader = 1,
+    kInternal = 2,
 };
 
 struct ElfloaderSetSize {

@@ -42,7 +42,13 @@ class UsbDeviceTask {
     DeviceDescriptor device_descriptor_ = {
         sizeof(DeviceDescriptor), 0x01, 0x0200,
         0xEF, 0x02, 0x01, 0x40,
-        0x18d1, 0x93FF, 0x0001,
+        0x18d1,
+#if defined(ELFLOADER)
+        0x93FE,
+#else
+        0x93FF,
+#endif
+        0x0001,
         1, 2, 3, 1
     };
     std::array<uint8_t, 1024> composite_descriptor_;

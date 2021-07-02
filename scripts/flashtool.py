@@ -20,6 +20,9 @@ SDP_PID = 0x013d
 FLASHLOADER_VID = 0x15a2
 FLASHLOADER_PID = 0x0073
 
+ELFLOADER_VID = 0x18d1
+ELFLOADER_PID = 0x93fe
+
 VALIANT_VID = 0x18d1
 VALIANT_PID = 0x93ff
 
@@ -30,6 +33,9 @@ BLOCK_COUNT = 64
 ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
 ELFLOADER_DONE = 2
+ELFLOADER_RESET = 3
+
+ELFLOADER_CMD_HEADER = '=BB'
 
 def sdp_vidpid():
     return '{},{}'.format(hex(SDP_VID), hex(SDP_PID))
@@ -37,10 +43,18 @@ def sdp_vidpid():
 def flashloader_vidpid():
     return '{},{}'.format(hex(FLASHLOADER_VID), hex(FLASHLOADER_PID))
 
-def is_valiant_connected():
+def is_valiant_connected(serial_number):
     for device in usb.core.find(find_all=True):
         if device.idVendor == VALIANT_VID and device.idProduct == VALIANT_PID:
-            return True
+            if not serial_number or device.serial_number == serial_number:
+                return True
+    return False
+
+def is_elfloader_connected(serial_number):
+    for device in usb.core.find(find_all=True):
+        if device.idVendor == ELFLOADER_VID and device.idProduct == ELFLOADER_PID:
+            if not serial_number or device.serial_number == serial_number:
+                return True
     return False
 
 def is_sdp_connected():
@@ -54,6 +68,19 @@ def is_flashloader_connected():
         if device.idVendor == FLASHLOADER_VID and device.idProduct == FLASHLOADER_PID:
             return True
     return False
+
+def EnumerateSDP():
+    return hid.enumerate(SDP_VID, SDP_PID)
+
+def EnumerateFlashloader():
+    return hid.enumerate(FLASHLOADER_VID, FLASHLOADER_PID)
+
+def EnumerateElfloader():
+    return hid.enumerate(ELFLOADER_VID, ELFLOADER_PID)
+
+def EnumerateValiant():
+    return usb.core.find(find_all=True, idVendor=VALIANT_VID, idProduct=VALIANT_PID)
+
 
 """
 Gets the full set of libraries that comprise a target executable.
@@ -186,11 +213,13 @@ class FlashtoolStates(Enum):
     DONE = auto()
     ERROR = auto()
     CHECK_FOR_ANY = auto()
+    CHECK_FOR_ELFLOADER = auto()
     CHECK_FOR_VALIANT = auto()
     RESET_TO_SDP = auto()
     CHECK_FOR_SDP = auto()
     LOAD_FLASHLOADER = auto()
     LOAD_ELFLOADER = auto()
+    RESET_ELFLOADER = auto()
     CHECK_FOR_FLASHLOADER = auto()
     PROGRAM = auto()
     PROGRAM_ELFLOADER = auto()
@@ -200,8 +229,10 @@ def FlashtoolError(**kwargs):
     return FlashtoolStates.DONE
 
 def CheckForAny(**kwargs):
-    if is_valiant_connected():
+    if is_valiant_connected(kwargs.get('serial', None)):
         return FlashtoolStates.CHECK_FOR_VALIANT
+    if is_elfloader_connected(kwargs.get('serial', None)):
+        return FlashtoolStates.CHECK_FOR_ELFLOADER
     if is_sdp_connected():
         return FlashtoolStates.CHECK_FOR_SDP
     if is_flashloader_connected():
@@ -209,10 +240,15 @@ def CheckForAny(**kwargs):
     return FlashtoolStates.ERROR
 
 def CheckForValiant(**kwargs):
-    if is_valiant_connected():
+    if is_valiant_connected(kwargs.get('serial', None)):
         return FlashtoolStates.RESET_TO_SDP
     # If we don't see Valiant on the bus, just check for SDP.
     return FlashtoolStates.CHECK_FOR_SDP
+
+def CheckForElfloader(**kwargs):
+    if is_elfloader_connected(kwargs.get('serial', None)):
+        return FlashtoolStates.RESET_ELFLOADER
+    return FlashtoolStates.ERROR
 
 def ResetToSdp(**kwargs):
     try:
@@ -237,32 +273,31 @@ def LoadFlashloader(**kwargs):
 
 def LoadElfloader(**kwargs):
     start_address = hexformat.srecord.SRecord.fromsrecfile(kwargs['elfloader_path']).startaddress
-    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'flash-image', kwargs['elfloader_path']])
-    subprocess.call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'call', hex(start_address), '0'])
+    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'flash-image', kwargs['elfloader_path']], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'call', hex(start_address), '0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if kwargs.get('target_elfloader', None):
+        return FlashtoolStates.DONE
     return FlashtoolStates.PROGRAM_ELFLOADER
 
 def CheckForFlashloader(**kwargs):
     for i in range(10):
         if is_flashloader_connected():
-            if kwargs['ram']:
+            if kwargs['ram'] or kwargs.get('target_elfloader', False):
                 return FlashtoolStates.LOAD_ELFLOADER
             else:
                 return FlashtoolStates.PROGRAM
         time.sleep(1)
     return FlashtoolStates.ERROR
 
-def Program(**kwargs):
-    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'receive-sb-file', kwargs['sbfile_path']])
-    return FlashtoolStates.RESET
 
-def ProgramElfloader(**kwargs):
+def OpenHidDevice(vid, pid, serial_number):
     h = hid.device()
     # First few tries to open the HID device can fail,
     # if Python is faster than the device. So retry a bit.
     opened = False
     for _ in range(100):
         try:
-            h.open(VALIANT_VID, VALIANT_PID)
+            h.open(vid, pid, serial_number=serial_number)
             opened = True
             break
         except:
@@ -270,12 +305,26 @@ def ProgramElfloader(**kwargs):
     if not opened:
         print('Failed to open Valiant HID device')
         return FlashtoolStates.ERROR
+    return h
+
+
+def ResetElfloader(**kwargs):
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
+    h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
+    return FlashtoolStates.CHECK_FOR_SDP
+
+def Program(**kwargs):
+    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'receive-sb-file', kwargs['sbfile_path']])
+    return FlashtoolStates.RESET
+
+def ProgramElfloader(**kwargs):
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
     with open(kwargs['elf_path'], 'rb') as elf:
         elf_data = elf.read()
         total_bytes = len(elf_data)
-        h.write(struct.pack('=BBl', 0, ELFLOADER_SETSIZE, total_bytes))
+        h.write(struct.pack(ELFLOADER_CMD_HEADER + 'l', 0, ELFLOADER_SETSIZE, total_bytes))
 
-        data_packet_header = '=BBll'
+        data_packet_header = ELFLOADER_CMD_HEADER + 'll'
         bytes_per_packet = 64 - struct.calcsize(data_packet_header) + 1 # 64 bytes HID packet, adjust for header and padding
         bytes_transferred = 0
         while bytes_transferred < total_bytes:
@@ -285,7 +334,7 @@ def ProgramElfloader(**kwargs):
                 0, ELFLOADER_BYTES, bytes_this_packet, bytes_transferred,
                 elf_data[bytes_transferred:bytes_transferred+bytes_this_packet]))
             bytes_transferred += bytes_this_packet
-        h.write(struct.pack('=BB', 0, ELFLOADER_DONE))
+        h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_DONE))
     h.close()
     return FlashtoolStates.DONE
 
@@ -296,12 +345,14 @@ def Reset(**kwargs):
 state_handlers = {
     FlashtoolStates.ERROR: FlashtoolError,
     FlashtoolStates.CHECK_FOR_ANY: CheckForAny,
+    FlashtoolStates.CHECK_FOR_ELFLOADER: CheckForElfloader,
     FlashtoolStates.CHECK_FOR_VALIANT: CheckForValiant,
     FlashtoolStates.RESET_TO_SDP: ResetToSdp,
     FlashtoolStates.CHECK_FOR_SDP: CheckForSdp,
     FlashtoolStates.LOAD_FLASHLOADER: LoadFlashloader,
     FlashtoolStates.CHECK_FOR_FLASHLOADER: CheckForFlashloader,
     FlashtoolStates.LOAD_ELFLOADER: LoadElfloader,
+    FlashtoolStates.RESET_ELFLOADER: ResetElfloader,
     FlashtoolStates.PROGRAM: Program,
     FlashtoolStates.PROGRAM_ELFLOADER: ProgramElfloader,
     FlashtoolStates.RESET: Reset,
@@ -324,6 +375,9 @@ def main():
     parser.add_argument('--elfloader_path', type=str, required=False)
     parser.add_argument('--strip', dest='strip', action='store_true')
     parser.add_argument('--toolchain', type=str, required=False)
+    parser.add_argument('--serial', type=str, required=False)
+    parser.add_argument('--list', dest='list', action='store_true')
+    parser.set_defaults(list=False)
     parser.set_defaults(ram=False)
     parser.set_defaults(strip=False)
     args = parser.parse_args()
@@ -363,6 +417,53 @@ def main():
         subprocess.check_call([os.path.join(toolchain_path, 'arm-none-eabi-strip'), '-s', elf_path, '-o', elf_path + '.stripped'])
         elf_path = elf_path + '.stripped'
 
+    state_machine_args = {
+        'blhost_path': blhost_path,
+        'flashloader_path': flashloader_path,
+        'ram': args.ram,
+        'elfloader_path': elfloader_path,
+        'elf_path': elf_path,
+    }
+
+    sdp_devices = len(EnumerateSDP())
+    flashloader_devices = len(EnumerateFlashloader())
+    for _ in range(sdp_devices):
+        state = FlashtoolStates.CHECK_FOR_SDP
+        while True:
+            state = state_handlers[state](
+                    target_elfloader=True,
+                    **state_machine_args,
+                    )
+            if state is FlashtoolStates.DONE:
+                break
+    for _ in range(flashloader_devices):
+        state = FlashtoolStates.CHECK_FOR_FLASHLOADER
+        while True:
+            state = state_handlers[state](
+                    target_elfloader=True,
+                    **state_machine_args,
+                    )
+            if state is FlashtoolStates.DONE:
+                break
+
+    # Sleep to allow time for the last device we threw into elfloader
+    # to enumerate.
+    time.sleep(1.0)
+
+    serial_list = []
+    for elfloader in EnumerateElfloader():
+        serial_list.append(elfloader['serial_number'])
+    for valiant in EnumerateValiant():
+        serial_list.append(valiant.serial_number)
+
+    if args.list:
+        print(serial_list)
+        return
+
+    if len(serial_list) > 1 and not args.serial:
+        print('Multiple valiants detected, please provide a serial number.')
+        return
+
     with tempfile.TemporaryDirectory() as workdir:
         sbfile_path = None
         if not args.ram:
@@ -378,12 +479,10 @@ def main():
         while True:
             print(state)
             state = state_handlers[state](
-                    blhost_path=blhost_path,
-                    flashloader_path=flashloader_path,
                     sbfile_path=sbfile_path,
-                    ram=args.ram,
-                    elfloader_path=elfloader_path,
-                    elf_path=elf_path)
+                    serial=args.serial,
+                    **state_machine_args,
+                    )
             if state is FlashtoolStates.DONE:
                 break
 

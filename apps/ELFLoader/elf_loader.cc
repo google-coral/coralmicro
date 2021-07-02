@@ -1,5 +1,6 @@
 #include "apps/ELFLoader/elf_loader.h"
 #include "libs/base/filesystem.h"
+#include "libs/base/reset.h"
 #include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
@@ -7,6 +8,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/freertos_kernel/include/timers.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_soc_src.h"
 #include <elf.h>
 #include <memory>
 
@@ -41,6 +43,9 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
             break;
         case ElfloaderCommand::Done:
             xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, elfloader_recv_image, APP_TASK_PRIORITY, NULL);
+            break;
+        case ElfloaderCommand::Reset:
+            valiant::ResetToBootloader();
             break;
     }
 }
@@ -147,7 +152,12 @@ extern "C" int main(int argc, char **argv) {
     TaskHandle_t usb_task;
     xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, &usb_task);
     usb_timer = xTimerCreate("usb_timer", pdMS_TO_TICKS(1000), pdFALSE, usb_task, usb_timer_callback);
-    xTimerStart(usb_timer, 0);
+
+    // See TRM chapter 10.3.1 for boot mode choices.
+    // If boot mode is *not* the serial downloader, start the boot timer.
+    if (SRC_GetBootMode(SRC) != kSerialDownloader) {
+        xTimerStart(usb_timer, 0);
+    }
 
     elfloader_hid_endpoints[0].endpointAddress =
         valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value() | (USB_IN << 7);
