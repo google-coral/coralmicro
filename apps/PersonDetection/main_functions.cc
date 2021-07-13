@@ -42,7 +42,7 @@ TfLiteTensor* input = nullptr;
 
 uint8_t *g_person_detect_model_data_fs;
 // An area of memory to use for input, output, and intermediate arrays.
-constexpr int kTensorArenaSize = 136 * 1024;
+constexpr int kTensorArenaSize = 96 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
