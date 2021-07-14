@@ -47,7 +47,7 @@ extern "C" int main(int argc, char **argv) {
     valiant::IPC::GetSingleton()->Init();
     valiant::Random::GetSingleton()->Init();
     valiant::ConsoleM7::GetSingleton()->Init();
-    valiant::filesystem::Init();
+    assert(valiant::filesystem::Init());
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);
     httpd_init();

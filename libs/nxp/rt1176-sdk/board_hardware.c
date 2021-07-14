@@ -112,7 +112,7 @@ void BOARD_InitNAND(void) {
         },
         .devicePort = kFLEXSPI_PortA1,
         .dataBytesPerPage = 2048,
-        .bytesInPageSpareArea = 128,
+        .bytesInPageSpareArea = 2048,
         .pagesPerBlock = 64,
         .busyOffset = 0,
         .busyBitPolarity = 0,
