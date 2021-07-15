@@ -55,8 +55,6 @@ def main():
             '--add-binary',
             os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb') + ':' + os.path.join('third_party', 'nxp', 'elftosb'),
             '--add-binary',
-            os.path.join(root_dir, 'third_party', 'mklfs', 'mklfs') + ':' + os.path.join('third_party', 'mklfs'),
-            '--add-binary',
             os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-strip') + ':' + os.path.join('third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
             '--add-binary',
             os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin') + ':' + os.path.join('third_party', 'nxp', 'flashloader'),

@@ -14,6 +14,13 @@ enum class ElfloaderCommand : uint8_t {
     Bytes = 1,
     Done = 2,
     Reset = 3,
+    Target = 4,
+};
+
+enum class ElfloaderTarget : uint8_t {
+    Ram = 0,
+    Path = 1,
+    Filesystem = 2,
 };
 
 enum BootModes {

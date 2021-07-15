@@ -24,28 +24,71 @@ void usb_device_task(void *param);
 /* Static data definitions */
 TimerHandle_t usb_timer;
 static uint8_t* elfloader_recv_image = nullptr;
+static char* elfloader_recv_path = nullptr;
 static uint8_t elfloader_data[64];
 static class_handle_t elfloader_class_handle;
+static ElfloaderTarget elfloader_target = ElfloaderTarget::Ram;
+static lfs_file_t file_handle;
 
 static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
     ElfloaderCommand cmd = static_cast<ElfloaderCommand>(buffer[0]);
     const ElfloaderSetSize *set_size = reinterpret_cast<const ElfloaderSetSize*>(&buffer[1]);
     const ElfloaderBytes *bytes = reinterpret_cast<const ElfloaderBytes*>(&buffer[1]);
+    const ElfloaderTarget *target = reinterpret_cast<const ElfloaderTarget*>(&buffer[1]);
     switch (cmd) {
         case ElfloaderCommand::SetSize:
             assert(length == sizeof(ElfloaderSetSize) + 1);
             xTimerStop(usb_timer, 0);
-            elfloader_recv_image = (uint8_t*)malloc(set_size->size);
+            switch (elfloader_target) {
+                case ElfloaderTarget::Filesystem:
+                    break;
+                case ElfloaderTarget::Ram:
+                    elfloader_recv_image = (uint8_t*)malloc(set_size->size);
+                    break;
+                case ElfloaderTarget::Path:
+                    elfloader_recv_path = (char*)malloc(set_size->size + 1);
+                    memset(elfloader_recv_path, 0, set_size->size + 1);
+                    break;
+            }
             break;
         case ElfloaderCommand::Bytes:
             assert(length >= sizeof(ElfloaderBytes) + 1);
-            memcpy(elfloader_recv_image + bytes->offset, &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
+            switch (elfloader_target) {
+                case ElfloaderTarget::Ram:
+                    memcpy(elfloader_recv_image + bytes->offset, &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
+                    break;
+                case ElfloaderTarget::Path:
+                    memcpy(elfloader_recv_path + bytes->offset, &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
+                    break;
+                case ElfloaderTarget::Filesystem:
+                    valiant::filesystem::Write(&file_handle, &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
+                    break;
+            }
             break;
         case ElfloaderCommand::Done:
-            xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, elfloader_recv_image, APP_TASK_PRIORITY, NULL);
+            switch (elfloader_target) {
+                case ElfloaderTarget::Ram:
+                    xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, elfloader_recv_image, APP_TASK_PRIORITY, NULL);
+                    break;
+                case ElfloaderTarget::Path: {
+                        // TODO(atv): This stuff can fail. We should propagate errors back to the Python side if possible.
+                        auto dir = valiant::filesystem::Dirname(elfloader_recv_path);
+                        valiant::filesystem::MakeDirs(dir.get());
+                        valiant::filesystem::Open(&file_handle, elfloader_recv_path, true);
+                        free(elfloader_recv_path);
+                        elfloader_recv_path = nullptr;
+                    }
+                    break;
+                case ElfloaderTarget::Filesystem:
+                    valiant::filesystem::Close(&file_handle);
+                    break;
+            }
             break;
         case ElfloaderCommand::Reset:
             valiant::ResetToBootloader();
+            break;
+        case ElfloaderCommand::Target:
+            elfloader_target = *target;
             break;
     }
 }
@@ -75,6 +118,7 @@ static void elfloader_SetClassHandle(class_handle_t class_handle) {
 }
 
 static usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t event, void *param) {
+    uint8_t dummy = 0;
     usb_status_t ret = kStatus_USB_Success;
     usb_device_endpoint_callback_message_struct_t *message =
         static_cast<usb_device_endpoint_callback_message_struct_t*>(param);
@@ -83,6 +127,7 @@ static usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t even
             if (message->length != USB_UNINITIALIZED_VAL_32) {
                 elfloader_recv(message->buffer, message->length);
             }
+            USB_DeviceHidSend(elfloader_class_handle, elfloader_hid_endpoints[kTxEndpoint].endpointAddress, &dummy, 1);
             USB_DeviceHidRecv(elfloader_class_handle, elfloader_hid_endpoints[kRxEndpoint].endpointAddress, elfloader_data, sizeof(elfloader_data));
             break;
         case kUSB_DeviceHidEventGetReport:

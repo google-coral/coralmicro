@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 from enum import Enum, auto
 from pathlib import Path
+from progress.bar import Bar
 import argparse
 import hexformat
 import hid
 import os
 import serial
-import shutil
 import struct
 import subprocess
 import sys
@@ -34,6 +34,11 @@ ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
 ELFLOADER_DONE = 2
 ELFLOADER_RESET = 3
+ELFLOADER_TARGET = 4
+
+ELFLOADER_TARGET_RAM = 0
+ELFLOADER_TARGET_PATH = 1
+ELFLOADER_TARGET_FILESYSTEM = 2
 
 ELFLOADER_CMD_HEADER = '=BB'
 
@@ -111,7 +116,7 @@ def GetLibs(build_dir, libs_path, scanned):
         sublibs |= GetLibs(build_dir, lib, scanned | libs_found)
     return libs_found | sublibs
 
-def CreateFilesystem(workdir, root_dir, build_dir, mklfs_path, elf_path):
+def CreateFilesystem(workdir, root_dir, build_dir, elf_path):
     libs_path = os.path.splitext(elf_path)[0] + '.libs'
     m4_exe_path = os.path.splitext(elf_path)[0] + '.m4_executable'
     libs = GetLibs(build_dir, libs_path, set())
@@ -142,21 +147,7 @@ def CreateFilesystem(workdir, root_dir, build_dir, mklfs_path, elf_path):
     if not all_files_exist:
         return None
 
-    os.makedirs(filesystem_dir)
-    for file in data_files:
-        source_path = file
-        target_path = file.replace(root_dir, filesystem_dir)
-        os.makedirs(os.path.dirname(target_path), exist_ok=True)
-        shutil.copyfile(source_path, target_path)
-    shutil.copyfile(elf_path, os.path.join(filesystem_dir, 'default.elf'))
-
-    filesystem_size = sum(file.stat().st_size for file in Path(filesystem_dir).rglob('*'))
-    filesystem_size = max(filesystem_size, BLOCK_SIZE * BLOCK_COUNT)
-    if (filesystem_size > BLOCK_SIZE * BLOCK_COUNT):
-        print('Filesystem too large!')
-        return None
-    subprocess.check_call([mklfs_path, '-c', 'filesystem', '-b', str(BLOCK_SIZE), '-r', '2048', '-p', '2048', '-s', str(filesystem_size), '-i', filesystem_bin], cwd=workdir)
-    return filesystem_bin
+    return data_files
 
 def CreateSbFile(workdir, elftosb_path, srec_path, filesystem_path):
     spinand_bdfile_path = os.path.join(workdir, 'program_flexspinand_image.bd')
@@ -181,8 +172,7 @@ def CreateSbFile(workdir, elftosb_path, srec_path, filesystem_path):
         spinand_bdfile.write('enable spinand 0x10000;\n')
         spinand_bdfile.write('erase spinand 0x4..0x8;\n')
         spinand_bdfile.write('erase spinand 0x8..0xc;\n')
-        if filesystem_path:
-            spinand_bdfile.write('erase spinand 0xc..0x4c;\n')
+        spinand_bdfile.write('erase spinand 0xc..0x4c;\n')
         spinand_bdfile.write('load spinand bootImageFile > 0x4;\n')
         spinand_bdfile.write('load spinand bootImageFile > 0x8;\n')
         if filesystem_path:
@@ -223,6 +213,7 @@ class FlashtoolStates(Enum):
     CHECK_FOR_FLASHLOADER = auto()
     PROGRAM = auto()
     PROGRAM_ELFLOADER = auto()
+    PROGRAM_DATA_FILES = auto()
     RESET = auto()
 
 def FlashtoolError(**kwargs):
@@ -277,7 +268,9 @@ def LoadElfloader(**kwargs):
     subprocess.call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'call', hex(start_address), '0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if kwargs.get('target_elfloader', None):
         return FlashtoolStates.DONE
-    return FlashtoolStates.PROGRAM_ELFLOADER
+    if kwargs.get('ram'):
+        return FlashtoolStates.PROGRAM_ELFLOADER
+    return FlashtoolStates.PROGRAM_DATA_FILES
 
 def CheckForFlashloader(**kwargs):
     for i in range(10):
@@ -311,35 +304,70 @@ def OpenHidDevice(vid, pid, serial_number):
 def ResetElfloader(**kwargs):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
     h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
+    h.close()
     return FlashtoolStates.CHECK_FOR_SDP
 
 def Program(**kwargs):
     subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'receive-sb-file', kwargs['sbfile_path']])
+    return FlashtoolStates.LOAD_ELFLOADER
+
+def ElfloaderTransferData(h, data, target, bar=None):
+    total_bytes = len(data)
+    h.write(struct.pack(ELFLOADER_CMD_HEADER + 'B', 0, ELFLOADER_TARGET, target))
+    h.read(1)
+
+    h.write(struct.pack(ELFLOADER_CMD_HEADER + 'l', 0, ELFLOADER_SETSIZE, total_bytes))
+    h.read(1)
+
+    data_packet_header = ELFLOADER_CMD_HEADER + 'll'
+    bytes_per_packet = 64 - struct.calcsize(data_packet_header) + 1 # 64 bytes HID packet, adjust for header and padding
+    bytes_transferred = 0
+    while bytes_transferred < total_bytes:
+        bytes_this_packet = min(bytes_per_packet, (total_bytes - bytes_transferred))
+        h.write(
+            struct.pack((data_packet_header + '%ds') % bytes_this_packet,
+            0, ELFLOADER_BYTES, bytes_this_packet, bytes_transferred,
+            data[bytes_transferred:bytes_transferred+bytes_this_packet]))
+        h.read(1)
+        bytes_transferred += bytes_this_packet
+        if bar:
+            bar.goto(bytes_transferred)
+    h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_DONE))
+    h.read(1)
+    if bar:
+        bar.finish()
     return FlashtoolStates.RESET
 
 def ProgramElfloader(**kwargs):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
     with open(kwargs['elf_path'], 'rb') as elf:
-        elf_data = elf.read()
-        total_bytes = len(elf_data)
-        h.write(struct.pack(ELFLOADER_CMD_HEADER + 'l', 0, ELFLOADER_SETSIZE, total_bytes))
-
-        data_packet_header = ELFLOADER_CMD_HEADER + 'll'
-        bytes_per_packet = 64 - struct.calcsize(data_packet_header) + 1 # 64 bytes HID packet, adjust for header and padding
-        bytes_transferred = 0
-        while bytes_transferred < total_bytes:
-            bytes_this_packet = min(bytes_per_packet, (total_bytes - bytes_transferred))
-            h.write(
-                struct.pack((data_packet_header + '%ds') % bytes_this_packet,
-                0, ELFLOADER_BYTES, bytes_this_packet, bytes_transferred,
-                elf_data[bytes_transferred:bytes_transferred+bytes_this_packet]))
-            bytes_transferred += bytes_this_packet
-        h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_DONE))
+        ElfloaderTransferData(h, elf.read(), ELFLOADER_TARGET_RAM)
     h.close()
     return FlashtoolStates.DONE
 
+def ProgramDataFiles(**kwargs):
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
+    files = kwargs.get('data_files')
+    files.add(kwargs.get('elf_path'))
+    for src_file in files:
+        if src_file is kwargs.get('elf_path'):
+            target_file = '/default.elf'
+        else:
+            target_file = src_file.replace(kwargs.get('root_dir'), '')
+
+        with open(src_file, 'rb') as f:
+            bar = Bar(target_file, max=os.fstat(f.fileno()).st_size)
+            # If we are running on something with the wrong directory separator, fix it.
+            target_file.replace('\\', '/')
+            ElfloaderTransferData(h, bytes(target_file, encoding='utf-8'), ELFLOADER_TARGET_PATH)
+            ElfloaderTransferData(h, f.read(), ELFLOADER_TARGET_FILESYSTEM, bar=bar)
+    h.close()
+    return FlashtoolStates.RESET
+
 def Reset(**kwargs):
-    subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'reset'])
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
+    h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
+    h.close()
     return FlashtoolStates.DONE
 
 state_handlers = {
@@ -355,6 +383,7 @@ state_handlers = {
     FlashtoolStates.RESET_ELFLOADER: ResetElfloader,
     FlashtoolStates.PROGRAM: Program,
     FlashtoolStates.PROGRAM_ELFLOADER: ProgramElfloader,
+    FlashtoolStates.PROGRAM_DATA_FILES: ProgramDataFiles,
     FlashtoolStates.RESET: Reset,
 }
 
@@ -389,7 +418,6 @@ def main():
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
     elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb')
-    mklfs_path = os.path.join(root_dir, 'third_party', 'mklfs', 'mklfs')
     toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
         elf_path,
@@ -397,7 +425,6 @@ def main():
         blhost_path,
         flashloader_path,
         elftosb_path,
-        mklfs_path,
         toolchain_path,
     ]
 
@@ -423,6 +450,7 @@ def main():
         'ram': args.ram,
         'elfloader_path': elfloader_path,
         'elf_path': elf_path,
+        'root_dir': root_dir,
     }
 
     sdp_devices = len(EnumerateSDP())
@@ -466,12 +494,13 @@ def main():
 
     with tempfile.TemporaryDirectory() as workdir:
         sbfile_path = None
+        data_files = None
         if not args.ram:
-            filesystem_path = CreateFilesystem(workdir, root_dir, build_dir, mklfs_path, elf_path)
-            if not filesystem_path:
+            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path)
+            if data_files is None:
                 print('Creating filesystem failed, exit')
                 return
-            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path, filesystem_path)
+            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path, None) #filesystem_path)
             if not sbfile_path:
                 print('Creating sbfile failed, exit')
                 return
@@ -480,6 +509,7 @@ def main():
             print(state)
             state = state_handlers[state](
                     sbfile_path=sbfile_path,
+                    data_files=data_files,
                     serial=args.serial,
                     **state_machine_args,
                     )

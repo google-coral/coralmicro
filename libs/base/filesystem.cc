@@ -4,6 +4,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
 #include <cstdio>
+#include <memory>
 
 extern "C" nand_handle_t* BOARD_GetNANDHandle(void);
 
@@ -128,11 +129,72 @@ bool Init() {
 }
 
 bool Open(lfs_file_t* handle, const char *path) {
+    return Open(handle, path, false);
+}
+
+bool Open(lfs_file_t* handle, const char *path, bool writable) {
     int ret;
     MutexLock lock(lfs_semaphore_);
-    ret = lfs_file_open(&lfs_handle_, handle, path, LFS_O_RDONLY);
+    ret = lfs_file_open(&lfs_handle_, handle, path, writable ? (LFS_O_CREAT | LFS_O_RDWR | LFS_O_TRUNC) : LFS_O_RDONLY);
 
     return (ret == LFS_ERR_OK) ? true : false;
+}
+
+int Write(lfs_file_t *handle, const void *buffer, size_t size) {
+    MutexLock lock(lfs_semaphore_);
+    return lfs_file_write(&lfs_handle_, handle, buffer, size);
+}
+
+std::unique_ptr<char[]> Dirname(const char *path) {
+    if (path[0] != '/') {
+        return nullptr;
+    }
+
+    int last_separator = 0;
+    for (size_t i = 0; i < strlen(path); ++i) {
+        if (path[i] == '/') {
+            last_separator = i;
+        }
+    }
+
+    std::unique_ptr<char[]> dir(new char[last_separator + 1]);
+    memset(dir.get(), 0, last_separator + 1);
+    memcpy(dir.get(), path, last_separator);
+    return dir;
+}
+
+bool MakeDirs(const char *path) {
+    int ret;
+    size_t path_len = strlen(path);
+    if (path_len > lfs_handle_.name_max) {
+        return false;
+    }
+
+    if (path[0] != '/') {
+        return false;
+    }
+
+    MutexLock lock(lfs_semaphore_);
+    std::unique_ptr<char[]> path_copy(new char[path_len + 1]);
+    memset(path_copy.get(), 0, path_len + 1);
+    memcpy(path_copy.get(), path, path_len);
+
+    for (size_t i = 1; i < path_len; ++i) {
+        if (path_copy[i] == '/') {
+            path_copy[i] = 0;
+            ret = lfs_mkdir(&lfs_handle_, path_copy.get());
+            if (ret < 0 && ret != LFS_ERR_EXIST) {
+                return false;
+            }
+            path_copy[i] = '/';
+        }
+    }
+    ret = lfs_mkdir(&lfs_handle_, path_copy.get());
+    if (ret < 0 && ret != LFS_ERR_EXIST) {
+        return false;
+    }
+
+    return true;
 }
 
 int Read(lfs_file_t* handle, void *buffer, size_t size) {
@@ -234,6 +296,16 @@ fail:
     }
     return false;
 }
+
+bool Remove(const char *path) {
+    MutexLock lock(lfs_semaphore_);
+    int ret = lfs_remove(&lfs_handle_, path);
+    if (ret < 0) {
+        return false;
+    }
+    return true;
+}
+
 }  // namespace filesystem
 
 }  // namespace valiant
