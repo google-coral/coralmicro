@@ -146,6 +146,7 @@ bool UsbDeviceTask::Init() {
         printf("USB_DeviceClassInit failed %d\r\n", ret);
         return false;
     }
+    SDK_DelayAtLeastUs(50000, CLOCK_GetFreq(kCLOCK_CpuClk));
     ret = USB_DeviceRun(device_handle_);
     if (ret != kStatus_USB_Success) {
         printf("USB_DeviceRun failed\r\n");
