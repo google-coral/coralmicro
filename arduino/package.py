@@ -77,6 +77,21 @@ def main():
                     'name': 'coral',
                     'maintainer': 'Coral Team',
                     'websiteURL': 'https://coral.ai',
+                    'tools': [
+                        {
+                            'name': 'arm-none-eabi-gcc',
+                            'version': '9-2020q2',
+                            'systems': [
+                                {
+                                    'host': 'x86_64-pc-linux-gnu',
+                                    'url': 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2',
+                                    'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2',
+                                    'checksum': 'MD5:2b9eeccc33470f9d3cda26983b9d2dc6',
+                                    'size': '140360119'
+                                }
+                            ]
+                        }
+                    ],
                     'email': 'coral-support@google.com',
                     'platforms': [
                         {
@@ -90,6 +105,13 @@ def main():
                             'boards': [
                                 {
                                     'name': 'Coral Valiant',
+                                }
+                            ],
+                            'toolsDependencies': [
+                                {
+                                    'packager': 'coral',
+                                    'name': 'arm-none-eabi-gcc',
+                                    'version': '9-2020q2'
                                 }
                             ],
                         },
