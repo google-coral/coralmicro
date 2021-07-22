@@ -488,7 +488,10 @@ def main():
         print(serial_list)
         return
 
-    if len(serial_list) > 1 and not args.serial:
+    serial = os.getenv('VALIANT_SERIAL')
+    if not serial:
+        serial = args.serial
+    if len(serial_list) > 1 and not serial:
         print('Multiple valiants detected, please provide a serial number.')
         return
 
@@ -510,7 +513,7 @@ def main():
             state = state_handlers[state](
                     sbfile_path=sbfile_path,
                     data_files=data_files,
-                    serial=args.serial,
+                    serial=serial,
                     **state_machine_args,
                     )
             if state is FlashtoolStates.DONE:
