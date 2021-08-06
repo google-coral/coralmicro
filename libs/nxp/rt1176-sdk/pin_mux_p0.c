@@ -83,6 +83,10 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05,
       0x2U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_02_GPIO9_IO01, 0U);
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_02_GPIO9_IO01, 0U);
 
   // User button (pulled-up, input)
   IOMUXC_SetPinMux(
@@ -469,6 +473,8 @@ void BOARD_InitPins(void) {
   // CAM_INT
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_AD_04_GPIO9_IO03, 0U);
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_EMC_B2_12_GPIO8_IO22, 0U);
   // CAM_TRIG
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B2_17_GPIO8_IO27, 0U);

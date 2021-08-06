@@ -22,7 +22,7 @@ extern "C" int main(int argc, char **argv) {
     valiant::ConsoleInit();
     valiant::filesystem::Init();
 
-#if defined(BOARD_REVISION_P0)
+#if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     // Initialize I2C5 state
     NVIC_SetPriority(LPI2C5_IRQn, 3);
     lpi2c_master_config_t config;

@@ -33,6 +33,7 @@ static StaticSemaphore_t gpio_semaphore_static;
 static GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kPowerLED] = GPIO13,
     [Gpio::kUserLED] = GPIO13,
+    [Gpio::kTpuLED] = GPIO9,
     [Gpio::kEdgeTpuPgood] = GPIO8,
     [Gpio::kEdgeTpuReset] = GPIO8,
     [Gpio::kEdgeTpuPmic] = GPIO8,
@@ -43,6 +44,7 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kBtHostWake] = GPIO11,
     [Gpio::kEthPhyRst] = GPIO8,
     [Gpio::kBufferEnable] = GPIO9,
+    [Gpio::kCameraPrivacyOverride] = GPIO8,
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = GPIO12,
 #endif
@@ -51,6 +53,7 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
 static uint32_t PinNameToPin[Gpio::kCount] = {
     [Gpio::kPowerLED] = 5,
     [Gpio::kUserLED] = 6,
+    [Gpio::kTpuLED] = 1,
     [Gpio::kEdgeTpuPgood] = 26,
     [Gpio::kEdgeTpuReset] = 24,
     [Gpio::kEdgeTpuPmic] = 25,
@@ -61,6 +64,7 @@ static uint32_t PinNameToPin[Gpio::kCount] = {
     [Gpio::kBtHostWake] = 16,
     [Gpio::kEthPhyRst] = 13,
     [Gpio::kBufferEnable] = 4,
+    [Gpio::kCameraPrivacyOverride] = 22,
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = 7,
 #endif
@@ -73,6 +77,11 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .interruptMode = kGPIO_NoIntmode,
     },
     [Gpio::kUserLED] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kTpuLED] = {
         .direction = kGPIO_DigitalOutput,
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
@@ -127,6 +136,11 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .outputLogic = 1,
         .interruptMode = kGPIO_NoIntmode,
     },
+    [Gpio::kCameraPrivacyOverride] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 1,
+        .interruptMode = kGPIO_NoIntmode,
+    },
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = {
         .direction = kGPIO_DigitalOutput,
@@ -139,6 +153,7 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
 static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kPowerLED] = HardFault_IRQn,
     [Gpio::kUserLED] = HardFault_IRQn,
+    [Gpio::kTpuLED] = HardFault_IRQn,
     [Gpio::kEdgeTpuPgood] = HardFault_IRQn,
     [Gpio::kEdgeTpuReset] = HardFault_IRQn,
     [Gpio::kEdgeTpuPmic] = HardFault_IRQn,
@@ -149,6 +164,7 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kBtHostWake] = HardFault_IRQn,
     [Gpio::kEthPhyRst] = HardFault_IRQn,
     [Gpio::kBufferEnable] = HardFault_IRQn,
+    [Gpio::kCameraPrivacyOverride] = HardFault_IRQn,
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = HardFault_IRQn,
 #endif
@@ -157,6 +173,7 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
 static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
     [Gpio::kPowerLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
     [Gpio::kUserLED] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
+    [Gpio::kTpuLED] = {IOMUXC_GPIO_AD_02_GPIO9_IO01},
     [Gpio::kEdgeTpuPgood] = {IOMUXC_GPIO_EMC_B2_16_GPIO8_IO26},
     [Gpio::kEdgeTpuReset] = {IOMUXC_GPIO_EMC_B2_14_GPIO8_IO24},
     [Gpio::kEdgeTpuPmic] = {IOMUXC_GPIO_EMC_B2_15_GPIO8_IO25},
@@ -172,6 +189,7 @@ static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
 static uint32_t PinNameToPullMask[Gpio::kCount] = {
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kTpuLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
     [Gpio::kEdgeTpuReset] = 0x0000000C,
     [Gpio::kEdgeTpuPmic] = 0x0000000C,
@@ -187,6 +205,7 @@ static uint32_t PinNameToPullMask[Gpio::kCount] = {
 static uint32_t PinNameToNoPull[Gpio::kCount] = {
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kTpuLED] = 0x00000000,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
     [Gpio::kEdgeTpuReset] = 0x0000000C,
     [Gpio::kEdgeTpuPmic] = 0x0000000C,
@@ -202,6 +221,7 @@ static uint32_t PinNameToNoPull[Gpio::kCount] = {
 static uint32_t PinNameToPullUp[Gpio::kCount] = {
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kTpuLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x00000004,
     [Gpio::kEdgeTpuReset] = 0x00000004,
     [Gpio::kEdgeTpuPmic] = 0x00000004,
@@ -217,6 +237,7 @@ static uint32_t PinNameToPullUp[Gpio::kCount] = {
 static uint32_t PinNameToPullDown[Gpio::kCount] = {
     [Gpio::kPowerLED] = 0x00000004,
     [Gpio::kUserLED] = 0x00000004,
+    [Gpio::kTpuLED] = 0x00000008,
     [Gpio::kEdgeTpuPgood] = 0x00000008,
     [Gpio::kEdgeTpuReset] = 0x00000008,
     [Gpio::kEdgeTpuPmic] = 0x00000008,

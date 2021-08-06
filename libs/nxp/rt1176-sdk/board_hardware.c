@@ -183,7 +183,7 @@ void BOARD_InitHardware(bool init_console) {
 #endif
 #endif  // __CORTEX_M == 7
 
-#if defined(BOARD_REVISION_P0)
+#if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     BOARD_InitNAND();
 #endif
 }

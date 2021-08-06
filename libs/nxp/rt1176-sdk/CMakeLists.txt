@@ -8,9 +8,22 @@ if(VALIANT_BOARD_REVISION STREQUAL EVK)
         fsl_flexspi_nor_boot.c
         pin_mux_evk.c
     )
+    set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
+        CPU_MIMXRT1176DVMAA_cm7
+    )
 elseif(VALIANT_BOARD_REVISION STREQUAL P0)
     set(libs_nxp_rt1176-sdk_SOURCES_REVISION
         pin_mux_p0.c
+    )
+    set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
+        CPU_MIMXRT1176DVMAA_cm7
+    )
+elseif(VALIANT_BOARD_REVISION STREQUAL P1)
+    set(libs_nxp_rt1176-sdk_SOURCES_REVISION
+        pin_mux_p0.c
+    )
+    set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
+        CPU_MIMXRT1176CVM8A_cm7
     )
 else()
     message(FATAL_ERROR "No revision selected.")
@@ -108,7 +121,7 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
 )
 
 set(libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS
-    CPU_MIMXRT1176DVMAA_cm7
+    ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7}
     XIP_BOOT_HEADER_ENABLE=1
     XIP_EXTERNAL_FLASH=1
 )

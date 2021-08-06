@@ -108,11 +108,13 @@ void BOARD_BootClockRUN(void)
     CLOCK_SetRootClock(kCLOCK_Root_M7, &rootCfg);
     CLOCK_SetRootClock(kCLOCK_Root_M7_Systick, &rootCfg);
 
-#if defined(CONSUMER_SERIES)
-    CLOCK_InitArmPllWithFreq(1000);
-#elif defined(AUTOMOTIVE_SERIES) || defined(INDUSTRIAL_SERIES)
+#if defined(BOARD_REVISION_P1)
     CLOCK_InitArmPllWithFreq(800);
+#else
+    CLOCK_InitArmPllWithFreq(1000);
 #endif
+
+
     /* Configure M7 */
     rootCfg.mux = kCLOCK_M7_ClockRoot_MuxArmPllOut;
     rootCfg.div = 1;

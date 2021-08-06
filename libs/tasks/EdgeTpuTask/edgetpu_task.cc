@@ -88,7 +88,7 @@ void EdgeTpuTask::TaskInit() {
 }
 
 void EdgeTpuTask::HandlePowerRequest(PowerRequest& req) {
-#if defined(BOARD_REVISION_P0)
+#if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     gpio::SetGpio(gpio::Gpio::kEdgeTpuPmic, req.enable);
 
     if (req.enable) {

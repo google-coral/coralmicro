@@ -9,6 +9,7 @@ namespace gpio {
 enum Gpio {
     kPowerLED,
     kUserLED,
+    kTpuLED,
     kEdgeTpuPgood,
     kEdgeTpuReset,
     kEdgeTpuPmic,
@@ -19,6 +20,7 @@ enum Gpio {
     kBtHostWake,
     kEthPhyRst,
     kBufferEnable,
+    kCameraPrivacyOverride,
 
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     kArduinoD0,
