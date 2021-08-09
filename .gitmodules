@@ -37,3 +37,6 @@
 [submodule "third_party/ArduinoCore-API"]
 	path = third_party/ArduinoCore-API
 	url = https://github.com/arduino/ArduinoCore-API
+[submodule "third_party/mjson"]
+	path = third_party/mjson
+	url = https://github.com/cesanta/mjson
