@@ -1,4 +1,5 @@
 #include "libs/base/gpio.h"
+#include "libs/base/httpd.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -17,7 +18,7 @@ static uint8_t camera_grayscale_small[96 * 96] __attribute__((section(".sdram_bs
 static uint8_t camera_rgb[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_rgb_posenet[kPosenetWidth * kPosenetHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
-extern "C" int fs_open_custom(struct fs_file *file, const char *name) {
+static int fs_open_custom(void *context, struct fs_file *file, const char *name) {
     if (strncmp(name, "/camera.rgb", strlen(name)) == 0) {
         memset(file, 0, sizeof(struct fs_file));
         file->data = reinterpret_cast<const char*>(camera_rgb);
@@ -53,7 +54,7 @@ extern "C" int fs_open_custom(struct fs_file *file, const char *name) {
     return 0;
 }
 
-extern "C" void fs_close_custom(struct fs_file *file) {
+static void fs_close_custom(void* context, struct fs_file *file) {
     (void)file;
 }
 
@@ -88,6 +89,13 @@ void GetFrame() {
 
 extern "C" void app_main(void *param) {
     printf("Camera test\r\n");
+
+    valiant::httpd::HTTPDHandlers handlers;
+    handlers.fs_open_custom = fs_open_custom;
+    handlers.fs_close_custom = fs_close_custom;
+
+    valiant::httpd::Init();
+    valiant::httpd::RegisterHandlerForPath("/", &handlers);
 
     // Enable Power, Streaming, and enable test pattern.
     valiant::CameraTask::GetSingleton()->SetPower(true);

@@ -369,6 +369,24 @@ target_link_libraries(libs_nxp_rt1176-sdk_lwip
     libs_nxp_rt1176-sdk_freertos
 )
 
+add_library_m7(libs_nxp_rt1176-sdk_lwip_httpd
+    ${CMAKE_SOURCE_DIR}/libs/base/httpd.cc
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/fs.c
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/httpd.c
+)
+
+target_compile_definitions(libs_nxp_rt1176-sdk_lwip_httpd PUBLIC
+    LWIP_HTTPD_CGI_SSI
+    LWIP_HTTPD_CUSTOM_FILES
+    LWIP_HTTPD_DYNAMIC_FILE_READ
+    LWIP_HTTPD_DYNAMIC_HEADERS
+    LWIP_HTTPD_SUPPORT_POST
+)
+
+target_link_libraries(libs_nxp_rt1176-sdk_lwip_httpd
+    libs_nxp_rt1176-sdk_lwip
+)
+
 add_library_m7(libs_nxp_rt1176-sdk_wiced
     bt_firmware_controller.c
     WICED/WWD/internal/chips/43455/resources.c

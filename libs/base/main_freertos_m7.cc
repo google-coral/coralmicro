@@ -37,7 +37,6 @@ void InitializeCDCEEM() {
             cdc_eem.descriptor_data(), cdc_eem.descriptor_data_size());
 }
 
-extern "C" void httpd_init(void) __attribute__((weak));
 extern "C" void app_main(void *param);
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
@@ -50,7 +49,6 @@ extern "C" int main(int argc, char **argv) {
     assert(valiant::filesystem::Init());
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);
-    httpd_init();
     InitializeCDCEEM();
     valiant::UsbDeviceTask::GetSingleton()->Init();
     valiant::UsbHostTask::GetSingleton()->Init();
