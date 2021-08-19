@@ -27,16 +27,16 @@
 	url = https://github.com/google-coral/coralmicro-blhost
 [submodule "third_party/FreeRTOS_helpers"]
 	path = third_party/FreeRTOS_helpers
-	url = https://github.com/DRNadler/FreeRTOS_helpers.git
+	url = https://github.com/DRNadler/FreeRTOS_helpers
 [submodule "third_party/kissfft"]
 	path = third_party/kissfft
 	url = https://spacepark.googlesource.com/valiant/kissfft
 [submodule "third_party/cyw-bt-patch"]
 	path = third_party/cyw-bt-patch
-	url = https://github.com/murata-wireless/cyw-bt-patch.git
+	url = https://github.com/murata-wireless/cyw-bt-patch
 [submodule "third_party/ArduinoCore-API"]
 	path = third_party/ArduinoCore-API
-	url = https://github.com/arduino/ArduinoCore-API
+	url = https://spacepark.googlesource.com/valiant/ArduinoCore-API
 [submodule "third_party/mjson"]
 	path = third_party/mjson
 	url = https://github.com/cesanta/mjson
