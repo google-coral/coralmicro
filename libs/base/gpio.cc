@@ -31,6 +31,9 @@ namespace gpio {
 static SemaphoreHandle_t gpio_semaphore;
 static StaticSemaphore_t gpio_semaphore_static;
 static GPIO_Type* PinNameToModule[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = GPIO12,
+#endif
     [Gpio::kPowerLED] = GPIO13,
     [Gpio::kUserLED] = GPIO13,
     [Gpio::kTpuLED] = GPIO9,
@@ -45,12 +48,12 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kEthPhyRst] = GPIO8,
     [Gpio::kBufferEnable] = GPIO9,
     [Gpio::kCameraPrivacyOverride] = GPIO8,
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = GPIO12,
-#endif
 };
 
 static uint32_t PinNameToPin[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = 7,
+#endif
     [Gpio::kPowerLED] = 5,
     [Gpio::kUserLED] = 6,
     [Gpio::kTpuLED] = 1,
@@ -65,12 +68,16 @@ static uint32_t PinNameToPin[Gpio::kCount] = {
     [Gpio::kEthPhyRst] = 13,
     [Gpio::kBufferEnable] = 4,
     [Gpio::kCameraPrivacyOverride] = 22,
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 7,
-#endif
 };
 
 static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+#endif
     [Gpio::kPowerLED] = {
         .direction = kGPIO_DigitalOutput,
         .outputLogic = 0,
@@ -141,16 +148,12 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .outputLogic = 1,
         .interruptMode = kGPIO_NoIntmode,
     },
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-#endif
 };
 
 static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = HardFault_IRQn,
+#endif
     [Gpio::kPowerLED] = HardFault_IRQn,
     [Gpio::kUserLED] = HardFault_IRQn,
     [Gpio::kTpuLED] = HardFault_IRQn,
@@ -165,12 +168,12 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kEthPhyRst] = HardFault_IRQn,
     [Gpio::kBufferEnable] = HardFault_IRQn,
     [Gpio::kCameraPrivacyOverride] = HardFault_IRQn,
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = HardFault_IRQn,
-#endif
 };
 
 static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = {IOMUXC_GPIO_LPSR_07_GPIO12_IO07},
+#endif
     [Gpio::kPowerLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
     [Gpio::kUserLED] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
     [Gpio::kTpuLED] = {IOMUXC_GPIO_AD_02_GPIO9_IO01},
@@ -181,12 +184,12 @@ static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
     [Gpio::kUserButton] = {IOMUXC_GPIO_SNVS_00_DIG_GPIO13_IO03},
     [Gpio::kCameraTrigger] = {IOMUXC_GPIO_EMC_B2_17_GPIO8_IO27},
     [Gpio::kAntennaSelect] = {IOMUXC_GPIO_DISP_B2_06_GPIO11_IO07},
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = {IOMUXC_GPIO_LPSR_07_GPIO12_IO07},
-#endif
 };
 
 static uint32_t PinNameToPullMask[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = 0x0000000C,
+#endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kTpuLED] = 0x0000000C,
@@ -197,12 +200,12 @@ static uint32_t PinNameToPullMask[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x0000000C,
     [Gpio::kCameraTrigger] = 0x0000000C,
     [Gpio::kAntennaSelect] = 0x0000000C,
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x0000000C,
-#endif
 };
 
 static uint32_t PinNameToNoPull[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = 0x00000000,
+#endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kTpuLED] = 0x00000000,
@@ -213,12 +216,12 @@ static uint32_t PinNameToNoPull[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x00000000,
     [Gpio::kCameraTrigger] = 0x0000000C,
     [Gpio::kAntennaSelect] = 0x00000000,
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x00000000,
-#endif
 };
 
 static uint32_t PinNameToPullUp[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = 0x0000000C,
+#endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kTpuLED] = 0x0000000C,
@@ -229,12 +232,12 @@ static uint32_t PinNameToPullUp[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x0000000C,
     [Gpio::kCameraTrigger] = 0x00000004,
     [Gpio::kAntennaSelect] = 0x0000000C,
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x0000000C,
-#endif
 };
 
 static uint32_t PinNameToPullDown[Gpio::kCount] = {
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+    [Gpio::kArduinoD0] = 0x00000004,
+#endif
     [Gpio::kPowerLED] = 0x00000004,
     [Gpio::kUserLED] = 0x00000004,
     [Gpio::kTpuLED] = 0x00000008,
@@ -245,9 +248,6 @@ static uint32_t PinNameToPullDown[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x00000004,
     [Gpio::kCameraTrigger] = 0x00000008,
     [Gpio::kAntennaSelect] = 0x00000004,
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x00000004,
-#endif
 };
 
 static GpioCallback IRQHandlers[Gpio::kCount];
