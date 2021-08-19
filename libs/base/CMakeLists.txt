@@ -44,6 +44,7 @@ if (VALIANT_BOARD_REVISION STREQUAL P0 OR VALIANT_BOARD_REVISION STREQUAL P1)
 endif()
 
 target_link_libraries(libs_base-m7_freertos
+    libs_nxp_rt1176-sdk-mbedtls
     libs_nxp_rt1176-sdk_freertos
     libs_nxp_rt1176-sdk-mcmgr_m7
     libs_CdcAcm_freertos

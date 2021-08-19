@@ -468,3 +468,11 @@ target_link_libraries(libs_nxp_rt1176-sdk_wiced
     libs_nxp_rt1176-sdk_lwip
     libs_nxp_rt1176-sdk_sdmmc
 )
+
+add_library_m7(libs_nxp_rt1176-sdk-mbedtls
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/base64.c
+)
+
+target_include_directories(libs_nxp_rt1176-sdk-mbedtls PUBLIC
+    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/include
+)
