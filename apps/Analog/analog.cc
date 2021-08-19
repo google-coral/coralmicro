@@ -6,6 +6,7 @@
 
 extern "C" void app_main(void *param) {
     valiant::analog::Init(valiant::analog::Device::ADC1);
+    valiant::analog::Init(valiant::analog::Device::DAC1);
     valiant::analog::ADCConfig config;
     valiant::analog::CreateConfig(
         config,

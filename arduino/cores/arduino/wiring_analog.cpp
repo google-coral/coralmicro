@@ -29,6 +29,7 @@ void wiringAnalogInit() {
     pwm_config.A.enabled = false;
     pwm_config.B.enabled = false;
     valiant::analog::Init(Device::ADC1);
+    valiant::analog::Init(Device::DAC1);
     valiant::analog::CreateConfig(
         Config_A0,
         Device::ADC1, 0,

@@ -15,19 +15,25 @@ static ADC_Type* DeviceToADC(Device d) {
             return LPADC1;
         case Device::ADC2:
             return LPADC2;
+        default:
+            return nullptr;
     }
     assert(false);
 }
 
 void Init(Device device) {
-    lpadc_config_t adc_config;
-    LPADC_GetDefaultConfig(&adc_config);
-    LPADC_Init(DeviceToADC(device), &adc_config);
+    if (device == Device::ADC1 || device == Device::ADC2) {
+        lpadc_config_t adc_config;
+        LPADC_GetDefaultConfig(&adc_config);
+        LPADC_Init(DeviceToADC(device), &adc_config);
+    }
 
-    dac12_config_t dac_config;
-    DAC12_GetDefaultConfig(&dac_config);
-    dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
-    DAC12_Init(DAC, &dac_config);
+    if (device == Device::DAC1) {
+        dac12_config_t dac_config;
+        DAC12_GetDefaultConfig(&dac_config);
+        dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
+        DAC12_Init(DAC, &dac_config);
+    }
 }
 
 static void GetDefaultConfig(ADCConfig& config) {

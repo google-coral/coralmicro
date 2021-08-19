@@ -10,6 +10,7 @@ namespace analog {
 enum class Device {
     ADC1,
     ADC2,
+    DAC1,
 };
 
 enum class Side {
