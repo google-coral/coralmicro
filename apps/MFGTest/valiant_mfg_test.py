@@ -185,7 +185,7 @@ class ValiantMFGTest(object):
         """Captures one second of audio.
 
         Returns:
-          A JSON-RPC result packet with a data parameter containing base64-encoded audio data (16-bit signed PCM @ 16000Hz), or JSON-RPC error.
+          A JSON-RPC result packet with a data parameter containing base64-encoded audio data (32-bit signed PCM @ 16000Hz), or JSON-RPC error.
         """
         payload = mfg_test.get_new_payload()
         payload['method'] = 'capture_audio'

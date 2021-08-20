@@ -573,16 +573,16 @@ static void CaptureTestPattern(struct jsonrpc_request *request) {
 // Implements the "capture_audio" RPC.
 // Attempts to capture 1 second of audio.
 // Returns success, with a parameter "data" containing the captured audio in base64 (or failure).
-// The audio captured is 16-bit signed PCM @ 16000Hz.
+// The audio captured is 32-bit signed PCM @ 16000Hz.
 static void CaptureAudio(struct jsonrpc_request *request) {
     struct AudioParams {
         SemaphoreHandle_t sema;
         int count;
-        uint16_t* audio_data;
+        uint32_t* audio_data;
     };
     AudioParams params;
-    std::vector<uint16_t> audio_data(16000, 0xA5A5);
-    size_t audio_data_size = sizeof(uint16_t) * audio_data.size();
+    std::vector<uint32_t> audio_data(16000, 0xA5A5A5A5);
+    size_t audio_data_size = sizeof(uint32_t) * audio_data.size();
     params.sema = xSemaphoreCreateBinary();
     params.count = 0;
     params.audio_data = audio_data.data();
@@ -599,12 +599,12 @@ static void CaptureAudio(struct jsonrpc_request *request) {
             return reinterpret_cast<uint32_t*>(0);
         } else {
             params->count++;
-            return reinterpret_cast<uint32_t*>(params->audio_data);
+            return params->audio_data;
         }
     }, &params);
 
     valiant::AudioTask::GetSingleton()->SetPower(true);
-    valiant::AudioTask::GetSingleton()->SetBuffer(reinterpret_cast<uint32_t*>(audio_data.data()), audio_data_size);
+    valiant::AudioTask::GetSingleton()->SetBuffer(audio_data.data(), audio_data_size);
     valiant::AudioTask::GetSingleton()->Enable();
     BaseType_t ret = xSemaphoreTake(params.sema, pdMS_TO_TICKS(3000));
     valiant::AudioTask::GetSingleton()->Disable();
