@@ -134,7 +134,11 @@ def CreateFilesystem(workdir, root_dir, build_dir, elf_path):
         data_path = os.path.splitext(lib)[0] + '.data'
         with open(data_path, 'r') as f:
             data_files |= set(f.readline().split(';'))
-    data_files.remove('')
+    try:
+        data_files.remove('')
+    except KeyError:
+        # If the key is not found, don't panic.
+        pass
 
     filesystem_dir = os.path.join(workdir, 'filesystem')
     filesystem_bin = os.path.join(workdir, 'filesystem.bin')
@@ -354,11 +358,12 @@ def ProgramDataFiles(**kwargs):
             target_file = '/default.elf'
         else:
             target_file = src_file.replace(kwargs.get('root_dir'), '')
+            target_file = '/' + target_file
+            # If we are running on something with the wrong directory separator, fix it.
+            target_file.replace('\\', '/')
 
         with open(src_file, 'rb') as f:
             bar = Bar(target_file, max=os.fstat(f.fileno()).st_size)
-            # If we are running on something with the wrong directory separator, fix it.
-            target_file.replace('\\', '/')
             ElfloaderTransferData(h, bytes(target_file, encoding='utf-8'), ELFLOADER_TARGET_PATH)
             ElfloaderTransferData(h, f.read(), ELFLOADER_TARGET_FILESYSTEM, bar=bar)
     h.close()
@@ -402,13 +407,10 @@ def main():
     parser.add_argument('--noram', dest='ram', action='store_false')
     parser.add_argument('--elf_path', type=str, required=False)
     parser.add_argument('--elfloader_path', type=str, required=False)
-    parser.add_argument('--strip', dest='strip', action='store_true')
-    parser.add_argument('--toolchain', type=str, required=False)
     parser.add_argument('--serial', type=str, required=False)
     parser.add_argument('--list', dest='list', action='store_true')
     parser.set_defaults(list=False)
     parser.set_defaults(ram=False)
-    parser.set_defaults(strip=False)
     args = parser.parse_args()
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
@@ -418,14 +420,12 @@ def main():
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
     elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb')
-    toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
         elf_path,
         elfloader_path,
         blhost_path,
         flashloader_path,
         elftosb_path,
-        toolchain_path,
     ]
 
     if not args.elfloader_path or not args.elf_path:
@@ -439,10 +439,6 @@ def main():
             all_paths_exist = False
     if not all_paths_exist:
         return
-
-    if args.strip:
-        subprocess.check_call([os.path.join(toolchain_path, 'arm-none-eabi-strip'), '-s', elf_path, '-o', elf_path + '.stripped'])
-        elf_path = elf_path + '.stripped'
 
     state_machine_args = {
         'blhost_path': blhost_path,

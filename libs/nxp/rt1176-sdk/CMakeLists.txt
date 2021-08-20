@@ -417,9 +417,9 @@ add_library_m7(libs_nxp_rt1176-sdk_wiced
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC/WWD/wwd_platform.c
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/wwd_resources.c
     DATA
-    ${CMAKE_SOURCE_DIR}/third_party/firmware/cypress/43455C0.bin
-    ${CMAKE_SOURCE_DIR}/third_party/firmware/cypress/43455C0.clm_blob
-    ${CMAKE_SOURCE_DIR}/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd
+    third_party/firmware/cypress/43455C0.bin
+    third_party/firmware/cypress/43455C0.clm_blob
+    third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC

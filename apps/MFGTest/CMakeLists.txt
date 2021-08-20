@@ -5,10 +5,6 @@ include_directories(.)
 
 add_executable_m7(MFGTest
     mfg_test.cc
-    DATA
-    ${CMAKE_SOURCE_DIR}/models/testconv1-edgetpu.tflite
-    ${CMAKE_SOURCE_DIR}/models/testconv1-expected-output.bin
-    ${CMAKE_SOURCE_DIR}/models/testconv1-test-input.bin
 )
 
 target_link_libraries(MFGTest

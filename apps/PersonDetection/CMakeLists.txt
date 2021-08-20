@@ -9,7 +9,7 @@ add_executable_m7(PersonDetection
     person_detection.cc
     test_helpers.cc
     DATA
-    ${CMAKE_SOURCE_DIR}/models/person_detect_model.tflite
+    models/person_detect_model.tflite
 )
 
 target_include_directories(PersonDetection PRIVATE
