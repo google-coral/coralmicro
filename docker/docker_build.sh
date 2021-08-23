@@ -40,7 +40,12 @@ EOF
 
     docker build -t valiant ${ROOTDIR}/docker
     mkdir -p ${build_dir}
-    docker run -it -w /valiant -v ${ROOTDIR}:/valiant -v ${build_dir}:/build valiant bash -xc "
+    if [[ -t 1 ]]; then
+        INTERACTIVE="-it"
+    else
+        INTERACTIVE=""
+    fi
+    docker run --rm ${INTERACTIVE} -w /valiant -v ${ROOTDIR}:/valiant -v ${build_dir}:/build valiant bash -xc "
         chmod a+w /
         groupadd --gid $(id -g) $(id -g -n)
         useradd -m -e '' -s /bin/bash --gid $(id -g) --uid $(id -u) $(id -u -n)
