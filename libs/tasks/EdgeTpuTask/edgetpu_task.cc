@@ -56,7 +56,8 @@ usb_status_t EdgeTpuTask::USBHostEvent(
             printf("EdgeTPU went away...\r\n");
 #endif
             SetNextState(EDGETPU_STATE_UNATTACHED);
-            return kStatus_USB_Success;
+            USB_HostEdgeTpuDeinit(this->device_handle(), this->class_handle());
+            return USB_HostRemoveDevice(host_handle, this->device_handle());
         default:
             return kStatus_USB_Success;
     }
@@ -111,6 +112,7 @@ void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
 
     switch (next_state) {
         case EDGETPU_STATE_UNATTACHED:
+            EdgeTpuManager::GetSingleton()->NotifyConnected(nullptr);
             break;
         case EDGETPU_STATE_ATTACHED:
             ret = USB_HostEdgeTpuInit(device_handle(), &class_handle_);
