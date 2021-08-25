@@ -12,11 +12,13 @@ function main {
 Usage: docker_build.sh [-b <build_dir>]
   -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
   -m               build for mfgtest
+  -a               build arduino library archive
 EOF
 )
     local build_dir
+    local build_arduino
     local mfgtest
-    local args=$(getopt hmb: $*)
+    local args=$(getopt hmab: $*)
     set -- $args
 
     for i; do
@@ -27,6 +29,10 @@ EOF
                 ;;
             -m)
                 mfgtest=true
+                shift
+                ;;
+            -a)
+                build_arduino=true
                 shift
                 ;;
             --)
@@ -56,6 +62,10 @@ EOF
     mkdir -p ${build_dir}
     cmake -B ${build_dir} ${mfgtest_cmake_flags}
     make -C ${build_dir} -j $(nproc)
+
+    if [[ ! -z ${build_arduino} ]]; then
+        python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir}
+    fi
 }
 
 main "$@"
