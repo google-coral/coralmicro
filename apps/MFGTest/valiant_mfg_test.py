@@ -57,9 +57,9 @@ class ValiantMFGTest(object):
           Example:
             {'id': 0, 'result': {'serial_number': '350a280e828f2c4f'}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'get_serial_number'
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def set_pmic_rail_state(self, rail, enable):
@@ -74,13 +74,13 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'set_pmic_rail_state'
         payload['params'].append({
             'rail': rail.value,
             'enable': enable,
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def set_led_state(self, led, enable):
@@ -98,13 +98,13 @@ class ValiantMFGTest(object):
         Notes:
           Setting the state of the TPU LED requires the TPU power to be enabled.
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'set_led_state'
         payload['params'].append({
             'led': led.value,
             'enable': enable,
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def set_pin_pair_to_gpio(self, output_pin, input_pin):
@@ -119,13 +119,13 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'set_pin_pair_to_gpio'
         payload['params'].append({
             'output_pin': output_pin,
             'input_pin': input_pin,
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def set_gpio(self, pin, enable):
@@ -140,13 +140,13 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'set_gpio'
         payload['params'].append({
             'pin': pin,
             'enable': enable,
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def get_gpio(self, pin):
@@ -160,12 +160,12 @@ class ValiantMFGTest(object):
           Example:
             {'id': 40, 'result': {'value': 1}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'get_gpio'
         payload['params'].append({
             'pin': pin,
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def capture_test_pattern(self):
@@ -176,9 +176,9 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'capture_test_pattern'
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def capture_audio(self):
@@ -187,9 +187,9 @@ class ValiantMFGTest(object):
         Returns:
           A JSON-RPC result packet with a data parameter containing base64-encoded audio data (32-bit signed PCM @ 16000Hz), or JSON-RPC error.
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'capture_audio'
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def set_tpu_power_state(self, enable):
@@ -203,12 +203,12 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'set_tpu_power_state'
         payload['params'].append({
             'enable': enable,
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def run_testconv1(self):
@@ -222,23 +222,23 @@ class ValiantMFGTest(object):
         Note:
           The TPU power must be enabled before calling this.
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'run_testconv1'
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def get_tpu_chip_ids(self):
         """Not implemented"""
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'get_tpu_chip_ids'
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def check_tpu_alarm(self):
         """Not implemented"""
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'check_tpu_alarm'
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def set_dac_value(self, counts):
@@ -253,12 +253,12 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'set_dac_value'
         payload['params'].append({
             'counts': counts,
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def test_sdram_pattern(self):
@@ -269,9 +269,9 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'test_sdram_pattern'
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def write_file(self, filename, data):
@@ -286,13 +286,13 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'write_file'
         payload['params'].append({
             'filename': filename,
             'data': base64.b64encode(data.encode()).decode(),
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
     def read_file(self, filename):
@@ -306,12 +306,12 @@ class ValiantMFGTest(object):
           Example:
             {'id': 24, 'result': {'data': 'aGVsbG8gbWZndGVzdA=='}}
         """
-        payload = mfg_test.get_new_payload()
+        payload = self.get_new_payload()
         payload['method'] = 'read_file'
         payload['params'].append({
             'filename': filename
         })
-        result = mfg_test.send_rpc(payload)
+        result = self.send_rpc(payload)
         return result
 
 if __name__ == '__main__':
