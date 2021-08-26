@@ -1,4 +1,5 @@
 #include "libs/tpu/edgetpu_manager.h"
+#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "third_party/flatbuffers/include/flatbuffers/flexbuffers.h"
 #include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
@@ -12,21 +13,39 @@ constexpr char kKeyChipName[] = "2";
 constexpr char kKeyParamCache_DEPRECATED[] = "3";
 constexpr char kKeyExecutable[] = "4";
 
+EdgeTpuContext::EdgeTpuContext() {
+    EdgeTpuTask::GetSingleton()->SetPower(true);
+}
+
+EdgeTpuContext::~EdgeTpuContext() {
+    EdgeTpuTask::GetSingleton()->SetPower(false);
+}
+
 EdgeTpuManager::EdgeTpuManager() {}
 
 void EdgeTpuManager::NotifyConnected(usb_host_edgetpu_instance_t* usb_instance) {
     usb_instance_ = usb_instance;
 }
 
+std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice(const PerformanceMode mode) {
+    if (!context_.expired()) {
+        return context_.lock();
+    }
 
-bool EdgeTpuManager::OpenDevice(const PerformanceMode mode) {
+    auto shared_context = std::make_shared<EdgeTpuContext>();
+
     while (!usb_instance_) {
         vTaskDelay(pdMS_TO_TICKS(200));
     }
-    return tpu_driver_.Initialize(usb_instance_, mode);
+    if (!tpu_driver_.Initialize(usb_instance_, mode)) {
+        return nullptr;
+    }
+
+    context_ = shared_context;
+    return shared_context;
 }
 
-bool EdgeTpuManager::OpenDevice() {
+std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice() {
     return OpenDevice(PerformanceMode::kHigh);
 }
 

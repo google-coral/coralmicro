@@ -89,10 +89,23 @@ void EdgeTpuTask::TaskInit() {
 }
 
 bool EdgeTpuTask::HandleGetPowerRequest() {
-    return enabled_;
+    return (enabled_count_ > 0);
 }
 
 void EdgeTpuTask::HandleSetPowerRequest(SetPowerRequest& req) {
+    if (req.enable) {
+        enabled_count_++;
+        // Already enabled, increment count and exit.
+        if (enabled_count_ > 1) {
+            return;
+        }
+    } else {
+        enabled_count_ = std::max(0, enabled_count_ - 1);
+        // Someone else still asked to keep this on, exit.
+        if (enabled_count_ > 0) {
+            return;
+        }
+    }
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     gpio::SetGpio(gpio::Gpio::kEdgeTpuPmic, req.enable);
 
@@ -108,7 +121,6 @@ void EdgeTpuTask::HandleSetPowerRequest(SetPowerRequest& req) {
 
     gpio::SetGpio(gpio::Gpio::kEdgeTpuReset, req.enable);
 #endif
-    enabled_ = req.enable;
 }
 
 void EdgeTpuTask::HandleNextState(NextStateRequest& req) {

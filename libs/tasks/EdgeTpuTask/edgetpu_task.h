@@ -115,7 +115,7 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeT
     usb_host_interface_handle interface_handle_;
     usb_host_class_handle class_handle_;
     uint8_t status_;
-    bool enabled_;
+    int enabled_count_ = 0;
 };
 }  // namespace valiant
 

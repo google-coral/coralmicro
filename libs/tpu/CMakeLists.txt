@@ -18,6 +18,7 @@ add_library_m7(libs_tpu_freertos STATIC
 target_link_libraries(libs_tpu_freertos
     libs_nxp_rt1176-sdk_freertos
     libs_usb_host_edgetpu_freertos
+    libs_tasks_EdgeTpuTask_freertos
     libs_tensorflow-m7
     ${libs_tpu_TARGET_LINK_LIBRARIES}
 )

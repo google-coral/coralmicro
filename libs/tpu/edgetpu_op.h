@@ -5,6 +5,7 @@ struct TfLiteRegistration;
 
 namespace valiant {
 
+static const char kCustomOp[] = "edgetpu-custom-op";
 TfLiteRegistration* RegisterCustomOp();
 
 }  // namespace valiant

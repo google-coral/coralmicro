@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 set(libs_tensorflow_SOURCES
     debug_log.c
+    classification.cc
+    utils.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/c/common.c
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/error_reporter.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/flatbuffer_conversions.cc
@@ -110,6 +112,7 @@ target_link_libraries(libs_tensorflow-m7
     libs_gemmlowp
     libs_kissfft-m7
     libs_ruy
+    libs_tpu_freertos
 )
 
 add_library_m4(libs_tensorflow-m4 STATIC
@@ -130,6 +133,7 @@ target_link_libraries(libs_tensorflow-m4
     libs_gemmlowp
     libs_kissfft-m4
     libs_ruy
+    libs_tpu_freertos
 )
 
 add_library_m7(libs_tensorflow_model_hello_world STATIC

@@ -168,8 +168,6 @@ void OutputLayer::Relayout(uint8_t *dest) const {
         if (src != dest) {
             const int padded_size_bytes = PaddedSizeBytes();
             const int actual_size_bytes = ActualSizeBytes();
-            // TODO(atv): check padded vs actual and see if you need to allocate more space
-            assert(false);
             const int executions = execution_count_per_inference();
             if (executions == 1 || padded_size_bytes == actual_size_bytes) {
                 memcpy(dest, src, z_bytes * executions);

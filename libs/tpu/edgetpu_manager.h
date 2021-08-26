@@ -13,6 +13,12 @@
 
 namespace valiant {
 
+class EdgeTpuContext {
+  public:
+    EdgeTpuContext();
+    ~EdgeTpuContext();
+};
+
 class EdgeTpuPackage {
   public:
     EdgeTpuPackage(const platforms::darwinn::Executable* inference_exe,
@@ -46,8 +52,8 @@ class EdgeTpuManager {
 
     EdgeTpuPackage* RegisterPackage(const char* package_content, size_t length);
     TfLiteStatus Invoke(EdgeTpuPackage* package, TfLiteContext *context, TfLiteNode *node);
-    bool OpenDevice(const PerformanceMode mode);
-    bool OpenDevice();
+    std::shared_ptr<EdgeTpuContext> OpenDevice(const PerformanceMode mode);
+    std::shared_ptr<EdgeTpuContext> OpenDevice();
     void NotifyConnected(usb_host_edgetpu_instance_t* usb_instance);
 
   private:
@@ -56,6 +62,7 @@ class EdgeTpuManager {
     std::array<EdgeTpuPackage*, 2> cached_packages_;
     uint64_t current_parameter_caching_token_ = 0;
     usb_host_edgetpu_instance_t* usb_instance_ = nullptr;
+    std::weak_ptr<EdgeTpuContext> context_;
 };
 
 }  // namespace valiant
