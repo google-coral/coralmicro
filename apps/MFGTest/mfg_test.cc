@@ -543,7 +543,11 @@ static void GetGpio(struct jsonrpc_request *request) {
 // Configures the sensor to test pattern mode, and captures via trigger.
 // Returns success if the test pattern has the expected data, failure otherwise.
 static void CaptureTestPattern(struct jsonrpc_request *request) {
-    valiant::CameraTask::GetSingleton()->SetPower(true);
+    if (!valiant::CameraTask::GetSingleton()->SetPower(true)) {
+        valiant::CameraTask::GetSingleton()->SetPower(false);
+        jsonrpc_return_error(request, -1, "unable to detect camera", nullptr);
+        return;
+    }
     valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::TRIGGER);
     valiant::CameraTask::GetSingleton()->SetTestPattern(
             valiant::camera::TestPattern::WALKING_ONES);

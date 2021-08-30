@@ -44,6 +44,10 @@ struct EnableResponse {
     bool success;
 };
 
+struct PowerResponse {
+    bool success;
+};
+
 enum class TestPattern : uint8_t {
   NONE = 0x00,
   COLOR_BAR = 0x01,
@@ -59,6 +63,7 @@ struct Response {
   union {
       FrameResponse frame;
       EnableResponse enable;
+      PowerResponse power;
   } response;
 };
 
@@ -151,7 +156,7 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     int GetFrame(uint8_t **buffer, bool block);
     static bool GetFrame(std::list<camera::FrameFormat> fmts);
     void ReturnFrame(int index);
-    void SetPower(bool enable);
+    bool SetPower(bool enable);
     void SetTestPattern(camera::TestPattern pattern);
     void Trigger();
 
@@ -168,7 +173,7 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     void RequestHandler(camera::Request *req) override;
     camera::EnableResponse HandleEnableRequest(const camera::Mode& mode);
     void HandleDisableRequest();
-    void HandlePowerRequest(const camera::PowerRequest& power);
+    camera::PowerResponse HandlePowerRequest(const camera::PowerRequest& power);
     camera::FrameResponse HandleFrameRequest(const camera::FrameRequest& frame);
     void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
     void SetMode(const camera::Mode& mode);

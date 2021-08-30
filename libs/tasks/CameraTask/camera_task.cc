@@ -323,11 +323,12 @@ void CameraTask::Disable() {
     SendRequest(req);
 }
 
-void CameraTask::SetPower(bool enable) {
+bool CameraTask::SetPower(bool enable) {
     Request req;
     req.type = RequestType::Power;
     req.request.power.enable = enable;
-    SendRequest(req);
+    Response resp = SendRequest(req);
+    return resp.response.power.success;
 }
 
 void CameraTask::SetTestPattern(TestPattern pattern) {
@@ -461,7 +462,9 @@ void CameraTask::HandleDisableRequest() {
     NVIC_DisableIRQ(PXP_IRQn);
 }
 
-void CameraTask::HandlePowerRequest(const PowerRequest& power) {
+PowerResponse CameraTask::HandlePowerRequest(const PowerRequest& power) {
+    PowerResponse resp;
+    resp.success = true;
     PmicTask::GetSingleton()->SetRailState(
             pmic::Rail::CAM_2V8, power.enable);
     PmicTask::GetSingleton()->SetRailState(
@@ -475,10 +478,10 @@ void CameraTask::HandlePowerRequest(const PowerRequest& power) {
         Write(CameraRegisters::SW_RESET, 0x00);
         if (model_id_h != kModelIdHExpected || model_id_l != kModelIdLExpected) {
             printf("Camera model id not as expected: 0x%02x%02x\r\n", model_id_h, model_id_l);
-            // resp.success = false;
-            // return resp;
+            resp.success = false;
         }
     }
+    return resp;
 }
 
 FrameResponse CameraTask::HandleFrameRequest(const FrameRequest& frame) {
@@ -530,7 +533,7 @@ void CameraTask::RequestHandler(Request *req) {
             HandleDisableRequest();
             break;
         case RequestType::Power:
-            HandlePowerRequest(req->request.power);
+            resp.response.power = HandlePowerRequest(req->request.power);
             break;
         case RequestType::Frame:
             resp.response.frame = HandleFrameRequest(req->request.frame);
