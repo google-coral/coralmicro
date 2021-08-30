@@ -331,6 +331,8 @@ if __name__ == '__main__':
     print(mfg_test.set_led_state(LEDs.USER, False))
     print(mfg_test.set_led_state(LEDs.POWER, False))
     print(mfg_test.capture_test_pattern())
+    # Should return failure, as power is off.
+    print(mfg_test.run_testconv1())
     print(mfg_test.set_tpu_power_state(True))
     print(mfg_test.set_led_state(LEDs.TPU, True))
     print(mfg_test.run_testconv1())

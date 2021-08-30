@@ -369,6 +369,10 @@ static void SetLedState(struct jsonrpc_request *request) {
             valiant::gpio::SetGpio(valiant::gpio::kUserLED, enable);
             break;
         case kTpu:
+            if (!valiant::EdgeTpuTask::GetSingleton()->GetPower()) {
+                jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
+                return;
+            }
             valiant::gpio::SetGpio(valiant::gpio::kTpuLED, enable);
             break;
         default:
@@ -645,6 +649,10 @@ static void SetTPUPowerState(struct jsonrpc_request *request) {
 // Runs the simple "testconv1" model using the TPU.
 // NOTE: The TPU power must be enabled for this RPC to succeed.
 static void RunTestConv1(struct jsonrpc_request *request) {
+    if (!valiant::EdgeTpuTask::GetSingleton()->GetPower()) {
+        jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
+        return;
+    }
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!valiant::testconv1::setup()) {
         jsonrpc_return_error(request, -1, "testconv1 setup failed", nullptr);

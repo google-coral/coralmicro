@@ -88,7 +88,11 @@ void EdgeTpuTask::TaskInit() {
             kEdgeTpuVid, kEdgeTpuPid, std::bind(&EdgeTpuTask::USBHostEvent, this, _1, _2, _3, _4));
 }
 
-void EdgeTpuTask::HandlePowerRequest(PowerRequest& req) {
+bool EdgeTpuTask::HandleGetPowerRequest() {
+    return enabled_;
+}
+
+void EdgeTpuTask::HandleSetPowerRequest(SetPowerRequest& req) {
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     gpio::SetGpio(gpio::Gpio::kEdgeTpuPmic, req.enable);
 
@@ -104,6 +108,7 @@ void EdgeTpuTask::HandlePowerRequest(PowerRequest& req) {
 
     gpio::SetGpio(gpio::Gpio::kEdgeTpuReset, req.enable);
 #endif
+    enabled_ = req.enable;
 }
 
 void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
@@ -156,10 +161,17 @@ void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
     }
 }
 
+bool EdgeTpuTask::GetPower() {
+    Request req;
+    req.type = RequestType::GET_POWER;
+    Response resp = SendRequest(req);
+    return resp.response.get_power.enabled;
+}
+
 void EdgeTpuTask::SetPower(bool enable) {
     Request req;
-    req.type = RequestType::POWER;
-    req.request.power.enable = enable;
+    req.type = RequestType::SET_POWER;
+    req.request.set_power.enable = enable;
     SendRequest(req);
 }
 
@@ -170,8 +182,11 @@ void EdgeTpuTask::RequestHandler(Request *req) {
         case RequestType::NEXT_STATE:
             HandleNextState(req->request.next_state);
             break;
-        case RequestType::POWER:
-            HandlePowerRequest(req->request.power);
+        case RequestType::SET_POWER:
+            HandleSetPowerRequest(req->request.set_power);
+            break;
+        case RequestType::GET_POWER:
+            resp.response.get_power.enabled = HandleGetPowerRequest();
             break;
     }
 

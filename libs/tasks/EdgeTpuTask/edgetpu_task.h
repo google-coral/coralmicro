@@ -28,26 +28,34 @@ enum edgetpu_state {
 
 enum class RequestType : uint8_t {
     NEXT_STATE,
-    POWER,
+    SET_POWER,
+    GET_POWER,
 };
 
 struct NextStateRequest {
     edgetpu_state state;
 };
 
-struct PowerRequest {
+struct SetPowerRequest {
     bool enable;
+};
+
+struct GetPowerResponse {
+    bool enabled;
 };
 
 struct Response {
     RequestType type;
+    union {
+        GetPowerResponse get_power;
+    } response;
 };
 
 struct Request {
     RequestType type;
     union {
         NextStateRequest next_state;
-        PowerRequest power;
+        SetPowerRequest set_power;
     } request;
     std::function<void(Response)> callback;
 };
@@ -61,6 +69,7 @@ extern const char kEdgeTpuTaskName[];
 class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeTpuTaskName,
                                      kEdgeTpuTaskStackDepth, EDGETPU_TASK_PRIORITY, kEdgeTpuTaskQueueLength> {
   public:
+    bool GetPower();
     void SetPower(bool enable);
     static EdgeTpuTask* GetSingleton() {
         static EdgeTpuTask task;
@@ -91,7 +100,8 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeT
     void TaskInit() override;
     void RequestHandler(edgetpu::Request *req) override;
     void HandleNextState(edgetpu::NextStateRequest& req);
-    void HandlePowerRequest(edgetpu::PowerRequest& req);
+    bool HandleGetPowerRequest();
+    void HandleSetPowerRequest(edgetpu::SetPowerRequest& req);
     void SetNextState(enum edgetpu::edgetpu_state next_state);
     static void SetInterfaceCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status);
     static void GetStatusCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status);
@@ -105,6 +115,7 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeT
     usb_host_interface_handle interface_handle_;
     usb_host_class_handle class_handle_;
     uint8_t status_;
+    bool enabled_;
 };
 }  // namespace valiant
 
