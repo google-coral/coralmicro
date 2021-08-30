@@ -109,7 +109,7 @@ void AudioTask::HandleEnableRequest() {
 }
 
 void AudioTask::HandleDisableRequest() {
-    PDM_Deinit(PDM);
+    PDM_TransferTerminateReceiveEDMA(PDM, &pdm_edma_handle_);
 }
 
 void AudioTask::HandlePowerRequest(PowerRequest& power) {
