@@ -36,6 +36,9 @@ namespace valiant {
 uint8_t ConsoleM7::m4_console_buffer_storage_[kM4ConsoleBufferSize] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
 void ConsoleM7::Write(char *buffer, int size) {
+    if (!tx_task_) {
+        return;
+    }
     ConsoleMessage msg = {
         size, (uint8_t*)malloc(size),
     };
@@ -44,6 +47,9 @@ void ConsoleM7::Write(char *buffer, int size) {
 }
 
 int ConsoleM7::Read(char *buffer, int size) {
+    if (!rx_task_) {
+        return -1;
+    }
     MutexLock lock(rx_mutex_);
     int bytes_to_return = std::min(size, static_cast<int>(rx_buffer_available_));
 
@@ -134,7 +140,7 @@ void usb_device_task(void *param) {
     }
 }
 
-void ConsoleM7::Init() {
+void ConsoleM7::Init(bool init_tx, bool init_rx) {
     m4_console_buffer_ = reinterpret_cast<ipc::StreamBuffer*>(m4_console_buffer_storage_);
     m4_console_buffer_->stream_buffer =
         xStreamBufferCreateStatic(kM4ConsoleBufferBytes, 1, m4_console_buffer_->stream_buffer_storage, &m4_console_buffer_->static_stream_buffer);
@@ -160,8 +166,12 @@ void ConsoleM7::Init() {
     rx_mutex_ = xSemaphoreCreateMutex();
 
     xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, NULL);
-    xTaskCreate(StaticM7ConsoleTaskTxFn, "m7_console_task_tx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
-    xTaskCreate(StaticM7ConsoleTaskRxFn, "m7_console_task_rx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+    if (init_tx) {
+        xTaskCreate(StaticM7ConsoleTaskTxFn, "m7_console_task_tx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, &tx_task_);
+    }
+    if (init_rx) {
+        xTaskCreate(StaticM7ConsoleTaskRxFn, "m7_console_task_rx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, &rx_task_);
+    }
     if (IPCM7::HasM4Application()) {
         xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
     }

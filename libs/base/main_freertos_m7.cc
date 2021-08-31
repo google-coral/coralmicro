@@ -1,3 +1,5 @@
+#include "libs/base/main_freertos_m7.h"
+
 #include "libs/base/console_m7.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
@@ -39,13 +41,18 @@ void InitializeCDCEEM() {
 
 extern "C" void app_main(void *param);
 extern "C" int main(int argc, char **argv) __attribute__((weak));
+
 extern "C" int main(int argc, char **argv) {
+    return real_main(argc, argv, true, true);
+}
+
+extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_console_rx) {
     BOARD_InitHardware(true);
     valiant::timer::Init();
     valiant::gpio::Init();
     valiant::IPC::GetSingleton()->Init();
     valiant::Random::GetSingleton()->Init();
-    valiant::ConsoleM7::GetSingleton()->Init();
+    valiant::ConsoleM7::GetSingleton()->Init(init_console_tx, init_console_rx);
     assert(valiant::filesystem::Init());
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);

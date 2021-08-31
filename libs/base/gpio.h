@@ -21,6 +21,7 @@ enum Gpio {
     kCameraTrigger,
     kAntennaSelect,
     kBtHostWake,
+    kBtDevWake,
     kEthPhyRst,
     kBufferEnable,
     kCameraPrivacyOverride,

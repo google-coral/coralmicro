@@ -15,7 +15,7 @@ class ConsoleM7 {
         static ConsoleM7 console;
         return &console;
     }
-    void Init();
+    void Init(bool init_tx, bool init_rx);
     ipc::StreamBuffer* GetM4ConsoleBufferPtr();
     void Write(char *buffer, int size);
     // NOTE: This reads from the internal buffer, not directly from a serial device.
@@ -51,6 +51,8 @@ class ConsoleM7 {
     std::array<uint8_t, kRxBufferSize> rx_buffer_;
     size_t rx_buffer_read_ = 0, rx_buffer_write_ = 0, rx_buffer_available_ = 0;
     SemaphoreHandle_t rx_mutex_;
+
+    TaskHandle_t tx_task_, rx_task_;
 };
 
 }  // namespace valiant

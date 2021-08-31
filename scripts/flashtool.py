@@ -403,6 +403,7 @@ def main():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--build_dir', type=str)
     parser.add_argument('--app', type=str, required=True)
+    parser.add_argument('--subapp', type=str, required=False)
     parser.add_argument('--ram', dest='ram', action='store_true')
     parser.add_argument('--noram', dest='ram', action='store_false')
     parser.add_argument('--elf_path', type=str, required=False)
@@ -415,7 +416,7 @@ def main():
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
     app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir else None
-    elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, args.app + '.stripped')
+    elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app) + '.stripped')
     elfloader_path = args.elfloader_path if args.elfloader_path else os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')

@@ -15,6 +15,10 @@ class LEDs(Enum):
     USER = 1
     TPU = 2
 
+class Antenna(Enum):
+    INTERNAL = 0
+    EXTERNAL = 1
+
 class ValiantMFGTest(object):
     """Manufacturing test runner for Valiant.
 
@@ -313,6 +317,64 @@ class ValiantMFGTest(object):
         })
         result = self.send_rpc(payload)
         return result
+
+    def wifi_get_ap(self, name):
+        """Scans for an access point of the provided name.
+
+        Args:
+          name: Name of the access point to search for.
+
+        Returns:
+          A JSON-RPC result with the signal strength of the network, or JSON-RPC error.
+          Example:
+            {'id': 1, 'result': {'signal_strength': -52}}
+        """
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_get_ap'
+        payload['params'].append({
+            'name': name
+        })
+        result = self.send_rpc(payload)
+        return result
+
+    def wifi_set_antenna(self, antenna):
+        """Sets which antenna to use for WiFi.
+
+        Args:
+          antenna: A value from the Antenna Enum.
+
+        Returns:
+          A JSON-RPC result packet with no extra data, or JSON-RPC error.
+          Example:
+            {'id': 2, 'result': {}}
+        """
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_set_antenna'
+        payload['params'].append({
+            'antenna': antenna.value,
+        })
+        result = self.send_rpc(payload)
+        return result
+
+    def ble_scan(self, address):
+        """Scans for a BLE device with the given MAC address.
+
+        Args:
+          address: The MAC address to search for (as a string).
+
+        Returns:
+          A JSON-RPC result packet with signal strength, or JSON-RPC error.
+          Example:
+            {'id':  4, 'result': {'signal_strength': -58}}
+        """
+        payload = self.get_new_payload()
+        payload['method'] = 'ble_scan'
+        payload['params'].append({
+            'address': address,
+        })
+        result = self.send_rpc(payload)
+        return result
+
 
 if __name__ == '__main__':
     """

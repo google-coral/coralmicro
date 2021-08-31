@@ -3,6 +3,7 @@
 #include "libs/base/analog.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/main_freertos_m7.h"
 #include "libs/base/utils.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
@@ -10,10 +11,10 @@
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "libs/testconv1/testconv1.h"
 #include "libs/tpu/edgetpu_manager.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
-#include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
+#include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 
 #include <array>
 #include <map>
@@ -879,4 +880,8 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("read_file", ReadFile);
 
     vTaskSuspend(NULL);
+}
+
+extern "C" int main(int argc, char **argv) {
+    return real_main(argc, argv, false, false);
 }
