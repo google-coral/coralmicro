@@ -6,7 +6,7 @@
 namespace valiant {
 
 struct netif* GetEthernetInterface();
-void InitializeEthernet();
+void InitializeEthernet(bool default_iface);
 
 }  // namespace valiant
 

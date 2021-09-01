@@ -375,6 +375,19 @@ class ValiantMFGTest(object):
         result = self.send_rpc(payload)
         return result
 
+    def eth_get_ip(self):
+        """Gets the IP address assigned to the Ethernet interface.
+
+        Returns:
+          A JSON-RPC result packet with the ip address, or JSON-RPC error.
+          Example:
+            {'id': 0, 'result': {'ip': '172.16.243.96'}}
+        """
+        payload = self.get_new_payload()
+        payload['method'] = 'eth_get_ip'
+        result = self.send_rpc(payload)
+        return result
+
 
 if __name__ == '__main__':
     """

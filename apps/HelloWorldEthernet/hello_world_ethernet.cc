@@ -14,7 +14,7 @@ struct DnsCallbackArg {
 extern "C" void app_main(void *param) {
     printf("Hello world Ethernet.\r\n");
 
-    valiant::InitializeEthernet();
+    valiant::InitializeEthernet(true);
 
     struct netif *ethernet = valiant::GetEthernetInterface();
 

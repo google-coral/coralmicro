@@ -25,7 +25,7 @@ struct netif* GetEthernetInterface() {
     return eth_netif;
 }
 
-void InitializeEthernet() {
+void InitializeEthernet(bool default_iface) {
     ip4_addr_t netif_ipaddr, netif_netmask, netif_gw;
     ethernetif_config_t enet_config = {
         .phyHandle = &phyHandle,
@@ -66,7 +66,9 @@ void InitializeEthernet() {
     IP4_ADDR(&netif_gw, 0, 0, 0, 0);
     
     netifapi_netif_add(&netif, &netif_ipaddr, &netif_netmask, &netif_gw, &enet_config, ethernetif1_init, tcpip_input);
-    netifapi_netif_set_default(&netif);
+    if (default_iface) {
+        netifapi_netif_set_default(&netif);
+    }
     netifapi_netif_set_up(&netif);
     netifapi_dhcp_start(&netif);
     eth_netif = &netif;

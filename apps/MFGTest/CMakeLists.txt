@@ -30,3 +30,15 @@ target_link_libraries(MFGTestWiFi
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/libwicedble.a
     libs_nxp_rt1176-sdk_wiced
 )
+
+add_executable_m7(MFGTestPOE
+    mfg_test_poe.cc
+    ${CMAKE_SOURCE_DIR}/libs/base/ethernet.cc
+)
+
+target_link_libraries(MFGTestPOE
+    libs_base-m7_freertos
+    libs_RPCServer
+    libs_RPCServerIOHTTP
+    libs_mjson
+)
