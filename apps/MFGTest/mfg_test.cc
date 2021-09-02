@@ -14,6 +14,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 
 #include <array>
@@ -847,6 +848,56 @@ static void ReadFile(struct jsonrpc_request *request) {
     }
 }
 
+static void FuseMACAddress(struct jsonrpc_request *request) {
+    uint32_t mac_address_hi, mac_address_lo;
+    status_t status;
+    const char *address_param_pattern = "$[0].address";
+    std::vector<char> address;
+    int size;
+    int find_result;
+    find_result = mjson_find(request->params, request->params_len, address_param_pattern, nullptr, &size);
+    if (find_result == MJSON_TOK_STRING) {
+        address.resize(size + 1, 0);
+        mjson_get_string(request->params, request->params_len, address_param_pattern, address.data(), size);
+    } else {
+        jsonrpc_return_error(request, -1, "'address' missing", nullptr);
+        return;
+    }
+
+    unsigned int a, b, c, d, e, f;
+    int tokens = sscanf(address.data(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);
+    if (tokens != 6) {
+        jsonrpc_return_error(request, -1, "could not get six octets from 'address'", nullptr);
+        return;
+    }
+
+    OCOTP_Init(OCOTP, 0);
+
+    status = OCOTP_ReadFuseShadowRegisterExt(OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), &mac_address_hi, 1);
+    if (status != kStatus_Success) {
+        jsonrpc_return_error(request, -1, "failed to read MAC address fuse register", nullptr);
+        return;
+    }
+
+    // Preserve the reserved bits at the top of the high register.
+    mac_address_hi &= 0xFFFF0000;
+    mac_address_hi |= (a << 8) | (b);
+    mac_address_lo = (c << 24) | (d << 16) | (e << 8) | f;
+
+    status = OCOTP_WriteFuseShadowRegister(OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), mac_address_hi);
+    if (status != kStatus_Success) {
+        jsonrpc_return_error(request, -1, "failed to write MAC address fuse register", nullptr);
+        return;
+    }
+    status = OCOTP_WriteFuseShadowRegister(OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO), mac_address_lo);
+    if (status != kStatus_Success) {
+        jsonrpc_return_error(request, -1, "failed to write MAC address fuse register", nullptr);
+        return;
+    }
+
+    jsonrpc_return_success(request, "{}");
+}
+
 extern "C" void app_main(void *param) {
     InitializeLoopbackMappings();
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
@@ -878,6 +929,7 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("test_sdram_pattern", TestSDRamPattern);
     rpc_server.RegisterRPC("write_file", WriteFile);
     rpc_server.RegisterRPC("read_file", ReadFile);
+    rpc_server.RegisterRPC("fuse_mac_address", FuseMACAddress);
 
     vTaskSuspend(NULL);
 }

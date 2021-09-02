@@ -388,6 +388,19 @@ class ValiantMFGTest(object):
         result = self.send_rpc(payload)
         return result
 
+    def fuse_mac_address(self, address):
+      """Writes a MAC address into device fuses.
+
+      Returns:
+        A JSON-RPC result packet with no extra data, or JSON-RPC error.
+      """
+      payload = self.get_new_payload()
+      payload['method'] = 'fuse_mac_address'
+      payload['params'].append({
+          'address': address,
+      })
+      result = self.send_rpc(payload)
+      return result
 
 if __name__ == '__main__':
     """
