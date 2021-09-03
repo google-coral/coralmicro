@@ -17,6 +17,7 @@ class RPCServerIOHTTP : public RPCServerIO {
     bool Init() override;
 
     struct rpc_data {
+        std::vector<char> post_data;
         std::vector<char> reply_buf;
         size_t reply_buf_written;
     };

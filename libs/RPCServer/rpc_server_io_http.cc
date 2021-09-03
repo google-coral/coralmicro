@@ -22,19 +22,19 @@ err_t RPCServerIOHTTP::static_httpd_post_receive_data(void *context, void *conne
 
 err_t RPCServerIOHTTP::httpd_post_receive_data(void *connection, struct pbuf *p) {
     auto *this_rpc_data = rpc_data_map[connection];
-    std::vector<char> buf(p->tot_len, 0);
+    auto post_data_len = this_rpc_data->post_data.size();
+    this_rpc_data->post_data.resize(post_data_len + p->tot_len);
     if (p->len == p->tot_len) {
-        memcpy(buf.data(), p->payload, p->tot_len);
+        memcpy(this_rpc_data->post_data.data() + post_data_len, p->payload, p->tot_len);
     } else {
-        size_t offset = 0;
+        size_t offset = post_data_len;
         struct pbuf *tmp_p = p;
         do {
-            memcpy(buf.data() + offset, tmp_p->payload, tmp_p->len);
+            memcpy(this_rpc_data->post_data.data() + offset, tmp_p->payload, tmp_p->len);
             offset += tmp_p->len;
             tmp_p = tmp_p->next;
         } while (tmp_p->len != tmp_p->tot_len);
     }
-    jsonrpc_ctx_process(parent_context(), buf.data(), p->tot_len, jsonrpc_reply, this_rpc_data, nullptr);
     pbuf_free(p);
     return ERR_OK;
 }
@@ -70,6 +70,8 @@ void RPCServerIOHTTP::static_httpd_post_finished(void* context, void *connection
 }
 
 void RPCServerIOHTTP::httpd_post_finished(void *connection, char *response_uri, u16_t response_uri_len) {
+    auto *this_rpc_data = rpc_data_map[connection];
+    jsonrpc_ctx_process(parent_context(), this_rpc_data->post_data.data(), this_rpc_data->post_data.size(), jsonrpc_reply, this_rpc_data, nullptr);
     const char *response = "/jsonrpc/response.json?connection=%x";
     snprintf(response_uri, response_uri_len, response, connection);
 }
