@@ -13,6 +13,7 @@ target_link_libraries(MFGTest
     libs_RPCServerIOHTTP
     libs_mjson
     libs_testconv1
+    libs_testlib
     libs_tpu_freertos
 )
 

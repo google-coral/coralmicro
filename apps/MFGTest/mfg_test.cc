@@ -10,6 +10,7 @@
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "libs/testconv1/testconv1.h"
+#include "libs/testlib/test_lib.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -279,23 +280,6 @@ static void InitializeLoopbackMappings() {
         {178, {GPIO11, 2}},
     };
 }
-
-// Implementation of "get_serial_number" RPC.
-// Returns JSON results with the key "serial_number" and the serial, as a string.
-static void GetSerialNumber(struct jsonrpc_request *request) {
-    char serial_number_str[16];
-    uint64_t serial_number = valiant::utils::GetUniqueID();
-    for (int i = 0; i < 16; ++i) {
-        uint8_t nibble = (serial_number >> (i * 4)) & 0xF;
-        if (nibble < 10) {
-            serial_number_str[15 - i] = nibble + '0';
-        } else {
-            serial_number_str[15 - i] = (nibble - 10) + 'a';
-        }
-    }
-    jsonrpc_return_success(request, "{%Q:%.*Q}", "serial_number", 16, serial_number_str);
-}
-
 // Implementation of "set_pmic_rail_state" RPC.
 // Takes two parameters:
 //    "rail" is an enumerated value indicating the rail to change.
@@ -912,7 +896,8 @@ extern "C" void app_main(void *param) {
     }
     rpc_server.RegisterIO(rpc_server_io_http);
 
-    rpc_server.RegisterRPC("get_serial_number", GetSerialNumber);
+    rpc_server.RegisterRPC("get_serial_number",
+                           valiant::testlib::GetSerialNumber);
     rpc_server.RegisterRPC("set_pmic_rail_state", SetPmicRailState);
     rpc_server.RegisterRPC("set_led_state", SetLedState);
     // TODO(atv): Special handling for the pair with DAC_OUT

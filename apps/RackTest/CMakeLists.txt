@@ -11,5 +11,6 @@ target_link_libraries(RackTest
     libs_base-m7_freertos
     libs_RPCServer
     libs_RPCServerIOHTTP
+    libs_testlib
     libs_mjson
 )
