@@ -7,5 +7,6 @@ target_link_libraries(libs_testlib PUBLIC
     libs_base-m7_freertos
     libs_RPCServer
     libs_RPCServerIOHTTP
+    libs_testconv1
     libs_mjson
 )

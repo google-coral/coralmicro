@@ -635,26 +635,6 @@ static void SetTPUPowerState(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-// Implements the "run_testconv1" RPC.
-// Runs the simple "testconv1" model using the TPU.
-// NOTE: The TPU power must be enabled for this RPC to succeed.
-static void RunTestConv1(struct jsonrpc_request *request) {
-    if (!valiant::EdgeTpuTask::GetSingleton()->GetPower()) {
-        jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
-        return;
-    }
-    valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
-    if (!valiant::testconv1::setup()) {
-        jsonrpc_return_error(request, -1, "testconv1 setup failed", nullptr);
-        return;
-    }
-    if (!valiant::testconv1::loop()) {
-        jsonrpc_return_error(request, -1, "testconv1 loop failed", nullptr);
-        return;
-    }
-    jsonrpc_return_success(request, "{}");
-}
-
 static void GetTPUChipIds(struct jsonrpc_request *request) {
     jsonrpc_return_error(request, -1, "get_tpu_chip_ids not implemented", nullptr);
 }
@@ -907,7 +887,8 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("capture_test_pattern", CaptureTestPattern);
     rpc_server.RegisterRPC("capture_audio", CaptureAudio);
     rpc_server.RegisterRPC("set_tpu_power_state", SetTPUPowerState);
-    rpc_server.RegisterRPC("run_testconv1", RunTestConv1);
+    rpc_server.RegisterRPC("run_testconv1",
+                           valiant::testlib::RunTestConv1);
     rpc_server.RegisterRPC("get_tpu_chip_ids", GetTPUChipIds);
     rpc_server.RegisterRPC("check_tpu_alarm", CheckTPUAlarm);
     rpc_server.RegisterRPC("set_dac_value", SetDACValue);

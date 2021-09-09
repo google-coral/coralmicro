@@ -21,6 +21,8 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterIO(rpc_server_io_http);
     rpc_server.RegisterRPC("get_serial_number",
                            valiant::testlib::GetSerialNumber);
+    rpc_server.RegisterRPC("run_testconv1",
+                           valiant::testlib::RunTestConv1);
 
     vTaskSuspend(NULL);
 }

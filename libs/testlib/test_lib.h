@@ -7,6 +7,7 @@ namespace valiant {
 namespace testlib {
 
 void GetSerialNumber(struct jsonrpc_request *request);
+void RunTestConv1(struct jsonrpc_request *request);
 
 }  // namespace testlib
 }  // namespace valiant
