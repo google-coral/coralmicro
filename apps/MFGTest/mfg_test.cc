@@ -616,25 +616,6 @@ static void CaptureAudio(struct jsonrpc_request *request) {
     }
 }
 
-// Implements the "set_tpu_power_state" RPC.
-// Takes one parameter, "enable" -- a boolean indicating the state to set.
-// Returns success or failure.
-static void SetTPUPowerState(struct jsonrpc_request *request) {
-    int enable;
-    const char *enable_param_pattern = "$[0].enable";
-
-    int find_result = mjson_find(request->params, request->params_len, enable_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
-        mjson_get_bool(request->params, request->params_len, enable_param_pattern, &enable);
-    } else {
-        jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
-        return;
-    }
-
-    valiant::EdgeTpuTask::GetSingleton()->SetPower(enable);
-    jsonrpc_return_success(request, "{}");
-}
-
 static void GetTPUChipIds(struct jsonrpc_request *request) {
     jsonrpc_return_error(request, -1, "get_tpu_chip_ids not implemented", nullptr);
 }
@@ -886,7 +867,8 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("get_gpio", GetGpio);
     rpc_server.RegisterRPC("capture_test_pattern", CaptureTestPattern);
     rpc_server.RegisterRPC("capture_audio", CaptureAudio);
-    rpc_server.RegisterRPC("set_tpu_power_state", SetTPUPowerState);
+    rpc_server.RegisterRPC("set_tpu_power_state",
+                           valiant::testlib::SetTPUPowerState);
     rpc_server.RegisterRPC("run_testconv1",
                            valiant::testlib::RunTestConv1);
     rpc_server.RegisterRPC("get_tpu_chip_ids", GetTPUChipIds);

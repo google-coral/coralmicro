@@ -49,5 +49,24 @@ void RunTestConv1(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
+// Implements the "set_tpu_power_state" RPC.
+// Takes one parameter, "enable" -- a boolean indicating the state to set.
+// Returns success or failure.
+void SetTPUPowerState(struct jsonrpc_request *request) {
+    int enable;
+    const char *enable_param_pattern = "$[0].enable";
+
+    int find_result = mjson_find(request->params, request->params_len, enable_param_pattern, nullptr, nullptr);
+    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
+        mjson_get_bool(request->params, request->params_len, enable_param_pattern, &enable);
+    } else {
+        jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
+        return;
+    }
+
+    valiant::EdgeTpuTask::GetSingleton()->SetPower(enable);
+    jsonrpc_return_success(request, "{}");
+}
+
 }  // namespace testlib
 }  // namespace valiant

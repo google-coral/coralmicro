@@ -23,6 +23,8 @@ extern "C" void app_main(void *param) {
                            valiant::testlib::GetSerialNumber);
     rpc_server.RegisterRPC("run_testconv1",
                            valiant::testlib::RunTestConv1);
+    rpc_server.RegisterRPC("set_tpu_power_state",
+                           valiant::testlib::SetTPUPowerState);
 
     vTaskSuspend(NULL);
 }
