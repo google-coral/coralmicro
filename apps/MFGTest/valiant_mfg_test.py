@@ -402,6 +402,20 @@ class ValiantMFGTest(object):
       result = self.send_rpc(payload)
       return result
 
+    def read_mac_address(self):
+      """Reads the MAC address from device fuses.
+
+      Returns:
+        A JSON-RPC result packet with the address. An all-zero
+        address indicates that no address has been fused.
+        Example:
+          {'id': 44, 'result': {'address': '7C:D9:5C:AA:BB:CC'}}
+      """
+      payload = self.get_new_payload()
+      payload['method'] = 'read_mac_address'
+      result = self.send_rpc(payload)
+      return result
+
 if __name__ == '__main__':
     """
     Sample runner for the RPCs implemented in this class.
@@ -463,3 +477,5 @@ if __name__ == '__main__':
     print(mfg_test.get_gpio(169))
     print(mfg_test.set_gpio(171, False))
     print(mfg_test.get_gpio(169))
+
+    print(mfg_test.read_mac_address())

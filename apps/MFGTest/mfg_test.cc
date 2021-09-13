@@ -843,6 +843,14 @@ static void FuseMACAddress(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
+static void ReadMACAddress(struct jsonrpc_request *request) {
+    valiant::MacAddress address = valiant::utils::GetMacAddress();
+    char address_str[255];
+    memset(address_str, 0, sizeof(address_str));
+    snprintf(address_str, sizeof(address_str), "%02X:%02X:%02X:%02X:%02X:%02X", address.a, address.b, address.c, address.d, address.e, address.f);
+    jsonrpc_return_success(request, "{%Q:%Q}", "address", address_str);
+}
+
 extern "C" void app_main(void *param) {
     InitializeLoopbackMappings();
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
@@ -878,6 +886,7 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("write_file", WriteFile);
     rpc_server.RegisterRPC("read_file", ReadFile);
     rpc_server.RegisterRPC("fuse_mac_address", FuseMACAddress);
+    rpc_server.RegisterRPC("read_mac_address", ReadMACAddress);
 
     vTaskSuspend(NULL);
 }
