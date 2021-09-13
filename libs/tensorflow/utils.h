@@ -10,6 +10,14 @@
 namespace valiant {
 namespace tensorflow {
 
+template <typename T>
+struct BBox {
+    T ymin;
+    T xmin;
+    T ymax;
+    T xmax;
+};
+
 struct ImageDims {
   int height;
   int width;

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 set(libs_tensorflow_SOURCES
     debug_log.c
     classification.cc
+    detection.cc
     utils.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/c/common.c
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/error_reporter.cc
