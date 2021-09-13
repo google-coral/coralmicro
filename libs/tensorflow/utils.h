@@ -10,6 +10,22 @@
 namespace valiant {
 namespace tensorflow {
 
+struct ImageDims {
+  int height;
+  int width;
+  int depth;
+};
+
+inline bool operator==(const ImageDims& a, const ImageDims& b) {
+  return a.height == b.height && a.width == b.width && a.depth == b.depth;
+}
+inline int ImageSize(const ImageDims& dims) {
+  return dims.height * dims.width * dims.depth;
+}
+
+bool ResizeImage(const ImageDims& in_dims, const uint8_t *in,
+                 const ImageDims& out_dims, uint8_t* out);
+
 inline int TensorSize(TfLiteTensor* tensor) {
     int size = 1;
     for (int i = 0; i < tensor->dims->size; ++i) {

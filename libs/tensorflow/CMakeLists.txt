@@ -92,6 +92,8 @@ set(libs_tensorflow_SOURCES
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/simple_memory_allocator.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/system_setup.cc
     ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/schema/schema_utils.cc
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/test_helpers.cc
+    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/kernel_runner.cc
 )
 
 add_library_m7(libs_tensorflow-m7 STATIC
