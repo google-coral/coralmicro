@@ -153,7 +153,7 @@ def CreateFilesystem(workdir, root_dir, build_dir, elf_path):
 
     return data_files
 
-def CreateSbFile(workdir, elftosb_path, srec_path, filesystem_path):
+def CreateSbFile(workdir, elftosb_path, srec_path):
     spinand_bdfile_path = os.path.join(workdir, 'program_flexspinand_image.bd')
     itcm_bdfile_path = os.path.join(workdir, 'imx-itcm-unsigned.bd')
 
@@ -164,8 +164,6 @@ def CreateSbFile(workdir, elftosb_path, srec_path, filesystem_path):
     with open(spinand_bdfile_path, 'w') as spinand_bdfile:
         spinand_bdfile.write('sources {\n')
         spinand_bdfile.write('bootImageFile = extern (0);\n')
-        if filesystem_path:
-            spinand_bdfile.write('filesystemFile = extern (1);\n')
         spinand_bdfile.write('}\n')
         spinand_bdfile.write('section (0) {\n')
         spinand_bdfile.write('load 0xC2000105 > 0x10000;\n')
@@ -179,8 +177,6 @@ def CreateSbFile(workdir, elftosb_path, srec_path, filesystem_path):
         spinand_bdfile.write('erase spinand 0xc..0x4c;\n')
         spinand_bdfile.write('load spinand bootImageFile > 0x4;\n')
         spinand_bdfile.write('load spinand bootImageFile > 0x8;\n')
-        if filesystem_path:
-            spinand_bdfile.write('load spinand filesystemFile > 0xc;\n')
         spinand_bdfile.write('}\n')
     with open(itcm_bdfile_path, 'w') as itcm_bdfile:
         itcm_bdfile.write('options {\n')
@@ -198,8 +194,6 @@ def CreateSbFile(workdir, elftosb_path, srec_path, filesystem_path):
     sbfile_path = os.path.join(workdir, 'program.sb')
     subprocess.check_call([elftosb_path, '-f', 'imx', '-V', '-c', itcm_bdfile_path, '-o', ivt_bin_path, srec_path])
     args = [elftosb_path, '-f', 'kinetis', '-V', '-c', spinand_bdfile_path, '-o', sbfile_path, ivt_bin_path]
-    if filesystem_path:
-        args.append(filesystem_path)
     subprocess.check_call(args)
     return sbfile_path
 
@@ -351,8 +345,9 @@ def ProgramElfloader(**kwargs):
 
 def ProgramDataFiles(**kwargs):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
-    files = kwargs.get('data_files')
-    files.add(kwargs.get('elf_path'))
+    files = list(kwargs.get('data_files'))
+    files.append(kwargs.get('elf_path'))
+    files.sort()
     for src_file in files:
         if src_file is kwargs.get('elf_path'):
             target_file = '/default.elf'
@@ -500,7 +495,7 @@ def main():
             if data_files is None:
                 print('Creating filesystem failed, exit')
                 return
-            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path, None) #filesystem_path)
+            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path)
             if not sbfile_path:
                 print('Creating sbfile failed, exit')
                 return
