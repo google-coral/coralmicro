@@ -52,9 +52,9 @@ class TpuDriver {
     };
 
     bool BulkOutTransfer(const uint8_t *data, uint32_t data_length) const;
-    bool BulkOutTransferInternal(uint8_t endpoint, const uint8_t *data, uint32_t data_length) const;
+    ssize_t BulkOutTransferInternal(uint8_t endpoint, const uint8_t *data, uint32_t data_length) const;
     bool BulkInTransfer(uint8_t *data, uint32_t data_length) const;
-    bool BulkInTransferInternal(uint8_t endpoint, uint8_t *data, uint32_t data_length) const;
+    ssize_t BulkInTransferInternal(uint8_t endpoint, uint8_t *data, uint32_t data_length) const;
 
     bool SendData(DescriptorTag tag, const uint8_t *data, uint32_t length) const;
     bool WriteHeader(DescriptorTag tag, uint32_t length) const;

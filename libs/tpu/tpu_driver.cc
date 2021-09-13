@@ -12,6 +12,14 @@ static uint8_t BulkTransferBuffer[kMaxBulkBufferSize];
 
 namespace valiant {
 
+namespace {
+struct UsbTransferMetadata {
+    SemaphoreHandle_t sema;
+    usb_status_t status;
+    size_t bytes_transferred;
+};
+}  // namespace
+
 namespace registers = platforms::darwinn::driver::config::registers;
 
 TpuDriver::TpuDriver() {
@@ -230,9 +238,10 @@ bool TpuDriver::Write64(uint64_t reg, uint64_t val) {
     return CSRTransfer(reg, &val, false, RegisterSize::kRegSize64);
 }
 
-bool TpuDriver::BulkOutTransferInternal(uint8_t endpoint, const uint8_t *data, uint32_t data_length) const {
-    bool ret = false;
-    SemaphoreHandle_t sema = xSemaphoreCreateBinary();
+ssize_t TpuDriver::BulkOutTransferInternal(uint8_t endpoint, const uint8_t *data, uint32_t data_length) const {
+    UsbTransferMetadata meta;
+    meta.sema = xSemaphoreCreateBinary();
+    meta.status = kStatus_USB_Error;
 
     usb_status_t bulk_status = USB_HostEdgeTpuBulkOutSend(usb_instance_, endpoint,
             (uint8_t*)data, data_length,
@@ -240,24 +249,29 @@ bool TpuDriver::BulkOutTransferInternal(uint8_t endpoint, const uint8_t *data, u
                uint8_t *data,
                uint32_t data_length,
                usb_status_t status) {
-                SemaphoreHandle_t sema = (SemaphoreHandle_t)param;
-                xSemaphoreGive(sema);
-            }, sema);
+                UsbTransferMetadata* meta = reinterpret_cast<UsbTransferMetadata*>(param);
+                meta->bytes_transferred = data_length;
+                meta->status = status;
+                xSemaphoreGive(meta->sema);
+            }, &meta);
 
     if (bulk_status != kStatus_USB_Success) {
         printf("USB_HostEdgeTpuBulkOutSend failed\r\n");
         goto exit;
     }
 
-    if (xSemaphoreTake(sema, pdMS_TO_TICKS(200)) == pdFALSE) {
+    if (xSemaphoreTake(meta.sema, pdMS_TO_TICKS(200)) == pdFALSE) {
         printf("%s didn't get semaphore\r\n", __func__);
-        goto exit;
     };
 
-    ret = true;
 exit:
-    vSemaphoreDelete(sema);
-    return ret;
+    vSemaphoreDelete(meta.sema);
+
+    if (meta.status == kStatus_USB_Success) {
+        return meta.bytes_transferred;
+    } else {
+        return -meta.status;
+    }
 }
 
 bool TpuDriver::BulkOutTransfer(const uint8_t *data, uint32_t data_length) const {
@@ -267,9 +281,10 @@ bool TpuDriver::BulkOutTransfer(const uint8_t *data, uint32_t data_length) const
     while (bytes_left > 0) {
         uint32_t chunk_size = std::min(kMaxBulkBufferSize, bytes_left);
         memcpy(BulkTransferBuffer, current_chunk, chunk_size);
-        if (BulkOutTransferInternal(kSingleBulkOutEndpoint, BulkTransferBuffer, chunk_size)) {
-            current_chunk += chunk_size;
-            bytes_left -= chunk_size;
+        ssize_t bytes_sent = BulkOutTransferInternal(kSingleBulkOutEndpoint, BulkTransferBuffer, chunk_size);
+        if (bytes_sent > 0) {
+            current_chunk += bytes_sent;
+            bytes_left -= bytes_sent;
         } else {
             printf("Bad BulkOutTransferInternal\r\n");
             return false;
@@ -279,9 +294,10 @@ bool TpuDriver::BulkOutTransfer(const uint8_t *data, uint32_t data_length) const
     return true;
 }
 
-bool TpuDriver::BulkInTransferInternal(uint8_t endpoint, uint8_t *data, uint32_t data_length) const {
-    bool ret = false;
-    SemaphoreHandle_t sema = xSemaphoreCreateBinary();
+ssize_t TpuDriver::BulkInTransferInternal(uint8_t endpoint, uint8_t *data, uint32_t data_length) const {
+    UsbTransferMetadata meta;
+    meta.sema = xSemaphoreCreateBinary();
+    meta.status = kStatus_USB_Error;
 
     usb_status_t bulk_status = USB_HostEdgeTpuBulkInRecv(usb_instance_, endpoint,
             data, data_length,
@@ -289,24 +305,29 @@ bool TpuDriver::BulkInTransferInternal(uint8_t endpoint, uint8_t *data, uint32_t
                uint8_t *data,
                uint32_t data_length,
                usb_status_t status) {
-                SemaphoreHandle_t sema = (SemaphoreHandle_t)param;
-                xSemaphoreGive(sema);
-            }, sema);
+                UsbTransferMetadata* meta = reinterpret_cast<UsbTransferMetadata*>(param);
+                meta->bytes_transferred = data_length;
+                meta->status = status;
+                xSemaphoreGive(meta->sema);
+            }, &meta);
 
     if (bulk_status != kStatus_USB_Success) {
         printf("USB_HostEdgeTpuBulkInRecv failed\r\n");
         goto exit;
     }
 
-    if (xSemaphoreTake(sema, pdMS_TO_TICKS(200)) == pdFALSE) {
+    if (xSemaphoreTake(meta.sema, pdMS_TO_TICKS(200)) == pdFALSE) {
         printf("%s didn't get semaphore\r\n", __func__);
-        goto exit;
     };
 
-    ret = true;
 exit:
-    vSemaphoreDelete(sema);
-    return ret;
+    vSemaphoreDelete(meta.sema);
+
+    if (meta.status == kStatus_USB_Success) {
+        return meta.bytes_transferred;
+    } else {
+        return -meta.status;
+    }
 }
 
 bool TpuDriver::BulkInTransfer(uint8_t *data, uint32_t data_length) const {
@@ -314,10 +335,11 @@ bool TpuDriver::BulkInTransfer(uint8_t *data, uint32_t data_length) const {
     uint32_t bytes_left = data_length;
     while (bytes_left > 0) {
         uint32_t chunk_size = std::min(kMaxBulkBufferSize, bytes_left);
-        if (BulkInTransferInternal(kSingleBulkOutEndpoint, BulkTransferBuffer, chunk_size)) {
+        ssize_t bytes_received = BulkInTransferInternal(kSingleBulkOutEndpoint, BulkTransferBuffer, chunk_size);
+        if (bytes_received > 0) {
             memcpy(current_chunk, BulkTransferBuffer, chunk_size);
-            current_chunk += chunk_size;
-            bytes_left -= chunk_size;
+            current_chunk += bytes_received;
+            bytes_left -= bytes_received;
         } else {
             printf("Bad BulkInTransferInternal\r\n");
             return false;
