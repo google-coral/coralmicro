@@ -81,6 +81,13 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("set_tpu_power_state",
                            valiant::testlib::SetTPUPowerState);
     rpc_server.RegisterRPC("posenet_stress_run", PosenetStressRun);
-
+    rpc_server.RegisterRPC(valiant::testlib::kBeginUploadResourceName,
+                           valiant::testlib::BeginUploadResource);
+    rpc_server.RegisterRPC(valiant::testlib::kUploadResourceChunkName,
+                           valiant::testlib::UploadResourceChunk);
+    rpc_server.RegisterRPC(valiant::testlib::kDeleteResourceName,
+                           valiant::testlib::DeleteResource);
+    rpc_server.RegisterRPC(valiant::testlib::kRunClassificationModelName,
+                           valiant::testlib::RunClassificationModel);
     vTaskSuspend(NULL);
 }
