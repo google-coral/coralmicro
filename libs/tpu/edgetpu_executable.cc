@@ -1,23 +1,15 @@
 #include "libs/tpu/edgetpu_executable.h"
+
+#include "libs/base/utils.h"
 #include "third_party/tensorflow/tensorflow/lite/kernels/kernel_util.h"
 
 namespace valiant {
-
-namespace {
-uint64_t hash(const char* s) {
-    uint64_t h = 0;
-    while (*s) {
-        h = h * 101 + (uint64_t) *(s++);
-    }
-    return h;
-}
-}  // namespace
 
 EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe) :
     executable_(exe) {
     if (executable_->output_layers()) {
         for (const auto* output_layer : *(executable_->output_layers())) {
-            output_layers_[hash(output_layer->name()->c_str())] =
+            output_layers_[utils::StrHash(output_layer->name()->c_str())] =
                 new OutputLayer(output_layer);
         }
     }
@@ -61,7 +53,7 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
                         break;
                     case platforms::darwinn::Description_BASE_ADDRESS_OUTPUT_ACTIVATION:
                         name = dma_hint->meta()->name()->c_str();
-                        key = hash(name);
+                        key = utils::StrHash(name);
                         if (output_layers_.find(key) == output_layers_.end()) {
                             printf("Executable does not have output layer %s\r\n", name);
                             break;
@@ -92,7 +84,7 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
                 return kTfLiteError;
             }
             name = executable_->output_layers()->Get(i)->name()->c_str();
-            key = hash(name);
+            key = utils::StrHash(name);
 
             if (output_layers_.find(key) == output_layers_.end()) {
                 printf("Executable does not have buffer for %s\r\n", name);

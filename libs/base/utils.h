@@ -24,6 +24,14 @@ namespace utils {
 uint64_t GetUniqueID();
 MacAddress GetMacAddress();
 
+inline uint64_t StrHash(const char* s) {
+    uint64_t h = 0;
+    while (*s) {
+        h = h * 101 + (uint64_t) *(s++);
+    }
+    return h;
+}
+
 }  // namespace utils
 }  // namespace valiant
 
