@@ -39,7 +39,7 @@ void PosenetStressRun(struct jsonrpc_request *request) {
         valiant::CameraTask::GetSingleton()->ReturnFrame(index);
     }
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 5000; i++) {
         TfLiteTensor *input = valiant::posenet::input();
         valiant::camera::FrameFormat fmt;
         fmt.width = input->dims->data[2];
