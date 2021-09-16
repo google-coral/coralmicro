@@ -20,6 +20,7 @@ class RPCServerIOHTTP : public RPCServerIO {
         std::vector<char> post_data;
         std::vector<char> reply_buf;
         size_t reply_buf_written;
+        size_t post_data_written;
     };
   private:
     err_t httpd_post_begin(void* connection, const char* uri, const char* http_request,

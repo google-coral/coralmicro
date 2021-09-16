@@ -22,8 +22,7 @@ err_t RPCServerIOHTTP::static_httpd_post_receive_data(void *context, void *conne
 
 err_t RPCServerIOHTTP::httpd_post_receive_data(void *connection, struct pbuf *p) {
     auto *this_rpc_data = rpc_data_map[connection];
-    auto post_data_len = this_rpc_data->post_data.size();
-    this_rpc_data->post_data.resize(post_data_len + p->tot_len);
+    auto post_data_len = this_rpc_data->post_data_written;
     if (p->len == p->tot_len) {
         memcpy(this_rpc_data->post_data.data() + post_data_len, p->payload, p->tot_len);
     } else {
@@ -35,6 +34,7 @@ err_t RPCServerIOHTTP::httpd_post_receive_data(void *connection, struct pbuf *p)
             tmp_p = tmp_p->next;
         } while (tmp_p->len != tmp_p->tot_len);
     }
+    this_rpc_data->post_data_written += p->tot_len;
     pbuf_free(p);
     return ERR_OK;
 }
@@ -54,7 +54,9 @@ err_t RPCServerIOHTTP::httpd_post_begin(void *connection, const char *uri, const
                        u16_t http_request_len, int content_len, char *response_uri,
                        u16_t response_uri_len, u8_t *post_auto_wnd) {
     auto *this_rpc_data = new rpc_data;
-    memset(this_rpc_data, 0, sizeof(rpc_data));
+    this_rpc_data->post_data.resize(content_len, 0);
+    this_rpc_data->reply_buf_written = 0;
+    this_rpc_data->post_data_written = 0;
     rpc_data_map[connection] = this_rpc_data;
     const char *expected_uri = "/jsonrpc";
     if (strncmp(uri, expected_uri, strlen(expected_uri)) == 0) {
