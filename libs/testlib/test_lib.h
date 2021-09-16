@@ -3,8 +3,14 @@
 
 #include "third_party/mjson/src/mjson.h"
 
+#include <vector>
+
 namespace valiant {
 namespace testlib {
+
+bool JSONRPCGetIntegerParam(struct jsonrpc_request* request, const char *param_name, int* out);
+bool JSONRPCGetBooleanParam(struct jsonrpc_request* request, const char *param_name, bool *out);
+bool JSONRPCGetStringParam(struct jsonrpc_request* request, const char *param_name, std::vector<char>* out);
 
 void GetSerialNumber(struct jsonrpc_request *request);
 void RunTestConv1(struct jsonrpc_request *request);

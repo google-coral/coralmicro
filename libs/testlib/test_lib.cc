@@ -13,6 +13,56 @@
 namespace valiant {
 namespace testlib {
 
+static std::unique_ptr<char> JSONRPCCreateParamFormatString(const char *param_name) {
+    const char *param_format = "$[0].%s";
+    // +1 for null terminator.
+    int param_pattern_len = snprintf(nullptr, 0, param_format, param_name) + 1;
+    std::unique_ptr<char> param_pattern(new char[param_pattern_len]);
+    snprintf(param_pattern.get(), param_pattern_len, param_format, param_name);
+    return param_pattern;
+}
+
+bool JSONRPCGetIntegerParam(struct jsonrpc_request* request, const char *param_name, int* out) {
+    auto param_pattern = JSONRPCCreateParamFormatString(param_name);
+    double param_double;
+    int find_result = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
+    if (find_result == MJSON_TOK_NUMBER) {
+        mjson_get_number(request->params, request->params_len, param_pattern.get(), &param_double);
+        *out = static_cast<int>(param_double);
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool JSONRPCGetBooleanParam(struct jsonrpc_request* request, const char *param_name, bool *out) {
+    auto param_pattern = JSONRPCCreateParamFormatString(param_name);
+    int find_result = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
+    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
+        int param;
+        mjson_get_bool(request->params, request->params_len, param_pattern.get(), &param);
+        *out = !!param;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool JSONRPCGetStringParam(struct jsonrpc_request* request, const char *param_name, std::vector<char>* out) {
+    int find_result;
+    ssize_t find_size = 0;
+    auto param_pattern = JSONRPCCreateParamFormatString(param_name);
+
+    find_result = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, &find_size);
+    if (find_result == MJSON_TOK_STRING) {
+        out->resize(find_size, 0);
+        mjson_get_string(request->params, request->params_len, param_pattern.get(), out->data(), find_size);
+    } else {
+        return false;
+    }
+    return true;
+}
+
 // Implementation of "get_serial_number" RPC.
 // Returns JSON results with the key "serial_number" and the serial, as a string.
 void GetSerialNumber(struct jsonrpc_request *request) {
@@ -53,13 +103,8 @@ void RunTestConv1(struct jsonrpc_request *request) {
 // Takes one parameter, "enable" -- a boolean indicating the state to set.
 // Returns success or failure.
 void SetTPUPowerState(struct jsonrpc_request *request) {
-    int enable;
-    const char *enable_param_pattern = "$[0].enable";
-
-    int find_result = mjson_find(request->params, request->params_len, enable_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
-        mjson_get_bool(request->params, request->params_len, enable_param_pattern, &enable);
-    } else {
+    bool enable;
+    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
         jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
         return;
     }
