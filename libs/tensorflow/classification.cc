@@ -50,5 +50,18 @@ std::vector<Class> GetClassificationResults(
     }
 }
 
+bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor) {
+    const float scale = input_tensor.params.scale;
+    const float zero_point = input_tensor.params.zero_point;
+    const float mean = 128;
+    const float std = 128;
+    const float epsilon = 1e-5;
+    if (std::abs(scale * std - 1) < epsilon && std::abs(mean - zero_point) < epsilon) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 }  // namespace tensorflow
 }  // namespace valiant

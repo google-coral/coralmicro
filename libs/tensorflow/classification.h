@@ -25,6 +25,8 @@ std::vector<Class> GetClassificationResults(
     size_t top_k = std::numeric_limits<size_t>::max()
 );
 
+bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor);
+
 }  // namespace tensorflow
 }  // namespace valiant
 

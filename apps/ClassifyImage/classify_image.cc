@@ -55,17 +55,12 @@ void real_main() {
         return;
     }
 
-    const float scale = input_tensor->params.scale;
-    const float zero_point = input_tensor->params.zero_point;
-    const float mean = 128;
-    const float std = 128;
-    const float epsilon = 1e-5;
     unsigned char* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
-    if (std::abs(scale * std - 1) < epsilon && std::abs(mean - zero_point) < epsilon) {
-        memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
-    } else {
+    if (tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor)) {
         printf("must preprocess\r\n");
         return;
+    } else {
+        memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
     }
 
     if (interpreter->Invoke() != kTfLiteOk) {
