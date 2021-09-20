@@ -40,6 +40,8 @@ void PosenetStressRun(struct jsonrpc_request *request) {
         valiant::CameraTask::GetSingleton()->ReturnFrame(index);
     }
     if(!valiant::testlib::JSONRPCGetIntegerParam(request, "iterations", &iterations)){
+            valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
+            valiant::CameraTask::GetSingleton()->SetPower(false);
             jsonrpc_return_error(request, -1, "Failed to get int iterations.", nullptr);
             return;
     }
