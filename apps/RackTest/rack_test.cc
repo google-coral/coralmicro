@@ -21,6 +21,7 @@ void PosenetStressRun(struct jsonrpc_request *request) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
     bool loopSuccess;
+    int iterations;
 
     if (!valiant::posenet::setup()) {
         printf("setup() failed\r\n");
@@ -38,8 +39,11 @@ void PosenetStressRun(struct jsonrpc_request *request) {
         index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
         valiant::CameraTask::GetSingleton()->ReturnFrame(index);
     }
-
-    for (int i = 0; i < 5000; i++) {
+    if(!valiant::testlib::JSONRPCGetIntegerParam(request, "iterations", &iterations)){
+            jsonrpc_return_error(request, -1, "Failed to get int iterations.", nullptr);
+            return;
+    }
+    for (int i = 0; i < iterations; i++) {
         TfLiteTensor *input = valiant::posenet::input();
         valiant::camera::FrameFormat fmt;
         fmt.width = input->dims->data[2];
