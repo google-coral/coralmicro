@@ -39,7 +39,12 @@ def main():
         os.makedirs(libs_dir, exist_ok=True)
 
         # Copy the arduino library bundle into the core.
-        shutil.copy(os.path.join(build_dir, 'liblibs_arduino_bundled.a'), libs_dir)
+        with tempfile.TemporaryDirectory() as rebundle_dir:
+            arduino_bundle_path = os.path.join(build_dir, 'liblibs_arduino_bundled.a')
+            arduino_rebundled_path = os.path.join(libs_dir, 'liblibs_arduino_bundled.a')
+            subprocess.check_call(['ar', 'x', arduino_bundle_path], cwd=rebundle_dir)
+            object_files = os.listdir(rebundle_dir)
+            subprocess.check_call(['ar', 'rcs', arduino_rebundled_path] + object_files, cwd=rebundle_dir)
 
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'VALIANT')
         os.makedirs(bootloader_dir)

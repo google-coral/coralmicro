@@ -405,8 +405,13 @@ def main():
     parser.add_argument('--elfloader_path', type=str, required=False)
     parser.add_argument('--serial', type=str, required=False)
     parser.add_argument('--list', dest='list', action='store_true')
+    # --strip and --toolchain are provided for Arduino uses.
+    # CMake-built targets already generate a stripped binary.
+    parser.add_argument('--strip', dest='strip', action='store_true')
+    parser.add_argument('--toolchain', type=str, required=False)
     parser.set_defaults(list=False)
     parser.set_defaults(ram=False)
+    parser.set_defaults(strip=False)
     args = parser.parse_args()
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
@@ -416,6 +421,7 @@ def main():
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
     elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb')
+    toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
         elf_path,
         elfloader_path,
@@ -423,6 +429,9 @@ def main():
         flashloader_path,
         elftosb_path,
     ]
+
+    if args.strip:
+        paths_to_check.append(toolchain_path)
 
     if not args.elfloader_path or not args.elf_path:
         paths_to_check.append(build_dir)
@@ -435,6 +444,10 @@ def main():
             all_paths_exist = False
     if not all_paths_exist:
         return
+
+    if args.strip:
+        subprocess.check_call([os.path.join(toolchain_path, 'arm-none-eabi-strip'), '-s', elf_path, '-o', elf_path + '.stripped'])
+        elf_path = elf_path + '.stripped'
 
     state_machine_args = {
         'blhost_path': blhost_path,

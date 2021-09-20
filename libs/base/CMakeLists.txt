@@ -71,3 +71,11 @@ target_link_libraries(libs_base-m4_freertos
     libs_tasks_PmicTask_freertos-m4
     libs_nxp_rt1176-sdk_littlefs-m4
 )
+
+target_sources(libs_base-m7_bm PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_bm>)
+target_sources(libs_base-m4_bm PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_bm-m4>)
+target_sources(libs_base-m7_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)
+target_sources(libs_base-m4_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos-m4>)
+target_sources(libs_base-m7_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
+target_sources(libs_base-m4_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS-m4>)
+target_sources(libs_base-m7_freertos PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk-mcmgr_m7>)

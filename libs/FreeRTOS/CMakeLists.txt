@@ -23,7 +23,7 @@ set(libs_FreeRTOS_INCLUDE_DIRECTORIES_PRIVATE
     ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/freertos_kernel/include/
 )
 
-add_library_m7(libs_FreeRTOS STATIC
+add_library_m7(libs_FreeRTOS OBJECT
     ${libs_FreeRTOS_SOURCES}
 )
 
@@ -33,7 +33,7 @@ target_include_directories(libs_FreeRTOS PUBLIC
     ${libs_FreeRTOS_INCLUDE_DIRECTORIES_PRIVATE}
 )
 
-add_library_m4(libs_FreeRTOS-m4 STATIC
+add_library_m4(libs_FreeRTOS-m4 OBJECT
     ${libs_FreeRTOS_SOURCES}
 )
 

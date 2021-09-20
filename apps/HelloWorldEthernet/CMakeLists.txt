@@ -13,6 +13,6 @@ target_include_directories(HelloWorldEthernet PRIVATE
 )
 
 target_link_libraries(HelloWorldEthernet
-    libs_nxp_rt1176-sdk_lwip
     libs_base-m7_freertos
+    libs_nxp_rt1176-sdk_lwip
 )

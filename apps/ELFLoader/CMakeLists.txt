@@ -26,3 +26,5 @@ target_link_libraries(ELFLoader
     libs_FreeRTOS
     libs_nxp_rt1176-sdk_littlefs
 )
+target_sources(ELFLoader PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)
+target_sources(ELFLoader PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)

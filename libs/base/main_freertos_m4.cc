@@ -15,10 +15,15 @@
 lpi2c_rtos_handle_t i2c5_handle;
 extern "C" void app_main(void *param);
 
+void pre_app_main(void *param) {
+    valiant::IPC::GetSingleton()->Init();
+    app_main(param);
+}
+
 extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware(true);
-    valiant::IPC::GetSingleton()->Init();
+
     valiant::ConsoleInit();
     valiant::filesystem::Init();
 
@@ -33,9 +38,7 @@ extern "C" int main(int argc, char **argv) {
     valiant::CameraTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
-    static StaticTask_t xTaskBuffer;
-    static StackType_t xStack[configMINIMAL_STACK_SIZE * 10];
-    xTaskCreateStatic(app_main, "app_main", configMINIMAL_STACK_SIZE * 10, NULL, APP_TASK_PRIORITY, xStack, &xTaskBuffer);
+    xTaskCreate(pre_app_main, "app_main", configMINIMAL_STACK_SIZE * 90, nullptr, APP_TASK_PRIORITY, nullptr);
 
     vTaskStartScheduler();
 
