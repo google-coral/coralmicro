@@ -1,4 +1,5 @@
 #include "libs/base/utils.h"
+#include "libs/base/ipc_m7.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -303,6 +304,22 @@ void RunClassificationModel(struct jsonrpc_request *request) {
         return;
     }
     jsonrpc_return_success(request, "{%Q:%d, %Q:%g}", "id", results[0].id, "score", results[0].score);
+}
+
+void StartM4(struct jsonrpc_request *request) {
+    IPCM7* ipc = static_cast<IPCM7*>(IPC::GetSingleton());
+    if (!ipc->HasM4Application()) {
+        jsonrpc_return_error(request, -1, "No M4 application present", nullptr);
+        return;
+    }
+
+    ipc->StartM4();
+    if (!ipc->M4IsAlive(1000 /* ms */)) {
+        jsonrpc_return_error(request, -1, "M4 did not come to life", nullptr);
+        return;
+    }
+
+    jsonrpc_return_success(request, "{}");
 }
 
 }  // namespace testlib

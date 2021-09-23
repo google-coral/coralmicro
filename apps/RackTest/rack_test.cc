@@ -1,4 +1,6 @@
+#include "apps/RackTest/rack_test_ipc.h"
 #include "libs/base/utils.h"
+#include "libs/base/ipc_m7.h"
 #include "libs/posenet/posenet.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
@@ -11,6 +13,21 @@
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
 
 #include <array>
+
+static constexpr const char *kM4XOR = "m4_xor";
+
+static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
+    TaskHandle_t rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
+    const RackTestAppMessage* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
+    switch (app_message->message_type) {
+        case RackTestAppMessageType::XOR: {
+            xTaskNotify(rpc_task_handle, app_message->message.xor_value, eSetValueWithOverwrite);
+            break;
+        }
+        default:
+            printf("Unknown message type\r\n");
+    }
+}
 
 void PosenetStressRun(struct jsonrpc_request *request) {
     valiant::posenet::Output output;
@@ -68,7 +85,36 @@ void PosenetStressRun(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
+static void M4XOR(struct jsonrpc_request *request) {
+    valiant::IPCM7* ipc = static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton());
+    std::vector<char> value_string;
+    valiant::testlib::JSONRPCGetStringParam(request, "value", &value_string);
+
+    if (!ipc->M4IsAlive(1000 /* ms */)) {
+        jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
+        return;
+    }
+
+    uint32_t value = reinterpret_cast<uint32_t>(strtoul(value_string.data(), nullptr, 10));
+    valiant::ipc::Message msg;
+    msg.type = valiant::ipc::MessageType::APP;
+    RackTestAppMessage* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
+    app_message->message_type = RackTestAppMessageType::XOR;
+    app_message->message.xor_value = value;
+    valiant::IPC::GetSingleton()->SendMessage(msg);
+
+    // hang out here and wait for an event.
+    uint32_t xor_value;
+    if (xTaskNotifyWait(0, 0, &xor_value, pdMS_TO_TICKS(1000)) != pdTRUE) {
+        jsonrpc_return_error(request, -1, "Timed out waiting for response from M4", nullptr);
+        return;
+    }
+
+    jsonrpc_return_success(request, "{%Q:%lu}", "value", xor_value);
+}
+
 extern "C" void app_main(void *param) {
+    valiant::IPC::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
     valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
@@ -95,5 +141,9 @@ extern "C" void app_main(void *param) {
                            valiant::testlib::DeleteResource);
     rpc_server.RegisterRPC(valiant::testlib::kRunClassificationModelName,
                            valiant::testlib::RunClassificationModel);
+    rpc_server.RegisterRPC(valiant::testlib::kStartM4Name,
+                           valiant::testlib::StartM4);
+    rpc_server.RegisterRPC(kM4XOR,
+                           M4XOR);
     vTaskSuspend(NULL);
 }
