@@ -72,11 +72,11 @@ EOF
     else
         INTERACTIVE=""
     fi
-    docker run --rm ${INTERACTIVE} -w /valiant -v ${ROOTDIR}:/valiant -v ${build_dir}:/build valiant bash -xc "
+    docker run --rm ${INTERACTIVE} -w ${ROOTDIR} -v ${ROOTDIR}:${ROOTDIR} -v ${build_dir}:${ROOTDIR}/build valiant bash -xc "
         chmod a+w /
         groupadd --gid $(id -g) $(id -g -n)
         useradd -m -e '' -s /bin/bash --gid $(id -g) --uid $(id -u) $(id -u -n)
-        su $(id -u -n) -c 'bash /valiant/build.sh -b /build ${mfgtest_build_flags} ${arduino_build_flags}'
+        su $(id -u -n) -c 'bash ${ROOTDIR}/build.sh -b ${ROOTDIR}/build ${mfgtest_build_flags} ${arduino_build_flags}'
     "
 }
 

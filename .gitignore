@@ -1,3 +1,6 @@
+.arduino15/
 build/
+build-mfgtest/
 .gdb_history
 .vscode
+arduino-cli.yaml

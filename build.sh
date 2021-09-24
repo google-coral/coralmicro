@@ -65,6 +65,35 @@ EOF
 
     if [[ ! -z ${build_arduino} ]]; then
         python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir}
+        cat <<EOF >${ROOTDIR}/arduino-cli.yaml
+board_manager:
+  additional_urls:
+    - file://${build_dir}/package_coral_index.json
+daemon:
+  port: "50051"
+directories:
+  data: ${ROOTDIR}/.arduino15
+  downloads: ${ROOTDIR}/.arduino15/staging
+  user: ${ROOTDIR}/.arduino15/user
+library:
+  enable_unsafe_install: true
+logging:
+  file: ""
+  format: text
+  level: info
+metrics:
+  addr: :9090
+  enabled: true
+sketch:
+  always_export_binaries: false
+EOF
+    python3 -m http.server --directory ${build_dir} &
+    http_pid="$!"
+    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core update-index
+    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core install coral:valiant
+    ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:valiant:valiant ${ROOTDIR}/sketches/HelloWorld -v
+    kill ${http_pid}
+    wait
     fi
 }
 
