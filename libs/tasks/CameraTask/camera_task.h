@@ -26,6 +26,7 @@ enum class RequestType : uint8_t {
     Frame,
     Power,
     TestPattern,
+    Discard,
 };
 
 struct FrameRequest {
@@ -38,6 +39,10 @@ struct FrameResponse {
 
 struct PowerRequest {
     bool enable;
+};
+
+struct DiscardRequest {
+    int count;
 };
 
 struct EnableResponse {
@@ -74,6 +79,7 @@ struct Request {
         PowerRequest power;
         TestPatternRequest test_pattern;
         Mode mode;
+        DiscardRequest discard;
     } request;
     std::function<void(Response)> callback;
 };
@@ -159,6 +165,7 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     bool SetPower(bool enable);
     void SetTestPattern(camera::TestPattern pattern);
     void Trigger();
+    void DiscardFrames(int count);
 
     // CSI driver wants width to be divisible by 8, and 324 is not.
     // 324 * 324 == 13122 * 8 -- this makes the CSI driver happy!
@@ -176,6 +183,7 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     camera::PowerResponse HandlePowerRequest(const camera::PowerRequest& power);
     camera::FrameResponse HandleFrameRequest(const camera::FrameRequest& frame);
     void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
+    void HandleDiscardRequest(const camera::DiscardRequest& discard);
     void SetMode(const camera::Mode& mode);
     bool Read(camera::CameraRegisters reg, uint8_t *val);
     bool Write(camera::CameraRegisters reg, uint8_t val);

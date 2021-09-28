@@ -342,6 +342,13 @@ void CameraTask::Trigger() {
     gpio::SetGpio(gpio::Gpio::kCameraTrigger, true);
 }
 
+void CameraTask::DiscardFrames(int count) {
+    Request req;
+    req.type = RequestType::Discard;
+    req.request.discard.count = count;
+    SendRequest(req);
+}
+
 void CameraTask::TaskInit() {
     status_t status;
     csi_config_.width = kCsiWidth;
@@ -473,9 +480,15 @@ PowerResponse CameraTask::HandlePowerRequest(const PowerRequest& power) {
 
     if (power.enable) {
         uint8_t model_id_h = 0xff, model_id_l = 0xff;
-        Read(CameraRegisters::MODEL_ID_H, &model_id_h);
-        Read(CameraRegisters::MODEL_ID_L, &model_id_l);
-        Write(CameraRegisters::SW_RESET, 0x00);
+        for (int i = 0; i < 10; ++i) {
+            Read(CameraRegisters::MODEL_ID_H, &model_id_h);
+            Read(CameraRegisters::MODEL_ID_L, &model_id_l);
+            Write(CameraRegisters::SW_RESET, 0x00);
+            if (model_id_h == kModelIdHExpected && model_id_l == kModelIdLExpected) {
+                break;
+            }
+        }
+
         if (model_id_h != kModelIdHExpected || model_id_l != kModelIdLExpected) {
             printf("Camera model id not as expected: 0x%02x%02x\r\n", model_id_h, model_id_l);
             resp.success = false;
@@ -517,6 +530,22 @@ void CameraTask::HandleTestPatternRequest(const TestPatternRequest& test_pattern
     Write(CameraRegisters::TEST_PATTERN_MODE, static_cast<uint8_t>(test_pattern.pattern));
 }
 
+void CameraTask::HandleDiscardRequest(const DiscardRequest& discard) {
+    int discarded = 0;
+    while (discarded < discard.count) {
+        FrameRequest request;
+        request.index = -1;
+        FrameResponse resp = HandleFrameRequest(request);
+        if (resp.index != -1) {
+            // Return the frame, and increment the discard counter.
+            discarded++;
+            request.index = resp.index;
+            HandleFrameRequest(request);
+        }
+
+    }
+}
+
 void CameraTask::SetMode(const Mode& mode) {
     Write(CameraRegisters::MODE_SELECT, static_cast<uint8_t>(mode));
     mode_ = mode;
@@ -540,6 +569,9 @@ void CameraTask::RequestHandler(Request *req) {
             break;
         case RequestType::TestPattern:
             HandleTestPatternRequest(req->request.test_pattern);
+            break;
+        case RequestType::Discard:
+            HandleDiscardRequest(req->request.discard);
             break;
     }
     if (req->callback)

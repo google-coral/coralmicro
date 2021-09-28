@@ -30,11 +30,7 @@ static void serial_number_rpc(struct jsonrpc_request *r) {
 static void take_picture_rpc(struct jsonrpc_request *r) {
     valiant::CameraTask::GetSingleton()->SetPower(true);
     valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
-    for (int i = 0; i < 100; ++i) {
-        uint8_t* buffer;
-        int index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
-        valiant::CameraTask::GetSingleton()->ReturnFrame(index);
-    }
+    valiant::CameraTask::GetSingleton()->DiscardFrames(100);
 
     std::vector<uint8_t> image_buffer(
         valiant::CameraTask::kWidth *

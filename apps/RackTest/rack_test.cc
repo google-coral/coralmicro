@@ -50,12 +50,7 @@ void PosenetStressRun(struct jsonrpc_request *request) {
     valiant::posenet::loop(&output);
     printf("Posenet static datatest finished.\r\n");
 
-    uint8_t *buffer = nullptr;
-    int index = -1;
-    for (int i = 0; i < 100; ++i) {
-        index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
-        valiant::CameraTask::GetSingleton()->ReturnFrame(index);
-    }
+    valiant::CameraTask::GetSingleton()->DiscardFrames(100);
     if(!valiant::testlib::JSONRPCGetIntegerParam(request, "iterations", &iterations)){
             valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
             valiant::CameraTask::GetSingleton()->SetPower(false);

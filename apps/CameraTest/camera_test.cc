@@ -104,15 +104,11 @@ extern "C" void app_main(void *param) {
             valiant::camera::TestPattern::WALKING_ONES);
 
     // Get and discard some frames to let the sensor stabilize.
-    uint8_t *buffer = nullptr;
-    int index = -1;
-    for (int i = 0; i < 100; ++i) {
-        index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
-        valiant::CameraTask::GetSingleton()->ReturnFrame(index);
-    }
+    valiant::CameraTask::GetSingleton()->DiscardFrames(100);
 
     // Get a frame -- compare the result to the expected 'walking ones' test pattern
-    index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+    uint8_t *buffer = nullptr;
+    int index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
     uint8_t expected = 0;
     bool success = true;
     for (unsigned int i = 0; i < valiant::CameraTask::kWidth * valiant::CameraTask::kHeight; ++i) {
@@ -134,10 +130,7 @@ extern "C" void app_main(void *param) {
 
     valiant::CameraTask::GetSingleton()->SetTestPattern(
             valiant::camera::TestPattern::NONE);
-    for (int i = 0; i < 100; ++i) {
-        index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
-        valiant::CameraTask::GetSingleton()->ReturnFrame(index);
-    }
+    valiant::CameraTask::GetSingleton()->DiscardFrames(100);
     GetFrame();
 
     // Switch to triggered mode, the button press will capture and convert a new frame.
