@@ -38,7 +38,10 @@ extern "C" int main(int argc, char **argv) {
     valiant::CameraTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
-    xTaskCreate(pre_app_main, "app_main", configMINIMAL_STACK_SIZE * 90, nullptr, APP_TASK_PRIORITY, nullptr);
+    constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;
+    static StaticTask_t xTaskBuffer;
+    static StackType_t xStack[stack_size];
+    xTaskCreateStatic(pre_app_main, "app_main", stack_size, NULL, APP_TASK_PRIORITY, xStack, &xTaskBuffer);
 
     vTaskStartScheduler();
 
