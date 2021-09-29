@@ -5,6 +5,7 @@ from progress.bar import Bar
 import argparse
 import hexformat
 import hid
+import ipaddress
 import os
 import serial
 import struct
@@ -29,6 +30,8 @@ VALIANT_PID = 0x93ff
 VALIANT_UART_PATH = '/dev/valiant_UART'
 BLOCK_SIZE = 2048 * 64
 BLOCK_COUNT = 64
+
+USB_IP_ADDRESS_FILE = '/usb_ip_address'
 
 ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
@@ -140,8 +143,6 @@ def CreateFilesystem(workdir, root_dir, build_dir, elf_path):
         # If the key is not found, don't panic.
         pass
 
-    filesystem_dir = os.path.join(workdir, 'filesystem')
-    filesystem_bin = os.path.join(workdir, 'filesystem.bin')
     all_files_exist = True
     for file in data_files:
         path = os.path.join(root_dir, file)
@@ -347,20 +348,33 @@ def ProgramDataFiles(**kwargs):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
     files = list(kwargs.get('data_files'))
     files.append(kwargs.get('elf_path'))
+    files.append(USB_IP_ADDRESS_FILE)
     files.sort()
     for src_file in files:
         if src_file is kwargs.get('elf_path'):
             target_file = '/default.elf'
         else:
             target_file = src_file.replace(kwargs.get('root_dir'), '')
-            target_file = '/' + target_file
+            if target_file[0] != '/':
+                target_file = '/' + target_file
             # If we are running on something with the wrong directory separator, fix it.
             target_file.replace('\\', '/')
 
-        with open(src_file, 'rb') as f:
+        def write_file(f):
             bar = Bar(target_file, max=os.fstat(f.fileno()).st_size)
             ElfloaderTransferData(h, bytes(target_file, encoding='utf-8'), ELFLOADER_TARGET_PATH)
             ElfloaderTransferData(h, f.read(), ELFLOADER_TARGET_FILESYSTEM, bar=bar)
+
+        if src_file is USB_IP_ADDRESS_FILE:
+            with tempfile.NamedTemporaryFile() as f:
+                f.write(str(kwargs['usb_ip_address']).encode())
+                f.flush()
+                f.seek(0)
+                write_file(f)
+                continue
+
+        with open(src_file, 'rb') as f:
+            write_file(f)
     h.close()
     return FlashtoolStates.RESET
 
@@ -405,6 +419,7 @@ def main():
     parser.add_argument('--elfloader_path', type=str, required=False)
     parser.add_argument('--serial', type=str, required=False)
     parser.add_argument('--list', dest='list', action='store_true')
+    parser.add_argument('--usb_ip_address', type=str, required=False, default='10.10.10.1')
     # --strip and --toolchain are provided for Arduino uses.
     # CMake-built targets already generate a stripped binary.
     parser.add_argument('--strip', dest='strip', action='store_true')
@@ -413,6 +428,8 @@ def main():
     parser.set_defaults(ram=False)
     parser.set_defaults(strip=False)
     args = parser.parse_args()
+
+    usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
     app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir else None
@@ -456,6 +473,7 @@ def main():
         'elfloader_path': elfloader_path,
         'elf_path': elf_path,
         'root_dir': root_dir,
+        'usb_ip_address': usb_ip_address,
     }
 
     sdp_devices = len(EnumerateSDP())

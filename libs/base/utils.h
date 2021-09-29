@@ -1,6 +1,7 @@
 #ifndef _LIBS_BASE_UTILS_H_
 #define _LIBS_BASE_UTILS_H_
 
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/ip_addr.h"
 #include <cstdint>
 
 #define FUSE_ADDRESS_TO_OCOTP_INDEX(fuse) ((fuse - 0x800) >> 4)
@@ -23,6 +24,7 @@ struct MacAddress {
 namespace utils {
 uint64_t GetUniqueID();
 MacAddress GetMacAddress();
+bool GetUSBIPAddress(ip4_addr_t* addr);
 
 inline uint64_t StrHash(const char* s) {
     uint64_t h = 0;

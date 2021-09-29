@@ -221,6 +221,17 @@ bool Close(lfs_file_t* handle) {
     return (ret == LFS_ERR_OK) ? true : false;
 }
 
+ssize_t Size(const char *path) {
+    lfs_file_t handle;
+    if (!Open(&handle, path)) {
+        return -1;
+    }
+
+    ssize_t ret = Size(&handle);
+    Close(&handle);
+    return ret;
+}
+
 lfs_soff_t Size(lfs_file_t* handle) {
     MutexLock lock(lfs_semaphore_);
     return lfs_file_size(&lfs_handle_, handle);

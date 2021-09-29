@@ -127,10 +127,12 @@ static void dhcp_thread( void * thread_input );
 /******************************************************
  *               Variable Definitions
  ******************************************************/
-static char             new_ip_addr[4]                = { 10, 10, 10, 0 };
-static uint16_t         next_available_ip_addr        = ( 10 << 8 ) + 100;
+static char server_ip_addr_option_buff_default[6] = { 54, 4 };
+
+static char             new_ip_addr[4];
+static uint16_t         next_available_ip_addr;
 static char             subnet_option_buff[]          = { 1, 4, 255, 255, 255, 0 };
-static char             server_ip_addr_option_buff[]  = { 54, 4, 10, 10, 10, 1 };
+static char             server_ip_addr_option_buff[6];
 static char             dns_server_ip_addr_option_buff[]  = { 54, 4, 8, 8, 8, 8 };
 static char             mtu_option_buff[]             = { 26, 2, 1500>>8, 1500&0xff };
 static char             dhcp_offer_option_buff[]      = { 53, 1, DHCPOFFER };
@@ -148,7 +150,21 @@ static dhcp_header_t    dhcp_header_buff;
 
 void start_dhcp_server( uint32_t local_addr )
 {
-    //xTaskCreate( dhcp_thread, "DHCP thread", DHCP_STACK_SIZE/sizeof( portSTACK_TYPE ), (void*)local_addr, DEFAULT_THREAD_PRIO, &dhcp_thread_handle);
+    char a, b, c, d;
+    d = (local_addr >> 24) & 0xFF;
+    c = (local_addr >> 16) & 0xFF;
+    b = (local_addr >> 8) & 0xFF;
+    a = (local_addr) & 0xFF;
+    new_ip_addr[0] = a;
+    new_ip_addr[1] = b;
+    new_ip_addr[2] = c;
+    new_ip_addr[3] = 0;
+    next_available_ip_addr = (c << 8) + 100;
+    memcpy(server_ip_addr_option_buff, server_ip_addr_option_buff_default, sizeof(server_ip_addr_option_buff));
+    server_ip_addr_option_buff[2] = a;
+    server_ip_addr_option_buff[3] = b;
+    server_ip_addr_option_buff[4] = c;
+    server_ip_addr_option_buff[5] = d;
     xTaskCreate( dhcp_thread, "DHCP thread", DHCP_STACK_SIZE/sizeof( portSTACK_TYPE ), (void*)local_addr, DEFAULT_THREAD_PRIO, &dhcp_thread_handle);
 }
 

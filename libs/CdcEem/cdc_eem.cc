@@ -1,4 +1,6 @@
 #include "libs/CdcEem/cdc_eem.h"
+
+#include "libs/base/utils.h"
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/netif/ethernet.h"
 
@@ -25,8 +27,9 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
     cdc_eem_interfaces_[0].interfaceNumber = data_iface;
     tx_semaphore_ = xSemaphoreCreateBinary();
 
-
-    IP4_ADDR(&netif_ipaddr_, 10, 10, 10, 1);
+    if (!utils::GetUSBIPAddress(&netif_ipaddr_)) {
+        IP4_ADDR(&netif_ipaddr_, 10, 10, 10, 1);
+    }
     IP4_ADDR(&netif_netmask_, 255, 255, 255, 0);
     IP4_ADDR(&netif_gw_, 0, 0, 0, 0);
     netifapi_netif_add(&netif_, &netif_ipaddr_, &netif_netmask_, &netif_gw_, this, CdcEem::StaticNetifInit, ethernet_input);
