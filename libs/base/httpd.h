@@ -1,6 +1,7 @@
 #ifndef _LIBS_BASE_HTTPD_H_
 #define _LIBS_BASE_HTTPD_H_
 
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/fs.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 #include <string>
 

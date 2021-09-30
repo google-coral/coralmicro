@@ -3,13 +3,18 @@ project(OOBE)
 
 add_executable_m7(OOBE
     oobe_cm7.cc
+    oobe_json.cc
     M4_EXECUTABLE
     OOBEM4
 )
 
 target_link_libraries(OOBE
     libs_base-m7_freertos
+    libs_curl
+    libs_RPCServer
+    libs_RPCServerIOHTTP
     libs_posenet
+    libs_testlib
 )
 
 add_executable_m4(OOBEM4

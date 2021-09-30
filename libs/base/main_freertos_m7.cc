@@ -77,7 +77,7 @@ extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_
     valiant::AudioTask::GetSingleton()->Init();
 #endif
 
-    xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 10, NULL, APP_TASK_PRIORITY, NULL);
+    xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30, NULL, APP_TASK_PRIORITY, NULL);
 
     vTaskStartScheduler();
 

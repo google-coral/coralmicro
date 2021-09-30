@@ -88,13 +88,17 @@ int fs_read_custom(struct fs_file *file, char *buffer, int count) {
 }
 
 int fs_open_custom(struct fs_file *file, const char *name) {
+    int ret = 0;
     for (auto it : handlers_map) {
         if (memcmp(name, it.first.c_str(), it.first.length()) == 0) {
             HTTPDHandlers *handlers = it.second;
-            return handlers->fs_open_custom(handlers->context, file, name);
+            ret = handlers->fs_open_custom(handlers->context, file, name);
+            if (file->pextension) {
+                connections_map.insert({file->pextension, handlers});
+            }
         }
     }
-    return 0;
+    return ret;
 }
 
 void fs_close_custom(struct fs_file *file) {
@@ -103,6 +107,7 @@ void fs_close_custom(struct fs_file *file) {
     if (it != connections_map.end()) {
         HTTPDHandlers *handlers = it->second;
         handlers->fs_close_custom(handlers->context, file);
+        connections_map.erase(connection);
     }
 }
 

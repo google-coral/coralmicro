@@ -1,0 +1,5 @@
+json-rpc==1.13.0
+flask==2.0.1
+Pillow==8.1.2
+svgwrite==1.4.1
+cairosvg==2.5.2
