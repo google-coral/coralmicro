@@ -40,3 +40,6 @@
 [submodule "third_party/mjson"]
 	path = third_party/mjson
 	url = https://github.com/cesanta/mjson
+[submodule "third_party/curl"]
+	path = third_party/curl
+	url = https://github.com/curl/curl
