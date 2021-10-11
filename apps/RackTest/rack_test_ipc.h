@@ -5,12 +5,14 @@
 
 enum class RackTestAppMessageType : uint8_t {
     XOR = 0,
+    COREMARK,
 };
 
 struct RackTestAppMessage {
     RackTestAppMessageType message_type;
     union {
         uint32_t xor_value;
+        char* buffer_ptr;
     } message;
 };
 static_assert(sizeof(RackTestAppMessage) <= valiant::ipc::kMessageBufferDataSize);

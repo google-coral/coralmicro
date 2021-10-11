@@ -1,6 +1,7 @@
 #include "apps/RackTest/rack_test_ipc.h"
 #include "libs/base/utils.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/CoreMark/core_portme.h"
 #include "libs/posenet/posenet.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
@@ -15,6 +16,8 @@
 #include <array>
 
 static constexpr const char *kM4XOR = "m4_xor";
+static constexpr const char *kM4CoreMark = "m4_coremark";
+static constexpr const char *kM7CoreMark = "m7_coremark";
 
 static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
     TaskHandle_t rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
@@ -22,6 +25,10 @@ static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferData
     switch (app_message->message_type) {
         case RackTestAppMessageType::XOR: {
             xTaskNotify(rpc_task_handle, app_message->message.xor_value, eSetValueWithOverwrite);
+            break;
+        }
+            case RackTestAppMessageType::COREMARK: {
+            xTaskNotify(rpc_task_handle, 0, eSetValueWithOverwrite);
             break;
         }
         default:
@@ -108,6 +115,36 @@ static void M4XOR(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%lu}", "value", xor_value);
 }
 
+static void M4CoreMark(struct jsonrpc_request *request) {
+    valiant::IPCM7* ipc = static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton());
+
+    if (!ipc->M4IsAlive(1000 /* ms */)) {
+        jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
+        return;
+    }
+
+    char coremark_buffer[MAX_COREMARK_BUFFER];
+    valiant::ipc::Message msg;
+    msg.type = valiant::ipc::MessageType::APP;
+    RackTestAppMessage* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
+    app_message->message_type = RackTestAppMessageType::COREMARK;
+    app_message->message.buffer_ptr = coremark_buffer;
+    valiant::IPC::GetSingleton()->SendMessage(msg);
+
+    if (xTaskNotifyWait(0, 0, nullptr, pdMS_TO_TICKS(30000)) != pdTRUE) {
+        jsonrpc_return_error(request, -1, "Timed out waiting for response from M4", nullptr);
+        return;
+    }
+
+    jsonrpc_return_success(request, "{%Q:%Q}", "coremark_results", coremark_buffer);
+}
+
+static void M7CoreMark(struct jsonrpc_request *request) {
+    char coremark_buffer[MAX_COREMARK_BUFFER];
+    RunCoreMark(coremark_buffer);
+    jsonrpc_return_success(request, "{%Q:%Q}", "coremark_results", coremark_buffer);
+}
+
 extern "C" void app_main(void *param) {
     valiant::IPC::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
@@ -144,5 +181,9 @@ extern "C" void app_main(void *param) {
                            M4XOR);
     rpc_server.RegisterRPC("capture_test_pattern", 
                             valiant::testlib::CaptureTestPattern);
+    rpc_server.RegisterRPC(kM4CoreMark,
+                           M4CoreMark);
+    rpc_server.RegisterRPC(kM7CoreMark,
+                           M7CoreMark);
     vTaskSuspend(NULL);
 }

@@ -11,6 +11,8 @@ add_executable_m7(RackTest
 
 target_link_libraries(RackTest
     libs_base-m7_freertos
+    libs_coremark-m7
+    libs_mjson
     libs_posenet
     libs_RPCServer
     libs_RPCServerIOHTTP
@@ -20,7 +22,6 @@ target_link_libraries(RackTest
     libs_tensorflow-m7
     libs_testlib
     libs_tpu_freertos
-    libs_mjson
 )
 
 add_executable_m4(RackTestM4
@@ -29,4 +30,5 @@ add_executable_m4(RackTestM4
 
 target_link_libraries(RackTestM4
     libs_base-m4_freertos
+    libs_coremark-m4
 )
