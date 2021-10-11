@@ -1,5 +1,6 @@
 #include "libs/base/utils.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/base/tempsense.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -320,6 +321,24 @@ void StartM4(struct jsonrpc_request *request) {
     }
 
     jsonrpc_return_success(request, "{}");
+}
+
+void GetTemperature(struct jsonrpc_request *request) {
+    int sensor_num;
+    float temperature;
+    if (!JSONRPCGetIntegerParam(request, "sensor", &sensor_num)) {
+        jsonrpc_return_error(request, -1, "'sensor' missing", nullptr);
+        return;
+    }
+
+    valiant::tempsense::TempSensor sensor = static_cast<valiant::tempsense::TempSensor>(sensor_num);
+    if(sensor >= valiant::tempsense::TempSensor::kSensorCount) {
+        jsonrpc_return_error(request, -1, "Invalid temperature sensor", nullptr);
+        return;
+    }
+
+    temperature = valiant::tempsense::GetTemperature(sensor);
+    jsonrpc_return_success(request, "{%Q:%g}", "temperature", temperature);
 }
 
 }  // namespace testlib

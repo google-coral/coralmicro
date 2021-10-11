@@ -6,6 +6,7 @@
 #include "libs/base/ipc.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks.h"
+#include "libs/base/tempsense.h"
 #include "libs/base/timer.h"
 #include "libs/CdcEem/cdc_eem.h"
 #include "libs/nxp/rt1176-sdk/board_hardware.h"
@@ -61,6 +62,7 @@ extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_
     valiant::UsbHostTask::GetSingleton()->Init();
     valiant::EdgeTpuDfuTask::GetSingleton()->Init();
     valiant::EdgeTpuTask::GetSingleton()->Init();
+    valiant::tempsense::Init();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     // Initialize I2C5 state

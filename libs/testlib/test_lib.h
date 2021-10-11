@@ -13,6 +13,7 @@ constexpr const char *kUploadResourceChunkName = "upload_resource_chunk";
 constexpr const char *kDeleteResourceName = "delete_resource";
 constexpr const char *kRunClassificationModelName = "run_classification_model";
 constexpr const char *kStartM4Name = "start_m4";
+constexpr const char *kGetTemperatureName = "get_temperature";
 
 bool JSONRPCGetIntegerParam(struct jsonrpc_request* request, const char *param_name, int* out);
 bool JSONRPCGetBooleanParam(struct jsonrpc_request* request, const char *param_name, bool *out);
@@ -26,6 +27,7 @@ void UploadResourceChunk(struct jsonrpc_request *request);
 void DeleteResource(struct jsonrpc_request *request);
 void RunClassificationModel(struct jsonrpc_request *request);
 void StartM4(struct jsonrpc_request *request);
+void GetTemperature(struct jsonrpc_request *request);
 
 }  // namespace testlib
 }  // namespace valiant

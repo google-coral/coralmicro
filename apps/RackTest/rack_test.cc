@@ -138,6 +138,8 @@ extern "C" void app_main(void *param) {
                            valiant::testlib::RunClassificationModel);
     rpc_server.RegisterRPC(valiant::testlib::kStartM4Name,
                            valiant::testlib::StartM4);
+    rpc_server.RegisterRPC(valiant::testlib::kGetTemperatureName,
+                           valiant::testlib::GetTemperature);
     rpc_server.RegisterRPC(kM4XOR,
                            M4XOR);
     vTaskSuspend(NULL);
