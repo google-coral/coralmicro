@@ -3,6 +3,7 @@
 #include "libs/base/tempsense.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
+#include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/testconv1/testconv1.h"
 #include "libs/testlib/test_lib.h"
@@ -340,6 +341,46 @@ void GetTemperature(struct jsonrpc_request *request) {
     temperature = valiant::tempsense::GetTemperature(sensor);
     jsonrpc_return_success(request, "{%Q:%g}", "temperature", temperature);
 }
+
+// Implements the "capture_test_pattern" RPC.
+// Configures the sensor to test pattern mode, and captures via trigger.
+// Returns success if the test pattern has the expected data, failure otherwise.
+void CaptureTestPattern(struct jsonrpc_request *request) {
+    if (!valiant::CameraTask::GetSingleton()->SetPower(true)) {
+        valiant::CameraTask::GetSingleton()->SetPower(false);
+        jsonrpc_return_error(request, -1, "unable to detect camera", nullptr);
+        return;
+    }
+    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::TRIGGER);
+    valiant::CameraTask::GetSingleton()->SetTestPattern(
+            valiant::camera::TestPattern::WALKING_ONES);
+
+    valiant::CameraTask::GetSingleton()->Trigger();
+
+    uint8_t* buffer = nullptr;
+    int index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+    uint8_t expected = 0;
+    bool success = true;
+    for (unsigned int i = 0; i < valiant::CameraTask::kWidth * valiant::CameraTask::kHeight; ++i) {
+        if (buffer[i] != expected) {
+            success = false;
+            break;
+        }
+        if (expected == 0) {
+            expected = 1;
+        } else {
+            expected = expected << 1;
+        }
+    }
+    if (success) {
+        jsonrpc_return_success(request, "{}");
+    } else {
+        jsonrpc_return_error(request, -1, "camera test pattern mismatch", nullptr);
+    }
+    valiant::CameraTask::GetSingleton()->ReturnFrame(index);
+    valiant::CameraTask::GetSingleton()->SetPower(false);
+}
+
 
 }  // namespace testlib
 }  // namespace valiant

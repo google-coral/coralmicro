@@ -142,5 +142,7 @@ extern "C" void app_main(void *param) {
                            valiant::testlib::GetTemperature);
     rpc_server.RegisterRPC(kM4XOR,
                            M4XOR);
+    rpc_server.RegisterRPC("capture_test_pattern", 
+                            valiant::testlib::CaptureTestPattern);
     vTaskSuspend(NULL);
 }

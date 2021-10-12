@@ -28,6 +28,7 @@ void DeleteResource(struct jsonrpc_request *request);
 void RunClassificationModel(struct jsonrpc_request *request);
 void StartM4(struct jsonrpc_request *request);
 void GetTemperature(struct jsonrpc_request *request);
+void CaptureTestPattern(struct jsonrpc_request *request);
 
 }  // namespace testlib
 }  // namespace valiant

@@ -6,7 +6,6 @@
 #include "libs/base/main_freertos_m7.h"
 #include "libs/base/utils.h"
 #include "libs/tasks/AudioTask/audio_task.h"
-#include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "libs/testconv1/testconv1.h"
@@ -525,45 +524,6 @@ static void GetGpio(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%d}", "value", pin_value);
 }
 
-// Implements the "capture_test_pattern" RPC.
-// Configures the sensor to test pattern mode, and captures via trigger.
-// Returns success if the test pattern has the expected data, failure otherwise.
-static void CaptureTestPattern(struct jsonrpc_request *request) {
-    if (!valiant::CameraTask::GetSingleton()->SetPower(true)) {
-        valiant::CameraTask::GetSingleton()->SetPower(false);
-        jsonrpc_return_error(request, -1, "unable to detect camera", nullptr);
-        return;
-    }
-    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::TRIGGER);
-    valiant::CameraTask::GetSingleton()->SetTestPattern(
-            valiant::camera::TestPattern::WALKING_ONES);
-
-    valiant::CameraTask::GetSingleton()->Trigger();
-
-    uint8_t* buffer = nullptr;
-    int index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
-    uint8_t expected = 0;
-    bool success = true;
-    for (unsigned int i = 0; i < valiant::CameraTask::kWidth * valiant::CameraTask::kHeight; ++i) {
-        if (buffer[i] != expected) {
-            success = false;
-            break;
-        }
-        if (expected == 0) {
-            expected = 1;
-        } else {
-            expected = expected << 1;
-        }
-    }
-    if (success) {
-        jsonrpc_return_success(request, "{}");
-    } else {
-        jsonrpc_return_error(request, -1, "camera test pattern mismatch", nullptr);
-    }
-    valiant::CameraTask::GetSingleton()->ReturnFrame(index);
-    valiant::CameraTask::GetSingleton()->SetPower(false);
-}
-
 // Implements the "capture_audio" RPC.
 // Attempts to capture 1 second of audio.
 // Returns success, with a parameter "data" containing the captured audio in base64 (or failure).
@@ -873,7 +833,8 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("set_pin_pair_to_gpio", SetPinPairToGpio);
     rpc_server.RegisterRPC("set_gpio", SetGpio);
     rpc_server.RegisterRPC("get_gpio", GetGpio);
-    rpc_server.RegisterRPC("capture_test_pattern", CaptureTestPattern);
+    rpc_server.RegisterRPC("capture_test_pattern", 
+                            valiant::testlib::CaptureTestPattern);
     rpc_server.RegisterRPC("capture_audio", CaptureAudio);
     rpc_server.RegisterRPC("set_tpu_power_state",
                            valiant::testlib::SetTPUPowerState);
