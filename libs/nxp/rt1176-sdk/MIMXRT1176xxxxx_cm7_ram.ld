@@ -86,6 +86,16 @@ SECTIONS
     . = ALIGN(4);
   } > m_interrupts
 
+  .curl :
+  {
+     . = ALIGN(4);
+     __curl_start = .;
+     *liblibs_curl.a:*(.text .text*)
+     *liblibs_curl.a:*(.data .data*)
+     *liblibs_curl.a:*(.rodata .rodata*)
+     __curl_end = .;
+     . = ALIGN(4);
+  } > m_ocram
   .lwip :
   {
      . = ALIGN(4);

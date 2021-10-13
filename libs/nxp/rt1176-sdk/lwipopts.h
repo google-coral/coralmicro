@@ -210,11 +210,12 @@ void sys_mark_tcpip_thread(void);
 #ifndef LWIP_STATS
 #define LWIP_STATS 1
 #endif
-#ifndef LWIP_PROVIDE_ERRNO
-#define LWIP_PROVIDE_ERRNO 1
-#endif
 
 #define MEMP_STATS 1
+
+#ifndef LWIP_ERRNO_STDINCLUDE
+#define LWIP_ERRNO_STDINCLUDE 1
+#endif
 /*
    --------------------------------------
    ---------- Checksum options ----------

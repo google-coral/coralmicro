@@ -330,6 +330,7 @@ add_library_m7(libs_nxp_rt1176-sdk_lwip
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_msg.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/err.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netbuf.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netdb.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netifapi.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/sockets.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/tcpip.c
@@ -363,6 +364,7 @@ add_library_m7(libs_nxp_rt1176-sdk_lwip
 target_include_directories(libs_nxp_rt1176-sdk_lwip PUBLIC
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/include/compat/posix
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_lwip
