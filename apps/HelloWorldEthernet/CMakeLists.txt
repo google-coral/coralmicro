@@ -5,7 +5,7 @@ include_directories(.)
 
 add_executable_m7(HelloWorldEthernet
     hello_world_ethernet.cc
-    ${CMAKE_SOURCE_DIR}/libs/base/ethernet.cc
+    ${VALIANT_SOURCE_DIR}/libs/base/ethernet.cc
 )
 
 target_include_directories(HelloWorldEthernet PRIVATE

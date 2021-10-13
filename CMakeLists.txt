@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 
-include(${CMAKE_SOURCE_DIR}/cmake/bundle_static_library.cmake)
+set(VALIANT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+include(${VALIANT_SOURCE_DIR}/cmake/bundle_static_library.cmake)
 
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain-arm-none-eabi-gcc.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${VALIANT_SOURCE_DIR}/cmake/toolchain-arm-none-eabi-gcc.cmake)
 endif()
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
@@ -37,6 +38,12 @@ endif()
 set(ignore ${DEBUG_CONSOLE_TRANSFER_BLOCKING})
 
 project(valiant)
-include_directories(.)
-add_subdirectory(apps)
-add_subdirectory(libs)
+include_directories(${VALIANT_SOURCE_DIR})
+
+if (${CMAKE_SOURCE_DIR} STREQUAL ${VALIANT_SOURCE_DIR})
+    add_subdirectory(${VALIANT_SOURCE_DIR}/apps)
+else()
+    add_subdirectory(${VALIANT_SOURCE_DIR}/apps/ELFLoader)
+endif()
+
+add_subdirectory(${VALIANT_SOURCE_DIR}/libs)

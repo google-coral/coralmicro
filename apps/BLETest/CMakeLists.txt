@@ -15,6 +15,6 @@ target_include_directories(BLETest PRIVATE
 
 target_link_libraries(BLETest
     libs_base-m7_freertos
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/libwicedble.a
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/libwicedble.a
     libs_nxp_rt1176-sdk_wiced
 )

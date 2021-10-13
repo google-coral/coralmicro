@@ -38,67 +38,67 @@ set(libs_nxp_rt1176-sdk_SOURCES
     usb_device_class.c
     usb_device_cdc_eem.c
     ${libs_nxp_rt1176-sdk_SOURCES_REVISION}
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_port_uart.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/uart/fsl_adapter_lpuart.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_anatop_ai.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dmamux.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_edma.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_enet.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_flexspi.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpadc.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_mu.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm_edma.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pmu.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pxp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_romapi.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_semc.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_tempsensor.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_xbara.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/str/fsl_str.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_dci.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_ehci.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_hub.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_hub_app.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_devices.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_ehci.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_framework.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_hid.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/usb_device_ch9.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_port_uart.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/uart/fsl_adapter_lpuart.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_anatop_ai.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dmamux.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_edma.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_enet.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_flexspi.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpadc.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_mu.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm_edma.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pmu.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pxp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_romapi.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_semc.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_tempsensor.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_xbara.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/str/fsl_str.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_dci.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device_ehci.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_hub.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_hub_app.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_devices.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_ehci.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_framework.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_hid.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/usb_device_ch9.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.c
     ${libs_CMSIS_SOURCES}
 )
 
 set(libs_nxp_rt1176-sdk-m7_SOURCES
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7/fsl_cache.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/gcc/startup_MIMXRT1176_cm7.S
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/system_MIMXRT1176_cm7.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7/fsl_cache.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/gcc/startup_MIMXRT1176_cm7.S
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/system_MIMXRT1176_cm7.c
 )
 
 set(libs_nxp_rt1176-sdk-m4_SOURCES
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm4/fsl_cache.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/gcc/startup_MIMXRT1176_cm4.S
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/system_MIMXRT1176_cm4.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm4/fsl_cache.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/gcc/startup_MIMXRT1176_cm4.S
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/system_MIMXRT1176_cm4.c
 )
 
 set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
@@ -131,44 +131,44 @@ set(libs_nxp_rt1176-sdk-m4_COMPILE_DEFINITIONS
 )
 
 set(libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES
-    ${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/xip
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/common_task
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/uart
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/str
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/xip
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/include
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/phy
+    ${VALIANT_SOURCE_DIR}/libs/nxp/rt1176-sdk
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/xip
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/common_task
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/uart
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/str
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/xip
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/device
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/host/class
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/phy
 )
 
 set(libs_nxp_rt1176-sdk-m7_TARGET_INCLUDE_DIRECTORIES
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7
 )
 
 set(libs_nxp_rt1176-sdk-m4_TARGET_INCLUDE_DIRECTORIES
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm4
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm4
 )
 
 set(libs_nxp_rt1176-sdk_TARGET_LINK_LIBRARIES
 )
 
 set(libs_nxp_rt1176-sdk-mcmgr_SOURCES
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_internal_core_api_imxrt1170.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_mu_internal.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_internal_core_api_imxrt1170.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr_mu_internal.c
 )
 
 set(libs_nxp_rt1176-sdk-mcmgr_COMPILE_DEFINITIONS
@@ -186,13 +186,13 @@ target_link_libraries(libs_nxp_rt1176-sdk-mcmgr_m7 PUBLIC
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_bm OBJECT
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
 )
 
 add_library_m4(libs_nxp_rt1176-sdk_bm-m4 OBJECT
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_bm.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
 )
@@ -230,18 +230,18 @@ target_link_libraries(libs_nxp_rt1176-sdk_bm-m4
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
     ${libs_FreeRTOS_SOURCES}
 )
 
 add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
     ${libs_nxp_rt1176-sdk-mcmgr_SOURCES}
@@ -286,17 +286,17 @@ target_link_libraries(libs_nxp_rt1176-sdk_freertos-m4
 
 add_library_m7(libs_nxp_rt1176-sdk_sdmmc
     sdmmc_config.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/sdio/fsl_sdio.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_usdhc.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/host/usdhc/non_blocking/fsl_sdmmc_host.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/osa/fsl_sdmmc_osa.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/sdio/fsl_sdio.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_usdhc.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/host/usdhc/non_blocking/fsl_sdmmc_host.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/osa/fsl_sdmmc_osa.c
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_sdmmc PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/common
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/host/usdhc
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/osa
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/sdio
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/common
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/host/usdhc
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/osa
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/sdio
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_sdmmc
@@ -304,65 +304,65 @@ target_link_libraries(libs_nxp_rt1176-sdk_sdmmc
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_littlefs
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_littlefs PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
 )
 
 add_library_m4(libs_nxp_rt1176-sdk_littlefs-m4
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_littlefs-m4 PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_lwip
     dhcp_server.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif_kinetis.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/sys_arch.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_lib.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_msg.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/err.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netbuf.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netifapi.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/sockets.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/tcpip.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/raw.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/def.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/dns.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/inet_chksum.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/sys.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/init.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ip.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/acd.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/dhcp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/etharp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/icmp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4_addr.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4_frag.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/mem.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/memp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/netif.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/pbuf.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/stats.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/tcp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/tcp_in.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/tcp_out.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/timeouts.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/udp.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/netif/ethernet.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif_kinetis.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/sys_arch.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_lib.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_msg.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/err.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netbuf.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/netifapi.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/sockets.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/tcpip.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/raw.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/def.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/dns.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/inet_chksum.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/sys.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/init.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ip.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/acd.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/dhcp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/etharp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/icmp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4_addr.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4_frag.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/mem.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/memp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/netif.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/pbuf.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/stats.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/tcp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/tcp_in.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/tcp_out.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/timeouts.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/udp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/netif/ethernet.c
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_lwip PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/include
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_lwip
@@ -370,9 +370,9 @@ target_link_libraries(libs_nxp_rt1176-sdk_lwip
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_lwip_httpd
-    ${CMAKE_SOURCE_DIR}/libs/base/httpd.cc
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/fs.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/httpd.c
+    ${VALIANT_SOURCE_DIR}/libs/base/httpd.cc
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/fs.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/httpd.c
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk_lwip_httpd PUBLIC
@@ -392,30 +392,30 @@ add_library_m7(libs_nxp_rt1176-sdk_wiced
     WICED/WWD/internal/chips/43455/resources.c
     WICED/platform/MCU/LPC/WWD/wwd_platform.cc
     rtos/freertos/vendors/nxp/wifi/wiced/iot_wifi.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_bluetooth.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_imxrt.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/wiced_rtos.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD/wwd_rtos.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/SDIO/wwd_bus_protocol.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/wwd_bus_common.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/chips/43455/wwd_ap.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/chips/43455/wwd_chip_specific_functions.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/tlv.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_ap_common.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_clm.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_debug.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_internal.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_management.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_sdpcm.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_thread.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_wifi.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_wifi_sleep.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/internal/wifi.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/network/LwIP/WWD/wwd_buffer.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/network/LwIP/WWD/wwd_network.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC/WWD/wwd_SDIO.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC/WWD/wwd_platform.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/wwd_resources.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_bluetooth.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_imxrt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/wiced_rtos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD/wwd_rtos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/SDIO/wwd_bus_protocol.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/wwd_bus_common.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/chips/43455/wwd_ap.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/chips/43455/wwd_chip_specific_functions.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/tlv.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_ap_common.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_clm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_debug.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_internal.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_management.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_sdpcm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_thread.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_wifi.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/wwd_wifi_sleep.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/internal/wifi.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/network/LwIP/WWD/wwd_buffer.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/network/LwIP/WWD/wwd_network.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC/WWD/wwd_SDIO.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC/WWD/wwd_platform.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/wwd_resources.c
     DATA
     third_party/firmware/cypress/43455C0.bin
     third_party/firmware/cypress/43455C0.clm_blob
@@ -423,28 +423,28 @@ add_library_m7(libs_nxp_rt1176-sdk_wiced
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/bt_app_inc
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Components/stack/include
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Projects/bte/main
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/WICED
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/RTOS
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/network
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/SDIO
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/chips/43455
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/network/LwIP/WWD
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/include
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/include
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/platforms/MURATA_TYPE1MW
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/c_sdk/standard/common/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/bt_app_inc
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Components/stack/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Projects/bte/main
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/WICED
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/RTOS
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/network
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/SDIO
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/chips/43455
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/network/LwIP/WWD
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/platforms/MURATA_TYPE1MW
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/c_sdk/standard/common/include
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk_wiced PUBLIC
@@ -470,11 +470,11 @@ target_link_libraries(libs_nxp_rt1176-sdk_wiced
 )
 
 add_library_m7(libs_nxp_rt1176-sdk-mbedtls
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/base64.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/base64.c
 )
 
 target_include_directories(libs_nxp_rt1176-sdk-mbedtls PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/include
 )
 target_sources(libs_nxp_rt1176-sdk_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
 target_sources(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS-m4>)

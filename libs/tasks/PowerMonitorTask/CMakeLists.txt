@@ -4,7 +4,7 @@ set(libs_tasks_PowerMonitorTask_SOURCES
     power_monitor_task.cc
 )
 
-add_library(libs_tasks_PowerMonitorTask_freertos STATIC
+add_library_m7(libs_tasks_PowerMonitorTask_freertos STATIC
     ${libs_tasks_PowerMonitorTask_SOURCES}
 )
 target_link_libraries(libs_tasks_PowerMonitorTask_freertos

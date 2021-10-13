@@ -5,8 +5,8 @@ include_directories(.)
 
 add_executable_m7(CameraTest
     camera_test.cc
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/httpd.c
-    ${CMAKE_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/fs.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/httpd.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/fs.c
 )
 
 target_compile_definitions(CameraTest PUBLIC

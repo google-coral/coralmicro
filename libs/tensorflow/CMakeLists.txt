@@ -2,96 +2,96 @@ cmake_minimum_required(VERSION 3.13)
 
 set(libs_tensorflow_SOURCES
     debug_log.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/c/common.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/error_reporter.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/flatbuffer_conversions.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/op_resolver.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/tensor_utils.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/fft.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/frontend.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/window.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/window_util.c
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/kernels/internal/quantization_util.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/kernels/kernel_util.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/activations.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/add_n.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/arg_min_max.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/batch_to_space_nd.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/ceil.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/add.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/conv.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/depthwise_conv.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/fully_connected.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/mul.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/pooling.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/softmax.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/svdf.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/comparisons.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/concatenation.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/conv_common.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/depthwise_conv_common.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/dequantize.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/detection_postprocess.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/div.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/elementwise.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/elu.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/ethosu.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/floor.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/fully_connected_common.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/hard_swish.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/kernel_util.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/l2_pool_2d.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/l2norm.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/leaky_relu.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/logical.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/logistic.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/maximum_minimum.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/neg.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/pack.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/pad.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/prelu.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/quantize.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/quantize_common.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/reduce.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/reshape.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/round.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/shape.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/softmax_common.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/space_to_batch_nd.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/split.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/split_v.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/squeeze.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/strided_slice.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/sub.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/svdf_common.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/tanh.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/transpose_conv.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/unpack.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/memory_helpers.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_allocator.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_string.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_utils.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/simple_memory_allocator.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/system_setup.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/schema/schema_utils.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/test_helpers.cc
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/kernel_runner.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/c/common.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/error_reporter.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/flatbuffer_conversions.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/op_resolver.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/core/api/tensor_utils.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/fft.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/filterbank.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/frontend.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_scale.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/window.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/experimental/microfrontend/lib/window_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/kernels/internal/quantization_util.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/kernels/kernel_util.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/activations.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/add_n.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/arg_min_max.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/batch_to_space_nd.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/ceil.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/add.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/conv.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/depthwise_conv.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/fully_connected.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/mul.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/pooling.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/softmax.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/cmsis_nn/svdf.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/comparisons.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/concatenation.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/conv_common.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/depthwise_conv_common.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/dequantize.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/detection_postprocess.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/div.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/elementwise.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/elu.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/ethosu.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/floor.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/fully_connected_common.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/hard_swish.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/kernel_util.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/l2_pool_2d.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/l2norm.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/leaky_relu.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/logical.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/logistic.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/maximum_minimum.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/neg.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/pack.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/pad.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/prelu.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/quantize.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/quantize_common.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/reduce.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/reshape.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/round.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/shape.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/softmax_common.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/space_to_batch_nd.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/split.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/split_v.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/squeeze.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/strided_slice.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/sub.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/svdf_common.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/tanh.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/transpose_conv.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/unpack.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/memory_helpers.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_allocator.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_string.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/micro_utils.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/simple_memory_allocator.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/system_setup.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/schema/schema_utils.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/test_helpers.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/kernels/kernel_runner.cc
 )
 
 add_library_m7(libs_tensorflow-m7 STATIC
@@ -106,7 +106,7 @@ target_compile_definitions(libs_tensorflow-m7 PUBLIC
 )
 
 target_include_directories(libs_tensorflow-m7 PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow
 )
 
 target_link_libraries(libs_tensorflow-m7
@@ -128,7 +128,7 @@ target_compile_definitions(libs_tensorflow-m4 PUBLIC
 )
 
 target_include_directories(libs_tensorflow-m4 PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow
 )
 
 target_link_libraries(libs_tensorflow-m4
@@ -140,8 +140,8 @@ target_link_libraries(libs_tensorflow-m4
 )
 
 add_library_m7(libs_tensorflow_model_hello_world STATIC
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/examples/hello_world/model.cc
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow/tensorflow/lite/micro/examples/hello_world/model.cc
 )
 target_include_directories(libs_tensorflow_model_hello_world PUBLIC
-    ${CMAKE_SOURCE_DIR}/third_party/tensorflow
+    ${VALIANT_SOURCE_DIR}/third_party/tensorflow
 )

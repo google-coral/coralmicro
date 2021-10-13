@@ -4,10 +4,11 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-get_filename_component(CMAKE_C_COMPILER ${CMAKE_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH CACHE)
-get_filename_component(CMAKE_CXX_COMPILER ${CMAKE_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH CACHE)
-get_filename_component(CMAKE_OBJCOPY ${CMAKE_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy REALPATH CACHE)
-get_filename_component(CMAKE_STRIP ${CMAKE_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip REALPATH CACHE)
+get_filename_component(CMAKE_C_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH CACHE)
+get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH CACHE)
+get_filename_component(CMAKE_OBJCOPY ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy REALPATH CACHE)
+get_filename_component(CMAKE_STRIP ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip REALPATH CACHE)
+
 
 execute_process(
     COMMAND ${CMAKE_C_COMPILER} -print-libgcc-file-name
@@ -118,7 +119,7 @@ function(add_executable_m7)
     set(oneValueArgs LINKER_SCRIPT M4_EXECUTABLE)
     set(multiValueArgs DATA)
     cmake_parse_arguments(ADD_EXECUTABLE_M7 "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    set(LINKER_SCRIPT "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_ram.ld")
+    set(LINKER_SCRIPT "-T${VALIANT_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_ram.ld")
     if (ADD_EXECUTABLE_M7_LINKER_SCRIPT)
         set(LINKER_SCRIPT "-T${ADD_EXECUTABLE_M7_LINKER_SCRIPT}")
     endif ()
@@ -149,9 +150,14 @@ function(add_library_m7)
     set(multiValueArgs DATA)
     cmake_parse_arguments(ADD_LIBRARY_M7 "" "" "${multiValueArgs}" ${ARGN})
     add_library(${ADD_LIBRARY_M7_UNPARSED_ARGUMENTS})
-    target_compile_options(${ARGV0} PUBLIC ${CM7_C_FLAGS})
-    target_link_options(${ARGV0} PUBLIC ${CM7_LINK_FLAGS})
-    file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
+
+    get_target_property(type ${ARGV0} TYPE)
+    if (NOT ${type} STREQUAL "INTERFACE_LIBRARY")
+        target_compile_options(${ARGV0} PUBLIC ${CM7_C_FLAGS})
+        target_link_options(${ARGV0} PUBLIC ${CM7_LINK_FLAGS})
+        file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
+    endif()
+
     file(GENERATE OUTPUT ${ARGV0}.data CONTENT "${ADD_LIBRARY_M7_DATA}")
 endfunction()
 
@@ -160,7 +166,7 @@ function(add_executable_m4)
     cmake_parse_arguments(ADD_EXECUTABLE_M4 "" "" "${multiValueArgs}" ${ARGN})
     add_executable(${ADD_EXECUTABLE_M4_UNPARSED_ARGUMENTS})
     target_compile_options(${ARGV0} PUBLIC ${CM4_C_FLAGS})
-    target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS} "-T${CMAKE_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm4_ram.ld")
+    target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS} "-T${VALIANT_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm4_ram.ld")
     add_custom_command(TARGET ${ARGV0} POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary ${ARGV0} ${ARGV0}.bin
         COMMAND ${CMAKE_OBJCOPY}
@@ -185,8 +191,13 @@ function(add_library_m4)
     set(multiValueArgs DATA)
     cmake_parse_arguments(ADD_LIBRARY_M4 "" "" "${multiValueArgs}" ${ARGN})
     add_library(${ADD_LIBRARY_M4_UNPARSED_ARGUMENTS})
-    target_compile_options(${ARGV0} PUBLIC ${CM4_C_FLAGS})
-    target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS})
-    file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
+
+    get_target_property(type ${ARGV0} TYPE)
+    if (NOT ${type} STREQUAL "INTERFACE_LIBRARY")
+        target_compile_options(${ARGV0} PUBLIC ${CM4_C_FLAGS})
+        target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS})
+        file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
+    endif()
+
     file(GENERATE OUTPUT ${ARGV0}.data CONTENT "${ADD_LIBRARY_M4_DATA}")
 endfunction()

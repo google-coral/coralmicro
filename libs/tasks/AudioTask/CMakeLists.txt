@@ -4,7 +4,7 @@ set(libs_tasks_AudioTask_SOURCES
     audio_task.cc
 )
 
-add_library(libs_tasks_AudioTask_freertos STATIC
+add_library_m7(libs_tasks_AudioTask_freertos STATIC
     ${libs_tasks_AudioTask_SOURCES}
 )
 target_link_libraries(libs_tasks_AudioTask_freertos
