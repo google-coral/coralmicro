@@ -17,7 +17,7 @@ add_executable_m4(OOBEM4
     oobe_cm4.cc
     main_functions.cc
     DATA
-    models/person_detect_model.tflite
+    ${VALIANT_SOURCE_DIR}/models/person_detect_model.tflite
 )
 
 target_link_libraries(OOBEM4

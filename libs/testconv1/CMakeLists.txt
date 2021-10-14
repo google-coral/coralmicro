@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 add_library_m7(libs_testconv1 STATIC
     testconv1.cc
     DATA
-    models/testconv1-edgetpu.tflite
-    models/testconv1-expected-output.bin
-    models/testconv1-test-input.bin
+    ${VALIANT_SOURCE_DIR}/models/testconv1-edgetpu.tflite
+    ${VALIANT_SOURCE_DIR}/models/testconv1-expected-output.bin
+    ${VALIANT_SOURCE_DIR}/models/testconv1-test-input.bin
 )
 
 target_include_directories(libs_testconv1 PUBLIC

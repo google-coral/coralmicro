@@ -4,8 +4,8 @@ add_library_m7(libs_posenet STATIC
     posenet_decoder.cc
     posenet_decoder_op.cc
     DATA
-    models/posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite
-    models/posenet_test_input.bin
+    ${VALIANT_SOURCE_DIR}/models/posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite
+    ${VALIANT_SOURCE_DIR}/models/posenet_test_input.bin
 )
 target_include_directories(libs_posenet PUBLIC
     .

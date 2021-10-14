@@ -6,8 +6,8 @@ include_directories(.)
 add_executable_m7(DetectImage
     detect_image.cc
     DATA
-    apps/DetectImage/cat.rgb
-    models/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
+    ${VALIANT_SOURCE_DIR}/apps/DetectImage/cat.rgb
+    ${VALIANT_SOURCE_DIR}/models/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
 )
 
 target_link_libraries(DetectImage

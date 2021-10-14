@@ -89,6 +89,18 @@ def EnumerateElfloader():
 def EnumerateValiant():
     return usb.core.find(find_all=True, idVendor=VALIANT_VID, idProduct=VALIANT_PID)
 
+def FindElfloader(build_dir):
+    default_path = os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
+    if os.path.exists(default_path):
+        return default_path
+    for root, dirs, files in os.walk(build_dir):
+        if os.path.split(root)[1] == "ELFLoader":
+            for file in files:
+                if file == "image.srec":
+                    return os.path.join(root, file)
+    return None
+
+
 
 """
 Gets the full set of libraries that comprise a target executable.
@@ -143,16 +155,20 @@ def CreateFilesystem(workdir, root_dir, build_dir, elf_path):
         # If the key is not found, don't panic.
         pass
 
+
+    data_files = list(data_files)
+    absolute_file_paths = list()
     all_files_exist = True
     for file in data_files:
-        path = os.path.join(root_dir, file)
+        path = os.path.join(build_dir, file)
         if not os.path.exists(path):
             print('%s does not exist!' % path)
             all_files_exist = False
+        absolute_file_paths.append(path)
     if not all_files_exist:
         return None
 
-    return data_files
+    return list(zip(absolute_file_paths, data_files))
 
 def CreateSbFile(workdir, elftosb_path, srec_path):
     spinand_bdfile_path = os.path.join(workdir, 'program_flexspinand_image.bd')
@@ -346,19 +362,15 @@ def ProgramElfloader(**kwargs):
 
 def ProgramDataFiles(**kwargs):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
-    files = list(kwargs.get('data_files'))
-    files.append(kwargs.get('elf_path'))
-    files.append(USB_IP_ADDRESS_FILE)
-    files.sort()
-    for src_file in files:
-        if src_file is kwargs.get('elf_path'):
-            target_file = '/default.elf'
-        else:
-            target_file = src_file.replace(kwargs.get('root_dir'), '')
-            if target_file[0] != '/':
-                target_file = '/' + target_file
-            # If we are running on something with the wrong directory separator, fix it.
-            target_file.replace('\\', '/')
+    data_files = kwargs.get('data_files')
+    data_files.append((kwargs.get('elf_path'), '/default.elf'))
+    data_files.append((USB_IP_ADDRESS_FILE, USB_IP_ADDRESS_FILE))
+    data_files = sorted(data_files, key=lambda x: x[1])
+    for (src_file, target_file) in data_files:
+        if target_file[0] != '/':
+            target_file = '/' + target_file
+        # If we are running on something with the wrong directory separator, fix it.
+        target_file.replace('\\', '/')
 
         def write_file(f):
             bar = Bar(target_file, max=os.fstat(f.fileno()).st_size)
@@ -410,12 +422,10 @@ def main():
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     parser = argparse.ArgumentParser(description='Valiant flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--build_dir', type=str)
-    parser.add_argument('--app', type=str, required=True)
+    parser.add_argument('--build_dir', type=str, required=True)
     parser.add_argument('--subapp', type=str, required=False)
     parser.add_argument('--ram', dest='ram', action='store_true')
     parser.add_argument('--noram', dest='ram', action='store_false')
-    parser.add_argument('--elf_path', type=str, required=False)
     parser.add_argument('--elfloader_path', type=str, required=False)
     parser.add_argument('--serial', type=str, required=False)
     parser.add_argument('--list', dest='list', action='store_true')
@@ -427,14 +437,19 @@ def main():
     parser.set_defaults(list=False)
     parser.set_defaults(ram=False)
     parser.set_defaults(strip=False)
+
+    app_elf_group = parser.add_mutually_exclusive_group(required=True)
+    app_elf_group.add_argument('--app', type=str)
+    app_elf_group.add_argument('--elf_path', type=str)
+
     args = parser.parse_args()
 
     usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
-    app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir else None
+    app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir and args.app else None
     elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app) + '.stripped')
-    elfloader_path = args.elfloader_path if args.elfloader_path else os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
+    elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir)
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
     elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb')
@@ -447,12 +462,17 @@ def main():
         elftosb_path,
     ]
 
+    if not elfloader_path:
+        print('No elfloader found or provided!')
+        return
+
     if args.strip:
         paths_to_check.append(toolchain_path)
 
     if not args.elfloader_path or not args.elf_path:
         paths_to_check.append(build_dir)
-        paths_to_check.append(app_dir)
+        if app_dir:
+            paths_to_check.append(app_dir)
 
     all_paths_exist = True
     for path in paths_to_check:

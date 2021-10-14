@@ -9,6 +9,7 @@ get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/tool
 get_filename_component(CMAKE_OBJCOPY ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy REALPATH CACHE)
 get_filename_component(CMAKE_STRIP ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip REALPATH CACHE)
 
+string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" VALIANT_PREFIX "${VALIANT_SOURCE_DIR}")
 
 execute_process(
     COMMAND ${CMAKE_C_COMPILER} -print-libgcc-file-name
@@ -143,6 +144,14 @@ function(add_executable_m7)
         DEPENDS ${ARGV0}
     )
     file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
+
+    foreach (file IN LISTS ADD_EXECUTABLE_M7_DATA)
+        string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" STRIPPED_FILE ${file})
+        string(REGEX REPLACE "^${VALIANT_PREFIX}/" "" STRIPPED_FILE ${STRIPPED_FILE})
+        configure_file(${file} ${CMAKE_BINARY_DIR}/${STRIPPED_FILE} COPYONLY)
+    endforeach()
+    list(TRANSFORM ADD_EXECUTABLE_M7_DATA REPLACE "^${CMAKE_SOURCE_DIR}/" "")
+    list(TRANSFORM ADD_EXECUTABLE_M7_DATA REPLACE "^${VALIANT_PREFIX}/" "")
     file(GENERATE OUTPUT ${ARGV0}.data CONTENT "${ADD_EXECUTABLE_M7_DATA}")
 endfunction()
 
@@ -158,6 +167,13 @@ function(add_library_m7)
         file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
     endif()
 
+    foreach (file IN LISTS ADD_LIBRARY_M7_DATA)
+        string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" STRIPPED_FILE ${file})
+        string(REGEX REPLACE "^${VALIANT_PREFIX}/" "" STRIPPED_FILE ${STRIPPED_FILE})
+        configure_file(${file} ${CMAKE_BINARY_DIR}/${STRIPPED_FILE} COPYONLY)
+    endforeach()
+    list(TRANSFORM ADD_LIBRARY_M7_DATA REPLACE "^${CMAKE_SOURCE_DIR}/" "")
+    list(TRANSFORM ADD_LIBRARY_M7_DATA REPLACE "^${VALIANT_PREFIX}/" "")
     file(GENERATE OUTPUT ${ARGV0}.data CONTENT "${ADD_LIBRARY_M7_DATA}")
 endfunction()
 
@@ -167,15 +183,16 @@ function(add_executable_m4)
     add_executable(${ADD_EXECUTABLE_M4_UNPARSED_ARGUMENTS})
     target_compile_options(${ARGV0} PUBLIC ${CM4_C_FLAGS})
     target_link_options(${ARGV0} PUBLIC ${CM4_LINK_FLAGS} "-T${VALIANT_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm4_ram.ld")
+    string(REGEX REPLACE "-" "_" ARGV0_UNDERSCORED ${ARGV0})
     add_custom_command(TARGET ${ARGV0} POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary ${ARGV0} ${ARGV0}.bin
         COMMAND ${CMAKE_OBJCOPY}
             -I binary
             --rename-section .data=.core1_code
             -O elf32-littlearm
-            --redefine-sym _binary_${ARGV0}_bin_start=m4_binary_start
-            --redefine-sym _binary_${ARGV0}_bin_end=m4_binary_end
-            --redefine-sym _binary_${ARGV0}_bin_size=m4_binary_size
+            --redefine-sym _binary_${ARGV0_UNDERSCORED}_bin_start=m4_binary_start
+            --redefine-sym _binary_${ARGV0_UNDERSCORED}_bin_end=m4_binary_end
+            --redefine-sym _binary_${ARGV0_UNDERSCORED}_bin_size=m4_binary_size
             ${ARGV0}.bin ${ARGV0}.obj
         DEPENDS ${ARGV0}
         BYPRODUCTS ${ARGV0}.bin ${ARGV0}.obj
@@ -184,6 +201,14 @@ function(add_executable_m4)
         DEPENDS ${ARGV0}
     )
     file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
+
+    foreach (file IN LISTS ADD_EXECUTABLE_M4_DATA)
+        string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" STRIPPED_FILE ${file})
+        string(REGEX REPLACE "^${VALIANT_PREFIX}/" "" STRIPPED_FILE ${STRIPPED_FILE})
+        configure_file(${file} ${CMAKE_BINARY_DIR}/${STRIPPED_FILE} COPYONLY)
+    endforeach()
+    list(TRANSFORM ADD_EXECUTABLE_M4_DATA REPLACE "^${CMAKE_SOURCE_DIR}/" "")
+    list(TRANSFORM ADD_EXECUTABLE_M4_DATA REPLACE "^${VALIANT_PREFIX}/" "")
     file(GENERATE OUTPUT ${ARGV0}.data CONTENT "${ADD_EXECUTABLE_M4_DATA}")
 endfunction()
 
@@ -199,5 +224,12 @@ function(add_library_m4)
         file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
     endif()
 
+    foreach (file IN LISTS ADD_LIBRARY_M4_DATA)
+        string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" STRIPPED_FILE ${file})
+        string(REGEX REPLACE "^${VALIANT_PREFIX}/" "" STRIPPED_FILE ${STRIPPED_FILE})
+        configure_file(${file} ${CMAKE_BINARY_DIR}/${STRIPPED_FILE} COPYONLY)
+    endforeach()
+    list(TRANSFORM ADD_LIBRARY_M4_DATA REPLACE "^${CMAKE_SOURCE_DIR}/" "")
+    list(TRANSFORM ADD_LIBRARY_M4_DATA REPLACE "^${VALIANT_PREFIX}/" "")
     file(GENERATE OUTPUT ${ARGV0}.data CONTENT "${ADD_LIBRARY_M4_DATA}")
 endfunction()
