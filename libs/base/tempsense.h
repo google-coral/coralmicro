@@ -6,6 +6,7 @@ namespace tempsense {
 
 enum class TempSensor : unsigned int {
     kCPU,
+    kTPU,
     kSensorCount,
 };
 

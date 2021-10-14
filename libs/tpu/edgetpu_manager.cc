@@ -139,4 +139,13 @@ TfLiteStatus EdgeTpuManager::Invoke(EdgeTpuPackage* package, TfLiteContext *cont
     return package->inference_exe()->Invoke(tpu_driver_, context, node);
 }
 
+float EdgeTpuManager::GetTemperature() {
+    // Only attempt to read the temperature if the device has been opened.
+    if (context_.expired()) {
+        return -276.88f;
+    }
+
+    return tpu_driver_.GetTemperature();
+}
+
 }  // namespace valiant

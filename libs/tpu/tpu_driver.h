@@ -44,6 +44,7 @@ class TpuDriver {
     bool SendInstructions(const uint8_t *data, uint32_t length) const;
     bool GetOutputs(uint8_t *data, uint32_t length) const;
     bool ReadEvent() const;
+    float GetTemperature();
 
   private:
     enum class RegisterSize {

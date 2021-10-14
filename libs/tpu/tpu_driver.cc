@@ -145,6 +145,35 @@ bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance, Performanc
     assert(Write64(chip_config_.GetUsbCsrOffsets().multi_bo_ep, 0));
     assert(Write64(chip_config_.GetUsbCsrOffsets().outfeed_chunk_length, 0x20));
 
+    uint32_t omc0_d0_reg, omc0_d8_reg, omc0_dc_reg;
+
+    // Enables tempsense clock.
+    assert(Read32(chip_config_.GetApexCsrOffsets().omc0_d0, &omc0_d0_reg));
+    registers::Omc0D0 omc0_d0(omc0_d0_reg);
+    omc0_d0.set_clk_en(0x1);
+    omc0_d0.set_adr(0xC);
+    omc0_d0.set_tref(0);
+    omc0_d0.set_tslope(0);
+    omc0_d0.set_t_setting(0);
+    assert(Write32(chip_config_.GetApexCsrOffsets().omc0_d0, omc0_d0.raw()));
+
+    // Enables tempsense input ports.
+    assert(Read32(chip_config_.GetApexCsrOffsets().omc0_d8, &omc0_d8_reg));
+    registers::Omc0D8 omc0_d8(omc0_d8_reg);
+    omc0_d8.set_enbg(0x1);
+    omc0_d8.set_envr(0x1);
+    omc0_d8.set_enad(0x1);
+    assert(Write32(chip_config_.GetApexCsrOffsets().omc0_d8, omc0_d8.raw()));
+
+    // Wait 100 us before enabling tempsense flow.
+    SDK_DelayAtLeastUs(100, CLOCK_GetFreq(kCLOCK_CpuClk));
+
+    // Enables tempsense flow.
+    assert(Read32(chip_config_.GetApexCsrOffsets().omc0_dc, &omc0_dc_reg));
+    registers::Omc0DC omc0_dc(omc0_dc_reg);
+    omc0_dc.set_enthmc(0x1);
+    assert(Write32(chip_config_.GetApexCsrOffsets().omc0_dc, omc0_dc.raw()));
+
     assert(DoRunControl(platforms::darwinn::driver::RunControl::kMoveToRun));
 
     return true;
@@ -515,6 +544,16 @@ bool TpuDriver::DoRunControl(platforms::darwinn::driver::RunControl run_state) {
     }
 
     return true;
+}
+
+float TpuDriver::GetTemperature() {
+    uint32_t omc0_dc_reg;
+    float temperature;
+    assert(Read32(chip_config_.GetApexCsrOffsets().omc0_dc, &omc0_dc_reg));
+    registers::Omc0DC omc0_dc(omc0_dc_reg);
+    temperature = (662 - omc0_dc.data()) * 250 + 550;
+    // temerature is currently in mC, divide by 1000 for C.
+    return temperature / 1000;
 }
 
 }  // namespace valiant

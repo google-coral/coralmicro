@@ -965,6 +965,7 @@ const InterruptCsrOffsets kBeagleUsbTopLevelInt3InterruptCsrOffsets = {
 
 const ApexCsrOffsets kBeagleApexCsrOffsets = {
     0x1a000,  // NOLINT: omc0_00
+    0x1a0d0,  // NOLINT: omc0_d0
     0x1a0d4,  // NOLINT: omc0_d4
     0x1a0d8,  // NOLINT: omc0_d8
     0x1a0dc,  // NOLINT: omc0_dc

@@ -13,6 +13,7 @@ namespace config {
 struct ApexCsrOffsets {
   uint64 omc0_00;
 
+  uint64 omc0_d0;
   uint64 omc0_d4;
   uint64 omc0_d8;
   uint64 omc0_dc;

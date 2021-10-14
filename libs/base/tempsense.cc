@@ -1,4 +1,5 @@
 #include "libs/base/tempsense.h"
+#include "libs/tpu/edgetpu_manager.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_tempsensor.h"
 
 namespace valiant {
@@ -22,6 +23,11 @@ float GetTemperature(TempSensor sensor) {
             TMPSNS_StartMeasure(TMPSNS);
             temperature = TMPSNS_GetCurrentTemperature(TMPSNS);
             return temperature;
+        case TempSensor::kTPU:
+        {
+            const auto& context = EdgeTpuManager::GetSingleton()->OpenDevice();
+            return EdgeTpuManager::GetSingleton()->GetTemperature();
+        }
         default:
             return -273.15f;
     }

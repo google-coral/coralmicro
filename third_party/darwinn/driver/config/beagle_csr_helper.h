@@ -37,13 +37,61 @@ class Omc000 {
   } reg_;
 };
 
-
-// CSR helper to access fields for omc0_d4 CSR.
-class Omc0d4 {
+// CSR helper to access fields for omc0_d0 CSR.
+class Omc0D0 {
  public:
   // defaults to reset value.
-  Omc0d4() : Omc0d4(0x1ull) {}
-  explicit Omc0d4(uint64 value) { reg_.raw_ = value; }
+  Omc0D0() : Omc0D0(0ULL) {
+    set_adr(0xC);
+    set_tref(0x8);
+    set_tslope(0x8);
+    set_t_setting(0x2);
+  }
+  explicit Omc0D0(uint64 value) { reg_.raw_ = value; }
+
+  void set_raw(uint64 value) { reg_.raw_ = value; }
+  uint64 raw() const { return reg_.raw_; }
+
+  void set_clk_div(uint64 value) { reg_.clk_div_ = value; }
+  uint64 clk_div() const { return reg_.clk_div_(); }
+
+  void set_clk_en(uint64 value) { reg_.clk_en_ = value; }
+  uint64 clk_en() const { return reg_.clk_en_(); }
+
+  void set_adr(uint64 value) { reg_.adr_ = value; }
+  uint64 adr() const { return reg_.adr_(); }
+
+  void set_tref(uint64 value) { reg_.tref_ = value; }
+  uint64 tref() const { return reg_.tref_(); }
+
+  void set_tslope(uint64 value) { reg_.tslope_ = value; }
+  uint64 tslope() const { return reg_.tslope_(); }
+  
+  void set_t_setting(uint64 value) { reg_.t_setting_ = value; }
+  uint64 t_setting() const { return reg_.t_setting_(); }
+
+ private:
+  union {
+    uint64 raw_;
+    // these are named after fields in the spec.
+    platforms::darwinn::driver::Bitfield<0, 2> clk_div_;
+    platforms::darwinn::driver::Bitfield<3, 4> field_03_;
+    platforms::darwinn::driver::Bitfield<7, 1> clk_en_;
+    platforms::darwinn::driver::Bitfield<8, 5> adr_;
+    platforms::darwinn::driver::Bitfield<13, 4> field_13_;
+    platforms::darwinn::driver::Bitfield<16, 4> tref_;
+    platforms::darwinn::driver::Bitfield<20, 4> tslope_;
+    platforms::darwinn::driver::Bitfield<24, 4> t_setting_;
+    platforms::darwinn::driver::Bitfield<28, 4> field_28_;
+  } reg_;
+};
+
+// CSR helper to access fields for omc0_d4 CSR.
+class Omc0D4 {
+ public:
+  // defaults to reset value.
+  Omc0D4() : Omc0D4(0x1ull) {}
+  explicit Omc0D4(uint64 value) { reg_.raw_ = value; }
 
   void set_raw(uint64 value) { reg_.raw_ = value; }
   uint64 raw() const { return reg_.raw_; }
@@ -117,6 +165,9 @@ class Omc0DC {
 
   void set_raw(uint64 value) { reg_.raw_ = value; }
   uint64 raw() const { return reg_.raw_; }
+
+  void set_enthmc(uint64 value) { reg_.enthmc_ = value; }
+  uint64 enthmc() const { return reg_.enthmc_(); }
 
   void set_data(uint64 value) { reg_.data_ = value; }
   uint64 data() const { return reg_.data_(); }

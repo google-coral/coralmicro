@@ -55,6 +55,7 @@ class EdgeTpuManager {
     std::shared_ptr<EdgeTpuContext> OpenDevice(const PerformanceMode mode);
     std::shared_ptr<EdgeTpuContext> OpenDevice();
     void NotifyConnected(usb_host_edgetpu_instance_t* usb_instance);
+    float GetTemperature();
 
   private:
     TpuDriver tpu_driver_;
