@@ -1,6 +1,7 @@
 #include "libs/base/utils.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/tempsense.h"
+#include "libs/base/timer.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/CameraTask/camera_task.h"
@@ -294,18 +295,28 @@ void RunClassificationModel(struct jsonrpc_request *request) {
         return;
     }
 
-    // Invoke
+    // The first Invoke is slow due to model transfer. Run an Invoke
+    // but ignore the results.
     if (interpreter->Invoke() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
         return;
     }
+
+    uint32_t start = valiant::timer::micros();
+    if (interpreter->Invoke() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+        return;
+    }
+    uint32_t end = valiant::timer::micros();
+    uint32_t latency = end - start;
+
     // Return results and check on host side
     auto results = tensorflow::GetClassificationResults(interpreter.get(), 0.0f, 1);
     if (results.size() < 1) {
         jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
         return;
     }
-    jsonrpc_return_success(request, "{%Q:%d, %Q:%g}", "id", results[0].id, "score", results[0].score);
+    jsonrpc_return_success(request, "{%Q:%d, %Q:%g, %Q:%d}", "id", results[0].id, "score", results[0].score, "latency", latency);
 }
 
 void StartM4(struct jsonrpc_request *request) {
