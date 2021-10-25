@@ -175,6 +175,7 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     static constexpr size_t kHeight = 324;
 
     void PXP_IRQHandler();
+    static int FormatToBPP(camera::Format fmt);
   private:
     void TaskInit() override;
     void RequestHandler(camera::Request *req) override;
@@ -196,7 +197,6 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     };
     static pxp_ps_pixel_format_t FormatToPXPPSFormat(camera::Format fmt);
     static pxp_output_pixel_format_t FormatToPXPOutputFormat(camera::Format fmt);
-    static int FormatToBPP(camera::Format fmt);
     static void BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
     static void BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
     bool PXPOperation(const PXPConfiguration& input, const PXPConfiguration& output, bool preserve_ratio);
