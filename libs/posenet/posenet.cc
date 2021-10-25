@@ -71,6 +71,10 @@ TfLiteTensor* input() {
 }
 
 bool loop(Output* output) {
+    return loop(output, true);
+}
+
+bool loop(Output* output, bool print) {
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
         return false;
@@ -95,7 +99,9 @@ bool loop(Output* output) {
             }
         }
 
-        PrintOutput(*output);
+        if (print) {
+            PrintOutput(*output);
+        }
     }
 
     return true;

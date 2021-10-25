@@ -22,6 +22,9 @@ Original Author: Shay Gal-on
 */
 #ifndef CORE_PORTME_H
 #define CORE_PORTME_H
+
+#include <stdbool.h>
+
 /************************/
 /* Data types and settings */
 /************************/
@@ -213,6 +216,7 @@ int ee_printf(const char *fmt, ...);
 
 #define MAX_COREMARK_BUFFER 512
 void RunCoreMark(char *buffer);
+void CoreMark_PrintToConsole(bool);
 
 
 #if MAIN_HAS_NOARGC

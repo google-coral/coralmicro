@@ -28,6 +28,7 @@ struct Output {
 
 bool setup();
 bool loop(Output* output);
+bool loop(Output* output, bool print);
 TfLiteTensor* input();
 
 }  // namespace posenet
