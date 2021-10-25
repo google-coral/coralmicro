@@ -1,3 +1,4 @@
+#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
 #include "libs/tasks/UsbHostTask/usb_host_task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
@@ -30,7 +31,7 @@ usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(usb_host_handle host_handle,
     usb_host_interface_t *interface_ptr;
     int id;
     SetHostInstance((usb_host_instance_t*)host_handle);
-    switch (event_code) {
+    switch (event_code & 0xFFFF) {
         case kUSB_HostEventAttach:
             configuration_ptr = (usb_host_configuration_t*)config_handle;
             for (int i = 0; i < configuration_ptr->interfaceCount; ++i) {
@@ -54,7 +55,6 @@ usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(usb_host_handle host_handle,
             return kStatus_USB_Success;
         case kUSB_HostEventDetach:
             SetNextState(DFU_STATE_UNATTACHED);
-            printf("Detached DFU\r\n");
             return kStatus_USB_Success;
         default:
             return kStatus_USB_Success;
@@ -294,9 +294,9 @@ void EdgeTpuDfuTask::HandleNextState(NextStateRequest& req) {
             }
             break;
         case DFU_STATE_COMPLETE:
+            USB_HostEhciResetBus((usb_host_ehci_instance_t*)host_instance()->controllerHandle);
             ret = USB_HostDfuDeinit(device_handle(), class_handle());
             SetClassHandle(nullptr);
-            USB_HostEhciResetBus((usb_host_ehci_instance_t*)host_instance()->controllerHandle);
             USB_HostTriggerReEnumeration(device_handle());
             break;
         case DFU_STATE_ERROR:
