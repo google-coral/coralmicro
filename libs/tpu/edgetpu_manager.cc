@@ -1,4 +1,6 @@
 #include "libs/tpu/edgetpu_manager.h"
+
+#include "libs/base/mutex.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "third_party/flatbuffers/include/flatbuffers/flexbuffers.h"
@@ -21,13 +23,16 @@ EdgeTpuContext::~EdgeTpuContext() {
     EdgeTpuTask::GetSingleton()->SetPower(false);
 }
 
-EdgeTpuManager::EdgeTpuManager() {}
+EdgeTpuManager::EdgeTpuManager() {
+    mutex_ = xSemaphoreCreateMutex();
+}
 
 void EdgeTpuManager::NotifyConnected(usb_host_edgetpu_instance_t* usb_instance) {
     usb_instance_ = usb_instance;
 }
 
 std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice(const PerformanceMode mode) {
+    MutexLock lock(mutex_);
     if (!context_.expired()) {
         return context_.lock();
     }
@@ -50,6 +55,7 @@ std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice() {
 }
 
 EdgeTpuPackage* EdgeTpuManager::RegisterPackage(const char *package_content, size_t length) {
+    MutexLock lock(mutex_);
     uintptr_t package_ptr = (uintptr_t)package_content;
 
     if (packages_.find(package_ptr) != packages_.end()) {
@@ -115,6 +121,7 @@ EdgeTpuPackage* EdgeTpuManager::RegisterPackage(const char *package_content, siz
 }
 
 TfLiteStatus EdgeTpuManager::Invoke(EdgeTpuPackage* package, TfLiteContext *context, TfLiteNode *node) {
+    MutexLock lock(mutex_);
     if (package->parameter_caching_exe()) {
         auto token = package->parameter_caching_exe()->ParameterCachingToken();
         if (token != current_parameter_caching_token_) {
@@ -140,6 +147,7 @@ TfLiteStatus EdgeTpuManager::Invoke(EdgeTpuPackage* package, TfLiteContext *cont
 }
 
 float EdgeTpuManager::GetTemperature() {
+    MutexLock lock(mutex_);
     // Only attempt to read the temperature if the device has been opened.
     if (context_.expired()) {
         return -276.88f;
