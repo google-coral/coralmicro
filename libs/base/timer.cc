@@ -44,3 +44,7 @@ uint32_t micros() {
 
 }  // namespace timer
 }  // namespace valiant
+
+extern "C" uint32_t vPortGetRunTimeCounterValue(void) {
+    return valiant::timer::micros();
+}

@@ -21,6 +21,10 @@ static void elfloader_SetClassHandle(class_handle_t class_handle);
 static usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t event, void *param);
 void usb_device_task(void *param);
 
+extern "C" uint32_t vPortGetRunTimeCounterValue(void) {
+    return 0;
+}
+
 /* Static data definitions */
 TimerHandle_t usb_timer;
 static uint8_t* elfloader_recv_image = nullptr;

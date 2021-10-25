@@ -64,6 +64,7 @@ add_library_m4(libs_base-m4_freertos STATIC
     ipc.cc
     ipc_m4.cc
     main_freertos_m4.cc
+    timer.cc
 )
 
 target_link_libraries(libs_base-m4_freertos

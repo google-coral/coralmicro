@@ -78,7 +78,8 @@
 #define configUSE_DAEMON_TASK_STARTUP_HOOK      0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS           0
+#define configGENERATE_RUN_TIME_STATS           1
+
 #define configUSE_TRACE_FACILITY                1
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
 
@@ -123,6 +124,10 @@ void vGenerateSecondaryToPrimaryInterrupt(void*);
 #define sbSEND_COMPLETED( pxStreamBuffer ) vGenerateSecondaryToPrimaryInterrupt( pxStreamBuffer )
 #endif
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES (2)
+
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() do {} while (0)
+uint32_t vPortGetRunTimeCounterValue(void);
+#define portGET_RUN_TIME_COUNTER_VALUE() vPortGetRunTimeCounterValue()
 
 #if defined(__ICCARM__)||defined(__CC_ARM)||defined(__GNUC__)
     /* in Kinetis SDK, this contains the system core clock frequency */
