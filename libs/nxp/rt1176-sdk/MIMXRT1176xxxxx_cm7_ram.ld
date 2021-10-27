@@ -141,6 +141,7 @@ SECTIONS
     *(.text*)                /* .text* sections (code) */
     *(.rodata)               /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)              /* .rodata* sections (constants, strings, etc.) */
+    KEEP(*(.rodata.debug))
     *(.glue_7)               /* glue arm to thumb code */
     *(.glue_7t)              /* glue thumb to arm code */
     *(.eh_frame)

@@ -8,6 +8,7 @@ import hid
 import ipaddress
 import os
 import serial
+import signal
 import struct
 import subprocess
 import sys
@@ -230,6 +231,7 @@ class FlashtoolStates(Enum):
     PROGRAM_ELFLOADER = auto()
     PROGRAM_DATA_FILES = auto()
     RESET = auto()
+    START_GDB = auto()
 
 def FlashtoolError(**kwargs):
     return FlashtoolStates.DONE
@@ -358,7 +360,9 @@ def ProgramElfloader(**kwargs):
     with open(kwargs['elf_path'], 'rb') as elf:
         ElfloaderTransferData(h, elf.read(), ELFLOADER_TARGET_RAM)
     h.close()
-    return FlashtoolStates.DONE
+    if not kwargs.get('debug', False):
+        return FlashtoolStates.DONE
+    return FlashtoolStates.START_GDB
 
 def ProgramDataFiles(**kwargs):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
@@ -396,6 +400,32 @@ def Reset(**kwargs):
     h.close()
     return FlashtoolStates.DONE
 
+def StartGdb(**kwargs):
+    jlink_gdbserver = os.path.join(kwargs.get('jlink_path'), 'JLinkGDBServerCLExe')
+    gdb_exe = os.path.join(kwargs.get('toolchain_path'), 'arm-none-eabi-gdb')
+    if not os.path.exists(jlink_gdbserver):
+        print(jlink_gdbserver + ' does not exist!')
+        return FlashtoolStates.ERROR
+    if not os.path.exists(gdb_exe):
+        print(gdb_exe + ' does not exist!')
+        return FlashtoolStates.ERROR
+
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    with subprocess.Popen(
+        [jlink_gdbserver, '-select', 'USB', '-device', 'MIMXRT1176xxx8_M7', '-endian', 'little', '-if', 'JTAG', '-speed', '4000', '-noir', '-noLocalhostOnly', '-rtos', 'GDBServer/RTOSPlugin_FreeRTOS.so'],
+        stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, preexec_fn=os.setpgrp) as gdbserver:
+        with tempfile.NamedTemporaryFile('w') as gdb_commands:
+            gdb_commands.writelines([
+                'file ' + kwargs.get('unstripped_elf_path') + '\n',
+                'target remote localhost:2331\n',
+                'continue\n'
+            ])
+            gdb_commands.flush()
+            with subprocess.Popen([gdb_exe, '-x', gdb_commands.name]) as gdb:
+                gdb.communicate()
+        gdbserver.terminate()
+    return FlashtoolStates.DONE
+
 state_handlers = {
     FlashtoolStates.ERROR: FlashtoolError,
     FlashtoolStates.CHECK_FOR_ANY: CheckForAny,
@@ -411,6 +441,7 @@ state_handlers = {
     FlashtoolStates.PROGRAM_ELFLOADER: ProgramElfloader,
     FlashtoolStates.PROGRAM_DATA_FILES: ProgramDataFiles,
     FlashtoolStates.RESET: Reset,
+    FlashtoolStates.START_GDB: StartGdb,
 }
 
 def main():
@@ -434,9 +465,12 @@ def main():
     # CMake-built targets already generate a stripped binary.
     parser.add_argument('--strip', dest='strip', action='store_true')
     parser.add_argument('--toolchain', type=str, required=False)
+    parser.add_argument('--debug', dest='debug', action='store_true')
+    parser.add_argument('--jlink_path', type=str, default='/opt/SEGGER/JLink')
     parser.set_defaults(list=False)
     parser.set_defaults(ram=False)
     parser.set_defaults(strip=False)
+    parser.set_defaults(debug=False)
 
     app_elf_group = parser.add_mutually_exclusive_group(required=True)
     app_elf_group.add_argument('--app', type=str)
@@ -449,6 +483,7 @@ def main():
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
     app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir and args.app else None
     elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app) + '.stripped')
+    unstripped_elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app))
     elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir)
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
@@ -456,6 +491,7 @@ def main():
     toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
         elf_path,
+        unstripped_elf_path,
         elfloader_path,
         blhost_path,
         flashloader_path,
@@ -466,7 +502,7 @@ def main():
         print('No elfloader found or provided!')
         return
 
-    if args.strip:
+    if args.strip or args.debug:
         paths_to_check.append(toolchain_path)
 
     if not args.elfloader_path or not args.elf_path:
@@ -492,8 +528,12 @@ def main():
         'ram': args.ram,
         'elfloader_path': elfloader_path,
         'elf_path': elf_path,
+        'unstripped_elf_path': unstripped_elf_path,
         'root_dir': root_dir,
         'usb_ip_address': usb_ip_address,
+        'debug': args.debug,
+        'jlink_path': args.jlink_path,
+        'toolchain_path': toolchain_path,
     }
 
     sdp_devices = len(EnumerateSDP())
