@@ -96,6 +96,18 @@ SECTIONS
      __curl_end = .;
      . = ALIGN(4);
   } > m_ocram
+
+  .mbedtls :
+  {
+     . = ALIGN(4);
+     __mbedtls_start = .;
+     *liblibs_nxp_rt1176-sdk-mbedtls.a:*(.text .text*)
+     *liblibs_nxp_rt1176-sdk-mbedtls.a:*(.data .data*)
+     *liblibs_nxp_rt1176-sdk-mbedtls.a:*(.rodata .rodata*)
+     __mbedtls_end = .;
+     . = ALIGN(4);
+  } > m_ocram
+
   .lwip :
   {
      . = ALIGN(4);

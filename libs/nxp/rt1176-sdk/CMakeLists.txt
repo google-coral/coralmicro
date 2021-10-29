@@ -472,11 +472,81 @@ target_link_libraries(libs_nxp_rt1176-sdk_wiced
 )
 
 add_library_m7(libs_nxp_rt1176-sdk-mbedtls
+    mbedtls.cc
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/aes.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/arc4.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/asn1parse.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/asn1write.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/base64.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/bignum.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/camellia.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ccm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/certs.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/chacha20.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/chachapoly.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/cipher.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/cipher_wrap.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ctr_drbg.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/debug.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/des.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/dhm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ecdh.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ecdsa.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ecp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/entropy.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/error.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/gcm.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/hmac_drbg.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/md.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/md5.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/md_wrap.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/oid.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pem.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pk.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pk_wrap.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pkcs12.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pkcs5.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pkparse.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pkparse.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pkwrite.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/platform.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/platform_util.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/poly1305.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ripemd160.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ripemd160.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/rsa.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/rsa_internal.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/sha1.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/sha256.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/sha512.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_ciphersuites.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_cli.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_srv.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_tls.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/timing.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/version.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/x509.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/x509_crl.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/x509_crt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/x509_crt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk/ecp_alt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk/ecp_curves_alt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk/ksdk_mbedtls.c
+)
+
+target_link_libraries(libs_nxp_rt1176-sdk-mbedtls
+    libs_nxp_rt1176-sdk_freertos
+    libs_nxp_rt1176-sdk_lwip
 )
 
 target_include_directories(libs_nxp_rt1176-sdk-mbedtls PUBLIC
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk
 )
+
+target_compile_definitions(libs_nxp_rt1176-sdk-mbedtls PUBLIC
+    MBEDTLS_CONFIG_FILE="libs/nxp/rt1176-sdk/ksdk_mbedtls_config.h"
+)
+
 target_sources(libs_nxp_rt1176-sdk_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
 target_sources(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS-m4>)
