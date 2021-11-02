@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 
 add_library_m7(libs_coremark-m7 STATIC
+    core_main.c
     core_portme.c
     core_valiant.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_list_join.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_main.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_matrix.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_state.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_util.c
@@ -24,10 +24,10 @@ target_compile_definitions(libs_coremark-m7 PRIVATE
 )
 
 add_library_m4(libs_coremark-m4 STATIC
+    core_main.c
     core_portme.c
     core_valiant.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_list_join.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_main.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_matrix.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_state.c
     ${VALIANT_SOURCE_DIR}/third_party/coremark/core_util.c

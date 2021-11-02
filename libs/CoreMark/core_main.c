@@ -68,6 +68,7 @@ iterate(void *pres)
         res->crc = crcu16(crc, res->crc);
         if (i == 0)
             res->crclist = res->crc;
+        vTaskDelay(1);
     }
     return NULL;
 }
@@ -106,13 +107,13 @@ char *mem_name[3] = { "Static", "Heap", "Stack" };
 
 #if MAIN_HAS_NOARGC
 MAIN_RETURN_TYPE
-coremark_main(void)
+main(void)
 {
     int   argc = 0;
     char *argv[1];
 #else
 MAIN_RETURN_TYPE
-coremark_main(int argc, char *argv[])
+main(int argc, char *argv[])
 {
 #endif
     ee_u16       i, j = 0, num_algorithms = 0;
