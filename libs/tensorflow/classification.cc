@@ -63,5 +63,29 @@ bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor) {
     }
 }
 
+bool ClassificationPreprocess(TfLiteTensor* input_tensor) {
+    if (input_tensor->type != kTfLiteUInt8) {
+        return false;
+    }
+    const float scale = input_tensor->params.scale;
+    const float zero_point = input_tensor->params.zero_point;
+    const float mean = 128;
+    const float std = 128;
+    const size_t size = input_tensor->bytes;
+
+    uint8_t *input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
+    for (size_t i = 0; i < size; ++i) {
+      const float tmp = (input_tensor_data[i] - mean) / (std * scale) + zero_point;
+      if (tmp > 255) {
+        input_tensor_data[i] = 255;
+      } else if (tmp < 0) {
+        input_tensor_data[i] = 0;
+      } else {
+        input_tensor_data[i] = static_cast<uint8_t>(tmp);
+      }
+    }
+    return true;
+}
+
 }  // namespace tensorflow
 }  // namespace valiant

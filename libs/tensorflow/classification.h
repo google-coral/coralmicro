@@ -27,6 +27,8 @@ std::vector<Class> GetClassificationResults(
 
 bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor);
 
+bool ClassificationPreprocess(TfLiteTensor* input_tensor);
+
 }  // namespace tensorflow
 }  // namespace valiant
 

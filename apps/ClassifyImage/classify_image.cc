@@ -55,13 +55,11 @@ void real_main() {
         return;
     }
 
-    unsigned char* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
     if (tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor)) {
-        printf("must preprocess\r\n");
-        return;
-    } else {
-        memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
+        tensorflow::ClassificationPreprocess(input_tensor);
     }
+    unsigned char* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
+    memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
 
     if (interpreter->Invoke() != kTfLiteOk) {
         printf("invoke failed\r\n");

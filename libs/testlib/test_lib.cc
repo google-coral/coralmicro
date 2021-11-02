@@ -277,9 +277,15 @@ void RunClassificationModel(struct jsonrpc_request *request) {
 
     auto* input_tensor = interpreter->input_tensor(0);
     bool needs_preprocessing = tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
+    uint32_t preprocess_latency = 0;
     if (needs_preprocessing) {
-        jsonrpc_return_error(request, -1, "input needs preprocessing, not supported", nullptr);
-        return;
+        uint32_t preprocess_start = valiant::timer::micros();
+        if (!tensorflow::ClassificationPreprocess(input_tensor)) {
+            jsonrpc_return_error(request, -1, "input preprocessing failed", nullptr);
+            return;
+        }
+        uint32_t preprocess_end = valiant::timer::micros();
+        preprocess_latency = preprocess_end - preprocess_start;
     }
 
     // Resize into input tensor
@@ -316,7 +322,7 @@ void RunClassificationModel(struct jsonrpc_request *request) {
         jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
         return;
     }
-    jsonrpc_return_success(request, "{%Q:%d, %Q:%g, %Q:%d}", "id", results[0].id, "score", results[0].score, "latency", latency);
+    jsonrpc_return_success(request, "{%Q:%d, %Q:%g, %Q:%d}", "id", results[0].id, "score", results[0].score, "latency", latency + preprocess_latency);
 }
 
 void StartM4(struct jsonrpc_request *request) {
