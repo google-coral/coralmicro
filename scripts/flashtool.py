@@ -305,16 +305,19 @@ def OpenHidDevice(vid, pid, serial_number):
     # First few tries to open the HID device can fail,
     # if Python is faster than the device. So retry a bit.
     opened = False
-    for _ in range(100):
+    for _ in range(30):
         try:
+            print('OpenHidDevice vid={:x} pid={:x} serial={} ...'.format(vid, pid, serial_number))
             h.open(vid, pid, serial_number=serial_number)
             opened = True
             break
         except:
+            time.sleep(0.5)
             pass
     if not opened:
-        print('Failed to open Valiant HID device')
-        return FlashtoolStates.ERROR
+        raise Exception('Failed to open Valiant HID device')
+    print('OpenHidDevice: {} {} {}'.format(
+                h.get_manufacturer_string(), h.get_product_string(), h.get_serial_number_string()))
     return h
 
 
