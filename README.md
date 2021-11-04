@@ -23,7 +23,7 @@ make -C build
 Before running the script for the first time, be sure to install the required Python modules:
 ```
 python3 -m pip install -r scripts/requirements.txt
-sudo apt-get install libhidapi-hidraw0 python-dev libusb-1.0-0-dev libudev-dev
+sudo apt-get install libhidapi-hidraw0 python-dev libusb-1.0-0-dev libudev-dev protobuf-compiler
 ```
 
 Also, be sure to setup udev rules, or the scripts will have permission and path issues:

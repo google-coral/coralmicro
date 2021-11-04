@@ -47,3 +47,4 @@ else()
 endif()
 
 add_subdirectory(${VALIANT_SOURCE_DIR}/libs)
+add_subdirectory(${VALIANT_SOURCE_DIR}/third_party/nanopb)

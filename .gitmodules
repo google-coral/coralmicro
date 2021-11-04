@@ -46,3 +46,6 @@
 [submodule "third_party/coremark"]
 	path = third_party/coremark
 	url = https://github.com/eembc/coremark
+[submodule "third_party/nanopb"]
+	path = third_party/nanopb
+	url = https://github.com/nanopb/nanopb.git
