@@ -13,6 +13,7 @@ add_library_m7(libs_curl STATIC
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/dynbuf.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/easy.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/escape.c
+    ${VALIANT_SOURCE_DIR}/third_party/curl/lib/getenv.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/getinfo.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/hash.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/hostip.c
@@ -45,8 +46,11 @@ add_library_m7(libs_curl STATIC
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/transfer.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/url.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/urlapi.c
+    ${VALIANT_SOURCE_DIR}/third_party/curl/lib/vtls/mbedtls.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/vtls/vtls.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/warnless.c
+    DATA
+    ${VALIANT_SOURCE_DIR}/ca-certificates.crt
 )
 
 target_compile_definitions(libs_curl PRIVATE
@@ -66,4 +70,5 @@ target_include_directories(libs_curl PUBLIC
 target_link_libraries(libs_curl
     libs_base-m7_freertos
     libs_nxp_rt1176-sdk_lwip
+    libs_nxp_rt1176-sdk-mbedtls
 )

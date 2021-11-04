@@ -6,10 +6,43 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
 #include <cstdio>
 
+/* clang-format off */
+#include "libs/curl/curl.h"
+/* clang-format on */
+
 struct DnsCallbackArg {
     SemaphoreHandle_t sema;
     ip_addr_t ip_addr;
 };
+
+static size_t curl_writefunction(void* contents, size_t size, size_t nmemb, void* param) {
+    size_t* bytes_curled = reinterpret_cast<size_t*>(param);
+    *bytes_curled = *bytes_curled + (size * nmemb);
+    return size * nmemb;
+}
+
+static void CURLRequest(const char *url) {
+    CURL* curl;
+    CURLcode res;
+
+    curl = curl_easy_init();
+    printf("Curling %s\r\n", url);
+    if (curl) {
+        size_t bytes_curled = 0;
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes_curled);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunction);
+        res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            printf("curl_easy_perform failed: %s\r\n", curl_easy_strerror(res));
+        } else {
+            printf("Curling of %s successful! (%d bytes curled)\r\n", url, bytes_curled);
+        }
+        curl_easy_cleanup(curl);
+    }
+}
 
 extern "C" void app_main(void *param) {
     printf("Hello world Ethernet.\r\n");
@@ -47,6 +80,10 @@ extern "C" void app_main(void *param) {
     vSemaphoreDelete(dns_arg.sema);
 
     printf("google.com -> %s\r\n", ipaddr_ntoa(&dns_arg.ip_addr));
+
+    curl_global_init(CURL_GLOBAL_ALL);
+    CURLRequest("https://www.google.com");
+    curl_global_cleanup();
 
     vTaskSuspend(NULL);
 }

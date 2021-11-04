@@ -55,4 +55,8 @@
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_TFTP 1
 
+#define USE_MBEDTLS 1
+
+#define CURL_CA_BUNDLE "/ca-certificates.crt"
+
 #endif  // _LIBS_CURL_CURL_CONFIG_H_
