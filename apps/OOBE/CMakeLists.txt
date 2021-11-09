@@ -10,9 +10,6 @@ add_executable_m7(OOBE
 
 target_link_libraries(OOBE
     libs_base-m7_freertos
-    libs_curl
-    libs_RPCServer
-    libs_RPCServerIOHTTP
     libs_posenet
     libs_testlib
 )

@@ -7,8 +7,7 @@
 namespace valiant {
 namespace oobe {
 
-std::unique_ptr<char> CreatePoseJSON(unsigned int id, unsigned int now, const posenet::Output& output, int pose);
-std::unique_ptr<char> CreateFrameJSON(unsigned int id, unsigned int now, unsigned int good_poses_count, const char *url);
+std::unique_ptr<char[]> CreatePoseJSON(const posenet::Output& output, float threshold);
 
 }  // namespace valiant
 }  // namespace oobe

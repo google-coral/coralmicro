@@ -5,17 +5,19 @@ import cairosvg
 import collections
 import enum
 import ipaddress
+import json
 import requests
 import socket
 import svgwrite
 import threading
+import time
 import tkinter as tk
 from io import BytesIO
 from copy import deepcopy
-from flask import Flask, current_app
-from flask import request as flask_request
-from jsonrpc.backend.flask import api
 from PIL import ImageTk, Image
+
+POSENET_INPUT_WIDTH = 481
+POSENET_INPUT_HEIGHT = 353
 
 Keypoint = collections.namedtuple('Keypoint', ['point', 'score'])
 Point = collections.namedtuple('Point', ['x', 'y'])
@@ -96,108 +98,75 @@ class ValiantOOBE(object):
             'method': '',
             'id': -1,
         }
-        self.host_ip = self.get_own_address()
         self.panel = None
-        self.frames = {}
-        self.poses = {}
-        self.poses_count = {}
+        self.frame = None
+        self.poses = []
 
-    def get_next_id(self):
-        next_id = self.next_id
-        self.next_id += 1
-        return next_id
-
-    def get_new_payload(self):
-        new_payload = deepcopy(self.payload_template)
-        new_payload['id'] = self.get_next_id()
-        return new_payload
-
-    def send_rpc(self, json):
-        if json['method'] and (json['jsonrpc'] == '2.0') and (json['id'] != -1) and (json['params'] != None):
-            if self.print_payloads:
-                print(json)
-            return requests.post(self.url, json=json).json()
-        raise ValueError('Missing key in RPC')
-
-    def get_own_address(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect((str(self.device_ip), self.device_port))
-        own_address = s.getsockname()[0]
-        s.close()
-        return own_address
-
-    def register_receiver(self):
-        payload = self.get_new_payload()
-        payload['method'] = 'register_receiver'
-        payload['params'].append({
-            'address': self.get_own_address(),
-        })
-        return self.send_rpc(payload)
-
-    def unregister_receiver(self):
-        payload = self.get_new_payload()
-        payload['method'] = 'unregister_receiver'
-        payload['params'].append({
-            'address': self.get_own_address(),
-        })
-        return self.send_rpc(payload)
-
-    def render_frame(self, index):
-        final_frame = self.frames[index].copy()
-        local_poses = self.poses[index]
-        for pose in local_poses:
+    def render_frame(self):
+        final_frame = self.frame.copy()
+        for pose in self.poses:
             final_frame.alpha_composite(pose)
-        self.poses.pop(index)
-        self.poses_count.pop(index)
-        self.frames.pop(index)
 
         tk_image = ImageTk.PhotoImage(image=final_frame)
         self.panel.configure(image=tk_image)
         self.panel.image = tk_image
 
-    def rpc_pose(self, *args, **kwargs):
-        pose_keypoints = {}
-        for i, value in enumerate(kwargs['keypoints']):
-            name = KeypointType(i)
-            score = value[0]
-            x = value[1]
-            y = value[2]
-            pose_keypoints[name] = Keypoint(Point(x, y), score)
-        pose = Pose(pose_keypoints, kwargs['score'])
+    def pose(self, pose_json):
+        try:
+            poses = json.loads(pose_json)
+            for pose in poses:
+                pose_keypoints = {}
+                for i, value in enumerate(pose['keypoints']):
+                    name = KeypointType(i)
+                    score = value[0]
+                    x = value[1]
+                    y = value[2]
+                    pose_keypoints[name] = Keypoint(Point(x, y), score)
+                p = Pose(pose_keypoints, pose['score'])
 
-        dwg = svgwrite.Drawing('', size=(481, 353))
-        draw_pose(dwg, pose, (481, 353), (0, 0, 481, 353))
+                dwg = svgwrite.Drawing('', size=(POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT))
+                draw_pose(dwg, p, (POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT), (0, 0, POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT))
+                png = cairosvg.svg2png(bytestring=dwg.tostring().encode())
+                pose_image = Image.open(BytesIO(png))
+                self.poses.append(pose_image)
 
-        png = cairosvg.svg2png(bytestring=dwg.tostring().encode())
-        pose_image = Image.open(BytesIO(png))
-        self.poses[kwargs['now']].append(pose_image)
-        if len(self.poses[kwargs['now']]) == self.poses_count[kwargs['now']]:
-            self.render_frame(kwargs['now'])
+        except Exception as e:
+            print('exception ' + str(e))
 
-        return []
+def FetchThread(shutdown_event, oobe):
+    thread_start = time.time()
+    last_report = time.time()
+    frame_count = 0
+    while not shutdown_event.is_set():
+        start = time.time()
+        try:
+            r = requests.get('http://' + str(oobe.device_ip) + '/camera', timeout=1)
+            if len(r.content) > 0:
+                rgb_image = Image.frombytes('RGB', (POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT), r.content)
+                rgb_image.putalpha(255)
+                oobe.frame = rgb_image
+                frame_count += 1
+            r2 = requests.get('http://' + str(oobe.device_ip) + '/pose', timeout=1)
+            if r2.status_code == requests.codes.ok:
+                oobe.poses = []
+                oobe.pose(r2.content)
+        # These happen occasionally... nothing to do but try next cycle.
+        except socket.error:
+            pass
 
-    def rpc_frame(self, *args, **kwargs):
-        r = requests.get('http://' + str(self.device_ip) + kwargs['url'])
-        rgb_image = Image.frombytes('RGB', (481, 353), r.content)
-        rgb_image.putalpha(255)
-        self.frames[kwargs['now']] = rgb_image
-        self.poses[kwargs['now']] = []
-        self.poses_count[kwargs['now']] = kwargs['poses']
-        if (kwargs['poses'] == 0):
-            self.render_frame(kwargs['now'])
+        if oobe.frame:
+            oobe.render_frame()
 
-        return []
+        end = time.time()
+        if (end - last_report) > 10:
+            frames_per_second = frame_count / (end - thread_start)
+            last_report = end
+            print('FPS: %f Total frames: %d Time: %f' % (frames_per_second, frame_count, (end - thread_start)))
 
-
-@api.dispatcher.add_method
-def pose(*args, **kwargs):
-    oobe = current_app.oobe
-    return oobe.rpc_pose(*args, **kwargs)
-
-@api.dispatcher.add_method
-def frame(*args, **kwargs):
-    oobe = current_app.oobe
-    return oobe.rpc_frame(*args, **kwargs)
+        fps_target = 10
+        sleep_time = (1.0 / fps_target) - (end - start)
+        if (sleep_time > 0):
+            time.sleep(sleep_time)
 
 def main():
     parser = argparse.ArgumentParser(description='Valiant OOBE visualizer',
@@ -205,25 +174,15 @@ def main():
     parser.add_argument('--device_ip_address', type=str, default='10.10.10.1')
     args = parser.parse_args()
 
-    app = Flask(__name__)
-    app.register_blueprint(api.as_blueprint())
-
-    @app.route("/shutdown", methods=['POST'])
-    def shutdown():
-        func = flask_request.environ.get('werkzeug.server.shutdown')
-        func()
-        return "Shutting down"
-
     oobe = ValiantOOBE(ipaddress.ip_address(args.device_ip_address), 80, print_payloads=True)
-    oobe.register_receiver()
-    app.oobe = oobe
 
-    flask_thread = threading.Thread(target=lambda: app.run(host=oobe.host_ip, port='8080', debug=True, use_reloader=False))
-    flask_thread.start()
+    fetch_shutdown_event = threading.Event()
+    fetch_thread = threading.Thread(target=lambda: FetchThread(fetch_shutdown_event, oobe))
+    fetch_thread.start()
 
     window = tk.Tk()
     window.title("Valiant OOBE")
-    window.geometry("481x353")
+    window.geometry("%dx%d" % (POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT))
     window.configure(background='grey')
 
     oobe.panel = tk.Label(window)
@@ -233,9 +192,8 @@ def main():
     except KeyboardInterrupt:
         pass
 
-    oobe.unregister_receiver()
-    requests.post('http://' + oobe.host_ip + ':8080/shutdown')
-    flask_thread.join()
+    fetch_shutdown_event.set()
+    fetch_thread.join()
 
 if __name__ == '__main__':
     main()
