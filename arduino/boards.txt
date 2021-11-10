@@ -24,4 +24,4 @@ valiant.bootloader.file={runtime.platform.path}/bootloaders/VALIANT/image.srec
 
 valiant.upload.tool=flashtool
 valiant.upload.protocol=
-valiant.upload.pattern={cmd.path} --elfloader_path {bootloader.file} --app . --ram --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path}
+valiant.upload.pattern={cmd.path} --elfloader_path {bootloader.file} --build_dir . --ram --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path}
