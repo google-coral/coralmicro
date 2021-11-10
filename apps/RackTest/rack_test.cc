@@ -1,6 +1,7 @@
 #include "apps/RackTest/rack_test_ipc.h"
-#include "libs/base/utils.h"
+#include "libs/base/httpd.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/base/utils.h"
 #include "libs/CoreMark/core_portme.h"
 #include "libs/posenet/posenet.h"
 #include "libs/RPCServer/rpc_server.h"
@@ -14,10 +15,13 @@
 #include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
 
 #include <array>
+#include <memory>
 
 static constexpr const char *kM4XOR = "m4_xor";
 static constexpr const char *kM4CoreMark = "m4_coremark";
 static constexpr const char *kM7CoreMark = "m7_coremark";
+static constexpr const char *kGetFrame = "get_frame";
+static std::unique_ptr<uint8_t[]> camera_rgb;
 
 static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
     TaskHandle_t rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
@@ -145,6 +149,53 @@ static void M7CoreMark(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%Q}", "coremark_results", coremark_buffer);
 }
 
+static void GetFrame(struct jsonrpc_request *request) {
+    if(!camera_rgb){
+        camera_rgb = std::make_unique<uint8_t[]>(valiant::CameraTask::kWidth * valiant::CameraTask::kHeight * 
+            valiant::CameraTask::FormatToBPP(valiant::camera::Format::RGB));
+    }
+    valiant::CameraTask::GetSingleton()->SetPower(true);
+    valiant::camera::TestPattern pattern = valiant::camera::TestPattern::COLOR_BAR; 
+    valiant::CameraTask::GetSingleton()->SetTestPattern(pattern);
+    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
+    valiant::camera::FrameFormat fmt_rgb;
+
+    fmt_rgb.fmt = valiant::camera::Format::RGB;
+    fmt_rgb.width = valiant::CameraTask::kWidth;
+    fmt_rgb.height = valiant::CameraTask::kHeight;
+    fmt_rgb.preserve_ratio = false;
+    fmt_rgb.buffer = camera_rgb.get();
+ 
+
+    bool success = (valiant::CameraTask::GetSingleton()->GetFrame({fmt_rgb}));
+
+    if(success)
+        jsonrpc_return_success(request, "{}");
+    else
+        jsonrpc_return_error(request, -1, "Call to GetFrame returned false.", nullptr);
+
+    valiant::CameraTask::GetSingleton()->SetPower(false);
+}
+
+static int fs_open_custom(void *context, struct fs_file *file, const char *name) {
+    if (strncmp(name, "/colorbar.raw", strlen(name)) == 0) {
+        memset(file, 0, sizeof(struct fs_file));
+        file->data = reinterpret_cast<const char*>(camera_rgb.release());
+        file->len = valiant::CameraTask::kWidth * valiant::CameraTask::kHeight * 
+            valiant::CameraTask::FormatToBPP(valiant::camera::Format::RGB);
+        file->index = file->len;
+        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
+        return 1;
+    }
+    return 0;
+}
+
+static void fs_close_custom(void* context, struct fs_file *file) {
+    if (file->data) {
+        delete file->data;
+    }
+}
+
 extern "C" void app_main(void *param) {
     valiant::IPC::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
@@ -157,6 +208,14 @@ extern "C" void app_main(void *param) {
         printf("Failed to initialize RPCServer\r\n");
         vTaskSuspend(NULL);
     }
+
+    valiant::httpd::HTTPDHandlers handlers;
+    handlers.fs_open_custom = fs_open_custom;
+    handlers.fs_close_custom = fs_close_custom;
+
+    valiant::httpd::Init();
+    valiant::httpd::RegisterHandlerForPath("/", &handlers);
+
     rpc_server.RegisterIO(rpc_server_io_http);
     rpc_server.RegisterRPC("get_serial_number",
                            valiant::testlib::GetSerialNumber);
@@ -185,5 +244,7 @@ extern "C" void app_main(void *param) {
                            M4CoreMark);
     rpc_server.RegisterRPC(kM7CoreMark,
                            M7CoreMark);
+    rpc_server.RegisterRPC(kGetFrame,
+                           GetFrame);
     vTaskSuspend(NULL);
 }
