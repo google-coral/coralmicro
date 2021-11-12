@@ -401,9 +401,8 @@ target_link_libraries(libs_nxp_rt1176-sdk_lwip_mdns
     libs_nxp_rt1176-sdk_lwip
 )
 
-add_library_m7(libs_nxp_rt1176-sdk_wiced
+set(libs_nxp_rt1176-sdk_wiced_SOURCES
     bt_firmware_controller.c
-    WICED/WWD/internal/chips/43455/resources.c
     WICED/platform/MCU/LPC/WWD/wwd_platform.cc
     rtos/freertos/vendors/nxp/wifi/wiced/iot_wifi.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_bluetooth.c
@@ -430,13 +429,9 @@ add_library_m7(libs_nxp_rt1176-sdk_wiced
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC/WWD/wwd_SDIO.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/LPC/WWD/wwd_platform.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/MCU/wwd_resources.c
-    DATA
-    ${VALIANT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.bin
-    ${VALIANT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.clm_blob
-    ${VALIANT_SOURCE_DIR}/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd
 )
 
-target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC
+set(libs_nxp_rt1176-sdk_wiced_INCLUDE_DIRECTORIES
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/bt_app_inc
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Components/stack/include
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Projects/bte/main
@@ -461,12 +456,13 @@ target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/c_sdk/standard/common/include
 )
 
-target_compile_definitions(libs_nxp_rt1176-sdk_wiced PUBLIC
+set(libs_nxp_rt1176-sdk_wiced_COMPILE_DEFINITIONS
     # Wi-Fi
     WLAN_ARM_CR4
     USES_RESOURCES_IN_EXTERNAL_STORAGE
     HIGH_SPEED_SDIO_CLOCK
     WPRINT_PLATFORM_PERMISSION
+    WICED_PAYLOAD_MTU=8320
 
     # Bluetooth
     WICED_BLUETOOTH_PLATFORM
@@ -477,10 +473,60 @@ target_compile_definitions(libs_nxp_rt1176-sdk_wiced PUBLIC
     BOARD_BT_UART_CLK_FREQ=CLOCK_GetRootClockFreq\(kCLOCK_Root_Lpuart2\)
 )
 
-target_link_libraries(libs_nxp_rt1176-sdk_wiced
+set(libs_nxp_rt1176-sdk_wiced_TARGET_LINK_LIBRARIES
     libs_nxp_rt1176-sdk_freertos
     libs_nxp_rt1176-sdk_lwip
     libs_nxp_rt1176-sdk_sdmmc
+)
+
+add_library_m7(libs_nxp_rt1176-sdk_wiced
+    WICED/WWD/internal/chips/43455/resources.c
+    ${libs_nxp_rt1176-sdk_wiced_SOURCES}
+    DATA
+    ${VALIANT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.bin
+    ${VALIANT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.clm_blob
+    ${VALIANT_SOURCE_DIR}/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd
+)
+
+target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC
+    ${libs_nxp_rt1176-sdk_wiced_INCLUDE_DIRECTORIES}
+)
+
+target_compile_definitions(libs_nxp_rt1176-sdk_wiced PUBLIC
+    ${libs_nxp_rt1176-sdk_wiced_COMPILE_DEFINITIONS}
+)
+
+target_link_libraries(libs_nxp_rt1176-sdk_wiced
+    ${libs_nxp_rt1176-sdk_wiced_TARGET_LINK_LIBRARIES}
+)
+
+add_library_m7(libs_nxp_rt1176-sdk_wiced_mfgtest
+    WICED/WWD/internal/chips/43455/resources-mfgtest.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/wlu_server.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/wl/exe/wlu_server_shared.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/wl/exe/wlu_pipe.c
+    ${libs_nxp_rt1176-sdk_wiced_SOURCES}
+    DATA
+    ${VALIANT_SOURCE_DIR}/third_party/firmware/cypress/43455C0-mfgtest.bin
+    ${VALIANT_SOURCE_DIR}/third_party/firmware/cypress/43455C0-mfgtest.clm_blob
+)
+
+target_include_directories(libs_nxp_rt1176-sdk_wiced_mfgtest PUBLIC
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/common/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/shared/bcmwifi/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/wl/exe
+    ${libs_nxp_rt1176-sdk_wiced_INCLUDE_DIRECTORIES}
+)
+
+target_compile_definitions(libs_nxp_rt1176-sdk_wiced_mfgtest PUBLIC
+    RWL_SERIAL
+    TARGET_wiced
+    ${libs_nxp_rt1176-sdk_wiced_COMPILE_DEFINITIONS}
+)
+
+target_link_libraries(libs_nxp_rt1176-sdk_wiced_mfgtest
+    ${libs_nxp_rt1176-sdk_wiced_TARGET_LINK_LIBRARIES}
 )
 
 add_library_m7(libs_nxp_rt1176-sdk-mbedtls
