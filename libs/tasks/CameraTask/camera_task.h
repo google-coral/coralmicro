@@ -133,6 +133,7 @@ enum class Format {
     RGBA,
     RGB,
     Y8,
+    RAW,
 };
 
 struct FrameFormat {

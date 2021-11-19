@@ -67,7 +67,7 @@ bool CameraTask::GetFrame(std::list<camera::FrameFormat> fmts) {
     for (const camera::FrameFormat& fmt : fmts) {
         switch (fmt.fmt) {
             case Format::RGB: {
-                    if (fmt.width == kWidth && fmt.width == kHeight) {
+                    if (fmt.width == kWidth && fmt.height == kHeight) {
                         BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height);
                     } else {
                         std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
@@ -105,6 +105,14 @@ bool CameraTask::GetFrame(std::list<camera::FrameFormat> fmts) {
                     output.height = fmt.height;
                     ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
                 }
+                break;
+            case Format::RAW:
+                if (fmt.width != kWidth || fmt.height != kHeight) {
+                    ret = false;
+                    break;
+                }
+                memcpy(fmt.buffer, raw, kWidth * kHeight * FormatToBPP(Format::RAW));
+                ret = true;
                 break;
             default:
                 ret = false;
@@ -179,6 +187,7 @@ int CameraTask::FormatToBPP(Format fmt) {
             return 4;
         case Format::RGB:
             return 3;
+        case Format::RAW:
         case Format::Y8:
             return 1;
     }

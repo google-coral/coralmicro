@@ -17,6 +17,7 @@ static uint8_t camera_grayscale[valiant::CameraTask::kWidth * valiant::CameraTas
 static uint8_t camera_grayscale_small[96 * 96] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_rgb[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_rgb_posenet[kPosenetWidth * kPosenetHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+static uint8_t camera_raw[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
 static int fs_open_custom(void *context, struct fs_file *file, const char *name) {
     if (strncmp(name, "/camera.rgb", strlen(name)) == 0) {
@@ -51,6 +52,14 @@ static int fs_open_custom(void *context, struct fs_file *file, const char *name)
         file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
         return 1;
     }
+    if (strncmp(name, "/camera.raw", strlen(name)) == 0) {
+        memset(file, 0, sizeof(struct fs_file));
+        file->data = reinterpret_cast<const char*>(camera_raw);
+        file->len = sizeof(camera_raw);
+        file->index = file->len;
+        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
+        return 1;
+    }
     return 0;
 }
 
@@ -59,7 +68,7 @@ static void fs_close_custom(void* context, struct fs_file *file) {
 }
 
 void GetFrame() {
-    valiant::camera::FrameFormat fmt_rgb, fmt_rgb_posenet, fmt_grayscale, fmt_grayscale_small;
+    valiant::camera::FrameFormat fmt_rgb, fmt_rgb_posenet, fmt_grayscale, fmt_grayscale_small, fmt_raw;
     fmt_rgb.fmt = valiant::camera::Format::RGB;
     fmt_rgb.width = valiant::CameraTask::kWidth;
     fmt_rgb.height = valiant::CameraTask::kHeight;
@@ -84,7 +93,13 @@ void GetFrame() {
     fmt_grayscale_small.preserve_ratio = false;
     fmt_grayscale_small.buffer = camera_grayscale_small;
 
-    valiant::CameraTask::GetFrame({fmt_rgb, fmt_rgb_posenet, fmt_grayscale, fmt_grayscale_small});
+    fmt_raw.fmt = valiant::camera::Format::RAW;
+    fmt_raw.width = valiant::CameraTask::kWidth;
+    fmt_raw.height = valiant::CameraTask::kHeight;
+    fmt_raw.preserve_ratio = true;
+    fmt_raw.buffer = camera_raw;
+
+    valiant::CameraTask::GetFrame({fmt_rgb, fmt_rgb_posenet, fmt_grayscale, fmt_grayscale_small, fmt_raw});
 }
 
 extern "C" void app_main(void *param) {
