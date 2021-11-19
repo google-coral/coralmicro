@@ -162,13 +162,10 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart2, &rootCfg);
 
-#ifndef SKIP_SEMC_INIT
-    CLOCK_InitPfd(kCLOCK_PllSys2, kCLOCK_Pfd1, 16);
-    /* Configure Semc using SysPll2Pfd1 divided by 3 */
-    rootCfg.mux = kCLOCK_SEMC_ClockRoot_MuxSysPll2Pfd1;
-    rootCfg.div = 3;
+    /* Configure Semc using SysPll2 divided by 4 (targeting 133MHz) */
+    rootCfg.mux = kCLOCK_SEMC_ClockRoot_MuxSysPll2Out;
+    rootCfg.div = 4;
     CLOCK_SetRootClock(kCLOCK_Root_Semc, &rootCfg);
-#endif
 
     /* Configure Bus using SysPll3 divided by 2 */
     rootCfg.mux = kCLOCK_BUS_ClockRoot_MuxSysPll3Out;
