@@ -203,9 +203,9 @@ static void dhcp_thread( void * thread_input )
     netconn_bind(conn, IP_ADDR_ANY, IPPORT_DHCPS);
     conn->recv_timeout = DHCP_SOCKET_TIMEOUT;
 
-#if LWIP_IGMP /* Only for testing of multicast join*/
+#if 0 /* Only for testing of multicast join*/
     {
-        #include "lwip\netif.h"
+        #include "lwip/netif.h"
 
         ip4_addr_t multiaddr;
         IP4_ADDR(&multiaddr, 224, 5, 6, 7);

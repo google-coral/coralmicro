@@ -342,9 +342,11 @@ add_library_m7(libs_nxp_rt1176-sdk_lwip
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/init.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ip.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/acd.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/autoip.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/dhcp.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/etharp.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/icmp.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/igmp.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4_addr.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/core/ipv4/ip4_frag.c
@@ -386,6 +388,16 @@ target_compile_definitions(libs_nxp_rt1176-sdk_lwip_httpd PUBLIC
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk_lwip_httpd
+    libs_nxp_rt1176-sdk_lwip
+)
+
+add_library_m7(libs_nxp_rt1176-sdk_lwip_mdns
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/mdns/mdns.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/mdns/mdns_domain.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/mdns/mdns_out.c
+)
+
+target_link_libraries(libs_nxp_rt1176-sdk_lwip_mdns
     libs_nxp_rt1176-sdk_lwip
 )
 
