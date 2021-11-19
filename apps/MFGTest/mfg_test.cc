@@ -52,7 +52,7 @@ static void InitializeLoopbackMappings() {
         {41, 44},
         {42, 40},
         {43, 45},
-        {44, 1},
+        {44, 41},
         {45, 43},
         {46, 48},
         {48, 46},
