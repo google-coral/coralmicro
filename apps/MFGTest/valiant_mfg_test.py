@@ -356,7 +356,7 @@ class ValiantMFGTest(object):
         result = self.send_rpc(payload)
         return result
 
-    def ble_scan(self, address):
+    def ble_find(self, address):
         """Scans for a BLE device with the given MAC address.
 
         Args:
@@ -368,10 +368,26 @@ class ValiantMFGTest(object):
             {'id':  4, 'result': {'signal_strength': -58}}
         """
         payload = self.get_new_payload()
-        payload['method'] = 'ble_scan'
+        payload['method'] = 'ble_find'
         payload['params'].append({
             'address': address,
         })
+        result = self.send_rpc(payload)
+        return result
+
+    def ble_scan(self):
+        """Scans for a BLE devices.
+
+        Args:
+          address: The MAC address to search for (as a string).
+
+        Returns:
+          A JSON-RPC result packet with device found and it's signal strength, or JSON-RPC error.
+          Example:
+            {'id':  4, 'result': {'address': '73:85:B5:4E:E0:24', 'signal_strength': -99}}
+        """
+        payload = self.get_new_payload()
+        payload['method'] = 'ble_scan'
         result = self.send_rpc(payload)
         return result
 

@@ -107,7 +107,7 @@ static void WifiSetAntenna(struct jsonrpc_request *request) {
 static SemaphoreHandle_t ble_ready_mtx;
 static bool ble_ready = false;
 static SemaphoreHandle_t ble_scan_sema;
-static void BLEScan(struct jsonrpc_request *request) {
+static void BLEFind(struct jsonrpc_request *request) {
 #if defined(DEBUG_CONSOLE_TRANSFER_NON_BLOCKING)
     jsonrpc_return_error(request, -1, "this build does not support BLE", nullptr);
     return;
@@ -174,6 +174,48 @@ static void BLEScan(struct jsonrpc_request *request) {
     }
 }
 
+static void BLEScan(struct jsonrpc_request *request) {
+#if defined(DEBUG_CONSOLE_TRANSFER_NON_BLOCKING)
+    jsonrpc_return_error(request, -1, "this build does not support BLE", nullptr);
+    return;
+#endif
+    {
+        valiant::MutexLock lock(ble_ready_mtx);
+        if (!ble_ready) {
+            jsonrpc_return_error(request, -1, "bt not ready yet", nullptr);
+            return;
+        }
+    }
+
+    static int8_t rssi;
+    static char address[18] = "00:00:00:00:00:00";
+
+    // This static here is because there isn't a way to pass a parameter into the scan.
+    // Reset the value each time through the method.
+    static bool found_address;
+    found_address = false;
+    wiced_result_t ret = wiced_bt_ble_observe(WICED_TRUE, 3, [](wiced_bt_ble_scan_results_t *p_scan_result, uint8_t *p_adv_data) {
+        if (p_scan_result) {
+            found_address = true;
+            auto s = p_scan_result->remote_bd_addr;
+            sprintf(address, "%02X:%02X:%02X:%02X:%02X:%02X", s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]);
+            rssi = p_scan_result->rssi;
+        } else {
+            xSemaphoreGive(ble_scan_sema);
+        }
+    });
+    if (ret != WICED_BT_PENDING) {
+        jsonrpc_return_error(request, -1, "failed to initiate bt scan", nullptr);
+        return;
+    }
+    xSemaphoreTake(ble_scan_sema, portMAX_DELAY);
+    if (found_address) {
+        jsonrpc_return_success(request, "{%Q:%Q, %Q:%d}", "address", address, "signal_strength", rssi);
+    } else {
+        jsonrpc_return_error(request, -1, "failed to find 'address'", nullptr);
+    }
+}
+
 
 #if !defined(DEBUG_CONSOLE_TRANSFER_NON_BLOCKING)
 static wiced_result_t ble_management_callback(wiced_bt_management_evt_t event,
@@ -233,6 +275,7 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("wifi_get_ap", WifiGetAP);
     rpc_server.RegisterRPC("wifi_set_antenna", WifiSetAntenna);
     rpc_server.RegisterRPC("ble_scan", BLEScan);
+    rpc_server.RegisterRPC("ble_find", BLEFind);
 
     vTaskSuspend(NULL);
 }
