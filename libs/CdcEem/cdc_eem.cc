@@ -51,7 +51,7 @@ err_t CdcEem::NetifInit(struct netif *netif) {
     netif->linkoutput = CdcEem::StaticTxFunc;
     netif->mtu = 300;
     netif->hwaddr_len = 6;
-    netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+    netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_IGMP;
 
     netif->hwaddr[0] = 0x00;
     netif->hwaddr[1] = 0x1A;
