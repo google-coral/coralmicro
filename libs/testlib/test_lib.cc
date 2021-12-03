@@ -4,6 +4,7 @@
 #include "libs/base/timer.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
+#include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/testconv1/testconv1.h"
@@ -398,6 +399,57 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
     valiant::CameraTask::GetSingleton()->SetPower(false);
 }
 
+// Implements the "capture_audio" RPC.
+// Attempts to capture 1 second of audio.
+// Returns success, with a parameter "data" containing the captured audio in base64 (or failure).
+// The audio captured is 32-bit signed PCM @ 16000Hz.
+void CaptureAudio(struct jsonrpc_request *request) {
+    struct AudioParams {
+        SemaphoreHandle_t sema;
+        int count;
+        uint32_t* audio_data;
+    };
+    AudioParams params;
+    std::vector<uint32_t> audio_data(16000, 0xA5A5A5A5);
+    size_t audio_data_size = sizeof(uint32_t) * audio_data.size();
+    params.sema = xSemaphoreCreateBinary();
+    params.count = 0;
+    params.audio_data = audio_data.data();
+    valiant::AudioTask::GetSingleton()->SetCallback([](void *param) {
+        AudioParams* params = reinterpret_cast<AudioParams*>(param);
+        // If this is the second time we hit the callback, return nothing for the buffer
+        // to terminate recording.
+        // Otherwise, we feed the original buffer back in. This should give us a clean recording
+        // of one second, without any sort of pops or glitches that happen when the mic starts.
+        if (params->count == 1) {
+            BaseType_t reschedule = pdFALSE;
+            xSemaphoreGiveFromISR(params->sema, &reschedule);
+            portYIELD_FROM_ISR(reschedule);
+            return reinterpret_cast<uint32_t*>(0);
+        } else {
+            params->count++;
+            return params->audio_data;
+        }
+    }, &params);
+
+    valiant::AudioTask::GetSingleton()->SetPower(true);
+    valiant::AudioTask::GetSingleton()->SetBuffer(audio_data.data(), audio_data_size);
+    valiant::AudioTask::GetSingleton()->Enable();
+    BaseType_t ret = xSemaphoreTake(params.sema, pdMS_TO_TICKS(3000));
+    valiant::AudioTask::GetSingleton()->Disable();
+    valiant::AudioTask::GetSingleton()->SetPower(false);
+    vSemaphoreDelete(params.sema);
+
+    if (ret != pdTRUE) {
+        jsonrpc_return_error(request, -1, "semaphore timed out", nullptr);
+    } else {
+        size_t encoded_length = 0;
+        mbedtls_base64_encode(nullptr, 0, &encoded_length, reinterpret_cast<uint8_t*>(audio_data.data()), audio_data_size);
+        std::vector<uint8_t> encoded_data(encoded_length);
+        mbedtls_base64_encode(encoded_data.data(), encoded_length, &encoded_length, reinterpret_cast<uint8_t*>(audio_data.data()), audio_data_size);
+        jsonrpc_return_success(request, "{%Q:%.*Q}", "data", encoded_length, encoded_data.data());
+    }
+}
 
 }  // namespace testlib
 }  // namespace valiant

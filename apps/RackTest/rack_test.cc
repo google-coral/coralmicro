@@ -246,5 +246,6 @@ extern "C" void app_main(void *param) {
                            M7CoreMark);
     rpc_server.RegisterRPC(kGetFrame,
                            GetFrame);
+    rpc_server.RegisterRPC(valiant::testlib::kCaptureAudioName, valiant::testlib::CaptureAudio);
     vTaskSuspend(NULL);
 }
