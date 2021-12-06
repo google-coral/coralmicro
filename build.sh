@@ -1,6 +1,6 @@
 #!/bin/bash
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly ROOTDIR="${SCRIPT_DIR}"
+readonly ROOTDIR=$(readlink -f "${SCRIPT_DIR}")
 
 function die {
     echo "$@" >/dev/stderr
@@ -58,6 +58,7 @@ EOF
         fi
     fi
 
+    set -xe
 
     mkdir -p ${build_dir}
     cmake -B ${build_dir} ${mfgtest_cmake_flags}
