@@ -118,6 +118,7 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
     __STARTUP_CLEAR_BSS
     __STARTUP_INITIALIZE_NONCACHEDATA
     __USE_SHMEM
+    DEBUG_CONSOLE_TRANSFER_NON_BLOCKING
 )
 
 set(libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS
@@ -402,11 +403,11 @@ target_link_libraries(libs_nxp_rt1176-sdk_lwip_mdns
 )
 
 set(libs_nxp_rt1176-sdk_wiced_SOURCES
+    bluetooth.cc
     bt_firmware_controller.c
     WICED/platform/MCU/LPC/WWD/wwd_platform.cc
     rtos/freertos/vendors/nxp/wifi/wiced/iot_wifi.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_bluetooth.c
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_imxrt.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/wiced_rtos.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD/wwd_rtos.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/bus_protocols/SDIO/wwd_bus_protocol.c

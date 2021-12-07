@@ -108,10 +108,6 @@ static SemaphoreHandle_t ble_ready_mtx;
 static bool ble_ready = false;
 static SemaphoreHandle_t ble_scan_sema;
 static void BLEFind(struct jsonrpc_request *request) {
-#if defined(DEBUG_CONSOLE_TRANSFER_NON_BLOCKING)
-    jsonrpc_return_error(request, -1, "this build does not support BLE", nullptr);
-    return;
-#endif
     {
         valiant::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
@@ -175,10 +171,6 @@ static void BLEFind(struct jsonrpc_request *request) {
 }
 
 static void BLEScan(struct jsonrpc_request *request) {
-#if defined(DEBUG_CONSOLE_TRANSFER_NON_BLOCKING)
-    jsonrpc_return_error(request, -1, "this build does not support BLE", nullptr);
-    return;
-#endif
     {
         valiant::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
@@ -217,7 +209,6 @@ static void BLEScan(struct jsonrpc_request *request) {
 }
 
 
-#if !defined(DEBUG_CONSOLE_TRANSFER_NON_BLOCKING)
 static wiced_result_t ble_management_callback(wiced_bt_management_evt_t event,
                                                        wiced_bt_management_evt_data_t *p_event_data) {
     switch (event) {
@@ -239,7 +230,6 @@ static wiced_result_t ble_management_callback(wiced_bt_management_evt_t event,
     }
     return WICED_BT_SUCCESS;
 }
-#endif
 
 extern unsigned char brcm_patchram_buf[];
 extern unsigned int brcm_patch_ram_length;
@@ -256,9 +246,7 @@ extern "C" void app_main(void *param) {
 
     xWifiStatus = WIFI_On();
     valiant::gpio::SetGpio(valiant::gpio::kBtDevWake, false);
-#if !defined(DEBUG_CONSOLE_TRANSFER_NON_BLOCKING)
     wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings, wiced_bt_cfg_buf_pools);
-#endif
 
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
     valiant::rpc::RPCServer rpc_server;

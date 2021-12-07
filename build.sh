@@ -11,13 +11,11 @@ function main {
     local usage=$(cat <<EOF
 Usage: docker_build.sh [-b <build_dir>]
   -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
-  -m               build for mfgtest
   -a               build arduino library archive
 EOF
 )
     local build_dir
     local build_arduino
-    local mfgtest
     local args=$(getopt hmab: $*)
     set -- $args
 
@@ -26,10 +24,6 @@ EOF
             -b) # build_dir
                 build_dir="$2"
                 shift 2
-                ;;
-            -m)
-                mfgtest=true
-                shift
                 ;;
             -a)
                 build_arduino=true
@@ -45,23 +39,14 @@ EOF
         esac
     done
 
-    local mfgtest_cmake_flags
-    if [[ ! -z "${mfgtest}" ]]; then
-        mfgtest_cmake_flags="-DDEBUG_CONSOLE_TRANSFER_BLOCKING=1"
-    fi
-
     if [[ -z "${build_dir}" ]]; then
-        if [[ -z "${mfgtest}" ]]; then
-            build_dir="${ROOTDIR}/build"
-        else
-            build_dir="${ROOTDIR}/build-mfgtest"
-        fi
+        build_dir="${ROOTDIR}/build"
     fi
 
     set -xe
 
     mkdir -p ${build_dir}
-    cmake -B ${build_dir} ${mfgtest_cmake_flags}
+    cmake -B ${build_dir}
     make -C ${build_dir} -j $(nproc)
 
     if [[ ! -z ${build_arduino} ]]; then

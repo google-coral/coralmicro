@@ -12,13 +12,11 @@ function main {
 Usage: docker_build.sh [-b <build_dir>]
   -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
   -a               build arduino package
-  -m               build for mfgtest
 EOF
 )
 
     local build_dir
     local arduino
-    local mfgtest
     local args=$(getopt hmab: $*)
     set -- $args
 
@@ -32,10 +30,6 @@ EOF
                 arduino=true
                 shift
                 ;;
-            -m)
-                mfgtest=true
-                shift
-                ;;
             --)
                 shift
                 break
@@ -46,22 +40,13 @@ EOF
         esac
     done
 
-    local mfgtest_build_flags
-    if [[ ! -z "${mfgtest}" ]]; then
-        mfgtest_build_flags="-m"
-    fi
-
     local arduino_build_flags
     if [[ ! -z "${arduino}" ]]; then
         arduino_build_flags="-a"
     fi
 
     if [[ -z "${build_dir}" ]]; then
-        if [[ -z "${mfgtest}" ]]; then
-            build_dir="${ROOTDIR}/build"
-        else
-            build_dir="${ROOTDIR}/build-mfgtest"
-        fi
+        build_dir="${ROOTDIR}/build"
     fi
 
     docker build -t valiant ${ROOTDIR}/docker
@@ -76,7 +61,7 @@ EOF
         chmod a+w /
         groupadd --gid $(id -g) $(id -g -n)
         useradd -m -e '' -s /bin/bash --gid $(id -g) --uid $(id -u) $(id -u -n)
-        su $(id -u -n) -c 'bash ${ROOTDIR}/build.sh -b ${ROOTDIR}/build ${mfgtest_build_flags} ${arduino_build_flags}'
+        su $(id -u -n) -c 'bash ${ROOTDIR}/build.sh -b ${ROOTDIR}/build ${arduino_build_flags}'
     "
 }
 
