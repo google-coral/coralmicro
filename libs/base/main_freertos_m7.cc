@@ -22,6 +22,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_sema4.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 #include <functional>
 using namespace std::placeholders;
@@ -49,6 +50,7 @@ extern "C" int main(int argc, char **argv) {
 
 extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_console_rx) {
     BOARD_InitHardware(true);
+    SEMA4_Init(SEMA4);
     valiant::timer::Init();
     valiant::gpio::Init();
     valiant::IPC::GetSingleton()->Init();
