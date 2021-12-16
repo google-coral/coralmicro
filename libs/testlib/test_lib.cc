@@ -1,7 +1,8 @@
-#include "libs/base/utils.h"
+#include "libs/base/gpio.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/tempsense.h"
 #include "libs/base/timer.h"
+#include "libs/base/utils.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/AudioTask/audio_task.h"
@@ -449,6 +450,41 @@ void CaptureAudio(struct jsonrpc_request *request) {
         mbedtls_base64_encode(encoded_data.data(), encoded_length, &encoded_length, reinterpret_cast<uint8_t*>(audio_data.data()), audio_data_size);
         jsonrpc_return_success(request, "{%Q:%.*Q}", "data", encoded_length, encoded_data.data());
     }
+}
+
+void WifiSetAntenna(struct jsonrpc_request *request) {
+    double antenna_double;
+    int antenna;
+    const char *antenna_param_pattern = "$[0].antenna";
+
+    int find_result;
+    find_result = mjson_find(request->params, request->params_len, antenna_param_pattern, nullptr, nullptr);
+    if (find_result == MJSON_TOK_NUMBER) {
+        mjson_get_number(request->params, request->params_len, antenna_param_pattern, &antenna_double);
+        antenna = static_cast<int>(antenna_double);
+    } else {
+        jsonrpc_return_error(request, -1, "'antenna' missing", nullptr);
+        return;
+    }
+
+    enum Antenna {
+        kInternal = 0,
+        kExternal = 1,
+    };
+
+
+    switch (antenna) {
+        case kInternal:
+            gpio::SetGpio(gpio::Gpio::kAntennaSelect, false);
+            break;
+        case kExternal:
+            gpio::SetGpio(gpio::Gpio::kAntennaSelect, true);
+            break;
+        default:
+            jsonrpc_return_error(request, -1, "invalid antenna selection", nullptr);
+            return;
+    }
+    jsonrpc_return_success(request, "{}");
 }
 
 }  // namespace testlib

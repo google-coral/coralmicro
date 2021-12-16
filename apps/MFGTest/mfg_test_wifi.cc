@@ -2,6 +2,7 @@
 #include "libs/base/gpio.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/base/mutex.h"
+#include "libs/testlib/test_lib.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -67,41 +68,6 @@ static void WifiGetAP(struct jsonrpc_request *request) {
     }
 
     jsonrpc_return_success(request, "{%Q:%d}", "signal_strength", best_rssi);
-}
-
-static void WifiSetAntenna(struct jsonrpc_request *request) {
-    double antenna_double;
-    int antenna;
-    const char *antenna_param_pattern = "$[0].antenna";
-
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, antenna_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, antenna_param_pattern, &antenna_double);
-        antenna = static_cast<int>(antenna_double);
-    } else {
-        jsonrpc_return_error(request, -1, "'antenna' missing", nullptr);
-        return;
-    }
-
-    enum Antenna {
-        kInternal = 0,
-        kExternal = 1,
-    };
-
-
-    switch (antenna) {
-        case kInternal:
-            valiant::gpio::SetGpio(valiant::gpio::Gpio::kAntennaSelect, false);
-            break;
-        case kExternal:
-            valiant::gpio::SetGpio(valiant::gpio::Gpio::kAntennaSelect, true);
-            break;
-        default:
-            jsonrpc_return_error(request, -1, "invalid antenna selection", nullptr);
-            return;
-    }
-    jsonrpc_return_success(request, "{}");
 }
 
 static SemaphoreHandle_t ble_ready_mtx;
@@ -261,7 +227,7 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterIO(rpc_server_io_http);
 
     rpc_server.RegisterRPC("wifi_get_ap", WifiGetAP);
-    rpc_server.RegisterRPC("wifi_set_antenna", WifiSetAntenna);
+    rpc_server.RegisterRPC(valiant::testlib::kWifiSetAntennaName, valiant::testlib::WifiSetAntenna);
     rpc_server.RegisterRPC("ble_scan", BLEScan);
     rpc_server.RegisterRPC("ble_find", BLEFind);
 
