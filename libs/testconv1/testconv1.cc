@@ -31,6 +31,11 @@ bool setup() {
     TfLiteStatus allocate_status;
     static tflite::MicroErrorReporter micro_error_reporter;
     error_reporter = &micro_error_reporter;
+    static bool initialized = false;
+
+    if (initialized) {
+        return true;
+    }
 
     testconv1_edgetpu_tflite = valiant::filesystem::ReadToMemory("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite_len);
     testconv1_expected_output_bin = valiant::filesystem::ReadToMemory("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin_len);
@@ -82,6 +87,7 @@ bool setup() {
     }
     memcpy(input->data.uint8, testconv1_test_input_bin, testconv1_test_input_bin_len);
 
+    initialized = true;
     return true;
 }
 
