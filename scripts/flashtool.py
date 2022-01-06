@@ -93,15 +93,20 @@ def EnumerateElfloader():
 def EnumerateValiant():
     return usb.core.find(find_all=True, idVendor=VALIANT_VID, idProduct=VALIANT_PID)
 
-def FindElfloader(build_dir):
+def FindElfloader(build_dir, cached_files):
     default_path = os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
     if os.path.exists(default_path):
         return default_path
-    for root, dirs, files in os.walk(build_dir):
-        if os.path.split(root)[1] == "ELFLoader":
-            for file in files:
-                if file == "image.srec":
-                    return os.path.join(root, file)
+    if cached_files:
+        for f in cached_files:
+            if 'ELFLoader/image.srec' in f:
+                return os.path.join(build_dir, f)
+    else:
+        for root, dirs, files in os.walk(build_dir):
+            if os.path.split(root)[1] == "ELFLoader":
+                for file in files:
+                    if file == "image.srec":
+                        return os.path.join(root, file)
     return None
 
 
@@ -114,31 +119,40 @@ Args:
   libs_path: path to .libs file of target executable
   scanned: set of already scanned libraries. Pass set() for initial call,
            recursive calls use this data to break cycles.
+  cached_files: list of file locations (to avoid using os.walk).
 
 Returns:
   A set containing .libs file of all library dependencies
 """
-def GetLibs(build_dir, libs_path, scanned):
+def GetLibs(build_dir, libs_path, scanned, cached_files):
     libs_found = set()
     with open(libs_path, 'r') as f:
         libs = f.readline().split(';')
         for lib in libs:
-            for root, dirs, files in os.walk(build_dir):
-                for file in files:
-                    libs_path = os.path.join(root, file)
-                    if libs_path in scanned:
-                        continue
-                    if (file == lib + '.libs'):
-                        libs_found.add(libs_path)
+            if cached_files:
+                for f in cached_files:
+                        if lib + '.libs' in f:
+                            libs_path = os.path.join(build_dir,f)
+                            if libs_path not in scanned:
+                                libs_found.add(libs_path)
+                            break
+            else:
+                for root, dirs, files in os.walk(build_dir):
+                    for file in files:
+                        libs_path = os.path.join(root, file)
+                        if libs_path in scanned:
+                            continue
+                        if (file == lib + '.libs'):
+                            libs_found.add(libs_path)
     sublibs = set()
     for lib in libs_found:
-        sublibs |= GetLibs(build_dir, lib, scanned | libs_found)
+        sublibs |= GetLibs(build_dir, lib, scanned | libs_found, cached_files)
     return libs_found | sublibs
 
-def CreateFilesystem(workdir, root_dir, build_dir, elf_path):
+def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files):
     libs_path = os.path.splitext(elf_path)[0] + '.libs'
     m4_exe_path = os.path.splitext(elf_path)[0] + '.m4_executable'
-    libs = GetLibs(build_dir, libs_path, set())
+    libs = GetLibs(build_dir, libs_path, set(), cached_files)
     libs.add(libs_path)
     if os.path.exists(m4_exe_path):
         with open(m4_exe_path) as f:
@@ -146,7 +160,7 @@ def CreateFilesystem(workdir, root_dir, build_dir, elf_path):
         m4_exe_libs = os.path.join(os.path.dirname(m4_exe_path), m4_exe) + '.libs'
         libs |= GetLibs(build_dir,
                            m4_exe_libs,
-                           set())
+                           set(), cached_files)
         libs.add(m4_exe_libs)
     data_files = set()
     for lib in libs:
@@ -483,6 +497,7 @@ def main():
     parser.add_argument('--toolchain', type=str, required=False)
     parser.add_argument('--debug', dest='debug', action='store_true')
     parser.add_argument('--jlink_path', type=str, default='/opt/SEGGER/JLink')
+    parser.add_argument('--cached_files_path', type=str, required=False)
     parser.set_defaults(list=False)
     parser.set_defaults(ram=False)
     parser.set_defaults(strip=False)
@@ -497,10 +512,17 @@ def main():
     usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
+    cached_files_path = os.path.abspath(args.cached_files_path) if args.cached_files_path else None
+    if cached_files_path and os.path.exists(cached_files_path):
+        with open(cached_files_path, 'r') as file_list:
+            cached_files = file_list.read().splitlines()
+    else:
+        cached_files = None
     app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir and args.app else None
     elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app) + '.stripped')
     unstripped_elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app))
-    elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir)
+    print('Finding all necessary files')
+    elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir, cached_files)
 
     if os.name == 'nt':
       blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'win', 'blhost.exe')
@@ -607,7 +629,8 @@ def main():
         sbfile_path = None
         data_files = None
         if not args.ram:
-            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path)
+            print('Creating Filesystem')
+            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files)
             if data_files is None:
                 print('Creating filesystem failed, exit')
                 return
