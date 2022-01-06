@@ -82,6 +82,7 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kEthPhyRst] = GPIO8,
     [Gpio::kBufferEnable] = GPIO9,
     [Gpio::kCameraPrivacyOverride] = GPIO8,
+    [Gpio::kCryptoRst] = GPIO12,
 };
 
 static uint32_t PinNameToPin[Gpio::kCount] = {
@@ -106,6 +107,7 @@ static uint32_t PinNameToPin[Gpio::kCount] = {
     [Gpio::kEthPhyRst] = 13,
     [Gpio::kBufferEnable] = 4,
     [Gpio::kCameraPrivacyOverride] = 22,
+    [Gpio::kCryptoRst] = 8,
 };
 
 static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
@@ -206,6 +208,11 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .outputLogic = 1,
         .interruptMode = kGPIO_NoIntmode,
     },
+    [Gpio::kCryptoRst] = {
+        .direction = kGPIO_DigitalOutput,
+        .outputLogic = 1,
+        .interruptMode = kGPIO_NoIntmode,
+    },
 };
 
 static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
@@ -230,6 +237,7 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kEthPhyRst] = HardFault_IRQn,
     [Gpio::kBufferEnable] = HardFault_IRQn,
     [Gpio::kCameraPrivacyOverride] = HardFault_IRQn,
+    [Gpio::kCryptoRst] = HardFault_IRQn,
 };
 
 static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
@@ -249,6 +257,12 @@ static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
     [Gpio::kUserButton] = {IOMUXC_GPIO_SNVS_00_DIG_GPIO13_IO03},
     [Gpio::kCameraTrigger] = {IOMUXC_GPIO_EMC_B2_17_GPIO8_IO27},
     [Gpio::kAntennaSelect] = {IOMUXC_GPIO_DISP_B2_06_GPIO11_IO07},
+    [Gpio::kBtHostWake] = {IOMUXC_GPIO_DISP_B2_15_GPIO11_IO16},
+    [Gpio::kBtDevWake] = {IOMUXC_GPIO_DISP_B2_14_GPIO11_IO15},
+    [Gpio::kEthPhyRst] = {IOMUXC_GPIO_EMC_B2_03_GPIO8_IO13},
+    [Gpio::kBufferEnable] = {IOMUXC_GPIO_AD_05_GPIO9_IO04},
+    [Gpio::kCameraPrivacyOverride] = {IOMUXC_GPIO_EMC_B2_12_GPIO8_IO22},
+    [Gpio::kCryptoRst] = {IOMUXC_GPIO_LPSR_08_GPIO12_IO08},
 };
 
 static uint32_t PinNameToPullMask[Gpio::kCount] = {

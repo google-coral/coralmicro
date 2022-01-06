@@ -27,8 +27,12 @@
 #include <functional>
 using namespace std::placeholders;
 
-lpi2c_rtos_handle_t i2c5_handle;
+static lpi2c_rtos_handle_t i2c5_handle;
 static valiant::CdcEem cdc_eem;
+
+extern "C" lpi2c_rtos_handle_t* I2C5Handle() {
+    return &i2c5_handle;
+}
 
 void InitializeCDCEEM() {
     cdc_eem.Init(

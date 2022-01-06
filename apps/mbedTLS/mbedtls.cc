@@ -1,3 +1,4 @@
+#include "libs/a71ch/a71ch.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -11,6 +12,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/des.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/dhm.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/ecp.h"
+#include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/entropy.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/gcm.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/hmac_drbg.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/md5.h"
@@ -43,6 +45,7 @@ const selftest_t selftests[] =
     {"des", mbedtls_des_self_test},
     {"dhm", mbedtls_dhm_self_test},
     {"ecp", mbedtls_ecp_self_test},
+    {"entropy", mbedtls_entropy_self_test},
     {"gcm", mbedtls_gcm_self_test},
     {"hmac_drbg", mbedtls_hmac_drbg_self_test},
     {"md5", mbedtls_md5_self_test},
@@ -59,6 +62,11 @@ const selftest_t selftests[] =
 };
 
 extern "C" void app_main(void *param) {
+    if (!valiant::a71ch::Init()) {
+        printf("A71CH init failed\r\n");
+        vTaskSuspend(NULL);
+    }
+
     for (const selftest_t* test = selftests; test->name != NULL; test++) {
         test->function(1);
     }

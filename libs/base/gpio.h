@@ -28,6 +28,7 @@ enum Gpio {
     kEthPhyRst,
     kBufferEnable,
     kCameraPrivacyOverride,
+    kCryptoRst,
     kCount
 };
 
