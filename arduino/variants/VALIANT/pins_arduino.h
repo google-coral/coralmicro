@@ -3,14 +3,14 @@
 
 /*
 Valiant Arduino pin assignment diagram:
-Pin (Analog) | Silk label | Silk label | Pin (Analog)
+Pin (Arduino pin) | Silk label | Silk label | Pin (Arduino pin)
 
 -              VSYS         SCL1         16
-0              SCL6         SDA1         15
-1 (A3)         PWM0         SDA6         14
+0 (D0)         SCL6         SDA1         15
+1 (A3)         PWM0         SDA6         14 (D3)
 2 (A4)         PWM1         DAC          13 (A2)
-3              RTS          SDI          12
-4              CTS          SDO          11
+3 (D1)         RTS          SDI          12
+4 (D2)         CTS          SDO          11
 5              RXD          SCK          10
 6              TXD          CS           9
 7 (A0)         A-B          VBAK         -
@@ -19,7 +19,7 @@ Pin (Analog) | Silk label | Silk label | Pin (Analog)
 -              GND          GND          -
 
 17 - LED
-18 - User button
+18 - User button (D4)
 */
 
 #define PIN_BTN (18U)
@@ -29,6 +29,10 @@ Pin (Analog) | Silk label | Silk label | Pin (Analog)
 #define LEDG (PIN_LED)
 
 #define D0 (0U)
+#define D1 (3U)
+#define D2 (4U)
+#define D3 (14U)
+#define D4 (18U)
 
 #define A0 (7U)
 #define A1 (8U)
@@ -36,6 +40,8 @@ Pin (Analog) | Silk label | Silk label | Pin (Analog)
 #define A3 (1U)
 #define A4 (2U)
 
-#define DAC0 (13U)
+#define DAC0 (PIN_BTN)
+
+#define digitalPinToInterrupt(p) (p)
 
 #endif  // __PINS_ARDUINO_H__

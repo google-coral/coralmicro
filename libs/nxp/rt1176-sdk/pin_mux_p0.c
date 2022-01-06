@@ -187,10 +187,13 @@ void BOARD_InitPins(void) {
                                                  Pull / Keep Select Field: Pull Disable, Highz
                                                  Pull Up / Down Config. Field: Weak pull down
                                                  Open Drain Field: Disabled */
+
+#ifndef VALIANT_ARDUINO
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B2_00_LPUART6_CTS_B, 0U);
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B2_01_LPUART6_RTS_B, 0U);
+#endif
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B1_40_LPUART6_TXD,
       0U);
@@ -198,12 +201,14 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_EMC_B1_41_LPUART6_RXD,
       0U);
 
+#ifndef VALIANT_ARDUINO
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_EMC_B2_00_LPUART6_CTS_B,
       0x0EU);
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_EMC_B2_01_LPUART6_RTS_B,
       0x0EU);
+#endif
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_EMC_B1_40_LPUART6_TXD,
       0x0EU);
@@ -614,7 +619,10 @@ void BOARD_InitPins(void) {
 
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
 void InitArduinoPins(void) {
-    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_07_GPIO12_IO07, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_06_GPIO_MUX6_IO06, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_EMC_B2_00_GPIO_MUX2_IO10, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_EMC_B2_01_GPIO_MUX2_IO11, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_00_FLEXPWM1_PWM0_A, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_FLEXPWM1_PWM0_B, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_32_LPI2C1_SCL, 1U);

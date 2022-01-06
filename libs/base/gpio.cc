@@ -25,6 +25,36 @@ extern "C" void GPIO13_Combined_0_31_IRQHandler(void) {
     SDK_ISR_EXIT_BARRIER;
 }
 
+#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+extern "C" void GPIO6_Combined_0_15_IRQHandler(void) {
+    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO6);
+    GPIO_PortClearInterruptFlags(GPIO6, pins);
+    int i = 0;
+    while (pins) {
+        if (pins & 1) {
+            valiant::gpio::IRQHandler(GPIO6, i);
+        }
+        ++i;
+        pins = pins >> 1;
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
+extern "C" void GPIO2_Combined_0_15_IRQHandler(void) {
+    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO2);
+    GPIO_PortClearInterruptFlags(GPIO2, pins);
+    int i = 0;
+    while (pins) {
+        if (pins & 1) {
+            valiant::gpio::IRQHandler(GPIO2, i);
+        }
+        ++i;
+        pins = pins >> 1;
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+#endif
+
 namespace valiant {
 namespace gpio {
 
@@ -32,7 +62,10 @@ static SemaphoreHandle_t gpio_semaphore;
 static StaticSemaphore_t gpio_semaphore_static;
 static GPIO_Type* PinNameToModule[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = GPIO12,
+    [Gpio::kArduinoD0] = GPIO6,
+    [Gpio::kArduinoD1] = GPIO2,
+    [Gpio::kArduinoD2] = GPIO2,
+    [Gpio::kArduinoD3] = GPIO6,
 #endif
     [Gpio::kPowerLED] = GPIO13,
     [Gpio::kUserLED] = GPIO13,
@@ -54,6 +87,9 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
 static uint32_t PinNameToPin[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = 7,
+    [Gpio::kArduinoD1] = 11,
+    [Gpio::kArduinoD2] = 10,
+    [Gpio::kArduinoD3] = 6,
 #endif
     [Gpio::kPowerLED] = 5,
     [Gpio::kUserLED] = 6,
@@ -75,9 +111,24 @@ static uint32_t PinNameToPin[Gpio::kCount] = {
 static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = {
-        .direction = kGPIO_DigitalOutput,
+        .direction = kGPIO_DigitalInput,
         .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
+        .interruptMode = kGPIO_IntFallingEdge,
+    },
+    [Gpio::kArduinoD1] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_IntFallingEdge,
+    },
+    [Gpio::kArduinoD2] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_IntFallingEdge,
+    },
+    [Gpio::kArduinoD3] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_IntFallingEdge,
     },
 #endif
     [Gpio::kPowerLED] = {
@@ -159,7 +210,10 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
 
 static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = HardFault_IRQn,
+    [Gpio::kArduinoD0] = GPIO6_Combined_0_15_IRQn,
+    [Gpio::kArduinoD1] = GPIO2_Combined_0_15_IRQn,
+    [Gpio::kArduinoD2] = GPIO2_Combined_0_15_IRQn,
+    [Gpio::kArduinoD3] = GPIO6_Combined_0_15_IRQn,
 #endif
     [Gpio::kPowerLED] = HardFault_IRQn,
     [Gpio::kUserLED] = HardFault_IRQn,
@@ -180,7 +234,10 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
 
 static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
-    [Gpio::kArduinoD0] = {IOMUXC_GPIO_LPSR_07_GPIO12_IO07},
+    [Gpio::kArduinoD0] = {IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07},
+    [Gpio::kArduinoD1] = {IOMUXC_GPIO_EMC_B2_01_GPIO_MUX2_IO11},
+    [Gpio::kArduinoD2] = {IOMUXC_GPIO_EMC_B2_00_GPIO_MUX2_IO10},
+    [Gpio::kArduinoD3] = {IOMUXC_GPIO_LPSR_06_GPIO_MUX6_IO06},
 #endif
     [Gpio::kPowerLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
     [Gpio::kUserLED] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
@@ -197,6 +254,9 @@ static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
 static uint32_t PinNameToPullMask[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x0000000C,
+    [Gpio::kArduinoD1] = 0x0000000C,
+    [Gpio::kArduinoD2] = 0x0000000C,
+    [Gpio::kArduinoD3] = 0x0000000C,
 #endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
@@ -213,6 +273,9 @@ static uint32_t PinNameToPullMask[Gpio::kCount] = {
 static uint32_t PinNameToNoPull[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x00000000,
+    [Gpio::kArduinoD1] = 0x0000000C,
+    [Gpio::kArduinoD2] = 0x0000000C,
+    [Gpio::kArduinoD3] = 0x00000000,
 #endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
@@ -229,6 +292,9 @@ static uint32_t PinNameToNoPull[Gpio::kCount] = {
 static uint32_t PinNameToPullUp[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x0000000C,
+    [Gpio::kArduinoD1] = 0x00000004,
+    [Gpio::kArduinoD2] = 0x00000004,
+    [Gpio::kArduinoD3] = 0x0000000C,
 #endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
@@ -245,6 +311,9 @@ static uint32_t PinNameToPullUp[Gpio::kCount] = {
 static uint32_t PinNameToPullDown[Gpio::kCount] = {
 #if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x00000004,
+    [Gpio::kArduinoD1] = 0x00000008,
+    [Gpio::kArduinoD2] = 0x00000008,
+    [Gpio::kArduinoD3] = 0x00000004,
 #endif
     [Gpio::kPowerLED] = 0x00000004,
     [Gpio::kUserLED] = 0x00000004,
@@ -256,6 +325,15 @@ static uint32_t PinNameToPullDown[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x00000004,
     [Gpio::kCameraTrigger] = 0x00000008,
     [Gpio::kAntennaSelect] = 0x00000004,
+};
+
+static gpio_interrupt_mode_t InterruptModeToGpioIntMode[InterruptMode::kIntModeCount] = {
+    [InterruptMode::kIntModeNone] = kGPIO_NoIntmode,
+    [InterruptMode::kIntModeLow] = kGPIO_IntLowLevel,
+    [InterruptMode::kIntModeHigh] = kGPIO_IntHighLevel,
+    [InterruptMode::kIntModeRising] = kGPIO_IntRisingEdge,
+    [InterruptMode::kIntModeFalling] = kGPIO_IntFallingEdge,
+    [InterruptMode::kIntModeChanging] = kGPIO_IntRisingOrFallingEdge,
 };
 
 static GpioCallback IRQHandlers[Gpio::kCount];
@@ -312,6 +390,22 @@ void SetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
     IOMUXC_SetPinConfig(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4], pin_config);
 }
 
+void SetIntMode(Gpio gpio, InterruptMode mode) {
+    auto *config = &PinNameToConfig[gpio];
+    config->direction = kGPIO_DigitalInput;
+    config->interruptMode = InterruptModeToGpioIntMode[mode];
+    GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
+    if (PinNameToConfig[gpio].interruptMode != kGPIO_NoIntmode) {
+        GPIO_PinSetInterruptConfig(PinNameToModule[gpio], PinNameToPin[gpio], PinNameToConfig[gpio].interruptMode);
+        GPIO_PortClearInterruptFlags(PinNameToModule[gpio], GPIO_PortGetInterruptFlags(PinNameToModule[gpio]));
+        GPIO_PortEnableInterrupts(PinNameToModule[gpio], 1 << PinNameToPin[gpio]);
+        EnableIRQ(PinNameToIRQ[gpio]);
+        NVIC_SetPriority(PinNameToIRQ[gpio], 5);
+    } else {
+        DisableIRQ(PinNameToIRQ[gpio]);
+    }
+}
+
 void RegisterIRQHandler(Gpio gpio, GpioCallback cb) {
     IRQHandlers[gpio] = cb;
 }
@@ -326,6 +420,14 @@ static void IRQHandler(GPIO_Type* gpio, uint32_t pin) {
             return;
         }
     }
+}
+
+gpio_pin_config_t GetPinConfig(Gpio gpio) {
+    return PinNameToConfig[gpio];
+}
+
+void SetPinConfig(Gpio gpio, gpio_pin_config_t config) {
+    GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], &config);
 }
 
 }  // namespace gpio
