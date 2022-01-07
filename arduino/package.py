@@ -58,7 +58,7 @@ def main():
             '--add-binary',
             os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost') + ':' + os.path.join('third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64'),
             '--add-binary',
-            os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb') + ':' + os.path.join('third_party', 'nxp', 'elftosb'),
+            os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'linux', 'amd64', 'elftosb') + ':' + os.path.join('third_party', 'nxp', 'elftosb', 'linux', 'amd64'),
             '--add-binary',
             os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-strip') + ':' + os.path.join('third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
             '--add-binary',
