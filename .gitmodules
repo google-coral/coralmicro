@@ -49,3 +49,6 @@
 [submodule "third_party/nanopb"]
 	path = third_party/nanopb
 	url = https://github.com/nanopb/nanopb.git
+[submodule "third_party/toolchain-win"]
+	path = third_party/toolchain-win
+	url = https://spacepark.googlesource.com/valiant/toolchain
