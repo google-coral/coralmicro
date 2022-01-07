@@ -4,10 +4,17 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
+if (${CMAKE_HOST_WIN32})
+get_filename_component(CMAKE_C_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc.exe REALPATH CACHE)
+get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++.exe REALPATH CACHE)
+get_filename_component(CMAKE_OBJCOPY ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy.exe REALPATH CACHE)
+get_filename_component(CMAKE_STRIP ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip.exe REALPATH CACHE)
+else()
 get_filename_component(CMAKE_C_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH CACHE)
 get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH CACHE)
 get_filename_component(CMAKE_OBJCOPY ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy REALPATH CACHE)
 get_filename_component(CMAKE_STRIP ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip REALPATH CACHE)
+endif()
 
 string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" VALIANT_PREFIX "${VALIANT_SOURCE_DIR}")
 
