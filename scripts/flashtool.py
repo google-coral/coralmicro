@@ -488,9 +488,18 @@ def main():
     elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app) + '.stripped')
     unstripped_elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app))
     elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir)
-    blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
+
+    if os.name == 'nt':
+      blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'win', 'blhost.exe')
+    else:
+      blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
+
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
-    elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'elftosb')
+
+    if os.name == 'nt':
+      elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'win', 'elftosb.exe')
+    else:
+      elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'linux', 'amd64', 'elftosb')
     toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
         elf_path,
