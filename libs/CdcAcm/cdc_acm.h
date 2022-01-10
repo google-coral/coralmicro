@@ -116,6 +116,13 @@ class CdcAcm {
     };
     CdcAcmClassDescriptor descriptor_ = {
         {
+            sizeof(InterfaceAssociationDescriptor),
+            0x0B,
+            0, // first iface num
+            2, // total num ifaces
+            0x02, 0x02, 0x01, 0,
+        }, // InterfaceAssociationDescriptor
+        {
             sizeof(InterfaceDescriptor),
             0x04,
             0, // iface num

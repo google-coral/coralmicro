@@ -183,13 +183,6 @@ UsbDeviceTask::UsbDeviceTask() {
             0x80, // kUsb11AndHigher
             250, // kUses500mA
         }, // ConfigurationDescriptor
-        {
-            sizeof(InterfaceAssociationDescriptor),
-            0x0B,
-            0, // first iface num
-            1, // total num ifaces
-            0x02, 0x02, 0x01, 0,
-        }, // InterfaceAssociationDescriptor
     };
     composite_descriptor_size_ = sizeof(composite_descriptor);
     // composite_descriptor_.resize(sizeof(composite_descriptor));

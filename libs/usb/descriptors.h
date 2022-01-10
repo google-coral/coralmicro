@@ -96,6 +96,7 @@ struct CdcUnionFunctionalDescriptor {
 } __attribute__((packed));
 
 struct CdcAcmClassDescriptor {
+    InterfaceAssociationDescriptor iad0;
     // Command
     InterfaceDescriptor cmd_iface;
     CdcHeaderFunctionalDescriptor cmd_hdr_fd;
@@ -134,7 +135,6 @@ struct HidClassDescriptor {
 
 struct CompositeDescriptor {
     ConfigurationDescriptor conf;
-    InterfaceAssociationDescriptor iad0;
 } __attribute__((packed));
 
 struct LangIdDescriptor {
