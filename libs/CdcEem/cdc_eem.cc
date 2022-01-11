@@ -2,6 +2,7 @@
 
 #include "libs/base/utils.h"
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/netif/ethernet.h"
 
 extern "C" {
@@ -97,11 +98,17 @@ void CdcEem::SetClassHandle(class_handle_t class_handle) {
 }
 
 err_t CdcEem::TransmitFrame(uint8_t* buffer, uint32_t length) {
+    if (endianness_ == Endianness::kUnknown) {
+        DbgConsole_Printf("[EEM] Tried to send to remote with unknown endianness\r\n");
+        return ERR_IF;
+    }
     usb_status_t status;
     uint32_t crc = PP_HTONL(0xdeadbeef);
     uint16_t *header = (uint16_t*)tx_buffer_;
-    // printf("TransmitFrame %p\r\n", length);
     *header = (0 << EEM_DATA_CRC_SHIFT) | ((length + sizeof(uint32_t)) & EEM_DATA_LEN_MASK);
+    if (endianness_ == Endianness::kBigEndian) {
+        *header = htons(*header);
+    }
     memcpy(tx_buffer_ + sizeof(uint16_t), buffer, length);
     memcpy(tx_buffer_ + sizeof(uint16_t) + length, &crc, sizeof(uint32_t));
     status = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, tx_buffer_, sizeof(uint16_t) + length + sizeof(uint32_t));
@@ -158,6 +165,53 @@ usb_status_t CdcEem::Transmit(uint8_t* buffer, uint32_t length) {
     return status;
 }
 
+usb_status_t CdcEem::SetControlLineState(usb_device_cdc_eem_request_param_struct_t* eem_param) {
+    usb_status_t ret = kStatus_USB_Error;
+
+    uint8_t dte_status = eem_param->setupValue;
+    uint16_t uart_state = 0;
+
+    uint8_t dte_present = (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE);
+    uint8_t carrier_present = (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_CARRIER_ACTIVATION);
+    if (carrier_present) {
+        uart_state |= USB_DEVICE_CDC_UART_STATE_TX_CARRIER;
+    } else {
+        uart_state &= ~USB_DEVICE_CDC_UART_STATE_TX_CARRIER;
+    }
+
+    if (dte_present) {
+        uart_state |= USB_DEVICE_CDC_UART_STATE_RX_CARRIER;
+    } else {
+        uart_state &= ~USB_DEVICE_CDC_UART_STATE_RX_CARRIER;
+    }
+
+    serial_state_buffer_[0] = 0xA1; // NotifyRequestType
+    serial_state_buffer_[1] = USB_DEVICE_CDC_NOTIF_SERIAL_STATE;
+    serial_state_buffer_[2] = 0x00;
+    serial_state_buffer_[3] = 0x00;
+    serial_state_buffer_[4] = eem_param->interfaceIndex;
+    serial_state_buffer_[5] = 0x00;
+    serial_state_buffer_[6] = 0x02; // UartBitmapSize
+    serial_state_buffer_[7] = 0x00;
+
+    uint8_t *uart_bitmap = &serial_state_buffer_[8];
+    uart_bitmap[0] = uart_state & 0xFF;
+    uart_bitmap[1] = (uart_state >> 8) & 0xFF;
+
+    uint32_t len = sizeof(serial_state_buffer_);
+    usb_device_cdc_eem_struct_t* cdc_eem = (usb_device_cdc_eem_struct_t*)class_handle_;
+    if (cdc_eem->hasSentState == 0) {
+        ret = USB_DeviceCdcEemSend(
+                class_handle_, bulk_in_ep_, serial_state_buffer_, len);
+        if (ret != kStatus_USB_Success) {
+            DbgConsole_Printf("USB_DeviceCdcEemSend failed in %s\r\n", __func__);
+        }
+        cdc_eem->hasSentState = 1;
+    }
+
+    return ret;
+}
+
 usb_status_t CdcEem::SendEchoRequest() {
     uint8_t echo_size = 16;
     uint8_t echo_buffer[echo_size + sizeof(uint16_t)];
@@ -172,8 +226,39 @@ usb_status_t CdcEem::SendEchoRequest() {
     return Transmit(echo_buffer, sizeof(echo_buffer));
 }
 
-void CdcEem::ProcessPacket() {
+void CdcEem::DetectEndianness(uint32_t packet_length) {
+    if (endianness_ == Endianness::kUnknown) {
+        uint16_t packet_hdr_le = *((uint16_t*)rx_buffer_);
+        uint16_t packet_hdr_be = ntohs(*((uint16_t*)rx_buffer_));
+        // Two-byte packets are usually EEM command packets, but we can't
+        // detect endianness from them with certainty -- so we will not try.
+        if (packet_length <= sizeof(uint16_t)) {
+            return;
+        }
+        uint16_t le_len = ((packet_hdr_le & EEM_DATA_LEN_MASK) >> EEM_DATA_LEN_SHIFT);
+        uint16_t be_len = ((packet_hdr_be & EEM_DATA_LEN_MASK) >> EEM_DATA_LEN_SHIFT);
+        if (le_len == (packet_length - sizeof(uint16_t))) {
+            endianness_ = Endianness::kLittleEndian;
+        } else if (be_len == (packet_length - sizeof(uint16_t))) {
+            endianness_ = Endianness::kBigEndian;
+        } else {
+            DbgConsole_Printf("[EEM] Unable to detect endianness\r\n");
+            return;
+        }
+    }
+}
+
+void CdcEem::ProcessPacket(uint32_t packet_length) {
+    DetectEndianness(packet_length);
+    if (endianness_ == Endianness::kUnknown) {
+        return;
+    }
+
     uint16_t packet_hdr = *((uint16_t*)rx_buffer_);
+    if (endianness_ == Endianness::kBigEndian) {
+        packet_hdr = ntohs(packet_hdr);
+    }
+
     if (packet_hdr & EEM_HEADER_TYPE_MASK) {
         uint16_t opcode = (packet_hdr & EEM_COMMAND_OPCODE_MASK) >> EEM_COMMAND_OPCODE_SHIFT;
         uint16_t param = (packet_hdr & EEM_COMMAND_PARAM_MASK) >> EEM_COMMAND_PARAM_SHIFT;
@@ -189,6 +274,9 @@ void CdcEem::ProcessPacket() {
     } else {
         uint16_t checksum = (packet_hdr & EEM_DATA_CRC_MASK) >> EEM_DATA_CRC_SHIFT;
         uint16_t len = (packet_hdr & EEM_DATA_LEN_MASK) >> EEM_DATA_LEN_SHIFT;
+        if (len == 0) {
+            return;
+        }
         uint8_t *data = rx_buffer_ + sizeof(uint16_t);
         uint16_t data_len = len - sizeof(uint32_t);
         // TODO(atv): We should validate checksum. But we won't (for now). See if the stack handles that?
@@ -216,10 +304,11 @@ bool CdcEem::HandleEvent(uint32_t event, void *param) {
 usb_status_t CdcEem::Handler(uint32_t event, void *param) {
     usb_status_t ret = kStatus_USB_Error;
     usb_device_endpoint_callback_message_struct_t *ep_cb = (usb_device_endpoint_callback_message_struct_t*)param;
+    usb_device_cdc_eem_request_param_struct_t* eem_param = (usb_device_cdc_eem_request_param_struct_t*)param;
 
     switch (event) {
         case kUSB_DeviceEemEventRecvResponse: {
-            ProcessPacket();
+            ProcessPacket(ep_cb->length);
             ret = USB_DeviceCdcEemRecv(class_handle_, bulk_out_ep_, rx_buffer_, cdc_eem_data_endpoints_[DATA_OUT].maxPacketSize);
             break;
         }
@@ -232,6 +321,9 @@ usb_status_t CdcEem::Handler(uint32_t event, void *param) {
                     ret = USB_DeviceCdcEemRecv(class_handle_, bulk_out_ep_, rx_buffer_, cdc_eem_data_endpoints_[DATA_OUT].maxPacketSize);
                 }
             }
+            break;
+        case kUSB_DeviceCdcEventSetControlLineState:
+            ret = SetControlLineState(eem_param);
             break;
         default:
             DbgConsole_Printf("Unhandled EEM event: %d\r\n", event);

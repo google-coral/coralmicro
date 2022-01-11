@@ -27,7 +27,8 @@ class CdcEem {
     bool Initialized() { return initialized_; }
   private:
 
-    void ProcessPacket();
+    usb_status_t SetControlLineState(usb_device_cdc_eem_request_param_struct_t* eem_param);
+    void ProcessPacket(uint32_t packet_length);
     usb_status_t SendEchoRequest();
     static usb_status_t Handler(class_handle_t class_handle, uint32_t event, void *param);
     usb_status_t Handler(uint32_t event, void *param);
@@ -106,6 +107,7 @@ class CdcEem {
     }; // CdcEemClassDescriptor
 
     bool initialized_ = false;
+    uint8_t serial_state_buffer_[10];
     uint8_t tx_buffer_[512];
     uint8_t rx_buffer_[512];
     uint8_t bulk_in_ep_, bulk_out_ep_;
@@ -116,6 +118,14 @@ class CdcEem {
 
     ip4_addr_t netif_ipaddr_, netif_netmask_, netif_gw_;
     struct netif netif_;
+
+    enum Endianness {
+        kUnknown,
+        kLittleEndian,
+        kBigEndian,
+    };
+    Endianness endianness_ = Endianness::kUnknown;
+    void DetectEndianness(uint32_t packet_length);
 };
 
 }  // namespace valiant

@@ -2,6 +2,7 @@
 #include "usb.h"
 #include "usb_device.h"
 #include "usb_device_class.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 
 #if USB_DEVICE_CONFIG_CDC_EEM
 #include "usb_device_cdc_eem.h"
@@ -196,6 +197,8 @@ usb_status_t USB_DeviceCdcEemEvent(void *handle, uint32_t event, void *param) {
     uint8_t alternate;
     uint8_t *temp8;
 
+    usb_device_cdc_eem_request_param_struct_t reqParam;
+
     if (!param || !handle) {
         return kStatus_USB_InvalidHandle;
     }
@@ -226,7 +229,18 @@ usb_status_t USB_DeviceCdcEemEvent(void *handle, uint32_t event, void *param) {
             if ((controlRequest->setup->wIndex & 0xFF) != cdcEemHandle->interfaceNumber) {
                 break;
             }
-            DbgConsole_Printf("[EEM] Unhandled class request\r\n");
+
+            reqParam.buffer         = &(controlRequest->buffer);
+            reqParam.length         = &(controlRequest->length);
+            reqParam.interfaceIndex = controlRequest->setup->wIndex;
+            reqParam.setupValue     = controlRequest->setup->wValue;
+            reqParam.isSetup        = controlRequest->isSetup;
+
+            if (controlRequest->setup->bRequest == USB_DEVICE_CDC_REQUEST_SET_CONTROL_LINE_STATE) {
+                error = cdcEemHandle->configStruct->classCallback((class_handle_t)cdcEemHandle, kUSB_DeviceCdcEventSetControlLineState, &reqParam);
+            } else {
+                DbgConsole_Printf("[EEM] Unhandled class request %x %x request: %x\r\n", controlRequest->setup->wIndex & 0xFF, cdcEemHandle->interfaceNumber, controlRequest->setup->bRequest);
+            }
             break;
         }
         case kUSB_DeviceClassEventSetInterface:

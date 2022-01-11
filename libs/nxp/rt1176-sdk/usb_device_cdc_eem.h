@@ -41,7 +41,18 @@ typedef struct _usb_device_cdc_eem_struct {
     uint8_t configuration;
     uint8_t alternate;
     uint8_t interfaceNumber;
+    uint8_t hasSentState;
 } usb_device_cdc_eem_struct_t;
+
+/*! @brief Definition of parameters for CDC ACM request. */
+typedef struct _usb_device_cdc_eem_request_param_struct
+{
+    uint8_t **buffer;        /*!< The pointer to the address of the buffer for CDC class request. */
+    uint32_t *length;        /*!< The pointer to the length of the buffer for CDC class request. */
+    uint16_t interfaceIndex; /*!< The interface index of the setup packet. */
+    uint16_t setupValue;     /*!< The wValue field of the setup packet. */
+    uint8_t isSetup;         /*!< The flag indicates if it is a setup packet, 1: yes, 0: no. */
+} usb_device_cdc_eem_request_param_struct_t;
 
 #if defined(__cplusplus)
 extern "C" {
