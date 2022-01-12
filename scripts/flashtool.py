@@ -28,6 +28,9 @@ ELFLOADER_PID = 0x93fe
 VALIANT_VID = 0x18d1
 VALIANT_PID = 0x93ff
 
+OPEN_HID_RETRY_INTERVAL_S = 0.1
+OPEN_HID_RETRY_TIME_S = 15
+
 VALIANT_UART_PATH = '/dev/valiant_UART'
 BLOCK_SIZE = 2048 * 64
 BLOCK_COUNT = 64
@@ -305,19 +308,19 @@ def OpenHidDevice(vid, pid, serial_number):
     # First few tries to open the HID device can fail,
     # if Python is faster than the device. So retry a bit.
     opened = False
-    for _ in range(30):
+    print('OpenHidDevice vid={:x} pid={:x} ...'.format(vid, pid))
+    for _ in range(round(OPEN_HID_RETRY_TIME_S / OPEN_HID_RETRY_INTERVAL_S)):
         try:
-            print('OpenHidDevice vid={:x} pid={:x} serial={} ...'.format(vid, pid, serial_number))
             h.open(vid, pid, serial_number=serial_number)
+            print('OpenHidDevice vid={:x} pid={:x} opened'.format(vid, pid, serial_number))
             opened = True
             break
         except:
-            time.sleep(0.5)
+            time.sleep(OPEN_HID_RETRY_INTERVAL_S)
             pass
     if not opened:
         raise Exception('Failed to open Valiant HID device')
-    print('OpenHidDevice: {} {} {}'.format(
-                h.get_manufacturer_string(), h.get_product_string(), h.get_serial_number_string()))
+
     return h
 
 
