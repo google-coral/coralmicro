@@ -36,6 +36,8 @@ BLOCK_SIZE = 2048 * 64
 BLOCK_COUNT = 64
 
 USB_IP_ADDRESS_FILE = '/usb_ip_address'
+WIFI_SSID_FILE = '/wifi_ssid'
+WIFI_PSK_FILE = '/wifi_psk'
 
 ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
@@ -398,6 +400,10 @@ def ProgramDataFiles(**kwargs):
     data_files = kwargs.get('data_files')
     data_files.append((kwargs.get('elf_path'), '/default.elf'))
     data_files.append((USB_IP_ADDRESS_FILE, USB_IP_ADDRESS_FILE))
+    if kwargs['wifi_ssid'] is not None:
+        data_files.append((WIFI_SSID_FILE, WIFI_SSID_FILE))
+    if kwargs['wifi_psk'] is not None:
+        data_files.append((WIFI_PSK_FILE, WIFI_PSK_FILE))
     data_files = sorted(data_files, key=lambda x: x[1])
     for (src_file, target_file) in data_files:
         if target_file[0] != '/':
@@ -413,6 +419,20 @@ def ProgramDataFiles(**kwargs):
         if src_file is USB_IP_ADDRESS_FILE:
             with tempfile.NamedTemporaryFile() as f:
                 f.write(str(kwargs['usb_ip_address']).encode())
+                f.flush()
+                f.seek(0)
+                write_file(f)
+                continue
+        if src_file is WIFI_SSID_FILE and kwargs['wifi_ssid'] is not None:
+            with tempfile.NamedTemporaryFile() as f:
+                f.write(str(kwargs['wifi_ssid']).encode())
+                f.flush()
+                f.seek(0)
+                write_file(f)
+                continue
+        if src_file is WIFI_PSK_FILE and kwargs['wifi_psk'] is not None:
+            with tempfile.NamedTemporaryFile() as f:
+                f.write(str(kwargs['wifi_psk']).encode())
                 f.flush()
                 f.seek(0)
                 write_file(f)
@@ -490,6 +510,8 @@ def main():
     parser.add_argument('--serial', type=str, required=False)
     parser.add_argument('--list', dest='list', action='store_true')
     parser.add_argument('--usb_ip_address', type=str, required=False, default='10.10.10.1')
+    parser.add_argument('--wifi_ssid', type=str, required=False, default=None)
+    parser.add_argument('--wifi_psk', type=str, required=False, default=None)
     # --strip and --toolchain are provided for Arduino uses.
     # CMake-built targets already generate a stripped binary.
     parser.add_argument('--strip', dest='strip', action='store_true')
@@ -578,6 +600,8 @@ def main():
         'unstripped_elf_path': unstripped_elf_path,
         'root_dir': root_dir,
         'usb_ip_address': usb_ip_address,
+        'wifi_ssid': args.wifi_ssid,
+        'wifi_psk': args.wifi_psk,
         'debug': args.debug,
         'jlink_path': args.jlink_path,
         'toolchain_path': toolchain_path,
