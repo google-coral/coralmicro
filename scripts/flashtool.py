@@ -335,12 +335,22 @@ def Program(**kwargs):
     return FlashtoolStates.LOAD_ELFLOADER
 
 def ElfloaderTransferData(h, data, target, bar=None):
+    warned = False
+    def read_byte():
+        try:
+            h.read(1, timeout_ms=1000)
+        except:
+            nonlocal warned
+            if not warned:
+                print('Warning: failed to read ACK byte after TX')
+                warned = True
+
     total_bytes = len(data)
     h.write(struct.pack(ELFLOADER_CMD_HEADER + 'B', 0, ELFLOADER_TARGET, target))
-    h.read(1)
+    read_byte()
 
     h.write(struct.pack(ELFLOADER_CMD_HEADER + 'l', 0, ELFLOADER_SETSIZE, total_bytes))
-    h.read(1)
+    read_byte()
 
     data_packet_header = ELFLOADER_CMD_HEADER + 'll'
     bytes_per_packet = 64 - struct.calcsize(data_packet_header) + 1 # 64 bytes HID packet, adjust for header and padding
@@ -351,12 +361,12 @@ def ElfloaderTransferData(h, data, target, bar=None):
             struct.pack((data_packet_header + '%ds') % bytes_this_packet,
             0, ELFLOADER_BYTES, bytes_this_packet, bytes_transferred,
             data[bytes_transferred:bytes_transferred+bytes_this_packet]))
-        h.read(1)
+        read_byte()
         bytes_transferred += bytes_this_packet
         if bar:
             bar.goto(bytes_transferred)
     h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_DONE))
-    h.read(1)
+    read_byte()
     if bar:
         bar.finish()
     return FlashtoolStates.RESET
