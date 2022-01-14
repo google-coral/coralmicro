@@ -9,6 +9,11 @@ get_filename_component(CMAKE_C_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolch
 get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++.exe REALPATH CACHE)
 get_filename_component(CMAKE_OBJCOPY ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy.exe REALPATH CACHE)
 get_filename_component(CMAKE_STRIP ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip.exe REALPATH CACHE)
+elseif(${CMAKE_HOST_APPLE})
+get_filename_component(CMAKE_C_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH CACHE)
+get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH CACHE)
+get_filename_component(CMAKE_OBJCOPY ${VALIANT_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy REALPATH CACHE)
+get_filename_component(CMAKE_STRIP ${VALIANT_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip REALPATH CACHE)
 else()
 get_filename_component(CMAKE_C_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH CACHE)
 get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH CACHE)
@@ -17,6 +22,10 @@ get_filename_component(CMAKE_STRIP ${VALIANT_SOURCE_DIR}/third_party/toolchain/g
 endif()
 
 string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" VALIANT_PREFIX "${VALIANT_SOURCE_DIR}")
+
+message(STATUS "is mac: ${CMAKE_HOST_APPLE}")
+message(STATUS "Valiant source dir: ${VALIANT_SOURCE_DIR}")
+message(STATUS "Toolchain c compiler mac: ${CMAKE_C_COMPILER}")
 
 execute_process(
     COMMAND ${CMAKE_C_COMPILER} -print-libgcc-file-name
