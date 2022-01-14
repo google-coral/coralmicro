@@ -39,10 +39,10 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
     const ElfloaderSetSize *set_size = reinterpret_cast<const ElfloaderSetSize*>(&buffer[1]);
     const ElfloaderBytes *bytes = reinterpret_cast<const ElfloaderBytes*>(&buffer[1]);
     const ElfloaderTarget *target = reinterpret_cast<const ElfloaderTarget*>(&buffer[1]);
+    xTimerStop(usb_timer, 0);
     switch (cmd) {
         case ElfloaderCommand::SetSize:
             assert(length == sizeof(ElfloaderSetSize) + 1);
-            xTimerStop(usb_timer, 0);
             switch (elfloader_target) {
                 case ElfloaderTarget::Filesystem:
                     break;
