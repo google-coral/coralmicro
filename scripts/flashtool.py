@@ -100,7 +100,7 @@ def FindElfloader(build_dir, cached_files):
     if cached_files:
         for f in cached_files:
             if 'ELFLoader/image.srec' in f:
-                return os.path.join(build_dir, f)
+                return f
     else:
         for root, dirs, files in os.walk(build_dir):
             if os.path.split(root)[1] == "ELFLoader":
@@ -132,9 +132,8 @@ def GetLibs(build_dir, libs_path, scanned, cached_files):
             if cached_files:
                 for f in cached_files:
                         if lib + '.libs' in f:
-                            libs_path = os.path.join(build_dir,f)
-                            if libs_path not in scanned:
-                                libs_found.add(libs_path)
+                            if f not in scanned:
+                                libs_found.add(f)
                             break
             else:
                 for root, dirs, files in os.walk(build_dir):
@@ -497,7 +496,7 @@ def main():
     parser.add_argument('--toolchain', type=str, required=False)
     parser.add_argument('--debug', dest='debug', action='store_true')
     parser.add_argument('--jlink_path', type=str, default='/opt/SEGGER/JLink')
-    parser.add_argument('--cached_files_path', type=str, required=False)
+    parser.add_argument('--cached', dest='cached', action='store_true')
     parser.set_defaults(list=False)
     parser.set_defaults(ram=False)
     parser.set_defaults(strip=False)
@@ -512,10 +511,11 @@ def main():
     usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
-    cached_files_path = os.path.abspath(args.cached_files_path) if args.cached_files_path else None
-    if cached_files_path and os.path.exists(cached_files_path):
-        with open(cached_files_path, 'r') as file_list:
-            cached_files = file_list.read().splitlines()
+    if args.cached:
+        cached_files_path = os.path.join(build_dir, 'cached_files.txt')
+        if os.path.exists(cached_files_path):
+            with open(cached_files_path, 'r') as file_list:
+                cached_files = file_list.read().splitlines()
     else:
         cached_files = None
     app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir and args.app else None
