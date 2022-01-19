@@ -153,12 +153,21 @@ static usb_device_class_config_struct_t elfloader_config_data_ = {
 
 typedef void (*entry_point)(void);
 static void elfloader_main(void *param) {
-    size_t elf_size;
+    size_t elf_size = 0;
     std::unique_ptr<uint8_t> application_elf;
     if (!param) {
         application_elf.reset(valiant::filesystem::ReadToMemory("/default.elf", &elf_size));
     } else {
         application_elf.reset(reinterpret_cast<uint8_t*>(param));
+    }
+
+    // If we do not have an application for any reason, suspend this thread.
+    // Otherwise, suspend the USB thread so that the host cannot try to talk to us
+    // and cause confusion.
+    if (!application_elf || (!param && elf_size == 0)) {
+        vTaskSuspend(NULL);
+    } else {
+        vTaskSuspend(reinterpret_cast<TaskHandle_t>(pvTimerGetTimerID(usb_timer)));
     }
 
     Elf32_Ehdr* elf_header = reinterpret_cast<Elf32_Ehdr*>(application_elf.get());
@@ -190,7 +199,6 @@ void usb_device_task(void *param) {
 }
 
 static void usb_timer_callback(TimerHandle_t timer) {
-    vTaskSuspend(reinterpret_cast<TaskHandle_t>(pvTimerGetTimerID(timer)));
     xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, nullptr, APP_TASK_PRIORITY, NULL);
 }
 
