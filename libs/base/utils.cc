@@ -38,8 +38,12 @@ static bool GetFileDataAsCStr(const char *path, std::vector<char> *out, size_t *
 
     out->resize(len + 1);
     std::fill(out->begin(), out->end(), 0);
-    if (!valiant::filesystem::ReadToMemory(path, reinterpret_cast<uint8_t*>(out->data()), out_len)) {
+    if (!valiant::filesystem::ReadToMemory(path, reinterpret_cast<uint8_t*>(out->data()), &len)) {
         return false;
+    }
+
+    if (out_len) {
+        *out_len = len;
     }
 
     return true;
