@@ -7,6 +7,7 @@ import hexformat
 import hid
 import ipaddress
 import os
+import platform
 import serial
 import signal
 import struct
@@ -352,6 +353,8 @@ def Program(**kwargs):
 def ElfloaderTransferData(h, data, target, bar=None):
     warned = False
     def read_byte():
+        if (platform.system() == 'Darwin'):
+            return
         try:
             h.read(1, timeout_ms=1000)
         except:
@@ -532,6 +535,19 @@ def main():
 
     usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
 
+    platform_dir = ''
+    toolchain_dir = ''
+    system_name = platform.system()
+    if (system_name == 'Windows'):
+       platform_dir = 'win'
+       toolchain_dir = 'toolchain-win'
+    elif (system_name == 'Darwin'):
+       platform_dir = 'mac'
+       toolchain_dir = 'toolchain-mac'
+    elif (system_name == 'Linux'):
+       platform_dir = 'linux/amd64'
+       toolchain_dir = 'toolchain'
+
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
     if args.cached:
         cached_files_path = os.path.join(build_dir, 'cached_files.txt')
@@ -549,15 +565,15 @@ def main():
     if os.name == 'nt':
       blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'win', 'blhost.exe')
     else:
-      blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost')
+      blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost')
 
     flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
 
     if os.name == 'nt':
       elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'win', 'elftosb.exe')
     else:
-      elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'linux', 'amd64', 'elftosb')
-    toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
+      elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb')
+    toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
         elf_path,
         unstripped_elf_path,

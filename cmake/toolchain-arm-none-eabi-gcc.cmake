@@ -23,10 +23,6 @@ endif()
 
 string(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" VALIANT_PREFIX "${VALIANT_SOURCE_DIR}")
 
-message(STATUS "is mac: ${CMAKE_HOST_APPLE}")
-message(STATUS "Valiant source dir: ${VALIANT_SOURCE_DIR}")
-message(STATUS "Toolchain c compiler mac: ${CMAKE_C_COMPILER}")
-
 execute_process(
     COMMAND ${CMAKE_C_COMPILER} -print-libgcc-file-name
     OUTPUT_VARIABLE CMAKE_FIND_ROOT_PATH

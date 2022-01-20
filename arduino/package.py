@@ -9,6 +9,7 @@ import json
 import multiprocessing
 import os
 import tempfile
+import platform
 import shutil
 import subprocess
 import tarfile
@@ -38,13 +39,28 @@ def main():
         libs_dir = os.path.join(core_out_dir, 'variants', 'VALIANT', 'libs')
         os.makedirs(libs_dir, exist_ok=True)
 
+        platform_dir = ''
+        toolchain_dir = ''
+        system_name = platform.system()
+        if (system_name == 'Windows'):
+             platform_dir = 'win'
+             toolchain_dir = 'toolchain-win'
+        elif (system_name == 'Darwin'):
+             platform_dir = 'mac'
+             toolchain_dir = 'toolchain-mac'
+        else:
+             platform_dir = 'linux/amd64'
+             toolchain_dir = 'toolchain'
+
+        ar_path = os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-ar')
+
         # Copy the arduino library bundle into the core.
         with tempfile.TemporaryDirectory() as rebundle_dir:
             arduino_bundle_path = os.path.join(build_dir, 'liblibs_arduino_bundled.a')
             arduino_rebundled_path = os.path.join(libs_dir, 'liblibs_arduino_bundled.a')
-            subprocess.check_call(['ar', 'x', arduino_bundle_path], cwd=rebundle_dir)
+            subprocess.check_call([ar_path, 'x', arduino_bundle_path], cwd=rebundle_dir)
             object_files = os.listdir(rebundle_dir)
-            subprocess.check_call(['ar', 'rcs', arduino_rebundled_path] + object_files, cwd=rebundle_dir)
+            subprocess.check_call([ar_path, 'rcs', arduino_rebundled_path] + object_files, cwd=rebundle_dir)
 
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'VALIANT')
         os.makedirs(bootloader_dir)
@@ -56,13 +72,23 @@ def main():
             '-F',
             '--distpath', pyinstaller_dist_path,
             '--add-binary',
-            os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64', 'blhost') + ':' + os.path.join('third_party', 'nxp', 'blhost', 'bin', 'linux', 'amd64'),
+            os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost') + ':' + os.path.join('third_party', 'nxp', 'blhost', 'bin', platform_dir),
             '--add-binary',
-            os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', 'linux', 'amd64', 'elftosb') + ':' + os.path.join('third_party', 'nxp', 'elftosb', 'linux', 'amd64'),
+            os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb') + ':' + os.path.join('third_party', 'nxp', 'elftosb', platform_dir),
             '--add-binary',
-            os.path.join(root_dir, 'third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-strip') + ':' + os.path.join('third_party', 'toolchain', 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
+            os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-strip') + ':' + os.path.join('third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
             '--add-binary',
             os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin') + ':' + os.path.join('third_party', 'nxp', 'flashloader'),
+            '--hidden-import', 'progress.bar',
+            '--hidden-import', 'hexformat',
+            '--hidden-import', 'hid',
+            '--hidden-import', 'ipaddress',
+            '--hidden-import', 'serial',
+            '--hidden-import', 'signal',
+            '--hidden-import', 'struct',
+            '--hidden-import', 'sys',
+            '--hidden-import', 'time',
+            '--hidden-import', 'usb.core',
             os.path.join(root_dir, 'scripts', 'flashtool.py'),
         ])
 
@@ -93,6 +119,13 @@ def main():
                                     'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2',
                                     'checksum': 'MD5:2b9eeccc33470f9d3cda26983b9d2dc6',
                                     'size': '140360119'
+                                },
+                                {
+                                  'host': 'x86_64-apple-darwin',
+                                  'url': 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2',
+                                  'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2',
+                                  'checksum': 'MD5:75a171beac35453fd2f0f48b3cb239c3',
+                                  'size': '142999997'
                                 }
                             ]
                         }

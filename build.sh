@@ -1,11 +1,21 @@
 #!/bin/bash
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly ROOTDIR=$(readlink -f "${SCRIPT_DIR}")
 
 function die {
     echo "$@" >/dev/stderr
     exit 1
 }
+
+ROOTDIR=''
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ ! $(type greadlink) > /dev/null ]]; then
+        die "Install greadlink: brew install coreutils"
+    fi
+    ROOTDIR=$(greadlink -f "${SCRIPT_DIR}")
+else
+    ROOTDIR=$(readlink -f "${SCRIPT_DIR}")
+fi
+readonly ROOTDIR
 
 function main {
     local usage=$(cat <<EOF
