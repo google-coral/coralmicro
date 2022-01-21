@@ -1,5 +1,6 @@
 #include "libs/base/ethernet.h"
 #include "libs/base/main_freertos_m7.h"
+#include "libs/testlib/test_lib.h"
 #include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -27,6 +28,26 @@ static void EthGetIP(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%Q}", "ip", ip4addr_ntoa(netif_ip4_addr(ethernet)));
 }
 
+static void EthWritePHY(struct jsonrpc_request *request) {
+    int reg, val;
+    if (!valiant::testlib::JSONRPCGetIntegerParam(request, "reg", &reg)) {
+        jsonrpc_return_error(request, -1, "missing 'reg' parameter", nullptr);
+        return;
+    }
+    if (!valiant::testlib::JSONRPCGetIntegerParam(request, "val", &val)) {
+        jsonrpc_return_error(request, -1, "missing 'val' parameter", nullptr);
+        return;
+    }
+
+    status_t status = valiant::EthernetPHYWrite(reg, val);
+    if (status != kStatus_Success) {
+        jsonrpc_return_error(request, -1, "EthernetPHYWrite failed", nullptr);
+        return;
+    }
+
+    jsonrpc_return_success(request, "{}");
+}
+
 extern "C" void app_main(void *param) {
     valiant::InitializeEthernet(false);
 
@@ -43,6 +64,7 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterIO(rpc_server_io_http);
 
     rpc_server.RegisterRPC("eth_get_ip", EthGetIP);
+    rpc_server.RegisterRPC("eth_write_phy", EthWritePHY);
 
     vTaskSuspend(NULL);
 }

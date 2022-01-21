@@ -43,4 +43,5 @@ target_link_libraries(MFGTestPOE
     libs_RPCServer
     libs_RPCServerIOHTTP
     libs_mjson
+    libs_testlib
 )

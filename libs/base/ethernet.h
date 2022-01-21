@@ -7,6 +7,7 @@ namespace valiant {
 
 struct netif* GetEthernetInterface();
 void InitializeEthernet(bool default_iface);
+status_t EthernetPHYWrite(uint32_t phyReg, uint32_t data);
 
 }  // namespace valiant
 

@@ -404,6 +404,21 @@ class ValiantMFGTest(object):
         result = self.send_rpc(payload)
         return result
 
+    def eth_write_phy(self, reg, val):
+        """Writes `val` to the Ethernet PHY at location `reg`.
+
+        Returns:
+          A JSON-RPC result packet with no extra data, or JSON-RPC error.
+        """
+        payload = self.get_new_payload()
+        payload['method'] = 'eth_write_phy'
+        payload['params'].append({
+            'reg': reg,
+            'val': val,
+        })
+        result = self.send_rpc(payload)
+        return result
+
     def fuse_mac_address(self, address):
       """Writes a MAC address into device fuses.
 

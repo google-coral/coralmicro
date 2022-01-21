@@ -3,6 +3,7 @@
 #include "libs/base/utils.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
+#include "third_party/nxp/rt1176-sdk/components/phy/fsl_phy.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.h"
@@ -23,6 +24,10 @@ static phy_handle_t phyHandle = {
 
 struct netif* GetEthernetInterface() {
     return eth_netif;
+}
+
+status_t EthernetPHYWrite(uint32_t phyReg, uint32_t data) {
+    return PHY_Write(&phyHandle, phyReg, data);
 }
 
 void InitializeEthernet(bool default_iface) {
