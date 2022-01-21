@@ -21,6 +21,9 @@ static void elfloader_SetClassHandle(class_handle_t class_handle);
 static usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t event, void *param);
 void usb_device_task(void *param);
 
+extern "C" uint32_t disable_usb_timeout;
+uint32_t disable_usb_timeout __attribute__ ((section (".noinit_rpmsg_sh_mem")));
+
 extern "C" uint32_t vPortGetRunTimeCounterValue(void) {
     return 0;
 }
@@ -212,7 +215,7 @@ extern "C" int main(int argc, char **argv) {
 
     // See TRM chapter 10.3.1 for boot mode choices.
     // If boot mode is *not* the serial downloader, start the boot timer.
-    if (SRC_GetBootMode(SRC) != kSerialDownloader) {
+    if (SRC_GetBootMode(SRC) != kSerialDownloader && disable_usb_timeout != 0xffffffff) {
         xTimerStart(usb_timer, 0);
     }
 

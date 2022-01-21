@@ -30,7 +30,7 @@ ENTRY(Reset_Handler)
 TEXT_SIZE = 0x1fc00;
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x01000000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
-RPMSG_SHMEM_SIZE = 0;
+RPMSG_SHMEM_SIZE = 0x2000;
 
 /*
  * Valid memory regions:

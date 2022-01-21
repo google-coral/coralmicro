@@ -299,8 +299,18 @@ def LoadFlashloader(**kwargs):
     return FlashtoolStates.CHECK_FOR_FLASHLOADER
 
 def LoadElfloader(**kwargs):
+    symbols = subprocess.check_output('{} -t {}'.format(os.path.join(kwargs.get('toolchain_path'), 'arm-none-eabi-objdump'), kwargs['elfloader_elf_path']), shell=True, text=True)
+    disable_usb_timeout_address = 0
+    for symbol in symbols.splitlines():
+        if not 'disable_usb_timeout' in symbol:
+            continue
+        disable_usb_timeout_address = int(symbol.split()[0], 16)
+        break
+    if not disable_usb_timeout_address:
+        raise Exception('Failed to find disable_usb_timeout symbol in {}'.format(kwargs['elfloader_elf_path']))
     start_address = hexformat.srecord.SRecord.fromsrecfile(kwargs['elfloader_path']).startaddress
     subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'flash-image', kwargs['elfloader_path']], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.check_output('{} -u {} write-memory {} {{{{ffffffff}}}}'.format(kwargs['blhost_path'], flashloader_vidpid(), hex(disable_usb_timeout_address)), shell=True, text=True)
     subprocess.call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'call', hex(start_address), '0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if kwargs.get('target_elfloader', None):
         return FlashtoolStates.DONE
@@ -561,6 +571,7 @@ def main():
     unstripped_elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app))
     print('Finding all necessary files')
     elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir, cached_files)
+    elfloader_elf_path = os.path.join(os.path.dirname(elfloader_path), 'ELFLoader')
 
     if os.name == 'nt':
       blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', 'win', 'blhost.exe')
@@ -578,6 +589,7 @@ def main():
         elf_path,
         unstripped_elf_path,
         elfloader_path,
+        elfloader_elf_path,
         blhost_path,
         flashloader_path,
         elftosb_path,
@@ -612,6 +624,7 @@ def main():
         'flashloader_path': flashloader_path,
         'ram': args.ram,
         'elfloader_path': elfloader_path,
+        'elfloader_elf_path': elfloader_elf_path,
         'elf_path': elf_path,
         'unstripped_elf_path': unstripped_elf_path,
         'root_dir': root_dir,
