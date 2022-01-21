@@ -1,6 +1,7 @@
 .arduino15/
 arduino-cli.yaml
 
+cmake-build-*
 build/
 build-mfgtest/
 
@@ -18,3 +19,5 @@ __pycache__/
 *.swp
 
 .vscode
+.idea
+__pycache__

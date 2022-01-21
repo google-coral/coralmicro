@@ -539,6 +539,7 @@ def main():
 
     app_elf_group = parser.add_mutually_exclusive_group(required=True)
     app_elf_group.add_argument('--app', type=str)
+    app_elf_group.add_argument('--example', type=str)
     app_elf_group.add_argument('--elf_path', type=str)
 
     args = parser.parse_args()
@@ -566,9 +567,23 @@ def main():
                 cached_files = file_list.read().splitlines()
     else:
         cached_files = None
-    app_dir = os.path.join(build_dir, 'apps', args.app) if args.build_dir and args.app else None
-    elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app) + '.stripped')
-    unstripped_elf_path = args.elf_path if args.elf_path else os.path.join(app_dir, (args.subapp if args.subapp else args.app))
+
+    elf_path = args.elf_path if args.elf_path else None
+    unstripped_elf_path = args.elf_path if args.elf_path else None
+    if args.build_dir:
+        app_dir = None
+        elf_name = None
+        if args.app:
+            elf_name = args.app
+            app_dir = os.path.join(build_dir, 'apps', args.app)
+        elif args.example:
+            elf_name = args.example
+            app_dir = os.path.join(build_dir, 'examples', args.example)
+        elf_path = os.path.join(app_dir, (
+            args.subapp if args.subapp else elf_name) + '.stripped') if elf_path is None else elf_path
+        unstripped_elf_path = os.path.join(app_dir, (
+            args.subapp if args.subapp else elf_name)) if unstripped_elf_path is None else unstripped_elf_path
+
     print('Finding all necessary files')
     elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir, cached_files)
     elfloader_elf_path = os.path.join(os.path.dirname(elfloader_path), 'ELFLoader')

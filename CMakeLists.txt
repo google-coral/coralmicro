@@ -37,6 +37,7 @@ include_directories(${VALIANT_SOURCE_DIR})
 
 if (${CMAKE_SOURCE_DIR} STREQUAL ${VALIANT_SOURCE_DIR})
     add_subdirectory(${VALIANT_SOURCE_DIR}/apps)
+    add_subdirectory(${VALIANT_SOURCE_DIR}/examples)
 else()
     add_subdirectory(${VALIANT_SOURCE_DIR}/apps/ELFLoader)
 endif()
