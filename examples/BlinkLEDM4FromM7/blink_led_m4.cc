@@ -1,4 +1,4 @@
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
+#include "libs/base/gpio.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include <cstdio>
@@ -8,10 +8,9 @@ extern "C" [[noreturn]] void app_main(void *param) {
     bool on = true;
     while (true) {
         on = !on;
-        // TODO(vunam): switch over to using the valiant::gpio::SetGpio interface for the m4.
-        GPIO_PinWrite(GPIO9, 1, on);
-        GPIO_PinWrite(GPIO13, 5, on);
-        GPIO_PinWrite(GPIO13, 6, on);
+        valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, on);
+        valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, on);
+        valiant::gpio::SetGpio(valiant::gpio::Gpio::kTpuLED, on);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

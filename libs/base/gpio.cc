@@ -340,13 +340,25 @@ static GpioCallback IRQHandlers[Gpio::kCount];
 
 void Init() {
     gpio_semaphore = xSemaphoreCreateMutexStatic(&gpio_semaphore_static);
+
+    bool m4{false};
+#if (__CORTEX_M == 4)
+    m4 = true;
+#endif
     for (int i = 0; i < Gpio::kCount; ++i) {
         IRQHandlers[i] = nullptr;
-        GPIO_PinInit(
-            PinNameToModule[i],
-            PinNameToPin[i],
-            &PinNameToConfig[i]
-        );
+        switch (i) {
+            case Gpio::kTpuLED:
+            case Gpio::kEdgeTpuPgood:
+            case Gpio::kEdgeTpuReset:
+            case Gpio::kEdgeTpuPmic:
+                if (m4)  break; // Do not initialize tpu gpios for the m4.
+            default:
+               GPIO_PinInit(
+                PinNameToModule[i],
+                PinNameToPin[i],
+                &PinNameToConfig[i]);
+        }
         if (PinNameToConfig[i].interruptMode != kGPIO_NoIntmode) {
             GPIO_PinSetInterruptConfig(PinNameToModule[i], PinNameToPin[i], PinNameToConfig[i].interruptMode);
             GPIO_PortClearInterruptFlags(PinNameToModule[i], GPIO_PortGetInterruptFlags(PinNameToModule[i]));

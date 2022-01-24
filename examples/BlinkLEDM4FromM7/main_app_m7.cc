@@ -8,7 +8,5 @@ extern "C" [[noreturn]] void app_main(void *param) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     printf("Starting M4...\r\n");
     static_cast<valiant::IPCM7 *>(valiant::IPC::GetSingleton())->StartM4();
-    while (true) {
-        vTaskSuspend(nullptr);
-    }
+    vTaskSuspend(nullptr);
 }
