@@ -435,7 +435,8 @@ def ElfloaderTransferData(h, data, target, bar=None):
 def ProgramElfloader(**kwargs):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
     with open(kwargs['elf_path'], 'rb') as elf:
-        ElfloaderTransferData(h, elf.read(), ELFLOADER_TARGET_RAM)
+        data = elf.read()
+        ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM, bar=Bar(kwargs['elf_path'], max=len(data)))
     h.close()
     if not kwargs.get('debug', False):
         return FlashtoolStates.DONE
