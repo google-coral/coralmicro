@@ -65,6 +65,7 @@ def main():
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'VALIANT')
         os.makedirs(bootloader_dir)
         shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'), bootloader_dir)
+        shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'), bootloader_dir)
 
         # Leverage pyinstaller to package flashtool.
         pyinstaller_dist_path = os.path.join(core_out_dir, 'tools', 'flashtool')
