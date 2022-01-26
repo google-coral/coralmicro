@@ -157,7 +157,7 @@ bool UsbDeviceTask::Init() {
 
 UsbDeviceTask::UsbDeviceTask() {
     uint64_t unique_id = valiant::utils::GetUniqueID();
-    snprintf(serial_number.data(), serial_number.size(), "%lx%lx", static_cast<uint32_t>(unique_id >> 32), static_cast<uint32_t>(unique_id));
+    snprintf(serial_number.data(), serial_number.size(), "%08lx%08lx", static_cast<uint32_t>(unique_id >> 32), static_cast<uint32_t>(unique_id));
     uint32_t usbClockFreq = 24000000;
     usb_phy_config_struct_t phyConfig = {
         BOARD_USB_PHY_D_CAL,
