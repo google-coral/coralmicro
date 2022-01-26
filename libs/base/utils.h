@@ -37,6 +37,8 @@ inline uint64_t StrHash(const char* s) {
     return h;
 }
 
+size_t Base64Size(size_t data_size);
+
 }  // namespace utils
 }  // namespace valiant
 

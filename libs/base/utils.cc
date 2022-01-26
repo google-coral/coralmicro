@@ -92,5 +92,9 @@ bool GetWifiPSK(std::string* wifi_psk_out) {
     return true;
 }
 
+std::size_t Base64Size(std::size_t data_size) {
+        return (((data_size * 4) / 3) + 4 - 1) & -4;;
+}
+
 }  // namespace utils
 }  // namespace valiant

@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.13)
+project(CameraDetection)
+
+include_directories(.)
+
+add_executable_m7(CameraDetection
+    camera_detection.cc
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/httpsrv/httpsrv_base64.c
+    DATA
+    ${VALIANT_SOURCE_DIR}/models/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
+)
+
+target_link_libraries(CameraDetection
+    libs_base-m7_freertos
+    libs_RPCServer
+    libs_RPCServerIOHTTP
+    libs_mjson
+    libs_tensorflow-m7
+    libs_tpu_freertos
+)

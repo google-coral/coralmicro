@@ -49,7 +49,7 @@ static void take_picture_rpc(struct jsonrpc_request *r) {
     valiant::CameraTask::GetSingleton()->Disable();
     valiant::CameraTask::GetSingleton()->SetPower(false);
     if (ret) {
-        size_t base64_size = (((image_buffer.size() * 4) / 3) + 4 - 1) & -4;
+        auto base64_size = valiant::utils::Base64Size(image_buffer.size());
         std::vector<char> base64_data(base64_size);
         base64_encode_binary(reinterpret_cast<char*>(image_buffer.data()), base64_data.data(), image_buffer.size());
         jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %d, %Q: %d, %Q: %.*Q}",
