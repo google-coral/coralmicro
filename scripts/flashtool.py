@@ -259,25 +259,34 @@ def FlashtoolError(**kwargs):
     return FlashtoolStates.DONE
 
 def CheckForAny(**kwargs):
-    if is_valiant_connected(kwargs.get('serial', None)):
-        return FlashtoolStates.CHECK_FOR_VALIANT
-    if is_elfloader_connected(kwargs.get('serial', None)):
-        return FlashtoolStates.CHECK_FOR_ELFLOADER
-    if is_sdp_connected():
-        return FlashtoolStates.CHECK_FOR_SDP
-    if is_flashloader_connected():
-        return FlashtoolStates.CHECK_FOR_FLASHLOADER
+    for i in range(10):
+        if is_valiant_connected(kwargs.get('serial', None)):
+            return FlashtoolStates.CHECK_FOR_VALIANT
+        if is_elfloader_connected(kwargs.get('serial', None)):
+            return FlashtoolStates.CHECK_FOR_ELFLOADER
+        if is_sdp_connected():
+            return FlashtoolStates.CHECK_FOR_SDP
+        if is_flashloader_connected():
+            return FlashtoolStates.CHECK_FOR_FLASHLOADER
+        time.sleep(1)
     return FlashtoolStates.ERROR
 
 def CheckForValiant(**kwargs):
-    if is_valiant_connected(kwargs.get('serial', None)):
-        return FlashtoolStates.RESET_TO_SDP
+    for i in range(10):
+        if is_valiant_connected(kwargs.get('serial', None)):
+            # port is needed later as well, wait for it.
+            port = FindSerialPortForDevice(**kwargs)
+            if port and os.path.exists(port):
+                return FlashtoolStates.RESET_TO_SDP
+        time.sleep(1)
     # If we don't see Valiant on the bus, just check for SDP.
     return FlashtoolStates.CHECK_FOR_SDP
 
 def CheckForElfloader(**kwargs):
-    if is_elfloader_connected(kwargs.get('serial', None)):
-        return FlashtoolStates.RESET_ELFLOADER
+    for i in range(10):
+        if is_elfloader_connected(kwargs.get('serial', None)):
+            return FlashtoolStates.RESET_ELFLOADER
+        time.sleep(1)
     return FlashtoolStates.ERROR
 
 def FindSerialPortForDevice(**kwargs):
@@ -294,14 +303,22 @@ def ResetToSdp(**kwargs):
     if port is None:
         print('serial port not found')
         return FlashtoolStates.ERROR
-    try:
-        s = serial.Serial(port, baudrate=1200)
-        s.dtr = False
-        s.close()
-        return FlashtoolStates.CHECK_FOR_SDP
-    except Exception:
-        print('Unable to open %s' % port)
-        return FlashtoolStates.ERROR
+
+    # Port could be enumerated at this point but udev rules are still to get applied.
+    # Typically this results in exceptions like "[Errno 13] Permission denied: '/dev/ttyACM0'"
+    for i in range(10):
+        with serial.Serial(baudrate=1200) as s:
+            try:
+                s.port = port
+                s.dtr = False
+                s.open()
+                s.write(b'42')  ## Dummy write to force apply s.dtr.
+                return FlashtoolStates.CHECK_FOR_SDP
+            except:
+                pass
+        time.sleep(1)
+    print('Unable to open %s' % port)
+    return FlashtoolStates.ERROR
 
 def CheckForSdp(**kwargs):
     for i in range(10):
@@ -672,20 +689,24 @@ def main():
     for _ in range(sdp_devices):
         state = FlashtoolStates.CHECK_FOR_SDP
         while True:
+            print(state)
             state = state_handlers[state](
                     target_elfloader=True,
                     **state_machine_args,
                     )
             if state is FlashtoolStates.DONE:
+                print(state)
                 break
     for _ in range(flashloader_devices):
         state = FlashtoolStates.CHECK_FOR_FLASHLOADER
         while True:
+            print(state)
             state = state_handlers[state](
                     target_elfloader=True,
                     **state_machine_args,
                     )
             if state is FlashtoolStates.DONE:
+                print(state)
                 break
 
     # Sleep to allow time for the last device we threw into elfloader
@@ -740,6 +761,7 @@ def main():
                     **state_machine_args,
                     )
             if state is FlashtoolStates.DONE:
+                print(state)
                 break
 
 if __name__ == '__main__':
