@@ -9,6 +9,7 @@ import ipaddress
 import os
 import platform
 import serial
+import serial.tools.list_ports
 import signal
 import struct
 import subprocess
@@ -32,7 +33,6 @@ VALIANT_PID = 0x93ff
 OPEN_HID_RETRY_INTERVAL_S = 0.1
 OPEN_HID_RETRY_TIME_S = 15
 
-VALIANT_UART_PATH = '/dev/valiant_UART'
 BLOCK_SIZE = 2048 * 64
 BLOCK_COUNT = 64
 
@@ -61,8 +61,11 @@ def flashloader_vidpid():
 def is_valiant_connected(serial_number):
     for device in usb.core.find(find_all=True):
         if device.idVendor == VALIANT_VID and device.idProduct == VALIANT_PID:
-            if not serial_number or device.serial_number == serial_number:
-                return True
+            try:
+                if not serial_number or device.serial_number == serial_number:
+                    return True
+            except ValueError:
+                pass
     return False
 
 def is_elfloader_connected(serial_number):
@@ -277,14 +280,27 @@ def CheckForElfloader(**kwargs):
         return FlashtoolStates.RESET_ELFLOADER
     return FlashtoolStates.ERROR
 
+def FindSerialPortForDevice(**kwargs):
+    for port in serial.tools.list_ports.comports():
+        try:
+            if port.serial_number == kwargs.get('serial'):
+                return port.device
+        except ValueError:
+            pass
+    return None
+
 def ResetToSdp(**kwargs):
+    port = FindSerialPortForDevice(**kwargs)
+    if port is None:
+        print('serial port not found')
+        return FlashtoolStates.ERROR
     try:
-        s = serial.Serial(VALIANT_UART_PATH, baudrate=1200)
+        s = serial.Serial(port, baudrate=1200)
         s.dtr = False
         s.close()
         return FlashtoolStates.CHECK_FOR_SDP
     except Exception:
-        print('Unable to open %s' % VALIANT_UART_PATH)
+        print('Unable to open %s' % port)
         return FlashtoolStates.ERROR
 
 def CheckForSdp(**kwargs):
@@ -680,7 +696,10 @@ def main():
     for elfloader in EnumerateElfloader():
         serial_list.append(elfloader['serial_number'])
     for valiant in EnumerateValiant():
-        serial_list.append(valiant.serial_number)
+        try:
+          serial_list.append(valiant.serial_number)
+        except ValueError:
+          pass
 
     if args.list:
         print(serial_list)
@@ -691,6 +710,11 @@ def main():
         serial = args.serial
     if len(serial_list) > 1 and not serial:
         print('Multiple valiants detected, please provide a serial number.')
+        return
+    if not serial and len(serial_list) == 1:
+        serial = serial_list[0]
+    if not serial:
+        print('No Valiant devices detected!')
         return
 
     with tempfile.TemporaryDirectory() as workdir:
