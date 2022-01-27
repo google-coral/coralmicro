@@ -57,6 +57,7 @@ set(COMMON_C_FLAGS
     "--specs=nano.specs"
     "--specs=nosys.specs"
     "-u _printf_float"
+    "-ffile-prefix-map=${CMAKE_SOURCE_DIR}="
 )
 if (VALIANT_BOARD_REVISION STREQUAL EVK)
     list(APPEND COMMON_C_FLAGS "-DBOARD_REVISION_EVK")
