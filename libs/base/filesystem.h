@@ -10,12 +10,17 @@ namespace filesystem {
 
 bool Init();
 bool Open(lfs_file_t *handle, const char *path);
-bool Open(lfs_file_t* handle, const char *path, bool writable);
+bool Open(lfs_file_t* handle, const char *path, bool writable, bool append = false);
 int Read(lfs_file_t *handle, void *buffer, size_t size);
 int Write(lfs_file_t *handle, const void *buffer, size_t size);
 bool MakeDirs(const char *path);
+bool OpenDir(lfs_dir_t *dir, const char *path);
+bool ReadDir(lfs_dir_t *dir, lfs_info *info);
+bool CloseDir(lfs_dir_t *dir);
+bool RewindDir(lfs_dir_t *dir);
 std::unique_ptr<char[]> Dirname(const char *path);
 bool Seek(lfs_file_t *handle, size_t off, int whence);
+size_t Position(lfs_file_t *handle);
 bool Close(lfs_file_t *handle);
 bool Remove(const char *path);
 lfs_soff_t Size(lfs_file_t* handle);

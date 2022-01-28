@@ -140,12 +140,12 @@ bool Open(lfs_file_t* handle, const char *path) {
     return Open(handle, path, false);
 }
 
-bool Open(lfs_file_t* handle, const char *path, bool writable) {
+bool Open(lfs_file_t* handle, const char *path, bool writable, bool append) {
     int ret;
     MutexLock lock(lfs_semaphore_);
-    ret = lfs_file_open(&lfs_handle_, handle, path, writable ? (LFS_O_CREAT | LFS_O_RDWR | LFS_O_TRUNC) : LFS_O_RDONLY);
+    ret = lfs_file_open(&lfs_handle_, handle, path, writable ? ((append ? LFS_O_APPEND : LFS_O_TRUNC) | LFS_O_CREAT | LFS_O_RDWR) : LFS_O_RDONLY);
 
-    return (ret == LFS_ERR_OK) ? true : false;
+    return (ret == LFS_ERR_OK);
 }
 
 int Write(lfs_file_t *handle, const void *buffer, size_t size) {
@@ -201,6 +201,55 @@ bool MakeDirs(const char *path) {
     return true;
 }
 
+bool OpenDir(lfs_dir_t *dir, const char *path) {
+    int ret;
+    MutexLock lock(lfs_semaphore_);
+    ret = lfs_dir_open(&lfs_handle_, dir, path);
+
+    if (ret < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+bool ReadDir(lfs_dir_t *dir, lfs_info *info)  {
+    int ret;
+    MutexLock lock(lfs_semaphore_);
+    ret = lfs_dir_read(&lfs_handle_, dir, info);
+
+    if (ret <= 0) {
+        return false;
+    }
+
+    return true;
+}
+
+
+bool CloseDir(lfs_dir_t *dir) {
+    int ret;
+    MutexLock lock(lfs_semaphore_);
+    ret = lfs_dir_close(&lfs_handle_, dir);
+
+    if (ret < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+bool RewindDir(lfs_dir_t *dir) {
+    int ret;
+    MutexLock lock(lfs_semaphore_);
+    ret = lfs_dir_rewind(&lfs_handle_, dir);
+
+    if (ret < 0) {
+        return false;
+    }
+
+    return true;
+}
+
 int Read(lfs_file_t* handle, void *buffer, size_t size) {
     int ret;
     MutexLock lock(lfs_semaphore_);
@@ -215,6 +264,10 @@ bool Seek(lfs_file_t* handle, size_t off, int whence) {
     ret = lfs_file_seek(&lfs_handle_, handle, off, whence);
 
     return (ret >= 0) ? true : false;
+}
+
+size_t Position(lfs_file_t* handle) {
+    return lfs_file_seek(&lfs_handle_, handle, 0, LFS_SEEK_CUR);
 }
 
 bool Close(lfs_file_t* handle) {
