@@ -25,6 +25,12 @@ def main():
 
     arduino_dir = os.path.abspath(os.path.dirname(__file__))
     root_dir = os.path.abspath(os.path.join(arduino_dir, '..'))
+
+    # Remove previous coral package.
+    coral_package_dir = os.path.join(root_dir, '.arduino15', 'packages', 'coral')
+    if os.path.exists(coral_package_dir):
+        shutil.rmtree(coral_package_dir)
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Copy out arduino core to temp directory
         core_out_dir = os.path.join(tmpdir, 'coral-valiant-1.0.0')
