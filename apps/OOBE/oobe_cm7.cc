@@ -50,8 +50,7 @@ static int camera_http_fs_open_custom(void *context, struct fs_file *file, const
         file->data = reinterpret_cast<const char*>(camera_output.release());
         file->len = kPosenetSize;
         file->index = kPosenetSize;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        file->is_custom_file = true;
+        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT | FS_FILE_FLAGS_CUSTOM;
         file->pextension = reinterpret_cast<void*>(kCameraPextension);
         return 1;
     }
@@ -65,8 +64,7 @@ static int camera_http_fs_open_custom(void *context, struct fs_file *file, const
         file->data = reinterpret_cast<const char*>(pose_json.release());
         file->len = strlen(file->data);
         file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        file->is_custom_file = true;
+        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT | FS_FILE_FLAGS_CUSTOM;
         file->pextension = reinterpret_cast<void*>(kPosePextension);
         return 1;
     }

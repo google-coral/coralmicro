@@ -5,7 +5,7 @@
 #include <cstring>
 
 extern "C" {
-#include "third_party/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
+#include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
 extern "C" void app_main(void *param) {

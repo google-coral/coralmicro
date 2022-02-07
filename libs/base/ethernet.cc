@@ -62,8 +62,8 @@ void InitializeEthernet(bool default_iface) {
     // Delay 72ms for internal circuits to settle
     SDK_DelayAtLeastUs(72000, CLOCK_GetFreq(kCLOCK_CpuClk));
 
-    EnableIRQ(ENET_MAC0_Tx_Rx_Done_0_IRQn);
-    EnableIRQ(ENET_MAC0_Tx_Rx_Done_1_IRQn);
+    EnableIRQ(ENET_1G_MAC0_Tx_Rx_1_IRQn);
+    EnableIRQ(ENET_1G_MAC0_Tx_Rx_2_IRQn);
 
     mdioHandle.resource.csrClock_Hz = CLOCK_GetRootClockFreq(kCLOCK_Root_Bus);
     IP4_ADDR(&netif_ipaddr, 0, 0, 0, 0);

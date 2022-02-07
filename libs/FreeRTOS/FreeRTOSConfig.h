@@ -126,6 +126,9 @@ void vGenerateSecondaryToPrimaryInterrupt(void*);
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES (2)
 
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() do {} while (0)
+#if defined(__cplusplus)
+extern "C"
+#endif
 uint32_t vPortGetRunTimeCounterValue(void);
 #define portGET_RUN_TIME_COUNTER_VALUE() vPortGetRunTimeCounterValue()
 

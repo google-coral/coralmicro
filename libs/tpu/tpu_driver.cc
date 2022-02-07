@@ -4,6 +4,8 @@
 #include "third_party/darwinn/driver/config/common_csr_helper.h"
 #include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb_spec.h"
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/semphr.h"
 
 #include <cassert>
 

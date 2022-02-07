@@ -3,6 +3,7 @@
 #include "libs/base/utils.h"
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/etharp.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/netif/ethernet.h"
 
 extern "C" {

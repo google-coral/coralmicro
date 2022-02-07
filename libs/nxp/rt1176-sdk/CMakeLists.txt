@@ -49,6 +49,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common_arm.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dmamux.c
@@ -251,14 +252,14 @@ add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk_freertos PUBLIC
-    FSL_RTOS_FREE_RTOS
+    SDK_OS_FREE_RTOS
     USE_RTOS=1
     ${libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS}
     ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC
-    FSL_RTOS_FREE_RTOS
+    SDK_OS_FREE_RTOS
     ${libs_nxp_rt1176-sdk-m4_COMPILE_DEFINITIONS}
     ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
     ${libs_nxp_rt1176-sdk-mcmgr_COMPILE_DEFINITIONS}
@@ -368,6 +369,7 @@ target_compile_definitions(libs_nxp_rt1176-sdk_lwip_httpd PUBLIC
     LWIP_HTTPD_CUSTOM_FILES
     LWIP_HTTPD_DYNAMIC_FILE_READ
     LWIP_HTTPD_DYNAMIC_HEADERS
+    LWIP_HTTPD_FILE_EXTENSION
     LWIP_HTTPD_SUPPORT_POST
 )
 
@@ -416,6 +418,7 @@ set(libs_nxp_rt1176-sdk_wiced_SOURCES
 )
 
 set(libs_nxp_rt1176-sdk_wiced_INCLUDE_DIRECTORIES
+    ${VALIANT_SOURCE_DIR}/libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/bt_app_inc
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Components/stack/include
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Projects/bte/main
@@ -436,8 +439,8 @@ set(libs_nxp_rt1176-sdk_wiced_INCLUDE_DIRECTORIES
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/platform/include
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/include
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/platforms/MURATA_TYPE1MW
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/c_sdk/standard/common/include
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/c_sdk/standard/common/include/types
 )
 
 set(libs_nxp_rt1176-sdk_wiced_COMPILE_DEFINITIONS
@@ -541,7 +544,6 @@ add_library_m7(libs_nxp_rt1176-sdk-mbedtls
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/hmac_drbg.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/md.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/md5.c
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/md_wrap.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/oid.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pem.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/pk.c
@@ -563,6 +565,7 @@ add_library_m7(libs_nxp_rt1176-sdk-mbedtls
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/sha512.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_ciphersuites.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_cli.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_msg.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_srv.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/ssl_tls.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/timing.c
@@ -584,6 +587,7 @@ target_link_libraries(libs_nxp_rt1176-sdk-mbedtls
 target_include_directories(libs_nxp_rt1176-sdk-mbedtls PUBLIC
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/include
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk-mbedtls PUBLIC
