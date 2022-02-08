@@ -55,7 +55,7 @@ void CameraTask::PXP_IRQHandler() {
 
 bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
     bool ret = true;
-    uint8_t *raw = nullptr;
+    uint8_t* raw = nullptr;
     int index = GetSingleton()->GetFrame(&raw, true);
     if (!raw) {
         return false;
