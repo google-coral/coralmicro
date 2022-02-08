@@ -154,14 +154,14 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
   public:
     void Init(lpi2c_rtos_handle_t *i2c_handle);
     static CameraTask *GetSingleton() {
-        static CameraTask pmic;
-        return &pmic;
+        static CameraTask camera;
+        return &camera;
     }
     void Enable(camera::Mode mode);
     void Disable();
     // TODO(atv): Convert this to return a class that cleans up?
     int GetFrame(uint8_t **buffer, bool block);
-    static bool GetFrame(std::list<camera::FrameFormat> fmts);
+    static bool GetFrame(const std::list<camera::FrameFormat>& fmts);
     void ReturnFrame(int index);
     bool SetPower(bool enable);
     void SetTestPattern(camera::TestPattern pattern);

@@ -30,7 +30,7 @@ uint8_t* IndexToFramebufferPtr(int index) {
     return reinterpret_cast<uint8_t*>(framebuffers[index]);
 }
 
-int FramebufferPtrToIndex(uint8_t* framebuffer_ptr) {
+int FramebufferPtrToIndex(const uint8_t* framebuffer_ptr) {
     for (int i = 0; i < kFramebufferCount; ++i) {
         if (reinterpret_cast<uint8_t*>(framebuffers[i]) == framebuffer_ptr) {
             return i;
@@ -53,7 +53,7 @@ void CameraTask::PXP_IRQHandler() {
     }
 }
 
-bool CameraTask::GetFrame(std::list<camera::FrameFormat> fmts) {
+bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
     bool ret = true;
     uint8_t *raw = nullptr;
     int index = GetSingleton()->GetFrame(&raw, true);
@@ -124,7 +124,8 @@ bool CameraTask::GetFrame(std::list<camera::FrameFormat> fmts) {
 }
 
 namespace {
-void BayerInternal(const uint8_t *camera_raw, int width, int height, std::function<void(int x, int y, uint8_t r, uint8_t g, uint8_t b)> callback) {
+void BayerInternal(const uint8_t *camera_raw, int width, int height,
+                   const std::function<void(int x, int y, uint8_t r, uint8_t g, uint8_t b)> &callback) {
     bool blue = true, green = false;
     for (int y = 2; y < height - 2; y++) {
         int start = green ? 3 : 2;

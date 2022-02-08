@@ -10,8 +10,8 @@
 
 #if defined(__cplusplus)
 #define VALIDATE_TASK_PRIORITY(prio) \
-    static_assert(prio < configMAX_PRIORITIES); \
-    static_assert(prio >= 0);
+    static_assert(prio < configMAX_PRIORITIES, "Invalid value for task priority"); \
+    static_assert(prio >= 0, "Invalid value for task priority");
 
 VALIDATE_TASK_PRIORITY(IPC_TASK_PRIORITY);
 VALIDATE_TASK_PRIORITY(CONSOLE_TASK_PRIORITY);

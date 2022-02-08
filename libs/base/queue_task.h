@@ -53,7 +53,7 @@ class QueueTask {
     // Calls implementation-specific initialization, and then starts receiving from the queue.
     // This will block and yield the CPU if no messages are available.
     // When a message is received, the implementation-specific handler is invoked.
-    void TaskMain() {
+    [[noreturn]] void TaskMain() {
         TaskInit();
 
         Request msg;
