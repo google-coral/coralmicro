@@ -1,30 +1,27 @@
 #!/usr/bin/python3
 
 import argparse
-import cairosvg
 import collections
+import contextlib
 import enum
 import ipaddress
 import json
 import requests
 import socket
-import svgwrite
 import threading
 import time
 import tkinter as tk
-from io import BytesIO
-from copy import deepcopy
+
 from PIL import ImageTk, Image
 
 POSENET_INPUT_WIDTH = 481
 POSENET_INPUT_HEIGHT = 353
 
-Keypoint = collections.namedtuple('Keypoint', ['point', 'score'])
-Point = collections.namedtuple('Point', ['x', 'y'])
-Pose = collections.namedtuple('Pose', ['keypoints', 'score'])
+Keypoint = collections.namedtuple('Keypoint', ('point', 'score'))
+Point = collections.namedtuple('Point', ('x', 'y'))
+Pose = collections.namedtuple('Pose', ('keypoints', 'score'))
 
 class KeypointType(enum.IntEnum):
-    """Pose kepoints."""
     NOSE = 0
     LEFT_EYE = 1
     RIGHT_EYE = 2
@@ -65,135 +62,98 @@ EDGES = (
     (KeypointType.RIGHT_KNEE, KeypointType.RIGHT_ANKLE),
 )
 
-def draw_pose(dwg, pose, src_size, inference_box, color='yellow', threshold=0.2):
-    box_x, box_y, box_w, box_h = inference_box
-    scale_x, scale_y = src_size[0] / box_w, src_size[1] / box_h
-    xys = {}
-    for label, keypoint in pose.keypoints.items():
-        if keypoint.score < threshold: continue
-        # Offset and scale to source coordinate space.
-        kp_x = int((keypoint.point[0] - box_x) * scale_x)
-        kp_y = int((keypoint.point[1] - box_y) * scale_y)
+def parse_keypoints(keypoints):
+    return {KeypointType(i) : Keypoint(Point(x, y), score)
+            for i, (score, x, y) in enumerate(keypoints)}
 
-        xys[label] = (kp_x, kp_y)
-        dwg.add(dwg.circle(center=(int(kp_x), int(kp_y)), r=5,
-                           fill='cyan', fill_opacity=keypoint.score, stroke=color))
+def parse_poses(poses):
+    return [Pose(parse_keypoints(pose['keypoints']), pose['score']) for pose in poses]
 
-    for a, b in EDGES:
-        if a not in xys or b not in xys: continue
-        ax, ay = xys[a]
-        bx, by = xys[b]
-        dwg.add(dwg.line(start=(ax, ay), end=(bx, by), stroke=color, stroke_width=2))
-
-class ValiantOOBE(object):
-    def __init__(self, device_ip, device_port, print_payloads=False):
-        self.device_ip = device_ip
-        self.device_port = device_port
-        self.url = 'http://' + str(device_ip) + ':' + str(device_port) + '/jsonrpc'
-        self.print_payloads = print_payloads
-        self.next_id = 0
-        self.payload_template = {
-            'jsonrpc': '2.0',
-            'params': [],
-            'method': '',
-            'id': -1,
-        }
-        self.panel = None
-        self.frame = None
-        self.poses = []
-
-    def render_frame(self):
-        final_frame = self.frame.copy()
-        for pose in self.poses:
-            final_frame.alpha_composite(pose)
-
-        tk_image = ImageTk.PhotoImage(image=final_frame)
-        self.panel.configure(image=tk_image)
-        self.panel.image = tk_image
-
-    def pose(self, pose_json):
-        try:
-            poses = json.loads(pose_json)
-            for pose in poses:
-                pose_keypoints = {}
-                for i, value in enumerate(pose['keypoints']):
-                    name = KeypointType(i)
-                    score = value[0]
-                    x = value[1]
-                    y = value[2]
-                    pose_keypoints[name] = Keypoint(Point(x, y), score)
-                p = Pose(pose_keypoints, pose['score'])
-
-                dwg = svgwrite.Drawing('', size=(POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT))
-                draw_pose(dwg, p, (POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT), (0, 0, POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT))
-                png = cairosvg.svg2png(bytestring=dwg.tostring().encode())
-                pose_image = Image.open(BytesIO(png))
-                self.poses.append(pose_image)
-
-        except Exception as e:
-            print('exception ' + str(e))
-
-def FetchThread(shutdown_event, oobe):
-    thread_start = time.time()
-    last_report = time.time()
+def fetch_data(done, device_ip, update_image, update_poses, fps_target=10):
+    thread_start = time.monotonic()
+    last_report = time.monotonic()
+    
     frame_count = 0
-    while not shutdown_event.is_set():
-        start = time.time()
+    while not done.is_set():
+        start = time.monotonic()
         try:
-            r = requests.get('http://' + str(oobe.device_ip) + '/camera', timeout=1)
-            if len(r.content) > 0:
+            r = requests.get('http://%s/camera' % device_ip, timeout=1)
+            if r.status_code == requests.codes.ok and r.content:
                 rgb_image = Image.frombytes('RGB', (POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT), r.content)
-                rgb_image.putalpha(255)
-                oobe.frame = rgb_image
+                update_image(rgb_image)
                 frame_count += 1
-            r2 = requests.get('http://' + str(oobe.device_ip) + '/pose', timeout=1)
-            if r2.status_code == requests.codes.ok:
-                oobe.poses = []
-                oobe.pose(r2.content)
-        # These happen occasionally... nothing to do but try next cycle.
+
+            r = requests.get('http://%s/pose' % device_ip, timeout=1)
+            if r.status_code == requests.codes.ok:
+                update_poses(parse_poses(json.loads(r.content)))
         except socket.error:
-            pass
+            pass  # These happen occasionally... nothing to do but try next cycle.
 
-        if oobe.frame:
-            oobe.render_frame()
-
-        end = time.time()
-        if (end - last_report) > 10:
-            frames_per_second = frame_count / (end - thread_start)
+        end = time.monotonic()
+        if end - last_report > 5:
+            fps = frame_count / (end - thread_start)
             last_report = end
-            print('FPS: %f Total frames: %d Time: %f' % (frames_per_second, frame_count, (end - thread_start)))
+            print('FPS: %f Total frames: %d Time: %f' % (fps, frame_count, (end - thread_start)))
 
-        fps_target = 10
-        sleep_time = (1.0 / fps_target) - (end - start)
-        if (sleep_time > 0):
-            time.sleep(sleep_time)
+        time.sleep(max(0, (1.0 / fps_target) - (end - start)))
 
+@contextlib.contextmanager
+def fetch(*args):
+    done = threading.Event()
+    thread = threading.Thread(target=lambda: fetch_data(done, *args))
+    thread.start()
+    try:
+        yield
+    finally:
+        done.set()
+        thread.join()
+ 
 def main():
     parser = argparse.ArgumentParser(description='Valiant OOBE visualizer',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--device_ip_address', type=str, default='10.10.10.1')
+    parser.add_argument('--device_ip_address', type=ipaddress.ip_address, default='10.10.10.1')
     args = parser.parse_args()
 
-    oobe = ValiantOOBE(ipaddress.ip_address(args.device_ip_address), 80, print_payloads=True)
+    root = tk.Tk()
+    root.title("Valiant OOBE")
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
+    canvas = tk.Canvas(root, width=POSENET_INPUT_WIDTH, height=POSENET_INPUT_HEIGHT)
+    image_id = canvas.create_image(0, 0, anchor='nw')
+    canvas.grid(column=0, row=0, sticky='nwes')
 
-    fetch_shutdown_event = threading.Event()
-    fetch_thread = threading.Thread(target=lambda: FetchThread(fetch_shutdown_event, oobe))
-    fetch_thread.start()
+    tk_image = None
+    def update_image(image):
+        nonlocal tk_image
+        tk_image = ImageTk.PhotoImage(image=image)
+        canvas.itemconfigure(image_id, image=tk_image)        
 
-    window = tk.Tk()
-    window.title("Valiant OOBE")
-    window.geometry("%dx%d" % (POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT))
-    window.configure(background='grey')
+    def update_poses(poses, r=5, threshold=0.2):
+        canvas.delete('pose')
+        for pose in poses:
+            for start, end in EDGES:
+                s = pose.keypoints[start]
+                e = pose.keypoints[end]
+                if s.score < threshold or e.score < threshold:
+                    continue
+                canvas.create_line(s.point.x, s.point.y, e.point.x, e.point.y, 
+                                   fill='yellow', tags=('pose',))
 
-    oobe.panel = tk.Label(window)
-    oobe.panel.pack()
-    try:
-        window.mainloop()
-    except KeyboardInterrupt:
-        pass
+            for keypoint in pose.keypoints.values():
+                if keypoint.score < threshold: 
+                    continue
+                x, y = keypoint.point
+                canvas.create_oval(x - r, y - r, x + r, y + r, 
+                                   fill='cyan', outline='yellow', tags=('pose',))
 
-    fetch_shutdown_event.set()
-    fetch_thread.join()
+
+    with fetch(args.device_ip_address, 
+               lambda image: root.after(0, lambda: update_image(image)), 
+               lambda poses: root.after(0, lambda: update_poses(poses))):
+        try:
+            root.mainloop()
+        except KeyboardInterrupt:
+            pass
 
 if __name__ == '__main__':
     main()
