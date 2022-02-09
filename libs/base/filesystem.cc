@@ -3,6 +3,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
+#include "./third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 #include <cstdio>
 #include <memory>
 
@@ -177,10 +178,6 @@ bool MakeDirs(const char *path) {
         return false;
     }
 
-    if (path[0] != '/') {
-        return false;
-    }
-
     MutexLock lock(lfs_semaphore_);
     std::unique_ptr<char[]> path_copy(new char[path_len + 1]);
     memset(path_copy.get(), 0, path_len + 1);
@@ -300,6 +297,38 @@ fail:
 bool Remove(const char *path) {
     MutexLock lock(lfs_semaphore_);
     int ret = lfs_remove(&lfs_handle_, path);
+    if (ret < 0) {
+        return false;
+    }
+    return true;
+}
+
+bool Stat(const char *path, struct lfs_info *info) {
+    MutexLock lock(lfs_semaphore_);
+    int ret = lfs_stat(&lfs_handle_, path, info);
+    if (ret < 0) {
+        return false;
+    }
+    return true;
+}
+
+bool DirOpen(lfs_dir_t *dir, const char *path) {
+    MutexLock lock(lfs_semaphore_);
+    int ret = lfs_dir_open(&lfs_handle_, dir, path);
+    if (ret < 0) {
+        return false;
+    }
+    return true;
+}
+
+int DirRead(lfs_dir_t *dir, struct lfs_info *info) {
+    MutexLock lock(lfs_semaphore_);
+    return lfs_dir_read(&lfs_handle_, dir, info);
+}
+
+bool DirClose(lfs_dir_t *dir) {
+    MutexLock lock(lfs_semaphore_);
+    int ret = lfs_dir_close(&lfs_handle_, dir);
     if (ret < 0) {
         return false;
     }

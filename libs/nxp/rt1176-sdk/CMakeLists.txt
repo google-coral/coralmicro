@@ -40,6 +40,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${libs_nxp_rt1176-sdk_SOURCES_REVISION}
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
+    # ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/internal_flash/fsl_adapter_flexspi_nor_flash.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.c
@@ -138,7 +139,11 @@ set(libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/xip
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/common_task
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/internal_flash
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/log
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/mem_manager
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/messaging
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager
@@ -254,6 +259,7 @@ add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
 target_compile_definitions(libs_nxp_rt1176-sdk_freertos PUBLIC
     SDK_OS_FREE_RTOS
     USE_RTOS=1
+    FSL_OSA_TASK_ENABLE
     ${libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS}
     ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS}
 )
@@ -596,3 +602,5 @@ target_compile_definitions(libs_nxp_rt1176-sdk-mbedtls PUBLIC
 
 target_sources(libs_nxp_rt1176-sdk_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
 target_sources(libs_nxp_rt1176-sdk_freertos-m4 PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS-m4>)
+
+add_subdirectory(edgefast_bluetooth)

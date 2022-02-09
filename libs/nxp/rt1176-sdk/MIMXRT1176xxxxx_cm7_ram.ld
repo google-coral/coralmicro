@@ -162,6 +162,33 @@ SECTIONS
     . = ALIGN(4);
   } > m_text
 
+  ._settings_handler_static :
+  {
+    . = ALIGN(4);
+    _settings_handler_static_list_start = .;
+    KEEP(*(SORT(._settings_handler_static.static.*)))
+    _settings_handler_static_list_end = .;
+    . = ALIGN(4);
+  } > m_text
+
+  ._bt_gatt_service_static :
+  {
+    . = ALIGN(4);
+    _bt_gatt_service_static_list_start = .;
+    KEEP(*(SORT(._bt_gatt_service_static.static.*)))
+    _bt_gatt_service_static_list_end = .;
+    . = ALIGN(4);
+  } > m_text
+
+  ._bt_l2cap_fixed_chan :
+  {
+    . = ALIGN(4);
+    _bt_l2cap_fixed_chan_list_start = .;
+    KEEP(*(SORT(._bt_l2cap_fixed_chan.static.*)))
+    _bt_l2cap_fixed_chan_list_end = .;
+    . = ALIGN(4);
+  } > m_text
+
   .ARM.extab :
   {
     *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -247,6 +274,9 @@ SECTIONS
     *(.data)                 /* .data sections */
     *(.data*)                /* .data* sections */
     KEEP(*(.jcr*))
+    . = ALIGN(4);
+    _net_buf_pool_list = .;
+    KEEP(*(SORT(._net_buf_pool*)))
     . = ALIGN(4);
     __data_end__ = .;        /* define a global symbol at data end */
   } > m_data
