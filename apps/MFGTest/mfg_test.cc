@@ -32,6 +32,8 @@ static std::map<int, std::array<uint32_t, 5>> j5_j6_iomuxc;
 // GPIO module / pin number for each pin to be tested.
 static std::map<int, std::pair<GPIO_Type*, int>> j5_j6_gpio_pins;
 
+constexpr static int kDacPin = 95;
+
 static void InitializeLoopbackMappings() {
     j5_j6_loopback_mapping = {
         {1, 3},
@@ -83,6 +85,7 @@ static void InitializeLoopbackMappings() {
         {92, 94},
         {93, 100},
         {94, 92},
+        {95, 14},
         {96, 98},
         {98, 96},
         {100, 93},
@@ -164,6 +167,7 @@ static void InitializeLoopbackMappings() {
         {92, {IOMUXC_GPIO_SD_B1_01_GPIO10_IO04}},
         {93, {IOMUXC_GPIO_AD_34_GPIO10_IO01}},
         {94, {IOMUXC_GPIO_SD_B1_03_GPIO10_IO06}},
+        {95, {}},
         {96, {IOMUXC_GPIO_SD_B1_02_GPIO10_IO05}},
         {98, {IOMUXC_GPIO_SD_B1_05_GPIO10_IO08}},
         {100, {IOMUXC_GPIO_SD_B1_00_GPIO10_IO03}},
@@ -246,6 +250,7 @@ static void InitializeLoopbackMappings() {
         {92, {GPIO10, 4}},
         {93, {GPIO10, 1}},
         {94, {GPIO10, 6}},
+        {95, {}},
         {96, {GPIO10, 5}},
         {98, {GPIO10, 8}},
         {100, {GPIO10, 3}},
@@ -442,14 +447,19 @@ static void SetPinPairToGpio(struct jsonrpc_request *request) {
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
     };
-    GPIO_PinInit(output_pin_gpio_values->second.first, output_pin_gpio_values->second.second, &pin_config_output);
-    GPIO_PinInit(input_pin_gpio_values->second.first, input_pin_gpio_values->second.second, &pin_config_input);
     const uint32_t kInputBufferOn = 1U;
-    IOMUXC_SetPinMux(output_pin_mux->second[0], output_pin_mux->second[1], output_pin_mux->second[2], output_pin_mux->second[3], output_pin_mux->second[4], kInputBufferOn);
-    IOMUXC_SetPinMux(input_pin_mux->second[0], input_pin_mux->second[1], input_pin_mux->second[2], input_pin_mux->second[3], input_pin_mux->second[4], kInputBufferOn);
     const uint32_t kDisablePulls = 0U;
-    IOMUXC_SetPinConfig(output_pin_mux->second[0], output_pin_mux->second[1], output_pin_mux->second[2], output_pin_mux->second[3], output_pin_mux->second[4], kDisablePulls);
-    IOMUXC_SetPinConfig(input_pin_mux->second[0], input_pin_mux->second[1], input_pin_mux->second[2], input_pin_mux->second[3], input_pin_mux->second[4], kDisablePulls);
+    if (output_pin != kDacPin) {
+        GPIO_PinInit(output_pin_gpio_values->second.first, output_pin_gpio_values->second.second, &pin_config_output);
+        IOMUXC_SetPinMux(output_pin_mux->second[0], output_pin_mux->second[1], output_pin_mux->second[2], output_pin_mux->second[3], output_pin_mux->second[4], kInputBufferOn);
+        IOMUXC_SetPinConfig(output_pin_mux->second[0], output_pin_mux->second[1], output_pin_mux->second[2], output_pin_mux->second[3], output_pin_mux->second[4], kDisablePulls);
+    }
+
+    if (input_pin != kDacPin) {
+        GPIO_PinInit(input_pin_gpio_values->second.first, input_pin_gpio_values->second.second, &pin_config_input);
+        IOMUXC_SetPinMux(input_pin_mux->second[0], input_pin_mux->second[1], input_pin_mux->second[2], input_pin_mux->second[3], input_pin_mux->second[4], kInputBufferOn);
+        IOMUXC_SetPinConfig(input_pin_mux->second[0], input_pin_mux->second[1], input_pin_mux->second[2], input_pin_mux->second[3], input_pin_mux->second[4], kDisablePulls);
+    }
 
     jsonrpc_return_success(request, "{}");
 }
@@ -489,7 +499,13 @@ static void SetGpio(struct jsonrpc_request *request) {
         jsonrpc_return_error(request, -1, "invalid pin", nullptr);
         return;
     }
-    GPIO_PinWrite(pin_gpio_values->second.first, pin_gpio_values->second.second, enable);
+
+    if (pin != kDacPin) {
+        GPIO_PinWrite(pin_gpio_values->second.first, pin_gpio_values->second.second, enable);
+    } else {
+        valiant::analog::WriteDAC(enable ? 4095 : 1);
+        valiant::analog::EnableDAC(true);
+    }
     jsonrpc_return_success(request, "{}", nullptr);
 }
 
@@ -552,13 +568,8 @@ static void SetDACValue(struct jsonrpc_request *request) {
         return;
     }
 
-    valiant::analog::Init(valiant::analog::Device::DAC1);
-    if (counts) {
-        valiant::analog::EnableDAC(true);
-        valiant::analog::WriteDAC(counts);
-    } else {
-        valiant::analog::EnableDAC(false);
-    }
+    valiant::analog::WriteDAC(counts);
+    valiant::analog::EnableDAC(!!counts);
 
     jsonrpc_return_success(request, "{}");
 }
@@ -760,6 +771,7 @@ static void ReadMACAddress(struct jsonrpc_request *request) {
 
 extern "C" void app_main(void *param) {
     InitializeLoopbackMappings();
+    valiant::analog::Init(valiant::analog::Device::DAC1);
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
     valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
