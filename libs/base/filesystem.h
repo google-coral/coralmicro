@@ -1,7 +1,7 @@
 #ifndef _LIBS_BASE_FILESYSTEM_H_
 #define _LIBS_BASE_FILESYSTEM_H_
 
-#include "third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.h"
+#include "third_party/littlefs/lfs.h"
 #include <cstdlib>
 #include <memory>
 

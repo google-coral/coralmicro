@@ -305,24 +305,6 @@ target_link_libraries(libs_nxp_rt1176-sdk_sdmmc
     libs_nxp_rt1176-sdk_freertos
 )
 
-add_library_m7(libs_nxp_rt1176-sdk_littlefs
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
-)
-
-target_include_directories(libs_nxp_rt1176-sdk_littlefs PUBLIC
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
-)
-
-add_library_m4(libs_nxp_rt1176-sdk_littlefs-m4
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c
-)
-
-target_include_directories(libs_nxp_rt1176-sdk_littlefs-m4 PUBLIC
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs
-)
-
 add_library_m7(libs_nxp_rt1176-sdk_lwip
     dhcp_server.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.c

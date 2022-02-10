@@ -52,3 +52,6 @@
 [submodule "third_party/toolchain-win"]
 	path = third_party/toolchain-win
 	url = https://spacepark.googlesource.com/valiant/toolchain
+[submodule "third_party/littlefs"]
+	path = third_party/littlefs
+	url = https://github.com/littlefs-project/littlefs

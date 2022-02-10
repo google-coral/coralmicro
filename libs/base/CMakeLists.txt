@@ -38,7 +38,7 @@ if (VALIANT_BOARD_REVISION STREQUAL P0 OR VALIANT_BOARD_REVISION STREQUAL P1)
         libs_tasks_CameraTask_freertos
         libs_tasks_PmicTask_freertos
         libs_tasks_PowerMonitorTask_freertos
-        libs_nxp_rt1176-sdk_littlefs
+        libs_littlefs
         libs_nxp_rt1176-sdk_lwip
         libs_nxp_rt1176-sdk_lwip_httpd
     )
@@ -71,7 +71,7 @@ target_link_libraries(libs_base-m4_freertos
     libs_nxp_rt1176-sdk_freertos-m4
     libs_tasks_CameraTask_freertos-m4
     libs_tasks_PmicTask_freertos-m4
-    libs_nxp_rt1176-sdk_littlefs-m4
+    libs_littlefs-m4
 )
 
 target_sources(libs_base-m7_bm PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_bm>)
