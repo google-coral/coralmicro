@@ -3,9 +3,9 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 

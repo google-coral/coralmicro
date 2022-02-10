@@ -18,15 +18,14 @@ limitations under the License.
 #include "third_party/freertos_kernel/include/task.h"
 
 #include "libs/base/filesystem.h"
-#include "tensorflow/lite/micro/examples/person_detection/detection_responder.h"
-#include "tensorflow/lite/micro/examples/person_detection/image_provider.h"
-#include "tensorflow/lite/micro/examples/person_detection/model_settings.h"
-#include "tensorflow/lite/micro/examples/person_detection/person_detect_model_data.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
-#include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "tensorflow/lite/micro/system_setup.h"
-#include "tensorflow/lite/schema/schema_generated.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/detection_responder.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/system_setup.h"
+#include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {

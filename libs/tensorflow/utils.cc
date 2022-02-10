@@ -1,7 +1,7 @@
 #include "libs/tensorflow/utils.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/kernels/kernel_runner.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/test_helpers.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/kernels/kernel_runner.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/test_helpers.h"
 
 namespace valiant {
 namespace tensorflow {
@@ -27,13 +27,25 @@ std::unique_ptr<tflite::MicroInterpreter> MakeEdgeTpuInterpreterInternal(
     return interpreter;
 }
 
-bool ResizeImage(const ImageDims& in_dims, const uint8_t *in,
-                 const ImageDims& out_dims, uint8_t* out) {
+bool ResizeImage(const ImageDims& in_dims, const uint8_t *uin,
+                 const ImageDims& out_dims, uint8_t* uout) {
     if (in_dims == out_dims) {
-        memcpy(out, in, ImageSize(in_dims));
+        memcpy(uout, uin, ImageSize(in_dims));
         return true;
     }
 
+    // TODO(dkovalev): Implement resizing in a more efficient way. TFLM doesn't
+    // support uint8, int8 is required for all operations.
+    const auto in_size = ImageSize(in_dims);
+    auto in_tmp = std::make_unique<int8_t[]>(in_size);
+    int8_t* in = in_tmp.get();
+
+    const auto out_size = ImageSize(out_dims);
+    auto out_tmp = std::make_unique<int8_t[]>(out_size);
+    int8_t* out = out_tmp.get();
+
+    for (int i = 0; i < in_size; ++i)
+        in[i] = static_cast<int>(uin[i]) - 128;
 
     // Array with 4 values: batch, rows, columns, depth
     int input_dims_ints[] = {4, 1, in_dims.height, in_dims.width, in_dims.depth};
@@ -80,6 +92,10 @@ bool ResizeImage(const ImageDims& in_dims, const uint8_t *in,
         printf("failed to invoke\r\n");
         return false;
     }
+
+    for (int i = 0; i < out_size; ++i)
+        uout[i] = static_cast<int>(out[i]) + 128;
+
     return true;
 }
 

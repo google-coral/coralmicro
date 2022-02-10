@@ -5,7 +5,7 @@
 #include "libs/tpu/executable_generated.h"
 #include "libs/tpu/tpu_driver.h"
 #include "libs/usb_host_edgetpu/usb_host_edgetpu.h"
-#include "third_party/tensorflow/tensorflow/lite/c/common.h"
+#include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 

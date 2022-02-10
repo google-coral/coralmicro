@@ -1,6 +1,6 @@
 #include "libs/tpu/edgetpu_op.h"
 #include "libs/tpu/edgetpu_manager.h"
-#include "third_party/tensorflow/tensorflow/lite/c/common.h"
+#include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
 namespace valiant {
 

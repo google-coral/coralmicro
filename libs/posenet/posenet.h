@@ -1,7 +1,7 @@
 #ifndef _LIBS_POSENET_H_
 #define _LIBS_POSENET_H_
 
-#include "third_party/tensorflow/tensorflow/lite/c/common.h"
+#include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 #include <cstdint>
 
 namespace valiant {

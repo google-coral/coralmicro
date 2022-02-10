@@ -6,7 +6,7 @@
 
 #include "posenet_decoder.h"
 #include "flatbuffers/flexbuffers.h"
-#include "tensorflow/lite/kernels/internal/tensor.h"
+#include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 
 namespace coral {

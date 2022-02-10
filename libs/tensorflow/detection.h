@@ -2,7 +2,7 @@
 #define _LIBS_TENSORFLOW_DETECTION_H_
 
 #include "libs/tensorflow/utils.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include <limits>
 #include <vector>
 

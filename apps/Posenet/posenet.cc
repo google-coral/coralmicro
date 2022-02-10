@@ -2,7 +2,7 @@
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tpu/edgetpu_manager.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 extern "C" void app_main(void *param) {
     valiant::posenet::Output output;

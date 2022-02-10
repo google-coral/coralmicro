@@ -16,11 +16,10 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "third_party/tensorflow/tensorflow/lite/schema/schema_generated.h"
-#include "third_party/tensorflow/tensorflow/lite/version.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 
 #include <array>
 #include <map>

@@ -12,7 +12,7 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 #include <array>
 #include <memory>

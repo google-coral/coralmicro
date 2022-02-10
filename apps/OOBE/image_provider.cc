@@ -1,9 +1,9 @@
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/person_detection/image_provider.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/person_detection/model_settings.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tensorflow/tensorflow/lite/schema/schema_generated.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 
 #include <cstring>
 #include <memory>

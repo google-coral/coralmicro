@@ -13,20 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "tensorflow/lite/micro/examples/micro_speech/main_functions.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
 
-#include "tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
-#include "tensorflow/lite/micro/examples/micro_speech/command_responder.h"
-#include "tensorflow/lite/micro/examples/micro_speech/feature_provider.h"
-#include "tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
-#include "tensorflow/lite/micro/examples/micro_speech/micro_features/model.h"
-#include "tensorflow/lite/micro/examples/micro_speech/recognize_commands.h"
-#include "tensorflow/lite/micro/kernels/micro_ops.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
-#include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/version.h"
+#include "apps/MicroSpeech/model.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/command_responder.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/feature_provider.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/recognize_commands.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/kernels/micro_ops.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {

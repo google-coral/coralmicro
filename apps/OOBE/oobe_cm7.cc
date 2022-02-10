@@ -13,7 +13,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 #include <cstdio>
 #include <cstring>

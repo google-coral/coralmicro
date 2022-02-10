@@ -48,21 +48,25 @@ std::vector<Object> GetDetectionResults(
 
 std::vector<Object> GetDetectionResults(
     tflite::MicroInterpreter* interpreter,
-    float threshold,
-    size_t top_k) {
-    const float *bboxes;
-    const float *ids;
-    const float *scores;
-    const float *count;
+    float threshold, size_t top_k) {
+
     if (interpreter->outputs().size() != 4) {
         printf("Output size mismatch\r\n");
         return std::vector<Object>();
     }
 
-    bboxes = tflite::GetTensorData<float>(interpreter->output_tensor(0));
-    ids = tflite::GetTensorData<float>(interpreter->output_tensor(1));
-    scores = tflite::GetTensorData<float>(interpreter->output_tensor(2));
-    count = tflite::GetTensorData<float>(interpreter->output_tensor(3));
+    const float *bboxes, *ids, *scores, *count;
+    if (interpreter->output_tensor(2)->dims->size == 1) {
+        scores = tflite::GetTensorData<float>(interpreter->output_tensor(0));
+        bboxes = tflite::GetTensorData<float>(interpreter->output_tensor(1));
+        count = tflite::GetTensorData<float>(interpreter->output_tensor(2));
+        ids = tflite::GetTensorData<float>(interpreter->output_tensor(3));
+    } else {
+        bboxes = tflite::GetTensorData<float>(interpreter->output_tensor(0));
+        ids = tflite::GetTensorData<float>(interpreter->output_tensor(1));
+        scores = tflite::GetTensorData<float>(interpreter->output_tensor(2));
+        count = tflite::GetTensorData<float>(interpreter->output_tensor(3));
+    }
 
     return GetDetectionResults(bboxes, ids, scores, static_cast<size_t>(count[0]),
                                threshold, top_k);

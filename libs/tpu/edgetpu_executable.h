@@ -3,7 +3,7 @@
 
 #include "libs/tpu/executable_generated.h"
 #include "libs/tpu/tpu_driver.h"
-#include "third_party/tensorflow/tensorflow/lite/c/common.h"
+#include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
 #include <cstdlib>
 #include <map>

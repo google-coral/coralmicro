@@ -1,7 +1,7 @@
 #include "libs/tpu/edgetpu_executable.h"
 
 #include "libs/base/utils.h"
-#include "third_party/tensorflow/tensorflow/lite/kernels/kernel_util.h"
+#include "third_party/tflite-micro/tensorflow/lite/kernels/kernel_util.h"
 
 namespace valiant {
 

@@ -3,10 +3,9 @@
 #include "libs/base/filesystem.h"
 #include "libs/posenet/posenet_decoder_op.h"
 #include "libs/tpu/edgetpu_op.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tensorflow/tensorflow/lite/version.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 namespace valiant {
 namespace posenet {

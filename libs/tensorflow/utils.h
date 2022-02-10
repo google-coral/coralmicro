@@ -3,9 +3,9 @@
 
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
 namespace valiant {
 namespace tensorflow {
@@ -31,8 +31,8 @@ inline int ImageSize(const ImageDims& dims) {
   return dims.height * dims.width * dims.depth;
 }
 
-bool ResizeImage(const ImageDims& in_dims, const uint8_t *in,
-                 const ImageDims& out_dims, uint8_t* out);
+bool ResizeImage(const ImageDims& in_dims, const uint8_t *uin,
+                 const ImageDims& out_dims, uint8_t* uout);
 
 inline int TensorSize(TfLiteTensor* tensor) {
     int size = 1;

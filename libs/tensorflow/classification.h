@@ -1,7 +1,7 @@
 #ifndef _LIBS_TENSORFLOW_CLASSIFICATION_H_
 #define _LIBS_TENSORFLOW_CLASSIFICATION_H_
 
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include <limits>
 #include <vector>
 

@@ -1,13 +1,12 @@
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/peripherals.h"
 #include "libs/nxp/rt1176-sdk/pin_mux.h"
+#include "libs/tensorflow/hello_world_model.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/all_ops_resolver.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/hello_world/model.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tensorflow/tensorflow/lite/version.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 #include <cstdio>
 

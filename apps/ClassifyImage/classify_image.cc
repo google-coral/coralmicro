@@ -2,9 +2,9 @@
 #include "libs/tensorflow/classification.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_error_reporter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -23,7 +23,7 @@ void real_main() {
         return;
     }
 
-    auto input_data = filesystem::ReadToMemory("/apps/ClassifyImage/cat.rgb", &input_size);
+    auto input_data = filesystem::ReadToMemory("/apps/ClassifyImage/cat_224x224.rgb", &input_size);
     if (!input_data || input_size == 0) {
         printf("Failed to load input\r\n");
         return;

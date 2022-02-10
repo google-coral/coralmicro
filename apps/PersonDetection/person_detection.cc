@@ -4,9 +4,8 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/person_detection/detection_responder.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/person_detection/main_functions.h"
-#include "third_party/tensorflow/tensorflow/lite/micro/examples/person_detection/person_detect_model_data.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/detection_responder.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/main_functions.h"
 
 #include <cstdio>
 #include <cstring>
