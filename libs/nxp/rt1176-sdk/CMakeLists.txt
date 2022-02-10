@@ -61,6 +61,7 @@ set(libs_nxp_rt1176-sdk_SOURCES
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpadc.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpspi.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_mu.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.c
@@ -240,6 +241,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_bm-m4
 add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpspi_freertos.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
@@ -249,6 +251,7 @@ add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
 add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction_free_rtos.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpspi_freertos.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
