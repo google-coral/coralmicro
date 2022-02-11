@@ -594,6 +594,7 @@ def main():
        toolchain_dir = 'toolchain'
 
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
+    cached_files = None
     if args.cached:
         cached_files_path = os.path.join(build_dir, 'cached_files.txt')
         if os.path.exists(cached_files_path):

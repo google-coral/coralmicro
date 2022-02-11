@@ -1,20 +1,19 @@
+#include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/tempsense.h"
 #include "libs/base/timer.h"
 #include "libs/base/utils.h"
-#include "libs/RPCServer/rpc_server.h"
-#include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/testconv1/testconv1.h"
 #include "libs/testlib/test_lib.h"
 #include "libs/tensorflow/classification.h"
+#include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
@@ -203,7 +202,7 @@ void DeleteResource(struct jsonrpc_request *request) {
         return;
     }
 
-    uint64_t key = utils::StrHash(reinterpret_cast<const char *>(resource_name.data()));
+    uint64_t key = utils::StrHash(reinterpret_cast<const char*>(resource_name.data()));
     auto it = uploaded_resources.find(key);
     if (it == uploaded_resources.end()) {
         jsonrpc_return_error(request, -1, "unknown resource", nullptr);
@@ -214,7 +213,126 @@ void DeleteResource(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-void RunClassificationModel(struct jsonrpc_request *request) {
+void RunDetectionModel(struct jsonrpc_request* request) {
+    std::vector<char> model_resource_name, image_resource_name;
+    int image_width, image_height, image_depth;
+
+    if (!JSONRPCGetStringParam(request, "model_resource_name", &model_resource_name)) {
+        jsonrpc_return_error(request, -1, "'model_resource_name' missing", nullptr);
+        return;
+    }
+    if (!JSONRPCGetStringParam(request, "image_resource_name", &image_resource_name)) {
+        jsonrpc_return_error(request, -1, "'image_resource_name' missing", nullptr);
+        return;
+    }
+    if (!JSONRPCGetIntegerParam(request, "image_width", &image_width)) {
+        jsonrpc_return_error(request, -1, "'image_width' missing", nullptr);
+        return;
+    }
+    if (!JSONRPCGetIntegerParam(request, "image_height", &image_height)) {
+        jsonrpc_return_error(request, -1, "'image_height' missing", nullptr);
+        return;
+    }
+    if (!JSONRPCGetIntegerParam(request, "image_depth", &image_depth)) {
+        jsonrpc_return_error(request, -1, "'image_depth' missing", nullptr);
+        return;
+    }
+
+    size_t model_size;
+    uint8_t* model_resource = GetResource(model_resource_name, &model_size);
+    if (!model_resource || !model_size) {
+        jsonrpc_return_error(request, -1, "missing model resource", nullptr);
+        return;
+    }
+    uint8_t* image_resource = GetResource(image_resource_name, nullptr);
+    if (!image_resource) {
+        jsonrpc_return_error(request, -1, "missing image resource", nullptr);
+        return;
+    }
+
+    const tflite::Model* model = tflite::GetModel(model_resource);
+    if (model->version() != TFLITE_SCHEMA_VERSION) {
+        char buf[50];
+        sprintf(buf, "model schema version unsupported: %ld", model->version());
+        jsonrpc_return_error(request, -1, buf, nullptr);
+        return;
+    }
+
+
+    tflite::MicroErrorReporter error_reporter;
+    std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
+    if (!context) {
+        jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
+        return;
+    }
+    constexpr size_t kTensorArenaSize{8 * 1024 * 1024};
+
+//    std::unique_ptr<uint8_t[]> tensor_arena(new(std::nothrow) uint8_t[kTensorArenaSize]);
+//    if (!tensor_arena) {
+//        jsonrpc_return_error(request, -1, "failed to allocate tensor arena", nullptr);
+//        return;
+//    }
+    static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+
+    tflite::MicroMutableOpResolver</*tOpCount=*/3> resolver;
+    resolver.AddDequantize();
+    resolver.AddDetectionPostprocess();
+
+    auto interpreter = tensorflow::MakeEdgeTpuInterpreter(model, context.get(), &resolver, &error_reporter,
+                                                          tensor_arena, kTensorArenaSize);
+    if (!interpreter) {
+        jsonrpc_return_error(request, -1, "failed to make interpreter", nullptr);
+        return;
+    }
+
+    auto* input_tensor = interpreter->input_tensor(0);
+    auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
+    tensorflow::ImageDims tensor_dims = {
+        input_tensor->dims->data[1],
+        input_tensor->dims->data[2],
+        input_tensor->dims->data[3]
+    };
+    auto preprocess_start = valiant::timer::micros();
+    if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
+                                 image_resource, tensor_dims, input_tensor_data)) {
+        jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
+        return;
+    }
+    auto preprocess_latency = valiant::timer::micros() - preprocess_start;
+
+    // The first Invoke is slow due to model transfer. Run an Invoke
+    // but ignore the results.
+    if (interpreter->Invoke() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+        return;
+    }
+
+    auto invoke_start = valiant::timer::micros();
+    if (interpreter->Invoke() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+        return;
+    }
+    auto invoke_latency = valiant::timer::micros() - invoke_start;
+
+    // Return results and check on host side
+    auto results = tensorflow::GetDetectionResults(interpreter.get(), 0.7, 3);
+    if (results.empty()) {
+        jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
+        return;
+    }
+    const auto& top_result = results.at(0);
+    jsonrpc_return_success(request,
+                           "{%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q:%d}",
+                           "id", top_result.id,
+                           "score", top_result.score,
+                           "xmin", top_result.bbox.xmin,
+                           "xmax", top_result.bbox.xmax,
+                           "ymin", top_result.bbox.ymin,
+                           "ymax", top_result.bbox.ymax,
+                           "latency", (preprocess_latency + invoke_latency));
+}
+
+void RunClassificationModel(struct jsonrpc_request* request) {
     std::vector<char> model_resource_name, image_resource_name;
     int image_width, image_height, image_depth;
 
@@ -240,24 +358,24 @@ void RunClassificationModel(struct jsonrpc_request *request) {
     }
 
     uint8_t* model_resource = GetResource(model_resource_name, nullptr);
-    uint8_t* image_resource = GetResource(image_resource_name, nullptr);
     if (!model_resource) {
         jsonrpc_return_error(request, -1, "missing model resource", nullptr);
         return;
     }
+    uint8_t* image_resource = GetResource(image_resource_name, nullptr);
     if (!image_resource) {
         jsonrpc_return_error(request, -1, "missing image resource", nullptr);
         return;
     }
 
-    const tflite::Model *model = tflite::GetModel(model_resource);
+    const tflite::Model* model = tflite::GetModel(model_resource);
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         jsonrpc_return_error(request, -1, "model schema version unsupported", nullptr);
         return;
     }
 
-    std::unique_ptr<tflite::MicroErrorReporter> error_reporter(new tflite::MicroErrorReporter());
-    std::unique_ptr<tflite::MicroMutableOpResolver<1>> resolver(new tflite::MicroMutableOpResolver<1>);
+    tflite::MicroErrorReporter error_reporter;
+    tflite::MicroMutableOpResolver<1> resolver;
     std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
@@ -267,12 +385,13 @@ void RunClassificationModel(struct jsonrpc_request *request) {
     constexpr size_t kTensorArenaSize = 1 * 1024 * 1024;
     // Use std::nothrow to detect out-of-memory condition specifically in the test lib and
     // prevent a silent crash.
-    std::unique_ptr<uint8_t[]> tensor_arena(new (std::nothrow) uint8_t[kTensorArenaSize]);
+    std::unique_ptr<uint8_t[]> tensor_arena(new(std::nothrow) uint8_t[kTensorArenaSize]);
     if (!tensor_arena) {
         jsonrpc_return_error(request, -1, "failed to allocate tensor arena", nullptr);
         return;
     }
-    auto interpreter = tensorflow::MakeEdgeTpuInterpreter(model, context.get(), resolver.get(), error_reporter.get(), tensor_arena.get(), kTensorArenaSize);
+    auto interpreter = tensorflow::MakeEdgeTpuInterpreter(model, context.get(), &resolver, &error_reporter,
+                                                          tensor_arena.get(), kTensorArenaSize);
     if (!interpreter) {
         jsonrpc_return_error(request, -1, "failed to make interpreter", nullptr);
         return;
@@ -321,7 +440,7 @@ void RunClassificationModel(struct jsonrpc_request *request) {
 
     // Return results and check on host side
     auto results = tensorflow::GetClassificationResults(interpreter.get(), 0.0f, 1);
-    if (results.size() < 1) {
+    if (results.empty()) {
         jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
         return;
     }
@@ -329,7 +448,7 @@ void RunClassificationModel(struct jsonrpc_request *request) {
 }
 
 void StartM4(struct jsonrpc_request *request) {
-    IPCM7* ipc = static_cast<IPCM7*>(IPC::GetSingleton());
+    auto* ipc = static_cast<IPCM7*>(IPC::GetSingleton());
     if (!ipc->HasM4Application()) {
         jsonrpc_return_error(request, -1, "No M4 application present", nullptr);
         return;
@@ -352,7 +471,7 @@ void GetTemperature(struct jsonrpc_request *request) {
         return;
     }
 
-    valiant::tempsense::TempSensor sensor = static_cast<valiant::tempsense::TempSensor>(sensor_num);
+    auto sensor = static_cast<valiant::tempsense::TempSensor>(sensor_num);
     if(sensor >= valiant::tempsense::TempSensor::kSensorCount) {
         jsonrpc_return_error(request, -1, "Invalid temperature sensor", nullptr);
         return;
@@ -373,7 +492,7 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
     }
     valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::TRIGGER);
     valiant::CameraTask::GetSingleton()->SetTestPattern(
-            valiant::camera::TestPattern::WALKING_ONES);
+        valiant::camera::TestPattern::WALKING_ONES);
 
     valiant::CameraTask::GetSingleton()->Trigger();
 
@@ -418,7 +537,7 @@ void CaptureAudio(struct jsonrpc_request *request) {
     params.count = 0;
     params.audio_data = audio_data.data();
     valiant::AudioTask::GetSingleton()->SetCallback([](void *param) {
-        AudioParams* params = reinterpret_cast<AudioParams*>(param);
+        auto* params = reinterpret_cast<AudioParams*>(param);
         // If this is the second time we hit the callback, return nothing for the buffer
         // to terminate recording.
         // Otherwise, we feed the original buffer back in. This should give us a clean recording
