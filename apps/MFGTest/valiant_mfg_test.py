@@ -1,23 +1,37 @@
 #!/usr/bin/python3
 
 from copy import deepcopy
-from enum import Enum
+
 import base64
+import enum
+import inspect
 import requests
 
-class PMICRails(Enum):
+class PMICRails(enum.IntEnum):
     CAM_2V8 = 0
     CAM_1V8 = 1
     MIC_1V8 = 2
 
-class LEDs(Enum):
+class LEDs(enum.IntEnum):
     POWER = 0
     USER = 1
     TPU = 2
 
-class Antenna(Enum):
+class Antenna(enum.IntEnum):
     INTERNAL = 0
     EXTERNAL = 1
+
+def rpc(func):
+    def rpc_impl(*args, **kwargs):
+        params = inspect.getcallargs(func, *args, **kwargs)
+        self = params.pop('self')
+        payload = self.get_new_payload()
+        payload['method'] = func.__name__
+        if params:
+            payload['params'].append(params)
+        result = self.send_rpc(payload)
+        return result
+    return rpc_impl
 
 class ValiantMFGTest(object):
     """Manufacturing test runner for Valiant.
@@ -53,6 +67,7 @@ class ValiantMFGTest(object):
             return requests.post(self.url, json=json).json()
         raise ValueError('Missing key in RPC')
 
+    @rpc
     def get_serial_number(self):
         """Gets the serial number from the device
 
@@ -61,11 +76,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 0, 'result': {'serial_number': '350a280e828f2c4f'}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'get_serial_number'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def set_pmic_rail_state(self, rail, enable):
         """Sets the state of a PMIC rail.
 
@@ -78,15 +90,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'set_pmic_rail_state'
-        payload['params'].append({
-            'rail': rail.value,
-            'enable': enable,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def set_led_state(self, led, enable):
         """Sets the state of an LED.
 
@@ -102,15 +107,8 @@ class ValiantMFGTest(object):
         Notes:
           Setting the state of the TPU LED requires the TPU power to be enabled.
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'set_led_state'
-        payload['params'].append({
-            'led': led.value,
-            'enable': enable,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def set_pin_pair_to_gpio(self, output_pin, input_pin):
         """Sets a pair of pins to GPIO mode for loopback testing.
 
@@ -123,15 +121,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'set_pin_pair_to_gpio'
-        payload['params'].append({
-            'output_pin': output_pin,
-            'input_pin': input_pin,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def set_gpio(self, pin, enable):
         """Sets a GPIO's output value.
 
@@ -144,15 +135,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'set_gpio'
-        payload['params'].append({
-            'pin': pin,
-            'enable': enable,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def get_gpio(self, pin):
         """Gets a GPIO's input value.
 
@@ -164,14 +148,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 40, 'result': {'value': 1}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'get_gpio'
-        payload['params'].append({
-            'pin': pin,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def capture_test_pattern(self):
         """Captures a test pattern from the camera sensor.
 
@@ -180,22 +158,16 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'capture_test_pattern'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def capture_audio(self):
         """Captures one second of audio.
 
         Returns:
           A JSON-RPC result packet with a data parameter containing base64-encoded audio data (32-bit signed PCM @ 16000Hz), or JSON-RPC error.
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'capture_audio'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def set_tpu_power_state(self, enable):
         """Sets the power state of the TPU.
 
@@ -207,14 +179,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'set_tpu_power_state'
-        payload['params'].append({
-            'enable': enable,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def run_testconv1(self):
         """Executes the TestConv1 model on TPU.
 
@@ -226,25 +192,16 @@ class ValiantMFGTest(object):
         Note:
           The TPU power must be enabled before calling this.
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'run_testconv1'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def get_tpu_chip_ids(self):
         """Not implemented"""
-        payload = self.get_new_payload()
-        payload['method'] = 'get_tpu_chip_ids'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def check_tpu_alarm(self):
         """Not implemented"""
-        payload = self.get_new_payload()
-        payload['method'] = 'check_tpu_alarm'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def set_dac_value(self, counts):
         """Sets the output value of the DAC pin.
 
@@ -257,14 +214,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'set_dac_value'
-        payload['params'].append({
-            'counts': counts,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def test_sdram_pattern(self):
         """Runs a pattern test in SDRAM.
 
@@ -273,10 +224,6 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'test_sdram_pattern'
-        result = self.send_rpc(payload)
-        return result
 
     def write_file(self, filename, data):
         """Writes data to filesystem.
@@ -299,6 +246,7 @@ class ValiantMFGTest(object):
         result = self.send_rpc(payload)
         return result
 
+    @rpc
     def read_file(self, filename):
         """Reads data from filesystem.
 
@@ -310,14 +258,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 24, 'result': {'data': 'aGVsbG8gbWZndGVzdA=='}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'read_file'
-        payload['params'].append({
-            'filename': filename
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def wifi_get_ap(self, name):
         """Scans for an access point of the provided name.
 
@@ -329,14 +271,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {'signal_strength': -52}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'wifi_get_ap'
-        payload['params'].append({
-            'name': name
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def wifi_set_antenna(self, antenna):
         """Sets which antenna to use for WiFi.
 
@@ -348,14 +284,8 @@ class ValiantMFGTest(object):
           Example:
             {'id': 2, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'wifi_set_antenna'
-        payload['params'].append({
-            'antenna': antenna.value,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def ble_find(self, address):
         """Scans for a BLE device with the given MAC address.
 
@@ -367,14 +297,8 @@ class ValiantMFGTest(object):
           Example:
             {'id':  4, 'result': {'signal_strength': -58}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'ble_find'
-        payload['params'].append({
-            'address': address,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def ble_scan(self):
         """Scans for a BLE devices.
 
@@ -386,11 +310,8 @@ class ValiantMFGTest(object):
           Example:
             {'id':  4, 'result': {'address': '73:85:B5:4E:E0:24', 'signal_strength': -99}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'ble_scan'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def eth_get_ip(self):
         """Gets the IP address assigned to the Ethernet interface.
 
@@ -399,40 +320,24 @@ class ValiantMFGTest(object):
           Example:
             {'id': 0, 'result': {'ip': '172.16.243.96'}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'eth_get_ip'
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def eth_write_phy(self, reg, val):
         """Writes `val` to the Ethernet PHY at location `reg`.
 
         Returns:
           A JSON-RPC result packet with no extra data, or JSON-RPC error.
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'eth_write_phy'
-        payload['params'].append({
-            'reg': reg,
-            'val': val,
-        })
-        result = self.send_rpc(payload)
-        return result
 
+    @rpc
     def fuse_mac_address(self, address):
       """Writes a MAC address into device fuses.
 
       Returns:
         A JSON-RPC result packet with no extra data, or JSON-RPC error.
       """
-      payload = self.get_new_payload()
-      payload['method'] = 'fuse_mac_address'
-      payload['params'].append({
-          'address': address,
-      })
-      result = self.send_rpc(payload)
-      return result
 
+    @rpc
     def read_mac_address(self):
       """Reads the MAC address from device fuses.
 
@@ -442,10 +347,7 @@ class ValiantMFGTest(object):
         Example:
           {'id': 44, 'result': {'address': '7C:D9:5C:AA:BB:CC'}}
       """
-      payload = self.get_new_payload()
-      payload['method'] = 'read_mac_address'
-      result = self.send_rpc(payload)
-      return result
+
 
 if __name__ == '__main__':
     """
