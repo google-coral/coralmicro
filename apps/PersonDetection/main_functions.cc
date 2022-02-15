@@ -40,7 +40,7 @@ TfLiteTensor* input = nullptr;
 // signed 8-bit integers is to subtract 128 from the unsigned value to get a
 // signed value.
 
-uint8_t *g_person_detect_model_data_fs;
+std::unique_ptr<uint8_t[]> g_person_detect_model_data_fs;
 // An area of memory to use for input, output, and intermediate arrays.
 constexpr int kTensorArenaSize = 96 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
@@ -59,7 +59,7 @@ void setup() {
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   g_person_detect_model_data_fs = valiant::filesystem::ReadToMemory("/models/person_detect_model.tflite", nullptr);
-  model = tflite::GetModel(g_person_detect_model_data_fs);
+  model = tflite::GetModel(g_person_detect_model_data_fs.get());
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
                          "Model provided is schema version %d not equal "

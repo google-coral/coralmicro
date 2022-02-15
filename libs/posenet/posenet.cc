@@ -23,8 +23,8 @@ static const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
 static size_t posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len, posenet_test_input_bin_len;
-static uint8_t *posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
-static uint8_t *posenet_test_input_bin;
+static std::unique_ptr<uint8_t[]> posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
+static std::unique_ptr<uint8_t[]> posenet_test_input_bin;
 }  // namespace
 
 const char* const KeypointTypes[] = {
@@ -129,7 +129,7 @@ bool setup() {
         return false;
     }
 
-    model = tflite::GetModel(posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite);
+    model = tflite::GetModel(posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite.get());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",
@@ -156,7 +156,7 @@ bool setup() {
         TF_LITE_REPORT_ERROR(error_reporter, "Input tensor length doesn't match canned input\r\n");
         return false;
     }
-    memcpy(input_tensor->data.uint8, posenet_test_input_bin, posenet_test_input_bin_len);
+    memcpy(input_tensor->data.uint8, posenet_test_input_bin.get(), posenet_test_input_bin_len);
     return true;
 }
 

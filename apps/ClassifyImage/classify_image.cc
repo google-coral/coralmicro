@@ -17,13 +17,13 @@ namespace {
 
 void real_main() {
     size_t model_size, input_size;
-    std::unique_ptr<uint8_t> model_data(filesystem::ReadToMemory("/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite", &model_size));
-    std::unique_ptr<uint8_t> input_data(filesystem::ReadToMemory("/apps/ClassifyImage/cat.rgb", &input_size));
+    auto model_data = filesystem::ReadToMemory("/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite", &model_size);
     if (!model_data || model_size == 0) {
         printf("Failed to load model\r\n");
         return;
     }
 
+    auto input_data = filesystem::ReadToMemory("/apps/ClassifyImage/cat.rgb", &input_size);
     if (!input_data || input_size == 0) {
         printf("Failed to load input\r\n");
         return;

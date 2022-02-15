@@ -25,17 +25,18 @@ void real_main() {
         3
     };
     size_t model_size, input_size;
-    std::unique_ptr<uint8_t> model_data(filesystem::ReadToMemory("/models/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite", &model_size));
-    std::unique_ptr<uint8_t> input_data(filesystem::ReadToMemory("/apps/DetectImage/cat.rgb", &input_size));
+    auto model_data = filesystem::ReadToMemory("/models/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite", &model_size);
     if (!model_data || model_size == 0) {
         printf("Failed to load model %p %d\r\n", model_data.get(), model_size);
         return;
     }
 
+    auto input_data = filesystem::ReadToMemory("/apps/DetectImage/cat.rgb", &input_size);
     if (!input_data || input_size == 0) {
         printf("Failed to load input\r\n");
         return;
     }
+
     const tflite::Model* model = tflite::GetModel(model_data.get());
 
     std::unique_ptr<tflite::MicroErrorReporter> error_reporter(new tflite::MicroErrorReporter());

@@ -101,8 +101,8 @@ extern "C" void app_main(void *param) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
 
     size_t model_size;
-    std::unique_ptr<uint8_t> model_data(valiant::filesystem::ReadToMemory(
-            "/models/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite", &model_size));
+    auto model_data = valiant::filesystem::ReadToMemory(
+            "/models/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite", &model_size);
     if (!model_data || model_size == 0) {
         printf("Failed to load inference_info %p %d\r\n", model_data.get(), model_size);
         vTaskSuspend(nullptr);

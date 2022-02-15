@@ -22,9 +22,9 @@ const int kExtraArenaSize = 32768;
 const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
 size_t testconv1_edgetpu_tflite_len, testconv1_test_input_bin_len, testconv1_expected_output_bin_len;
-const uint8_t *testconv1_edgetpu_tflite;
-const uint8_t *testconv1_expected_output_bin;
-const uint8_t *testconv1_test_input_bin;
+std::unique_ptr<uint8_t[]> testconv1_edgetpu_tflite;
+std::unique_ptr<uint8_t[]> testconv1_expected_output_bin;
+std::unique_ptr<uint8_t[]> testconv1_test_input_bin;
 }  // namespace
 
 bool setup() {
@@ -54,7 +54,7 @@ bool setup() {
         return false;
     }
 
-    model = tflite::GetModel(testconv1_edgetpu_tflite);
+    model = tflite::GetModel(testconv1_edgetpu_tflite.get());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",
@@ -85,7 +85,7 @@ bool setup() {
         TF_LITE_REPORT_ERROR(error_reporter, "Output tensor length doesn't match canned output");
         return false;
     }
-    memcpy(input->data.uint8, testconv1_test_input_bin, testconv1_test_input_bin_len);
+    memcpy(input->data.uint8, testconv1_test_input_bin.get(), testconv1_test_input_bin_len);
 
     initialized = true;
     return true;
@@ -97,7 +97,7 @@ bool loop() {
     if (invoke_status != kTfLiteOk) {
         return false;
     }
-    if (memcmp(output->data.uint8, testconv1_expected_output_bin, testconv1_expected_output_bin_len) != 0) {
+    if (memcmp(output->data.uint8, testconv1_expected_output_bin.get(), testconv1_expected_output_bin_len) != 0) {
         TF_LITE_REPORT_ERROR(error_reporter, "Output did not match expected");
         return false;
     }

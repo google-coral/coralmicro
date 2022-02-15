@@ -50,7 +50,7 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
                 case ElfloaderTarget::Filesystem:
                     break;
                 case ElfloaderTarget::Ram:
-                    elfloader_recv_image = (uint8_t*)malloc(set_size->size);
+                    elfloader_recv_image = new uint8_t[set_size->size];
                     break;
                 case ElfloaderTarget::Path:
                     elfloader_recv_path = (char*)malloc(set_size->size + 1);
@@ -157,9 +157,9 @@ static usb_device_class_config_struct_t elfloader_config_data_ = {
 typedef void (*entry_point)(void);
 static void elfloader_main(void *param) {
     size_t elf_size = 0;
-    std::unique_ptr<uint8_t> application_elf;
+    std::unique_ptr<uint8_t[]> application_elf;
     if (!param) {
-        application_elf.reset(valiant::filesystem::ReadToMemory("/default.elf", &elf_size));
+        application_elf = valiant::filesystem::ReadToMemory("/default.elf", &elf_size);
     } else {
         application_elf.reset(reinterpret_cast<uint8_t*>(param));
     }

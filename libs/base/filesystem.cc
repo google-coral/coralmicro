@@ -9,8 +9,15 @@
 extern "C" nand_handle_t* BOARD_GetNANDHandle(void);
 
 namespace valiant {
-
 namespace filesystem {
+namespace {
+
+struct AutoClose {
+  lfs_file_t* handle;
+  ~AutoClose() { Close(handle); }
+};
+
+}  // namespace
 
 static lfs_t lfs_handle_;
 static lfs_config lfs_config_;
@@ -237,38 +244,20 @@ lfs_soff_t Size(lfs_file_t* handle) {
     return lfs_file_size(&lfs_handle_, handle);
 }
 
-uint8_t* ReadToMemory(const char *path, size_t* size_bytes) {
+std::unique_ptr<uint8_t[]> ReadToMemory(const char *path, size_t* size_bytes) {
+    if (size_bytes) *size_bytes = 0;
+
     lfs_file_t handle;
-    lfs_soff_t file_size;
-    uint8_t *data;
-    if (!Open(&handle, path)) {
-        goto fail;
-    }
+    if (!Open(&handle, path)) return nullptr;
+    AutoClose close{&handle};
 
-    file_size = Size(&handle);
+    auto file_size = Size(&handle);
+    auto data = std::make_unique<uint8_t[]>(file_size);
 
-    data = reinterpret_cast<uint8_t*>(malloc(file_size));
-    if (!data) {
-        goto fail_close;
-    }
+    if (Read(&handle, data.get(), file_size) < 0) return nullptr;
 
-    if (Read(&handle, data, file_size) < 0) {
-        goto fail_close;
-    }
-
-    Close(&handle);
-    if (size_bytes) {
-        *size_bytes = file_size;
-    }
+    if (size_bytes) *size_bytes = file_size;
     return data;
-
-fail_close:
-    Close(&handle);
-fail:
-    if (size_bytes) {
-        *size_bytes = 0;
-    }
-    return nullptr;
 }
 
 bool ReadToMemory(const char *path, uint8_t* data, size_t* size_bytes) {

@@ -23,9 +23,9 @@ static tflite::MicroMutableOpResolver<1> resolver;
 constexpr size_t kTensorArenaSize = 1024 * 10 * 2;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
 size_t testconv1_edgetpu_tflite_len, testconv1_test_input_bin_len, testconv1_expected_output_bin_len;
-const uint8_t *testconv1_edgetpu_tflite;
-const uint8_t *testconv1_expected_output_bin;
-const uint8_t *testconv1_test_input_bin;
+std::unique_ptr<uint8_t[]> testconv1_edgetpu_tflite;
+std::unique_ptr<uint8_t[]> testconv1_expected_output_bin;
+std::unique_ptr<uint8_t[]> testconv1_test_input_bin;
 
 constexpr size_t sdram_memory_size = 1024 * 1024;
 static uint8_t sdram_memory[sdram_memory_size] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
@@ -76,7 +76,7 @@ TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
         return false;
     }
 
-    const tflite::Model *model = tflite::GetModel(testconv1_edgetpu_tflite);
+    const tflite::Model *model = tflite::GetModel(testconv1_edgetpu_tflite.get());
     TF_LITE_MICRO_EXPECT_EQ(static_cast<int>(model->version()), TFLITE_SCHEMA_VERSION);
 
     resolver.AddCustom("edgetpu-custom-op", valiant::RegisterCustomOp());
@@ -87,13 +87,13 @@ TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
     TfLiteTensor *output = interpreter.output(0);
     TF_LITE_MICRO_EXPECT_EQ(input->bytes, testconv1_test_input_bin_len);
     TF_LITE_MICRO_EXPECT_EQ(output->bytes, testconv1_expected_output_bin_len);
-    memcpy(tflite::GetTensorData<uint8_t>(input), testconv1_test_input_bin, testconv1_test_input_bin_len);
+    memcpy(tflite::GetTensorData<uint8_t>(input), testconv1_test_input_bin.get(), testconv1_test_input_bin_len);
 
     for (int i = 0; i < 100; ++i) {
         memset(tflite::GetTensorData<uint8_t>(output), 0, output->bytes);
         TF_LITE_MICRO_EXPECT_EQ(interpreter.Invoke(), kTfLiteOk);
         TF_LITE_MICRO_EXPECT_EQ(
-                memcmp(tflite::GetTensorData<uint8_t>(output), testconv1_expected_output_bin, testconv1_expected_output_bin_len),
+                memcmp(tflite::GetTensorData<uint8_t>(output), testconv1_expected_output_bin.get(), testconv1_expected_output_bin_len),
                 0);
     }
 }

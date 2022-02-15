@@ -20,7 +20,7 @@ bool Close(lfs_file_t *handle);
 bool Remove(const char *path);
 lfs_soff_t Size(lfs_file_t* handle);
 ssize_t Size(const char *path);
-uint8_t *ReadToMemory(const char *path, size_t* size_bytes);
+std::unique_ptr<uint8_t[]> ReadToMemory(const char *path, size_t* size_bytes);
 bool ReadToMemory(const char *path, uint8_t* data, size_t* size_bytes);
 
 }  // namespace filesystem
