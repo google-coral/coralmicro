@@ -156,7 +156,7 @@ static void BLEScan(struct jsonrpc_request *request) {
         if (p_scan_result) {
             found_address = true;
             auto s = p_scan_result->remote_bd_addr;
-            sprintf(address, "%02X:%02X:%02X:%02X:%02X:%02X", s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]);
+            sprintf(address, "%02X:%02X:%02X:%02X:%02X:%02X", s[0], s[1], s[2], s[3], s[4], s[5]);
             rssi = p_scan_result->rssi;
         } else {
             xSemaphoreGive(ble_scan_sema);
