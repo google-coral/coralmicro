@@ -104,6 +104,7 @@ set(CM4_C_FLAGS
     "-mcpu=cortex-m4"
     "-mfloat-abi=hard"
     "-mfpu=fpv4-sp-d16"
+    "-DNDEBUG"
 )
 list(JOIN CM4_C_FLAGS " " CM4_C_FLAGS_STR)
 
