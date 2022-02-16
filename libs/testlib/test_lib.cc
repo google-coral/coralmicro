@@ -266,7 +266,9 @@ void RunClassificationModel(struct jsonrpc_request *request) {
     }
 
     constexpr size_t kTensorArenaSize = 1 * 1024 * 1024;
-    std::unique_ptr<uint8_t[]> tensor_arena(new uint8_t[kTensorArenaSize]);
+    // Use std::nothrow to detect out-of-memory condition specifically in the test lib and
+    // prevent a silent crash.
+    std::unique_ptr<uint8_t[]> tensor_arena(new (std::nothrow) uint8_t[kTensorArenaSize]);
     if (!tensor_arena) {
         jsonrpc_return_error(request, -1, "failed to allocate tensor arena", nullptr);
         return;

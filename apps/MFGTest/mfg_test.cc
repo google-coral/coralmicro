@@ -579,7 +579,7 @@ static void SetDACValue(struct jsonrpc_request *request) {
 // Returns success or failure.
 static void TestSDRamPattern(struct jsonrpc_request *request) {
     size_t sdram_area_size = 1024 * 1024; // 1 MB
-    std::unique_ptr<uint8_t[]> sdram_area(new uint8_t[sdram_area_size]);
+    auto sdram_area = std::make_unique<uint8_t[]>(sdram_area_size);
     if (sdram_area.get() < reinterpret_cast<void*>(0x80000000U)) {
         jsonrpc_return_error(request, -1, "test_sdram_pattern memory not in sdram", nullptr);
         return;

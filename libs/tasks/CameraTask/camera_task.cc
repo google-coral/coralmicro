@@ -70,7 +70,7 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
                         BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height);
                     } else {
-                        std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
+                        auto buffer_rgba = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGBA) * kWidth * kHeight);
                         BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
                         PXPConfiguration input;
                         input.data = buffer_rgba.get();
@@ -87,11 +87,7 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
                 }
                 break;
             case Format::Y8: {
-                    std::unique_ptr<uint8_t> buffer_rgba(reinterpret_cast<uint8_t*>(malloc(FormatToBPP(Format::RGBA) * kWidth * kHeight)));
-                    if (!buffer_rgba) {
-                        ret = false;
-                        break;
-                    }
+                    auto buffer_rgba = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGBA) * kWidth * kHeight);
                     BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
                     PXPConfiguration input;
                     input.data = buffer_rgba.get();

@@ -12,7 +12,7 @@
 TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
                       int image_height, int channels, int8_t* image_data) {
 
-    std::unique_ptr<uint8_t[]> unsigned_image_data(reinterpret_cast<uint8_t*>(malloc(image_width * image_height)));
+    auto unsigned_image_data = std::make_unique<uint8_t[]>(image_width * image_height);
     valiant::camera::FrameFormat fmt;
     fmt.width = image_width;
     fmt.height = image_height;
