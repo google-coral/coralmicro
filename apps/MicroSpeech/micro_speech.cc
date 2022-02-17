@@ -11,44 +11,36 @@
 
 #include <cstdio>
 
-static constexpr int kNumberOfBuffers = 2;
-static uint32_t audio_sample_data[kNumberOfBuffers][kMaxAudioSampleSize] __attribute__((section(".noinit.$rpmsg_sh_mem")));
+static int32_t audio_sample_data[2][kMaxAudioSampleSize] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 static bool is_audio_initialized = false;
-static int queued_buffer = 0;
 
-constexpr int kAudioCaptureBufferSize = kAudioSampleFrequency * 0.5;
+constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
+constexpr int kAudioCaptureBufferSize = 1 * kAudioSampleFrequency;  // 1 second.
 int16_t g_audio_capture_buffer[kAudioCaptureBufferSize];
 int16_t g_audio_output_buffer[kMaxAudioSampleSize];
-int32_t g_latest_audio_timestamp = 0;
+int32_t g_latest_audio_timestamp_ms = 0;
 
 // Based on nxp_k66f implementation
 void CaptureSamples(const int32_t *sample_data) {
-    const int32_t time_in_ms = g_latest_audio_timestamp + (kMaxAudioSampleSize / (kAudioSampleFrequency / 1000));
-    const int32_t start_sample_offset =
-        g_latest_audio_timestamp * (kAudioSampleFrequency / 1000);
+    const int32_t next_timestamp_ms = g_latest_audio_timestamp_ms + (kMaxAudioSampleSize / kSamplesPerMs);
+    const int32_t offset = g_latest_audio_timestamp_ms * kSamplesPerMs;
     for (int i = 0; i < kMaxAudioSampleSize; ++i) {
-        const int capture_index = (start_sample_offset + i) % kAudioCaptureBufferSize;
-        g_audio_capture_buffer[capture_index] = (sample_data[i] >> 16) & 0xFFFF;
+        g_audio_capture_buffer[(offset + i) % kAudioCaptureBufferSize] = (sample_data[i] >> 16) & 0xFFFF;
     }
-    g_latest_audio_timestamp = time_in_ms;
+    g_latest_audio_timestamp_ms = next_timestamp_ms;
 }
 
 int32_t LatestAudioTimestamp() {
-    return g_latest_audio_timestamp;
+    return g_latest_audio_timestamp_ms;
 }
 
 TfLiteStatus InitAudioRecording() {
-    valiant::AudioTask::GetSingleton()->SetCallback([](void *param) {
-        CaptureSamples(reinterpret_cast<int32_t*>(audio_sample_data[queued_buffer]));
-        queued_buffer++;
-        if (queued_buffer == kNumberOfBuffers) {
-            queued_buffer = 0;
-        }
-        return audio_sample_data[queued_buffer];
-    }, NULL);
     valiant::AudioTask::GetSingleton()->SetPower(true);
-    valiant::AudioTask::GetSingleton()->SetBuffer(reinterpret_cast<uint32_t*>(audio_sample_data[queued_buffer]), sizeof(audio_sample_data[queued_buffer]));
-    valiant::AudioTask::GetSingleton()->Enable();
+    valiant::AudioTask::GetSingleton()->Enable(valiant::audio::SampleRate::k16000_Hz,
+    {audio_sample_data[0], audio_sample_data[1]}, kMaxAudioSampleSize,
+    nullptr, +[](void *param, const int32_t* buffer, size_t buffer_size) {
+        CaptureSamples(buffer);
+    });
     return kTfLiteOk;
 }
 
@@ -63,16 +55,12 @@ TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
         is_audio_initialized = true;
     }
 
-    const int start_offset = start_ms * (kAudioSampleFrequency / 1000);
-    const int duration_sample_count =
-        duration_ms * (kAudioSampleFrequency / 1000);
-    for (int i = 0; i < duration_sample_count; ++i) {
-        const int capture_index = (start_offset + i) % kAudioCaptureBufferSize;
-        g_audio_output_buffer[i] = g_audio_capture_buffer[capture_index];
+    const int offset = start_ms * kSamplesPerMs;
+    for (int i = 0; i < duration_ms * kSamplesPerMs; ++i) {
+        g_audio_output_buffer[i] = g_audio_capture_buffer[(offset + i) % kAudioCaptureBufferSize];
     }
     *audio_samples_size = kMaxAudioSampleSize;
     *audio_samples = g_audio_output_buffer;
-
     return kTfLiteOk;
 }
 

@@ -2,7 +2,6 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/random.h"
-#include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
@@ -28,9 +27,6 @@ std::unique_ptr<uint8_t[]> testconv1_test_input_bin;
 
 constexpr size_t sdram_memory_size = 1024 * 1024;
 static uint8_t sdram_memory[sdram_memory_size] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
-
-constexpr size_t kAudioSamples = 512;
-static uint16_t audio_samples[kAudioSamples];
 
 TF_LITE_MICRO_TESTS_BEGIN
 
@@ -127,51 +123,6 @@ TF_LITE_MICRO_TEST(CameraTest_CheckTestPattern) {
     valiant::CameraTask::GetSingleton()->ReturnFrame(index);
     valiant::CameraTask::GetSingleton()->Disable();
     valiant::CameraTask::GetSingleton()->SetPower(false);
-}
-
-// Check that no more kBadSamplePercentage of samples are
-// either our fill value or the default return value.
-// This helps to accomodate for the time for the microphone to start returning data
-// after clock/power application.
-// If the audio pipeline interface changes to eliminate that, reduce the percentage.
-TF_LITE_MICRO_TEST(AudioTest_CheckNonZeroSamples) {
-    constexpr float kBadSamplePercentage = 0.2;
-    constexpr uint16_t kFillValue = 0xa5a5;
-    constexpr uint16_t kDefaultValue = 0x9000;
-    SemaphoreHandle_t sema = xSemaphoreCreateBinary();
-    memset(audio_samples, kFillValue, ARRAY_SIZE(audio_samples));
-    valiant::AudioTask::GetSingleton()->SetCallback([](void *param) {
-        static int buffer_count = 0;
-        if (buffer_count == 4) {
-            BaseType_t reschedule = pdFALSE;
-            SemaphoreHandle_t sema = reinterpret_cast<SemaphoreHandle_t>(param);
-            xSemaphoreGiveFromISR(sema, &reschedule);
-            portYIELD_FROM_ISR(reschedule);
-            return reinterpret_cast<uint32_t*>(0);
-        } else {
-            buffer_count++;
-            return reinterpret_cast<uint32_t*>(audio_samples);
-        }
-    }, sema);
-    valiant::AudioTask::GetSingleton()->SetPower(true);
-    valiant::AudioTask::GetSingleton()->SetBuffer(reinterpret_cast<uint32_t*>(audio_samples), sizeof(audio_samples));
-    valiant::AudioTask::GetSingleton()->Enable();
-    xSemaphoreTake(sema, pdMS_TO_TICKS(1000));
-
-    int non_matching_count = 0;
-    for (size_t i = 0; i < ARRAY_SIZE(audio_samples); ++i) {
-        if (audio_samples[i] == kFillValue || audio_samples[i] == kDefaultValue) {
-            non_matching_count++;
-        }
-    }
-    TF_LITE_MICRO_EXPECT_LT(non_matching_count, static_cast<int>(kAudioSamples * kBadSamplePercentage));
-    if (non_matching_count >= static_cast<int>(kAudioSamples * kBadSamplePercentage)) {
-        printf("non_matching_count: %d\r\n", non_matching_count);
-    }
-
-    valiant::AudioTask::GetSingleton()->Disable();
-    valiant::AudioTask::GetSingleton()->SetPower(false);
-    vSemaphoreDelete(sema);
 }
 
 TF_LITE_MICRO_TEST(SDRAMTest_CheckReadWrite) {

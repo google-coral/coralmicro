@@ -243,8 +243,19 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Enet_Timer3, &rootCfg);
 
-    CLOCK_InitAudioPllWithFreq(96, false, 0, 0);
-    CLOCK_SetRootClockMux(kCLOCK_Root_Mic, 6); // Audio PLL
+    // Audio PLL:
+    // Frequency = Fref * (DIV_SELECT + NUM / DENOM) / (2^POST)
+    //           = 24 * (32 + 77/100)  / 2
+    //           = 393.24 MHz
+    const clock_audio_pll_config_t audioPllConfig = {
+        .loopDivider = 32,  // PLL loop divider. Valid range for DIV_SELECT divider value: 27~54
+        .postDivider = 1,   // Divider after the PLL, should only be 0, 1, 2, 3, 4, 5
+        .numerator   = 77,  // 30 bit numerator of fractional loop divider
+        .denominator = 100, // 30 bit denominator of fractional loop divider
+    };
+    CLOCK_InitAudioPll(&audioPllConfig);
+    CLOCK_SetRootClockMux(kCLOCK_Root_Mic, 6);  // Audio PLL @ 393.24 MHz
+    CLOCK_SetRootClockDiv(kCLOCK_Root_Mic, 16);  // 393.24 MHz / 16 = 24.5775 MHz
 
     rootCfg.mux = kCLOCK_FLEXSPI1_ClockRoot_MuxOscRc48MDiv2;
     rootCfg.div = 1;

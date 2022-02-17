@@ -525,51 +525,97 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
 // Returns success, with a parameter "data" containing the captured audio in base64 (or failure).
 // The audio captured is 32-bit signed PCM @ 16000Hz.
 void CaptureAudio(struct jsonrpc_request *request) {
+    int sample_rate_hz;
+    if (!JSONRPCGetIntegerParam(request, "sample_rate_hz", &sample_rate_hz)) {
+        jsonrpc_return_error(request, -1, "'sample_rate_hz' missing", nullptr);
+        return;
+    }
+
+    audio::SampleRate sample_rate;
+    if (sample_rate_hz == 16000) {
+        sample_rate = audio::SampleRate::k16000_Hz;
+    } else if (sample_rate_hz == 48000) {
+        sample_rate = audio::SampleRate::k48000_Hz;
+    } else {
+        jsonrpc_return_error(request, -1, "'sample_rate_hz' must be 16000 or 48000", nullptr);
+        return;
+    }
+
+    int duration_ms;
+    if (!JSONRPCGetIntegerParam(request, "duration_ms", &duration_ms)) {
+        jsonrpc_return_error(request, -1, "'duration_ms' missing", nullptr);
+        return;
+    }
+    if (duration_ms <= 0) {
+        jsonrpc_return_error(request, -1, "'duration_ms' must be positive", nullptr);
+        return;
+    }
+
+    int num_buffers;
+    if (!JSONRPCGetIntegerParam(request, "num_buffers", &num_buffers)) {
+        jsonrpc_return_error(request, -1, "'num_buffers' missing", nullptr);
+        return;
+    }
+    if (num_buffers > static_cast<int>(audio::kMaxNumBuffers)) {
+        jsonrpc_return_error(request, -1, "'num_buffers' too big", nullptr);
+        return;
+    }
+
+    int buffer_size_ms;
+    if (!JSONRPCGetIntegerParam(request, "buffer_size_ms", &buffer_size_ms)) {
+        jsonrpc_return_error(request, -1, "'buffer_size_ms' missing", nullptr);
+        return;
+    }
+    if (buffer_size_ms <= 0) {
+        jsonrpc_return_error(request, -1, "'buffer_size_ms' must be positive", nullptr);
+        return;
+    }
+
+    const int chunk_duration_ms = buffer_size_ms;
+    const int samples_per_chunk = chunk_duration_ms * (sample_rate_hz / 1000);
+    const int num_chunks = (duration_ms + chunk_duration_ms / 2) / chunk_duration_ms;
+
+    std::vector<int32_t> buffer(num_buffers * samples_per_chunk);
+    std::vector<int32_t*> buffers;
+    for (int i = 0; i < num_buffers; ++i)
+        buffers.push_back(buffer.data() + i*samples_per_chunk);
+
+    std::vector<int32_t> samples(num_chunks * samples_per_chunk);
     struct AudioParams {
-        SemaphoreHandle_t sema;
-        int count;
-        uint32_t* audio_data;
-    };
-    AudioParams params;
-    std::vector<uint32_t> audio_data(16000, 0xA5A5A5A5);
-    size_t audio_data_size = sizeof(uint32_t) * audio_data.size();
-    params.sema = xSemaphoreCreateBinary();
-    params.count = 0;
-    params.audio_data = audio_data.data();
-    valiant::AudioTask::GetSingleton()->SetCallback([](void *param) {
-        auto* params = reinterpret_cast<AudioParams*>(param);
-        // If this is the second time we hit the callback, return nothing for the buffer
-        // to terminate recording.
-        // Otherwise, we feed the original buffer back in. This should give us a clean recording
-        // of one second, without any sort of pops or glitches that happen when the mic starts.
-        if (params->count == 1) {
-            BaseType_t reschedule = pdFALSE;
-            xSemaphoreGiveFromISR(params->sema, &reschedule);
-            portYIELD_FROM_ISR(reschedule);
-            return reinterpret_cast<uint32_t*>(0);
-        } else {
-            params->count++;
-            return params->audio_data;
-        }
-    }, &params);
+        int32_t* first;
+        int32_t* last;
+    } params;
+    params.first = samples.data();
+    params.last = samples.data() + samples.size();
 
     valiant::AudioTask::GetSingleton()->SetPower(true);
-    valiant::AudioTask::GetSingleton()->SetBuffer(audio_data.data(), audio_data_size);
-    valiant::AudioTask::GetSingleton()->Enable();
-    BaseType_t ret = xSemaphoreTake(params.sema, pdMS_TO_TICKS(3000));
+    valiant::AudioTask::GetSingleton()->Enable(sample_rate,
+        buffers, samples_per_chunk, &params, +[](void* param,
+        const int32_t* buf, size_t size) {
+            AudioParams* params = reinterpret_cast<AudioParams*>(param);
+            if (params->first + size <= params->last) {
+                std::memcpy(params->first, buf, size * sizeof(buf[0]));
+                params->first += size;
+            }
+        });
+
+    // Add (chunk_duration_ms / 10) just in case. Capture is still limited by
+    // the buffer size.
+    vTaskDelay(pdMS_TO_TICKS(num_chunks * chunk_duration_ms + chunk_duration_ms / 10));
     valiant::AudioTask::GetSingleton()->Disable();
     valiant::AudioTask::GetSingleton()->SetPower(false);
-    vSemaphoreDelete(params.sema);
 
-    if (ret != pdTRUE) {
-        jsonrpc_return_error(request, -1, "semaphore timed out", nullptr);
-    } else {
-        size_t encoded_length = 0;
-        mbedtls_base64_encode(nullptr, 0, &encoded_length, reinterpret_cast<uint8_t*>(audio_data.data()), audio_data_size);
-        std::vector<uint8_t> encoded_data(encoded_length);
-        mbedtls_base64_encode(encoded_data.data(), encoded_length, &encoded_length, reinterpret_cast<uint8_t*>(audio_data.data()), audio_data_size);
-        jsonrpc_return_success(request, "{%Q:%.*Q}", "data", encoded_length, encoded_data.data());
-    }
+    size_t encoded_length = 0;
+    mbedtls_base64_encode(nullptr, 0, &encoded_length,
+                          reinterpret_cast<uint8_t*>(samples.data()),
+                          samples.size() * sizeof(samples[0]));
+    std::vector<uint8_t> encoded_data(encoded_length);
+    mbedtls_base64_encode(encoded_data.data(), encoded_data.size(),
+                          &encoded_length,
+                          reinterpret_cast<uint8_t*>(samples.data()),
+                          samples.size() * sizeof(samples[0]));
+    jsonrpc_return_success(request, "{%Q:%.*Q}", "data",
+                           encoded_length, encoded_data.data());
 }
 
 void WifiSetAntenna(struct jsonrpc_request *request) {

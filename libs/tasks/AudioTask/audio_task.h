@@ -7,32 +7,40 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm_edma.h"
 #include <functional>
+#include <vector>
 
 namespace valiant {
-
 namespace audio {
 
 enum class RequestType : uint8_t {
     Power,
     Enable,
     Disable,
-    SetCallback,
-    SetBuffer,
 };
 
 struct PowerRequest {
    bool enable;
 };
 
-typedef uint32_t* (*AudioTaskCallback)(void *);
-struct SetCallbackRequest {
-    AudioTaskCallback callback;
-    void *callback_param;
+enum class SampleRate : uint32_t {
+    k16000_Hz = 16000,
+    k48000_Hz = 48000,
 };
 
-struct SetBufferRequest {
-    uint32_t* buffer;
-    size_t bytes;
+using AudioTaskCallback =
+    void (*)(void *param, const int32_t* buffer, size_t buffer_size);
+
+constexpr size_t kMaxNumBuffers = 16;
+
+struct EnableRequest {
+   SampleRate sample_rate;
+
+   int32_t* buffers[kMaxNumBuffers];
+   size_t num_buffers;
+   size_t buffer_size;
+
+   void *callback_param;
+   AudioTaskCallback callback;
 };
 
 struct Response {
@@ -45,8 +53,7 @@ struct Request {
     RequestType type;
     union {
         PowerRequest power;
-        SetCallbackRequest set_callback;
-        SetBufferRequest set_buffer;
+        EnableRequest enable;
     } request;
     std::function<void(Response)> callback;
 };
@@ -57,43 +64,48 @@ static constexpr size_t kAudioTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
 static constexpr UBaseType_t kAudioTaskQueueLength = 4;
 extern const char kAudioTaskName[];
 
-class AudioTask : public QueueTask<audio::Request, audio::Response, kAudioTaskName, kAudioTaskStackDepth, AUDIO_TASK_PRIORITY, kAudioTaskQueueLength> {
+class AudioTask : public QueueTask<audio::Request,
+                                   audio::Response,
+                                   kAudioTaskName,
+                                   kAudioTaskStackDepth,
+                                   AUDIO_TASK_PRIORITY,
+                                   kAudioTaskQueueLength> {
   public:
-    void Init() override;
     static AudioTask* GetSingleton() {
         static AudioTask audio;
         return &audio;
     }
     void SetPower(bool enable);
-    void Enable();
+    void Enable(audio::SampleRate sample_rate,
+                const std::vector<int32_t*>& buffers, size_t buffer_size,
+                void *callback_param, audio::AudioTaskCallback callback);
     void Disable();
-    void SetCallback(audio::AudioTaskCallback cb, void *param);
-    void SetBuffer(uint32_t* buffer, size_t bytes);
+
   private:
     static void StaticPdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t status, void *userData);
     void PdmCallback(PDM_Type *base, pdm_edma_handle_t *handle, status_t status);
-    void TaskInit() override;
-    void RequestHandler(audio::Request *req) override;
-    void HandlePowerRequest(audio::PowerRequest& power);
-    void HandleEnableRequest();
-    void HandleDisableRequest();
-    void HandleSetCallback(audio::SetCallbackRequest& set_callback);
-    void HandleSetBuffer(audio::SetBufferRequest& set_buffer);
 
+    void TaskInit() override;
+
+    void RequestHandler(audio::Request *req) override;
+    void HandlePowerRequest(const audio::PowerRequest& request);
+    void HandleEnableRequest(const audio::EnableRequest& request);
+    void HandleDisableRequest();
+
+  private:
     edma_config_t edma_config_;
     // TODO(atv): marked noncacheable in demo. do i care?
     edma_handle_t edma_handle_ __attribute__((aligned(4)));
-    pdm_config_t pdm_config_;
-    pdm_edma_handle_t pdm_edma_handle_ __attribute__((aligned(4)));
-    edma_tcd_t edma_tcd_ __attribute__((aligned(32)));
-    pdm_channel_config_t channel_config_;
-    pdm_edma_transfer_t pdm_transfer_;
 
+    pdm_edma_handle_t pdm_edma_handle_ __attribute__((aligned(4)));
+    edma_tcd_t edma_tcd_[audio::kMaxNumBuffers] __attribute__((aligned(32)));
+
+    pdm_edma_transfer_t pdm_transfers_[audio::kMaxNumBuffers];
+    volatile int pdm_transfer_index_;
+    size_t pdm_transfer_count_;
+
+    void* callback_param_ = nullptr;
     audio::AudioTaskCallback callback_ = nullptr;
-    void* callback_param_;
-    uint32_t *rx_buffer_;
-    size_t rx_buffer_bytes_;
-    // uint16_t temp_rx_buffer_[512];
 };
 
 }  // namespace valiant
