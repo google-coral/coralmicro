@@ -12,12 +12,13 @@ function main {
 Usage: docker_build.sh [-b <build_dir>]
   -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
   -a               build arduino package
+  -n               build with ninja
 EOF
 )
 
     local build_dir
     local arduino
-    local args=$(getopt hmab: $*)
+    local args=$(getopt hmanb: $*)
     set -- $args
 
     for i; do
@@ -28,6 +29,10 @@ EOF
                 ;;
             -a)
                 arduino=true
+                shift
+                ;;
+            -n)
+                ninja=true
                 shift
                 ;;
             --)
@@ -43,6 +48,11 @@ EOF
     local arduino_build_flags
     if [[ ! -z "${arduino}" ]]; then
         arduino_build_flags="-a"
+    fi
+
+    local ninja_build_flags
+    if [[ ! -z "${ninja}" ]]; then
+        ninja_build_flags="-n"
     fi
 
     if [[ -z "${build_dir}" ]]; then
@@ -61,7 +71,7 @@ EOF
         chmod a+w /
         groupadd --gid $(id -g) $(id -g -n)
         useradd -m -e '' -s /bin/bash --gid $(id -g) --uid $(id -u) $(id -u -n)
-        su $(id -u -n) -c 'bash ${ROOTDIR}/build.sh -b ${ROOTDIR}/build ${arduino_build_flags}'
+        su $(id -u -n) -c 'bash ${ROOTDIR}/build.sh -b ${ROOTDIR}/build ${arduino_build_flags} ${ninja_build_flags}'
     "
 }
 

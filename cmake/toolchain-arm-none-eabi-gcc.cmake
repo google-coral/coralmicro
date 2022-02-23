@@ -41,7 +41,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-find_program(CMAKE_MAKE_PROGRAM make REQUIRED)
 find_program(CMAKE_XXD_PROGRAM xxd REQUIRED)
 
 set(COMMON_C_FLAGS
@@ -210,9 +209,6 @@ function(add_executable_m4)
             ${ARGV0}.bin ${ARGV0}.obj
         DEPENDS ${ARGV0}
         BYPRODUCTS ${ARGV0}.bin ${ARGV0}.obj
-    )
-    add_custom_command(OUTPUT ${ARGV0}.obj
-        DEPENDS ${ARGV0}
     )
     file(GENERATE OUTPUT ${ARGV0}.libs CONTENT "$<TARGET_PROPERTY:${ARGV0},LINK_LIBRARIES>")
 

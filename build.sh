@@ -22,11 +22,12 @@ function main {
 Usage: docker_build.sh [-b <build_dir>]
   -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
   -a               build arduino library archive
+  -n               build using ninja
 EOF
 )
     local build_dir
     local build_arduino
-    local args=$(getopt hmab: $*)
+    local args=$(getopt hmanb: $*)
     set -- $args
 
     for i; do
@@ -37,6 +38,10 @@ EOF
                 ;;
             -a)
                 build_arduino=true
+                shift
+                ;;
+            -n)
+                ninja=true
                 shift
                 ;;
             --)
@@ -50,14 +55,29 @@ EOF
     done
 
     if [[ -z "${build_dir}" ]]; then
-        build_dir="${ROOTDIR}/build"
+        if [[ ! -z "${ninja}" ]]; then
+            build_dir="${ROOTDIR}/build-ninja"
+        else
+            build_dir="${ROOTDIR}/build"
+        fi
+    fi
+
+    if [[ ! -z "${ninja}" ]]; then
+        generator="Ninja"
+    else
+        generator="Unix Makefiles"
     fi
 
     set -xe
 
     mkdir -p ${build_dir}
-    cmake -B ${build_dir}
-    make -C ${build_dir} -j $(nproc)
+    cmake -B ${build_dir} -G "${generator}"
+
+    if [[ ! -z "${ninja}" ]]; then
+        ninja -C ${build_dir}
+    else
+        make -C ${build_dir} -j $(nproc)
+    fi
 
     if [[ ! -z ${build_arduino} ]]; then
         python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir}
