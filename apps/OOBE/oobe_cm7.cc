@@ -45,24 +45,24 @@ static int camera_http_fs_open_custom(void *context, struct fs_file *file, const
     static_cast<void>(context);
     constexpr const char *camera = "/camera";
     constexpr const char *pose = "/pose";
-    if (strncmp(name, camera, strlen(camera)) == 0) {
+    if (std::strncmp(name, camera, std::strlen(camera)) == 0) {
         valiant::MutexLock lock(camera_output_mtx);
-        file->data = reinterpret_cast<const char*>(camera_output.release());
+        file->data = reinterpret_cast<char*>(camera_output.release());
         file->len = kPosenetSize;
         file->index = kPosenetSize;
         file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT | FS_FILE_FLAGS_CUSTOM;
         file->pextension = reinterpret_cast<void*>(kCameraPextension);
         return 1;
     }
-    if (strncmp(name, pose, strlen(pose)) == 0) {
+    if (std::strncmp(name, pose, std::strlen(pose)) == 0) {
         valiant::MutexLock lock(posenet_output_mtx);
         if (!posenet_output) {
             return 0;
         }
         auto pose_json = valiant::oobe::CreatePoseJSON(*posenet_output, kThreshold);
-        posenet_output.reset(nullptr);
-        file->data = reinterpret_cast<const char*>(pose_json.release());
-        file->len = strlen(file->data);
+        posenet_output.reset();
+        file->data = reinterpret_cast<char*>(pose_json.release());
+        file->len = std::strlen(file->data);
         file->index = file->len;
         file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT | FS_FILE_FLAGS_CUSTOM;
         file->pextension = reinterpret_cast<void*>(kPosePextension);
@@ -73,9 +73,7 @@ static int camera_http_fs_open_custom(void *context, struct fs_file *file, const
 
 static void camera_http_fs_close_custom(void *context, struct fs_file *file) {
     static_cast<void>(context);
-    if (file->data) {
-        delete file->data;
-    }
+    delete [] file->data;
 }
 
 static valiant::httpd::HTTPDHandlers camera_http_handlers = {
