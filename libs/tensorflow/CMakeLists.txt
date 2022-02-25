@@ -17,7 +17,6 @@ set(libs_tensorflow_SOURCES
     ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c
     ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.c
     ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend_io.c
-    ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend_memmap_generator.c
     ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c
     ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_lut.c
     ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale.c

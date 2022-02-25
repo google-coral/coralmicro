@@ -35,7 +35,8 @@ def main():
                  'generated_data',
                  '_main',
                  'kiss_fft_int16',
-                 'debug_log']:
+                 'debug_log',
+                 'frontend_memmap_generator']:
         files = exclude(files, word)
 
     for word in ['arc_custom',
