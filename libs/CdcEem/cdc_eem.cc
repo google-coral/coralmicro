@@ -71,13 +71,13 @@ err_t CdcEem::StaticTxFunc(struct netif *netif, struct pbuf *p) {
 }
 
 err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
-    std::unique_ptr<uint8_t> combined_pbuf(nullptr);
+    std::unique_ptr<uint8_t[]> combined_pbuf;
     uint8_t *tx_ptr = nullptr;
     uint32_t tx_len = p->tot_len;
-    if ((p->next == NULL) && (p->tot_len == p->len)) {
+    if (p->next == nullptr && p->tot_len == p->len) {
         tx_ptr = reinterpret_cast<uint8_t*>(p->payload);
     } else {
-        combined_pbuf.reset(reinterpret_cast<uint8_t*>(malloc(p->tot_len)));
+        combined_pbuf = std::make_unique<uint8_t[]>(p->tot_len);
         tx_ptr = combined_pbuf.get();
         struct pbuf *tmp_p = p;
         int offset = 0;
