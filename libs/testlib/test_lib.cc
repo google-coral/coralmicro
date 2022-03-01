@@ -30,12 +30,12 @@ static std::map<uint64_t, std::vector<uint8_t>> uploaded_resources;
 namespace valiant {
 namespace testlib {
 
-static std::unique_ptr<char> JSONRPCCreateParamFormatString(const char *param_name) {
+static std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_name) {
     const char *param_format = "$[0].%s";
     // +1 for null terminator.
-    int param_pattern_len = snprintf(nullptr, 0, param_format, param_name) + 1;
-    std::unique_ptr<char> param_pattern(new char[param_pattern_len]);
-    snprintf(param_pattern.get(), param_pattern_len, param_format, param_name);
+    auto size = snprintf(nullptr, 0, param_format, param_name) + 1;
+    auto param_pattern = std::make_unique<char[]>(size);
+    snprintf(param_pattern.get(), size, param_format, param_name);
     return param_pattern;
 }
 
