@@ -2,44 +2,48 @@
 #include "libs/tensorflow/classification.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/task.h"
 
 namespace valiant {
 
 namespace {
-    const int kTensorArenaSize = 1024 * 1024;
-    static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+const int kTensorArenaSize = 1024 * 1024;
+static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
+__attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 }  // namespace
 
 void real_main() {
     size_t model_size, input_size;
-    auto model_data = filesystem::ReadToMemory("/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite", &model_size);
+    auto model_data = filesystem::ReadToMemory(
+        "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite", &model_size);
     if (!model_data || model_size == 0) {
         printf("Failed to load model\r\n");
         return;
     }
 
-    auto input_data = filesystem::ReadToMemory("/apps/ClassifyImage/cat_224x224.rgb", &input_size);
+    auto input_data = filesystem::ReadToMemory(
+        "/apps/ClassifyImage/cat_224x224.rgb", &input_size);
     if (!input_data || input_size == 0) {
         printf("Failed to load input\r\n");
         return;
     }
     const tflite::Model* model = tflite::GetModel(model_data.get());
-    std::unique_ptr<tflite::MicroErrorReporter> error_reporter(new tflite::MicroErrorReporter());
-    std::unique_ptr<tflite::MicroMutableOpResolver<1>> resolver(new tflite::MicroMutableOpResolver<1>);
-    std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice();
+    tflite::MicroErrorReporter error_reporter;
+    tflite::MicroMutableOpResolver<1> resolver;
+    std::shared_ptr<EdgeTpuContext> context =
+        EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         printf("Failed to get EdgeTpuContext\r\n");
         return;
     }
     std::unique_ptr<tflite::MicroInterpreter> interpreter =
-        tensorflow::MakeEdgeTpuInterpreter(model, context.get(),
-        resolver.get(), error_reporter.get(),
-        tensor_arena, kTensorArenaSize);
+        tensorflow::MakeEdgeTpuInterpreter(model, context.get(), &resolver,
+                                           &error_reporter, tensor_arena,
+                                           kTensorArenaSize);
 
     if (!interpreter) {
         printf("Failed to make interpreter\r\n");
@@ -58,7 +62,7 @@ void real_main() {
     if (tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor)) {
         tensorflow::ClassificationPreprocess(input_tensor);
     }
-    unsigned char* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
+    auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
     memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
 
     if (interpreter->Invoke() != kTfLiteOk) {
@@ -66,7 +70,8 @@ void real_main() {
         return;
     }
 
-    auto results = tensorflow::GetClassificationResults(interpreter.get(), 0.0f, 3);
+    auto results =
+        tensorflow::GetClassificationResults(interpreter.get(), 0.0f, 3);
     for (auto result : results) {
         printf("Label ID: %d Score: %f\r\n", result.id, result.score);
     }
@@ -74,7 +79,7 @@ void real_main() {
 
 }  // namespace valiant
 
-extern "C" void app_main(void *param) {
+extern "C" void app_main(void* param) {
     valiant::real_main();
     vTaskSuspend(NULL);
 }
