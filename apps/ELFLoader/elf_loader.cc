@@ -45,7 +45,7 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
     xTimerStop(usb_timer, 0);
     switch (cmd) {
         case ElfloaderCommand::SetSize:
-            assert(length == sizeof(ElfloaderSetSize) + 1);
+            assert(length >= sizeof(ElfloaderSetSize) + 1);
             switch (elfloader_target) {
                 case ElfloaderTarget::Filesystem:
                     break;

@@ -8,6 +8,7 @@ import hid
 import ipaddress
 import os
 import platform
+import re
 import serial
 import serial.tools.list_ports
 import signal
@@ -17,6 +18,27 @@ import sys
 import tempfile
 import time
 import usb.core
+
+platform_dir = ''
+toolchain_dir = ''
+exe_extension = ''
+skip_hid_readback = False
+system_name = platform.system()
+if (system_name == 'Windows'):
+   platform_dir = 'win'
+   toolchain_dir = 'toolchain-win'
+   exe_extension = '.exe'
+   skip_hid_readback = True
+elif (system_name == 'Darwin'):
+   platform_dir = 'mac'
+   toolchain_dir = 'toolchain-mac'
+   skip_hid_readback = True
+elif (system_name == 'Linux'):
+   platform_dir = 'linux/amd64'
+   toolchain_dir = 'toolchain'
+else:
+   print('Unknown operating system!' + system_name)
+   raise OSError
 
 SDP_VID = 0x1fc9
 SDP_PID = 0x013d
@@ -59,13 +81,9 @@ def flashloader_vidpid():
     return '{},{}'.format(hex(FLASHLOADER_VID), hex(FLASHLOADER_PID))
 
 def is_valiant_connected(serial_number):
-    for device in usb.core.find(find_all=True):
-        if device.idVendor == VALIANT_VID and device.idProduct == VALIANT_PID:
-            try:
-                if not serial_number or device.serial_number == serial_number:
-                    return True
-            except ValueError:
-                pass
+    serial_list = EnumerateValiant()
+    if serial_number in serial_list:
+        return True
     return False
 
 def is_elfloader_connected(serial_number):
@@ -96,8 +114,14 @@ def EnumerateFlashloader():
 def EnumerateElfloader():
     return hid.enumerate(ELFLOADER_VID, ELFLOADER_PID)
 
+SERIAL_PORT_RE = re.compile('USB VID:PID=18D1:93FF SER=([0-9A-Fa-f]+)')
 def EnumerateValiant():
-    return usb.core.find(find_all=True, idVendor=VALIANT_VID, idProduct=VALIANT_PID)
+    serial_list = []
+    for port in serial.tools.list_ports.comports():
+        matches = SERIAL_PORT_RE.match(port.hwid)
+        if matches:
+            serial_list.append(matches.group(1).lower())
+    return serial_list
 
 def FindElfloader(build_dir, cached_files):
     default_path = os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
@@ -292,7 +316,7 @@ def CheckForElfloader(**kwargs):
 def FindSerialPortForDevice(**kwargs):
     for port in serial.tools.list_ports.comports():
         try:
-            if port.serial_number == kwargs.get('serial'):
+            if port.serial_number and port.serial_number.lower() == kwargs.get('serial'):
                 return port.device
         except ValueError:
             pass
@@ -314,6 +338,10 @@ def ResetToSdp(**kwargs):
                 s.open()
                 s.write(b'42')  ## Dummy write to force apply s.dtr.
                 return FlashtoolStates.CHECK_FOR_SDP
+            except serial.SerialException as e:
+                # If the port goes away, we get SerialException.
+                # Assume that this means the device reset into SDP, and try to proceed.
+                return FlashtoolStates.CHECK_FOR_SDP
             except:
                 pass
         time.sleep(1)
@@ -332,7 +360,7 @@ def LoadFlashloader(**kwargs):
     return FlashtoolStates.CHECK_FOR_FLASHLOADER
 
 def LoadElfloader(**kwargs):
-    symbols = subprocess.check_output('{} -t {}'.format(os.path.join(kwargs.get('toolchain_path'), 'arm-none-eabi-objdump'), kwargs['elfloader_elf_path']), shell=True, text=True)
+    symbols = subprocess.check_output('{} -t {}'.format(os.path.join(kwargs.get('toolchain_path'), 'arm-none-eabi-objdump') + exe_extension, kwargs['elfloader_elf_path']), shell=True, text=True)
     disable_usb_timeout_address = 0
     for symbol in symbols.splitlines():
         if not 'disable_usb_timeout' in symbol:
@@ -396,7 +424,7 @@ def Program(**kwargs):
 def ElfloaderTransferData(h, data, target, bar=None):
     warned = False
     def read_byte():
-        if (platform.system() == 'Darwin'):
+        if skip_hid_readback is True:
             return
         try:
             h.read(1, timeout_ms=1000)
@@ -580,19 +608,6 @@ def main():
 
     usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
 
-    platform_dir = ''
-    toolchain_dir = ''
-    system_name = platform.system()
-    if (system_name == 'Windows'):
-       platform_dir = 'win'
-       toolchain_dir = 'toolchain-win'
-    elif (system_name == 'Darwin'):
-       platform_dir = 'mac'
-       toolchain_dir = 'toolchain-mac'
-    elif (system_name == 'Linux'):
-       platform_dir = 'linux/amd64'
-       toolchain_dir = 'toolchain'
-
     build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
     cached_files = None
     if args.cached:
@@ -718,11 +733,8 @@ def main():
     serial_list = []
     for elfloader in EnumerateElfloader():
         serial_list.append(elfloader['serial_number'])
-    for valiant in EnumerateValiant():
-        try:
-          serial_list.append(valiant.serial_number)
-        except ValueError:
-          pass
+
+    serial_list += EnumerateValiant()
 
     if args.list:
         print(serial_list)

@@ -78,7 +78,7 @@ usb_status_t CdcAcm::SetControlLineState(usb_device_cdc_acm_request_param_struct
 
     can_transmit_ =(dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE) > 0;
 
-    if (!carrier_present && !dte_present && line_coding_.dwDTERate == 1200) {
+    if (line_coding_.dwDTERate == 1200) {
         ResetToBootloader();
     }
 
