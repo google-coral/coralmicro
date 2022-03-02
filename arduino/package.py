@@ -133,6 +133,13 @@ def main():
                                   'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2',
                                   'checksum': 'MD5:75a171beac35453fd2f0f48b3cb239c3',
                                   'size': '142999997'
+                                },
+                                {
+                                  'host': 'i686-mingw32',
+                                  'url': 'https://dl.google.com/coral/gcc-arm-none-eabi-9-2020-q2-update-win32-arduino1.zip',
+                                  'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-win32-arduino1.zip',
+                                  'checksum': 'SHA-256:daa13799151d05adb5c37016010e5ff649941aab4dac150a3ad649749cde4896',
+                                  'size': '182850168'
                                 }
                             ]
                         }
