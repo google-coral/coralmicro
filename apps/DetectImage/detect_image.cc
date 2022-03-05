@@ -34,11 +34,10 @@ void real_main() {
 
     const tflite::Model* model = tflite::GetModel(model_data.get());
 
-    std::unique_ptr<tflite::MicroErrorReporter> error_reporter(new tflite::MicroErrorReporter());
     constexpr int kNumOps = 3;
-    std::unique_ptr<tflite::MicroMutableOpResolver<kNumOps>> resolver(new tflite::MicroMutableOpResolver<kNumOps>);
-    resolver->AddDequantize();
-    resolver->AddDetectionPostprocess();
+    tflite::MicroMutableOpResolver<kNumOps> resolver;
+    resolver.AddDequantize();
+    resolver.AddDetectionPostprocess();
 
     std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
     if (!context) {
@@ -46,9 +45,10 @@ void real_main() {
         return;
     }
 
+    tflite::MicroErrorReporter error_reporter;
     std::unique_ptr<tflite::MicroInterpreter> interpreter =
         tensorflow::MakeEdgeTpuInterpreter(model, context.get(),
-        resolver.get(), error_reporter.get(),
+        &resolver, &error_reporter,
         tensor_arena, kTensorArenaSize);
     if (!interpreter) {
         printf("Failed to make interpreter\r\n");
@@ -56,13 +56,13 @@ void real_main() {
     }
 
     auto* input_tensor = interpreter->input_tensor(0);
-    unsigned char* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
+    auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
     if (input_size != input_tensor->bytes) {
         printf("bad input size %d != %d\r\n", input_size, input_tensor->bytes);
         return;
     }
 
-    memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
+    std::memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
 
     if (interpreter->Invoke() != kTfLiteOk) {
         printf("invoke failed\r\n");
