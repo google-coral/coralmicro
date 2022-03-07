@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 add_subdirectory(Analog)
+add_subdirectory(AudioStreaming)
 add_subdirectory(BFT)
 add_subdirectory(BLETest)
 add_subdirectory(BootROM)
