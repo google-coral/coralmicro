@@ -80,7 +80,8 @@ EOF
     fi
 
     if [[ ! -z ${build_arduino} ]]; then
-        python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir}
+        python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --core
+        python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --flashtool
         cat <<EOF >${ROOTDIR}/arduino-cli.yaml
 board_manager:
   additional_urls:
@@ -105,6 +106,12 @@ sketch:
 EOF
     python3 -m http.server --directory ${build_dir} &
     http_pid="$!"
+    python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --manifest \
+      --manifest_revision=9.9.9 \
+      --core_url=http://localhost:8000/coral-valiant-$(git rev-parse HEAD).tar.bz2 \
+      --core_sha256=$(sha256sum ${build_dir}/coral-valiant-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
+      --linux_flashtool_url=http://localhost:8000/coral-flashtool-linux64-$(git rev-parse HEAD).tar.bz2 \
+      --linux_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-linux64-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1)
     ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core update-index
     ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core install coral:valiant
     ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:valiant:valiant ${ROOTDIR}/sketches/HelloWorld -v

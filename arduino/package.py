@@ -6,14 +6,88 @@ Generate package for Valiant Arduino core.
 import argparse
 import hashlib
 import json
-import multiprocessing
 import os
 import tempfile
 import platform
+import py7zr
+import semver
 import shutil
 import subprocess
 import tarfile
+import urllib.request
 import PyInstaller.__main__
+from git import Repo
+
+platform_dir = ''
+toolchain_dir = ''
+exe_extension = ''
+pyinstaller_separator = ':'
+platform_name = ''
+system_name = platform.system()
+if (system_name == 'Windows'):
+     platform_dir = 'win'
+     toolchain_dir = 'toolchain-win'
+     exe_extension = '.exe'
+     platform_name = 'windows'
+     pyinstaller_separator = ';'
+elif (system_name == 'Darwin'):
+     platform_dir = 'mac'
+     toolchain_dir = 'toolchain-mac'
+     platform_name = 'osx'
+else:
+     platform_dir = 'linux/amd64'
+     toolchain_dir = 'toolchain'
+     platform_name = 'linux64'
+
+def CreateFlashtoolExe(core_out_dir, root_dir):
+    platform_flags = []
+    if (system_name == 'Windows'):
+        try:
+            libusb_1_0_25_7z = 'https://github.com/libusb/libusb/releases/download/v1.0.25/libusb-1.0.25.7z'
+            libusb_1_0_25_7z_sha256 = '3d1c98416f454026034b2b5d67f8a294053898cb70a8b489874e75b136c6674d'
+            (filename, _) = urllib.request.urlretrieve(libusb_1_0_25_7z)
+            sha256sum = hashlib.sha256()
+            with open(filename, 'rb') as f:
+                sha256sum.update(f.read())
+                downloaded_sha256 = sha256sum.hexdigest()
+            if downloaded_sha256 != libusb_1_0_25_7z_sha256:
+                print('libusb checksum mismatch!')
+                raise
+            with py7zr.SevenZipFile(filename, 'r') as archive:
+                print(archive.extract(path=core_out_dir, targets=['VS2019/MS64/Release/dll/libusb-1.0.dll']))
+        finally:
+            urllib.request.urlcleanup()
+        platform_flags = [
+            '--add-binary',
+            core_out_dir + '/VS2019/MS64/Release/dll/libusb-1.0.dll' + pyinstaller_separator + '.',
+        ]
+    pyinstaller_dist_path = core_out_dir
+    PyInstaller.__main__.run([
+        '-F',
+        '--distpath', pyinstaller_dist_path,
+        '--add-binary',
+        os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost' + exe_extension) + pyinstaller_separator + os.path.join('third_party', 'nxp', 'blhost', 'bin', platform_dir),
+        '--add-binary',
+        os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb' + exe_extension) + pyinstaller_separator + os.path.join('third_party', 'nxp', 'elftosb', platform_dir),
+        '--add-binary',
+        os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-objdump' + exe_extension) + pyinstaller_separator + os.path.join('third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
+        '--add-binary',
+        os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-strip' + exe_extension) + pyinstaller_separator + os.path.join('third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
+        '--add-binary',
+        os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin') + pyinstaller_separator + os.path.join('third_party', 'nxp', 'flashloader'),
+        '--hidden-import', 'progress.bar',
+        '--hidden-import', 'hexformat',
+        '--hidden-import', 'hid',
+        '--hidden-import', 'ipaddress',
+        '--hidden-import', 'serial',
+        '--hidden-import', 'signal',
+        '--hidden-import', 'struct',
+        '--hidden-import', 'sys',
+        '--hidden-import', 'time',
+        '--hidden-import', 'usb.core'
+    ] + platform_flags + [
+        os.path.join(root_dir, 'scripts', 'flashtool.py'),
+    ])
 
 def main():
     parser = argparse.ArgumentParser(
@@ -21,10 +95,207 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('--output_dir', type=str, required=True)
+    main_group = parser.add_mutually_exclusive_group(required=True)
+    main_group.add_argument('--core', action='store_true')
+    main_group.add_argument('--flashtool', action='store_true')
+    main_group.add_argument('--manifest', action='store_true')
+
+    parser.add_argument('--core_url', type=str, default=None)
+    parser.add_argument('--core_sha256', type=str, default=None)
+    parser.add_argument('--win_flashtool_url', type=str, default=None)
+    parser.add_argument('--win_flashtool_sha256', type=str, default=None)
+    parser.add_argument('--mac_flashtool_url', type=str, default=None)
+    parser.add_argument('--mac_flashtool_sha256', type=str, default=None)
+    parser.add_argument('--linux_flashtool_url', type=str, default=None)
+    parser.add_argument('--linux_flashtool_sha256', type=str, default=None)
+    parser.add_argument('--manifest_revision', type=str, default=None)
     args = parser.parse_args()
 
     arduino_dir = os.path.abspath(os.path.dirname(__file__))
     root_dir = os.path.abspath(os.path.join(arduino_dir, '..'))
+    repo = Repo(root_dir)
+    git_revision = str(repo.head.commit)
+    common_kwargs = {
+        'arduino_dir': arduino_dir,
+        'root_dir': root_dir,
+        'git_revision': git_revision,
+    }
+
+    if args.core:
+        return core_main(args, **common_kwargs)
+    elif args.flashtool:
+        return flashtool_main(args, **common_kwargs)
+    elif args.manifest:
+        return manifest_main(args, **common_kwargs)
+
+def flashtool_main(args, **kwargs):
+    root_dir = kwargs.get('root_dir')
+    git_revision = kwargs.get('git_revision')
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        flashtool_out_dir = os.path.join(tmpdir, 'coral-flashtool-%s-%s' % (platform_name, git_revision))
+        CreateFlashtoolExe(flashtool_out_dir, root_dir)
+
+        flashtool_tar_path = os.path.join(args.output_dir, 'coral-flashtool-%s-%s.tar.bz2' % (platform_name, git_revision))
+        with tarfile.open(name=flashtool_tar_path, mode='w:bz2') as flashtool_tar:
+            flashtool_tar.add(flashtool_out_dir, arcname='coral-flashtool-%s-%s' % (platform_name, git_revision))
+        flashtool_sha256sum = hashlib.sha256()
+        with open(flashtool_tar_path, 'rb') as f:
+            flashtool_sha256sum.update(f.read())
+
+def GetDownloadMetadata(url):
+    (filename, _) = urllib.request.urlretrieve(url)
+    sha256sum = hashlib.sha256()
+    with open(filename, 'rb') as f:
+        sha256sum.update(f.read())
+    size = os.path.getsize(filename)
+    urllib.request.urlcleanup()
+    return (sha256sum.hexdigest(), size)
+
+
+def manifest_main(args, **kwargs):
+    manifest_revision = args.manifest_revision
+    if not manifest_revision:
+        print('Missing manifest revision!')
+        return
+    semver.VersionInfo.parse(manifest_revision)
+
+    git_revision = kwargs.get('git_revision')
+
+    core_url = args.core_url
+    core_sha256 = args.core_sha256
+    win_flashtool_url = args.win_flashtool_url
+    win_flashtool_sha256 = args.win_flashtool_sha256
+    mac_flashtool_url = args.mac_flashtool_url
+    mac_flashtool_sha256 = args.mac_flashtool_sha256
+    linux_flashtool_url = args.linux_flashtool_url
+    linux_flashtool_sha256 = args.linux_flashtool_sha256
+
+    systems_json = []
+    if linux_flashtool_url and linux_flashtool_sha256:
+        (sha256sum, size) = GetDownloadMetadata(linux_flashtool_url)
+        if sha256sum != linux_flashtool_sha256:
+            print('Provided Linux flashtool checksum does not match downloaded!')
+            return
+
+        systems_json.append({
+            'host': 'x86_64-pc-linux-gnu',
+            'url': linux_flashtool_url,
+            'archiveFileName': 'coral-flashtool-linux64.tar.bz2',
+            'checksum': 'SHA-256:%s' % sha256sum,
+            'size': str(size)
+        })
+    if mac_flashtool_url and mac_flashtool_sha256:
+        (sha256sum, size) = GetDownloadMetadata(mac_flashtool_url)
+        if sha256sum != mac_flashtool_sha256:
+            print('Provided Mac flashtool checksum does not match downloaded!')
+            return
+
+        systems_json.append({
+            'host': 'x86_64-apple-darwin',
+            'url': mac_flashtool_url,
+            'archiveFileName': 'coral-flashtool-osx.tar.bz2',
+            'checksum': 'SHA-256:%s' % sha256sum,
+            'size': str(size)
+        })
+    if win_flashtool_url and win_flashtool_sha256:
+        (sha256sum, size) = GetDownloadMetadata(win_flashtool_url)
+        if sha256sum != win_flashtool_sha256:
+            print('Provided Windows flashtool checksum does not match downloaded!')
+            return
+
+        systems_json.append({
+            'host': 'i686-mingw32',
+            'url': win_flashtool_url,
+            'archiveFileName': 'coral-flashtool-windows.tar.bz2',
+            'checksum': 'SHA-256:%s' % sha256sum,
+            'size': str(size)
+        })
+    if core_url and core_sha256:
+        (sha256sum, size) = GetDownloadMetadata(core_url)
+        if sha256sum != core_sha256:
+            print('Provided core checksum does not match downloaded!')
+            return
+        core_json = {
+            'name': 'Valiant',
+            'architecture': 'valiant',
+            'version': manifest_revision,
+            'url': core_url,
+            'archiveFileName': 'coral-valiant.tar.bz2',
+            'checksum': 'SHA-256:%s' % sha256sum,
+            'size': str(size),
+            'boards': [
+                {
+                    'name': 'Coral Valiant',
+                }
+            ],
+            'toolsDependencies': [
+                {
+                    'packager': 'coral',
+                    'name': 'arm-none-eabi-gcc',
+                    'version': '9-2020q2'
+                },
+                {
+                    'packager': 'coral',
+                    'name': 'flashtool',
+                    'version': manifest_revision
+                }
+            ],
+        },
+
+    # Make an arduino package manifest.
+    json_obj = {
+        'packages': [
+            {
+                'name': 'coral',
+                'maintainer': 'Coral Team',
+                'websiteURL': 'https://coral.ai',
+                'tools': [
+                    {
+                        'name': 'arm-none-eabi-gcc',
+                        'version': '9-2020q2',
+                        'systems': [
+                            {
+                                'host': 'x86_64-pc-linux-gnu',
+                                'url': 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2',
+                                'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2',
+                                'checksum': 'MD5:2b9eeccc33470f9d3cda26983b9d2dc6',
+                                'size': '140360119'
+                            },
+                            {
+                              'host': 'x86_64-apple-darwin',
+                              'url': 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2',
+                              'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2',
+                              'checksum': 'MD5:75a171beac35453fd2f0f48b3cb239c3',
+                              'size': '142999997'
+                            },
+                            {
+                              'host': 'i686-mingw32',
+                              'url': 'https://dl.google.com/coral/gcc-arm-none-eabi-9-2020-q2-update-win32-arduino1.zip',
+                              'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-win32-arduino1.zip',
+                              'checksum': 'SHA-256:daa13799151d05adb5c37016010e5ff649941aab4dac150a3ad649749cde4896',
+                              'size': '182850168'
+                            }
+                        ]
+                    },
+                    {
+                        'name': 'flashtool',
+                        'version': manifest_revision,
+                        'systems': systems_json
+                    }
+                ],
+                'email': 'coral-support@google.com',
+                'platforms': core_json,
+            },
+        ],
+    }
+    with open(os.path.join(args.output_dir, 'package_coral_index.json'), 'w') as f:
+        json.dump(json_obj, f, indent=2)
+
+def core_main(args, **kwargs):
+    root_dir = kwargs.get('root_dir')
+    arduino_dir = kwargs.get('arduino_dir')
+    git_revision = kwargs.get('git_revision')
 
     # Remove previous coral package.
     coral_package_dir = os.path.join(root_dir, '.arduino15', 'packages', 'coral')
@@ -33,32 +304,21 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Copy out arduino core to temp directory
-        core_out_dir = os.path.join(tmpdir, 'coral-valiant-1.0.0')
+        core_out_dir = os.path.join(tmpdir, 'coral-valiant-%s' % git_revision)
+        flashtool_out_dir = os.path.join(tmpdir, 'coral-flashtool-%s-%s' % (platform_name, git_revision))
+        os.makedirs(flashtool_out_dir, exist_ok=True)
         shutil.copytree(arduino_dir, core_out_dir)
 
         # Create a CMake build directory in the temp directory,
         # and build the arduino library bundle.
         build_dir = os.path.join(tmpdir, 'build')
         os.makedirs(build_dir)
-        subprocess.check_call(['cmake', root_dir, '-DVALIANT_ARDUINO=1'], cwd=build_dir)
-        subprocess.check_call(['make', '-C', build_dir, '-j', str(multiprocessing.cpu_count()), 'bundling_target', 'ELFLoader'])
+        subprocess.check_call(['cmake', root_dir, '-DVALIANT_ARDUINO=1', '-G', 'Ninja'], cwd=build_dir)
+        subprocess.check_call(['ninja', '-C', build_dir, 'bundling_target', 'ELFLoader'])
         libs_dir = os.path.join(core_out_dir, 'variants', 'VALIANT', 'libs')
         os.makedirs(libs_dir, exist_ok=True)
 
-        platform_dir = ''
-        toolchain_dir = ''
-        system_name = platform.system()
-        if (system_name == 'Windows'):
-             platform_dir = 'win'
-             toolchain_dir = 'toolchain-win'
-        elif (system_name == 'Darwin'):
-             platform_dir = 'mac'
-             toolchain_dir = 'toolchain-mac'
-        else:
-             platform_dir = 'linux/amd64'
-             toolchain_dir = 'toolchain'
-
-        ar_path = os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-ar')
+        ar_path = os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-ar' + exe_extension)
 
         # Copy the arduino library bundle into the core.
         with tempfile.TemporaryDirectory() as rebundle_dir:
@@ -73,106 +333,15 @@ def main():
         shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'), bootloader_dir)
         shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'), bootloader_dir)
 
-        # Leverage pyinstaller to package flashtool.
-        pyinstaller_dist_path = os.path.join(core_out_dir, 'tools', 'flashtool')
-        PyInstaller.__main__.run([
-            '-F',
-            '--distpath', pyinstaller_dist_path,
-            '--add-binary',
-            os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost') + ':' + os.path.join('third_party', 'nxp', 'blhost', 'bin', platform_dir),
-            '--add-binary',
-            os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb') + ':' + os.path.join('third_party', 'nxp', 'elftosb', platform_dir),
-            '--add-binary',
-            os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-strip') + ':' + os.path.join('third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
-            '--add-binary',
-            os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin') + ':' + os.path.join('third_party', 'nxp', 'flashloader'),
-            '--hidden-import', 'progress.bar',
-            '--hidden-import', 'hexformat',
-            '--hidden-import', 'hid',
-            '--hidden-import', 'ipaddress',
-            '--hidden-import', 'serial',
-            '--hidden-import', 'signal',
-            '--hidden-import', 'struct',
-            '--hidden-import', 'sys',
-            '--hidden-import', 'time',
-            '--hidden-import', 'usb.core',
-            os.path.join(root_dir, 'scripts', 'flashtool.py'),
-        ])
-
         # tbz2 everything
-        tar_path = os.path.join(args.output_dir, 'coral-valiant-1.0.0.tar.bz2')
+        tar_path = os.path.join(args.output_dir, 'coral-valiant-%s.tar.bz2' % git_revision)
         with tarfile.open(name=tar_path, mode='w:bz2') as arduino_tar:
-            arduino_tar.add(core_out_dir, arcname='coral-valiant-1.0.0')
+            arduino_tar.add(core_out_dir, arcname='coral-valiant-%s' % git_revision)
 
         tar_sha256sum = hashlib.sha256()
         with open(tar_path, 'rb') as f:
             tar_sha256sum.update(f.read())
 
-        # Make an arduino package manifest.
-        json_obj = {
-            'packages': [
-                {
-                    'name': 'coral',
-                    'maintainer': 'Coral Team',
-                    'websiteURL': 'https://coral.ai',
-                    'tools': [
-                        {
-                            'name': 'arm-none-eabi-gcc',
-                            'version': '9-2020q2',
-                            'systems': [
-                                {
-                                    'host': 'x86_64-pc-linux-gnu',
-                                    'url': 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2',
-                                    'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2',
-                                    'checksum': 'MD5:2b9eeccc33470f9d3cda26983b9d2dc6',
-                                    'size': '140360119'
-                                },
-                                {
-                                  'host': 'x86_64-apple-darwin',
-                                  'url': 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2',
-                                  'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2',
-                                  'checksum': 'MD5:75a171beac35453fd2f0f48b3cb239c3',
-                                  'size': '142999997'
-                                },
-                                {
-                                  'host': 'i686-mingw32',
-                                  'url': 'https://dl.google.com/coral/gcc-arm-none-eabi-9-2020-q2-update-win32-arduino1.zip',
-                                  'archiveFileName': 'gcc-arm-none-eabi-9-2020-q2-update-win32-arduino1.zip',
-                                  'checksum': 'SHA-256:daa13799151d05adb5c37016010e5ff649941aab4dac150a3ad649749cde4896',
-                                  'size': '182850168'
-                                }
-                            ]
-                        }
-                    ],
-                    'email': 'coral-support@google.com',
-                    'platforms': [
-                        {
-                            'name': 'Valiant',
-                            'architecture': 'valiant',
-                            'version': '1.0.0',
-                            'url': 'http://localhost:8000/coral-valiant-1.0.0.tar.bz2',
-                            'archiveFileName': 'coral-valiant-1.0.0.tar.bz2',
-                            'checksum': 'SHA-256:%s' % tar_sha256sum.hexdigest(),
-                            'size': os.path.getsize(tar_path),
-                            'boards': [
-                                {
-                                    'name': 'Coral Valiant',
-                                }
-                            ],
-                            'toolsDependencies': [
-                                {
-                                    'packager': 'coral',
-                                    'name': 'arm-none-eabi-gcc',
-                                    'version': '9-2020q2'
-                                }
-                            ],
-                        },
-                    ],
-                },
-            ],
-        }
-        with open(os.path.join(args.output_dir, 'package_coral_index.json'), 'w') as f:
-            json.dump(json_obj, f, indent=2)
 
 if __name__ == "__main__":
     main()

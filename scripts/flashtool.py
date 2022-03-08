@@ -300,7 +300,7 @@ def CheckForValiant(**kwargs):
         if is_valiant_connected(kwargs.get('serial', None)):
             # port is needed later as well, wait for it.
             port = FindSerialPortForDevice(**kwargs)
-            if port and os.path.exists(port):
+            if port:
                 return FlashtoolStates.RESET_TO_SDP
         time.sleep(1)
     # If we don't see Valiant on the bus, just check for SDP.

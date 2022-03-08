@@ -34,4 +34,5 @@ recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DARDUIN
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
 recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "@{lib.freertos.ldflags}" "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--whole-archive "{build.path}/{archive_file}" {lib.freertos} -Wl,--no-whole-archive -Wl,--start-group {lib.freertos.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group
 
-tools.flashtool.cmd.path={runtime.platform.path}/tools/flashtool/flashtool
+tools.flashtool.cmd.path={runtime.tools.flashtool.path}/flashtool
+tools.flashtool.cmd.path.windows={runtime.tools.flashtool.path}/flashtool.exe
