@@ -19,6 +19,10 @@
 #include <array>
 #include <map>
 
+using valiant::testlib::JSONRPCGetIntegerParam;
+using valiant::testlib::JSONRPCGetBooleanParam;
+using valiant::testlib::JSONRPCGetStringParam;
+
 // In the below maps, data about pins to be tested via the loopback fixture
 // is provided. Pins on J5 are numbered from 1-100, and pins on J6 are numbered from 101-200.
 
@@ -289,30 +293,19 @@ static void InitializeLoopbackMappings() {
 //    "enable" is a boolean state to set the rail to.
 // Returns success or failure to set the requested state.
 static void SetPmicRailState(struct jsonrpc_request *request) {
-    double rail_double;
-    valiant::pmic::Rail rail;
-    int enable;
-    const char *rail_param_pattern = "$[0].rail";
-    const char *enable_param_pattern = "$[0].enable";
-
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, rail_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, rail_param_pattern, &rail_double);
-        rail = static_cast<valiant::pmic::Rail>(static_cast<uint8_t>(rail_double));
-    } else {
+    int rail;
+    if (!JSONRPCGetIntegerParam(request, "rail", &rail)) {
         jsonrpc_return_error(request, -1, "'rail' missing or invalid", nullptr);
         return;
     }
-    find_result = mjson_find(request->params, request->params_len, enable_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
-        mjson_get_bool(request->params, request->params_len, enable_param_pattern, &enable);
-    } else {
+
+    bool enable;
+    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
         jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
         return;
     }
 
-    valiant::PmicTask::GetSingleton()->SetRailState(rail, enable);
+    valiant::PmicTask::GetSingleton()->SetRailState(static_cast<valiant::pmic::Rail>(rail), enable);
     jsonrpc_return_success(request, "{}");
 }
 
@@ -323,24 +316,14 @@ static void SetPmicRailState(struct jsonrpc_request *request) {
 // Returns success or failure to set the requested state.
 // NOTE: The TPU LED requires that the TPU power is enabled.
 static void SetLedState(struct jsonrpc_request *request) {
-    double led_double;
-    int enable, led;
-    const char *led_param_pattern = "$[0].led";
-    const char *enable_param_pattern = "$[0].enable";
-
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, led_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, led_param_pattern, &led_double);
-        led = static_cast<int>(led_double);
-    } else {
+    int led;
+    if (!JSONRPCGetIntegerParam(request, "led", &led)) {
         jsonrpc_return_error(request, -1, "'led' missing or invalid", nullptr);
         return;
     }
-    find_result = mjson_find(request->params, request->params_len, enable_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
-        mjson_get_bool(request->params, request->params_len, enable_param_pattern, &enable);
-    } else {
+
+    bool enable;
+    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
         jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
         return;
     }
@@ -377,26 +360,14 @@ static void SetLedState(struct jsonrpc_request *request) {
 //    "output_pin" is the pin which will be set to output mode
 // Returns success or failure to set the pin states.
 static void SetPinPairToGpio(struct jsonrpc_request *request) {
-    double output_pin_double, input_pin_double;
     int output_pin, input_pin;
-    const char *output_pin_param_pattern = "$[0].output_pin";
-    const char *input_pin_param_pattern = "$[0].input_pin";
 
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, output_pin_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, output_pin_param_pattern, &output_pin_double);
-        output_pin = static_cast<int>(output_pin_double);
-    } else {
+    if (!JSONRPCGetIntegerParam(request, "output_pin", &output_pin)) {
         jsonrpc_return_error(request, -1, "'output_pin' missing", nullptr);
         return;
     }
 
-    find_result = mjson_find(request->params, request->params_len, input_pin_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, input_pin_param_pattern, &input_pin_double);
-        input_pin = static_cast<int>(input_pin_double);
-    } else {
+    if (!JSONRPCGetIntegerParam(request, "input_pin", &input_pin)) {
         jsonrpc_return_error(request, -1, "'input_pin' missing", nullptr);
         return;
     }
@@ -470,26 +441,14 @@ static void SetPinPairToGpio(struct jsonrpc_request *request) {
 //    "enable" is whether to drive the pin high or low.
 // Returns success or failure.
 static void SetGpio(struct jsonrpc_request *request) {
-    double pin_double;
-    int pin, enable;
-
-    const char *pin_param_pattern = "$[0].pin";
-    const char *enable_param_pattern = "$[0].enable";
-
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, pin_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, pin_param_pattern, &pin_double);
-        pin = static_cast<int>(pin_double);
-    } else {
+    int pin;
+    if (!JSONRPCGetIntegerParam(request, "pin", &pin)) {
         jsonrpc_return_error(request, -1, "'pin' missing", nullptr);
         return;
     }
 
-    find_result = mjson_find(request->params, request->params_len, enable_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
-        mjson_get_bool(request->params, request->params_len, enable_param_pattern, &enable);
-    } else {
+    bool enable;
+    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
         jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
         return;
     }
@@ -514,17 +473,8 @@ static void SetGpio(struct jsonrpc_request *request) {
 //    "pin" is the numerical value of the pin to get the state of.
 // Returns success or failure.
 static void GetGpio(struct jsonrpc_request *request) {
-    double pin_double;
     int pin;
-
-    const char *pin_param_pattern = "$[0].pin";
-
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, pin_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, pin_param_pattern, &pin_double);
-        pin = static_cast<int>(pin_double);
-    } else {
+    if (!JSONRPCGetIntegerParam(request, "pin", &pin)) {
         jsonrpc_return_error(request, -1, "'pin' missing", nullptr);
         return;
     }
@@ -551,18 +501,12 @@ static void CheckTPUAlarm(struct jsonrpc_request *request) {
 // Takes one parameter, "counts". This represents the number of DAC counts to set, from 0-4095.
 // Returns success or failure.
 static void SetDACValue(struct jsonrpc_request *request) {
-    double counts_double;
-    const char *counts_param_pattern = "$[0].counts";
-
-    int find_result = mjson_find(request->params, request->params_len, counts_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, counts_param_pattern, &counts_double);
-    } else {
+    int counts;
+    if (!JSONRPCGetIntegerParam(request, "counts", &counts)) {
         jsonrpc_return_error(request, -1, "'counts' missing or invalid", nullptr);
         return;
     }
 
-    int counts = static_cast<int>(counts_double);
     if (counts > 4095 || counts < 0) {
         jsonrpc_return_error(request, -1, "'counts' out of range (0-4095)", nullptr);
         return;
@@ -606,25 +550,14 @@ static void TestSDRamPattern(struct jsonrpc_request *request) {
 //    "data": base64-encoded data to decode and write into the file.
 // Returns success or failure.
 static void WriteFile(struct jsonrpc_request *request) {
-    const char *filename_param_pattern = "$[0].filename";
-    const char *data_param_pattern = "$[0].data";
-    ssize_t size = 0;
-    int find_result;
-
     std::vector<char> filename, data;
-    find_result = mjson_find(request->params, request->params_len, filename_param_pattern, nullptr, &size);
-    if (find_result == MJSON_TOK_STRING) {
-        filename.resize(size, 0);
-        mjson_get_string(request->params, request->params_len, filename_param_pattern, filename.data(), size);
-    } else {
+
+    if (!JSONRPCGetStringParam(request, "filename", &filename)) {
         jsonrpc_return_error(request, -1, "'filename' missing or invalid", nullptr);
         return;
     }
-    find_result = mjson_find(request->params, request->params_len, data_param_pattern, nullptr, &size);
-    if (find_result == MJSON_TOK_STRING) {
-        data.resize(size, 0);
-        mjson_get_string(request->params, request->params_len, data_param_pattern, data.data(), size);
-    } else {
+
+    if (!JSONRPCGetStringParam(request, "data", &data)) {
         jsonrpc_return_error(request, -1, "'data' missing or invalid", nullptr);
         return;
     }
@@ -635,7 +568,6 @@ static void WriteFile(struct jsonrpc_request *request) {
         jsonrpc_return_error(request, -1, "failed to open file", nullptr);
         return;
     }
-
 
     // The data from mjson is a null-terminated string: use strlen for getting the size.
     unsigned int bytes_to_decode = strlen(data.data());
@@ -663,16 +595,8 @@ static void WriteFile(struct jsonrpc_request *request) {
 // Takes one parameter, "filename".
 // Base64-encodes and returns the data in the file, if it exists.
 static void ReadFile(struct jsonrpc_request *request) {
-    const char *filename_param_pattern = "$[0].filename";
-    ssize_t size = 0;
-    int find_result;
-
     std::vector<char> filename;
-    find_result = mjson_find(request->params, request->params_len, filename_param_pattern, nullptr, &size);
-    if (find_result == MJSON_TOK_STRING) {
-        filename.resize(size, 0);
-        mjson_get_string(request->params, request->params_len, filename_param_pattern, filename.data(), size);
-    } else {
+    if (!JSONRPCGetStringParam(request, "filename", &filename)) {
         jsonrpc_return_error(request, -1, "'filename' missing or invalid", nullptr);
         return;
     }
@@ -712,17 +636,8 @@ static void ReadFile(struct jsonrpc_request *request) {
 }
 
 static void FuseMACAddress(struct jsonrpc_request *request) {
-    uint32_t mac_address_hi, mac_address_lo;
-    status_t status;
-    const char *address_param_pattern = "$[0].address";
     std::vector<char> address;
-    int size;
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, address_param_pattern, nullptr, &size);
-    if (find_result == MJSON_TOK_STRING) {
-        address.resize(size + 1, 0);
-        mjson_get_string(request->params, request->params_len, address_param_pattern, address.data(), size);
-    } else {
+    if (!JSONRPCGetStringParam(request, "address", &address)) {
         jsonrpc_return_error(request, -1, "'address' missing", nullptr);
         return;
     }
@@ -736,7 +651,8 @@ static void FuseMACAddress(struct jsonrpc_request *request) {
 
     OCOTP_Init(OCOTP, 0);
 
-    status = OCOTP_ReadFuseShadowRegisterExt(OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), &mac_address_hi, 1);
+    uint32_t mac_address_hi, mac_address_lo;
+    status_t status = OCOTP_ReadFuseShadowRegisterExt(OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), &mac_address_hi, 1);
     if (status != kStatus_Success) {
         jsonrpc_return_error(request, -1, "failed to read MAC address fuse register", nullptr);
         return;
@@ -792,7 +708,7 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("set_pin_pair_to_gpio", SetPinPairToGpio);
     rpc_server.RegisterRPC("set_gpio", SetGpio);
     rpc_server.RegisterRPC("get_gpio", GetGpio);
-    rpc_server.RegisterRPC("capture_test_pattern", 
+    rpc_server.RegisterRPC("capture_test_pattern",
                             valiant::testlib::CaptureTestPattern);
     rpc_server.RegisterRPC(valiant::testlib::kCaptureAudioName, valiant::testlib::CaptureAudio);
     rpc_server.RegisterRPC("set_tpu_power_state",

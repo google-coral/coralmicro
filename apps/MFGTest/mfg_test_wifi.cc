@@ -14,6 +14,8 @@ extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
+using valiant::testlib::JSONRPCGetStringParam;
+
 extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;
 extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
 static WIFIReturnCode_t xWifiStatus = eWiFiFailure;
@@ -24,16 +26,8 @@ static void WifiGetAP(struct jsonrpc_request *request) {
         return;
     }
 
-    const char *name_param_pattern = "$[0].name";
-    ssize_t size = 0;
-    int find_result;
-
     std::vector<char> name;
-    find_result = mjson_find(request->params, request->params_len, name_param_pattern, nullptr, &size);
-    if (find_result == MJSON_TOK_STRING) {
-        name.resize(size, 0);
-        mjson_get_string(request->params, request->params_len, name_param_pattern, name.data(), size);
-    } else {
+    if (!JSONRPCGetStringParam(request, "name", &name)) {
         jsonrpc_return_error(request, -1, "'name' missing or invalid", nullptr);
         return;
     }
@@ -50,7 +44,7 @@ static void WifiGetAP(struct jsonrpc_request *request) {
 
     std::vector<int> scan_indices;
     for (int i = 0; i < kNumResults; ++i) {
-        if (memcmp(xScanResults[i].cSSID, name.data(), size) == 0) {
+        if (memcmp(xScanResults[i].cSSID, name.data(), name.size()) == 0) {
             scan_indices.push_back(i);
         }
     }
@@ -82,16 +76,9 @@ static void BLEFind(struct jsonrpc_request *request) {
         }
     }
 
-    const char *address_param_pattern = "$[0].address";
     std::vector<char> address;
-    int size;
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, address_param_pattern, nullptr, &size);
-    if (find_result == MJSON_TOK_STRING) {
-        address.resize(size + 1, 0);
-        mjson_get_string(request->params, request->params_len, address_param_pattern, address.data(), size);
-    } else {
-        jsonrpc_return_error(request, -1, "'address' missing", nullptr);
+    if (!JSONRPCGetStringParam(request, "address", &address)) {
+        jsonrpc_return_error(request, -1, "'address' missing or invalid", nullptr);
         return;
     }
 
