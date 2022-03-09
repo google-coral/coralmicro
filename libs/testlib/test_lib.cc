@@ -619,16 +619,8 @@ void CaptureAudio(struct jsonrpc_request *request) {
 }
 
 void WifiSetAntenna(struct jsonrpc_request *request) {
-    double antenna_double;
     int antenna;
-    const char *antenna_param_pattern = "$[0].antenna";
-
-    int find_result;
-    find_result = mjson_find(request->params, request->params_len, antenna_param_pattern, nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, antenna_param_pattern, &antenna_double);
-        antenna = static_cast<int>(antenna_double);
-    } else {
+    if (!JSONRPCGetIntegerParam(request, "antenna", &antenna)) {
         jsonrpc_return_error(request, -1, "'antenna' missing", nullptr);
         return;
     }
@@ -637,7 +629,6 @@ void WifiSetAntenna(struct jsonrpc_request *request) {
         kInternal = 0,
         kExternal = 1,
     };
-
 
     switch (antenna) {
         case kInternal:

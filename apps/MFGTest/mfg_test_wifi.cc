@@ -214,7 +214,8 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterIO(rpc_server_io_http);
 
     rpc_server.RegisterRPC("wifi_get_ap", WifiGetAP);
-    rpc_server.RegisterRPC(valiant::testlib::kWifiSetAntennaName, valiant::testlib::WifiSetAntenna);
+    rpc_server.RegisterRPC(valiant::testlib::kMethodWifiSetAntenna,
+                           valiant::testlib::WifiSetAntenna);
     rpc_server.RegisterRPC("ble_scan", BLEScan);
     rpc_server.RegisterRPC("ble_find", BLEFind);
 

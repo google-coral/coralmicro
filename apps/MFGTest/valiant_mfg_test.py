@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
-from copy import deepcopy
-
 import base64
 import enum
 import inspect
+import itertools
 import requests
+
 
 class PMICRails(enum.IntEnum):
     CAM_2V8 = 0
@@ -25,12 +25,7 @@ def rpc(func):
     def rpc_impl(*args, **kwargs):
         params = inspect.getcallargs(func, *args, **kwargs)
         self = params.pop('self')
-        payload = self.get_new_payload()
-        payload['method'] = func.__name__
-        if params:
-            payload['params'].append(params)
-        result = self.send_rpc(payload)
-        return result
+        return self.send_rpc(func.__name__, params)
     return rpc_impl
 
 class ValiantMFGTest(object):
@@ -42,30 +37,20 @@ class ValiantMFGTest(object):
     def __init__(self, url, print_payloads=False):
         self.url = url
         self.print_payloads = print_payloads
-        self.next_id = 0
-        self.payload_template = {
+        self.ids = itertools.count()
+
+    def send_rpc(self, method, params = None):
+        if not method:
+            raise ValueError('Missing "method"')
+        payload = {
             'jsonrpc': '2.0',
-            'params': [],
-            'method': '',
-            'id': -1,
+            'method': method,
+            'params': [params or {}],
+            'id': next(self.ids),
         }
-
-    def get_next_id(self):
-        next_id = self.next_id
-        self.next_id += 1
-        return next_id
-
-    def get_new_payload(self):
-        new_payload = deepcopy(self.payload_template)
-        new_payload['id'] = self.get_next_id()
-        return new_payload
-
-    def send_rpc(self, json):
-        if json['method'] and (json['jsonrpc'] == '2.0') and (json['id'] != -1) and (json['params'] != None):
-            if self.print_payloads:
-                print(json)
-            return requests.post(self.url, json=json).json()
-        raise ValueError('Missing key in RPC')
+        if self.print_payloads:
+            print(payload)
+        return requests.post(self.url, json=payload).json()
 
     @rpc
     def get_serial_number(self):
@@ -239,14 +224,10 @@ class ValiantMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
-        payload = self.get_new_payload()
-        payload['method'] = 'write_file'
-        payload['params'].append({
+        return self.send_rpc('write_file', {
             'filename': filename,
             'data': base64.b64encode(data.encode()).decode(),
         })
-        result = self.send_rpc(payload)
-        return result
 
     @rpc
     def read_file(self, filename):

@@ -8,20 +8,21 @@
 namespace valiant {
 namespace testlib {
 
-constexpr const char kGetSerialName[] = "get_serial_number";
-constexpr const char kRunTestConv1Name[] = "run_testconv1";
-constexpr const char kSetTPUPowerStateName[] = "set_tpu_power_state";
-constexpr const char kPosenetStressRunName[] = "posenet_stress_run";
-constexpr const char kBeginUploadResourceName[] = "begin_upload_resource";
-constexpr const char kUploadResourceChunkName[] = "upload_resource_chunk";
-constexpr const char kDeleteResourceName[] = "delete_resource";
-constexpr const char kRunClassificationModelName[] = "run_classification_model";
-constexpr const char kRunDetectionModelName[] = "run_detection_model";
-constexpr const char kStartM4Name[] = "start_m4";
-constexpr const char kCaptureTestPatternName[] = "capture_test_pattern";
-constexpr const char kGetTemperatureName[] = "get_temperature";
-constexpr const char kCaptureAudioName[] = "capture_audio";
-constexpr const char kWifiSetAntennaName[] = "wifi_set_antenna";
+// TODO(dkovalev): Add inline after switching to C++17.
+constexpr char kMethodGetSerialNumber[] = "get_serial_number";
+constexpr char kMethodRunTestConv1[] = "run_testconv1";
+constexpr char kMethodSetTPUPowerState[] = "set_tpu_power_state";
+constexpr char kMethodPosenetStressRun[] = "posenet_stress_run";
+constexpr char kMethodBeginUploadResource[] = "begin_upload_resource";
+constexpr char kMethodUploadResourceChunk[] = "upload_resource_chunk";
+constexpr char kMethodDeleteResource[] = "delete_resource";
+constexpr char kMethodRunClassificationModel[] = "run_classification_model";
+constexpr char kMethodRunDetectionModel[] = "run_detection_model";
+constexpr char kMethodStartM4[] = "start_m4";
+constexpr char kMethodCaptureTestPattern[] = "capture_test_pattern";
+constexpr char kMethodGetTemperature[] = "get_temperature";
+constexpr char kMethodCaptureAudio[] = "capture_audio";
+constexpr char kMethodWifiSetAntenna[] = "wifi_set_antenna";
 
 bool JSONRPCGetIntegerParam(struct jsonrpc_request* request, const char* param_name, int* out);
 bool JSONRPCGetBooleanParam(struct jsonrpc_request* request, const char* param_name, bool* out);

@@ -17,10 +17,10 @@
 #include <array>
 #include <memory>
 
-static constexpr const char *kM4XOR = "m4_xor";
-static constexpr const char *kM4CoreMark = "m4_coremark";
-static constexpr const char *kM7CoreMark = "m7_coremark";
-static constexpr const char *kGetFrame = "get_frame";
+static constexpr char kMethodM4XOR[] = "m4_xor";
+static constexpr char kMethodM4CoreMark[] = "m4_coremark";
+static constexpr char kMethodM7CoreMark[] = "m7_coremark";
+static constexpr char kMethodGetFrame[] = "get_frame";
 static std::unique_ptr<uint8_t[]> camera_rgb;
 
 static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
@@ -213,39 +213,35 @@ extern "C" void app_main(void *param) {
     valiant::httpd::RegisterHandlerForPath("/", &handlers);
 
     rpc_server.RegisterIO(rpc_server_io_http);
-    rpc_server.RegisterRPC(valiant::testlib::kGetSerialName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodGetSerialNumber,
                            valiant::testlib::GetSerialNumber);
-    rpc_server.RegisterRPC(valiant::testlib::kRunTestConv1Name,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodRunTestConv1,
                            valiant::testlib::RunTestConv1);
-    rpc_server.RegisterRPC(valiant::testlib::kSetTPUPowerStateName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodSetTPUPowerState,
                            valiant::testlib::SetTPUPowerState);
-    rpc_server.RegisterRPC(valiant::testlib::kPosenetStressRunName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodPosenetStressRun,
                            PosenetStressRun);
-    rpc_server.RegisterRPC(valiant::testlib::kBeginUploadResourceName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodBeginUploadResource,
                            valiant::testlib::BeginUploadResource);
-    rpc_server.RegisterRPC(valiant::testlib::kUploadResourceChunkName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodUploadResourceChunk,
                            valiant::testlib::UploadResourceChunk);
-    rpc_server.RegisterRPC(valiant::testlib::kDeleteResourceName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodDeleteResource,
                            valiant::testlib::DeleteResource);
-    rpc_server.RegisterRPC(valiant::testlib::kRunClassificationModelName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodRunClassificationModel,
                            valiant::testlib::RunClassificationModel);
-    rpc_server.RegisterRPC(valiant::testlib::kRunDetectionModelName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodRunDetectionModel,
                            valiant::testlib::RunDetectionModel);
-    rpc_server.RegisterRPC(valiant::testlib::kStartM4Name,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodStartM4,
                            valiant::testlib::StartM4);
-    rpc_server.RegisterRPC(valiant::testlib::kGetTemperatureName,
+    rpc_server.RegisterRPC(valiant::testlib::kMethodGetTemperature,
                            valiant::testlib::GetTemperature);
-    rpc_server.RegisterRPC(kM4XOR,
-                           M4XOR);
-    rpc_server.RegisterRPC(valiant::testlib::kCaptureTestPatternName,
+    rpc_server.RegisterRPC(kMethodM4XOR, M4XOR);
+    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureTestPattern,
                            valiant::testlib::CaptureTestPattern);
-    rpc_server.RegisterRPC(kM4CoreMark,
-                           M4CoreMark);
-    rpc_server.RegisterRPC(kM7CoreMark,
-                           M7CoreMark);
-    rpc_server.RegisterRPC(kGetFrame,
-                           GetFrame);
-    rpc_server.RegisterRPC(valiant::testlib::kCaptureAudioName,
+    rpc_server.RegisterRPC(kMethodM4CoreMark, M4CoreMark);
+    rpc_server.RegisterRPC(kMethodM7CoreMark, M7CoreMark);
+    rpc_server.RegisterRPC(kMethodGetFrame, GetFrame);
+    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureAudio,
                            valiant::testlib::CaptureAudio);
     vTaskSuspend(nullptr);
 }

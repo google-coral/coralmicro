@@ -700,7 +700,7 @@ extern "C" void app_main(void *param) {
     }
     rpc_server.RegisterIO(rpc_server_io_http);
 
-    rpc_server.RegisterRPC("get_serial_number",
+    rpc_server.RegisterRPC(valiant::testlib::kMethodGetSerialNumber,
                            valiant::testlib::GetSerialNumber);
     rpc_server.RegisterRPC("set_pmic_rail_state", SetPmicRailState);
     rpc_server.RegisterRPC("set_led_state", SetLedState);
@@ -708,12 +708,13 @@ extern "C" void app_main(void *param) {
     rpc_server.RegisterRPC("set_pin_pair_to_gpio", SetPinPairToGpio);
     rpc_server.RegisterRPC("set_gpio", SetGpio);
     rpc_server.RegisterRPC("get_gpio", GetGpio);
-    rpc_server.RegisterRPC("capture_test_pattern",
-                            valiant::testlib::CaptureTestPattern);
-    rpc_server.RegisterRPC(valiant::testlib::kCaptureAudioName, valiant::testlib::CaptureAudio);
-    rpc_server.RegisterRPC("set_tpu_power_state",
+    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureTestPattern,
+                           valiant::testlib::CaptureTestPattern);
+    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureAudio,
+                           valiant::testlib::CaptureAudio);
+    rpc_server.RegisterRPC(valiant::testlib::kMethodSetTPUPowerState,
                            valiant::testlib::SetTPUPowerState);
-    rpc_server.RegisterRPC("run_testconv1",
+    rpc_server.RegisterRPC(valiant::testlib::kMethodRunTestConv1,
                            valiant::testlib::RunTestConv1);
     rpc_server.RegisterRPC("get_tpu_chip_ids", GetTPUChipIds);
     rpc_server.RegisterRPC("check_tpu_alarm", CheckTPUAlarm);
