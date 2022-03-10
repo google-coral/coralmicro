@@ -9,12 +9,14 @@
 namespace valiant {
 class IPCM7 : public IPC {
   public:
+    static IPCM7* GetSingleton();
+
     void Init() override;
     void StartM4();
     bool M4IsAlive(uint32_t millis);
     static bool HasM4Application();
   protected:
-    void TxTaskFn(void *param) override;
+    void TxTaskFn() override;
   private:
     static void StaticRemoteAppEventHandler(uint16_t eventData, void *context);
     void RemoteAppEventHandler(uint16_t eventData, void *context);

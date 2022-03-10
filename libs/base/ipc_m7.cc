@@ -19,9 +19,9 @@ namespace valiant {
 uint8_t IPCM7::tx_queue_storage_[IPCM7::kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 uint8_t IPCM7::rx_queue_storage_[IPCM7::kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
-IPC* IPC::GetSingleton() {
+IPCM7* IPCM7::GetSingleton() {
     static IPCM7 ipc;
-    return static_cast<IPC*>(&ipc);
+    return &ipc;
 }
 
 void IPCM7::StaticRemoteAppEventHandler(uint16_t eventData, void *context) {
@@ -40,7 +40,7 @@ void IPCM7::HandleSystemMessage(const ipc::SystemMessage& message) {
     }
 }
 
-void IPCM7::TxTaskFn(void *param) {
+void IPCM7::TxTaskFn() {
     // Send the rx_queue_ address to the M4.
     size_t tx_bytes;
     tx_bytes = xMessageBufferSend(tx_queue_->message_buffer, &rx_queue_, sizeof(rx_queue_), portMAX_DELAY);
@@ -48,7 +48,7 @@ void IPCM7::TxTaskFn(void *param) {
         printf("Failed to send s2p buffer address\r\n");
     }
 
-    IPC::TxTaskFn(param);
+    IPC::TxTaskFn();
 }
 
 bool IPCM7::M4IsAlive(uint32_t millis) {

@@ -1,5 +1,5 @@
 #include "apps/RackTest/rack_test_ipc.h"
-#include "libs/base/ipc.h"
+#include "libs/base/ipc_m4.h"
 #include "libs/CoreMark/core_portme.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -13,7 +13,7 @@ static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferData
             RackTestAppMessage* app_reply = reinterpret_cast<RackTestAppMessage*>(&reply.message.data);
             app_reply->message_type = RackTestAppMessageType::XOR;
             app_reply->message.xor_value = (app_message->message.xor_value ^ 0xFEEDDEED);
-            valiant::IPC::GetSingleton()->SendMessage(reply);
+            valiant::IPCM4::GetSingleton()->SendMessage(reply);
             break;
         }
         case RackTestAppMessageType::COREMARK: {
@@ -26,7 +26,7 @@ static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferData
             //const char* results = GetCoreMarkResults();
             RunCoreMark(app_message->message.buffer_ptr);
             //app_reply->message.coremark_results = results;
-            valiant::IPC::GetSingleton()->SendMessage(reply);
+            valiant::IPCM4::GetSingleton()->SendMessage(reply);
             break;
         }
 
@@ -36,6 +36,6 @@ static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferData
 }
 
 extern "C" void app_main(void *param) {
-    valiant::IPC::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, nullptr);
+    valiant::IPCM4::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, nullptr);
     vTaskSuspend(NULL);
 }

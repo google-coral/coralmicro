@@ -1,5 +1,5 @@
 #include "examples/MessagePassing/example_message.h"
-#include "libs/base/ipc.h"
+#include "libs/base/ipc_m4.h"
 #include "libs/base/gpio.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -26,9 +26,9 @@ extern "C" void app_main(void* param) {
             reply.type = valiant::ipc::MessageType::APP;
             auto *ack = reinterpret_cast<mp_example::ExampleAppMessage*>(&reply.message.data);
             ack->type = mp_example::ExampleMessageType::ACKNOWLEDGED;
-            valiant::IPC::GetSingleton()->SendMessage(reply);
+            valiant::IPCM4::GetSingleton()->SendMessage(reply);
         }
     };
-    valiant::IPC::GetSingleton()->RegisterAppMessageHandler(message_handler, nullptr);
+    valiant::IPCM4::GetSingleton()->RegisterAppMessageHandler(message_handler, nullptr);
     vTaskSuspend(nullptr);
 }

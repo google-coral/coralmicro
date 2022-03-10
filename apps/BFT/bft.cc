@@ -31,11 +31,10 @@ static uint8_t sdram_memory[sdram_memory_size] __attribute__((section(".sdram_bs
 TF_LITE_MICRO_TESTS_BEGIN
 
 TF_LITE_MICRO_TEST(MulticoreTest_CheckM4) {
-    valiant::IPCM7* ipc = static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton());
+    auto* ipc = valiant::IPCM7::GetSingleton();
     TF_LITE_MICRO_EXPECT_NE(ipc, nullptr);
     ipc->StartM4();
-    TF_LITE_MICRO_EXPECT(
-        ipc->M4IsAlive(1000 /* ms */));
+    TF_LITE_MICRO_EXPECT(ipc->M4IsAlive(1000/*ms*/));
 }
 
 TF_LITE_MICRO_TEST(PowerMonitorTest_CheckChipId) {

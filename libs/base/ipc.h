@@ -13,13 +13,12 @@ namespace valiant {
 class IPC {
   public:
     using AppMessageHandler = std::function<void(const uint8_t data[ipc::kMessageBufferDataSize], void*)>;
-    static IPC* GetSingleton();
     virtual void Init();
     void SendMessage(const ipc::Message& message);
     void RegisterAppMessageHandler(AppMessageHandler, void *param);
   private:
     static void StaticFreeRtosMessageEventHandler(uint16_t eventData, void *context);
-    void FreeRtosMessageEventHandler(uint16_t eventData, void *context);
+    void FreeRtosMessageEventHandler(uint16_t eventData);
     static void StaticTxTaskFn(void *param);
     static void StaticRxTaskFn(void *param);
     AppMessageHandler app_handler_ = nullptr;
@@ -28,8 +27,8 @@ class IPC {
   protected:
     void HandleAppMessage(const uint8_t data[ipc::kMessageBufferDataSize]);
     virtual void HandleSystemMessage(const ipc::SystemMessage& message) = 0;
-    virtual void TxTaskFn(void *param);
-    virtual void RxTaskFn(void *param);
+    virtual void TxTaskFn();
+    virtual void RxTaskFn();
     SemaphoreHandle_t tx_semaphore_;
     TaskHandle_t tx_task_, rx_task_;
     ipc::MessageBuffer *tx_queue_, *rx_queue_;

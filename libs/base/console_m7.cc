@@ -82,7 +82,7 @@ void ConsoleM7::M4ConsoleTaskFn(void *param) {
     m4_console_buffer_msg.type = ipc::MessageType::SYSTEM;
     m4_console_buffer_msg.message.system.type = ipc::SystemMessageType::CONSOLE_BUFFER_PTR;
     m4_console_buffer_msg.message.system.message.console_buffer_ptr = GetM4ConsoleBufferPtr();
-    IPC::GetSingleton()->SendMessage(m4_console_buffer_msg);
+    IPCM7::GetSingleton()->SendMessage(m4_console_buffer_msg);
 
     size_t rx_bytes;
     char buf[16];

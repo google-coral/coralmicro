@@ -6,7 +6,7 @@
 #include <cstring>
 
 extern "C" void app_main(void *param) {
-    static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton())->StartM4();
+    valiant::IPCM7::GetSingleton()->StartM4();
     while (true) {
         valiant::MulticoreMutexLock lock(0);
         printf("[M7] Hello.\r\n");

@@ -3,7 +3,7 @@
 #include "libs/base/console_m7.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
-#include "libs/base/ipc.h"
+#include "libs/base/ipc_m7.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks.h"
 #include "libs/base/tempsense.h"
@@ -57,7 +57,7 @@ extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_
     SEMA4_Init(SEMA4);
     valiant::timer::Init();
     valiant::gpio::Init();
-    valiant::IPC::GetSingleton()->Init();
+    valiant::IPCM7::GetSingleton()->Init();
     valiant::Random::GetSingleton()->Init();
     valiant::ConsoleM7::GetSingleton()->Init(init_console_tx, init_console_rx);
     assert(valiant::filesystem::Init());

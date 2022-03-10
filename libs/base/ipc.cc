@@ -5,10 +5,10 @@
 namespace valiant {
 
 void IPC::StaticFreeRtosMessageEventHandler(uint16_t eventData, void *context) {
-    GetSingleton()->FreeRtosMessageEventHandler(eventData, context);
+    static_cast<IPC*>(context)->FreeRtosMessageEventHandler(eventData);
 }
 
-void IPC::FreeRtosMessageEventHandler(uint16_t eventData, void *context) {
+void IPC::FreeRtosMessageEventHandler(uint16_t eventData) {
     BaseType_t higher_priority_woken = pdFALSE;
     // TODO(atv): Get the base address of the shmem from a linker sym
     xStreamBufferSendCompletedFromISR(
@@ -37,14 +37,14 @@ void IPC::SendMessage(const ipc::Message& message) {
 }
 
 void IPC::StaticTxTaskFn(void *param) {
-    GetSingleton()->TxTaskFn(param);
+    static_cast<IPC*>(param)->TxTaskFn();
 }
 
 void IPC::StaticRxTaskFn(void *param) {
-    GetSingleton()->RxTaskFn(param);
+    static_cast<IPC*>(param)->RxTaskFn();
 }
 
-void IPC::TxTaskFn(void *param) {
+void IPC::TxTaskFn() {
     while (true) {
         ipc::Message* message;
         xTaskNotifyWaitIndexed(kSendMessageNotification, 0, 0, reinterpret_cast<uint32_t*>(&message), portMAX_DELAY);
@@ -53,7 +53,7 @@ void IPC::TxTaskFn(void *param) {
     }
 }
 
-void IPC::RxTaskFn(void *param) {
+void IPC::RxTaskFn() {
     size_t rx_bytes;
     while (true) {
         ipc::Message rx_message;
@@ -77,9 +77,9 @@ void IPC::RxTaskFn(void *param) {
 
 void IPC::Init() {
     tx_semaphore_ = xSemaphoreCreateBinary();
-    MCMGR_RegisterEvent(kMCMGR_FreeRtosMessageBuffersEvent, StaticFreeRtosMessageEventHandler, 0);
-    xTaskCreate(IPC::StaticTxTaskFn, "ipc_tx_task", configMINIMAL_STACK_SIZE * 10, NULL, IPC_TASK_PRIORITY, &tx_task_);
-    xTaskCreate(IPC::StaticRxTaskFn, "ipc_rx_task", configMINIMAL_STACK_SIZE * 10, NULL, IPC_TASK_PRIORITY, &rx_task_);
+    MCMGR_RegisterEvent(kMCMGR_FreeRtosMessageBuffersEvent, StaticFreeRtosMessageEventHandler, this);
+    xTaskCreate(IPC::StaticTxTaskFn, "ipc_tx_task", configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY, &tx_task_);
+    xTaskCreate(IPC::StaticRxTaskFn, "ipc_rx_task", configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY, &rx_task_);
     vTaskSuspend(tx_task_);
     vTaskSuspend(rx_task_);
 }

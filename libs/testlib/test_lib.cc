@@ -448,7 +448,7 @@ void RunClassificationModel(struct jsonrpc_request* request) {
 }
 
 void StartM4(struct jsonrpc_request *request) {
-    auto* ipc = static_cast<IPCM7*>(IPC::GetSingleton());
+    auto* ipc = IPCM7::GetSingleton();
     if (!ipc->HasM4Application()) {
         jsonrpc_return_error(request, -1, "No M4 application present", nullptr);
         return;

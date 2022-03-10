@@ -92,11 +92,10 @@ void PosenetStressRun(struct jsonrpc_request *request) {
 }
 
 static void M4XOR(struct jsonrpc_request *request) {
-    auto* ipc = static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton());
+    auto* ipc = valiant::IPCM7::GetSingleton();
     std::vector<char> value_string;
     valiant::testlib::JSONRPCGetStringParam(request, "value", &value_string);
-
-    if (!ipc->M4IsAlive(1000 /* ms */)) {
+    if (!ipc->M4IsAlive(1000/*ms*/)) {
         jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
         return;
     }
@@ -107,7 +106,7 @@ static void M4XOR(struct jsonrpc_request *request) {
     auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
     app_message->message_type = RackTestAppMessageType::XOR;
     app_message->message.xor_value = value;
-    valiant::IPC::GetSingleton()->SendMessage(msg);
+    valiant::IPCM7::GetSingleton()->SendMessage(msg);
 
     // hang out here and wait for an event.
     uint32_t xor_value;
@@ -120,9 +119,8 @@ static void M4XOR(struct jsonrpc_request *request) {
 }
 
 static void M4CoreMark(struct jsonrpc_request *request) {
-    auto* ipc = static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton());
-
-    if (!ipc->M4IsAlive(1000 /* ms */)) {
+    auto* ipc = valiant::IPCM7::GetSingleton();
+    if (!ipc->M4IsAlive(1000/*ms*/)) {
         jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
         return;
     }
@@ -133,7 +131,7 @@ static void M4CoreMark(struct jsonrpc_request *request) {
     auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
     app_message->message_type = RackTestAppMessageType::COREMARK;
     app_message->message.buffer_ptr = coremark_buffer;
-    valiant::IPC::GetSingleton()->SendMessage(msg);
+    valiant::IPCM7::GetSingleton()->SendMessage(msg);
 
     if (xTaskNotifyWait(0, 0, nullptr, pdMS_TO_TICKS(30000)) != pdTRUE) {
         jsonrpc_return_error(request, -1, "Timed out waiting for response from M4", nullptr);
@@ -151,11 +149,11 @@ static void M7CoreMark(struct jsonrpc_request *request) {
 
 static void GetFrame(struct jsonrpc_request *request) {
     if(!camera_rgb){
-        camera_rgb = std::make_unique<uint8_t[]>(valiant::CameraTask::kWidth * valiant::CameraTask::kHeight * 
+        camera_rgb = std::make_unique<uint8_t[]>(valiant::CameraTask::kWidth * valiant::CameraTask::kHeight *
             valiant::CameraTask::FormatToBPP(valiant::camera::Format::RGB));
     }
     valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::camera::TestPattern pattern = valiant::camera::TestPattern::COLOR_BAR; 
+    valiant::camera::TestPattern pattern = valiant::camera::TestPattern::COLOR_BAR;
     valiant::CameraTask::GetSingleton()->SetTestPattern(pattern);
     valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
     valiant::camera::FrameFormat fmt_rgb{};
@@ -195,7 +193,7 @@ static void fs_close_custom(void* context, struct fs_file *file) {
 }
 
 extern "C" void app_main(void *param) {
-    valiant::IPC::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
+    valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
     valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {

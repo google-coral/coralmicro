@@ -11,10 +11,8 @@ extern "C" [[noreturn]] void app_main(void* param) {
             printf("[M7] ACK received from M4\r\n");
         }
     };
-    valiant::IPC::GetSingleton()->RegisterAppMessageHandler(message_handler, nullptr);
-
-    // Starts M4.
-    static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton())->StartM4();
+    valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(message_handler, nullptr);
+    valiant::IPCM7::GetSingleton()->StartM4();
 
     bool led_status{false};
     auto ipc = valiant::IPCM7::GetSingleton();

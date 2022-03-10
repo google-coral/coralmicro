@@ -1,7 +1,7 @@
 #include "libs/base/console_m4.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
-#include "libs/base/ipc.h"
+#include "libs/base/ipc_m4.h"
 #include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/tasks/CameraTask/camera_task.h"
@@ -16,7 +16,7 @@ lpi2c_rtos_handle_t i2c5_handle;
 extern "C" [[noreturn]] void app_main(void *param);
 
 void pre_app_main(void *param) {
-    valiant::IPC::GetSingleton()->Init();
+    valiant::IPCM4::GetSingleton()->Init();
     app_main(param);
 }
 

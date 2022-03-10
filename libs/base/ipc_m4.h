@@ -7,9 +7,11 @@
 namespace valiant {
 class IPCM4 : public IPC {
   public:
+    static IPCM4* GetSingleton();
+
     void Init() override;
   protected:
-    void RxTaskFn(void *param) override;
+    void RxTaskFn() override;
   private:
     void HandleSystemMessage(const ipc::SystemMessage& message) override;
 };

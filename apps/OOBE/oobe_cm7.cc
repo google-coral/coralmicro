@@ -247,8 +247,7 @@ void main() {
         vTaskSuspend(NULL);
     }
 
-
-    static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton())->StartM4();
+    valiant::IPCM7::GetSingleton()->StartM4();
 
 #if defined(OOBE_DEMO)
     int count = 0;

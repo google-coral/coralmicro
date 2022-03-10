@@ -1,4 +1,4 @@
-#include "libs/base/ipc.h"
+#include "libs/base/ipc_m4.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -29,7 +29,7 @@ static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferData
 }
 
 extern "C" void app_main(void *param) {
-    valiant::IPC::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetCurrentTaskHandle());
+    valiant::IPCM4::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetCurrentTaskHandle());
     valiant::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));
     valiant::CameraTask::GetSingleton()->SetPower(true);
@@ -66,7 +66,7 @@ extern "C" void app_main(void *param) {
         valiant::CameraTask::GetSingleton()->Disable();
         valiant::ipc::Message msg;
         msg.type = valiant::ipc::MessageType::APP;
-        valiant::IPC::GetSingleton()->SendMessage(msg);
+        valiant::IPCM4::GetSingleton()->SendMessage(msg);
         vTaskSuspend(NULL);
     }
 }
