@@ -3,6 +3,7 @@
 #include "libs/base/httpd.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/mutex.h"
+#include "libs/base/utils.h"
 #include "libs/posenet/posenet.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -14,6 +15,18 @@
 #include "third_party/mjson/src/mjson.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+
+#if defined(OOBE_DEMO_ETHERNET)
+#include "libs/base/ethernet.h"
+#endif  // defined(OOBE_DEMO_ETHERNET)
+
+#if defined(OOBE_DEMO_WIFI)
+#include "libs/base/gpio.h"
+extern "C" {
+#include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
+}
+#endif  // defined(OOBE_DEMO_WIFI)
+
 
 #include <cstdio>
 #include <cstring>
@@ -165,6 +178,41 @@ void PosenetTask(void *param) {
     vTaskSuspend(NULL);
 }
 
+#if defined(OOBE_DEMO_WIFI)
+static bool ConnectToWifi() {
+    std::string wifi_ssid, wifi_psk;
+    bool have_ssid = valiant::utils::GetWifiSSID(&wifi_ssid);
+    bool have_psk = valiant::utils::GetWifiPSK(&wifi_psk);
+
+    if (have_ssid) {
+        WIFI_On();
+        WIFIReturnCode_t xWifiStatus;
+        WIFINetworkParams_t xNetworkParams;
+        xNetworkParams.pcSSID = wifi_ssid.c_str();
+        xNetworkParams.ucSSIDLength = wifi_ssid.length();
+        if (have_psk) {
+            xNetworkParams.pcPassword = wifi_psk.c_str();
+            xNetworkParams.ucPasswordLength = wifi_psk.length();
+            xNetworkParams.xSecurity = eWiFiSecurityWPA2;
+        } else {
+            xNetworkParams.pcPassword = "";
+            xNetworkParams.ucPasswordLength = 0;
+            xNetworkParams.xSecurity = eWiFiSecurityOpen;
+        }
+        xWifiStatus = WIFI_ConnectAP(&xNetworkParams);
+
+        if (xWifiStatus != eWiFiSuccess) {
+            printf("failed to connect to %s\r\n", wifi_ssid.c_str());
+            return false;
+        }
+    } else {
+        printf("No Wi-Fi SSID provided\r\n");
+        return false;
+    }
+    return true;
+}
+#endif // defined(OOBE_DEMO_WIFI)
+
 void main() {
     TaskHandle_t camera_task, posenet_task;
     xTaskCreate(CameraTask, "oobe_camera_task", configMINIMAL_STACK_SIZE * 30, nullptr, APP_TASK_PRIORITY, &camera_task);
@@ -172,6 +220,21 @@ void main() {
     posenet_input_mtx = xSemaphoreCreateMutex();
     camera_output_mtx = xSemaphoreCreateMutex();
     posenet_output_mtx = xSemaphoreCreateMutex();
+
+// For the OOBE Demo, bring up WiFi and Ethernet. For now these are active
+// but unused.
+#if defined(OOBE_DEMO_ETHERNET)
+    valiant::InitializeEthernet(false);
+#elif defined(OOBE_DEMO_WIFI)
+    ConnectToWifi();
+    if (!ConnectToWifi()) {
+        // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
+        valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, true);
+        valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, true);
+        valiant::gpio::SetGpio(valiant::gpio::Gpio::kTpuLED, true);
+        vTaskSuspend(NULL);
+    }
+#endif // defined(OOBE_DEMO_ETHERNET)
 
     valiant::httpd::Init();
     valiant::httpd::RegisterHandlerForPath("/", &camera_http_handlers);
@@ -183,7 +246,14 @@ void main() {
         printf("setup() failed\r\n");
         vTaskSuspend(NULL);
     }
+
+
     static_cast<valiant::IPCM7*>(valiant::IPC::GetSingleton())->StartM4();
+
+#if defined(OOBE_DEMO)
+    int count = 0;
+#endif  // defined (OOBE_DEMO)
+
     vTaskSuspend(NULL);
     while (true) {
         pause_processing = false;
@@ -194,10 +264,22 @@ void main() {
         posenet_output_time = xTaskGetTickCount();
 
         while (true) {
+// For OOBE Demo, run 20 iterations of this loop - each contains a one
+// second delay. For normal OOBE, check that the posenet task hasn't
+// progressed for 5 seconds (i.e. no poses detected).
+#if defined(OOBE_DEMO)
+            if (count >= 20) {
+                count = 0;
+                break;
+            }
+            ++count;
+#else
             TickType_t now = xTaskGetTickCount();
             if ((now - posenet_output_time) > pdMS_TO_TICKS(5000)) {
                 break;
             }
+#endif // defined(OOBE_DEMO)
+
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
 
