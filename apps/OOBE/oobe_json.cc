@@ -30,7 +30,7 @@ std::unique_ptr<char[]> CreatePoseJSON(const posenet::Output& output,
         append(&s, "  \"score\": %g,\n", output.poses[i].score);
         append(&s, "  \"keypoints\": [\n");
         for (int j = 0; j < posenet::kKeypoints; ++j) {
-            const auto& kp = output.poses[i].keypoints[i];
+            const auto& kp = output.poses[i].keypoints[j];
             append(&s, "    [%g, %g, %g]", kp.score, kp.x, kp.y);
             append(&s, j != posenet::kKeypoints - 1 ? ",\n" : "\n");
         }
