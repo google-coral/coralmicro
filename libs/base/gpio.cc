@@ -366,7 +366,10 @@ void Init() {
             case Gpio::kEdgeTpuPgood:
             case Gpio::kEdgeTpuReset:
             case Gpio::kEdgeTpuPmic:
-                if (m4)  break; // Do not initialize tpu gpios for the m4.
+            case Gpio::kBtHostWake:
+            case Gpio::kBtDevWake:
+            case Gpio::kEthPhyRst:
+                if (m4)  break; // Do not initialize tpu or ethernet gpios for the m4.
             default:
                GPIO_PinInit(
                 PinNameToModule[i],
