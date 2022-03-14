@@ -140,33 +140,6 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinConfig(IOMUXC_GPIO_EMC_B2_03_GPIO8_IO13, 0x4U); // ETHPHY_RST_B
   IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_05_GPIO9_IO04, 2U);
 
-  // SPI
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_LPSR_09_LPSPI6_PCS0,
-      0U);
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_LPSR_10_LPSPI6_SCK,
-      0U);
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_LPSR_11_LPSPI6_SOUT,
-      0U);
-  IOMUXC_SetPinMux(
-      IOMUXC_GPIO_LPSR_12_LPSPI6_SIN,
-      0U);
-
-  IOMUXC_SetPinConfig(
-      IOMUXC_GPIO_LPSR_09_LPSPI6_PCS0,
-      0x0U);
-  IOMUXC_SetPinConfig(
-      IOMUXC_GPIO_LPSR_10_LPSPI6_SCK,
-      0x0U);
-  IOMUXC_SetPinConfig(
-      IOMUXC_GPIO_LPSR_11_LPSPI6_SOUT,
-      0x0U);
-  IOMUXC_SetPinConfig(
-      IOMUXC_GPIO_LPSR_12_LPSPI6_SIN,
-      0x0U);
-
   // I2C5
   /* From freertos_lpi2c sample */
   IOMUXC_SetPinMux(
@@ -657,6 +630,36 @@ void InitArduinoPins(void) {
 
     IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_32_LPI2C1_SCL, 0x10);
     IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_33_LPI2C1_SDA, 0x10);
+
+    // SPI
+    // SPI is on the same pins as JTAG, comment these out if JTAG
+    // needs to do arduino-specific debugging
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_LPSR_09_LPSPI6_PCS0,
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_LPSR_10_LPSPI6_SCK,
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_LPSR_11_LPSPI6_SOUT,
+        0U);
+    IOMUXC_SetPinMux(
+        IOMUXC_GPIO_LPSR_12_LPSPI6_SIN,
+        0U);
+
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_LPSR_09_LPSPI6_PCS0,
+        0x0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_LPSR_10_LPSPI6_SCK,
+        0x0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_LPSR_11_LPSPI6_SOUT,
+        0x0U);
+    IOMUXC_SetPinConfig(
+        IOMUXC_GPIO_LPSR_12_LPSPI6_SIN,
+        0x0U);
+
 }
 #endif
 
