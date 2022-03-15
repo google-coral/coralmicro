@@ -97,7 +97,8 @@
 #define configTIMER_TASK_STACK_DEPTH            (configMINIMAL_STACK_SIZE * 2)
 
 /* Define to trap errors during development. */
-#define configASSERT(x) if(( x) == 0) {taskDISABLE_INTERRUPTS(); for (;;);}
+#include <stdio.h>
+#define configASSERT(x) if(( x) == 0) {taskDISABLE_INTERRUPTS(); printf("configASSERT %s\r\n", #x); for (;;) vTaskDelay(pdMS_TO_TICKS(500));}
 
 /* Optional functions - most linkers will remove unused functions anyway. */
 #define INCLUDE_vTaskPrioritySet                1
