@@ -202,23 +202,18 @@ extern "C" void app_main(void *param) {
     wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings, wiced_bt_cfg_buf_pools);
 
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
         printf("Failed to initialize RPCServerIOHTTP\r\n");
         vTaskSuspend(NULL);
     }
-    if (!rpc_server.Init()) {
-        printf("Failed to initialize RPCServer\r\n");
-        vTaskSuspend(NULL);
-    }
-    rpc_server.RegisterIO(rpc_server_io_http);
 
-    rpc_server.RegisterRPC("wifi_get_ap", WifiGetAP);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodWifiSetAntenna,
-                           valiant::testlib::WifiSetAntenna);
-    rpc_server.RegisterRPC("ble_scan", BLEScan);
-    rpc_server.RegisterRPC("ble_find", BLEFind);
-
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export("wifi_get_ap", WifiGetAP);
+    jsonrpc_export(valiant::testlib::kMethodWifiSetAntenna,
+                   valiant::testlib::WifiSetAntenna);
+    jsonrpc_export("ble_scan", BLEScan);
+    jsonrpc_export("ble_find", BLEFind);
+    rpc_server_io_http.SetContext(&jsonrpc_default_context);
     vTaskSuspend(NULL);
 }
 

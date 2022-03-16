@@ -689,41 +689,39 @@ extern "C" void app_main(void *param) {
     InitializeLoopbackMappings();
     valiant::analog::Init(valiant::analog::Device::DAC1);
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
         printf("Failed to initialize RPCServerIOHTTP\r\n");
         vTaskSuspend(NULL);
     }
-    if (!rpc_server.Init()) {
-        printf("Failed to initialize RPCServer\r\n");
-        vTaskSuspend(NULL);
-    }
-    rpc_server.RegisterIO(rpc_server_io_http);
 
-    rpc_server.RegisterRPC(valiant::testlib::kMethodGetSerialNumber,
-                           valiant::testlib::GetSerialNumber);
-    rpc_server.RegisterRPC("set_pmic_rail_state", SetPmicRailState);
-    rpc_server.RegisterRPC("set_led_state", SetLedState);
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
+                   valiant::testlib::GetSerialNumber);
+    jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
+                   valiant::testlib::GetSerialNumber);
+    jsonrpc_export("set_pmic_rail_state", SetPmicRailState);
+    jsonrpc_export("set_led_state", SetLedState);
     // TODO(atv): Special handling for the pair with DAC_OUT
-    rpc_server.RegisterRPC("set_pin_pair_to_gpio", SetPinPairToGpio);
-    rpc_server.RegisterRPC("set_gpio", SetGpio);
-    rpc_server.RegisterRPC("get_gpio", GetGpio);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureTestPattern,
-                           valiant::testlib::CaptureTestPattern);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureAudio,
-                           valiant::testlib::CaptureAudio);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodSetTPUPowerState,
-                           valiant::testlib::SetTPUPowerState);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodRunTestConv1,
-                           valiant::testlib::RunTestConv1);
-    rpc_server.RegisterRPC("get_tpu_chip_ids", GetTPUChipIds);
-    rpc_server.RegisterRPC("check_tpu_alarm", CheckTPUAlarm);
-    rpc_server.RegisterRPC("set_dac_value", SetDACValue);
-    rpc_server.RegisterRPC("test_sdram_pattern", TestSDRamPattern);
-    rpc_server.RegisterRPC("write_file", WriteFile);
-    rpc_server.RegisterRPC("read_file", ReadFile);
-    rpc_server.RegisterRPC("fuse_mac_address", FuseMACAddress);
-    rpc_server.RegisterRPC("read_mac_address", ReadMACAddress);
+    jsonrpc_export("set_pin_pair_to_gpio", SetPinPairToGpio);
+    jsonrpc_export("set_gpio", SetGpio);
+    jsonrpc_export("get_gpio", GetGpio);
+    jsonrpc_export(valiant::testlib::kMethodCaptureTestPattern,
+                   valiant::testlib::CaptureTestPattern);
+    jsonrpc_export(valiant::testlib::kMethodCaptureAudio,
+                   valiant::testlib::CaptureAudio);
+    jsonrpc_export(valiant::testlib::kMethodSetTPUPowerState,
+                   valiant::testlib::SetTPUPowerState);
+    jsonrpc_export(valiant::testlib::kMethodRunTestConv1,
+                   valiant::testlib::RunTestConv1);
+    jsonrpc_export("get_tpu_chip_ids", GetTPUChipIds);
+    jsonrpc_export("check_tpu_alarm", CheckTPUAlarm);
+    jsonrpc_export("set_dac_value", SetDACValue);
+    jsonrpc_export("test_sdram_pattern", TestSDRamPattern);
+    jsonrpc_export("write_file", WriteFile);
+    jsonrpc_export("read_file", ReadFile);
+    jsonrpc_export("fuse_mac_address", FuseMACAddress);
+    jsonrpc_export("read_mac_address", ReadMACAddress);
+    rpc_server_io_http.SetContext(&jsonrpc_default_context);
 
     vTaskSuspend(NULL);
 }

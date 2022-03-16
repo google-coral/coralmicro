@@ -12,7 +12,6 @@ add_executable_m7(CameraDetection
 
 target_link_libraries(CameraDetection
     libs_base-m7_freertos
-    libs_RPCServer
     libs_RPCServerIOHTTP
     libs_mjson
     libs_tensorflow-m7

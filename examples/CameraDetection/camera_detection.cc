@@ -135,20 +135,15 @@ extern "C" void app_main(void *param) {
     model_height = interpreter->input_tensor(0)->dims->data[1];
     model_width = interpreter->input_tensor(0)->dims->data[2];
 
-
     printf("Initializing the server...\n");
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
         printf("Failed to initialize RPCServerIOHTTP\r\n");
         vTaskSuspend(nullptr);
     }
-    if (!rpc_server.Init()) {
-        printf("Failed to initialize RPCServer\r\n");
-        vTaskSuspend(nullptr);
-    }
-    rpc_server.RegisterIO(rpc_server_io_http);
-    rpc_server.RegisterRPC("detect_from_camera", detect_from_camera_rpc);
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export("detect_from_camera", detect_from_camera_rpc);
+    rpc_server_io_http.SetContext(&jsonrpc_default_context);
     printf("Detection server ready\r\n");
     vTaskSuspend(nullptr);
 }

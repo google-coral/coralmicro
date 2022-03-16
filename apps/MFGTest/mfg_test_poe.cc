@@ -50,21 +50,16 @@ static void EthWritePHY(struct jsonrpc_request *request) {
 
 extern "C" void app_main(void *param) {
     valiant::InitializeEthernet(false);
-
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
         printf("Failed to initialize RPCServerIOHTTP\r\n");
         vTaskSuspend(NULL);
     }
-    if (!rpc_server.Init()) {
-        printf("Failed to initialize RPCServer\r\n");
-        vTaskSuspend(NULL);
-    }
-    rpc_server.RegisterIO(rpc_server_io_http);
 
-    rpc_server.RegisterRPC("eth_get_ip", EthGetIP);
-    rpc_server.RegisterRPC("eth_write_phy", EthWritePHY);
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export("eth_get_ip", EthGetIP);
+    jsonrpc_export("eth_write_phy", EthWritePHY);
+    rpc_server_io_http.SetContext(&jsonrpc_default_context);
 
     vTaskSuspend(NULL);
 }

@@ -66,21 +66,14 @@ static void take_picture_rpc(struct jsonrpc_request *r) {
 
 extern "C" void app_main(void *param) {
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
         printf("Failed to initialize RPCServerIOHTTP\r\n");
         vTaskSuspend(NULL);
     }
-    if (!rpc_server.Init()) {
-        printf("Failed to initialize RPCServer\r\n");
-        vTaskSuspend(NULL);
-    }
-    rpc_server.RegisterIO(rpc_server_io_http);
-
-    rpc_server.RegisterRPC("serial_number", serial_number_rpc);
-    rpc_server.RegisterRPC("take_picture", take_picture_rpc);
-
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export("serial_number", serial_number_rpc);
+    jsonrpc_export("take_picture", take_picture_rpc);
+    rpc_server_io_http.SetContext(&jsonrpc_default_context);
     printf("RPC server ready\r\n");
-
     vTaskSuspend(NULL);
 }

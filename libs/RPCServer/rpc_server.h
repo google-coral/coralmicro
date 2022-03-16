@@ -13,36 +13,18 @@
 namespace valiant {
 namespace rpc {
 
-class RPCServer;
-class RPCServerIO;
-
 class RPCServerIO {
   public:
     RPCServerIO() = default;
     ~RPCServerIO() = default;
     virtual bool Init() = 0;
-    struct jsonrpc_ctx* parent_context();
-  private:
-    void SetParent(RPCServer* s) { parent_ = s; }
-    friend class RPCServer;
-    RPCServer *parent_;
-};
+    struct jsonrpc_ctx* parent_context() { return ctx_; }
 
-class RPCServer {
-  public:
-    typedef void (*RPCHandler)(struct jsonrpc_request*);
-    RPCServer() = default;
-    ~RPCServer();
-
-    bool Init();
-    void RegisterRPC(const std::string& name, RPCHandler handler);
-    void RegisterIO(RPCServerIO& io);
-    struct jsonrpc_ctx* context() { return &ctx_; }
+    void SetContext(struct jsonrpc_ctx* ctx) {
+      ctx_ = ctx;
+    }
   private:
-    SemaphoreHandle_t mu_;
-    struct jsonrpc_ctx ctx_;
-    std::vector<std::unique_ptr<std::string>> rpc_names;
-    std::vector<std::unique_ptr<struct jsonrpc_method>> rpc_methods;
+    struct jsonrpc_ctx* ctx_;
 };
 
 }  // namespace rpc

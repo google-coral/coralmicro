@@ -195,13 +195,8 @@ static void fs_close_custom(void* context, struct fs_file *file) {
 extern "C" void app_main(void *param) {
     valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
     valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    valiant::rpc::RPCServer rpc_server;
     if (!rpc_server_io_http.Init()) {
         printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(nullptr);
-    }
-    if (!rpc_server.Init()) {
-        printf("Failed to initialize RPCServer\r\n");
         vTaskSuspend(nullptr);
     }
 
@@ -212,36 +207,36 @@ extern "C" void app_main(void *param) {
     valiant::httpd::Init();
     valiant::httpd::RegisterHandlerForPath("/", &handlers);
 
-    rpc_server.RegisterIO(rpc_server_io_http);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodGetSerialNumber,
-                           valiant::testlib::GetSerialNumber);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodRunTestConv1,
-                           valiant::testlib::RunTestConv1);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodSetTPUPowerState,
-                           valiant::testlib::SetTPUPowerState);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodPosenetStressRun,
-                           PosenetStressRun);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodBeginUploadResource,
-                           valiant::testlib::BeginUploadResource);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodUploadResourceChunk,
-                           valiant::testlib::UploadResourceChunk);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodDeleteResource,
-                           valiant::testlib::DeleteResource);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodRunClassificationModel,
-                           valiant::testlib::RunClassificationModel);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodRunDetectionModel,
-                           valiant::testlib::RunDetectionModel);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodStartM4,
-                           valiant::testlib::StartM4);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodGetTemperature,
-                           valiant::testlib::GetTemperature);
-    rpc_server.RegisterRPC(kMethodM4XOR, M4XOR);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureTestPattern,
-                           valiant::testlib::CaptureTestPattern);
-    rpc_server.RegisterRPC(kMethodM4CoreMark, M4CoreMark);
-    rpc_server.RegisterRPC(kMethodM7CoreMark, M7CoreMark);
-    rpc_server.RegisterRPC(kMethodGetFrame, GetFrame);
-    rpc_server.RegisterRPC(valiant::testlib::kMethodCaptureAudio,
-                           valiant::testlib::CaptureAudio);
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
+                   valiant::testlib::GetSerialNumber);
+    jsonrpc_export(valiant::testlib::kMethodRunTestConv1,
+                   valiant::testlib::RunTestConv1);
+    jsonrpc_export(valiant::testlib::kMethodSetTPUPowerState,
+                   valiant::testlib::SetTPUPowerState);
+    jsonrpc_export(valiant::testlib::kMethodPosenetStressRun, PosenetStressRun);
+    jsonrpc_export(valiant::testlib::kMethodBeginUploadResource,
+                   valiant::testlib::BeginUploadResource);
+    jsonrpc_export(valiant::testlib::kMethodUploadResourceChunk,
+                   valiant::testlib::UploadResourceChunk);
+    jsonrpc_export(valiant::testlib::kMethodDeleteResource,
+                   valiant::testlib::DeleteResource);
+    jsonrpc_export(valiant::testlib::kMethodRunClassificationModel,
+                   valiant::testlib::RunClassificationModel);
+    jsonrpc_export(valiant::testlib::kMethodRunDetectionModel,
+                   valiant::testlib::RunDetectionModel);
+    jsonrpc_export(valiant::testlib::kMethodStartM4,
+                   valiant::testlib::StartM4);
+    jsonrpc_export(valiant::testlib::kMethodGetTemperature,
+                   valiant::testlib::GetTemperature);
+    jsonrpc_export(kMethodM4XOR, M4XOR);
+    jsonrpc_export(valiant::testlib::kMethodCaptureTestPattern,
+                   valiant::testlib::CaptureTestPattern);
+    jsonrpc_export(kMethodM4CoreMark, M4CoreMark);
+    jsonrpc_export(kMethodM7CoreMark, M7CoreMark);
+    jsonrpc_export(kMethodGetFrame, GetFrame);
+    jsonrpc_export(valiant::testlib::kMethodCaptureAudio,
+                   valiant::testlib::CaptureAudio);
+    rpc_server_io_http.SetContext(&jsonrpc_default_context);
     vTaskSuspend(nullptr);
 }

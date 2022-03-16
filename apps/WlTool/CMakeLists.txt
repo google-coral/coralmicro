@@ -13,7 +13,6 @@ target_include_directories(WlTool PRIVATE
 
 target_link_libraries(WlTool
     libs_base-m7_freertos
-    libs_RPCServer
     libs_RPCServerIOHTTP
     libs_testlib
     libs_nxp_rt1176-sdk_wiced_mfgtest

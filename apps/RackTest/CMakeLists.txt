@@ -14,7 +14,6 @@ target_link_libraries(RackTest
     libs_coremark-m7
     libs_mjson
     libs_posenet
-    libs_RPCServer
     libs_RPCServerIOHTTP
     libs_tasks_EdgeTpuTask_freertos
     libs_tasks_EdgeTpuDfuTask_freertos
