@@ -200,6 +200,8 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     static pxp_output_pixel_format_t FormatToPXPOutputFormat(camera::Format fmt);
     static void BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
     static void BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
+    static void BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height);
+    static void RGBToGrayscale(const uint8_t *camera_rgb, uint8_t *camera_grayscale, int width, int height);
     bool PXPOperation(const PXPConfiguration& input, const PXPConfiguration& output, bool preserve_ratio);
 
     static constexpr uint8_t kModelIdHExpected = 0x01;

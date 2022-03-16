@@ -150,8 +150,29 @@ void M7CoreMark(struct jsonrpc_request *request) {
 }
 
 void GetFrame(struct jsonrpc_request *request) {
-    camera_rgb.resize(valiant::CameraTask::kWidth * valiant::CameraTask::kHeight *
-            valiant::CameraTask::FormatToBPP(valiant::camera::Format::RGB));
+    int rpc_width, rpc_height;
+    std::string rpc_format;
+    bool rpc_width_valid = valiant::testlib::JsonRpcGetIntegerParam(request, "width", &rpc_width);
+    bool rpc_height_valid = valiant::testlib::JsonRpcGetIntegerParam(request, "height", &rpc_height);
+    bool rpc_format_valid = valiant::testlib::JsonRpcGetStringParam(request, "format", &rpc_format);
+
+    int width = rpc_width_valid ? rpc_width : valiant::CameraTask::kWidth;
+    int height = rpc_height_valid ? rpc_height : valiant::CameraTask::kHeight;
+    valiant::camera::Format format = valiant::camera::Format::RGB;
+
+    if (rpc_format_valid) {
+        constexpr char kFormatRGB[] = "RGB";
+        constexpr char kFormatGrayscale[] = "L";
+        if (memcmp(rpc_format.c_str(), kFormatRGB, std::min(rpc_format.length(), strlen(kFormatRGB))) == 0) {
+            format = valiant::camera::Format::RGB;
+        }
+        if (memcmp(rpc_format.c_str(), kFormatGrayscale, std::min(rpc_format.length(), strlen(kFormatGrayscale))) == 0) {
+            format = valiant::camera::Format::Y8;
+        }
+    }
+
+    camera_rgb.resize(width * height *
+            valiant::CameraTask::FormatToBPP(format));
 
     valiant::CameraTask::GetSingleton()->SetPower(true);
     valiant::camera::TestPattern pattern = valiant::camera::TestPattern::COLOR_BAR;
@@ -159,9 +180,9 @@ void GetFrame(struct jsonrpc_request *request) {
     valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
     valiant::camera::FrameFormat fmt_rgb{};
 
-    fmt_rgb.fmt = valiant::camera::Format::RGB;
-    fmt_rgb.width = valiant::CameraTask::kWidth;
-    fmt_rgb.height = valiant::CameraTask::kHeight;
+    fmt_rgb.fmt = format;
+    fmt_rgb.width = width;
+    fmt_rgb.height = height;
     fmt_rgb.preserve_ratio = false;
     fmt_rgb.buffer = camera_rgb.data();
 
@@ -175,11 +196,10 @@ void GetFrame(struct jsonrpc_request *request) {
 }
 
 bool DynamicFileHandler(const char* name, std::vector<uint8_t>* buffer) {
-    if (std::strcmp("/colorbar.raw", name) == 0) {
+    if (std::strcmp("/camera.rgb", name) == 0) {
         *buffer = std::move(camera_rgb);
         return true;
     }
-
     return false;
 }
 }  // namespace

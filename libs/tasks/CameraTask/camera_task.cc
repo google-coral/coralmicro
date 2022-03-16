@@ -18,6 +18,11 @@ namespace valiant {
 using namespace camera;
 
 static constexpr int kFramebufferCount = 4;
+static constexpr const float kRedCoefficient = .2126;
+static constexpr const float kGreenCoefficient = .7152;
+static constexpr const float kBlueCoefficient = .0722;
+static constexpr const float kUint8Max = 255.0;
+
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")))
 __attribute__((aligned(64)))
 uint8_t framebuffers[kFramebufferCount][CameraTask::kHeight][CameraTask::kWidth];
@@ -87,19 +92,25 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
                 }
                 break;
             case Format::Y8: {
-                    auto buffer_rgba = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGBA) * kWidth * kHeight);
-                    BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
-                    PXPConfiguration input;
-                    input.data = buffer_rgba.get();
-                    input.fmt = Format::RGBA;
-                    input.width = kWidth;
-                    input.height = kHeight;
-                    PXPConfiguration output;
-                    output.data = fmt.buffer;
-                    output.fmt = Format::Y8;
-                    output.width = fmt.width;
-                    output.height = fmt.height;
-                    ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
+                    if (fmt.width == kWidth && fmt.height == kHeight) {
+                        BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight);
+                    } else {
+                        auto buffer_rgba = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGBA) * kWidth * kHeight);
+                        auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * fmt.width * fmt.height);
+                        BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
+                        PXPConfiguration input;
+                        input.data = buffer_rgba.get();
+                        input.fmt = Format::RGBA;
+                        input.width = kWidth;
+                        input.height = kHeight;
+                        PXPConfiguration output;
+                        output.data = buffer_rgb.get();
+                        output.fmt = Format::RGB;
+                        output.width = fmt.width;
+                        output.height = fmt.height;
+                        ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
+                        RGBToGrayscale(buffer_rgb.get(), fmt.buffer, fmt.width, fmt.height);
+                    }
                 }
                 break;
             case Format::RAW:
@@ -177,6 +188,26 @@ void CameraTask::BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgba, in
             camera_rgba[(x * 4) + (y * width * 4) + 1] = g;
             camera_rgba[(x * 4) + (y * width * 4) + 2] = b;
     });
+}
+
+void CameraTask::BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height) {
+    BayerInternal(camera_raw, width, height, [camera_grayscale, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+        float r_f = static_cast<float>(r) / kUint8Max;
+        float g_f = static_cast<float>(g) / kUint8Max;
+        float b_f = static_cast<float>(b) / kUint8Max;
+        camera_grayscale[x + (y * width)] = static_cast<uint8_t>(((kRedCoefficient * r_f * r_f) + (kGreenCoefficient * g_f * g_f) + (kBlueCoefficient * b_f * b_f)) * kUint8Max);
+    });
+}
+
+void CameraTask::RGBToGrayscale(const uint8_t *camera_rgb, uint8_t *camera_grayscale, int width, int height) {
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            float r_f = static_cast<float>(camera_rgb[(x * 3) + (y * width * 3) + 0]) / kUint8Max;
+            float g_f = static_cast<float>(camera_rgb[(x * 3) + (y * width * 3) + 1]) / kUint8Max;
+            float b_f = static_cast<float>(camera_rgb[(x * 3) + (y * width * 3) + 2]) / kUint8Max;
+            camera_grayscale[x + (y * width)] = static_cast<uint8_t>(((kRedCoefficient * r_f * r_f) + (kGreenCoefficient * g_f * g_f) + (kBlueCoefficient * b_f * b_f)) * kUint8Max);
+        }
+    }
 }
 
 int CameraTask::FormatToBPP(Format fmt) {

@@ -466,29 +466,39 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
     valiant::CameraTask::GetSingleton()->SetTestPattern(
         valiant::camera::TestPattern::WALKING_ONES);
 
-    valiant::CameraTask::GetSingleton()->Trigger();
 
-    uint8_t* buffer = nullptr;
-    int index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
-    uint8_t expected = 0;
     bool success = true;
-    for (unsigned int i = 0; i < valiant::CameraTask::kWidth * valiant::CameraTask::kHeight; ++i) {
-        if (buffer[i] != expected) {
-            success = false;
-            break;
-        }
-        if (expected == 0) {
-            expected = 1;
-        } else {
-            expected = expected << 1;
-        }
+    // Getting this test pattern doesn't seem to always work on the first try, maybe there is some
+    // undocumented pattern change time in the sensor.
+    // Allow a small amount of retrying to smooth that over.
+    constexpr const int kRetries = 3;
+    for (int i = 0; i < kRetries; ++i) {
+       valiant::CameraTask::GetSingleton()->Trigger();
+       uint8_t* buffer = nullptr;
+       int index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+       uint8_t expected = 0;
+       success = true;
+       for (unsigned int i = 0; i < valiant::CameraTask::kWidth * valiant::CameraTask::kHeight; ++i) {
+          if (buffer[i] != expected) {
+             success = false;
+             break;
+          }
+          if (expected == 0) {
+             expected = 1;
+          } else {
+             expected = expected << 1;
+          }
+       }
+       valiant::CameraTask::GetSingleton()->ReturnFrame(index);
+       if (success) {
+          break;
+       }
     }
     if (success) {
-        jsonrpc_return_success(request, "{}");
+        jsonrpc_return_success(request, "{}", nullptr);
     } else {
         jsonrpc_return_error(request, -1, "camera test pattern mismatch", nullptr);
     }
-    valiant::CameraTask::GetSingleton()->ReturnFrame(index);
     valiant::CameraTask::GetSingleton()->SetPower(false);
 }
 
