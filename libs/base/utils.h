@@ -30,14 +30,6 @@ bool GetUSBIPAddress(ip4_addr_t* addr);
 bool GetWifiSSID(std::string* wifi_ssid_out);
 bool GetWifiPSK(std::string* wifi_psk_out);
 
-inline uint64_t StrHash(const char* s) {
-    uint64_t h = 0;
-    while (*s) {
-        h = h * 101 + (uint64_t) *(s++);
-    }
-    return h;
-}
-
 size_t Base64Size(size_t data_size);
 
 }  // namespace utils

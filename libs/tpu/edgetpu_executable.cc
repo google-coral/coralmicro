@@ -1,6 +1,5 @@
 #include "libs/tpu/edgetpu_executable.h"
 
-#include "libs/base/utils.h"
 #include "third_party/tflite-micro/tensorflow/lite/kernels/kernel_util.h"
 
 namespace valiant {
@@ -9,8 +8,7 @@ EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe) 
     executable_(exe) {
     if (executable_->output_layers()) {
         for (const auto* output_layer : *(executable_->output_layers())) {
-            output_layers_[utils::StrHash(output_layer->name()->c_str())] =
-                new OutputLayer(output_layer);
+            output_layers_[output_layer->name()->c_str()] = new OutputLayer(output_layer);
         }
     }
 }
@@ -31,7 +29,6 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
 
     const platforms::darwinn::DmaDescriptorHint* dma_hint;
     const char *name;
-    uint64_t key;
     uint8_t *output;
     int32_t ins_idx;
     const flatbuffers::Vector<uint8_t> *bitstream;
@@ -53,12 +50,11 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
                         break;
                     case platforms::darwinn::Description_BASE_ADDRESS_OUTPUT_ACTIVATION:
                         name = dma_hint->meta()->name()->c_str();
-                        key = utils::StrHash(name);
-                        if (output_layers_.find(key) == output_layers_.end()) {
+                        if (output_layers_.find(name) == output_layers_.end()) {
                             printf("Executable does not have output layer %s\r\n", name);
                             break;
                         }
-                        output = output_layers_.at(key)->output_buffer();
+                        output = output_layers_.at(name)->output_buffer();
                         RETURN_IF_ERROR(tpu_driver.GetOutputs(output, dma_hint->size_in_bytes()));
                         break;
                     default:
@@ -84,13 +80,11 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
                 return kTfLiteError;
             }
             name = executable_->output_layers()->Get(i)->name()->c_str();
-            key = utils::StrHash(name);
-
-            if (output_layers_.find(key) == output_layers_.end()) {
+            if (output_layers_.find(name) == output_layers_.end()) {
                 printf("Executable does not have buffer for %s\r\n", name);
                 return kTfLiteError;
             }
-            OutputLayer *output_layer = output_layers_[key];
+            OutputLayer *output_layer = output_layers_[name];
 
             output_layer->Relayout(output_tensor->data.uint8);
             output_layer->TransformSignedDataType(output_tensor->data.uint8, output_tensor->bytes);

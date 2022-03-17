@@ -6,6 +6,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <map>
 
 namespace valiant {
@@ -69,7 +70,13 @@ class EdgeTpuExecutable {
     }
   private:
     const platforms::darwinn::Executable* executable_;
-    std::map<uint64_t, OutputLayer*> output_layers_;
+
+    struct Less {
+      bool operator()(const char* a, const char* b) const {
+        return std::strcmp(a, b) < 0;
+      }
+    };
+    std::map<const char*, OutputLayer*, Less> output_layers_;
 };
 
 }  // namespace valiant
