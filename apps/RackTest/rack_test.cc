@@ -62,12 +62,12 @@ void PosenetStressRun(struct jsonrpc_request *request) {
     printf("Posenet static datatest finished.\r\n");
 
     valiant::CameraTask::GetSingleton()->DiscardFrames(100);
-    if(!valiant::testlib::JSONRPCGetIntegerParam(request, "iterations", &iterations)){
-            valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
-            valiant::CameraTask::GetSingleton()->SetPower(false);
-            jsonrpc_return_error(request, -1, "Failed to get int iterations.", nullptr);
-            return;
+    if (!valiant::testlib::JsonRpcGetIntegerParam(request, "iterations", &iterations)) {
+         valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
+         valiant::CameraTask::GetSingleton()->SetPower(false);
+         return;
     }
+
     for (int i = 0; i < iterations; i++) {
         TfLiteTensor* input = valiant::posenet::input();
         valiant::camera::FrameFormat fmt{};
@@ -92,10 +92,11 @@ void PosenetStressRun(struct jsonrpc_request *request) {
 }
 
 static void M4XOR(struct jsonrpc_request *request) {
-    auto* ipc = valiant::IPCM7::GetSingleton();
     std::vector<char> value_string;
-    valiant::testlib::JSONRPCGetStringParam(request, "value", &value_string);
-    if (!ipc->M4IsAlive(1000/*ms*/)) {
+    if (!valiant::testlib::JsonRpcGetStringParam(request, "value", &value_string))
+        return;
+
+    if (!valiant::IPCM7::GetSingleton()->M4IsAlive(1000/*ms*/)) {
         jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
         return;
     }

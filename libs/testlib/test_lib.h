@@ -24,9 +24,9 @@ constexpr char kMethodGetTemperature[] = "get_temperature";
 constexpr char kMethodCaptureAudio[] = "capture_audio";
 constexpr char kMethodWifiSetAntenna[] = "wifi_set_antenna";
 
-bool JSONRPCGetIntegerParam(struct jsonrpc_request* request, const char* param_name, int* out);
-bool JSONRPCGetBooleanParam(struct jsonrpc_request* request, const char* param_name, bool* out);
-bool JSONRPCGetStringParam(struct jsonrpc_request* request, const char* param_name, std::vector<char>* out);
+bool JsonRpcGetIntegerParam(struct jsonrpc_request* request, const char* param_name, int* out);
+bool JsonRpcGetBooleanParam(struct jsonrpc_request* request, const char* param_name, bool* out);
+bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char* param_name, std::vector<char>* out);
 
 void GetSerialNumber(struct jsonrpc_request* request);
 void RunTestConv1(struct jsonrpc_request* request);

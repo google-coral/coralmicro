@@ -29,15 +29,11 @@ static void EthGetIP(struct jsonrpc_request *request) {
 }
 
 static void EthWritePHY(struct jsonrpc_request *request) {
-    int reg, val;
-    if (!valiant::testlib::JSONRPCGetIntegerParam(request, "reg", &reg)) {
-        jsonrpc_return_error(request, -1, "missing 'reg' parameter", nullptr);
-        return;
-    }
-    if (!valiant::testlib::JSONRPCGetIntegerParam(request, "val", &val)) {
-        jsonrpc_return_error(request, -1, "missing 'val' parameter", nullptr);
-        return;
-    }
+    int reg;
+    if (!valiant::testlib::JsonRpcGetIntegerParam(request, "reg", &reg)) return;
+
+    int val;
+    if (!valiant::testlib::JsonRpcGetIntegerParam(request, "val", &val)) return;
 
     status_t status = valiant::EthernetPHYWrite(reg, val);
     if (status != kStatus_Success) {

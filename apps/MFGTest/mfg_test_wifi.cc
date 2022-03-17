@@ -14,7 +14,7 @@ extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
-using valiant::testlib::JSONRPCGetStringParam;
+using valiant::testlib::JsonRpcGetStringParam;
 
 extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;
 extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
@@ -27,10 +27,7 @@ static void WifiGetAP(struct jsonrpc_request *request) {
     }
 
     std::vector<char> name;
-    if (!JSONRPCGetStringParam(request, "name", &name)) {
-        jsonrpc_return_error(request, -1, "'name' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetStringParam(request, "name", &name)) return;
 
     WIFIReturnCode_t wifi_ret;
     constexpr int kNumResults = 50;
@@ -77,10 +74,7 @@ static void BLEFind(struct jsonrpc_request *request) {
     }
 
     std::vector<char> address;
-    if (!JSONRPCGetStringParam(request, "address", &address)) {
-        jsonrpc_return_error(request, -1, "'address' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetStringParam(request, "address", &address)) return;
 
     unsigned int a, b, c, d, e, f;
     int tokens = sscanf(address.data(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);

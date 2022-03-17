@@ -19,9 +19,9 @@
 #include <array>
 #include <map>
 
-using valiant::testlib::JSONRPCGetIntegerParam;
-using valiant::testlib::JSONRPCGetBooleanParam;
-using valiant::testlib::JSONRPCGetStringParam;
+using valiant::testlib::JsonRpcGetIntegerParam;
+using valiant::testlib::JsonRpcGetBooleanParam;
+using valiant::testlib::JsonRpcGetStringParam;
 
 // In the below maps, data about pins to be tested via the loopback fixture
 // is provided. Pins on J5 are numbered from 1-100, and pins on J6 are numbered from 101-200.
@@ -294,16 +294,10 @@ static void InitializeLoopbackMappings() {
 // Returns success or failure to set the requested state.
 static void SetPmicRailState(struct jsonrpc_request *request) {
     int rail;
-    if (!JSONRPCGetIntegerParam(request, "rail", &rail)) {
-        jsonrpc_return_error(request, -1, "'rail' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "rail", &rail)) return;
 
     bool enable;
-    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
-        jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
     valiant::PmicTask::GetSingleton()->SetRailState(static_cast<valiant::pmic::Rail>(rail), enable);
     jsonrpc_return_success(request, "{}");
@@ -317,16 +311,10 @@ static void SetPmicRailState(struct jsonrpc_request *request) {
 // NOTE: The TPU LED requires that the TPU power is enabled.
 static void SetLedState(struct jsonrpc_request *request) {
     int led;
-    if (!JSONRPCGetIntegerParam(request, "led", &led)) {
-        jsonrpc_return_error(request, -1, "'led' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "led", &led)) return;
 
     bool enable;
-    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
-        jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
     enum LEDs {
         kPower = 0,
@@ -362,15 +350,8 @@ static void SetLedState(struct jsonrpc_request *request) {
 static void SetPinPairToGpio(struct jsonrpc_request *request) {
     int output_pin, input_pin;
 
-    if (!JSONRPCGetIntegerParam(request, "output_pin", &output_pin)) {
-        jsonrpc_return_error(request, -1, "'output_pin' missing", nullptr);
-        return;
-    }
-
-    if (!JSONRPCGetIntegerParam(request, "input_pin", &input_pin)) {
-        jsonrpc_return_error(request, -1, "'input_pin' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "output_pin", &output_pin)) return;
+    if (!JsonRpcGetIntegerParam(request, "input_pin", &input_pin)) return;
 
     auto pin_pair_a = j5_j6_loopback_mapping.find(output_pin);
     auto pin_pair_b = j5_j6_loopback_mapping.find(input_pin);
@@ -442,16 +423,10 @@ static void SetPinPairToGpio(struct jsonrpc_request *request) {
 // Returns success or failure.
 static void SetGpio(struct jsonrpc_request *request) {
     int pin;
-    if (!JSONRPCGetIntegerParam(request, "pin", &pin)) {
-        jsonrpc_return_error(request, -1, "'pin' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
 
     bool enable;
-    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
-        jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
     auto pin_gpio_values = j5_j6_gpio_pins.find(pin);
     if (pin_gpio_values == j5_j6_gpio_pins.end()) {
@@ -474,10 +449,7 @@ static void SetGpio(struct jsonrpc_request *request) {
 // Returns success or failure.
 static void GetGpio(struct jsonrpc_request *request) {
     int pin;
-    if (!JSONRPCGetIntegerParam(request, "pin", &pin)) {
-        jsonrpc_return_error(request, -1, "'pin' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
 
     auto pin_gpio_values = j5_j6_gpio_pins.find(pin);
     if (pin_gpio_values == j5_j6_gpio_pins.end()) {
@@ -502,10 +474,7 @@ static void CheckTPUAlarm(struct jsonrpc_request *request) {
 // Returns success or failure.
 static void SetDACValue(struct jsonrpc_request *request) {
     int counts;
-    if (!JSONRPCGetIntegerParam(request, "counts", &counts)) {
-        jsonrpc_return_error(request, -1, "'counts' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "counts", &counts)) return;
 
     if (counts > 4095 || counts < 0) {
         jsonrpc_return_error(request, -1, "'counts' out of range (0-4095)", nullptr);
@@ -514,7 +483,6 @@ static void SetDACValue(struct jsonrpc_request *request) {
 
     valiant::analog::WriteDAC(counts);
     valiant::analog::EnableDAC(!!counts);
-
     jsonrpc_return_success(request, "{}");
 }
 
@@ -551,16 +519,8 @@ static void TestSDRamPattern(struct jsonrpc_request *request) {
 // Returns success or failure.
 static void WriteFile(struct jsonrpc_request *request) {
     std::vector<char> filename, data;
-
-    if (!JSONRPCGetStringParam(request, "filename", &filename)) {
-        jsonrpc_return_error(request, -1, "'filename' missing or invalid", nullptr);
-        return;
-    }
-
-    if (!JSONRPCGetStringParam(request, "data", &data)) {
-        jsonrpc_return_error(request, -1, "'data' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetStringParam(request, "filename", &filename))  return;
+    if (!JsonRpcGetStringParam(request, "data", &data)) return;
 
     lfs_file_t handle;
     bool ret = valiant::filesystem::Open(&handle, filename.data(), true);
@@ -596,10 +556,7 @@ static void WriteFile(struct jsonrpc_request *request) {
 // Base64-encodes and returns the data in the file, if it exists.
 static void ReadFile(struct jsonrpc_request *request) {
     std::vector<char> filename;
-    if (!JSONRPCGetStringParam(request, "filename", &filename)) {
-        jsonrpc_return_error(request, -1, "'filename' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
     lfs_file_t handle;
     bool ret = valiant::filesystem::Open(&handle, filename.data());
@@ -633,10 +590,7 @@ static void ReadFile(struct jsonrpc_request *request) {
 
 static void FuseMACAddress(struct jsonrpc_request *request) {
     std::vector<char> address;
-    if (!JSONRPCGetStringParam(request, "address", &address)) {
-        jsonrpc_return_error(request, -1, "'address' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetStringParam(request, "address", &address)) return;
 
     unsigned int a, b, c, d, e, f;
     int tokens = sscanf(address.data(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);

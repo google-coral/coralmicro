@@ -39,44 +39,65 @@ static std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_
     return param_pattern;
 }
 
-bool JSONRPCGetIntegerParam(struct jsonrpc_request* request, const char *param_name, int* out) {
+void JsonRpcReturnBadParam(struct jsonrpc_request* request, const char* message, const char* param_name) {
+   jsonrpc_return_error(request, JSONRPC_ERROR_BAD_PARAMS, message, "{%Q:%Q}", "param", param_name);
+}
+
+bool JsonRpcGetIntegerParam(struct jsonrpc_request* request, const char *param_name, int* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-    double param_double;
-    int find_result = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
-    if (find_result == MJSON_TOK_NUMBER) {
-        mjson_get_number(request->params, request->params_len, param_pattern.get(), &param_double);
-        *out = static_cast<int>(param_double);
-    } else {
+    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
+    if (tok == MJSON_TOK_INVALID) {
+        JsonRpcReturnBadParam(request, "missing param", param_name);
         return false;
     }
+
+    if (tok != MJSON_TOK_NUMBER) {
+        JsonRpcReturnBadParam(request, "param is not a number", param_name);
+        return false;
+    }
+
+    double value;
+    mjson_get_number(request->params, request->params_len, param_pattern.get(), &value);
+    *out = static_cast<int>(value);
     return true;
 }
 
-bool JSONRPCGetBooleanParam(struct jsonrpc_request* request, const char *param_name, bool *out) {
+bool JsonRpcGetBooleanParam(struct jsonrpc_request* request, const char *param_name, bool *out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-    int find_result = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
-    if (find_result == MJSON_TOK_TRUE || find_result == MJSON_TOK_FALSE) {
-        int param;
-        mjson_get_bool(request->params, request->params_len, param_pattern.get(), &param);
-        *out = !!param;
-    } else {
+    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
+    if (tok == MJSON_TOK_INVALID) {
+        JsonRpcReturnBadParam(request, "missing param", param_name);
         return false;
     }
+
+    if (tok != MJSON_TOK_TRUE && tok != MJSON_TOK_FALSE) {
+        JsonRpcReturnBadParam(request, "param is not a bool", param_name);
+        return false;
+    }
+
+    int value;
+    mjson_get_bool(request->params, request->params_len, param_pattern.get(), &value);
+    *out = !!value;
     return true;
 }
 
-bool JSONRPCGetStringParam(struct jsonrpc_request* request, const char *param_name, std::vector<char>* out) {
-    int find_result;
-    ssize_t find_size = 0;
+bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char *param_name, std::vector<char>* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
 
-    find_result = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, &find_size);
-    if (find_result == MJSON_TOK_STRING) {
-        out->resize(find_size, 0);
-        mjson_get_string(request->params, request->params_len, param_pattern.get(), out->data(), find_size);
-    } else {
+    ssize_t size = 0;
+    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, &size);
+    if (tok == MJSON_TOK_INVALID) {
+        JsonRpcReturnBadParam(request, "missing param", param_name);
         return false;
     }
+
+    if (tok != MJSON_TOK_STRING) {
+        JsonRpcReturnBadParam(request, "param is not a string", param_name);
+        return false;
+    }
+
+    out->resize(size);
+    mjson_get_string(request->params, request->params_len, param_pattern.get(), out->data(), size);
     return true;
 }
 
@@ -124,10 +145,7 @@ void RunTestConv1(struct jsonrpc_request *request) {
 // Returns success or failure.
 void SetTPUPowerState(struct jsonrpc_request *request) {
     bool enable;
-    if (!JSONRPCGetBooleanParam(request, "enable", &enable)) {
-        jsonrpc_return_error(request, -1, "'enable' missing or invalid", nullptr);
-        return;
-    }
+    if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
     valiant::EdgeTpuTask::GetSingleton()->SetPower(enable);
     jsonrpc_return_success(request, "{}");
@@ -135,17 +153,10 @@ void SetTPUPowerState(struct jsonrpc_request *request) {
 
 void BeginUploadResource(struct jsonrpc_request *request) {
     std::vector<char> resource_name;
+    if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
+
     int resource_size;
-
-    if (!JSONRPCGetStringParam(request, "name", &resource_name)) {
-        jsonrpc_return_error(request, -1, "'name' missing", nullptr);
-        return;
-    }
-
-    if (!JSONRPCGetIntegerParam(request, "size", &resource_size)) {
-        jsonrpc_return_error(request, -1, "'size' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "size", &resource_size)) return;
 
     uploaded_resources[resource_name].resize(resource_size);
     jsonrpc_return_success(request, "{}");
@@ -153,27 +164,19 @@ void BeginUploadResource(struct jsonrpc_request *request) {
 
 void UploadResourceChunk(struct jsonrpc_request *request) {
     std::vector<char> resource_name;
-    std::vector<char> resource_data;
-    int offset;
-
-    if (!JSONRPCGetStringParam(request, "name", &resource_name)) {
-        jsonrpc_return_error(request, -1, "'name' missing", nullptr);
-        return;
-    }
-    if (!JSONRPCGetIntegerParam(request, "offset", &offset)) {
-        jsonrpc_return_error(request, -1, "'offset' missing", nullptr);
-        return;
-    }
-    if (!JSONRPCGetStringParam(request, "data", &resource_data)) {
-        jsonrpc_return_error(request, -1, "'data' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
     uint8_t* resource = GetResource(resource_name, nullptr);
     if (!resource) {
         jsonrpc_return_error(request, -1, "unknown resource", nullptr);
         return;
     }
+
+    int offset;
+    if (!JsonRpcGetIntegerParam(request, "offset", &offset)) return;
+
+    std::vector<char> resource_data;
+    if (!JsonRpcGetStringParam(request, "data", &resource_data)) return;
 
     unsigned int bytes_to_decode = strlen(resource_data.data());
     size_t decoded_length = 0;
@@ -185,11 +188,7 @@ void UploadResourceChunk(struct jsonrpc_request *request) {
 
 void DeleteResource(struct jsonrpc_request *request) {
     std::vector<char> resource_name;
-
-    if (!JSONRPCGetStringParam(request, "name", &resource_name)) {
-        jsonrpc_return_error(request, -1, "'name' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
     auto it = uploaded_resources.find(resource_name);
     if (it == uploaded_resources.end()) {
@@ -205,26 +204,20 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     std::vector<char> model_resource_name, image_resource_name;
     int image_width, image_height, image_depth;
 
-    if (!JSONRPCGetStringParam(request, "model_resource_name", &model_resource_name)) {
-        jsonrpc_return_error(request, -1, "'model_resource_name' missing", nullptr);
+    if (!JsonRpcGetStringParam(request, "model_resource_name", &model_resource_name))
         return;
-    }
-    if (!JSONRPCGetStringParam(request, "image_resource_name", &image_resource_name)) {
-        jsonrpc_return_error(request, -1, "'image_resource_name' missing", nullptr);
+
+    if (!JsonRpcGetStringParam(request, "image_resource_name", &image_resource_name))
         return;
-    }
-    if (!JSONRPCGetIntegerParam(request, "image_width", &image_width)) {
-        jsonrpc_return_error(request, -1, "'image_width' missing", nullptr);
+
+    if (!JsonRpcGetIntegerParam(request, "image_width", &image_width))
         return;
-    }
-    if (!JSONRPCGetIntegerParam(request, "image_height", &image_height)) {
-        jsonrpc_return_error(request, -1, "'image_height' missing", nullptr);
+
+    if (!JsonRpcGetIntegerParam(request, "image_height", &image_height))
         return;
-    }
-    if (!JSONRPCGetIntegerParam(request, "image_depth", &image_depth)) {
-        jsonrpc_return_error(request, -1, "'image_depth' missing", nullptr);
+
+    if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth))
         return;
-    }
 
     size_t model_size;
     uint8_t* model_resource = GetResource(model_resource_name, &model_size);
@@ -324,26 +317,20 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     std::vector<char> model_resource_name, image_resource_name;
     int image_width, image_height, image_depth;
 
-    if (!JSONRPCGetStringParam(request, "model_resource_name", &model_resource_name)) {
-        jsonrpc_return_error(request, -1, "'model_resource_name' missing", nullptr);
+    if (!JsonRpcGetStringParam(request, "model_resource_name", &model_resource_name))
         return;
-    }
-    if (!JSONRPCGetStringParam(request, "image_resource_name", &image_resource_name)) {
-        jsonrpc_return_error(request, -1, "'image_resource_name' missing", nullptr);
+
+    if (!JsonRpcGetStringParam(request, "image_resource_name", &image_resource_name))
         return;
-    }
-    if (!JSONRPCGetIntegerParam(request, "image_width", &image_width)) {
-        jsonrpc_return_error(request, -1, "'image_width' missing", nullptr);
+
+    if (!JsonRpcGetIntegerParam(request, "image_width", &image_width))
         return;
-    }
-    if (!JSONRPCGetIntegerParam(request, "image_height", &image_height)) {
-        jsonrpc_return_error(request, -1, "'image_height' missing", nullptr);
+
+    if (!JsonRpcGetIntegerParam(request, "image_height", &image_height))
         return;
-    }
-    if (!JSONRPCGetIntegerParam(request, "image_depth", &image_depth)) {
-        jsonrpc_return_error(request, -1, "'image_depth' missing", nullptr);
+
+    if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth))
         return;
-    }
 
     uint8_t* model_resource = GetResource(model_resource_name, nullptr);
     if (!model_resource) {
@@ -453,11 +440,7 @@ void StartM4(struct jsonrpc_request *request) {
 
 void GetTemperature(struct jsonrpc_request *request) {
     int sensor_num;
-    float temperature;
-    if (!JSONRPCGetIntegerParam(request, "sensor", &sensor_num)) {
-        jsonrpc_return_error(request, -1, "'sensor' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "sensor", &sensor_num)) return;
 
     auto sensor = static_cast<valiant::tempsense::TempSensor>(sensor_num);
     if(sensor >= valiant::tempsense::TempSensor::kSensorCount) {
@@ -465,7 +448,7 @@ void GetTemperature(struct jsonrpc_request *request) {
         return;
     }
 
-    temperature = valiant::tempsense::GetTemperature(sensor);
+    float temperature = valiant::tempsense::GetTemperature(sensor);
     jsonrpc_return_success(request, "{%Q:%g}", "temperature", temperature);
 }
 
@@ -514,10 +497,8 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
 // The audio captured is 32-bit signed PCM @ 16000Hz.
 void CaptureAudio(struct jsonrpc_request *request) {
     int sample_rate_hz;
-    if (!JSONRPCGetIntegerParam(request, "sample_rate_hz", &sample_rate_hz)) {
-        jsonrpc_return_error(request, -1, "'sample_rate_hz' missing", nullptr);
+    if (!JsonRpcGetIntegerParam(request, "sample_rate_hz", &sample_rate_hz))
         return;
-    }
 
     audio::SampleRate sample_rate;
     if (sample_rate_hz == 16000) {
@@ -525,37 +506,31 @@ void CaptureAudio(struct jsonrpc_request *request) {
     } else if (sample_rate_hz == 48000) {
         sample_rate = audio::SampleRate::k48000_Hz;
     } else {
-        jsonrpc_return_error(request, -1, "'sample_rate_hz' must be 16000 or 48000", nullptr);
+        JsonRpcReturnBadParam(request, "sample rate must be 16000 or 48000 Hz", "sample_rate_hz");
         return;
     }
 
     int duration_ms;
-    if (!JSONRPCGetIntegerParam(request, "duration_ms", &duration_ms)) {
-        jsonrpc_return_error(request, -1, "'duration_ms' missing", nullptr);
+    if (!JsonRpcGetIntegerParam(request, "duration_ms", &duration_ms))
         return;
-    }
     if (duration_ms <= 0) {
-        jsonrpc_return_error(request, -1, "'duration_ms' must be positive", nullptr);
+        JsonRpcReturnBadParam(request, "duration must be positive", "duration_ms");
         return;
     }
 
     int num_buffers;
-    if (!JSONRPCGetIntegerParam(request, "num_buffers", &num_buffers)) {
-        jsonrpc_return_error(request, -1, "'num_buffers' missing", nullptr);
+    if (!JsonRpcGetIntegerParam(request, "num_buffers", &num_buffers))
         return;
-    }
     if (num_buffers > static_cast<int>(audio::kMaxNumBuffers)) {
-        jsonrpc_return_error(request, -1, "'num_buffers' too big", nullptr);
+        JsonRpcReturnBadParam(request, "number of buffers is too big", "num_buffers");
         return;
     }
 
     int buffer_size_ms;
-    if (!JSONRPCGetIntegerParam(request, "buffer_size_ms", &buffer_size_ms)) {
-        jsonrpc_return_error(request, -1, "'buffer_size_ms' missing", nullptr);
+    if (!JsonRpcGetIntegerParam(request, "buffer_size_ms", &buffer_size_ms))
         return;
-    }
     if (buffer_size_ms <= 0) {
-        jsonrpc_return_error(request, -1, "'buffer_size_ms' must be positive", nullptr);
+        JsonRpcReturnBadParam(request, "buffer size must be positive", "buffer_size_ms");
         return;
     }
 
@@ -599,10 +574,7 @@ void CaptureAudio(struct jsonrpc_request *request) {
 
 void WifiSetAntenna(struct jsonrpc_request *request) {
     int antenna;
-    if (!JSONRPCGetIntegerParam(request, "antenna", &antenna)) {
-        jsonrpc_return_error(request, -1, "'antenna' missing", nullptr);
-        return;
-    }
+    if (!JsonRpcGetIntegerParam(request, "antenna", &antenna)) return;
 
     enum Antenna {
         kInternal = 0,
