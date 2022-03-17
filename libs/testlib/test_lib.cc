@@ -25,7 +25,7 @@
 
 // Map for containing uploaded resources.
 // Key is the output of StrHash with the resource name as the parameter.
-static std::map<uint64_t, std::vector<uint8_t>> uploaded_resources;
+static std::map<std::vector<char>, std::vector<uint8_t>> uploaded_resources;
 
 namespace valiant {
 namespace testlib {
@@ -80,13 +80,11 @@ bool JSONRPCGetStringParam(struct jsonrpc_request* request, const char *param_na
     return true;
 }
 
-static uint8_t* GetResource(std::vector<char>& resource_name, size_t *resource_size) {
-    uint64_t key = utils::StrHash(reinterpret_cast<const char *>(resource_name.data()));
-    auto it = uploaded_resources.find(key);
+static uint8_t* GetResource(const std::vector<char>& resource_name, size_t *resource_size) {
+    auto it = uploaded_resources.find(resource_name);
     if (it == uploaded_resources.end()) {
         return nullptr;
     }
-
     if (resource_size) {
         *resource_size = it->second.size();
     }
@@ -157,8 +155,7 @@ void BeginUploadResource(struct jsonrpc_request *request) {
         return;
     }
 
-    uploaded_resources.insert({utils::StrHash(reinterpret_cast<const char *>(resource_name.data())), std::vector<uint8_t>(resource_size)});
-
+    uploaded_resources[resource_name].resize(resource_size);
     jsonrpc_return_success(request, "{}");
 }
 
@@ -202,14 +199,13 @@ void DeleteResource(struct jsonrpc_request *request) {
         return;
     }
 
-    uint64_t key = utils::StrHash(reinterpret_cast<const char*>(resource_name.data()));
-    auto it = uploaded_resources.find(key);
+    auto it = uploaded_resources.find(resource_name);
     if (it == uploaded_resources.end()) {
         jsonrpc_return_error(request, -1, "unknown resource", nullptr);
         return;
     }
 
-    uploaded_resources.erase(key);
+    uploaded_resources.erase(it);
     jsonrpc_return_success(request, "{}");
 }
 
