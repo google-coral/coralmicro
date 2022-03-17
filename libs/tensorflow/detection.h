@@ -1,13 +1,21 @@
 #ifndef _LIBS_TENSORFLOW_DETECTION_H_
 #define _LIBS_TENSORFLOW_DETECTION_H_
 
-#include "libs/tensorflow/utils.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+
 #include <limits>
 #include <vector>
 
 namespace valiant {
 namespace tensorflow {
+
+template <typename T>
+struct BBox {
+    T ymin;
+    T xmin;
+    T ymax;
+    T xmax;
+};
 
 struct Object {
     int id;
