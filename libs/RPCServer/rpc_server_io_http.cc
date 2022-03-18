@@ -8,9 +8,7 @@ namespace rpc {
 
 int RPCServerIOHTTP::jsonrpc_reply(const char *buf, int len, void *userdata) {
     rpc_data *this_rpc_data = reinterpret_cast<rpc_data*>(userdata);
-    for (int i = 0; i < len; ++i) {
-        this_rpc_data->reply_buf.push_back(buf[i]);
-    }
+    this_rpc_data->reply_buf.insert(this_rpc_data->reply_buf.end(), buf, buf + len);
     return len;
 }
 
@@ -55,7 +53,6 @@ err_t RPCServerIOHTTP::httpd_post_begin(void *connection, const char *uri, const
                        u16_t response_uri_len, u8_t *post_auto_wnd) {
     auto *this_rpc_data = new rpc_data;
     this_rpc_data->post_data.resize(content_len, 0);
-    this_rpc_data->reply_buf_written = 0;
     this_rpc_data->post_data_written = 0;
     rpc_data_map[connection] = this_rpc_data;
     const char *expected_uri = "/jsonrpc";
@@ -87,8 +84,11 @@ void RPCServerIOHTTP::static_httpd_cgi_handler(void* context, struct fs_file *fi
 void RPCServerIOHTTP::httpd_cgi_handler(struct fs_file *file, const char *uri, int iNumParams, char **pcParam, char **pcValue) {
     void *connection = file->pextension;
     auto *this_rpc_data = rpc_data_map[connection];
+
     file->len = this_rpc_data->reply_buf.size();
-    file->index = 0;
+    file->data = this_rpc_data->reply_buf.data();
+    file->index = file->len;
+    file->flags |= FS_FILE_FLAGS_HEADER_PERSISTENT;
 }
 
 int RPCServerIOHTTP::static_fs_read_custom(void* context, struct fs_file *file, char *buffer, int count) {
@@ -98,25 +98,7 @@ int RPCServerIOHTTP::static_fs_read_custom(void* context, struct fs_file *file, 
 }
 
 int RPCServerIOHTTP::fs_read_custom(struct fs_file *file, char *buffer, int count) {
-    void *connection = file->pextension;
-    if (!connection) {
-        return ERR_ARG;
-    }
-    auto *this_rpc_data = rpc_data_map[connection];
-    if (!this_rpc_data) {
-        return FS_READ_EOF;
-    }
-
-    size_t bytes_to_read = std::min(static_cast<size_t>(count), this_rpc_data->reply_buf.size() - this_rpc_data->reply_buf_written);
-
-    // We've read all the bytes in our file, let the webserver know this is all the bytes.
-    if (this_rpc_data->reply_buf_written == this_rpc_data->reply_buf.size()) {
-        return FS_READ_EOF;
-    }
-
-    memcpy(buffer, &this_rpc_data->reply_buf[this_rpc_data->reply_buf_written], bytes_to_read);
-    this_rpc_data->reply_buf_written += bytes_to_read;
-    return bytes_to_read;
+    return FS_READ_EOF;
 }
 
 int RPCServerIOHTTP::static_fs_open_custom(void* context, struct fs_file *file, const char *name) {
@@ -129,7 +111,6 @@ int RPCServerIOHTTP::fs_open_custom(struct fs_file *file, const char *name) {
     const char *response_uri = "/jsonrpc/response.json";
     if (strncmp(name, response_uri, strlen(response_uri)) == 0) {
         memset(file, 0, sizeof(struct fs_file));
-        file->index = -1;
         return 1;
     }
     return 0;

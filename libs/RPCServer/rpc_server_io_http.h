@@ -19,7 +19,6 @@ class RPCServerIOHTTP : public RPCServerIO {
     struct rpc_data {
         std::vector<char> post_data;
         std::vector<char> reply_buf;
-        size_t reply_buf_written;
         size_t post_data_written;
     };
   private:
