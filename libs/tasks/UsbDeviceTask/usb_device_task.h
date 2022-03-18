@@ -8,6 +8,7 @@
 
 #include <array>
 #include <functional>
+#include <string>
 #include <vector>
 
 namespace valiant {
@@ -69,8 +70,7 @@ class UsbDeviceTask {
 
     std::vector<usb_set_handle_callback> set_handle_callbacks_;
     std::vector<usb_handle_event_callback> handle_event_callbacks_;
-    // 16 hex charaters + NULL
-    std::array<char, 17> serial_number;
+    std::string serial_number_;
 };
 
 }  // namespace valiant

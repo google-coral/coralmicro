@@ -14,17 +14,9 @@
 #include <vector>
 
 static void serial_number_rpc(struct jsonrpc_request *r) {
-    char serial_number_str[16];
-    uint64_t serial_number = valiant::utils::GetUniqueID();
-    for (int i = 0; i < 16; ++i) {
-        uint8_t nibble = (serial_number >> (i * 4)) & 0xF;
-        if (nibble < 10) {
-            serial_number_str[15 - i] = nibble + '0';
-        } else {
-            serial_number_str[15 - i] = (nibble - 10) + 'a';
-        }
-    }
-    jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", 16, serial_number_str);
+    std::string serial = valiant::utils::GetSerialNumber();
+    jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", serial.size(),
+                           serial.c_str());
 }
 
 static void take_picture_rpc(struct jsonrpc_request *r) {

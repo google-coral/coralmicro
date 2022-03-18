@@ -24,6 +24,7 @@ struct MacAddress {
 
 namespace utils {
 uint64_t GetUniqueID();
+std::string GetSerialNumber();
 MacAddress GetMacAddress();
 bool GetUSBIPAddress(ip4_addr_t* addr);
 bool GetWifiSSID(std::string* wifi_ssid_out);

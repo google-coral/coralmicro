@@ -16,6 +16,14 @@ uint64_t GetUniqueID() {
     return ((static_cast<uint64_t>(fuse_val_hi) << 32) | fuse_val_lo);
 }
 
+std::string GetSerialNumber() {
+    uint64_t id = valiant::utils::GetUniqueID();
+    char serial[17];  // 16 hex characters + \0
+    snprintf(serial, sizeof(serial), "%08lx%08lx",
+             static_cast<uint32_t>(id >> 32), static_cast<uint32_t>(id));
+    return std::string(serial);
+}
+
 MacAddress GetMacAddress() {
     uint32_t fuse_val_hi, fuse_val_lo;
     fuse_val_lo = OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO)].FUSE;
