@@ -1,0 +1,1 @@
+../../../../../../../../../third_party/tflite-micro/tensorflow/lite/micro/micro_op_resolver.h

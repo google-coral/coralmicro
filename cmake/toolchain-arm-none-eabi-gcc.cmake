@@ -4,6 +4,13 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
+set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcsP <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcsP <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_C_ARCHIVE_APPEND "<CMAKE_AR> qcsP <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> qcsP <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_C_ARCHIVE_FINISH "")
+set(CMAKE_CXX_ARCHIVE_FINISH "")
+
 if (${CMAKE_HOST_WIN32})
 get_filename_component(CMAKE_C_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc.exe REALPATH CACHE)
 get_filename_component(CMAKE_CXX_COMPILER ${VALIANT_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++.exe REALPATH CACHE)

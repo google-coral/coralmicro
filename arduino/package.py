@@ -296,7 +296,6 @@ def core_main(args, **kwargs):
     root_dir = kwargs.get('root_dir')
     arduino_dir = kwargs.get('arduino_dir')
     git_revision = kwargs.get('git_revision')
-
     # Remove previous coral package.
     coral_package_dir = os.path.join(root_dir, '.arduino15', 'packages', 'coral')
     if os.path.exists(coral_package_dir):
@@ -322,11 +321,22 @@ def core_main(args, **kwargs):
 
         # Copy the arduino library bundle into the core.
         with tempfile.TemporaryDirectory() as rebundle_dir:
-            arduino_bundle_path = os.path.join(build_dir, 'liblibs_arduino_bundled.a')
             arduino_rebundled_path = os.path.join(libs_dir, 'liblibs_arduino_bundled.a')
-            subprocess.check_call([ar_path, 'x', arduino_bundle_path], cwd=rebundle_dir)
-            object_files = os.listdir(rebundle_dir)
-            subprocess.check_call([ar_path, 'rcs', arduino_rebundled_path] + object_files, cwd=rebundle_dir)
+
+            # Merge static libraries into a bundle
+            static_libs_path = os.path.join(build_dir, 'libs_arduino_bundled.txt')
+            with open(static_libs_path) as static_libs_file:
+                unique_objects = set()
+                for path in static_libs_file.readlines():
+                    path = path.strip('\n')
+                    obj_paths = subprocess.check_output([ar_path, 't', path]).decode("utf-8").split('\n')
+                    root_obj_dir = os.path.dirname(path)
+                    for obj_path in obj_paths:
+                        unique_path = obj_path.split('CMakeFiles')[-1]
+                        obj_full_path = os.path.join(build_dir, obj_path)
+                        if unique_path not in unique_objects and obj_path != '':
+                            subprocess.check_call([ar_path, 'q', arduino_rebundled_path, obj_full_path], cwd=build_dir)
+                            unique_objects.add(unique_path)
 
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'VALIANT')
         os.makedirs(bootloader_dir)

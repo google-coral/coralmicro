@@ -1,0 +1,1 @@
+../../../../../../../../../../third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h

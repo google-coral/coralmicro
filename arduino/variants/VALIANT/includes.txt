@@ -1,4 +1,5 @@
 -iwithprefixbefore/include
+-iwithprefixbefore/include/libs/nxp/rt1176-sdk/
 -iwithprefixbefore/include/third_party/CMSIS/CMSIS/Core/Include
 -iwithprefixbefore/include/third_party/freertos_kernel/include
 -iwithprefixbefore/include/third_party/freertos_kernel/portable/GCC/ARM_CM4F
@@ -6,4 +7,7 @@
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/components/osa
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/devices/MIMXRT1176
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers
+-iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/usb/host
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/usb/include
+-iwithprefixbefore/include/third_party/flatbuffers/include/
+-iwithprefixbefore/include/third_party/tflite-micro/

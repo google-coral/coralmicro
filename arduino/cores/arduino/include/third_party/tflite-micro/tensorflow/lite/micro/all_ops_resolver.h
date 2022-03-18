@@ -1,0 +1,1 @@
+../../../../../../../../../third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h

@@ -1,0 +1,1 @@
+../../../../../../../../third_party/darwinn/driver/config/scalar_core_csr_offsets.h
