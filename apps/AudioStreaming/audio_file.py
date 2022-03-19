@@ -17,7 +17,8 @@ def copy_data(sock, write, chunk_size=2048):
     return num_bytes
 
 def main():
-    parser = argparse.ArgumentParser(description='Audio Streaming Client')
+    parser = argparse.ArgumentParser(
+        description='Save audio from Valiant mic to file')
     parser.add_argument('--host', type=str, default='10.10.10.1')
     parser.add_argument('--port', '-p', type=int, default=33000)
     parser.add_argument('--output', '-o', type=str, required=True)
