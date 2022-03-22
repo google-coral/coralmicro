@@ -1,0 +1,49 @@
+#include "libs/tasks/AudioTask/audio_reader.h"
+
+namespace valiant {
+
+AudioReader::AudioReader(audio::SampleRate sample_rate, int dma_buffer_size_ms,
+                         int num_dma_buffers)
+    : dma_buffer_size_ms_(dma_buffer_size_ms) {
+    const int samples_per_ms = static_cast<int>(sample_rate) / 1000;
+    const int samples_per_dma_buffer = dma_buffer_size_ms * samples_per_ms;
+
+    buffer_.resize(samples_per_dma_buffer);
+    dma_buffer_.resize(num_dma_buffers * samples_per_dma_buffer);
+
+    ring_buffer_.Create(
+        /*xBufferSize=*/samples_per_dma_buffer * num_dma_buffers,
+        /*xTriggerLevel=*/samples_per_dma_buffer);
+    assert(ring_buffer_.Ok());
+
+    std::vector<int32_t*> dma_buffers;
+    for (int i = 0; i < num_dma_buffers; ++i)
+        dma_buffers.push_back(dma_buffer_.data() + i * samples_per_dma_buffer);
+
+    AudioTask::GetSingleton()->SetPower(true);
+    AudioTask::GetSingleton()->Enable(sample_rate, dma_buffers,
+                                      samples_per_dma_buffer, this, Callback);
+}
+
+AudioReader::~AudioReader() {
+    AudioTask::GetSingleton()->Disable();
+    AudioTask::GetSingleton()->SetPower(false);
+}
+
+size_t AudioReader::FillBuffer() {
+    auto received_size = ring_buffer_.Receive(
+        buffer_.data(), buffer_.size(), pdMS_TO_TICKS(2 * dma_buffer_size_ms_));
+    if (received_size != buffer_.size()) ++underflow_count_;
+    return received_size;
+}
+
+void AudioReader::Callback(void* param, const int32_t* buf, size_t size) {
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    auto* self = reinterpret_cast<AudioReader*>(param);
+    auto sent_size =
+        self->ring_buffer_.SendFromISR(buf, size, &xHigherPriorityTaskWoken);
+    if (size != sent_size) ++self->overflow_count_;
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+}  // namespace valiant

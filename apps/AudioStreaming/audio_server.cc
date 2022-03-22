@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "libs/tasks/AudioTask/audio_task.h"
+#include "libs/tasks/AudioTask/audio_reader.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -77,124 +77,6 @@ bool VerifySampleRate(int sample_rate_hz,
     return false;
 }
 
-template <typename T>
-class xStreamBuffer {
-   public:
-    xStreamBuffer() : handle_(nullptr) {}
-
-    ~xStreamBuffer() {
-        if (handle_) vStreamBufferDelete(handle_);
-    }
-
-    bool Ok() const { return handle_ != nullptr; }
-
-    void Create(size_t xBufferSize, size_t xTriggerLevel) {
-        handle_ = xStreamBufferCreate(xBufferSize * sizeof(T),
-                                      xTriggerLevel * sizeof(T));
-    }
-
-    size_t Send(const T* pvTxData, size_t xDataLength,
-                TickType_t xTicksToWait) {
-        return xStreamBufferSend(handle_, pvTxData, xDataLength * sizeof(T),
-                                 xTicksToWait) /
-               sizeof(T);
-    }
-
-    size_t SendFromISR(const T* pvTxData, size_t xDataLength,
-                       BaseType_t* pxHigherPriorityTaskWoken) {
-        return xStreamBufferSendFromISR(handle_, pvTxData,
-                                        xDataLength * sizeof(T),
-                                        pxHigherPriorityTaskWoken) /
-               sizeof(T);
-    }
-
-    size_t Receive(T* pvRxData, size_t xBufferLength, TickType_t xTicksToWait) {
-        return xStreamBufferReceive(handle_, pvRxData,
-                                    xBufferLength * sizeof(T), xTicksToWait) /
-               sizeof(T);
-    }
-
-    size_t ReceiveFromISR(void* pvRxData, size_t xBufferLength,
-                          BaseType_t* pxHigherPriorityTaskWoken) {
-        return xStreamBufferReceiveFromISR(handle_, pvRxData,
-                                           xBufferLength * sizeof(T),
-                                           pxHigherPriorityTaskWoken) /
-               sizeof(T);
-    }
-
-    BaseType_t Reset() { return xStreamBufferReset(handle_); }
-
-    BaseType_t IsEmpty() const { return xStreamBufferIsEmpty(handle_); }
-
-    BaseType_t IsFull() const { return xStreamBufferIsFull(handle_); }
-
-   private:
-    StreamBufferHandle_t handle_;
-};
-
-class AudioReader {
-   public:
-    AudioReader(valiant::audio::SampleRate sample_rate, int dma_buffer_size_ms,
-                int num_dma_buffers)
-        : dma_buffer_size_ms_(dma_buffer_size_ms) {
-        const int samples_per_ms = static_cast<int>(sample_rate) / 1000;
-        const int samples_per_dma_buffer = dma_buffer_size_ms * samples_per_ms;
-
-        buffer_.resize(samples_per_dma_buffer);
-        dma_buffer_.resize(num_dma_buffers * samples_per_dma_buffer);
-
-        ring_buffer_.Create(
-            /*xBufferSize=*/samples_per_dma_buffer * num_dma_buffers,
-            /*xTriggerLevel=*/samples_per_dma_buffer);
-        assert(ring_buffer_.Ok());
-
-        std::vector<int32_t*> dma_buffers;
-        for (int i = 0; i < num_dma_buffers; ++i)
-            dma_buffers.push_back(dma_buffer_.data() +
-                                  i * samples_per_dma_buffer);
-
-        valiant::AudioTask::GetSingleton()->SetPower(true);
-        valiant::AudioTask::GetSingleton()->Enable(
-            sample_rate, dma_buffers, samples_per_dma_buffer, this, Callback);
-    }
-
-    ~AudioReader() {
-        valiant::AudioTask::GetSingleton()->Disable();
-        valiant::AudioTask::GetSingleton()->SetPower(false);
-    }
-
-    const std::vector<int32_t>& Buffer() const { return buffer_; }
-
-    size_t FillBuffer() {
-        auto received_size =
-            ring_buffer_.Receive(buffer_.data(), buffer_.size(),
-                                 pdMS_TO_TICKS(2 * dma_buffer_size_ms_));
-        if (received_size != buffer_.size()) ++underflow_count_;
-        return received_size;
-    }
-
-    int OverflowCount() const { return overflow_count_; }
-    int UnderflowCount() const { return underflow_count_; }
-
-   private:
-    static void Callback(void* param, const int32_t* buf, size_t size) {
-        portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-        auto* self = reinterpret_cast<AudioReader*>(param);
-        auto sent_size = self->ring_buffer_.SendFromISR(
-            buf, size, &xHigherPriorityTaskWoken);
-        if (size != sent_size) ++self->overflow_count_;
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-    }
-
-    int dma_buffer_size_ms_;
-    std::vector<int32_t> buffer_;
-    std::vector<int32_t> dma_buffer_;
-    xStreamBuffer<int32_t> ring_buffer_;
-
-    volatile int overflow_count_ = 0;
-    volatile int underflow_count_ = 0;
-};
-
 void ProcessClient(int client_socket) {
     int32_t params[3];
     if (ReadArray(client_socket, params, 3) != Status::kOk) {
@@ -217,7 +99,8 @@ void ProcessClient(int client_socket) {
     printf("  DMA buffer size (ms): %d\n\r", dma_buffer_size_ms);
     printf("  # of DMA buffers: %d\n\r", num_dma_buffers);
 
-    AudioReader reader(sample_rate, dma_buffer_size_ms, num_dma_buffers);
+    valiant::AudioReader reader(sample_rate, dma_buffer_size_ms,
+                                num_dma_buffers);
 
     int total_bytes = 0;
     auto& buffer = reader.Buffer();

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(libs_tasks_AudioTask_SOURCES
+    audio_reader.cc
     audio_task.cc
 )
 
