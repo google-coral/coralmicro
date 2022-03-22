@@ -593,17 +593,8 @@ void CaptureAudio(struct jsonrpc_request *request) {
     valiant::AudioTask::GetSingleton()->Disable();
     valiant::AudioTask::GetSingleton()->SetPower(false);
 
-    size_t encoded_length = 0;
-    mbedtls_base64_encode(nullptr, 0, &encoded_length,
-                          reinterpret_cast<uint8_t*>(samples.data()),
-                          samples.size() * sizeof(samples[0]));
-    std::vector<uint8_t> encoded_data(encoded_length);
-    mbedtls_base64_encode(encoded_data.data(), encoded_data.size(),
-                          &encoded_length,
-                          reinterpret_cast<uint8_t*>(samples.data()),
-                          samples.size() * sizeof(samples[0]));
-    jsonrpc_return_success(request, "{%Q:%.*Q}", "data",
-                           encoded_length, encoded_data.data());
+    jsonrpc_return_success(request, "{%Q: %V}", "data",
+                           samples.size() * sizeof(samples[0]), samples.data());
 }
 
 void WifiSetAntenna(struct jsonrpc_request *request) {

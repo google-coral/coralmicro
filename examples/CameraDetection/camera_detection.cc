@@ -15,7 +15,6 @@
 #include "third_party/mjson/src/mjson.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/httpsrv/httpsrv_base64.h"
 
 namespace {
     constexpr int kTensorArenaSize{8 * 1024 * 1024};
@@ -62,20 +61,15 @@ namespace {
                 return;
             }
 
-            auto base64_size = valiant::utils::Base64Size(image_buffer.size());
-            std::vector<char> base64_data(base64_size);
-            base64_encode_binary(reinterpret_cast<char *>(image_buffer.data()), base64_data.data(),
-                                 image_buffer.size());
-
             // Parses output and returns to client.
             auto detection_results = valiant::tensorflow::GetDetectionResults(interpreter.get(), 0.5, 1);
             if (!detection_results.empty()) {
                 const auto &result = detection_results[0];
                 jsonrpc_return_success(r,
-                                       "{%Q: %d, %Q: %d, %Q: %.*Q, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g}}",
+                                       "{%Q: %d, %Q: %d, %Q: %V, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g}}",
                                        "width", model_width,
                                        "height", model_height,
-                                       "base64_data", base64_data.size(), base64_data.data(),
+                                       "base64_data", image_buffer.size(), image_buffer.data(),
                                        "detection", "id", result.id,
                                        "score", result.score,
                                        "xmin", result.bbox.xmin,
@@ -85,10 +79,10 @@ namespace {
                 return;
             }
             jsonrpc_return_success(r,
-                                   "{%Q: %d, %Q: %d, %Q: %.*Q, %Q: None}",
+                                   "{%Q: %d, %Q: %d, %Q: %V, %Q: None}",
                                    "width", model_width,
                                    "height", model_height,
-                                   "base64_data", base64_data.size(), base64_data.data(),
+                                   "base64_data", image_buffer.size(), image_buffer.data(),
                                    "detection");
 
         }

@@ -5,7 +5,6 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
-#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/httpsrv/httpsrv_base64.h"
 
 #include <cassert>
 #include <cstdio>
@@ -22,7 +21,7 @@ static void serial_number_rpc(struct jsonrpc_request *r) {
 static void take_picture_rpc(struct jsonrpc_request *r) {
     valiant::CameraTask::GetSingleton()->SetPower(true);
     valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
-    valiant::CameraTask::GetSingleton()->DiscardFrames(100);
+    valiant::CameraTask::GetSingleton()->DiscardFrames(1);
 
     std::vector<uint8_t> image_buffer(
         valiant::CameraTask::kWidth *
@@ -41,16 +40,10 @@ static void take_picture_rpc(struct jsonrpc_request *r) {
     valiant::CameraTask::GetSingleton()->Disable();
     valiant::CameraTask::GetSingleton()->SetPower(false);
     if (ret) {
-        auto base64_size = valiant::utils::Base64Size(image_buffer.size());
-        std::vector<char> base64_data(base64_size);
-        base64_encode_binary(reinterpret_cast<char*>(image_buffer.data()), base64_data.data(), image_buffer.size());
-        jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %d, %Q: %d, %Q: %.*Q}",
+        jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V}",
             "width", valiant::CameraTask::kWidth,
             "height", valiant::CameraTask::kHeight,
-            "image_data_size", image_buffer.size(),
-            "base64_size", base64_size,
-            "base64_data", base64_data.size(), base64_data.data()
-        );
+            "pixels", image_buffer.size(), image_buffer.data());
     } else {
         jsonrpc_return_error(r, -1, "failure", nullptr);
     }

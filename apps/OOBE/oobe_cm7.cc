@@ -13,7 +13,6 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
-#include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 #if defined(OOBE_DEMO_ETHERNET)

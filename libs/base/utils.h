@@ -29,9 +29,6 @@ MacAddress GetMacAddress();
 bool GetUSBIPAddress(ip4_addr_t* addr);
 bool GetWifiSSID(std::string* wifi_ssid_out);
 bool GetWifiPSK(std::string* wifi_psk_out);
-
-size_t Base64Size(size_t data_size);
-
 }  // namespace utils
 }  // namespace valiant
 

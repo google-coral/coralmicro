@@ -627,11 +627,7 @@ static void ReadFile(struct jsonrpc_request *request) {
     if (!ret) {
         jsonrpc_return_error(request, -1, "failed to close file", nullptr);
     } else {
-        size_t encoded_length = 0;
-        mbedtls_base64_encode(nullptr, 0, &encoded_length, data.data(), data.size());
-        std::vector<uint8_t> encoded_data(encoded_length);
-        mbedtls_base64_encode(encoded_data.data(), encoded_length, &encoded_length, data.data(), data.size());
-        jsonrpc_return_success(request, "{%Q:%.*Q}", "data", encoded_length, encoded_data.data());
+        jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(), data.data());
     }
 }
 

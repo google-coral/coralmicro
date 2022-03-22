@@ -26,8 +26,8 @@ def main():
     }
 
     response = requests.post(url, json=payload).json()
-    assert(response['result']['base64_data'])
-    image_data_base64 = response['result']['base64_data']
+    assert(response['result']['pixels'])
+    image_data_base64 = response['result']['pixels']
     width = response['result']['width']
     height = response['result']['height']
     image_data = base64.b64decode(image_data_base64)
