@@ -2,7 +2,6 @@
 #include <cstring>
 
 #include "libs/testlib/test_lib.h"
-#include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -94,15 +93,14 @@ extern "C" int rwl_read_serial_port(void *hndle, char *read_buf,
 }
 
 extern "C" void app_main(void *param) {
-  valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-  if (!rpc_server_io_http.Init()) {
-    printf("Failed to initialize RPCServerIOHTTP\r\n");
-    vTaskSuspend(NULL);
-  }
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export(valiant::testlib::kMethodWifiSetAntenna,
                  valiant::testlib::WifiSetAntenna);
-  rpc_server_io_http.SetContext(&jsonrpc_default_context);
+  valiant::rpc::RpcServer rpc_server;
+  if (!rpc_server.Init(&jsonrpc_default_context)) {
+    printf("Failed to initialize RPCServerIOHTTP\r\n");
+    vTaskSuspend(NULL);
+  }
 
   wwd_result_t err;
   err = (wwd_result_t)wiced_wlan_connectivity_init();

@@ -1,7 +1,6 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/utils.h"
-#include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
@@ -130,14 +129,14 @@ extern "C" void app_main(void *param) {
     model_width = interpreter->input_tensor(0)->dims->data[2];
 
     printf("Initializing the server...\n");
-    valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    if (!rpc_server_io_http.Init()) {
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export("detect_from_camera", detect_from_camera_rpc);
+    valiant::rpc::RpcServer rpc_server;
+    if (!rpc_server.Init(&jsonrpc_default_context)) {
         printf("Failed to initialize RPCServerIOHTTP\r\n");
         vTaskSuspend(nullptr);
     }
-    jsonrpc_init(nullptr, nullptr);
-    jsonrpc_export("detect_from_camera", detect_from_camera_rpc);
-    rpc_server_io_http.SetContext(&jsonrpc_default_context);
+
     printf("Detection server ready\r\n");
     vTaskSuspend(nullptr);
 }

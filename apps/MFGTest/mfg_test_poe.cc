@@ -1,7 +1,6 @@
 #include "libs/base/ethernet.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/testlib/test_lib.h"
-#include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -46,16 +45,15 @@ static void EthWritePHY(struct jsonrpc_request *request) {
 
 extern "C" void app_main(void *param) {
     valiant::InitializeEthernet(false);
-    valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    if (!rpc_server_io_http.Init()) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
 
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("eth_get_ip", EthGetIP);
     jsonrpc_export("eth_write_phy", EthWritePHY);
-    rpc_server_io_http.SetContext(&jsonrpc_default_context);
+    valiant::rpc::RpcServer rpc_server;
+    if (!rpc_server.Init(&jsonrpc_default_context)) {
+        printf("Failed to initialize RPCServerIOHTTP\r\n");
+        vTaskSuspend(NULL);
+    }
 
     vTaskSuspend(NULL);
 }

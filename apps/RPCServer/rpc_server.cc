@@ -1,5 +1,4 @@
 #include "libs/base/utils.h"
-#include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -50,15 +49,15 @@ static void take_picture_rpc(struct jsonrpc_request *r) {
 }
 
 extern "C" void app_main(void *param) {
-    valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    if (!rpc_server_io_http.Init()) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("serial_number", serial_number_rpc);
     jsonrpc_export("take_picture", take_picture_rpc);
-    rpc_server_io_http.SetContext(&jsonrpc_default_context);
+    valiant::rpc::RpcServer rpc_server;
+    if (!rpc_server.Init(&jsonrpc_default_context)) {
+        printf("Failed to initialize RPCServerIOHTTP\r\n");
+        vTaskSuspend(NULL);
+    }
+
     printf("RPC server ready\r\n");
     vTaskSuspend(NULL);
 }

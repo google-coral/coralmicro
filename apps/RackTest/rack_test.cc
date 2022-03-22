@@ -4,7 +4,6 @@
 #include "libs/base/utils.h"
 #include "libs/CoreMark/core_portme.h"
 #include "libs/posenet/posenet.h"
-#include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -195,11 +194,6 @@ static void fs_close_custom(void* context, struct fs_file *file) {
 
 extern "C" void app_main(void *param) {
     valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
-    valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    if (!rpc_server_io_http.Init()) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(nullptr);
-    }
 
     valiant::httpd::HTTPDHandlers handlers{};
     handlers.fs_open_custom = fs_open_custom;
@@ -238,6 +232,11 @@ extern "C" void app_main(void *param) {
     jsonrpc_export(kMethodGetFrame, GetFrame);
     jsonrpc_export(valiant::testlib::kMethodCaptureAudio,
                    valiant::testlib::CaptureAudio);
-    rpc_server_io_http.SetContext(&jsonrpc_default_context);
+    valiant::rpc::RpcServer rpc_server;
+    if (!rpc_server.Init(&jsonrpc_default_context)) {
+        printf("Failed to initialize RPCServerIOHTTP\r\n");
+        vTaskSuspend(nullptr);
+    }
+
     vTaskSuspend(nullptr);
 }

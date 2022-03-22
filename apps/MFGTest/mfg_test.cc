@@ -1,4 +1,3 @@
-#include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/base/analog.h"
 #include "libs/base/filesystem.h"
@@ -638,11 +637,6 @@ static void ReadMACAddress(struct jsonrpc_request *request) {
 extern "C" void app_main(void *param) {
     InitializeLoopbackMappings();
     valiant::analog::Init(valiant::analog::Device::DAC1);
-    valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    if (!rpc_server_io_http.Init()) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
 
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
@@ -671,7 +665,11 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("read_file", ReadFile);
     jsonrpc_export("fuse_mac_address", FuseMACAddress);
     jsonrpc_export("read_mac_address", ReadMACAddress);
-    rpc_server_io_http.SetContext(&jsonrpc_default_context);
+    valiant::rpc::RpcServer rpc_server;
+    if (!rpc_server.Init(&jsonrpc_default_context)) {
+        printf("Failed to initialize RPCServerIOHTTP\r\n");
+        vTaskSuspend(NULL);
+    }
 
     vTaskSuspend(NULL);
 }

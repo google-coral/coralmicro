@@ -3,7 +3,6 @@
 #include "libs/base/main_freertos_m7.h"
 #include "libs/base/mutex.h"
 #include "libs/testlib/test_lib.h"
-#include "libs/RPCServer/rpc_server.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -195,19 +194,18 @@ extern "C" void app_main(void *param) {
     valiant::gpio::SetGpio(valiant::gpio::kBtDevWake, false);
     wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings, wiced_bt_cfg_buf_pools);
 
-    valiant::rpc::RPCServerIOHTTP rpc_server_io_http;
-    if (!rpc_server_io_http.Init()) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
-
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("wifi_get_ap", WifiGetAP);
     jsonrpc_export(valiant::testlib::kMethodWifiSetAntenna,
                    valiant::testlib::WifiSetAntenna);
     jsonrpc_export("ble_scan", BLEScan);
     jsonrpc_export("ble_find", BLEFind);
-    rpc_server_io_http.SetContext(&jsonrpc_default_context);
+    valiant::rpc::RpcServer rpc_server;
+    if (!rpc_server.Init(&jsonrpc_default_context)) {
+        printf("Failed to initialize RPCServerIOHTTP\r\n");
+        vTaskSuspend(NULL);
+    }
+
     vTaskSuspend(NULL);
 }
 
