@@ -59,8 +59,8 @@ static int camera_http_fs_open_custom(void *context, struct fs_file *file, const
     constexpr const char *pose = "/pose";
     if (std::strncmp(name, camera, std::strlen(camera)) == 0) {
         valiant::MutexLock lock(camera_output_mtx);
+        file->len = camera_output.get() ? kPosenetSize : 0;
         file->data = reinterpret_cast<char*>(camera_output.release());
-        file->len = kPosenetSize;
         file->index = kPosenetSize;
         file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT | FS_FILE_FLAGS_CUSTOM;
         file->pextension = reinterpret_cast<void*>(kCameraPextension);
