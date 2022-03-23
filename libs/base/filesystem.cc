@@ -3,7 +3,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
-#include "./third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
+
 #include <cstdio>
 #include <memory>
 
@@ -18,102 +18,93 @@ struct AutoClose {
   ~AutoClose() { Close(handle); }
 };
 
+lfs_t lfs_handle_;
+lfs_config lfs_config_;
+SemaphoreHandle_t lfs_semaphore_;
+
+constexpr int kPagesPerBlock = 64;
+constexpr int kFilesystemBaseBlock = 12;
+constexpr lfs_size_t kPageSize = 2048;
+
+int LfsRead(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
+            void *buffer, lfs_size_t size) {
+    nand_handle_t* nand = BOARD_GetNANDHandle();
+    if (!nand) return LFS_ERR_IO;
+
+    auto* buf = reinterpret_cast<uint8_t*>(buffer);
+    while (size != 0) {
+        auto page_index = off / kPageSize;
+        auto read_size = std::min(kPageSize, size);
+        status_t status = Nand_Flash_Read_Page(nand,
+            (kFilesystemBaseBlock + block) * kPagesPerBlock + page_index,
+            buf, read_size);
+        if (status != kStatus_Success) return LFS_ERR_IO;
+
+        off += read_size;
+        buf += read_size;
+        size -= read_size;
+    }
+    return LFS_ERR_OK;
+}
+
+int LfsProg(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
+            const void *buffer, lfs_size_t size) {
+    nand_handle_t* nand = BOARD_GetNANDHandle();
+    if (!nand) return LFS_ERR_IO;
+
+    auto* buf = reinterpret_cast<const uint8_t*>(buffer);
+    while (size != 0) {
+        auto page_index = off / kPageSize;
+        auto write_size = std::min(kPageSize, size);
+        status_t status = Nand_Flash_Page_Program(nand,
+            (kFilesystemBaseBlock + block) * kPagesPerBlock + page_index,
+            buf, write_size);
+        if (status != kStatus_Success) return LFS_ERR_IO;
+
+        off += write_size;
+        buf += write_size;
+        size -= write_size;
+    }
+
+    return LFS_ERR_OK;
+}
+
+int LfsErase(const struct lfs_config *c, lfs_block_t block) {
+    nand_handle_t* nand = BOARD_GetNANDHandle();
+    if (!nand) return LFS_ERR_IO;
+    status_t status = Nand_Flash_Erase_Block(nand, kFilesystemBaseBlock + block);
+    if (status != kStatus_Success) return LFS_ERR_IO;
+    return LFS_ERR_OK;
+}
+
+int LfsSync(const struct lfs_config *c) {
+    return LFS_ERR_OK;
+}
+
 }  // namespace
 
-static lfs_t lfs_handle_;
-static lfs_config lfs_config_;
-static SemaphoreHandle_t lfs_semaphore_;
-constexpr const int kPagesPerBlock = 64;
-constexpr const int kFilesystemBaseBlock = 0xC;
-constexpr const int kFilesystemBasePage = (kFilesystemBaseBlock * kPagesPerBlock);
-constexpr const int kPageSize = 2048;
-
-static int LfsRead(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size) {
-    nand_handle_t* nand_handle = BOARD_GetNANDHandle();
-    if (!nand_handle) {
-        return LFS_ERR_IO;
-    }
-
-    lfs_size_t remaining_bytes = size;
-    lfs_off_t current_offset = off;
-    lfs_off_t memory_offset = 0;
-    int base_offset = off / kPageSize;
-    do {
-        lfs_size_t this_page_size = MIN(kPageSize, remaining_bytes);
-        int page_offset = (current_offset - off) / kPageSize;
-        status_t status = Nand_Flash_Read_Page_Partial(
-                nand_handle, kFilesystemBasePage + (block * kPagesPerBlock) + base_offset + page_offset, 0,
-                reinterpret_cast<uint8_t*>(buffer) + memory_offset, this_page_size);
-        if (status != kStatus_Success) {
-            return LFS_ERR_IO;
-        }
-        memory_offset += this_page_size;
-        current_offset += this_page_size;
-        remaining_bytes -= this_page_size;
-    } while (remaining_bytes);
-    return LFS_ERR_OK;
-}
-
-static int LfsProg(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size) {
-    nand_handle_t* nand_handle = BOARD_GetNANDHandle();
-    if (!nand_handle) {
-        return LFS_ERR_IO;
-    }
-
-    lfs_size_t remaining_bytes = size;
-    lfs_off_t current_offset = off;
-    lfs_off_t memory_offset = 0;
-    int base_offset = off / kPageSize;
-    do {
-        lfs_size_t this_page_size = MIN(kPageSize, remaining_bytes);
-        int page_offset = (current_offset - off) / kPageSize;
-        status_t status = Nand_Flash_Page_Program(
-            nand_handle, kFilesystemBasePage + (block * kPagesPerBlock) + base_offset + page_offset,
-            reinterpret_cast<const uint8_t*>(buffer) + memory_offset, this_page_size
-        );
-        if (status != kStatus_Success) {
-            return LFS_ERR_IO;
-        }
-        memory_offset += this_page_size;
-        current_offset += this_page_size;
-        remaining_bytes -= this_page_size;
-    } while (remaining_bytes);
-
-    return LFS_ERR_OK;
-}
-
-static int LfsErase(const struct lfs_config *c, lfs_block_t block) {
-    nand_handle_t* nand_handle = BOARD_GetNANDHandle();
-    if (!nand_handle) {
-        return LFS_ERR_IO;
-    }
-    status_t status = Nand_Flash_Erase_Block(nand_handle, kFilesystemBaseBlock + block);
-    if (status != kStatus_Success) {
-        return LFS_ERR_IO;
-    }
-    return LFS_ERR_OK;
-}
-
-static int LfsSync(const struct lfs_config *c) {
-    return LFS_ERR_OK;
-}
-
-bool Init() {
-    int ret;
+bool Init(bool force_format) {
     memset(&lfs_config_, 0, sizeof(lfs_config_));
     lfs_config_.read = LfsRead;
     lfs_config_.prog = LfsProg;
     lfs_config_.erase = LfsErase;
     lfs_config_.sync = LfsSync;
-    lfs_config_.read_size = 2048;
-    lfs_config_.prog_size = 2048;
+    lfs_config_.read_size = kPageSize;
+    lfs_config_.prog_size = kPageSize;
     lfs_config_.block_size = 131072;
     lfs_config_.block_count = 512;
     lfs_config_.block_cycles = 250;
-    lfs_config_.cache_size = 2048;
-    lfs_config_.lookahead_size = 2048;
+    lfs_config_.cache_size = kPageSize;
+    lfs_config_.lookahead_size = kPageSize;
 
-    ret = lfs_mount(&lfs_handle_, &lfs_config_);
+    if (force_format) {
+        int ret = lfs_format(&lfs_handle_, &lfs_config_);
+        if (ret < 0) {
+            return false;
+        }
+    }
+
+    int ret = lfs_mount(&lfs_handle_, &lfs_config_);
     if (ret < 0) {
         // No filesystem detected, go ahead and format.
         ret = lfs_format(&lfs_handle_, &lfs_config_);
@@ -389,5 +380,4 @@ bool DirClose(lfs_dir_t *dir) {
 }
 
 }  // namespace filesystem
-
 }  // namespace valiant

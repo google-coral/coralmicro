@@ -36,6 +36,7 @@ static uint8_t elfloader_data[64];
 static class_handle_t elfloader_class_handle;
 static ElfloaderTarget elfloader_target = ElfloaderTarget::Ram;
 static lfs_file_t file_handle;
+static bool filesystem_formatted = false;
 
 static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
     ElfloaderCommand cmd = static_cast<ElfloaderCommand>(buffer[0]);
@@ -96,6 +97,15 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
             break;
         case ElfloaderCommand::Target:
             elfloader_target = *target;
+
+            // Format filesystem before writing new files.
+            if (elfloader_target == ElfloaderTarget::Filesystem ||
+                elfloader_target == ElfloaderTarget::Path) {
+                if (!filesystem_formatted)  {
+                    valiant::filesystem::Init(/*force_format=*/true);
+                    filesystem_formatted = true;
+                }
+            }
             break;
     }
 }
