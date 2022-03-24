@@ -7,19 +7,21 @@
 namespace valiant {
 namespace oobe {
 namespace {
-template<typename... T>
-void append(std::vector<char>* v, const char* format, T... args) {
-  const int size = std::snprintf(nullptr, 0, format, args...) + 1;
-  v->resize(v->size() + size);
-  std::snprintf(&(*v)[v->size() - size], size, format, args...);
-  v->resize(v->size() - 1);  // remove null terminator
+template <typename... T>
+void append(std::vector<uint8_t>* v, const char* format, T... args) {
+    const int size = std::snprintf(nullptr, 0, format, args...) + 1;
+    v->resize(v->size() + size);
+    auto* s = reinterpret_cast<char*>(v->data() + v->size() - size);
+    std::snprintf(s, size, format, args...);
+    v->pop_back();  // remove null terminator
 }
-void append(std::vector<char>* v, const char* str) { append(v, "%s", str); }
+
+void append(std::vector<uint8_t>* v, const char* str) { append(v, "%s", str); }
 }  // namespace
 
-std::unique_ptr<char[]> CreatePoseJSON(const posenet::Output& output,
-                                       float threshold) {
-    std::vector<char> s;
+std::vector<uint8_t> CreatePoseJSON(const posenet::Output& output,
+                                    float threshold) {
+    std::vector<uint8_t> s;
     s.reserve(2048);
 
     int num_appended_poses = 0;
@@ -41,11 +43,7 @@ std::unique_ptr<char[]> CreatePoseJSON(const posenet::Output& output,
         ++num_appended_poses;
     }
     append(&s, "]");
-
-    s.push_back(0);
-    auto res = std::make_unique<char[]>(s.size());
-    std::memcpy(res.get(), s.data(), s.size());
-    return res;
+    return s;
 }
 
 }  // namespace oobe

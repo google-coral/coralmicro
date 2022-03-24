@@ -200,12 +200,8 @@ extern "C" void app_main(void *param) {
                    valiant::testlib::WifiSetAntenna);
     jsonrpc_export("ble_scan", BLEScan);
     jsonrpc_export("ble_find", BLEFind);
-    valiant::rpc::RpcServer rpc_server;
-    if (!rpc_server.Init(&jsonrpc_default_context)) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
 
+    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }
 

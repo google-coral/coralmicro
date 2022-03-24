@@ -41,10 +41,10 @@ constexpr int kPosenetDepth = 3;
 constexpr int kPosenetSize = kPosenetWidth * kPosenetHeight * kPosenetDepth;
 
 static SemaphoreHandle_t posenet_input_mtx;
-std::unique_ptr<uint8_t[]> posenet_input;
+std::vector<uint8_t> posenet_input;
 
 static SemaphoreHandle_t camera_output_mtx;
-std::unique_ptr<uint8_t[]> camera_output;
+std::vector<uint8_t> camera_output;
 
 static SemaphoreHandle_t posenet_output_mtx;
 std::unique_ptr<valiant::posenet::Output> posenet_output;
@@ -53,45 +53,23 @@ TickType_t posenet_output_time;
 constexpr unsigned int kCameraPextension = 0xdeadbeefU;
 constexpr unsigned int kPosePextension = 0xbadbeeefU;
 
-static int camera_http_fs_open_custom(void *context, struct fs_file *file, const char *name) {
-    static_cast<void>(context);
-    constexpr const char *camera = "/camera";
-    constexpr const char *pose = "/pose";
-    if (std::strncmp(name, camera, std::strlen(camera)) == 0) {
+static bool DynamicFileHandler(const char *name, std::vector<uint8_t>* buffer) {
+    if (std::strcmp(name, "/camera") == 0) {
         valiant::MutexLock lock(camera_output_mtx);
-        file->len = camera_output.get() ? kPosenetSize : 0;
-        file->data = reinterpret_cast<char*>(camera_output.release());
-        file->index = kPosenetSize;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT | FS_FILE_FLAGS_CUSTOM;
-        file->pextension = reinterpret_cast<void*>(kCameraPextension);
-        return 1;
+        *buffer = std::move(camera_output);
+        return true;
     }
-    if (std::strncmp(name, pose, std::strlen(pose)) == 0) {
+
+    if (std::strcmp(name, "/pose") == 0) {
         valiant::MutexLock lock(posenet_output_mtx);
-        if (!posenet_output) {
-            return 0;
-        }
-        auto pose_json = valiant::oobe::CreatePoseJSON(*posenet_output, kThreshold);
+        if (!posenet_output) return false;
+        *buffer = valiant::oobe::CreatePoseJSON(*posenet_output, kThreshold);
         posenet_output.reset();
-        file->data = reinterpret_cast<char*>(pose_json.release());
-        file->len = std::strlen(file->data);
-        file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT | FS_FILE_FLAGS_CUSTOM;
-        file->pextension = reinterpret_cast<void*>(kPosePextension);
-        return 1;
+        return true;
     }
-    return 0;
-}
 
-static void camera_http_fs_close_custom(void *context, struct fs_file *file) {
-    static_cast<void>(context);
-    delete [] file->data;
+    return false;
 }
-
-static valiant::httpd::HTTPDHandlers camera_http_handlers = {
-    .fs_open_custom = camera_http_fs_open_custom,
-    .fs_close_custom = camera_http_fs_close_custom,
-};
 
 namespace valiant {
 namespace oobe {
@@ -104,25 +82,24 @@ void CameraTask(void *param) {
     vTaskSuspend(NULL);
 
     while (true) {
-        auto input = std::make_unique<uint8_t[]>(kPosenetSize);
+        std::vector<uint8_t> input(kPosenetSize);
         valiant::camera::FrameFormat fmt;
         fmt.width = kPosenetWidth;
         fmt.height = kPosenetHeight;
         fmt.fmt = valiant::camera::Format::RGB;
         fmt.preserve_ratio = false;
-        fmt.buffer = input.get();
+        fmt.buffer = input.data();
         valiant::CameraTask::GetFrame({fmt});
 
         {
             valiant::MutexLock lock(posenet_input_mtx);
-            if (!posenet_input) {
-                posenet_input = std::make_unique<uint8_t[]>(kPosenetSize);
-                memcpy(posenet_input.get(), input.get(), kPosenetSize);
+            if (posenet_input.empty()) {
+                posenet_input = input;
             }
         }
         {
             valiant::MutexLock lock(camera_output_mtx);
-            camera_output.reset(input.release());
+            camera_output = std::move(input);
         }
 
         if (pause_processing) {
@@ -144,12 +121,12 @@ void PosenetTask(void *param) {
         TfLiteTensor *input = valiant::posenet::input();
         {
             valiant::MutexLock lock(posenet_input_mtx);
-            if (!posenet_input) {
+            if (posenet_input.empty()) {
                 taskYIELD();
                 continue;
             }
-            memcpy(tflite::GetTensorData<uint8_t>(input), posenet_input.get(), kPosenetSize);
-            posenet_input.reset(nullptr);
+            memcpy(tflite::GetTensorData<uint8_t>(input), posenet_input.data(), kPosenetSize);
+            posenet_input.resize(0);
         }
 
         valiant::posenet::loop(&output, false);
@@ -235,8 +212,9 @@ void main() {
     }
 #endif // defined(OOBE_DEMO_ETHERNET)
 
-    valiant::httpd::Init();
-    valiant::httpd::RegisterHandlerForPath("/", &camera_http_handlers);
+    valiant::httpd::HttpServer http_server;
+    http_server.SetDynamicFileHandler(DynamicFileHandler);
+    valiant::httpd::Init(&http_server);
 
     valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetCurrentTaskHandle());
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);

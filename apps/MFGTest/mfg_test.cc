@@ -665,12 +665,8 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("read_file", ReadFile);
     jsonrpc_export("fuse_mac_address", FuseMACAddress);
     jsonrpc_export("read_mac_address", ReadMACAddress);
-    valiant::rpc::RpcServer rpc_server;
-    if (!rpc_server.Init(&jsonrpc_default_context)) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
 
+    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }
 

@@ -16,13 +16,15 @@
 #include <array>
 #include <memory>
 
-static constexpr char kMethodM4XOR[] = "m4_xor";
-static constexpr char kMethodM4CoreMark[] = "m4_coremark";
-static constexpr char kMethodM7CoreMark[] = "m7_coremark";
-static constexpr char kMethodGetFrame[] = "get_frame";
-static std::unique_ptr<uint8_t[]> camera_rgb;
+namespace {
+constexpr char kMethodM4XOR[] = "m4_xor";
+constexpr char kMethodM4CoreMark[] = "m4_coremark";
+constexpr char kMethodM7CoreMark[] = "m7_coremark";
+constexpr char kMethodGetFrame[] = "get_frame";
 
-static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
+std::vector<uint8_t> camera_rgb;
+
+void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
     auto rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
     const auto* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
     switch (app_message->message_type) {
@@ -90,7 +92,7 @@ void PosenetStressRun(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-static void M4XOR(struct jsonrpc_request *request) {
+void M4XOR(struct jsonrpc_request *request) {
     std::vector<char> value_string;
     if (!valiant::testlib::JsonRpcGetStringParam(request, "value", &value_string))
         return;
@@ -118,7 +120,7 @@ static void M4XOR(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%lu}", "value", xor_value);
 }
 
-static void M4CoreMark(struct jsonrpc_request *request) {
+void M4CoreMark(struct jsonrpc_request *request) {
     auto* ipc = valiant::IPCM7::GetSingleton();
     if (!ipc->M4IsAlive(1000/*ms*/)) {
         jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
@@ -141,17 +143,16 @@ static void M4CoreMark(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%Q}", "coremark_results", coremark_buffer);
 }
 
-static void M7CoreMark(struct jsonrpc_request *request) {
+void M7CoreMark(struct jsonrpc_request *request) {
     char coremark_buffer[MAX_COREMARK_BUFFER];
     RunCoreMark(coremark_buffer);
     jsonrpc_return_success(request, "{%Q:%Q}", "coremark_results", coremark_buffer);
 }
 
-static void GetFrame(struct jsonrpc_request *request) {
-    if(!camera_rgb){
-        camera_rgb = std::make_unique<uint8_t[]>(valiant::CameraTask::kWidth * valiant::CameraTask::kHeight *
+void GetFrame(struct jsonrpc_request *request) {
+    camera_rgb.resize(valiant::CameraTask::kWidth * valiant::CameraTask::kHeight *
             valiant::CameraTask::FormatToBPP(valiant::camera::Format::RGB));
-    }
+
     valiant::CameraTask::GetSingleton()->SetPower(true);
     valiant::camera::TestPattern pattern = valiant::camera::TestPattern::COLOR_BAR;
     valiant::CameraTask::GetSingleton()->SetTestPattern(pattern);
@@ -162,45 +163,29 @@ static void GetFrame(struct jsonrpc_request *request) {
     fmt_rgb.width = valiant::CameraTask::kWidth;
     fmt_rgb.height = valiant::CameraTask::kHeight;
     fmt_rgb.preserve_ratio = false;
-    fmt_rgb.buffer = camera_rgb.get();
-
+    fmt_rgb.buffer = camera_rgb.data();
 
     bool success = (valiant::CameraTask::GetSingleton()->GetFrame({fmt_rgb}));
+    valiant::CameraTask::GetSingleton()->SetPower(false);
 
     if (success)
         jsonrpc_return_success(request, "{}");
     else
         jsonrpc_return_error(request, -1, "Call to GetFrame returned false.", nullptr);
-
-    valiant::CameraTask::GetSingleton()->SetPower(false);
 }
 
-static int fs_open_custom(void *context, struct fs_file *file, const char *name) {
-    if (strncmp(name, "/colorbar.raw", strlen(name)) == 0) {
-        memset(file, 0, sizeof(struct fs_file));
-        file->data = reinterpret_cast<const char*>(camera_rgb.release());
-        file->len = static_cast<int>(valiant::CameraTask::kWidth * valiant::CameraTask::kHeight *
-                                     valiant::CameraTask::FormatToBPP(valiant::camera::Format::RGB));
-        file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        return 1;
+bool DynamicFileHandler(const char* name, std::vector<uint8_t>* buffer) {
+    if (std::strcmp("/colorbar.raw", name) == 0) {
+        *buffer = std::move(camera_rgb);
+        return true;
     }
-    return 0;
-}
 
-static void fs_close_custom(void* context, struct fs_file *file) {
-    delete file->data;
+    return false;
 }
+}  // namespace
 
 extern "C" void app_main(void *param) {
     valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
-
-    valiant::httpd::HTTPDHandlers handlers{};
-    handlers.fs_open_custom = fs_open_custom;
-    handlers.fs_close_custom = fs_close_custom;
-
-    valiant::httpd::Init();
-    valiant::httpd::RegisterHandlerForPath("/", &handlers);
 
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
@@ -232,11 +217,9 @@ extern "C" void app_main(void *param) {
     jsonrpc_export(kMethodGetFrame, GetFrame);
     jsonrpc_export(valiant::testlib::kMethodCaptureAudio,
                    valiant::testlib::CaptureAudio);
-    valiant::rpc::RpcServer rpc_server;
-    if (!rpc_server.Init(&jsonrpc_default_context)) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(nullptr);
-    }
 
+    valiant::JsonRpcHttpServer server;
+    server.SetDynamicFileHandler(DynamicFileHandler);
+    valiant::httpd::Init(&server);
     vTaskSuspend(nullptr);
 }

@@ -49,12 +49,8 @@ extern "C" void app_main(void *param) {
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("eth_get_ip", EthGetIP);
     jsonrpc_export("eth_write_phy", EthWritePHY);
-    valiant::rpc::RpcServer rpc_server;
-    if (!rpc_server.Init(&jsonrpc_default_context)) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
 
+    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }
 

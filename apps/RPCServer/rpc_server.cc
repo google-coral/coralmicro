@@ -52,12 +52,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("serial_number", serial_number_rpc);
     jsonrpc_export("take_picture", take_picture_rpc);
-    valiant::rpc::RpcServer rpc_server;
-    if (!rpc_server.Init(&jsonrpc_default_context)) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(NULL);
-    }
-
+    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     printf("RPC server ready\r\n");
     vTaskSuspend(NULL);
 }

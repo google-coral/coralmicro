@@ -96,11 +96,7 @@ extern "C" void app_main(void *param) {
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export(valiant::testlib::kMethodWifiSetAntenna,
                  valiant::testlib::WifiSetAntenna);
-  valiant::rpc::RpcServer rpc_server;
-  if (!rpc_server.Init(&jsonrpc_default_context)) {
-    printf("Failed to initialize RPCServerIOHTTP\r\n");
-    vTaskSuspend(NULL);
-  }
+  valiant::httpd::Init(new valiant::JsonRpcHttpServer);
 
   wwd_result_t err;
   err = (wwd_result_t)wiced_wlan_connectivity_init();

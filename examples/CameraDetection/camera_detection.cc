@@ -131,12 +131,8 @@ extern "C" void app_main(void *param) {
     printf("Initializing the server...\n");
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("detect_from_camera", detect_from_camera_rpc);
-    valiant::rpc::RpcServer rpc_server;
-    if (!rpc_server.Init(&jsonrpc_default_context)) {
-        printf("Failed to initialize RPCServerIOHTTP\r\n");
-        vTaskSuspend(nullptr);
-    }
 
+    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     printf("Detection server ready\r\n");
     vTaskSuspend(nullptr);
 }

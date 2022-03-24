@@ -10,6 +10,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 
 #include <cstdio>
+#include <cstring>
 
 constexpr const int kPosenetWidth = 481;
 constexpr const int kPosenetHeight = 353;
@@ -19,52 +20,33 @@ static uint8_t camera_rgb[valiant::CameraTask::kWidth * valiant::CameraTask::kHe
 static uint8_t camera_rgb_posenet[kPosenetWidth * kPosenetHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_raw[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
-static int fs_open_custom(void *context, struct fs_file *file, const char *name) {
-    if (strncmp(name, "/camera.rgb", strlen(name)) == 0) {
-        memset(file, 0, sizeof(struct fs_file));
-        file->data = reinterpret_cast<const char*>(camera_rgb);
-        file->len = sizeof(camera_rgb);
-        file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        return 1;
+static bool StaticFileHandler(const char *name, const uint8_t** buffer, size_t* size) {
+    if (std::strcmp(name, "/camera.rgb") == 0) {
+        *buffer = camera_rgb;
+        *size = sizeof(camera_rgb);
+        return true;
     }
-    if (strncmp(name, "/camera-posenet.rgb", strlen(name)) == 0) {
-        memset(file, 0, sizeof(struct fs_file));
-        file->data = reinterpret_cast<const char*>(camera_rgb_posenet);
-        file->len = sizeof(camera_rgb_posenet);
-        file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        return 1;
+    if (std::strcmp(name, "/camera-posenet.rgb") == 0) {
+        *buffer = camera_rgb_posenet;
+        *size = sizeof(camera_rgb_posenet);
+        return true;
     }
-    if (strncmp(name, "/camera.gray", strlen(name)) == 0) {
-        memset(file, 0, sizeof(struct fs_file));
-        file->data = reinterpret_cast<const char*>(camera_grayscale);
-        file->len = sizeof(camera_grayscale);
-        file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        return 1;
+    if (std::strcmp(name, "/camera.gray") == 0) {
+        *buffer = camera_grayscale;
+        *size = sizeof(camera_grayscale);
+        return true;
     }
-    if (strncmp(name, "/camera-small.gray", strlen(name)) == 0) {
-        memset(file, 0, sizeof(struct fs_file));
-        file->data = reinterpret_cast<const char*>(camera_grayscale_small);
-        file->len = sizeof(camera_grayscale_small);
-        file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        return 1;
+    if (std::strcmp(name, "/camera-small.gray") == 0) {
+        *buffer = camera_grayscale_small;
+        *size = sizeof(camera_grayscale_small);
+        return true;
     }
-    if (strncmp(name, "/camera.raw", strlen(name)) == 0) {
-        memset(file, 0, sizeof(struct fs_file));
-        file->data = reinterpret_cast<const char*>(camera_raw);
-        file->len = sizeof(camera_raw);
-        file->index = file->len;
-        file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
-        return 1;
+    if (std::strcmp(name, "/camera.raw") == 0) {
+        *buffer = camera_raw;
+        *size = sizeof(camera_raw);
+        return true;
     }
-    return 0;
-}
-
-static void fs_close_custom(void* context, struct fs_file *file) {
-    (void)file;
+    return false;
 }
 
 void GetFrame() {
@@ -105,12 +87,9 @@ void GetFrame() {
 extern "C" void app_main(void *param) {
     printf("Camera test\r\n");
 
-    valiant::httpd::HTTPDHandlers handlers;
-    handlers.fs_open_custom = fs_open_custom;
-    handlers.fs_close_custom = fs_close_custom;
-
-    valiant::httpd::Init();
-    valiant::httpd::RegisterHandlerForPath("/", &handlers);
+    valiant::httpd::HttpServer http_server;
+    http_server.SetStaticFileHandler(StaticFileHandler);
+    valiant::httpd::Init(&http_server);
 
     // Enable Power, Streaming, and enable test pattern.
     valiant::CameraTask::GetSingleton()->SetPower(true);
