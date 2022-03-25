@@ -5,6 +5,7 @@ include_directories(.)
 
 add_executable_m7(MFGTest
     mfg_test.cc
+    mfg_test_iperf.cc
 )
 
 target_link_libraries(MFGTest
@@ -18,6 +19,7 @@ target_link_libraries(MFGTest
 
 add_executable_m7(MFGTestWiFi
     mfg_test_wifi.cc
+    mfg_test_iperf.cc
     wiced_bt_cfg.c
 )
 
@@ -33,6 +35,7 @@ target_link_libraries(MFGTestWiFi
 
 add_executable_m7(MFGTestPOE
     mfg_test_poe.cc
+    mfg_test_iperf.cc
     ${VALIANT_SOURCE_DIR}/libs/base/ethernet.cc
 )
 

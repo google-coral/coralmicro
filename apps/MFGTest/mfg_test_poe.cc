@@ -1,3 +1,4 @@
+#include "apps/MFGTest/mfg_test_iperf.h"
 #include "libs/base/ethernet.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/testlib/test_lib.h"
@@ -49,7 +50,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("eth_get_ip", EthGetIP);
     jsonrpc_export("eth_write_phy", EthWritePHY);
-
+    IperfInit();
     valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }

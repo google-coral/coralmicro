@@ -1,7 +1,9 @@
+#include "apps/MFGTest/mfg_test_iperf.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/base/mutex.h"
+#include "libs/base/utils.h"
 #include "libs/testlib/test_lib.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -177,6 +179,38 @@ static wiced_result_t ble_management_callback(wiced_bt_management_evt_t event,
     return WICED_BT_SUCCESS;
 }
 
+static bool ConnectToWifi() {
+    std::string wifi_ssid, wifi_psk;
+    bool have_ssid = valiant::utils::GetWifiSSID(&wifi_ssid);
+    bool have_psk = valiant::utils::GetWifiPSK(&wifi_psk);
+
+    if (have_ssid) {
+        WIFIReturnCode_t xWifiStatus;
+        WIFINetworkParams_t xNetworkParams;
+        xNetworkParams.pcSSID = wifi_ssid.c_str();
+        xNetworkParams.ucSSIDLength = wifi_ssid.length();
+        if (have_psk) {
+            xNetworkParams.pcPassword = wifi_psk.c_str();
+            xNetworkParams.ucPasswordLength = wifi_psk.length();
+            xNetworkParams.xSecurity = eWiFiSecurityWPA2;
+        } else {
+            xNetworkParams.pcPassword = "";
+            xNetworkParams.ucPasswordLength = 0;
+            xNetworkParams.xSecurity = eWiFiSecurityOpen;
+        }
+        xWifiStatus = WIFI_ConnectAP(&xNetworkParams);
+
+        if (xWifiStatus != eWiFiSuccess) {
+            printf("failed to connect to %s\r\n", wifi_ssid.c_str());
+            return false;
+        }
+    } else {
+        printf("No Wi-Fi SSID provided\r\n");
+        return false;
+    }
+    return true;
+}
+
 extern unsigned char brcm_patchram_buf[];
 extern unsigned int brcm_patch_ram_length;
 extern "C" void app_main(void *param) {
@@ -191,6 +225,19 @@ extern "C" void app_main(void *param) {
     }
 
     xWifiStatus = WIFI_On();
+    if (xWifiStatus == eWiFiSuccess) {
+        constexpr int kWifiConnectRetries = 5;
+        for (int i = 0; i < kWifiConnectRetries; ++i) {
+            if (ConnectToWifi()) {
+                valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, true);
+                break;
+            }
+        }
+    } else {
+        printf("Wi-Fi failed to come up (is the Wi-Fi board attached?\r\n");
+        valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, true);
+        vTaskSuspend(NULL);
+    }
     valiant::gpio::SetGpio(valiant::gpio::kBtDevWake, false);
     wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings, wiced_bt_cfg_buf_pools);
 
@@ -200,7 +247,7 @@ extern "C" void app_main(void *param) {
                    valiant::testlib::WifiSetAntenna);
     jsonrpc_export("ble_scan", BLEScan);
     jsonrpc_export("ble_find", BLEFind);
-
+    IperfInit();
     valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }

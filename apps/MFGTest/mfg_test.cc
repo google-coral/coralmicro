@@ -1,3 +1,4 @@
+#include "apps/MFGTest/mfg_test_iperf.h"
 #include "libs/RPCServer/rpc_server_io_http.h"
 #include "libs/base/analog.h"
 #include "libs/base/filesystem.h"
@@ -665,7 +666,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("read_file", ReadFile);
     jsonrpc_export("fuse_mac_address", FuseMACAddress);
     jsonrpc_export("read_mac_address", ReadMACAddress);
-
+    IperfInit();
     valiant::httpd::Init(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }

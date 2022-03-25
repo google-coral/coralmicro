@@ -331,6 +331,22 @@ class ValiantMFGTest(object):
           {'id': 44, 'result': {'address': '7C:D9:5C:AA:BB:CC'}}
       """
 
+    @rpc
+    def iperf_start(self, is_server, server_ip_address=None):
+      """Starts Iperf.
+
+      Returns:
+        A JSON-RPC result packet with no extra data, or JSON-RPC error.
+      """
+
+    @rpc
+    def iperf_stop(self):
+      """Stops Iperf.
+
+      Returns:
+        A JSON-RPC result packet with no extra data, or JSON-RPC error.
+      """
+
 
 if __name__ == '__main__':
     """

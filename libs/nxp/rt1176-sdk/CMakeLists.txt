@@ -317,6 +317,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_sdmmc
 
 add_library_m7(libs_nxp_rt1176-sdk_lwip
     dhcp_server.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/lwiperf/lwiperf.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif_kinetis.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/sys_arch.c
