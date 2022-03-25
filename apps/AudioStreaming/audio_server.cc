@@ -16,6 +16,13 @@ constexpr int kPort = 33000;
 
 enum class Status { kOk, kEof, kError };
 
+constexpr int kNumSampleFormats = 2;
+constexpr const char* kSampleFormatNames[] = {"S16_LE", "S32_LE"};
+enum SampleFormat {
+    kS16LE = 0,
+    kS32LE = 1,
+};
+
 Status ReadBytes(int fd, void* bytes, size_t size) {
     assert(fd >= 0);
     assert(bytes);
@@ -78,15 +85,16 @@ bool VerifySampleRate(int sample_rate_hz,
 }
 
 void ProcessClient(int client_socket) {
-    int32_t params[3];
-    if (ReadArray(client_socket, params, 3) != Status::kOk) {
+    int32_t params[4];
+    if (ReadArray(client_socket, params, 4) != Status::kOk) {
         printf("ERROR: Cannot read params from client socket\n\r");
         return;
     }
 
     const int sample_rate_hz = params[0];
-    const int dma_buffer_size_ms = params[1];
-    const int num_dma_buffers = params[2];
+    const int sample_format = params[1];
+    const int dma_buffer_size_ms = params[2];
+    const int num_dma_buffers = params[3];
 
     valiant::audio::SampleRate sample_rate;
     if (!VerifySampleRate(sample_rate_hz, &sample_rate)) {
@@ -94,21 +102,39 @@ void ProcessClient(int client_socket) {
         return;
     }
 
+    if (sample_format < 0 || sample_format >= kNumSampleFormats) {
+        printf("ERROR: Invalid sample format: %d\n\r", sample_format);
+        return;
+    }
+
     printf("Format:\n\r");
     printf("  Sample rate (Hz): %d\n\r", sample_rate_hz);
+    printf("  Sample format: %s\n\r", kSampleFormatNames[sample_format]);
     printf("  DMA buffer size (ms): %d\n\r", dma_buffer_size_ms);
-    printf("  # of DMA buffers: %d\n\r", num_dma_buffers);
+    printf("  DMA buffer count: %d\n\r", num_dma_buffers);
 
     valiant::AudioReader reader(sample_rate, dma_buffer_size_ms,
                                 num_dma_buffers);
 
     int total_bytes = 0;
-    auto& buffer = reader.Buffer();
-    while (true) {
-        auto size = reader.FillBuffer();
-        if (WriteArray(client_socket, buffer.data(), size) != Status::kOk)
-            break;
-        total_bytes += size * sizeof(int32_t);
+    auto& buffer32 = reader.Buffer();
+
+    if (sample_format == kS32LE) {
+        while (true) {
+            auto size = reader.FillBuffer();
+            if (WriteArray(client_socket, buffer32.data(), size) != Status::kOk)
+                break;
+            total_bytes += size * sizeof(int32_t);
+        }
+    } else {
+        std::vector<int16_t> buffer16(buffer32.size());
+        while (true) {
+            auto size = reader.FillBuffer();
+            for (size_t i = 0; i < size; ++i) buffer16[i] = buffer32[i] >> 16;
+            if (WriteArray(client_socket, buffer16.data(), size) != Status::kOk)
+                break;
+            total_bytes += size * sizeof(int16_t);
+        }
     }
 
     printf("Statistics:\n\r");
