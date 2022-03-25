@@ -24,16 +24,16 @@ toolchain_dir = ''
 exe_extension = ''
 skip_hid_readback = False
 system_name = platform.system()
-if (system_name == 'Windows'):
+if system_name == 'Windows':
    platform_dir = 'win'
    toolchain_dir = 'toolchain-win'
    exe_extension = '.exe'
    skip_hid_readback = True
-elif (system_name == 'Darwin'):
+elif system_name == 'Darwin':
    platform_dir = 'mac'
    toolchain_dir = 'toolchain-mac'
    skip_hid_readback = True
-elif (system_name == 'Linux'):
+elif system_name == 'Linux':
    platform_dir = 'linux/amd64'
    toolchain_dir = 'toolchain'
 else:
@@ -81,29 +81,20 @@ def flashloader_vidpid():
     return '{},{}'.format(hex(FLASHLOADER_VID), hex(FLASHLOADER_PID))
 
 def is_valiant_connected(serial_number):
-    serial_list = EnumerateValiant()
-    if serial_number in serial_list:
-        return True
-    return False
+    return serial_number in EnumerateValiant()
 
 def is_elfloader_connected(serial_number):
-    for device in usb.core.find(find_all=True):
-        if device.idVendor == ELFLOADER_VID and device.idProduct == ELFLOADER_PID:
-            if not serial_number or device.serial_number == serial_number:
-                return True
+    for device in usb.core.find(idVendor=ELFLOADER_VID, idProduct=ELFLOADER_PID,
+                                find_all=True):
+        if not serial_number or device.serial_number == serial_number:
+            return True
     return False
 
 def is_sdp_connected():
-    for device in usb.core.find(find_all=True):
-        if device.idVendor == SDP_VID and device.idProduct == SDP_PID:
-            return True
-    return False
+    return bool(usb.core.find(idVendor=SDP_VID, idProduct=SDP_PID))
 
 def is_flashloader_connected():
-    for device in usb.core.find(find_all=True):
-        if device.idVendor == FLASHLOADER_VID and device.idProduct == FLASHLOADER_PID:
-            return True
-    return False
+    return bool(usb.core.find(idVendor=FLASHLOADER_VID, idProduct=FLASHLOADER_PID))
 
 def EnumerateSDP():
     return hid.enumerate(SDP_VID, SDP_PID)
@@ -171,7 +162,7 @@ def GetLibs(build_dir, libs_path, scanned, cached_files):
                         libs_path = os.path.join(root, file)
                         if libs_path in scanned:
                             continue
-                        if (file == lib + '.libs'):
+                        if file == lib + '.libs':
                             libs_found.add(libs_path)
     sublibs = set()
     for lib in libs_found:
@@ -226,34 +217,39 @@ def CreateSbFile(workdir, elftosb_path, srec_path):
     itcm_startaddress = srec_obj.parts()[0][0] & 0xFFFF0000
 
     with open(spinand_bdfile_path, 'w') as spinand_bdfile:
-        spinand_bdfile.write('sources {\n')
-        spinand_bdfile.write('bootImageFile = extern (0);\n')
-        spinand_bdfile.write('}\n')
-        spinand_bdfile.write('section (0) {\n')
-        spinand_bdfile.write('load 0xC2000105 > 0x10000;\n')
-        spinand_bdfile.write('load 0x00010020 > 0x10004;\n')
-        spinand_bdfile.write('load 0x00040004 > 0x10008;\n')
-        spinand_bdfile.write('load 0x00080004 > 0x1000C;\n')
-        spinand_bdfile.write('load 0xC0010021 > 0x10020;\n')
-        spinand_bdfile.write('enable spinand 0x10000;\n')
-        spinand_bdfile.write('erase spinand 0x4..0x8;\n')
-        spinand_bdfile.write('erase spinand 0x8..0xc;\n')
-        spinand_bdfile.write('erase spinand 0xc..0x4c;\n')
-        spinand_bdfile.write('load spinand bootImageFile > 0x4;\n')
-        spinand_bdfile.write('load spinand bootImageFile > 0x8;\n')
-        spinand_bdfile.write('}\n')
+        spinand_bdfile.write(
+'''sources {
+  bootImageFile = extern (0);
+}
+section (0) {
+  load 0xC2000105 > 0x10000;
+  load 0x00010020 > 0x10004;
+  load 0x00040004 > 0x10008;
+  load 0x00080004 > 0x1000C;
+  load 0xC0010021 > 0x10020;
+  enable spinand 0x10000;
+  erase spinand 0x4..0x8;
+  erase spinand 0x8..0xc;
+  erase spinand 0xc..0x4c;
+  load spinand bootImageFile > 0x4;
+  load spinand bootImageFile > 0x8;
+}
+''')
+
     with open(itcm_bdfile_path, 'w') as itcm_bdfile:
-        itcm_bdfile.write('options {\n')
-        itcm_bdfile.write('flags = 0x00;\n')
-        itcm_bdfile.write('startAddress = ' + hex(itcm_startaddress) + ';\n')
-        itcm_bdfile.write('ivtOffset = 0x400;\n')
-        itcm_bdfile.write('initialLoadSize = 0x1000;\n')
-        itcm_bdfile.write('}\n')
-        itcm_bdfile.write('sources {\n')
-        itcm_bdfile.write('elfFile = extern(0);\n')
-        itcm_bdfile.write('}\n')
-        itcm_bdfile.write('section (0) {\n')
-        itcm_bdfile.write('}\n')
+        itcm_bdfile.write(
+'''options {
+  flags = 0x00;
+  startAddress = %s;
+  ivtOffset = 0x400;
+  initialLoadSize = 0x1000;
+}
+sources {
+  elfFile = extern(0);
+}
+section (0) {
+}
+''' % hex(itcm_startaddress))
     ivt_bin_path = os.path.join(workdir, 'ivt_program.bin')
     sbfile_path = os.path.join(workdir, 'program.sb')
     subprocess.check_call([elftosb_path, '-f', 'imx', '-V', '-c', itcm_bdfile_path, '-o', ivt_bin_path, srec_path])
@@ -284,9 +280,9 @@ def FlashtoolError(**kwargs):
 
 def CheckForAny(**kwargs):
     for i in range(10):
-        if is_valiant_connected(kwargs.get('serial', None)):
+        if is_valiant_connected(kwargs.get('serial')):
             return FlashtoolStates.CHECK_FOR_VALIANT
-        if is_elfloader_connected(kwargs.get('serial', None)):
+        if is_elfloader_connected(kwargs.get('serial')):
             return FlashtoolStates.CHECK_FOR_ELFLOADER
         if is_sdp_connected():
             return FlashtoolStates.CHECK_FOR_SDP
@@ -297,7 +293,7 @@ def CheckForAny(**kwargs):
 
 def CheckForValiant(**kwargs):
     for i in range(10):
-        if is_valiant_connected(kwargs.get('serial', None)):
+        if is_valiant_connected(kwargs.get('serial')):
             # port is needed later as well, wait for it.
             port = FindSerialPortForDevice(**kwargs)
             if port:
@@ -308,7 +304,7 @@ def CheckForValiant(**kwargs):
 
 def CheckForElfloader(**kwargs):
     for i in range(10):
-        if is_elfloader_connected(kwargs.get('serial', None)):
+        if is_elfloader_connected(kwargs.get('serial')):
             return FlashtoolStates.RESET_ELFLOADER
         time.sleep(1)
     return FlashtoolStates.ERROR
@@ -373,7 +369,7 @@ def LoadElfloader(**kwargs):
     subprocess.check_call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'flash-image', kwargs['elfloader_path']], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     subprocess.check_output('{} -u {} write-memory {} {{{{ffffffff}}}}'.format(kwargs['blhost_path'], flashloader_vidpid(), hex(disable_usb_timeout_address)), shell=True, text=True)
     subprocess.call([kwargs['blhost_path'], '-u', flashloader_vidpid(), 'call', hex(start_address), '0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    if kwargs.get('target_elfloader', None):
+    if kwargs.get('target_elfloader'):
         return FlashtoolStates.DONE
     if kwargs.get('ram'):
         return FlashtoolStates.PROGRAM_ELFLOADER
@@ -412,7 +408,7 @@ def OpenHidDevice(vid, pid, serial_number):
 
 
 def ResetElfloader(**kwargs):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial'))
     h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
     h.close()
     return FlashtoolStates.CHECK_FOR_SDP
@@ -461,7 +457,7 @@ def ElfloaderTransferData(h, data, target, bar=None):
     return FlashtoolStates.RESET
 
 def ProgramElfloader(**kwargs):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial'))
     with open(kwargs['elf_path'], 'rb') as elf:
         data = elf.read()
         ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM, bar=Bar(kwargs['elf_path'], max=len(data)))
@@ -471,7 +467,7 @@ def ProgramElfloader(**kwargs):
     return FlashtoolStates.START_GDB
 
 def ProgramDataFiles(**kwargs):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial'))
     data_files = kwargs.get('data_files')
     data_files.append((kwargs.get('elf_path'), '/default.elf'))
     data_files.append((USB_IP_ADDRESS_FILE, USB_IP_ADDRESS_FILE))
@@ -519,7 +515,7 @@ def ProgramDataFiles(**kwargs):
     return FlashtoolStates.RESET
 
 def Reset(**kwargs):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial', None))
+    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, kwargs.get('serial'))
     h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
     h.close()
     return FlashtoolStates.DONE
