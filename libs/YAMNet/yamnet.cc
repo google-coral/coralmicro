@@ -48,25 +48,20 @@ bool setup() {
     error_reporter = std::make_shared<tflite::MicroErrorReporter>();
     TF_LITE_REPORT_ERROR(error_reporter.get(), "YAMNet!");
 
-    size_t yamnet_edgetpu_tflite_len, yamnet_test_input_bin_len;
-    auto yamnet_edgetpu_tflite = valiant::filesystem::ReadToMemory(
-            kModelName, &yamnet_edgetpu_tflite_len);
-
-    auto yamnet_test_input_bin = valiant::filesystem::ReadToMemory(
-            "/models/yamnet_test_input.bin", &yamnet_test_input_bin_len);
-
-
-    if (!yamnet_edgetpu_tflite ||
-        yamnet_edgetpu_tflite_len == 0) {
+    std::vector<uint8_t> yamnet_edgetpu_tflite;
+    if (!valiant::filesystem::ReadFile(kModelName, &yamnet_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Failed to load model!");
         return false;
     }
-    if (!yamnet_test_input_bin || yamnet_test_input_bin_len == 0) {
+
+    std::vector<uint8_t> yamnet_test_input_bin;
+    if (!valiant::filesystem::ReadFile("/models/yamnet_test_input.bin",
+                                       &yamnet_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Failed to load test input!");
         return false;
     }
 
-    const auto *model = tflite::GetModel(yamnet_edgetpu_tflite.get());
+    const auto *model = tflite::GetModel(yamnet_edgetpu_tflite.data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter.get(),
             "Model schema version is %d, supported is %d",
@@ -117,11 +112,11 @@ bool setup() {
 
     input_tensor.reset(interpreter->input(0));
 
-    if (input_tensor->bytes != yamnet_test_input_bin_len) {
+    if (input_tensor->bytes != yamnet_test_input_bin.size()) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Input tensor length doesn't match canned input\r\n");
         return false;
     }
-    memcpy(tflite::GetTensorData<float>(input_tensor.get()), yamnet_test_input_bin.get(), yamnet_test_input_bin_len);
+    memcpy(tflite::GetTensorData<float>(input_tensor.get()), yamnet_test_input_bin.data(), yamnet_test_input_bin.size());
     return true;
 
 }

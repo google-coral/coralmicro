@@ -166,10 +166,16 @@ static usb_device_class_config_struct_t elfloader_config_data_ = {
 
 typedef void (*entry_point)(void);
 static void elfloader_main(void *param) {
-    size_t elf_size = 0;
+    ssize_t elf_size = -1;
     std::unique_ptr<uint8_t[]> application_elf;
     if (!param) {
-        application_elf = valiant::filesystem::ReadToMemory("/default.elf", &elf_size);
+        elf_size = valiant::filesystem::Size("/default.elf");
+        if (elf_size != -1) {
+            application_elf = std::make_unique<uint8_t[]>(elf_size);
+            if (valiant::filesystem::ReadFile("/default.elf", application_elf.get(), elf_size) != elf_size) {
+                application_elf.reset();
+            }
+        }
     } else {
         application_elf.reset(reinterpret_cast<uint8_t*>(param));
     }
@@ -177,7 +183,7 @@ static void elfloader_main(void *param) {
     // If we do not have an application for any reason, suspend this thread.
     // Otherwise, suspend the USB thread so that the host cannot try to talk to us
     // and cause confusion.
-    if (!application_elf || (!param && elf_size == 0)) {
+    if (!application_elf || (!param && elf_size == -1)) {
         vTaskSuspend(NULL);
     } else {
         vTaskSuspend(reinterpret_cast<TaskHandle_t>(pvTimerGetTimerID(usb_timer)));

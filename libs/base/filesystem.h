@@ -5,6 +5,8 @@
 
 #include <cstdlib>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace valiant {
 namespace filesystem {
@@ -26,12 +28,15 @@ bool Close(lfs_file_t *handle);
 bool Remove(const char *path);
 lfs_soff_t Size(lfs_file_t* handle);
 ssize_t Size(const char *path);
-std::unique_ptr<uint8_t[]> ReadToMemory(const char *path, size_t* size_bytes);
-bool ReadToMemory(const char *path, uint8_t* data, size_t* size_bytes);
 bool Stat(const char *path, struct lfs_info *info);
 bool DirOpen(lfs_dir_t *dir, const char *path);
 int DirRead(lfs_dir_t *dir, struct lfs_info *info);
 bool DirClose(lfs_dir_t *dir);
+
+bool ReadFile(const char* path, std::vector<uint8_t>* buf);
+bool ReadFile(const char* path, std::string* str);
+size_t ReadFile(const char* path, uint8_t* buf, size_t size);
+bool WriteFile(const char* path, const uint8_t* buf, size_t size);
 
 }  // namespace filesystem
 }  // namespace valiant

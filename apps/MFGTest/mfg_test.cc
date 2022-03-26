@@ -522,13 +522,6 @@ static void WriteFile(struct jsonrpc_request *request) {
     if (!JsonRpcGetStringParam(request, "filename", &filename))  return;
     if (!JsonRpcGetStringParam(request, "data", &data)) return;
 
-    lfs_file_t handle;
-    bool ret = valiant::filesystem::Open(&handle, filename.data(), true);
-    if (!ret) {
-        jsonrpc_return_error(request, -1, "failed to open file", nullptr);
-        return;
-    }
-
     // The data from mjson is a null-terminated string: use strlen for getting the size.
     unsigned int bytes_to_decode = strlen(data.data());
     size_t decoded_length = 0;
@@ -536,19 +529,11 @@ static void WriteFile(struct jsonrpc_request *request) {
     std::vector<uint8_t> decoded_data(decoded_length);
     mbedtls_base64_decode(decoded_data.data(), decoded_length, &decoded_length, reinterpret_cast<unsigned char*>(data.data()), bytes_to_decode);
 
-    int bytes_written = valiant::filesystem::Write(&handle, decoded_data.data(), decoded_length);
-    if (static_cast<unsigned int>(bytes_written) != decoded_length) {
-        jsonrpc_return_error(request, -1, "did not write all bytes", nullptr);
-        valiant::filesystem::Close(&handle);
-        return;
+    if (!valiant::filesystem::WriteFile(filename.data(), decoded_data.data(), decoded_data.size())) {
+        jsonrpc_return_error(request, -1, "failed to write file", nullptr);
     }
 
-    ret = valiant::filesystem::Close(&handle);
-    if (!ret) {
-        jsonrpc_return_error(request, -1, "failed to close file", nullptr);
-    } else {
-        jsonrpc_return_success(request, "{}");
-    }
+    jsonrpc_return_success(request, "{}");
 }
 
 // Implements the "read_file" RPC.
@@ -558,34 +543,12 @@ static void ReadFile(struct jsonrpc_request *request) {
     std::vector<char> filename;
     if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
-    lfs_file_t handle;
-    bool ret = valiant::filesystem::Open(&handle, filename.data());
-
-    if (!ret) {
-        jsonrpc_return_error(request, -1, "failed to open file", nullptr);
-        return;
+    std::vector<uint8_t> data;
+    if (!valiant::filesystem::ReadFile(filename.data(), &data)) {
+        jsonrpc_return_error(request, -1, "failed to read file", nullptr);
     }
 
-    lfs_soff_t file_size = valiant::filesystem::Size(&handle);
-    if (file_size <= 0) {
-        jsonrpc_return_error(request, -1, "bad file size", nullptr);
-        return;
-    }
-
-    std::vector<uint8_t> data(file_size);
-    int bytes_read = valiant::filesystem::Read(&handle, data.data(), file_size);
-    if (bytes_read < file_size) {
-        jsonrpc_return_error(request, -1, "failed to read all bytes", nullptr);
-        valiant::filesystem::Close(&handle);
-        return;
-    }
-
-    ret = valiant::filesystem::Close(&handle);
-    if (!ret) {
-        jsonrpc_return_error(request, -1, "failed to close file", nullptr);
-    } else {
-        jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(), data.data());
-    }
+    jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(), data.data());
 }
 
 static void FuseMACAddress(struct jsonrpc_request *request) {

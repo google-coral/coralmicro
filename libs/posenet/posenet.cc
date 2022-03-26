@@ -21,9 +21,8 @@ static const int kExtraArenaSize = 1 * 1024 * 1024;
 static const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
-static size_t posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len, posenet_test_input_bin_len;
-static std::unique_ptr<uint8_t[]> posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
-static std::unique_ptr<uint8_t[]> posenet_test_input_bin;
+static std::vector<uint8_t> posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
+static std::vector<uint8_t> posenet_test_input_bin;
 }  // namespace
 
 const char* const KeypointTypes[] = {
@@ -112,23 +111,20 @@ bool setup() {
     error_reporter = &micro_error_reporter;
     TF_LITE_REPORT_ERROR(error_reporter, "Posenet!");
 
-    posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite = valiant::filesystem::ReadToMemory(
+    if (!valiant::filesystem::ReadFile(
             "/models/posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite",
-            &posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len);
-    posenet_test_input_bin = valiant::filesystem::ReadToMemory(
-            "/models/posenet_test_input.bin", &posenet_test_input_bin_len);
-
-    if (!posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite ||
-        posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite_len == 0) {
+            &posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
         return false;
     }
-    if (!posenet_test_input_bin || posenet_test_input_bin_len == 0) {
+
+    if (!valiant::filesystem::ReadFile("/models/posenet_test_input.bin",
+                                       &posenet_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
         return false;
     }
 
-    model = tflite::GetModel(posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite.get());
+    model = tflite::GetModel(posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite.data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",
@@ -151,11 +147,11 @@ bool setup() {
 
     input_tensor = interpreter->input(0);
 
-    if (input_tensor->bytes != posenet_test_input_bin_len) {
+    if (input_tensor->bytes != posenet_test_input_bin.size()) {
         TF_LITE_REPORT_ERROR(error_reporter, "Input tensor length doesn't match canned input\r\n");
         return false;
     }
-    memcpy(input_tensor->data.uint8, posenet_test_input_bin.get(), posenet_test_input_bin_len);
+    memcpy(input_tensor->data.uint8, posenet_test_input_bin.data(), posenet_test_input_bin.size());
     return true;
 }
 

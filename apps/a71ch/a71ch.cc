@@ -54,17 +54,16 @@ extern "C" [[noreturn]] void app_main(void* param) {
         vTaskSuspend(NULL);
     }
 
-    size_t model_size;
+    std::vector<uint8_t> model;
     constexpr const char kModelPath[] = "/models/testconv1-edgetpu.tflite";
-    auto model = valiant::filesystem::ReadToMemory(kModelPath, &model_size);
-    if (!model.get() || model_size == 0) {
+    if (!valiant::filesystem::ReadFile(kModelPath, &model)) {
         printf("%s missing\r\n", kModelPath);
         vTaskSuspend(NULL);
     }
 
     uint16_t shaLen = 32;
     uint8_t sha[shaLen];
-    ret = A71_GetSha256(model.get(), model_size, sha, &shaLen);
+    ret = A71_GetSha256(model.data(), model.size(), sha, &shaLen);
     if (ret == SMCOM_OK) {
         printf("SHA256: ");
         for (int i = 0; i < shaLen; ++i) {

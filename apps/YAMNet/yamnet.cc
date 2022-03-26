@@ -9,9 +9,13 @@ extern "C" [[noreturn]] void app_main(void *param) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
 
-    size_t yamnet_test_input_bin_len;
-    auto yamnet_test_input_bin = valiant::filesystem::ReadToMemory(
-        "/models/yamnet_test_input.bin", &yamnet_test_input_bin_len);
+    std::vector<uint8_t> yamnet_test_input_bin;
+    if (!valiant::filesystem::ReadFile("/models/yamnet_test_input.bin",
+                                       &yamnet_test_input_bin)) {
+        printf("Failed to load input\r\n");
+        vTaskSuspend(nullptr);
+    }
+
     if (!valiant::yamnet::setup()) {
         printf("setup() failed\r\n");
         vTaskSuspend(nullptr);
@@ -20,7 +24,7 @@ extern "C" [[noreturn]] void app_main(void *param) {
 
     while (true) {
         auto tensor = tflite::GetTensorData<float>(valiant::yamnet::input().get());
-        memcpy(tensor, yamnet_test_input_bin.get(), yamnet_test_input_bin_len);
+        std::memcpy(tensor, yamnet_test_input_bin.data(), yamnet_test_input_bin.size());
         valiant::yamnet::loop(output);
         vTaskDelay(1000);
     }

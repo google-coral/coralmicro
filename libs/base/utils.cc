@@ -38,66 +38,23 @@ MacAddress GetMacAddress() {
     return m;
 }
 
-static bool GetFileDataAsCStr(const char *path, std::vector<char> *out, size_t *out_len) {
-    size_t len = valiant::filesystem::Size(path);
-    if (len < 0) {
-        return false;
-    }
-
-    out->resize(len + 1);
-    std::fill(out->begin(), out->end(), 0);
-    if (!valiant::filesystem::ReadToMemory(path, reinterpret_cast<uint8_t*>(out->data()), &len)) {
-        return false;
-    }
-
-    if (out_len) {
-        *out_len = len;
-    }
-
+bool GetUSBIPAddress(ip4_addr_t* usb_ip_out) {
+    std::string usb_ip;
+    if (!GetUSBIPAddress(&usb_ip)) return false;
+    if (!ipaddr_aton(usb_ip.c_str(), usb_ip_out)) return false;
     return true;
 }
 
-bool GetUSBIPAddress(ip4_addr_t* addr) {
-    constexpr const char *usb_ip_address_path = "/usb_ip_address";
-    if (!addr) {
-        return false;
-    }
-
-    std::vector<char> usb_ip_address;
-    if (!GetFileDataAsCStr(usb_ip_address_path, &usb_ip_address, nullptr)) {
-        return false;
-    }
-
-    if (!ipaddr_aton(usb_ip_address.data(), addr)) {
-        return false;
-    }
-    return true;
+bool GetUSBIPAddress(std::string* usb_ip_out) {
+    return valiant::filesystem::ReadFile("/usb_ip_address", usb_ip_out);
 }
 
 bool GetWifiSSID(std::string* wifi_ssid_out) {
-    constexpr const char *wifi_ssid_path = "/wifi_ssid";
-    std::vector<char> wifi_ssid_chr;
-    size_t len;
-    if (!GetFileDataAsCStr(wifi_ssid_path, &wifi_ssid_chr, &len)) {
-        return false;
-    }
-
-    wifi_ssid_out->erase();
-    wifi_ssid_out->append(wifi_ssid_chr.data(), len);
-    return true;
+    return valiant::filesystem::ReadFile("/wifi_ssid", wifi_ssid_out);
 }
 
 bool GetWifiPSK(std::string* wifi_psk_out) {
-    constexpr const char *wifi_psk_path = "/wifi_psk";
-    std::vector<char> wifi_psk_chr;
-    size_t len;
-    if (!GetFileDataAsCStr(wifi_psk_path, &wifi_psk_chr, &len)) {
-        return false;
-    }
-
-    wifi_psk_out->erase();
-    wifi_psk_out->append(wifi_psk_chr.data(), len);
-    return true;
+    return valiant::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
 }
 
 }  // namespace utils

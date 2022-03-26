@@ -93,14 +93,12 @@ extern "C" void app_main(void *param) {
     printf("Initializing the interpreter...\n");
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
 
-    size_t model_size;
-    auto model_data = valiant::filesystem::ReadToMemory(
-            "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite", &model_size);
-    if (!model_data || model_size == 0) {
-        printf("Failed to load inference_info %p %d\r\n", model_data.get(), model_size);
+    std::vector<uint8_t> model_data;
+    if (!valiant::filesystem::ReadFile("/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite", &model_data)) {
+        printf("Failed to load inference_info %p %d\r\n", model_data.data(), model_data.size());
         vTaskSuspend(nullptr);
     }
-    const auto *model = tflite::GetModel(model_data.get());
+    const auto *model = tflite::GetModel(model_data.data());
 
     edgetpu_context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
     if (!edgetpu_context) {

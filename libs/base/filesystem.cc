@@ -285,59 +285,6 @@ lfs_soff_t Size(lfs_file_t* handle) {
     return lfs_file_size(&lfs_handle_, handle);
 }
 
-std::unique_ptr<uint8_t[]> ReadToMemory(const char *path, size_t* size_bytes) {
-    if (size_bytes) *size_bytes = 0;
-
-    lfs_file_t handle;
-    if (!Open(&handle, path)) return nullptr;
-    AutoClose close{&handle};
-
-    auto file_size = Size(&handle);
-    auto data = std::make_unique<uint8_t[]>(file_size);
-
-    if (Read(&handle, data.get(), file_size) < 0) return nullptr;
-
-    if (size_bytes) *size_bytes = file_size;
-    return data;
-}
-
-bool ReadToMemory(const char *path, uint8_t* data, size_t* size_bytes) {
-    lfs_file_t handle;
-    lfs_soff_t file_size;
-
-    if (!data || !size_bytes) {
-        return false;
-    }
-
-    if (!Open(&handle, path)) {
-        goto fail;
-    }
-
-    file_size = Size(&handle);
-
-    if (static_cast<size_t>(file_size) > *size_bytes) {
-        goto fail_close;
-    }
-
-    if (Read(&handle, data, file_size) < 0) {
-        goto fail_close;
-    }
-
-    Close(&handle);
-    if (size_bytes) {
-        *size_bytes = file_size;
-    }
-    return true;
-
-fail_close:
-    Close(&handle);
-fail:
-    if (size_bytes) {
-        *size_bytes = 0;
-    }
-    return false;
-}
-
 bool Remove(const char *path) {
     MutexLock lock(lfs_semaphore_);
     int ret = lfs_remove(&lfs_handle_, path);
@@ -376,6 +323,41 @@ bool DirClose(lfs_dir_t *dir) {
     if (ret < 0) {
         return false;
     }
+    return true;
+}
+
+bool ReadFile(const char* path, std::vector<uint8_t>* buf) {
+    lfs_file_t handle;
+    if (!Open(&handle, path)) return false;
+    AutoClose close{&handle};
+    buf->resize(Size(&handle));
+    if (Read(&handle, buf->data(), buf->size()) < 0) return false;
+    return true;
+}
+
+bool ReadFile(const char* path, std::string* str) {
+    lfs_file_t handle;
+    if (!Open(&handle, path)) return false;
+    AutoClose close{&handle};
+    str->resize(Size(&handle));
+    if (Read(&handle, str->data(), str->size()) < 0) return false;
+    return true;
+}
+
+size_t ReadFile(const char* path, uint8_t* buf, size_t size) {
+    lfs_file_t handle;
+    if (!Open(&handle, path)) return 0;
+    AutoClose close{&handle};
+    auto read_size = std::min(size, static_cast<size_t>(Size(&handle)));
+    if (Read(&handle, buf, read_size) < 0) return 0;
+    return read_size;
+}
+
+bool WriteFile(const char* path, const uint8_t* buf, size_t size) {
+    lfs_file_t handle;
+    if (!Open(&handle, path, /*writable=*/true)) return false;
+    AutoClose close{&handle};
+    if (Write(&handle, buf, size) != static_cast<int>(size)) return false;
     return true;
 }
 

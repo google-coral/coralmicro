@@ -10,10 +10,9 @@ extern unsigned int brcm_patch_ram_length;
 
 extern "C" void app_main(void *param) {
     printf("Read patchram to sdram\r\n");
-    size_t brcm_patchram_size = brcm_patch_ram_length;
-    if (!valiant::filesystem::ReadToMemory("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
-                                            brcm_patchram_buf,
-                                            &brcm_patchram_size)) {
+    if (valiant::filesystem::ReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
+                                      brcm_patchram_buf,
+                                      brcm_patch_ram_length) != brcm_patch_ram_length) {
         printf("Reading patchram failed\r\n");
         vTaskSuspend(NULL);
     }

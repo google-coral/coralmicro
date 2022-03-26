@@ -20,10 +20,9 @@ const int kModelArenaSize = 32768;
 const int kExtraArenaSize = 32768;
 const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
-size_t testconv1_edgetpu_tflite_len, testconv1_test_input_bin_len, testconv1_expected_output_bin_len;
-std::unique_ptr<uint8_t[]> testconv1_edgetpu_tflite;
-std::unique_ptr<uint8_t[]> testconv1_expected_output_bin;
-std::unique_ptr<uint8_t[]> testconv1_test_input_bin;
+std::vector<uint8_t> testconv1_edgetpu_tflite;
+std::vector<uint8_t> testconv1_expected_output_bin;
+std::vector<uint8_t> testconv1_test_input_bin;
 }  // namespace
 
 bool setup() {
@@ -36,24 +35,23 @@ bool setup() {
         return true;
     }
 
-    testconv1_edgetpu_tflite = valiant::filesystem::ReadToMemory("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite_len);
-    testconv1_expected_output_bin = valiant::filesystem::ReadToMemory("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin_len);
-    testconv1_test_input_bin = valiant::filesystem::ReadToMemory("/models/testconv1-test-input.bin", &testconv1_test_input_bin_len);
-
-    if (!testconv1_edgetpu_tflite || testconv1_edgetpu_tflite_len == 0) {
+    if (!valiant::filesystem::ReadFile("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
         return false;
+
     }
-    if (!testconv1_expected_output_bin || testconv1_expected_output_bin_len == 0) {
+
+    if (!valiant::filesystem::ReadFile("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load expected output!");
         return false;
     }
-    if (!testconv1_test_input_bin || testconv1_test_input_bin_len == 0) {
+
+    if (!valiant::filesystem::ReadFile("/models/testconv1-test-input.bin", &testconv1_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
         return false;
     }
 
-    model = tflite::GetModel(testconv1_edgetpu_tflite.get());
+    model = tflite::GetModel(testconv1_edgetpu_tflite.data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",
@@ -76,15 +74,15 @@ bool setup() {
     input = interpreter->input(0);
     output = interpreter->output(0);
 
-    if (input->bytes != testconv1_test_input_bin_len) {
+    if (input->bytes != testconv1_test_input_bin.size()) {
         TF_LITE_REPORT_ERROR(error_reporter, "Input tensor length doesn't match canned input");
         return false;
     }
-    if (output->bytes != testconv1_expected_output_bin_len) {
+    if (output->bytes != testconv1_expected_output_bin.size()) {
         TF_LITE_REPORT_ERROR(error_reporter, "Output tensor length doesn't match canned output");
         return false;
     }
-    memcpy(input->data.uint8, testconv1_test_input_bin.get(), testconv1_test_input_bin_len);
+    memcpy(input->data.uint8, testconv1_test_input_bin.data(), testconv1_test_input_bin.size());
 
     initialized = true;
     return true;
@@ -96,7 +94,7 @@ bool loop() {
     if (invoke_status != kTfLiteOk) {
         return false;
     }
-    if (memcmp(output->data.uint8, testconv1_expected_output_bin.get(), testconv1_expected_output_bin_len) != 0) {
+    if (memcmp(output->data.uint8, testconv1_expected_output_bin.data(), testconv1_expected_output_bin.size()) != 0) {
         TF_LITE_REPORT_ERROR(error_reporter, "Output did not match expected");
         return false;
     }

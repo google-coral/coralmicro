@@ -17,21 +17,21 @@ __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 }  // namespace
 
 void real_main() {
-    size_t model_size, input_size;
-    auto model_data = filesystem::ReadToMemory(
-        "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite", &model_size);
-    if (!model_data || model_size == 0) {
+    std::vector<uint8_t> model_data;
+    if (!filesystem::ReadFile(
+            "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite", &model_data)) {
         printf("Failed to load model\r\n");
         return;
     }
 
-    auto input_data = filesystem::ReadToMemory(
-        "/apps/ClassifyImage/cat_224x224.rgb", &input_size);
-    if (!input_data || input_size == 0) {
+    std::vector<uint8_t> input_data;
+    if (!filesystem::ReadFile("/apps/ClassifyImage/cat_224x224.rgb",
+                              &input_data)) {
         printf("Failed to load input\r\n");
         return;
     }
-    const tflite::Model* model = tflite::GetModel(model_data.get());
+
+    const tflite::Model* model = tflite::GetModel(model_data.data());
     tflite::MicroErrorReporter error_reporter;
     tflite::MicroMutableOpResolver<1> resolver;
     std::shared_ptr<EdgeTpuContext> context =
@@ -44,7 +44,6 @@ void real_main() {
         tensorflow::MakeEdgeTpuInterpreter(model, context.get(), &resolver,
                                            &error_reporter, tensor_arena,
                                            kTensorArenaSize);
-
     if (!interpreter) {
         printf("Failed to make interpreter\r\n");
         return;
@@ -63,7 +62,7 @@ void real_main() {
         tensorflow::ClassificationPreprocess(input_tensor);
     }
     auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
-    memcpy(input_tensor_data, input_data.get(), input_tensor->bytes);
+    std::memcpy(input_tensor_data, input_data.data(), input_tensor->bytes);
 
     if (interpreter->Invoke() != kTfLiteOk) {
         printf("invoke failed\r\n");

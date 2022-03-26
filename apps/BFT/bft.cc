@@ -14,16 +14,16 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include <cstdio>
+#include <vector>
 
 namespace testing {
 
 static tflite::MicroMutableOpResolver<1> resolver;
 constexpr size_t kTensorArenaSize = 1024 * 10 * 2;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
-size_t testconv1_edgetpu_tflite_len, testconv1_test_input_bin_len, testconv1_expected_output_bin_len;
-std::unique_ptr<uint8_t[]> testconv1_edgetpu_tflite;
-std::unique_ptr<uint8_t[]> testconv1_expected_output_bin;
-std::unique_ptr<uint8_t[]> testconv1_test_input_bin;
+std::vector<uint8_t> testconv1_edgetpu_tflite;
+std::vector<uint8_t> testconv1_expected_output_bin;
+std::vector<uint8_t> testconv1_test_input_bin;
 
 constexpr size_t sdram_memory_size = 1024 * 1024;
 static uint8_t sdram_memory[sdram_memory_size] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
@@ -53,24 +53,26 @@ TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
 
-    testconv1_edgetpu_tflite = valiant::filesystem::ReadToMemory("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite_len);
-    testconv1_expected_output_bin = valiant::filesystem::ReadToMemory("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin_len);
-    testconv1_test_input_bin = valiant::filesystem::ReadToMemory("/models/testconv1-test-input.bin", &testconv1_test_input_bin_len);
-
-    if (!testconv1_edgetpu_tflite || testconv1_edgetpu_tflite_len == 0) {
+    if (!valiant::filesystem::ReadFile("/models/testconv1-edgetpu.tflite",
+                                       &testconv1_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load model!");
         return false;
     }
-    if (!testconv1_expected_output_bin || testconv1_expected_output_bin_len == 0) {
+
+    if (!valiant::filesystem::ReadFile("/models/testconv1-expected-output.bin",
+                                       &testconv1_expected_output_bin)) {
         TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load expected output!");
         return false;
+
     }
-    if (!testconv1_test_input_bin || testconv1_test_input_bin_len == 0) {
+
+    if (!valiant::filesystem::ReadFile("/models/testconv1-test-input.bin",
+                                       &testconv1_test_input_bin)) {
         TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load test input!");
         return false;
     }
 
-    const tflite::Model *model = tflite::GetModel(testconv1_edgetpu_tflite.get());
+    const tflite::Model *model = tflite::GetModel(testconv1_edgetpu_tflite.data());
     TF_LITE_MICRO_EXPECT_EQ(static_cast<int>(model->version()), TFLITE_SCHEMA_VERSION);
 
     resolver.AddCustom("edgetpu-custom-op", valiant::RegisterCustomOp());
@@ -79,15 +81,15 @@ TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
 
     TfLiteTensor *input = interpreter.input(0);
     TfLiteTensor *output = interpreter.output(0);
-    TF_LITE_MICRO_EXPECT_EQ(input->bytes, testconv1_test_input_bin_len);
-    TF_LITE_MICRO_EXPECT_EQ(output->bytes, testconv1_expected_output_bin_len);
-    memcpy(tflite::GetTensorData<uint8_t>(input), testconv1_test_input_bin.get(), testconv1_test_input_bin_len);
+    TF_LITE_MICRO_EXPECT_EQ(input->bytes, testconv1_test_input_bin.size());
+    TF_LITE_MICRO_EXPECT_EQ(output->bytes, testconv1_expected_output_bin.size());
+    memcpy(tflite::GetTensorData<uint8_t>(input), testconv1_test_input_bin.data(), testconv1_test_input_bin.size());
 
     for (int i = 0; i < 100; ++i) {
         memset(tflite::GetTensorData<uint8_t>(output), 0, output->bytes);
         TF_LITE_MICRO_EXPECT_EQ(interpreter.Invoke(), kTfLiteOk);
         TF_LITE_MICRO_EXPECT_EQ(
-                memcmp(tflite::GetTensorData<uint8_t>(output), testconv1_expected_output_bin.get(), testconv1_expected_output_bin_len),
+                memcmp(tflite::GetTensorData<uint8_t>(output), testconv1_expected_output_bin.data(), testconv1_expected_output_bin.size()),
                 0);
     }
 }
