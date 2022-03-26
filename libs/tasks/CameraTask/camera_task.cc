@@ -120,8 +120,9 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
 }
 
 namespace {
+template<typename Callback>
 void BayerInternal(const uint8_t *camera_raw, int width, int height,
-                   const std::function<void(int x, int y, uint8_t r, uint8_t g, uint8_t b)> &callback) {
+                   Callback callback) {
     bool blue = true, green = false;
     for (int y = 2; y < height - 2; y++) {
         int start = green ? 3 : 2;
