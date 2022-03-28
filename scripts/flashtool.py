@@ -3,6 +3,7 @@ from enum import Enum, auto
 from pathlib import Path
 from progress.bar import Bar
 import argparse
+import contextlib
 import hexformat
 import hid
 import inspect
@@ -390,32 +391,30 @@ def CheckForFlashloader(ram, target_elfloader=False):
         time.sleep(1)
     return FlashtoolStates.ERROR
 
-
+@contextlib.contextmanager
 def OpenHidDevice(vid, pid, serial_number):
     h = hid.device()
     # First few tries to open the HID device can fail,
     # if Python is faster than the device. So retry a bit.
-    opened = False
     print('OpenHidDevice vid={:x} pid={:x} ...'.format(vid, pid))
     for _ in range(round(OPEN_HID_RETRY_TIME_S / OPEN_HID_RETRY_INTERVAL_S)):
         try:
             h.open(vid, pid, serial_number=serial_number)
             print('OpenHidDevice vid={:x} pid={:x} opened'.format(vid, pid, serial_number))
-            opened = True
-            break
+            try:
+                yield h
+            finally:
+                h.close()
+            return
         except:
             time.sleep(OPEN_HID_RETRY_INTERVAL_S)
-            pass
-    if not opened:
-        raise Exception('Failed to open Valiant HID device')
 
-    return h
+    raise Exception('Failed to open Valiant HID device')
 
 
 def ResetElfloader(serial_number=None):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number)
-    h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
-    h.close()
+    with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
+        h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
     return FlashtoolStates.CHECK_FOR_SDP
 
 def Program(blhost_path, sbfile_path):
@@ -462,46 +461,44 @@ def ElfloaderTransferData(h, data, target, bar=None):
     return FlashtoolStates.RESET
 
 def ProgramElfloader(elf_path, debug=False, serial_number=None):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number)
-    data = read_file(elf_path)
-    ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM, bar=Bar(elf_path, max=len(data)))
-    h.close()
-    if not debug:
-        return FlashtoolStates.DONE
-    return FlashtoolStates.START_GDB
+    with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
+        data = read_file(elf_path)
+        ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM,
+                              bar=Bar(elf_path, max=len(data)))
+        if not debug:
+            return FlashtoolStates.DONE
+        return FlashtoolStates.START_GDB
 
 def ProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, serial_number=None):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number)
-    data_files.append((elf_path, '/default.elf'))
-    data_files.append((str(usb_ip_address).encode(), USB_IP_ADDRESS_FILE))
-    if wifi_ssid is not None:
-        data_files.append((wifi_ssid.encode(), WIFI_SSID_FILE))
-    if wifi_psk is not None:
-        data_files.append((wifi_psk.encode(), WIFI_PSK_FILE))
-    for src_file, target_file in sorted(data_files, key=lambda x: x[1]):
-        if target_file[0] != '/':
-            target_file = '/' + target_file
-        # If we are running on something with the wrong directory separator, fix it.
-        target_file.replace('\\', '/')
+    with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
+        data_files.append((elf_path, '/default.elf'))
+        data_files.append((str(usb_ip_address).encode(), USB_IP_ADDRESS_FILE))
+        if wifi_ssid is not None:
+            data_files.append((wifi_ssid.encode(), WIFI_SSID_FILE))
+        if wifi_psk is not None:
+            data_files.append((wifi_psk.encode(), WIFI_PSK_FILE))
+        for src_file, target_file in sorted(data_files, key=lambda x: x[1]):
+            if target_file[0] != '/':
+                target_file = '/' + target_file
+            # If we are running on something with the wrong directory separator, fix it.
+            target_file.replace('\\', '/')
 
-        if isinstance(src_file, str):
-            data = read_file(src_file)
-        elif isinstance(src_file, bytes):
-            data = src_file
-        else:
-            raise RuntimeError('src_file must be "str" or "bytes"')
+            if isinstance(src_file, str):
+                data = read_file(src_file)
+            elif isinstance(src_file, bytes):
+                data = src_file
+            else:
+                raise RuntimeError('src_file must be "str" or "bytes"')
 
-        ElfloaderTransferData(h, target_file.encode(), ELFLOADER_TARGET_PATH)
-        ElfloaderTransferData(h, data, ELFLOADER_TARGET_FILESYSTEM,
-                              bar=Bar(target_file, max=len(data)))
+            ElfloaderTransferData(h, target_file.encode(), ELFLOADER_TARGET_PATH)
+            ElfloaderTransferData(h, data, ELFLOADER_TARGET_FILESYSTEM,
+                                  bar=Bar(target_file, max=len(data)))
 
-    h.close()
-    return FlashtoolStates.RESET
+        return FlashtoolStates.RESET
 
 def Reset(serial_number=None):
-    h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number)
-    h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
-    h.close()
+    with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
+        h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
     return FlashtoolStates.DONE
 
 def StartGdb(jlink_path, toolchain_path, unstripped_elf_path):
