@@ -16,7 +16,7 @@ if __name__ == '__main__':
         response = mfg_test.iperf_start(is_server=True)
         print(response)
     else:  # args.c
-        print('Device ({args.device_ip_address}) acting as iPerf client, connecting to {args.c}')
+        print(f'Device ({args.device_ip_address}) acting as iPerf client, connecting to {args.c}')
         response = mfg_test.iperf_start(is_server=False, server_ip_address=args.c)
         print(response)
 
