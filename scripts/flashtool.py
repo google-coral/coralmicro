@@ -75,6 +75,10 @@ ELFLOADER_TARGET_FILESYSTEM = 2
 
 ELFLOADER_CMD_HEADER = '=BB'
 
+def read_file(path):
+    with open(path, 'rb') as f:
+        return f.read()
+
 def sdp_vidpid():
     return '{},{}'.format(hex(SDP_VID), hex(SDP_PID))
 
@@ -459,9 +463,8 @@ def ElfloaderTransferData(h, data, target, bar=None):
 
 def ProgramElfloader(elf_path, debug=False, serial_number=None):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number)
-    with open(elf_path, 'rb') as elf:
-        data = elf.read()
-        ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM, bar=Bar(elf_path, max=len(data)))
+    data = read_file(elf_path)
+    ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM, bar=Bar(elf_path, max=len(data)))
     h.close()
     if not debug:
         return FlashtoolStates.DONE
@@ -470,47 +473,28 @@ def ProgramElfloader(elf_path, debug=False, serial_number=None):
 def ProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, serial_number=None):
     h = OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number)
     data_files.append((elf_path, '/default.elf'))
-    data_files.append((USB_IP_ADDRESS_FILE, USB_IP_ADDRESS_FILE))
+    data_files.append((str(usb_ip_address).encode(), USB_IP_ADDRESS_FILE))
     if wifi_ssid is not None:
-        data_files.append((WIFI_SSID_FILE, WIFI_SSID_FILE))
+        data_files.append((wifi_ssid.encode(), WIFI_SSID_FILE))
     if wifi_psk is not None:
-        data_files.append((WIFI_PSK_FILE, WIFI_PSK_FILE))
-    data_files = sorted(data_files, key=lambda x: x[1])
-    for src_file, target_file in data_files:
+        data_files.append((wifi_psk.encode(), WIFI_PSK_FILE))
+    for src_file, target_file in sorted(data_files, key=lambda x: x[1]):
         if target_file[0] != '/':
             target_file = '/' + target_file
         # If we are running on something with the wrong directory separator, fix it.
         target_file.replace('\\', '/')
 
-        def write_file(f):
-            bar = Bar(target_file, max=os.fstat(f.fileno()).st_size)
-            ElfloaderTransferData(h, bytes(target_file, encoding='utf-8'), ELFLOADER_TARGET_PATH)
-            ElfloaderTransferData(h, f.read(), ELFLOADER_TARGET_FILESYSTEM, bar=bar)
+        if isinstance(src_file, str):
+            data = read_file(src_file)
+        elif isinstance(src_file, bytes):
+            data = src_file
+        else:
+            raise RuntimeError('src_file must be "str" or "bytes"')
 
-        if src_file is USB_IP_ADDRESS_FILE:
-            with tempfile.NamedTemporaryFile() as f:
-                f.write(str(usb_ip_address).encode())
-                f.flush()
-                f.seek(0)
-                write_file(f)
-                continue
-        if src_file is WIFI_SSID_FILE and wifi_ssid is not None:
-            with tempfile.NamedTemporaryFile() as f:
-                f.write(wifi_ssid.encode())
-                f.flush()
-                f.seek(0)
-                write_file(f)
-                continue
-        if src_file is WIFI_PSK_FILE and wifi_psk is not None:
-            with tempfile.NamedTemporaryFile() as f:
-                f.write(wifi_psk.encode())
-                f.flush()
-                f.seek(0)
-                write_file(f)
-                continue
+        ElfloaderTransferData(h, target_file.encode(), ELFLOADER_TARGET_PATH)
+        ElfloaderTransferData(h, data, ELFLOADER_TARGET_FILESYSTEM,
+                              bar=Bar(target_file, max=len(data)))
 
-        with open(src_file, 'rb') as f:
-            write_file(f)
     h.close()
     return FlashtoolStates.RESET
 
