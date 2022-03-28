@@ -9,7 +9,6 @@ set(OOBE_SOURCES
 set(OOBE_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_posenet
-    libs_testlib
 )
 
 add_executable_m7(OOBE

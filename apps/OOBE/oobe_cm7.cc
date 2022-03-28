@@ -7,7 +7,6 @@
 #include "libs/posenet/posenet.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/testlib/test_lib.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
