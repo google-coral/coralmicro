@@ -16,6 +16,9 @@ extern "C" int _write(int handle, char *buffer, int size) {
         xStreamBufferSend(console_buffer->stream_buffer, buffer, size, portMAX_DELAY);
     }
     DbgConsole_SendDataReliable(reinterpret_cast<uint8_t*>(buffer), size);
+#ifdef BLOCKING_PRINTF
+    DbgConsole_Flush();
+#endif
 
     return size;
 }

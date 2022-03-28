@@ -42,8 +42,15 @@ void ConsoleM7::Write(char *buffer, int size) {
     ConsoleMessage msg = {
         size, (uint8_t*)malloc(size),
     };
+#ifdef BLOCKING_PRINTF
+    msg.semaphore = xSemaphoreCreateBinaryStatic(&msg.semaphore_storage);
+#endif
     memcpy(msg.str, buffer, size);
     xQueueSend(console_queue_, &msg, portMAX_DELAY);
+#ifdef BLOCKING_PRINTF
+    xSemaphoreTake(msg.semaphore, portMAX_DELAY);
+    vSemaphoreDelete(msg.semaphore);
+#endif
 }
 
 int ConsoleM7::Read(char *buffer, int size) {
@@ -129,6 +136,10 @@ void ConsoleM7::M7ConsoleTaskTxFn(void *param) {
             DbgConsole_SendDataReliable((uint8_t*)msg.str, msg.len);
             cdc_acm_.Transmit((uint8_t*)msg.str, msg.len);
             free(msg.str);
+#ifdef BLOCKING_PRINTF
+            DbgConsole_Flush();
+            xSemaphoreGive(msg.semaphore);
+#endif
         }
     }
 }

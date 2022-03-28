@@ -26,6 +26,10 @@ class ConsoleM7 {
     struct ConsoleMessage {
         int len;
         uint8_t *str;
+#ifdef BLOCKING_PRINTF
+        SemaphoreHandle_t semaphore;
+        StaticSemaphore_t semaphore_storage;
+#endif
     };
 
     static void StaticM4ConsoleTaskFn(void *param);
