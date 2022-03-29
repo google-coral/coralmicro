@@ -12,19 +12,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+#include "apps/MicroSpeech/model.h"
 
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
-
-#include "apps/MicroSpeech/model.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/command_responder.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/feature_provider.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/recognize_commands.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/kernels/micro_ops.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/system_setup.h"
 #include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 
 // Globals, used for compatibility with Arduino-style sketches.
@@ -48,6 +47,8 @@ int8_t* model_input_buffer = nullptr;
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
+  tflite::InitializeTarget();
+
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -56,7 +57,7 @@ void setup() {
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(g_model);
+  model = tflite::GetModel(g_micro_speech_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
                          "Model provided is schema version %d not equal "

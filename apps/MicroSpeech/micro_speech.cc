@@ -7,77 +7,84 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
 
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
-
 #include <cstdio>
+#include <vector>
+#include <atomic>
 
-static int32_t audio_sample_data[2][kMaxAudioSampleSize] __attribute__((section(".noinit.$rpmsg_sh_mem")));
-static bool is_audio_initialized = false;
-
+namespace {
 constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
-constexpr int kAudioCaptureBufferSize = 1 * kAudioSampleFrequency;  // 1 second.
-int16_t g_audio_capture_buffer[kAudioCaptureBufferSize];
-int16_t g_audio_output_buffer[kMaxAudioSampleSize];
-int32_t g_latest_audio_timestamp_ms = 0;
 
-// Based on nxp_k66f implementation
-void CaptureSamples(const int32_t *sample_data) {
-    const int32_t next_timestamp_ms = g_latest_audio_timestamp_ms + (kMaxAudioSampleSize / kSamplesPerMs);
-    const int32_t offset = g_latest_audio_timestamp_ms * kSamplesPerMs;
-    for (int i = 0; i < kMaxAudioSampleSize; ++i) {
-        g_audio_capture_buffer[(offset + i) % kAudioCaptureBufferSize] = (sample_data[i] >> 16) & 0xFFFF;
-    }
-    g_latest_audio_timestamp_ms = next_timestamp_ms;
-}
+constexpr int kNumDmaBuffers = 10;
+constexpr int kDmaBufferSizeMs = 100;
+constexpr int kDmaBufferSize = kDmaBufferSizeMs * kSamplesPerMs;
+int32_t g_dma_buffers[kNumDmaBuffers][kDmaBufferSize] __attribute__((aligned(16)));
 
+constexpr int kAudioBufferSizeMs = 1000;
+constexpr int kAudioBufferSize = kAudioBufferSizeMs * kSamplesPerMs;
+int16_t g_audio_buffer[kAudioBufferSize] __attribute__((aligned(16)));
+std::atomic<int32_t> g_audio_buffer_end_index = 0;
+
+int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
+}  // namespace
+
+// From audio_provider.h
 int32_t LatestAudioTimestamp() {
-    return g_latest_audio_timestamp_ms;
+    return g_audio_buffer_end_index / kSamplesPerMs - 50;
 }
 
-TfLiteStatus InitAudioRecording() {
-    valiant::AudioTask::GetSingleton()->SetPower(true);
-    valiant::AudioTask::GetSingleton()->Enable(valiant::audio::SampleRate::k16000_Hz,
-    {audio_sample_data[0], audio_sample_data[1]}, kMaxAudioSampleSize,
-    nullptr, +[](void *param, const int32_t* buffer, size_t buffer_size) {
-        CaptureSamples(buffer);
-    });
-    return kTfLiteOk;
-}
-
+// From audio_provider.h
 TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
                              int start_ms, int duration_ms,
                              int* audio_samples_size, int16_t** audio_samples) {
-    if (!is_audio_initialized) {
-        TfLiteStatus init_status = InitAudioRecording();
-        if (init_status != kTfLiteOk) {
-            return init_status;
-        }
-        is_audio_initialized = true;
+    int32_t audio_buffer_end_index = g_audio_buffer_end_index;
+
+    auto buffer_end_ms = audio_buffer_end_index / kSamplesPerMs;
+    auto buffer_start_ms = buffer_end_ms - kAudioBufferSizeMs;
+
+    if (start_ms < buffer_start_ms) {
+        TF_LITE_REPORT_ERROR(error_reporter,
+            "start_ms < buffer_start_ms (%d vs %d)", start_ms, buffer_start_ms);
+        return kTfLiteError;
     }
 
-    const int offset = start_ms * kSamplesPerMs;
-    for (int i = 0; i < duration_ms * kSamplesPerMs; ++i) {
-        g_audio_output_buffer[i] = g_audio_capture_buffer[(offset + i) % kAudioCaptureBufferSize];
+    if (start_ms + duration_ms >= buffer_end_ms) {
+        TF_LITE_REPORT_ERROR(error_reporter, "start_ms + duration_ms > buffer_end_ms");
+        return kTfLiteError;
     }
+
+    int offset = audio_buffer_end_index + (start_ms - buffer_start_ms) * kSamplesPerMs;
+    for (int i = 0; i < kMaxAudioSampleSize; ++i)
+        g_audio_buffer_out[i] = g_audio_buffer[(offset + i) % kAudioBufferSize];
+
+    *audio_samples = g_audio_buffer_out;
     *audio_samples_size = kMaxAudioSampleSize;
-    *audio_samples = g_audio_output_buffer;
     return kTfLiteOk;
-}
-
-void RespondToCommand(tflite::ErrorReporter* error_reporter,
-                      int32_t current_time, const char* found_command,
-                      uint8_t score, bool is_new_command) {
-    if (is_new_command) {
-        printf("RespondToCommand current_time: %ld found_command %s score: %d new: %d ticks: %ld\r\n",
-                current_time, found_command, score, is_new_command, xTaskGetTickCount());
-    }
 }
 
 extern "C" void app_main(void *param) {
     printf("Micro speech\r\n");
+
+    // Setup audio
+    std::vector<int32_t*> dma_buffers;
+    for (int i = 0; i < kNumDmaBuffers; ++i)
+        dma_buffers.push_back(g_dma_buffers[i]);
+
+    valiant::AudioTask::GetSingleton()->SetPower(true);
+    valiant::AudioTask::GetSingleton()->Enable(
+        valiant::audio::SampleRate::k16000_Hz,
+        dma_buffers, kDmaBufferSize,
+    nullptr, +[](void *param, const int32_t* buffer, size_t buffer_size) {
+        int32_t offset = g_audio_buffer_end_index;
+        for (size_t i = 0; i < buffer_size; ++i)
+            g_audio_buffer[(offset + i) % kAudioBufferSize] = buffer[i] >> 16;
+        g_audio_buffer_end_index += buffer_size;
+    });
+
+    // Fill audio buffer
+    vTaskDelay(pdMS_TO_TICKS(kAudioBufferSizeMs));
+
     setup();
     while (true) {
         loop();
-        taskYIELD();
     }
 }
