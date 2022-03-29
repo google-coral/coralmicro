@@ -72,7 +72,8 @@ def parse_poses(poses):
 def fetch_data(done, device_ip, update_image, update_poses, fps_target=10):
     thread_start = time.monotonic()
     last_report = time.monotonic()
-    
+    last_pose_report = time.monotonic()
+
     frame_count = 0
     while not done.is_set():
         start = time.monotonic()
@@ -85,7 +86,11 @@ def fetch_data(done, device_ip, update_image, update_poses, fps_target=10):
 
             r = requests.get('http://%s/pose' % device_ip, timeout=1)
             if r.status_code == requests.codes.ok:
+                last_pose_report = time.monotonic()
                 update_poses(parse_poses(json.loads(r.content)))
+
+            if time.monotonic() - last_pose_report > 2:
+                update_poses([])
         except socket.error:
             pass  # These happen occasionally... nothing to do but try next cycle.
 
