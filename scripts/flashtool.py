@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-from enum import Enum, auto
 from pathlib import Path
 from progress.bar import Bar
 import argparse
@@ -263,57 +262,42 @@ section (0) {
     subprocess.check_call(args)
     return sbfile_path
 
-class FlashtoolStates(Enum):
-    DONE = auto()
-    ERROR = auto()
-    CHECK_FOR_ANY = auto()
-    CHECK_FOR_ELFLOADER = auto()
-    CHECK_FOR_VALIANT = auto()
-    RESET_TO_SDP = auto()
-    CHECK_FOR_SDP = auto()
-    LOAD_FLASHLOADER = auto()
-    LOAD_ELFLOADER = auto()
-    RESET_ELFLOADER = auto()
-    CHECK_FOR_FLASHLOADER = auto()
-    PROGRAM = auto()
-    PROGRAM_ELFLOADER = auto()
-    PROGRAM_DATA_FILES = auto()
-    RESET = auto()
-    START_GDB = auto()
+def StateDone():
+    pass
 
-def FlashtoolError():
-    return FlashtoolStates.DONE
+def StateFlashtoolError():
+    return StateDone
 
-def CheckForAny(serial_number=None):
+def StateCheckForAny(serial_number=None):
     for i in range(10):
         if is_valiant_connected(serial_number):
-            return FlashtoolStates.CHECK_FOR_VALIANT
+            return StateCheckForValiant
         if is_elfloader_connected(serial_number):
-            return FlashtoolStates.CHECK_FOR_ELFLOADER
+            return StateCheckForElfloader
         if is_sdp_connected():
-            return FlashtoolStates.CHECK_FOR_SDP
+            return StateCheckForSdp
         if is_flashloader_connected():
-            return FlashtoolStates.CHECK_FOR_FLASHLOADER
+            return StateCheckForFlashloader
         time.sleep(1)
-    return FlashtoolStates.ERROR
+    return StateFlashtoolError
 
-def CheckForValiant(serial_number=None):
+def StateCheckForValiant(serial_number=None):
     for i in range(10):
         if is_valiant_connected(serial_number):
             # port is needed later as well, wait for it.
             port = FindSerialPortForDevice(serial_number)
             if port:
-                return FlashtoolStates.RESET_TO_SDP
+                return StateResetToSdp
         time.sleep(1)
     # If we don't see Valiant on the bus, just check for SDP.
-    return FlashtoolStates.CHECK_FOR_SDP
+    return StateCheckForSdp
 
-def CheckForElfloader(serial_number=None):
+def StateCheckForElfloader(serial_number=None):
     for i in range(10):
         if is_elfloader_connected(serial_number):
-            return FlashtoolStates.RESET_ELFLOADER
+            return StateResetElfloader
         time.sleep(1)
-    return FlashtoolStates.ERROR
+    return StateFlashtoolError
 
 def FindSerialPortForDevice(serial_number=None):
     for port in serial.tools.list_ports.comports():
@@ -324,11 +308,11 @@ def FindSerialPortForDevice(serial_number=None):
             pass
     return None
 
-def ResetToSdp(serial_number=None):
+def StateResetToSdp(serial_number=None):
     port = FindSerialPortForDevice(serial_number)
     if port is None:
         print('serial port not found')
-        return FlashtoolStates.ERROR
+        return StateFlashtoolError
 
     # Port could be enumerated at this point but udev rules are still to get applied.
     # Typically this results in exceptions like "[Errno 13] Permission denied: '/dev/ttyACM0'"
@@ -339,29 +323,29 @@ def ResetToSdp(serial_number=None):
                 s.dtr = False
                 s.open()
                 s.write(b'42')  ## Dummy write to force apply s.dtr.
-                return FlashtoolStates.CHECK_FOR_SDP
+                return StateCheckForSdp
             except serial.SerialException as e:
                 # If the port goes away, we get SerialException.
                 # Assume that this means the device reset into SDP, and try to proceed.
-                return FlashtoolStates.CHECK_FOR_SDP
+                return StateCheckForSdp
             except:
                 pass
         time.sleep(1)
     print('Unable to open %s' % port)
-    return FlashtoolStates.ERROR
+    return StateFlashtoolError
 
-def CheckForSdp():
+def StateCheckForSdp():
     for i in range(10):
         if is_sdp_connected():
-            return FlashtoolStates.LOAD_FLASHLOADER
+            return StateLoadFlashloader
         time.sleep(1)
-    return FlashtoolStates.ERROR
+    return StateFlashtoolError
 
-def LoadFlashloader(blhost_path, flashloader_path):
+def StateLoadFlashloader(blhost_path, flashloader_path):
     subprocess.check_call([blhost_path, '-u', sdp_vidpid(), '--', 'load-image', flashloader_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return FlashtoolStates.CHECK_FOR_FLASHLOADER
+    return StateCheckForFlashloader
 
-def LoadElfloader(toolchain_path, elfloader_path, elfloader_elf_path, blhost_path, ram, target_elfloader=False):
+def StateLoadElfloader(toolchain_path, elfloader_path, elfloader_elf_path, blhost_path, ram, target_elfloader=False):
     symbols = subprocess.check_output('{} -t {}'.format(os.path.join(toolchain_path, 'arm-none-eabi-objdump') + exe_extension, elfloader_elf_path), shell=True, text=True)
     disable_usb_timeout_address = 0
     for symbol in symbols.splitlines():
@@ -376,20 +360,20 @@ def LoadElfloader(toolchain_path, elfloader_path, elfloader_elf_path, blhost_pat
     subprocess.check_output('{} -u {} write-memory {} {{{{ffffffff}}}}'.format(blhost_path, flashloader_vidpid(), hex(disable_usb_timeout_address)), shell=True, text=True)
     subprocess.call([blhost_path, '-u', flashloader_vidpid(), 'call', hex(start_address), '0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if target_elfloader:
-        return FlashtoolStates.DONE
+        return StateDone
     if ram:
-        return FlashtoolStates.PROGRAM_ELFLOADER
-    return FlashtoolStates.PROGRAM_DATA_FILES
+        return StateProgramElfloader
+    return StateProgramDataFiles
 
-def CheckForFlashloader(ram, target_elfloader=False):
+def StateCheckForFlashloader(ram, target_elfloader=False):
     for i in range(10):
         if is_flashloader_connected():
             if ram or target_elfloader:
-                return FlashtoolStates.LOAD_ELFLOADER
+                return StateLoadElfloader
             else:
-                return FlashtoolStates.PROGRAM
+                return StateProgram
         time.sleep(1)
-    return FlashtoolStates.ERROR
+    return StateFlashtoolError
 
 @contextlib.contextmanager
 def OpenHidDevice(vid, pid, serial_number):
@@ -412,14 +396,14 @@ def OpenHidDevice(vid, pid, serial_number):
     raise Exception('Failed to open Valiant HID device')
 
 
-def ResetElfloader(serial_number=None):
+def StateResetElfloader(serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
-    return FlashtoolStates.CHECK_FOR_SDP
+    return StateCheckForSdp
 
-def Program(blhost_path, sbfile_path):
+def StateProgram(blhost_path, sbfile_path):
     subprocess.check_call([blhost_path, '-u', flashloader_vidpid(), 'receive-sb-file', sbfile_path])
-    return FlashtoolStates.LOAD_ELFLOADER
+    return StateLoadElfloader
 
 def ElfloaderTransferData(h, data, target, bar=None):
     warned = False
@@ -458,18 +442,18 @@ def ElfloaderTransferData(h, data, target, bar=None):
     read_byte()
     if bar:
         bar.finish()
-    return FlashtoolStates.RESET
+    return StateReset
 
-def ProgramElfloader(elf_path, debug=False, serial_number=None):
+def StateProgramElfloader(elf_path, debug=False, serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         data = read_file(elf_path)
         ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM,
                               bar=Bar(elf_path, max=len(data)))
         if not debug:
-            return FlashtoolStates.DONE
-        return FlashtoolStates.START_GDB
+            return StateDone
+        return StateStartGdb
 
-def ProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, serial_number=None):
+def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         data_files.append((elf_path, '/default.elf'))
         data_files.append((str(usb_ip_address).encode(), USB_IP_ADDRESS_FILE))
@@ -494,22 +478,22 @@ def ProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_
             ElfloaderTransferData(h, data, ELFLOADER_TARGET_FILESYSTEM,
                                   bar=Bar(target_file, max=len(data)))
 
-        return FlashtoolStates.RESET
+        return StateReset
 
-def Reset(serial_number=None):
+def StateReset(serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
-    return FlashtoolStates.DONE
+    return StateDone
 
-def StartGdb(jlink_path, toolchain_path, unstripped_elf_path):
+def StateStartGdb(jlink_path, toolchain_path, unstripped_elf_path):
     jlink_gdbserver = os.path.join(jlink_path, 'JLinkGDBServerCLExe')
     gdb_exe = os.path.join(toolchain_path, 'arm-none-eabi-gdb')
     if not os.path.exists(jlink_gdbserver):
         print(jlink_gdbserver + ' does not exist!')
-        return FlashtoolStates.ERROR
+        return StateFlashtoolError
     if not os.path.exists(gdb_exe):
         print(gdb_exe + ' does not exist!')
-        return FlashtoolStates.ERROR
+        return StateFlashtoolError
 
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     with subprocess.Popen(
@@ -525,37 +509,19 @@ def StartGdb(jlink_path, toolchain_path, unstripped_elf_path):
             with subprocess.Popen([gdb_exe, '-x', gdb_commands.name]) as gdb:
                 gdb.communicate()
         gdbserver.terminate()
-    return FlashtoolStates.DONE
+    return StateDone
 
-state_handlers = {
-    FlashtoolStates.ERROR: FlashtoolError,
-    FlashtoolStates.CHECK_FOR_ANY: CheckForAny,
-    FlashtoolStates.CHECK_FOR_ELFLOADER: CheckForElfloader,
-    FlashtoolStates.CHECK_FOR_VALIANT: CheckForValiant,
-    FlashtoolStates.RESET_TO_SDP: ResetToSdp,
-    FlashtoolStates.CHECK_FOR_SDP: CheckForSdp,
-    FlashtoolStates.LOAD_FLASHLOADER: LoadFlashloader,
-    FlashtoolStates.CHECK_FOR_FLASHLOADER: CheckForFlashloader,
-    FlashtoolStates.LOAD_ELFLOADER: LoadElfloader,
-    FlashtoolStates.RESET_ELFLOADER: ResetElfloader,
-    FlashtoolStates.PROGRAM: Program,
-    FlashtoolStates.PROGRAM_ELFLOADER: ProgramElfloader,
-    FlashtoolStates.PROGRAM_DATA_FILES: ProgramDataFiles,
-    FlashtoolStates.RESET: Reset,
-    FlashtoolStates.START_GDB: StartGdb,
-}
+def state_name(state):
+    return ''.join('_' + c if c.isupper() else c for c in state.__name__)[1:].upper()
 
-def RunFlashtool(initial_state, **kwargs):
-    state = initial_state
+def RunFlashtool(state, **kwargs):
     while True:
-        print(state)
-        handler = state_handlers[state]
-        params = inspect.signature(handler).parameters.values()
-        handler_kwargs =  {param.name : kwargs.get(param.name, param.default) for param in params}
-        state = handler(**handler_kwargs)
-        if state is FlashtoolStates.DONE:
-            print(state)
+        print(state_name(state))
+        if state is StateDone:
             break
+        params = inspect.signature(state).parameters.values()
+        state_kwargs =  {param.name : kwargs.get(param.name, param.default) for param in params}
+        state = state(**state_kwargs)
 
 def main():
     # Check if we're running from inside a pyinstaller binary.
@@ -693,11 +659,11 @@ def main():
     sdp_devices = len(EnumerateSDP())
     flashloader_devices = len(EnumerateFlashloader())
     for _ in range(sdp_devices):
-        RunFlashtool(FlashtoolStates.CHECK_FOR_SDP,
+        RunFlashtool(StateCheckForSdp,
                      target_elfloader=True, **state_machine_args)
 
     for _ in range(flashloader_devices):
-        RunFlashtool(FlashtoolStates.CHECK_FOR_FLASHLOADER,
+        RunFlashtool(StateCheckForFlashloader,
                      target_elfloader=True, **state_machine_args)
 
     # Sleep to allow time for the last device we threw into elfloader
@@ -740,7 +706,7 @@ def main():
                 print('Creating sbfile failed, exit')
                 return
 
-        RunFlashtool(FlashtoolStates.CHECK_FOR_ANY, sbfile_path=sbfile_path,
+        RunFlashtool(StateCheckForAny, sbfile_path=sbfile_path,
                      data_files=data_files, serial_number=serial_number,
                      **state_machine_args)
 
