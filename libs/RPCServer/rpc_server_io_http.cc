@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #include "libs/base/httpd.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/fs.h"
@@ -12,9 +13,9 @@
 
 namespace valiant {
 namespace {
-int JsonRpcReply(const char* buf, int len, void* userdata) {
-    auto* data = reinterpret_cast<JsonRpcHttpServer::Data*>(userdata);
-    data->reply_buf.insert(data->reply_buf.end(), buf, buf + len);
+int Append(const char* buf, int len, void* userdata) {
+    auto* v = reinterpret_cast<std::vector<char>*>(userdata);
+    v->insert(v->end(), buf, buf + len);
     return len;
 }
 
@@ -36,28 +37,26 @@ err_t JsonRpcHttpServer::PostBegin(void* connection, const char* uri,
                                    u8_t* post_auto_wnd) {
     if (std::strcmp("/jsonrpc", uri) != 0) return ERR_ARG;
 
-    auto* data = new Data;
-    data->post_data.resize(content_len);
-    data->post_data_written = 0;
-    rpc_data_map_[connection] = data;
+    buffers_[connection].reserve(content_len);
     return ERR_OK;
 };
 
 err_t JsonRpcHttpServer::PostReceiveData(void* connection, struct pbuf* p) {
-    auto* data = rpc_data_map_[connection];
-    auto off = data->post_data_written;
-    auto len = pbuf_copy_partial(p, data->post_data.data() + off,
-                                 data->post_data.size() - off, 0);
-    data->post_data_written += len;
+    auto& buf = buffers_[connection];
+    auto off = buf.size();
+    buf.resize(buf.size() + p->tot_len);
+    auto len = pbuf_copy_partial(p, buf.data() + off, buf.size() - off, 0);
+    assert(len == p->tot_len);
     pbuf_free(p);
     return ERR_OK;
 }
 
 void JsonRpcHttpServer::PostFinished(void* connection, char* response_uri,
                                      u16_t response_uri_len) {
-    auto* data = rpc_data_map_[connection];
-    jsonrpc_ctx_process(ctx_, data->post_data.data(), data->post_data.size(),
-                        JsonRpcReply, data, nullptr);
+    auto& buf = buffers_[connection];
+    std::vector<char> reply;
+    jsonrpc_ctx_process(ctx_, buf.data(), buf.size(), Append, &reply, nullptr);
+    buf = std::move(reply);
     snprintf(response_uri, response_uri_len,
              "/jsonrpc/response.json?connection=%p", connection);
 }
@@ -70,11 +69,11 @@ void JsonRpcHttpServer::CgiHandler(struct fs_file* file, const char* uri,
             FindPointerParam("connection", iNumParams, pcParam, pcValue);
         assert(connection);
 
-        auto* data = rpc_data_map_[connection];
+        auto& buf = buffers_[connection];
 
         file->pextension = connection;
-        file->data = data->reply_buf.data();
-        file->len = data->reply_buf.size();
+        file->data = buf.data();
+        file->len = buf.size();
         file->index = file->len;
         file->flags |= FS_FILE_FLAGS_HEADER_PERSISTENT;
         return;
@@ -95,9 +94,7 @@ int JsonRpcHttpServer::FsOpenCustom(struct fs_file* file, const char* name) {
 
 void JsonRpcHttpServer::FsCloseCustom(struct fs_file* file) {
     if (file->flags & FS_FILE_FLAGS_JSON_RPC) {
-        auto* data = rpc_data_map_[file->pextension];
-        rpc_data_map_.erase(file->pextension);
-        delete data;
+        buffers_.erase(file->pextension);
         return;
     }
 

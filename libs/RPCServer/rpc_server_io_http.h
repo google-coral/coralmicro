@@ -14,12 +14,6 @@ class JsonRpcHttpServer : public valiant::httpd::HttpServer {
     JsonRpcHttpServer(struct jsonrpc_ctx* ctx = &jsonrpc_default_context)
         : ctx_(ctx) {}
 
-    struct Data {
-        std::vector<char> post_data;
-        std::vector<char> reply_buf;
-        size_t post_data_written;
-    };
-
     err_t PostBegin(void* connection, const char* uri, const char* http_request,
                     u16_t http_request_len, int content_len, char* response_uri,
                     u16_t response_uri_len, u8_t* post_auto_wnd) override;
@@ -35,7 +29,7 @@ class JsonRpcHttpServer : public valiant::httpd::HttpServer {
 
    private:
     struct jsonrpc_ctx* ctx_;
-    std::map<void*, Data*> rpc_data_map_;
+    std::map<void*, std::vector<char>> buffers_;  // connection-to-buffer map
 };
 
 }  // namespace valiant
