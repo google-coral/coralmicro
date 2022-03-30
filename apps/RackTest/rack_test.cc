@@ -93,7 +93,7 @@ void PosenetStressRun(struct jsonrpc_request *request) {
 }
 
 void M4XOR(struct jsonrpc_request *request) {
-    std::vector<char> value_string;
+    std::string value_string;
     if (!valiant::testlib::JsonRpcGetStringParam(request, "value", &value_string))
         return;
 
@@ -102,7 +102,7 @@ void M4XOR(struct jsonrpc_request *request) {
         return;
     }
 
-    auto value = reinterpret_cast<uint32_t>(strtoul(value_string.data(), nullptr, 10));
+    auto value = reinterpret_cast<uint32_t>(strtoul(value_string.c_str(), nullptr, 10));
     valiant::ipc::Message msg{};
     msg.type = valiant::ipc::MessageType::APP;
     auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);

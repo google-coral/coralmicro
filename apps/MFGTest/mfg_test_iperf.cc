@@ -44,10 +44,10 @@ static void IperfStart(struct jsonrpc_request *request) {
     if (server) {
         iperf_ctx.session = lwiperf_start_tcp_server_default(lwiperf_report, &iperf_ctx);
     } else { // client
-        std::vector<char> server_ip_address;
+        std::string server_ip_address;
         if (!JsonRpcGetStringParam(request, "server_ip_address", &server_ip_address)) return;
         ip_addr_t addr;
-        if (ipaddr_aton(server_ip_address.data(), &addr) == -1) {
+        if (ipaddr_aton(server_ip_address.c_str(), &addr) == -1) {
             jsonrpc_return_error(request, -1, "failed to parse `server_ip_address`", nullptr);
             return;
         }

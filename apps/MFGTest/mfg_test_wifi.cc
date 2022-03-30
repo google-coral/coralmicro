@@ -27,7 +27,7 @@ static void WifiGetAP(struct jsonrpc_request *request) {
         return;
     }
 
-    std::vector<char> name;
+    std::string name;
     if (!JsonRpcGetStringParam(request, "name", &name)) return;
 
     WIFIReturnCode_t wifi_ret;
@@ -42,7 +42,7 @@ static void WifiGetAP(struct jsonrpc_request *request) {
 
     std::vector<int> scan_indices;
     for (int i = 0; i < kNumResults; ++i) {
-        if (memcmp(xScanResults[i].cSSID, name.data(), name.size()) == 0) {
+        if (memcmp(xScanResults[i].cSSID, name.c_str(), name.size()) == 0) {
             scan_indices.push_back(i);
         }
     }
@@ -74,11 +74,11 @@ static void BLEFind(struct jsonrpc_request *request) {
         }
     }
 
-    std::vector<char> address;
+    std::string address;
     if (!JsonRpcGetStringParam(request, "address", &address)) return;
 
     unsigned int a, b, c, d, e, f;
-    int tokens = sscanf(address.data(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);
+    int tokens = sscanf(address.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);
     if (tokens != 6) {
         jsonrpc_return_error(request, -1, "could not get six octets from 'address'", nullptr);
         return;

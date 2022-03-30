@@ -14,7 +14,6 @@
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
@@ -25,7 +24,7 @@
 
 // Map for containing uploaded resources.
 // Key is the output of StrHash with the resource name as the parameter.
-static std::map<std::vector<char>, std::vector<uint8_t>> uploaded_resources;
+static std::map<std::string, std::vector<uint8_t>> uploaded_resources;
 
 namespace valiant {
 namespace testlib {
@@ -45,63 +44,69 @@ void JsonRpcReturnBadParam(struct jsonrpc_request* request, const char* message,
 
 bool JsonRpcGetIntegerParam(struct jsonrpc_request* request, const char *param_name, int* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
-    if (tok == MJSON_TOK_INVALID) {
-        JsonRpcReturnBadParam(request, "missing param", param_name);
-        return false;
-    }
-
-    if (tok != MJSON_TOK_NUMBER) {
-        JsonRpcReturnBadParam(request, "param is not a number", param_name);
-        return false;
-    }
 
     double value;
-    mjson_get_number(request->params, request->params_len, param_pattern.get(), &value);
+    if (mjson_get_number(request->params, request->params_len, param_pattern.get(), &value) == 0) {
+        JsonRpcReturnBadParam(request, "invalid param", param_name);
+        return false;
+    }
+
     *out = static_cast<int>(value);
     return true;
 }
 
 bool JsonRpcGetBooleanParam(struct jsonrpc_request* request, const char *param_name, bool *out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, nullptr);
-    if (tok == MJSON_TOK_INVALID) {
-        JsonRpcReturnBadParam(request, "missing param", param_name);
-        return false;
-    }
-
-    if (tok != MJSON_TOK_TRUE && tok != MJSON_TOK_FALSE) {
-        JsonRpcReturnBadParam(request, "param is not a bool", param_name);
-        return false;
-    }
 
     int value;
-    mjson_get_bool(request->params, request->params_len, param_pattern.get(), &value);
-    *out = !!value;
+    if (mjson_get_bool(request->params, request->params_len, param_pattern.get(), &value) == 0) {
+        JsonRpcReturnBadParam(request, "invalid param", param_name);
+        return false;
+    }
+
+    *out = static_cast<bool>(value);
     return true;
 }
 
-bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char *param_name, std::vector<char>* out) {
+bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char *param_name, std::string* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
 
     ssize_t size = 0;
     int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, &size);
-    if (tok == MJSON_TOK_INVALID) {
-        JsonRpcReturnBadParam(request, "missing param", param_name);
-        return false;
-    }
-
     if (tok != MJSON_TOK_STRING) {
-        JsonRpcReturnBadParam(request, "param is not a string", param_name);
+        JsonRpcReturnBadParam(request, "invalid param", param_name);
         return false;
     }
 
     out->resize(size);
-    mjson_get_string(request->params, request->params_len, param_pattern.get(), out->data(), size);
+    auto len = mjson_get_string(request->params, request->params_len,
+                                param_pattern.get(), out->data(), out->size());
+    out->resize(len);
     return true;
 }
 
-static uint8_t* GetResource(const std::vector<char>& resource_name, size_t *resource_size) {
+bool JsonRpcGetBase64Param(struct jsonrpc_request* request, const char *param_name, std::vector<uint8_t>* out) {
+    auto param_pattern = JSONRPCCreateParamFormatString(param_name);
+
+    ssize_t size = 0;
+    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, &size);
+    if (tok != MJSON_TOK_STRING) {
+        JsonRpcReturnBadParam(request, "invalid param", param_name);
+        return false;
+    }
+
+    // `size` includes both quotes, `size - 2` is the real sting size. Base64
+    // encodes every 3 bytes as 4 chars. Buffer size of `3 * ceil(size - 2) / 4`
+    // should be enough.
+    out->resize(3 * (((size - 2) + 3) / 4));
+    auto len = mjson_get_base64(request->params, request->params_len,
+                                param_pattern.get(),
+                                reinterpret_cast<char*>(out->data()), size);
+    out->resize(len);
+    return true;
+}
+
+static uint8_t* GetResource(const std::string& resource_name, size_t *resource_size) {
     auto it = uploaded_resources.find(resource_name);
     if (it == uploaded_resources.end()) {
         return nullptr;
@@ -152,7 +157,7 @@ void SetTPUPowerState(struct jsonrpc_request *request) {
 }
 
 void BeginUploadResource(struct jsonrpc_request *request) {
-    std::vector<char> resource_name;
+    std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
     int resource_size;
@@ -163,7 +168,7 @@ void BeginUploadResource(struct jsonrpc_request *request) {
 }
 
 void UploadResourceChunk(struct jsonrpc_request *request) {
-    std::vector<char> resource_name;
+    std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
     uint8_t* resource = GetResource(resource_name, nullptr);
@@ -175,19 +180,15 @@ void UploadResourceChunk(struct jsonrpc_request *request) {
     int offset;
     if (!JsonRpcGetIntegerParam(request, "offset", &offset)) return;
 
-    std::vector<char> resource_data;
-    if (!JsonRpcGetStringParam(request, "data", &resource_data)) return;
-
-    unsigned int bytes_to_decode = strlen(resource_data.data());
-    size_t decoded_length = 0;
-    mbedtls_base64_decode(nullptr, 0, &decoded_length, reinterpret_cast<unsigned char*>(resource_data.data()), bytes_to_decode);
-    mbedtls_base64_decode(resource + offset, decoded_length, &decoded_length, reinterpret_cast<unsigned char*>(resource_data.data()), bytes_to_decode);
+    std::vector<uint8_t> data;
+    if (!JsonRpcGetBase64Param(request, "data", &data)) return;
+    std::memcpy(resource + offset, data.data(), data.size());
 
     jsonrpc_return_success(request, "{}");
 }
 
 void DeleteResource(struct jsonrpc_request *request) {
-    std::vector<char> resource_name;
+    std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
     auto it = uploaded_resources.find(resource_name);
@@ -201,7 +202,7 @@ void DeleteResource(struct jsonrpc_request *request) {
 }
 
 void RunDetectionModel(struct jsonrpc_request* request) {
-    std::vector<char> model_resource_name, image_resource_name;
+    std::string model_resource_name, image_resource_name;
     int image_width, image_height, image_depth;
 
     if (!JsonRpcGetStringParam(request, "model_resource_name", &model_resource_name))
@@ -314,7 +315,7 @@ void RunDetectionModel(struct jsonrpc_request* request) {
 }
 
 void RunClassificationModel(struct jsonrpc_request* request) {
-    std::vector<char> model_resource_name, image_resource_name;
+    std::string model_resource_name, image_resource_name;
     int image_width, image_height, image_depth;
 
     if (!JsonRpcGetStringParam(request, "model_resource_name", &model_resource_name))

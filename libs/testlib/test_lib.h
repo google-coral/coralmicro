@@ -3,30 +3,31 @@
 
 #include "third_party/mjson/src/mjson.h"
 
+#include <string>
 #include <vector>
 
 namespace valiant {
 namespace testlib {
 
-// TODO(dkovalev): Add inline after switching to C++17.
-constexpr char kMethodGetSerialNumber[] = "get_serial_number";
-constexpr char kMethodRunTestConv1[] = "run_testconv1";
-constexpr char kMethodSetTPUPowerState[] = "set_tpu_power_state";
-constexpr char kMethodPosenetStressRun[] = "posenet_stress_run";
-constexpr char kMethodBeginUploadResource[] = "begin_upload_resource";
-constexpr char kMethodUploadResourceChunk[] = "upload_resource_chunk";
-constexpr char kMethodDeleteResource[] = "delete_resource";
-constexpr char kMethodRunClassificationModel[] = "run_classification_model";
-constexpr char kMethodRunDetectionModel[] = "run_detection_model";
-constexpr char kMethodStartM4[] = "start_m4";
-constexpr char kMethodCaptureTestPattern[] = "capture_test_pattern";
-constexpr char kMethodGetTemperature[] = "get_temperature";
-constexpr char kMethodCaptureAudio[] = "capture_audio";
-constexpr char kMethodWifiSetAntenna[] = "wifi_set_antenna";
+inline constexpr char kMethodGetSerialNumber[] = "get_serial_number";
+inline constexpr char kMethodRunTestConv1[] = "run_testconv1";
+inline constexpr char kMethodSetTPUPowerState[] = "set_tpu_power_state";
+inline constexpr char kMethodPosenetStressRun[] = "posenet_stress_run";
+inline constexpr char kMethodBeginUploadResource[] = "begin_upload_resource";
+inline constexpr char kMethodUploadResourceChunk[] = "upload_resource_chunk";
+inline constexpr char kMethodDeleteResource[] = "delete_resource";
+inline constexpr char kMethodRunClassificationModel[] = "run_classification_model";
+inline constexpr char kMethodRunDetectionModel[] = "run_detection_model";
+inline constexpr char kMethodStartM4[] = "start_m4";
+inline constexpr char kMethodCaptureTestPattern[] = "capture_test_pattern";
+inline constexpr char kMethodGetTemperature[] = "get_temperature";
+inline constexpr char kMethodCaptureAudio[] = "capture_audio";
+inline constexpr char kMethodWifiSetAntenna[] = "wifi_set_antenna";
 
 bool JsonRpcGetIntegerParam(struct jsonrpc_request* request, const char* param_name, int* out);
 bool JsonRpcGetBooleanParam(struct jsonrpc_request* request, const char* param_name, bool* out);
-bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char* param_name, std::vector<char>* out);
+bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char* param_name, std::string* out);
+bool JsonRpcGetBase64Param(struct jsonrpc_request* request, const char *param_name, std::vector<uint8_t>* out);
 
 void GetSerialNumber(struct jsonrpc_request* request);
 void RunTestConv1(struct jsonrpc_request* request);

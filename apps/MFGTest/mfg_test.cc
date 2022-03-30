@@ -14,7 +14,6 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
-#include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 
 #include <array>
 #include <map>
@@ -22,6 +21,7 @@
 using valiant::testlib::JsonRpcGetIntegerParam;
 using valiant::testlib::JsonRpcGetBooleanParam;
 using valiant::testlib::JsonRpcGetStringParam;
+using valiant::testlib::JsonRpcGetBase64Param;
 
 // In the below maps, data about pins to be tested via the loopback fixture
 // is provided. Pins on J5 are numbered from 1-100, and pins on J6 are numbered from 101-200.
@@ -518,19 +518,15 @@ static void TestSDRamPattern(struct jsonrpc_request *request) {
 //    "data": base64-encoded data to decode and write into the file.
 // Returns success or failure.
 static void WriteFile(struct jsonrpc_request *request) {
-    std::vector<char> filename, data;
+    std::string filename;
     if (!JsonRpcGetStringParam(request, "filename", &filename))  return;
-    if (!JsonRpcGetStringParam(request, "data", &data)) return;
 
-    // The data from mjson is a null-terminated string: use strlen for getting the size.
-    unsigned int bytes_to_decode = strlen(data.data());
-    size_t decoded_length = 0;
-    mbedtls_base64_decode(nullptr, 0, &decoded_length, reinterpret_cast<unsigned char*>(data.data()), bytes_to_decode);
-    std::vector<uint8_t> decoded_data(decoded_length);
-    mbedtls_base64_decode(decoded_data.data(), decoded_length, &decoded_length, reinterpret_cast<unsigned char*>(data.data()), bytes_to_decode);
+    std::vector<uint8_t> data;
+    if (!JsonRpcGetBase64Param(request, "data", &data)) return;
 
-    if (!valiant::filesystem::WriteFile(filename.data(), decoded_data.data(), decoded_data.size())) {
+    if (!valiant::filesystem::WriteFile(filename.c_str(), data.data(), data.size())) {
         jsonrpc_return_error(request, -1, "failed to write file", nullptr);
+        return;
     }
 
     jsonrpc_return_success(request, "{}");
@@ -540,11 +536,11 @@ static void WriteFile(struct jsonrpc_request *request) {
 // Takes one parameter, "filename".
 // Base64-encodes and returns the data in the file, if it exists.
 static void ReadFile(struct jsonrpc_request *request) {
-    std::vector<char> filename;
+    std::string filename;
     if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
     std::vector<uint8_t> data;
-    if (!valiant::filesystem::ReadFile(filename.data(), &data)) {
+    if (!valiant::filesystem::ReadFile(filename.c_str(), &data)) {
         jsonrpc_return_error(request, -1, "failed to read file", nullptr);
     }
 
@@ -552,11 +548,11 @@ static void ReadFile(struct jsonrpc_request *request) {
 }
 
 static void FuseMACAddress(struct jsonrpc_request *request) {
-    std::vector<char> address;
+    std::string address;
     if (!JsonRpcGetStringParam(request, "address", &address)) return;
 
     unsigned int a, b, c, d, e, f;
-    int tokens = sscanf(address.data(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);
+    int tokens = sscanf(address.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);
     if (tokens != 6) {
         jsonrpc_return_error(request, -1, "could not get six octets from 'address'", nullptr);
         return;
