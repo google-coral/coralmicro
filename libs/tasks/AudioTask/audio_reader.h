@@ -3,6 +3,7 @@
 
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 
 namespace valiant {
@@ -62,6 +63,20 @@ class FreeRTOSStreamBuffer {
     StreamBufferHandle_t handle_;
 };
 
+// Class to read audio samples from the microphone in real time.
+//
+// Example:
+//
+// AudioReader reader(audio::SampleRate::k16000_Hz,
+//                    /*dma_buffer_size_ms=*/100,
+//                    /*num_dma_buffers=*/10);
+//
+// auto& buffer = reader.Buffer();
+// while (true) {
+//     auto size = reader.FillBuffer();
+//     ProcessBuffer(buffer.data(), size);
+// }
+//
 class AudioReader {
    public:
     AudioReader(audio::SampleRate sample_rate, int dma_buffer_size_ms,
@@ -85,6 +100,47 @@ class AudioReader {
 
     volatile int overflow_count_ = 0;
     volatile int underflow_count_ = 0;
+};
+
+// Class to access fixed number of latest audio samples from the microphone.
+// Call `AccessLatestSamples()` at any time to access the latest
+// `latest_buffer_size_ms` of audio data.
+//
+// Example:
+//
+// LatestAudioReader reader(audio::SampleRate::k16000_Hz,
+//                          /*dma_buffer_size_ms=*/100,
+//                          /*num_dma_buffers=*/10,
+//                          /*latest_buffer_size_ms=*/150);
+//
+// reader.AccessLatestSamples([](const std::vector<int32_t>& samples) { ... });
+//
+class LatestAudioReader {
+   public:
+    LatestAudioReader(audio::SampleRate sample_rate, int dma_buffer_size_ms,
+                      int num_dma_buffers, int latest_buffer_size_ms);
+    ~LatestAudioReader();
+
+    template <typename F>
+    void AccessLatestSamples(F f) {
+        xSemaphoreTake(mutex_, portMAX_DELAY);
+        f(samples_);
+        xSemaphoreGive(mutex_);
+    };
+
+   private:
+    static void StaticRun(void* param);
+    void Run();
+
+    audio::SampleRate sample_rate_;
+    int dma_buffer_size_ms_;
+    int num_dma_buffers_;
+
+    TaskHandle_t task_;
+    SemaphoreHandle_t mutex_;
+    std::vector<int32_t> samples_;  // protected by mutex_;
+    size_t pos_ = 0;                // protected by mutex_;
+    bool done_ = false;             // protected by mutex_;
 };
 
 }  // namespace valiant

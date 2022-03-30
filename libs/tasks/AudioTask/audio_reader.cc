@@ -46,4 +46,56 @@ void AudioReader::Callback(void* param, const int32_t* buf, size_t size) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
+LatestAudioReader::LatestAudioReader(valiant::audio::SampleRate sample_rate,
+                                     int dma_buffer_size_ms,
+                                     int num_dma_buffers,
+                                     int latest_buffer_size_ms)
+    : sample_rate_(sample_rate),
+      dma_buffer_size_ms_(dma_buffer_size_ms),
+      num_dma_buffers_(num_dma_buffers) {
+    auto ret = xTaskCreate(StaticRun, "latest_audio_reader",
+                           configMINIMAL_STACK_SIZE * 30, this,
+                           APP_TASK_PRIORITY, &task_);
+    assert(ret == pdPASS);
+
+    mutex_ = xSemaphoreCreateMutex();
+    assert(mutex_);
+
+    samples_.resize(latest_buffer_size_ms *
+                    static_cast<uint32_t>(sample_rate_) / 1000);
+}
+
+LatestAudioReader::~LatestAudioReader() {
+    xSemaphoreTake(mutex_, portMAX_DELAY);
+    done_ = true;
+    xSemaphoreGive(mutex_);
+
+    while (eTaskGetState(task_) != eSuspended) taskYIELD();
+    vTaskDelete(task_);
+    vSemaphoreDelete(mutex_);
+}
+
+void LatestAudioReader::StaticRun(void* param) {
+    reinterpret_cast<LatestAudioReader*>(param)->Run();
+    vTaskSuspend(nullptr);
+}
+
+void LatestAudioReader::Run() {
+    valiant::AudioReader reader(sample_rate_, dma_buffer_size_ms_,
+                                num_dma_buffers_);
+    auto& buffer = reader.Buffer();
+
+    bool done = false;
+    while (!done) {
+        auto size = reader.FillBuffer();
+
+        xSemaphoreTake(mutex_, portMAX_DELAY);
+        for (size_t i = 0; i < size; ++i)
+            samples_[(pos_ + i) % samples_.size()] = buffer[i];
+        pos_ = (pos_ + size) % samples_.size();
+        done = done_;
+        xSemaphoreGive(mutex_);
+    }
+}
+
 }  // namespace valiant
