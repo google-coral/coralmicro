@@ -73,7 +73,23 @@ ELFLOADER_TARGET_RAM = 0
 ELFLOADER_TARGET_PATH = 1
 ELFLOADER_TARGET_FILESYSTEM = 2
 
-ELFLOADER_CMD_HEADER = '=BB'
+def elfloader_msg_setsize(size):
+    return struct.pack('=BBl', 0, ELFLOADER_SETSIZE, size)
+
+# 64 bytes HID packet, adjust for header and padding
+ELFLOADER_MAX_BYTES_PER_PACKET = 64 - struct.calcsize('=BBll') + 1
+
+def elfloader_msg_bytes(offset, data):
+    return struct.pack('=BBll%ds' % len(data), 0, ELFLOADER_BYTES,
+                       len(data), offset, data);
+def elfloader_msg_done():
+    return struct.pack('=BB', 0, ELFLOADER_DONE)
+
+def elfloader_msg_reset():
+    return struct.pack('=BB', 0, ELFLOADER_RESET)
+
+def elfloader_msg_target(target):
+    return struct.pack('=BBB', 0, ELFLOADER_TARGET, target)
 
 def read_file(path):
     with open(path, 'rb') as f:
@@ -395,10 +411,9 @@ def OpenHidDevice(vid, pid, serial_number):
 
     raise Exception('Failed to open Valiant HID device')
 
-
 def StateResetElfloader(serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
-        h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
+        h.write(elfloader_msg_reset())
     return StateCheckForSdp
 
 def StateProgram(blhost_path, sbfile_path):
@@ -419,26 +434,23 @@ def ElfloaderTransferData(h, data, target, bar=None):
                 warned = True
 
     total_bytes = len(data)
-    h.write(struct.pack(ELFLOADER_CMD_HEADER + 'B', 0, ELFLOADER_TARGET, target))
+    h.write(elfloader_msg_target(target))
     read_byte()
 
-    h.write(struct.pack(ELFLOADER_CMD_HEADER + 'l', 0, ELFLOADER_SETSIZE, total_bytes))
+    h.write(elfloader_msg_setsize(total_bytes))
     read_byte()
 
-    data_packet_header = ELFLOADER_CMD_HEADER + 'll'
-    bytes_per_packet = 64 - struct.calcsize(data_packet_header) + 1 # 64 bytes HID packet, adjust for header and padding
     bytes_transferred = 0
     while bytes_transferred < total_bytes:
-        bytes_this_packet = min(bytes_per_packet, (total_bytes - bytes_transferred))
-        h.write(
-            struct.pack((data_packet_header + '%ds') % bytes_this_packet,
-            0, ELFLOADER_BYTES, bytes_this_packet, bytes_transferred,
-            data[bytes_transferred:bytes_transferred+bytes_this_packet]))
+        bytes_this_packet = min(ELFLOADER_MAX_BYTES_PER_PACKET,
+                                total_bytes - bytes_transferred)
+        h.write(elfloader_msg_bytes(bytes_transferred,
+            data[bytes_transferred:bytes_transferred + bytes_this_packet]))
         read_byte()
         bytes_transferred += bytes_this_packet
         if bar:
             bar.goto(bytes_transferred)
-    h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_DONE))
+    h.write(elfloader_msg_done())
     read_byte()
     if bar:
         bar.finish()
@@ -482,7 +494,7 @@ def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, 
 
 def StateReset(serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
-        h.write(struct.pack(ELFLOADER_CMD_HEADER, 0, ELFLOADER_RESET))
+        h.write(elfloader_msg_reset())
     return StateDone
 
 def StateStartGdb(jlink_path, toolchain_path, unstripped_elf_path):
