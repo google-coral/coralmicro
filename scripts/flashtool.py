@@ -549,10 +549,6 @@ def main():
     parser.add_argument('--debug', dest='debug', action='store_true')
     parser.add_argument('--jlink_path', type=str, default='/opt/SEGGER/JLink')
     parser.add_argument('--cached', dest='cached', action='store_true')
-    parser.set_defaults(list=False)
-    parser.set_defaults(ram=False)
-    parser.set_defaults(strip=False)
-    parser.set_defaults(debug=False)
 
     app_elf_group = parser.add_mutually_exclusive_group(required=True)
     app_elf_group.add_argument('--app', type=str)
