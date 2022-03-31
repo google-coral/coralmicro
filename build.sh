@@ -104,14 +104,29 @@ metrics:
 sketch:
   always_export_binaries: false
 EOF
+    local platform_name=""
+    local flashtool_name=""
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        platform_name="linux64"
+        flashtool_name="linux"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        platform_name="osx"
+        flashtool_name="mac"
+    elif [[ "$OSTYPE" == "win32" ]]; then
+        platform_name="windows"
+        flashtool_name="win"
+    else
+        die "unkown platform name : $OSTYPE"
+    fi
+
     python3 -m http.server --directory ${build_dir} &
     http_pid="$!"
     python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --manifest \
-      --manifest_revision=9.9.9 \
-      --core_url=http://localhost:8000/coral-valiant-$(git rev-parse HEAD).tar.bz2 \
-      --core_sha256=$(sha256sum ${build_dir}/coral-valiant-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
-      --linux_flashtool_url=http://localhost:8000/coral-flashtool-linux64-$(git rev-parse HEAD).tar.bz2 \
-      --linux_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-linux64-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1)
+    --manifest_revision=9.9.9 \
+    --core_url=http://localhost:8000/coral-valiant-$(git rev-parse HEAD).tar.bz2 \
+    --core_sha256=$(sha256sum ${build_dir}/coral-valiant-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
+    --${flashtool_name}_flashtool_url=http://localhost:8000/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 \
+    --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1)
     ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core update-index
     ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core install coral:valiant
     ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:valiant:valiant ${ROOTDIR}/sketches/HelloWorld -v
