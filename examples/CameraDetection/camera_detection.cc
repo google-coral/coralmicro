@@ -1,136 +1,120 @@
-#include "libs/base/filesystem.h"
-#include "libs/base/gpio.h"
-#include "libs/base/utils.h"
+#include <cstring>
+#include <vector>
+
 #include "libs/RPCServer/rpc_server_io_http.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
+#include "libs/base/filesystem.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tensorflow/detection.h"
-#include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
-#include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "tensorflow/lite/schema/schema_generated.h"
-#include "third_party/mjson/src/mjson.h"
+#include "libs/tpu/edgetpu_op.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/mjson/src/mjson.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
 namespace {
-    constexpr int kTensorArenaSize{8 * 1024 * 1024};
+constexpr char kModelPath[] =
+    "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
+// An area of memory to use for input, output, and intermediate arrays.
+constexpr int kTensorArenaSize = 8 * 1024 * 1024;
+uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
+__attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
-    std::unique_ptr<tflite::MicroInterpreter> interpreter{nullptr};
-    std::shared_ptr<valiant::EdgeTpuContext> edgetpu_context{nullptr};
+void DetectFromCamera(struct jsonrpc_request* r) {
+    auto* interpreter =
+        reinterpret_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
 
-    int model_height{0};
-    int model_width{0};
-    // An area of memory to use for input, output, and intermediate arrays.
-    uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+    auto* input_tensor = interpreter->input_tensor(0);
+    int model_height = input_tensor->dims->data[1];
+    int model_width = input_tensor->dims->data[2];
 
-    void detect_from_camera_rpc(struct jsonrpc_request *r) {
-        valiant::CameraTask::GetSingleton()->SetPower(true);
-        valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
+    printf("width=%d; height=%d\n\r", model_width, model_height);
 
-        if (model_height == 0 || model_width == 0) {
-            jsonrpc_return_error(r, -1, "Model height/width not initialized.", nullptr);
-            return;
-        }
-        std::vector<uint8_t> image_buffer(model_width * model_height * /*channels=*/3);
-        valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB,
-                                         model_width,
-                                         model_height,
-                                         false,
-                                         image_buffer.data()};
+    valiant::CameraTask::GetSingleton()->SetPower(true);
+    valiant::CameraTask::GetSingleton()->Enable(
+        valiant::camera::Mode::STREAMING);
 
-        bool ret = valiant::CameraTask::GetFrame({fmt});
+    std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
+    valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB, model_width,
+                                     model_height, false, image.data()};
 
-        valiant::CameraTask::GetSingleton()->Disable();
-        valiant::CameraTask::GetSingleton()->SetPower(false);
+    bool ret = valiant::CameraTask::GetFrame({fmt});
 
-        if (!ret) {
-            jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
-            return;
-        } else {
-            // Copy image data to input tensor.
-            auto *input_tensor_data = tflite::GetTensorData<uint8_t>(interpreter->input_tensor(0));
-            std::memcpy(input_tensor_data, image_buffer.data(), image_buffer.size());
+    valiant::CameraTask::GetSingleton()->Disable();
+    valiant::CameraTask::GetSingleton()->SetPower(false);
 
-            // Run Inference.
-            if (interpreter->Invoke() != kTfLiteOk) {
-                jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
-                return;
-            }
-
-            // Parses output and returns to client.
-            auto detection_results = valiant::tensorflow::GetDetectionResults(interpreter.get(), 0.5, 1);
-            if (!detection_results.empty()) {
-                const auto &result = detection_results[0];
-                jsonrpc_return_success(r,
-                                       "{%Q: %d, %Q: %d, %Q: %V, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g}}",
-                                       "width", model_width,
-                                       "height", model_height,
-                                       "base64_data", image_buffer.size(), image_buffer.data(),
-                                       "detection", "id", result.id,
-                                       "score", result.score,
-                                       "xmin", result.bbox.xmin,
-                                       "xmax", result.bbox.xmax,
-                                       "ymin", result.bbox.ymin,
-                                       "ymax", result.bbox.ymax);
-                return;
-            }
-            jsonrpc_return_success(r,
-                                   "{%Q: %d, %Q: %d, %Q: %V, %Q: None}",
-                                   "width", model_width,
-                                   "height", model_height,
-                                   "base64_data", image_buffer.size(), image_buffer.data(),
-                                   "detection");
-
-        }
+    if (!ret) {
+        jsonrpc_return_error(r, -1, "Failed to get image from camera.",
+                             nullptr);
+        return;
     }
 
-} // namespace example
+    std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
+                image.size());
 
-extern "C" void app_main(void *param) {
-    printf("Initializing the interpreter...\n");
-    valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
-
-    std::vector<uint8_t> model_data;
-    if (!valiant::filesystem::ReadFile("/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite", &model_data)) {
-        printf("Failed to load inference_info %p %d\r\n", model_data.data(), model_data.size());
-        vTaskSuspend(nullptr);
+    if (interpreter->Invoke() != kTfLiteOk) {
+        jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
+        return;
     }
-    const auto *model = tflite::GetModel(model_data.data());
 
-    edgetpu_context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
-    if (!edgetpu_context) {
-        printf("Failed to get TPU context\r\n");
+    auto results =
+        valiant::tensorflow::GetDetectionResults(interpreter, 0.5, 1);
+    if (!results.empty()) {
+        const auto& result = results[0];
+        jsonrpc_return_success(
+            r,
+            "{%Q: %d, %Q: %d, %Q: %V, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, "
+            "%Q: %g, %Q: %g}}",
+            "width", model_width, "height", model_height, "base64_data",
+            image.size(), image.data(), "detection", "id", result.id, "score",
+            result.score, "xmin", result.bbox.xmin, "xmax", result.bbox.xmax,
+            "ymin", result.bbox.ymin, "ymax", result.bbox.ymax);
+        return;
+    }
+    jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: None}", "width",
+                           model_width, "height", model_height, "base64_data",
+                           image.size(), image.data(), "detection");
+}
+}  // namespace
+
+extern "C" void app_main(void* param) {
+    std::vector<uint8_t> model;
+    if (!valiant::filesystem::ReadFile(kModelPath, &model)) {
+        printf("ERROR: Failed to load %s\r\n", kModelPath);
         vTaskSuspend(nullptr);
     }
 
-    // Although only 2 ops are registered here, the resolver needs 3 because MakeEdgeTpuInterpreter
-    // is going to register an extra 'edgetpu-custom-op'.
-    constexpr int kNumTensorOps{3};
-    auto resolver = std::make_unique<tflite::MicroMutableOpResolver<kNumTensorOps>>();
-    resolver->AddDequantize();
-    resolver->AddDetectionPostprocess();
-
-    auto error_reporter = std::make_shared<tflite::MicroErrorReporter>();
-    interpreter =
-            valiant::tensorflow::MakeEdgeTpuInterpreter(model, edgetpu_context.get(), resolver.get(),
-                                                        error_reporter.get(),
-                                                        tensor_arena, kTensorArenaSize);
-    if (!interpreter) {
-        printf("Failed to make interpreter\r\n");
+    auto tpu_context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+    if (!tpu_context) {
+        printf("ERROR: Failed to get EdgeTpu context\r\n");
         vTaskSuspend(nullptr);
     }
 
-    model_height = interpreter->input_tensor(0)->dims->data[1];
-    model_width = interpreter->input_tensor(0)->dims->data[2];
+    tflite::MicroErrorReporter error_reporter;
+    tflite::MicroMutableOpResolver<3> resolver;
+    resolver.AddDequantize();
+    resolver.AddDetectionPostprocess();
+    resolver.AddCustom(valiant::kCustomOp, valiant::RegisterCustomOp());
 
-    printf("Initializing the server...\n");
-    jsonrpc_init(nullptr, nullptr);
-    jsonrpc_export("detect_from_camera", detect_from_camera_rpc);
+    tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
+                                         resolver, tensor_arena,
+                                         kTensorArenaSize, &error_reporter);
+    if (interpreter.AllocateTensors() != kTfLiteOk) {
+        printf("ERROR: AllocateTensors() failed\r\n");
+        vTaskSuspend(nullptr);
+    }
 
+    if (interpreter.inputs().size() != 1) {
+        printf("ERROR: Model must have only one input tensor\r\n");
+        vTaskSuspend(nullptr);
+    }
+
+    printf("Initializing detection server...%p\r\n", &interpreter);
+    jsonrpc_init(nullptr, &interpreter);
+    jsonrpc_export("detect_from_camera", DetectFromCamera);
     valiant::httpd::Init(new valiant::JsonRpcHttpServer);
-    printf("Detection server ready\r\n");
+    printf("Detection server ready!\r\n");
     vTaskSuspend(nullptr);
 }
