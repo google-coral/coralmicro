@@ -626,8 +626,8 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("fuse_mac_address", FuseMACAddress);
     jsonrpc_export("read_mac_address", ReadMACAddress);
     IperfInit();
-    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
-    vTaskSuspend(NULL);
+    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
+    vTaskSuspend(nullptr);
 }
 
 extern "C" int main(int argc, char **argv) {

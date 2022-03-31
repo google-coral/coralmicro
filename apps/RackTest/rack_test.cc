@@ -195,12 +195,10 @@ void GetFrame(struct jsonrpc_request *request) {
         jsonrpc_return_error(request, -1, "Call to GetFrame returned false.", nullptr);
 }
 
-bool DynamicFileHandler(const char* name, std::vector<uint8_t>* buffer) {
-    if (std::strcmp("/camera.rgb", name) == 0) {
-        *buffer = std::move(camera_rgb);
-        return true;
-    }
-    return false;
+valiant::HttpServer::Content UriHandler(const char* name) {
+    if (std::strcmp("/camera.rgb", name) == 0)
+        return valiant::HttpServer::Content{std::move(camera_rgb)};
+    return {};
 }
 }  // namespace
 
@@ -239,7 +237,7 @@ extern "C" void app_main(void *param) {
                    valiant::testlib::CaptureAudio);
 
     valiant::JsonRpcHttpServer server;
-    server.SetDynamicFileHandler(DynamicFileHandler);
-    valiant::httpd::Init(&server);
+    server.AddUriHandler(UriHandler);
+    valiant::UseHttpServer(&server);
     vTaskSuspend(nullptr);
 }

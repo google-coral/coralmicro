@@ -51,7 +51,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("eth_get_ip", EthGetIP);
     jsonrpc_export("eth_write_phy", EthWritePHY);
     IperfInit();
-    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
+    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }
 

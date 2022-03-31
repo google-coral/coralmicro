@@ -1,15 +1,16 @@
 #ifndef _LIBS_BASE_HTTPD_H_
 #define _LIBS_BASE_HTTPD_H_
 
+#include <cstring>
 #include <functional>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/fs.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 
 namespace valiant {
-namespace httpd {
 
 class HttpServer {
    public:
@@ -30,34 +31,44 @@ class HttpServer {
     virtual void CgiHandler(struct fs_file* file, const char* uri,
                             int iNumParams, char** pcParam, char** pcValue){};
 
-   public:
     virtual int FsOpenCustom(struct fs_file* file, const char* name);
     virtual int FsReadCustom(struct fs_file* file, char* buffer, int count);
     virtual void FsCloseCustom(struct fs_file* file);
 
    public:
-    using DynamicFileHandler =
-        std::function<bool(const char* name, std::vector<uint8_t>* buffer)>;
+    struct StaticBuffer {
+        const uint8_t* buffer;
+        size_t size;
+    };
 
-    using StaticFileHandler = std::function<bool(
-        const char* name, const uint8_t** buffer, size_t* size)>;
+    using Content = std::variant<std::monostate,        // Not found
+                                 std::string,           // Filename
+                                 std::vector<uint8_t>,  // Dynamic buffer
+                                 StaticBuffer>;         // Static buffer
 
-    void SetDynamicFileHandler(DynamicFileHandler handler) {
-        dynamic_file_handler_ = std::move(handler);
-    }
+    using UriHandler = std::function<Content(const char* uri)>;
 
-    void SetStaticFileHandler(StaticFileHandler handler) {
-        static_file_handler_ = std::move(handler);
+    void AddUriHandler(UriHandler handler) {
+        uri_handlers_.push_back(std::move(handler));
     }
 
    private:
-    DynamicFileHandler dynamic_file_handler_;
-    StaticFileHandler static_file_handler_;
+    std::vector<UriHandler> uri_handlers_;
 };
 
-void Init(HttpServer* server);
+struct FileSystemUriHandler {
+    static constexpr char kPrefix[] = "/fs/";
+    static constexpr size_t kPrefixLength = sizeof(kPrefix) - 1;
 
-}  // namespace httpd
+    HttpServer::Content operator()(const char* uri) {
+        if (std::strncmp(uri, kPrefix, kPrefixLength) == 0)
+            return std::string{uri + kPrefixLength - 1};
+        return {};
+    }
+};
+
+void UseHttpServer(HttpServer* server);
+
 }  // namespace valiant
 
 #endif  // _LIBS_BASE_HTTPD_H_

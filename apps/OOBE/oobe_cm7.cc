@@ -52,22 +52,22 @@ TickType_t posenet_output_time;
 constexpr unsigned int kCameraPextension = 0xdeadbeefU;
 constexpr unsigned int kPosePextension = 0xbadbeeefU;
 
-static bool DynamicFileHandler(const char *name, std::vector<uint8_t>* buffer) {
+static valiant::HttpServer::Content UriHandler(const char *name) {
     if (std::strcmp(name, "/camera") == 0) {
         valiant::MutexLock lock(camera_output_mtx);
-        *buffer = std::move(camera_output);
-        return true;
+        if (camera_output.empty()) return {};
+        return valiant::HttpServer::Content{std::move(camera_output)};
     }
 
     if (std::strcmp(name, "/pose") == 0) {
         valiant::MutexLock lock(posenet_output_mtx);
-        if (!posenet_output) return false;
-        *buffer = valiant::oobe::CreatePoseJSON(*posenet_output, kThreshold);
+        if (!posenet_output) return {};
+        auto json = valiant::oobe::CreatePoseJSON(*posenet_output, kThreshold);
         posenet_output.reset();
-        return true;
+        return json;
     }
 
-    return false;
+    return {};
 }
 
 namespace valiant {
@@ -209,9 +209,10 @@ void main() {
     }
 #endif // defined(OOBE_DEMO_ETHERNET)
 
-    valiant::httpd::HttpServer http_server;
-    http_server.SetDynamicFileHandler(DynamicFileHandler);
-    valiant::httpd::Init(&http_server);
+    valiant::HttpServer http_server;
+    http_server.AddUriHandler(UriHandler);
+    http_server.AddUriHandler(valiant::FileSystemUriHandler{});
+    valiant::UseHttpServer(&http_server);
 
     valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetCurrentTaskHandle());
     valiant::EdgeTpuTask::GetSingleton()->SetPower(true);

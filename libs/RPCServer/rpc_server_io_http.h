@@ -9,7 +9,7 @@
 
 namespace valiant {
 
-class JsonRpcHttpServer : public valiant::httpd::HttpServer {
+class JsonRpcHttpServer : public valiant::HttpServer {
    public:
     JsonRpcHttpServer(struct jsonrpc_ctx* ctx = &jsonrpc_default_context)
         : ctx_(ctx) {}

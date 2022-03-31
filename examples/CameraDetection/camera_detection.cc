@@ -114,7 +114,7 @@ extern "C" void app_main(void* param) {
     printf("Initializing detection server...%p\r\n", &interpreter);
     jsonrpc_init(nullptr, &interpreter);
     jsonrpc_export("detect_from_camera", DetectFromCamera);
-    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
+    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
     printf("Detection server ready!\r\n");
     vTaskSuspend(nullptr);
 }

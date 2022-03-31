@@ -20,33 +20,23 @@ static uint8_t camera_rgb[valiant::CameraTask::kWidth * valiant::CameraTask::kHe
 static uint8_t camera_rgb_posenet[kPosenetWidth * kPosenetHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_raw[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
-static bool StaticFileHandler(const char *name, const uint8_t** buffer, size_t* size) {
-    if (std::strcmp(name, "/camera.rgb") == 0) {
-        *buffer = camera_rgb;
-        *size = sizeof(camera_rgb);
-        return true;
-    }
-    if (std::strcmp(name, "/camera-posenet.rgb") == 0) {
-        *buffer = camera_rgb_posenet;
-        *size = sizeof(camera_rgb_posenet);
-        return true;
-    }
-    if (std::strcmp(name, "/camera.gray") == 0) {
-        *buffer = camera_grayscale;
-        *size = sizeof(camera_grayscale);
-        return true;
-    }
-    if (std::strcmp(name, "/camera-small.gray") == 0) {
-        *buffer = camera_grayscale_small;
-        *size = sizeof(camera_grayscale_small);
-        return true;
-    }
-    if (std::strcmp(name, "/camera.raw") == 0) {
-        *buffer = camera_raw;
-        *size = sizeof(camera_raw);
-        return true;
-    }
-    return false;
+static valiant::HttpServer::Content UriHandler(const char *name) {
+    if (std::strcmp(name, "/camera.rgb") == 0)
+        return valiant::HttpServer::StaticBuffer{camera_rgb, sizeof(camera_rgb)};
+
+    if (std::strcmp(name, "/camera-posenet.rgb") == 0)
+        return valiant::HttpServer::StaticBuffer{camera_rgb_posenet, sizeof(camera_rgb_posenet)};
+
+    if (std::strcmp(name, "/camera.gray") == 0)
+        return valiant::HttpServer::StaticBuffer{camera_grayscale, sizeof(camera_grayscale)};
+
+    if (std::strcmp(name, "/camera-small.gray") == 0)
+        return valiant::HttpServer::StaticBuffer{camera_grayscale_small, sizeof(camera_grayscale_small)};
+
+    if (std::strcmp(name, "/camera.raw") == 0)
+        return valiant::HttpServer::StaticBuffer{camera_raw, sizeof(camera_raw)};
+
+    return {};
 }
 
 void GetFrame() {
@@ -87,9 +77,9 @@ void GetFrame() {
 extern "C" void app_main(void *param) {
     printf("Camera test\r\n");
 
-    valiant::httpd::HttpServer http_server;
-    http_server.SetStaticFileHandler(StaticFileHandler);
-    valiant::httpd::Init(&http_server);
+    valiant::HttpServer http_server;
+    http_server.AddUriHandler(UriHandler);
+    valiant::UseHttpServer(&http_server);
 
     // Enable Power, Streaming, and enable test pattern.
     valiant::CameraTask::GetSingleton()->SetPower(true);

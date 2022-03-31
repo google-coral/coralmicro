@@ -247,7 +247,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("ble_scan", BLEScan);
     jsonrpc_export("ble_find", BLEFind);
     IperfInit();
-    valiant::httpd::Init(new valiant::JsonRpcHttpServer);
+    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }
 
