@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "libs/base/mutex.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -104,7 +105,10 @@ class AudioReader {
 
 // Class to access fixed number of latest audio samples from the microphone.
 // Call `AccessLatestSamples()` at any time to access the latest
-// `latest_buffer_size_ms` of audio data.
+// `latest_buffer_size_ms` of audio data. Samples start at `start_index`:
+//
+//   First part:  [samples.begin() + start_index, samples.end())
+//   Second part: [samples.begin(),               samples.begin() + start_index)
 //
 // Example:
 //
@@ -113,7 +117,8 @@ class AudioReader {
 //                          /*num_dma_buffers=*/10,
 //                          /*latest_buffer_size_ms=*/150);
 //
-// reader.AccessLatestSamples([](const std::vector<int32_t>& samples) { ... });
+// reader.AccessLatestSamples(
+//    [](const std::vector<int32_t>& samples, size_t start_index) { ... });
 //
 class LatestAudioReader {
    public:
@@ -121,11 +126,12 @@ class LatestAudioReader {
                       int num_dma_buffers, int latest_buffer_size_ms);
     ~LatestAudioReader();
 
+    size_t NumSamples() const { return samples_.size(); }
+
     template <typename F>
     void AccessLatestSamples(F f) {
-        xSemaphoreTake(mutex_, portMAX_DELAY);
-        f(samples_);
-        xSemaphoreGive(mutex_);
+        MutexLock lock(mutex_);
+        f(samples_, pos_);
     };
 
    private:

@@ -66,9 +66,10 @@ LatestAudioReader::LatestAudioReader(valiant::audio::SampleRate sample_rate,
 }
 
 LatestAudioReader::~LatestAudioReader() {
-    xSemaphoreTake(mutex_, portMAX_DELAY);
-    done_ = true;
-    xSemaphoreGive(mutex_);
+    {
+        MutexLock lock(mutex_);
+        done_ = true;
+    }
 
     while (eTaskGetState(task_) != eSuspended) taskYIELD();
     vTaskDelete(task_);
@@ -88,13 +89,13 @@ void LatestAudioReader::Run() {
     bool done = false;
     while (!done) {
         auto size = reader.FillBuffer();
-
-        xSemaphoreTake(mutex_, portMAX_DELAY);
-        for (size_t i = 0; i < size; ++i)
-            samples_[(pos_ + i) % samples_.size()] = buffer[i];
-        pos_ = (pos_ + size) % samples_.size();
-        done = done_;
-        xSemaphoreGive(mutex_);
+        {
+            MutexLock lock(mutex_);
+            for (size_t i = 0; i < size; ++i)
+                samples_[(pos_ + i) % samples_.size()] = buffer[i];
+            pos_ = (pos_ + size) % samples_.size();
+            done = done_;
+        }
     }
 }
 
