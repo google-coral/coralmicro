@@ -38,12 +38,12 @@ extern "C" void app_main(void *param) {
 
 #if defined(OOBE_DEMO)
     TimerHandle_t m4_timer = xTimerCreate("m4_timer", pdMS_TO_TICKS(10000), pdFALSE, (void*) 0,
-        [g_person_detected](TimerHandle_t xTimer) {
+        [](TimerHandle_t xTimer) {
             g_person_detected = true;
             GPIO_PinWrite(GPIO13, 6, true);
             xTimerReset(xTimer, 0);
          });
-#endif // defined(OOBE_DEMO
+#endif // defined(OOBE_DEMO)
 
     while (true) {
         printf("M4 main loop\r\n");
@@ -67,6 +67,6 @@ extern "C" void app_main(void *param) {
         valiant::ipc::Message msg;
         msg.type = valiant::ipc::MessageType::APP;
         valiant::IPCM4::GetSingleton()->SendMessage(msg);
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 }

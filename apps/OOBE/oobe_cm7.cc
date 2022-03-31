@@ -78,7 +78,7 @@ static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferData
 }
 
 void CameraTask(void *param) {
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 
     while (true) {
         std::vector<uint8_t> input(kPosenetSize);
@@ -103,17 +103,17 @@ void CameraTask(void *param) {
 
         if (pause_processing) {
             printf("suspend camera\r\n");
-            vTaskSuspend(NULL);
+            vTaskSuspend(nullptr);
             printf("resumed camera\r\n");
         }
         taskYIELD();
     }
 
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }
 
 void PosenetTask(void *param) {
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 
     valiant::posenet::Output output;
     while (true) {
@@ -137,20 +137,19 @@ void PosenetTask(void *param) {
         }
         if (good_poses_count) {
             valiant::MutexLock lock(posenet_output_mtx);
-            posenet_output.reset(nullptr);
             posenet_output = std::make_unique<valiant::posenet::Output>(output);
             posenet_output_time = xTaskGetTickCount();
         }
 
         if (pause_processing) {
             printf("suspend posenet\r\n");
-            vTaskSuspend(NULL);
+            vTaskSuspend(nullptr);
             printf("resumed posenet\r\n");
         }
         taskYIELD();
     }
 
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }
 
 #if defined(OOBE_DEMO_WIFI)
@@ -201,13 +200,12 @@ void main() {
 #if defined(OOBE_DEMO_ETHERNET)
     valiant::InitializeEthernet(false);
 #elif defined(OOBE_DEMO_WIFI)
-    ConnectToWifi();
     if (!ConnectToWifi()) {
         // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
         valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, true);
         valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, true);
         valiant::gpio::SetGpio(valiant::gpio::Gpio::kTpuLED, true);
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 #endif // defined(OOBE_DEMO_ETHERNET)
 
@@ -220,7 +218,7 @@ void main() {
     valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
     if (!valiant::posenet::setup()) {
         printf("setup() failed\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     valiant::IPCM7::GetSingleton()->StartM4();
@@ -229,7 +227,7 @@ void main() {
     int count = 0;
 #endif  // defined (OOBE_DEMO)
 
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
     while (true) {
         pause_processing = false;
         printf("CM7 awoken\r\n");
@@ -269,7 +267,7 @@ void main() {
         valiant::ipc::Message msg;
         msg.type = valiant::ipc::MessageType::APP;
         valiant::IPCM7::GetSingleton()->SendMessage(msg);
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 }
 
@@ -278,5 +276,5 @@ void main() {
 
 extern "C" void app_main(void *param) {
     valiant::oobe::main();
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }
