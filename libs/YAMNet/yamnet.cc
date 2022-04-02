@@ -97,13 +97,12 @@ bool setup() {
     auto resolver = std::make_unique<tflite::MicroMutableOpResolver<kNumTensorOps>>();
     resolver->AddQuantize();
     resolver->AddDequantize();
+    resolver->AddCustom(kCustomOp, RegisterCustomOp());
 
-    interpreter =
-            valiant::tensorflow::MakeEdgeTpuInterpreter(model, edgetpu_context.get(), resolver.get(),
-                                                        error_reporter.get(),
-                                                        tensor_arena, kTensorArenaSize);
+    interpreter = std::make_unique<tflite::MicroInterpreter>(
+        model, *resolver, tensor_arena, kTensorArenaSize, error_reporter.get());
 #endif
-    
+
     allocate_status = interpreter->AllocateTensors();
     if (allocate_status != kTfLiteOk) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "AllocateTensors failed.");

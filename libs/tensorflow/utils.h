@@ -57,34 +57,6 @@ std::vector<T> DequantizeTensor(TfLiteTensor* tensor) {
 
   return result;
 }
-
-std::unique_ptr<tflite::MicroInterpreter> MakeEdgeTpuInterpreterInternal(
-    const tflite::Model *model,
-    EdgeTpuContext *context,
-    tflite::MicroOpResolver* resolver,
-    tflite::MicroErrorReporter* error_reporter,
-    uint8_t *tensor_arena,
-    size_t tensor_arena_size
-    );
-
-template <unsigned int tOpCount>
-std::unique_ptr<tflite::MicroInterpreter> MakeEdgeTpuInterpreter(
-    const tflite::Model *model,
-    EdgeTpuContext *context,
-    tflite::MicroMutableOpResolver<tOpCount>* resolver,
-    tflite::MicroErrorReporter* error_reporter,
-    uint8_t *tensor_arena,
-    size_t tensor_arena_size
-    ) {
-        if (!resolver) {
-            return nullptr;
-        }
-        if (!resolver->FindOp(kCustomOp)) {
-            resolver->AddCustom(kCustomOp, RegisterCustomOp());
-        }
-        return MakeEdgeTpuInterpreterInternal(model, context, resolver, error_reporter, tensor_arena, tensor_arena_size);
-    }
-
 }  // namespace tensorflow
 }  // namespace valiant
 

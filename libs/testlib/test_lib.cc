@@ -240,7 +240,6 @@ void RunDetectionModel(struct jsonrpc_request* request) {
         return;
     }
 
-
     tflite::MicroErrorReporter error_reporter;
     std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
     if (!context) {
@@ -256,18 +255,19 @@ void RunDetectionModel(struct jsonrpc_request* request) {
 //    }
     static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
-    tflite::MicroMutableOpResolver</*tOpCount=*/3> resolver;
+    tflite::MicroMutableOpResolver<3> resolver;
     resolver.AddDequantize();
     resolver.AddDetectionPostprocess();
+    resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
-    auto interpreter = tensorflow::MakeEdgeTpuInterpreter(model, context.get(), &resolver, &error_reporter,
-                                                          tensor_arena, kTensorArenaSize);
-    if (!interpreter) {
-        jsonrpc_return_error(request, -1, "failed to make interpreter", nullptr);
+    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
+                                         kTensorArenaSize, &error_reporter);
+    if (interpreter.AllocateTensors() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
         return;
     }
 
-    auto* input_tensor = interpreter->input_tensor(0);
+    auto* input_tensor = interpreter.input_tensor(0);
     auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
     tensorflow::ImageDims tensor_dims = {
         input_tensor->dims->data[1],
@@ -284,20 +284,20 @@ void RunDetectionModel(struct jsonrpc_request* request) {
 
     // The first Invoke is slow due to model transfer. Run an Invoke
     // but ignore the results.
-    if (interpreter->Invoke() != kTfLiteOk) {
+    if (interpreter.Invoke() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
         return;
     }
 
     auto invoke_start = valiant::timer::micros();
-    if (interpreter->Invoke() != kTfLiteOk) {
+    if (interpreter.Invoke() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
         return;
     }
     auto invoke_latency = valiant::timer::micros() - invoke_start;
 
     // Return results and check on host side
-    auto results = tensorflow::GetDetectionResults(interpreter.get(), 0.7, 3);
+    auto results = tensorflow::GetDetectionResults(&interpreter, 0.7, 3);
     if (results.empty()) {
         jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
         return;
@@ -351,7 +351,6 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     }
 
     tflite::MicroErrorReporter error_reporter;
-    tflite::MicroMutableOpResolver<1> resolver;
     std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
@@ -366,14 +365,17 @@ void RunClassificationModel(struct jsonrpc_request* request) {
         jsonrpc_return_error(request, -1, "failed to allocate tensor arena", nullptr);
         return;
     }
-    auto interpreter = tensorflow::MakeEdgeTpuInterpreter(model, context.get(), &resolver, &error_reporter,
-                                                          tensor_arena.get(), kTensorArenaSize);
-    if (!interpreter) {
-        jsonrpc_return_error(request, -1, "failed to make interpreter", nullptr);
+
+    tflite::MicroMutableOpResolver<1> resolver;
+    resolver.AddCustom(kCustomOp, RegisterCustomOp());
+    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena.get(),
+                                         kTensorArenaSize, &error_reporter);
+    if (interpreter.AllocateTensors() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
         return;
     }
 
-    auto* input_tensor = interpreter->input_tensor(0);
+    auto* input_tensor = interpreter.input_tensor(0);
     bool needs_preprocessing = tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
     uint32_t preprocess_latency = 0;
     if (needs_preprocessing) {
@@ -401,13 +403,13 @@ void RunClassificationModel(struct jsonrpc_request* request) {
 
     // The first Invoke is slow due to model transfer. Run an Invoke
     // but ignore the results.
-    if (interpreter->Invoke() != kTfLiteOk) {
+    if (interpreter.Invoke() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
         return;
     }
 
     uint32_t start = valiant::timer::micros();
-    if (interpreter->Invoke() != kTfLiteOk) {
+    if (interpreter.Invoke() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
         return;
     }
@@ -415,7 +417,7 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     uint32_t latency = end - start;
 
     // Return results and check on host side
-    auto results = tensorflow::GetClassificationResults(interpreter.get(), 0.0f, 1);
+    auto results = tensorflow::GetClassificationResults(&interpreter, 0.0f, 1);
     if (results.empty()) {
         jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
         return;
