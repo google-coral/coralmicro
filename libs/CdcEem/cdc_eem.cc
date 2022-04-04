@@ -1,6 +1,7 @@
 #include "libs/CdcEem/cdc_eem.h"
 
 #include "libs/base/utils.h"
+#include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/etharp.h"
@@ -11,6 +12,7 @@ extern "C" {
 }
 
 #include <memory>
+#include <vector>
 
 #define DATA_OUT (1)
 #define DATA_IN  (0)
@@ -27,14 +29,15 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
     cdc_eem_data_endpoints_[DATA_IN].endpointAddress = bulk_in_ep | (USB_IN << 7);
     cdc_eem_data_endpoints_[DATA_OUT].endpointAddress = bulk_out_ep | (USB_OUT << 7);
     cdc_eem_interfaces_[0].interfaceNumber = data_iface;
-    tx_semaphore_ = xSemaphoreCreateBinary();
+    tx_queue_ = xQueueCreate(10, sizeof(void*));
+    xTaskCreate(CdcEem::StaticTaskFunction, "cdc_eem_task", configMINIMAL_STACK_SIZE * 10, this, USB_DEVICE_TASK_PRIORITY, nullptr);
 
     if (!utils::GetUSBIPAddress(&netif_ipaddr_)) {
         IP4_ADDR(&netif_ipaddr_, 10, 10, 10, 1);
     }
     IP4_ADDR(&netif_netmask_, 255, 255, 255, 0);
     IP4_ADDR(&netif_gw_, 0, 0, 0, 0);
-    netifapi_netif_add(&netif_, &netif_ipaddr_, &netif_netmask_, &netif_gw_, this, CdcEem::StaticNetifInit, ethernet_input);
+    netifapi_netif_add(&netif_, &netif_ipaddr_, &netif_netmask_, &netif_gw_, this, CdcEem::StaticNetifInit, tcpip_input);
     netifapi_netif_set_default(&netif_);
     netifapi_netif_set_link_up(&netif_);
     netifapi_netif_set_up(&netif_);
@@ -44,6 +47,21 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
 err_t CdcEem::StaticNetifInit(struct netif *netif) {
     CdcEem *instance = reinterpret_cast<CdcEem*>(netif->state);
     return instance->NetifInit(netif);
+}
+
+void CdcEem::StaticTaskFunction(void *param) {
+    CdcEem *instance = reinterpret_cast<CdcEem*>(param);
+    instance->TaskFunction(param);
+}
+
+void CdcEem::TaskFunction(void *param) {
+    while (true) {
+        std::vector<uint8_t>* packet;
+        if (xQueueReceive(tx_queue_, &packet, portMAX_DELAY) == pdTRUE) {
+            TransmitFrame(packet->data(), packet->size());
+            delete packet;
+        }
+    }
 }
 
 err_t CdcEem::NetifInit(struct netif *netif) {
@@ -71,26 +89,20 @@ err_t CdcEem::StaticTxFunc(struct netif *netif, struct pbuf *p) {
 }
 
 err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
-    std::unique_ptr<uint8_t[]> combined_pbuf;
-    uint8_t *tx_ptr = nullptr;
-    uint32_t tx_len = p->tot_len;
-    if (p->next == nullptr && p->tot_len == p->len) {
-        tx_ptr = reinterpret_cast<uint8_t*>(p->payload);
-    } else {
-        combined_pbuf = std::make_unique<uint8_t[]>(p->tot_len);
-        tx_ptr = combined_pbuf.get();
-        struct pbuf *tmp_p = p;
-        int offset = 0;
-        do {
-            memcpy(tx_ptr + offset, reinterpret_cast<uint8_t*>(tmp_p->payload), tmp_p->len);
-            offset += tmp_p->len;
-            tmp_p = tmp_p->next;
-            if (!tmp_p)
-                break;
-        } while (true);
+    auto* combined_pbuf = new std::vector<uint8_t>(p->tot_len);
+    if (!combined_pbuf) {
+        return ERR_IF;
     }
-
-    return TransmitFrame(tx_ptr, tx_len);
+    void *tx_ptr = pbuf_get_contiguous(p, combined_pbuf->data(), p->tot_len, p->tot_len, 0);
+    if (tx_ptr != combined_pbuf->data()) {
+        memcpy(combined_pbuf->data(), tx_ptr, p->tot_len);
+        tx_ptr = combined_pbuf->data();
+    }
+    if (xQueueSendToBack(tx_queue_, &combined_pbuf, 0) != pdTRUE) {
+        delete combined_pbuf;
+        return ERR_IF;
+    }
+    return ERR_OK;
 }
 
 void CdcEem::SetClassHandle(class_handle_t class_handle) {
@@ -98,7 +110,7 @@ void CdcEem::SetClassHandle(class_handle_t class_handle) {
     class_handle_ = class_handle;
 }
 
-err_t CdcEem::TransmitFrame(uint8_t* buffer, uint32_t length) {
+err_t CdcEem::TransmitFrame(void* buffer, uint32_t length) {
     if (endianness_ == Endianness::kUnknown) {
         DbgConsole_Printf("[EEM] Tried to send to remote with unknown endianness\r\n");
         return ERR_IF;
@@ -112,13 +124,17 @@ err_t CdcEem::TransmitFrame(uint8_t* buffer, uint32_t length) {
     }
     memcpy(tx_buffer_ + sizeof(uint16_t), buffer, length);
     memcpy(tx_buffer_ + sizeof(uint16_t) + length, &crc, sizeof(uint32_t));
-    status = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, tx_buffer_, sizeof(uint16_t) + length + sizeof(uint32_t));
-    if (status != kStatus_USB_Success) {
-        return ERR_IF;
+    while (true) {
+        status = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, tx_buffer_, sizeof(uint16_t) + length + sizeof(uint32_t));
+        if (status == kStatus_USB_Busy) {
+            taskYIELD();
+        } else {
+            break;
+        }
     }
-
-    if (xSemaphoreTake(tx_semaphore_, pdMS_TO_TICKS(200)) == pdFALSE) {
-        status = kStatus_USB_Error;
+    if (status != kStatus_USB_Success) {
+        DbgConsole_Printf("[EEM] USB_DeviceCdcEemSend failed, ERR_IF\r\n");
+        return ERR_IF;
     }
 
     return (status == kStatus_USB_Success) ? ERR_OK : ERR_IF;
@@ -137,33 +153,15 @@ err_t CdcEem::ReceiveFrame(uint8_t *buffer, uint32_t length) {
         printf("Failed to allocate pbuf\r\n");
         return ERR_BUF;
     }
-
-    memcpy(frame->payload, buffer, length);
-    err_t ret = tcpip_input(frame, tmp_netif);
+    pbuf_take(frame, buffer, length);
+    err_t ret = tmp_netif->input(frame, tmp_netif);
     if (ret != ERR_OK) {
-        pbuf_free(frame);
+        printf("tcpip_input() failed %d\r\n", ret);
+        pbuf_free_callback(frame);
         return ERR_IF;
     }
 
     return ERR_OK;
-}
-
-usb_status_t CdcEem::Transmit(uint8_t* buffer, uint32_t length) {
-    usb_status_t status;
-    if (length > 512) {
-        assert(false);
-    }
-    memcpy(tx_buffer_, buffer, length);
-    status = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, tx_buffer_, length);
-    if (status != kStatus_USB_Success) {
-        return status;
-    }
-
-    if (xSemaphoreTake(tx_semaphore_, pdMS_TO_TICKS(200)) == pdFALSE) {
-        status = kStatus_USB_Error;
-    }
-
-    return status;
 }
 
 usb_status_t CdcEem::SetControlLineState(usb_device_cdc_eem_request_param_struct_t* eem_param) {
@@ -211,20 +209,6 @@ usb_status_t CdcEem::SetControlLineState(usb_device_cdc_eem_request_param_struct
     }
 
     return ret;
-}
-
-usb_status_t CdcEem::SendEchoRequest() {
-    uint8_t echo_size = 16;
-    uint8_t echo_buffer[echo_size + sizeof(uint16_t)];
-
-    uint16_t *command = (uint16_t*)echo_buffer;
-    *command = (1 << EEM_HEADER_TYPE_SHIFT) | (EEM_COMMAND_ECHO << EEM_COMMAND_OPCODE_SHIFT) | echo_size;
-    uint8_t *echo_data = echo_buffer + sizeof(uint16_t);
-    for (int i = 0; i < echo_size; ++i) {
-        echo_data[i] = i;
-    }
-
-    return Transmit(echo_buffer, sizeof(echo_buffer));
 }
 
 void CdcEem::DetectEndianness(uint32_t packet_length) {
@@ -318,7 +302,6 @@ usb_status_t CdcEem::Handler(uint32_t event, void *param) {
                 ret = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, nullptr, 0);
             } else {
                 if (ep_cb->buffer || (!ep_cb->buffer && ep_cb->length == 0)) {
-                    xSemaphoreGive(tx_semaphore_);
                     ret = USB_DeviceCdcEemRecv(class_handle_, bulk_out_ep_, rx_buffer_, cdc_eem_data_endpoints_[DATA_OUT].maxPacketSize);
                 }
             }

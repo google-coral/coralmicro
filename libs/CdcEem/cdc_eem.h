@@ -23,13 +23,11 @@ class CdcEem {
     size_t descriptor_data_size() { return sizeof(descriptor_); }
     void SetClassHandle(class_handle_t class_handle);
     bool HandleEvent(uint32_t event, void *param);
-    usb_status_t Transmit(uint8_t *buffer, uint32_t length);
     bool Initialized() { return initialized_; }
   private:
 
     usb_status_t SetControlLineState(usb_device_cdc_eem_request_param_struct_t* eem_param);
     void ProcessPacket(uint32_t packet_length);
-    usb_status_t SendEchoRequest();
     static usb_status_t Handler(class_handle_t class_handle, uint32_t event, void *param);
     usb_status_t Handler(uint32_t event, void *param);
 
@@ -37,8 +35,10 @@ class CdcEem {
     static err_t StaticNetifInit(struct netif *netif);
     err_t NetifInit(struct netif *netif);
     static err_t StaticTxFunc(struct netif *netif, struct pbuf *p);
+    static void StaticTaskFunction(void *param);
+    void TaskFunction(void *param);
     err_t TxFunc(struct netif *netif, struct pbuf *p);
-    err_t TransmitFrame(uint8_t *buffer, uint32_t length);
+    err_t TransmitFrame(void *buffer, uint32_t length);
     err_t ReceiveFrame(uint8_t *buffer, uint32_t length);
 
     usb_device_endpoint_struct_t cdc_eem_data_endpoints_[2] = {
@@ -111,7 +111,7 @@ class CdcEem {
     uint8_t tx_buffer_[512];
     uint8_t rx_buffer_[512];
     uint8_t bulk_in_ep_, bulk_out_ep_;
-    SemaphoreHandle_t tx_semaphore_;
+    QueueHandle_t tx_queue_;
     class_handle_t class_handle_;
 
     static std::map<class_handle_t, CdcEem*> handle_map_;
