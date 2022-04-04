@@ -143,7 +143,7 @@ void ProcessClient(int client_socket) {
     printf("  Ring buffer underflows: %d\n\r", reader.UnderflowCount());
 }
 
-void run_server() {
+void RunServer() {
     const int server_socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (server_socket == -1) {
         printf("ERROR: Cannot create server socket\n\r");
@@ -182,6 +182,6 @@ void run_server() {
 }  // namespace
 
 extern "C" void app_main(void* param) {
-    run_server();
+    RunServer();
     vTaskSuspend(NULL);
 }

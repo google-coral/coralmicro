@@ -564,9 +564,8 @@ void CaptureAudio(struct jsonrpc_request *request) {
     params.first = samples.data();
     params.last = samples.data() + samples.size();
 
-    valiant::AudioTask::GetSingleton()->SetPower(true);
     valiant::AudioTask::GetSingleton()->Enable(sample_rate,
-        buffers, samples_per_chunk, &params, +[](void* param,
+        buffers.data(), buffers.size(), samples_per_chunk, &params, +[](void* param,
         const int32_t* buf, size_t size) {
             AudioParams* params = reinterpret_cast<AudioParams*>(param);
             if (params->first + size <= params->last) {
@@ -579,7 +578,6 @@ void CaptureAudio(struct jsonrpc_request *request) {
     // the buffer size.
     vTaskDelay(pdMS_TO_TICKS(num_chunks * chunk_duration_ms + chunk_duration_ms / 10));
     valiant::AudioTask::GetSingleton()->Disable();
-    valiant::AudioTask::GetSingleton()->SetPower(false);
 
     jsonrpc_return_success(request, "{%Q: %V}", "data",
                            samples.size() * sizeof(samples[0]), samples.data());

@@ -20,14 +20,12 @@ AudioReader::AudioReader(audio::SampleRate sample_rate, int dma_buffer_size_ms,
     for (int i = 0; i < num_dma_buffers; ++i)
         dma_buffers.push_back(dma_buffer_.data() + i * samples_per_dma_buffer);
 
-    AudioTask::GetSingleton()->SetPower(true);
-    AudioTask::GetSingleton()->Enable(sample_rate, dma_buffers,
+    AudioTask::GetSingleton()->Enable(sample_rate, dma_buffers.data(), dma_buffers.size(),
                                       samples_per_dma_buffer, this, Callback);
 }
 
 AudioReader::~AudioReader() {
     AudioTask::GetSingleton()->Disable();
-    AudioTask::GetSingleton()->SetPower(false);
 }
 
 size_t AudioReader::FillBuffer() {

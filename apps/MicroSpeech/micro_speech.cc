@@ -69,10 +69,9 @@ extern "C" void app_main(void *param) {
     for (int i = 0; i < kNumDmaBuffers; ++i)
         dma_buffers.push_back(g_dma_buffers[i]);
 
-    valiant::AudioTask::GetSingleton()->SetPower(true);
     valiant::AudioTask::GetSingleton()->Enable(
         valiant::audio::SampleRate::k16000_Hz,
-        dma_buffers, kDmaBufferSize,
+        dma_buffers.data(), dma_buffers.size(), kDmaBufferSize,
     nullptr, +[](void *param, const int32_t* buffer, size_t buffer_size) {
         int32_t offset = g_audio_buffer_end_index;
         for (size_t i = 0; i < buffer_size; ++i)
