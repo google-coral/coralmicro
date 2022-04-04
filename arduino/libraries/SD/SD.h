@@ -34,10 +34,10 @@ class File : public Stream {
   virtual int peek();
   virtual int available();
   virtual void flush();
-  int read(void *buf, uint16_t nbyte);
-  bool seek(uint32_t pos);
-  uint32_t position();
-  uint32_t size();
+  int read(void *buf, size_t nbyte);
+  bool seek(size_t pos);
+  size_t position();
+  size_t size();
   void close();
   operator bool() { return open_; }
   char *name();

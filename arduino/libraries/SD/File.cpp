@@ -16,9 +16,7 @@ File::File(std::shared_ptr<lfs_dir_t> handle, const char *name)
   name_[strlen(name)] = 0;
 }
 
-File::File() {
-  name_[0] = 0;
-}
+File::File() { name_[0] = 0; }
 
 size_t File::write(uint8_t val) { return write(&val, 1); }
 
@@ -47,7 +45,7 @@ int File::read() {
   return retval;
 }
 
-int File::read(void *buf, uint16_t nbyte) {
+int File::read(void *buf, size_t nbyte) {
   if (file_handle_) {
     return valiant::filesystem::Read(file_handle_.get(), buf, nbyte);
   }
@@ -67,14 +65,14 @@ void File::flush() {
   }
 }
 
-bool File::seek(uint32_t pos) {
+bool File::seek(size_t pos) {
   if (file_handle_ && pos >= 0 && pos <= size()) {
     return valiant::filesystem::Seek(file_handle_.get(), pos, LFS_SEEK_SET);
   }
   return false;
 }
 
-uint32_t File::position() {
+size_t File::position() {
   if (file_handle_) {
     // We need to write nothing to the file to make sure the internal
     // structures have been updated for a newly opened writable file
@@ -87,7 +85,7 @@ uint32_t File::position() {
   return -1;
 }
 
-uint32_t File::size() {
+size_t File::size() {
   if (file_handle_) {
     return valiant::filesystem::Size(file_handle_.get());
   }
