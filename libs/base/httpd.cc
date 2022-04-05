@@ -78,7 +78,7 @@ int HttpServer::FsOpenCustom(struct fs_file* file, const char* name) {
         if (auto* v = std::get_if<std::vector<uint8_t>>(&content)) {
             file->data = reinterpret_cast<char*>(v->data());
             file->len = v->size();
-            file->index = file->len;
+            file->index = 0;
             file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
             file->pextension = TaggedPointer<kTagVector>(
                 new std::vector<uint8_t>(std::move(*v)));
@@ -90,10 +90,23 @@ int HttpServer::FsOpenCustom(struct fs_file* file, const char* name) {
 }
 
 int HttpServer::FsReadCustom(struct fs_file* file, char* buffer, int count) {
-    auto* file_holder = Pointer<FileHolder>(file->pextension);
-    auto len = filesystem::Read(&file_holder->file, buffer, count);
-    file->index += len;
-    return len;
+    auto tag = Tag(file->pextension);
+
+    if (tag == kTagFileHolder) {
+        auto* file_holder = Pointer<FileHolder>(file->pextension);
+        auto len = filesystem::Read(&file_holder->file, buffer, count);
+        file->index += len;
+        return len;
+    }
+
+    if (tag == kTagVector) {
+        auto* v = Pointer<std::vector<uint8_t>>(file->pextension);
+        std::memcpy(buffer, v->data() + file->index, count);
+        file->index += count;
+        return count;
+    }
+
+    return FS_READ_EOF;
 };
 
 void HttpServer::FsCloseCustom(struct fs_file* file) {
