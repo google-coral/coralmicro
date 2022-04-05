@@ -20,13 +20,18 @@ Pin (Arduino pin) | Silk label | Silk label | Pin (Arduino pin)
 
 17 - LED
 18 - User button (D4)
+19 - Power LED
+20 - Tpu LED
 */
 
 #define PIN_BTN (18U)
 
-#define PIN_LED (17U)
-#define LED_BUILTIN (PIN_LED)
-#define LEDG (PIN_LED)
+#define PIN_LED_USER (17U)
+#define LED_BUILTIN (PIN_LED_USER)
+#define LEDG (PIN_LED_USER)
+
+#define PIN_LED_POWER (19U)
+#define PIN_LED_TPU (20U)
 
 #define D0 (0U)
 #define D1 (3U)

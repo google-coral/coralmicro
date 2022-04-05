@@ -18,6 +18,7 @@ std::shared_ptr<valiant::EdgeTpuContext> context = nullptr;
 const int kTensorArenaSize = 1024 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+int tpuPin = PIN_LED_TPU;
 }  // namespace
 
 void setup() {
@@ -76,6 +77,8 @@ void setup() {
         return;
     }
     Serial.println("Initialized");
+
+    pinMode(tpuPin, OUTPUT);
 }
 
 void loop() {
@@ -86,6 +89,7 @@ void loop() {
         return;
     }
 
+    digitalWrite(tpuPin, HIGH);
     auto* input_tensor = interpreter->input_tensor(0);
     if (input_tensor->type != kTfLiteUInt8) {
         Serial.println("Bad input type");
@@ -114,4 +118,5 @@ void loop() {
         Serial.print(" Score: ");
         Serial.println(result.score);
     }
+    digitalWrite(tpuPin, LOW);
 }

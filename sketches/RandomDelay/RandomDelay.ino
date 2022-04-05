@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-int ledPin = PIN_LED;
+int ledPin = PIN_LED_USER;
 
 void setup() {
     Serial.begin(115200);

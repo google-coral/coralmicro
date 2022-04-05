@@ -1,16 +1,20 @@
-#include "Arduino.h"
-#include "pins_arduino.h"
-
-#include "libs/base/gpio.h"
-
 #include <cassert>
+
+#include "Arduino.h"
+#include "libs/base/gpio.h"
+#include "libs/tpu/edgetpu_manager.h"
+#include "pins_arduino.h"
 
 static valiant::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
     switch (pinNumber) {
-        case PIN_LED:
+        case PIN_LED_USER:
             return valiant::gpio::Gpio::kUserLED;
         case PIN_BTN:
             return valiant::gpio::Gpio::kUserButton;
+        case PIN_LED_POWER:
+            return valiant::gpio::Gpio::kPowerLED;
+        case PIN_LED_TPU:
+            return valiant::gpio::Gpio::kTpuLED;
         case D0:
             return valiant::gpio::Gpio::kArduinoD0;
         case D1:
@@ -43,6 +47,7 @@ static valiant::gpio::InterruptMode PinStatusToInterruptMode(PinStatus mode) {
     }
 }
 
+std::shared_ptr<valiant::EdgeTpuContext> edgetpuContext = nullptr;
 
 void pinMode(pin_size_t pinNumber, PinMode pinMode) {
     valiant::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
@@ -59,7 +64,15 @@ void pinMode(pin_size_t pinNumber, PinMode pinMode) {
         case INPUT_PULLDOWN:
             valiant::gpio::SetMode(gpio, true, true, false);
             break;
-        break;
+    }
+
+    if (gpio == valiant::gpio::kTpuLED) {
+        if (pinMode == OUTPUT) {
+            edgetpuContext = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+        }
+        else {
+            edgetpuContext.reset();
+        }
     }
 }
 
@@ -75,7 +88,8 @@ PinStatus digitalRead(pin_size_t pinNumber) {
     return status ? HIGH : LOW;
 }
 
-void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback, PinStatus mode) {
+void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback,
+                     PinStatus mode) {
     valiant::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
     auto interrupt_mode = PinStatusToInterruptMode(mode);
     valiant::gpio::SetIntMode(gpio, interrupt_mode);
