@@ -11,6 +11,7 @@
 namespace valiant {
 namespace filesystem {
 
+lfs_t* Lfs();
 bool Init(bool force_format = false);
 bool Open(lfs_file_t *handle, const char *path);
 bool Open(lfs_file_t* handle, const char *path, bool writable, bool append = false);
@@ -33,6 +34,7 @@ bool DirOpen(lfs_dir_t *dir, const char *path);
 int DirRead(lfs_dir_t *dir, struct lfs_info *info);
 bool DirClose(lfs_dir_t *dir);
 
+bool FileExists(const char* path);
 bool ReadFile(const char* path, std::vector<uint8_t>* buf);
 bool ReadFile(const char* path, std::string* str);
 size_t ReadFile(const char* path, uint8_t* buf, size_t size);

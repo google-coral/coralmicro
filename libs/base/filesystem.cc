@@ -94,6 +94,8 @@ int LfsUnlock(const struct lfs_config *c) {
 }
 }  // namespace
 
+lfs_t* Lfs() { return &g_lfs; }
+
 bool Init(bool force_format) {
     if (g_lfs_mutex) vSemaphoreDelete(g_lfs_mutex);
 
@@ -283,6 +285,13 @@ int DirRead(lfs_dir_t *dir, struct lfs_info *info) {
 bool DirClose(lfs_dir_t *dir) {
     int ret = lfs_dir_close(&g_lfs, dir);
     if (ret < 0) return false;
+    return true;
+}
+
+bool FileExists(const char* path) {
+    lfs_file_t file;
+    if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return false;
+    lfs_file_close(&g_lfs, &file);
     return true;
 }
 
