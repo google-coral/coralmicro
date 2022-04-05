@@ -1,24 +1,28 @@
 #include <SD.h>
 
 #include "Arduino.h"
-#include "libs/tensorflow/classification.h"
+#include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "libs/tpu/edgetpu_op.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
 namespace {
-tflite::MicroMutableOpResolver<1> resolver;
+tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
-std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
-std::vector<uint8_t> image_data;
 std::shared_ptr<valiant::EdgeTpuContext> context = nullptr;
+std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 
-const int kTensorArenaSize = 1024 * 1024;
+constexpr char kModelPath[] =
+    "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
+constexpr char kImagePath[] = "/apps/DetectImage/cat_300x300.rgb";
+std::vector<uint8_t> image_data;
+
+constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
-int tpuPin = PIN_LED_TPU;
 }  // namespace
 
 void setup() {
@@ -28,45 +32,50 @@ void setup() {
     Serial.println("Loading Model");
     std::vector<uint8_t> model_data;
 
-    const char* model_name =
-        "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
-    if (!SD.exists(model_name)) {
+    if (!SD.exists(kModelPath)) {
         Serial.println("Model file not found");
         return;
     }
 
-    SDFile model_file = SD.open(model_name);
+    SDFile model_file = SD.open(kModelPath);
     uint32_t model_size = model_file.size();
     model_data.resize(model_size);
     if (model_file.read(model_data.data(), model_size) != model_size) {
         Serial.print("Error loading model");
     }
 
-    const char* image_name = "/apps/ClassifyImage/cat_224x224.rgb";
     Serial.println("Loading Input Image");
-    if (!SD.exists(image_name)) {
+    if (!SD.exists(kImagePath)) {
         Serial.println("Image file not found");
         return;
     }
-    SDFile image_file = SD.open(image_name);
+    SDFile image_file = SD.open(kImagePath);
     uint32_t image_size = image_file.size();
     image_data.resize(image_size);
     if (image_file.read(image_data.data(), image_size) != image_size) {
-        Serial.print("Error loading image");
+        Serial.println("Error loading image");
     }
-
+    Serial.println("Input image complete");
     model = tflite::GetModel(model_data.data());
     context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         Serial.println("Failed to get EdgeTpuContext");
         return;
     }
+    Serial.println("model and context created");
 
+    resolver.AddDequantize();
+    resolver.AddDetectionPostprocess();
     resolver.AddCustom(valiant::kCustomOp, valiant::RegisterCustomOp());
     tflite::MicroErrorReporter error_reporter;
-    interpreter = std::unique_ptr<tflite::MicroInterpreter>(
-        new tflite::MicroInterpreter(model, resolver, tensor_arena, kTensorArenaSize, &error_reporter));
-    interpreter->AllocateTensors();
+
+    interpreter =
+        std::unique_ptr<tflite::MicroInterpreter>(new tflite::MicroInterpreter(
+            model, resolver, tensor_arena, kTensorArenaSize, &error_reporter));
+
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+        Serial.println("allocate tensors failed");
+    }
 
     if (!interpreter) {
         Serial.println("Failed to make interpreter");
@@ -74,11 +83,10 @@ void setup() {
     }
     if (interpreter->inputs().size() != 1) {
         Serial.println("Bad inputs size");
+        Serial.println(interpreter->inputs().size());
         return;
     }
     Serial.println("Initialized");
-
-    pinMode(tpuPin, OUTPUT);
 }
 
 void loop() {
@@ -89,34 +97,35 @@ void loop() {
         return;
     }
 
-    digitalWrite(tpuPin, HIGH);
     auto* input_tensor = interpreter->input_tensor(0);
-    if (input_tensor->type != kTfLiteUInt8) {
-        Serial.println("Bad input type");
+    if (input_tensor->type != kTfLiteUInt8 ||
+        input_tensor->bytes != image_data.size()) {
+        Serial.println("ERROR: Invalid input tensor size");
         return;
     }
 
-    if (valiant::tensorflow::ClassificationInputNeedsPreprocessing(
-            *input_tensor)) {
-        valiant::tensorflow::ClassificationPreprocess(input_tensor);
-    }
-
-    valiant::tensorflow::TensorSize(input_tensor);
-    auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
-    memcpy(input_tensor_data, image_data.data(), input_tensor->bytes);
+    std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image_data.data(),
+                image_data.size());
 
     if (interpreter->Invoke() != kTfLiteOk) {
-        Serial.println("invoke failed");
+        Serial.println("ERROR: Invoke() failed");
         return;
     }
 
-    auto results = valiant::tensorflow::GetClassificationResults(
-        interpreter.get(), 0.0f, 3);
+    auto results =
+        valiant::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
     for (auto result : results) {
-        Serial.print("Label ID: ");
+        Serial.print("id: ");
         Serial.print(result.id);
-        Serial.print(" Score: ");
-        Serial.println(result.score);
+        Serial.print(" score: ");
+        Serial.print(result.score);
+        Serial.print(" xmin: ");
+        Serial.print(result.bbox.xmin);
+        Serial.print(" ymin: ");
+        Serial.print(result.bbox.ymin);
+        Serial.print(" xmax: ");
+        Serial.print(result.bbox.xmax);
+        Serial.print(" ymax: ");
+        Serial.println(result.bbox.ymax);
     }
-    digitalWrite(tpuPin, LOW);
 }
