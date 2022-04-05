@@ -7,10 +7,22 @@
 
 namespace coral::micro {
 namespace yamnet {
+    constexpr int kSampleRate = 16000;
+    constexpr int kSampleRateMs = kSampleRate / 1000;
+    constexpr int kDurationMs = 975;
+    constexpr int kAudioSize = kSampleRate * kDurationMs / 1000;
+    constexpr int kFeatureSliceSize = 64;
+    constexpr int kFeatureSliceCount = 96;
+    constexpr int kFeatureElementCount = (kFeatureSliceSize * kFeatureSliceCount);
+    constexpr int kFeatureSliceStrideMs = 10;
+    constexpr int kFeatureSliceDurationMs = 25;
+    constexpr int kFeatureSliceSamples = kFeatureSliceDurationMs * kSampleRateMs;
+
+
     bool setup();
     bool loop(std::shared_ptr<std::vector<tensorflow::Class>> output);
     bool loop(std::shared_ptr<std::vector<tensorflow::Class>> output, bool print);
-    std::shared_ptr<TfLiteTensor> input();
+    std::shared_ptr<int16_t[]> audio_input();
 } // namespace yamnet
 } // namespace coral::micro
 
