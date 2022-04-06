@@ -8,6 +8,7 @@ if __name__ == '__main__':
     mode_group.add_argument('-s', action='store_true')
     mode_group.add_argument('-c', type=str, help='IP address of iPerf server')
     parser.add_argument('--device_ip_address', type=str, required=False, default='10.10.10.1')
+    parser.add_argument('-t', type=int, required=False, default=10)
     args = parser.parse_args()
 
     mfg_test = ValiantMFGTest(f'http://{args.device_ip_address}:80/jsonrpc', print_payloads=True)
@@ -17,7 +18,7 @@ if __name__ == '__main__':
         print(response)
     else:  # args.c
         print(f'Device ({args.device_ip_address}) acting as iPerf client, connecting to {args.c}')
-        response = mfg_test.iperf_start(is_server=False, server_ip_address=args.c)
+        response = mfg_test.iperf_start(is_server=False, server_ip_address=args.c, duration=args.t)
         print(response)
 
     # response = mfg_test.iperf_stop()

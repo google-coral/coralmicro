@@ -332,7 +332,7 @@ class ValiantMFGTest(object):
       """
 
     @rpc
-    def iperf_start(self, is_server, server_ip_address=None):
+    def iperf_start(self, is_server, server_ip_address=None, duration=10):
       """Starts Iperf.
 
       Returns:

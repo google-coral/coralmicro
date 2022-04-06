@@ -7,6 +7,7 @@
 #include <vector>
 
 using valiant::testlib::JsonRpcGetBooleanParam;
+using valiant::testlib::JsonRpcGetIntegerParam;
 using valiant::testlib::JsonRpcGetStringParam;
 
 struct IperfContext {
@@ -45,13 +46,20 @@ static void IperfStart(struct jsonrpc_request *request) {
         iperf_ctx.session = lwiperf_start_tcp_server_default(lwiperf_report, &iperf_ctx);
     } else { // client
         std::string server_ip_address;
+        int duration_seconds;
         if (!JsonRpcGetStringParam(request, "server_ip_address", &server_ip_address)) return;
+        if (!JsonRpcGetIntegerParam(request, "duration", &duration_seconds)) {
+            duration_seconds = 10;
+        }
+        // Per lwiperf code, positive value for tcp_client's `amount` is bytes, negative value are time (unit of 10ms)
+        int amount = -(duration_seconds * 100);
+
         ip_addr_t addr;
         if (ipaddr_aton(server_ip_address.c_str(), &addr) == -1) {
             jsonrpc_return_error(request, -1, "failed to parse `server_ip_address`", nullptr);
             return;
         }
-        iperf_ctx.session = lwiperf_start_tcp_client_default(&addr, lwiperf_report, &iperf_ctx);
+        iperf_ctx.session = lwiperf_start_tcp_client(&addr, LWIPERF_TCP_PORT_DEFAULT, LWIPERF_CLIENT, amount, lwiperf_report, &iperf_ctx);
     }
 
     if (iperf_ctx.session) {
