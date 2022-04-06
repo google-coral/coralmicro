@@ -3,7 +3,6 @@
 
 #include <cassert>
 extern "C" uint32_t LPI2C_GetInstance(LPI2C_Type*);
-static IRQn_Type const kLpi2cIrqs[] = LPI2C_IRQS;
 
 namespace valiant {
 namespace arduino {

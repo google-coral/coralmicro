@@ -22,12 +22,14 @@ function main {
 Usage: docker_build.sh [-b <build_dir>]
   -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
   -a               build arduino library archive
+  -s               build all arduino sketches
   -n               build using ninja
 EOF
 )
     local build_dir
     local build_arduino
-    local args=$(getopt hmanb: $*)
+    local build_sketches
+    local args=$(getopt hmansb: $*)
     set -- $args
 
     for i; do
@@ -38,6 +40,10 @@ EOF
                 ;;
             -a)
                 build_arduino=true
+                shift
+                ;;
+            -s)
+                build_sketches=true
                 shift
                 ;;
             -n)
@@ -129,7 +135,11 @@ EOF
     --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1)
     ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core update-index
     ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core install coral:valiant
-    ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:valiant:valiant ${ROOTDIR}/sketches/HelloWorld -v
+    if [[ ! -z ${build_sketches} ]]; then
+        for sketch in ${ROOTDIR}/sketches/*; do
+            ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:valiant:valiant ${sketch};
+        done
+    fi
     kill ${http_pid}
     wait
     fi
