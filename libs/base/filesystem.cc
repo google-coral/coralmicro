@@ -314,15 +314,17 @@ bool ReadFile(const char* path, std::string* str) {
 
 size_t ReadFile(const char* path, uint8_t* buf, size_t size) {
     lfs_file_t file;
-    if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return false;
+    if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return 0;
     AutoClose close{&file};
 
     auto file_size = lfs_file_size(&g_lfs, &file);
-    if (file_size < 0) return false;
+    if (file_size < 0) return 0;
     size = std::min(size, static_cast<size_t>(file_size));
 
     auto n = lfs_file_read(&g_lfs, &file, buf, size);
-    return n >= 0 && static_cast<size_t>(n) == size;
+    if (n >= 0) return n;
+
+    return 0;
 }
 
 bool WriteFile(const char* path, const uint8_t* buf, size_t size) {
