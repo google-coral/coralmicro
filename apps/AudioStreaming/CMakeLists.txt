@@ -5,6 +5,7 @@ include_directories(.)
 
 add_executable_m7(AudioStreaming
     audio_server.cc
+    network.cc
 )
 
 target_include_directories(AudioStreaming PRIVATE

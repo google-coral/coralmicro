@@ -2,6 +2,7 @@
 #define _LIBS_TASKS_AUDIO_TASK_H_
 
 #include <functional>
+#include <optional>
 
 #include "libs/base/queue_task.h"
 #include "libs/base/tasks.h"
@@ -57,6 +58,8 @@ struct Request {
 static constexpr size_t kAudioTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
 static constexpr UBaseType_t kAudioTaskQueueLength = 4;
 extern const char kAudioTaskName[];
+
+std::optional<audio::SampleRate> CheckSampleRate(int sample_rate_hz);
 
 class AudioDriver {
    public:

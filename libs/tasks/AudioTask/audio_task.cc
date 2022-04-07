@@ -36,6 +36,16 @@ using namespace audio;
 
 constexpr const char kAudioTaskName[] = "audio_task";
 
+std::optional<audio::SampleRate> CheckSampleRate(int sample_rate_hz) {
+    switch (sample_rate_hz) {
+        case 16000:
+            return audio::SampleRate::k16000_Hz;
+        case 48000:
+            return audio::SampleRate::k48000_Hz;
+    }
+    return std::nullopt;
+}
+
 void AudioDriver::PdmCallback(PDM_Type* base, pdm_edma_handle_t* handle,
                               status_t status) {
     auto& pdm_transfer = pdm_transfers_[pdm_transfer_index_];

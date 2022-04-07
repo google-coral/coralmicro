@@ -4,18 +4,16 @@
 #include <cstdio>
 #include <cstring>
 
+#include "apps/AudioStreaming/network.h"
 #include "libs/tasks/AudioTask/audio_reader.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
+namespace valiant {
 namespace {
-
 constexpr int kPort = 33000;
-
-enum class Status { kOk, kEof, kError };
-
 constexpr int kNumSampleFormats = 2;
 constexpr const char* kSampleFormatNames[] = {"S16_LE", "S32_LE"};
 enum SampleFormat {
@@ -23,70 +21,9 @@ enum SampleFormat {
     kS32LE = 1,
 };
 
-Status ReadBytes(int fd, void* bytes, size_t size) {
-    assert(fd >= 0);
-    assert(bytes);
-
-    char* buf = reinterpret_cast<char*>(bytes);
-    while (size != 0) {
-        auto ret = ::read(fd, buf, size);
-        if (ret == 0) return Status::kEof;
-        if (ret == -1) {
-            if (errno == EINTR) continue;
-            return Status::kError;
-        }
-        size -= ret;
-        buf += ret;
-    }
-    return Status::kOk;
-}
-
-template <typename T>
-Status ReadArray(int fd, T* array, size_t array_size) {
-    return ReadBytes(fd, array, array_size * sizeof(T));
-}
-
-Status WriteBytes(int fd, const void* bytes, size_t size,
-                  size_t chunk_size = 1024) {
-    assert(fd >= 0);
-    assert(bytes);
-
-    const char* buf = reinterpret_cast<const char*>(bytes);
-    while (size != 0) {
-        auto len = std::min(size, chunk_size);
-        auto ret = ::write(fd, buf, len);
-        if (ret == -1) {
-            if (errno == EINTR) continue;
-            return Status::kError;
-        }
-        size -= len;
-        buf += len;
-    }
-
-    return Status::kOk;
-}
-
-template <typename T>
-Status WriteArray(int fd, const T* array, size_t array_size) {
-    return WriteBytes(fd, array, array_size * sizeof(T));
-}
-
-bool VerifySampleRate(int sample_rate_hz,
-                      valiant::audio::SampleRate* sample_rate) {
-    switch (sample_rate_hz) {
-        case 16000:
-            *sample_rate = valiant::audio::SampleRate::k16000_Hz;
-            return true;
-        case 48000:
-            *sample_rate = valiant::audio::SampleRate::k48000_Hz;
-            return true;
-    }
-    return false;
-}
-
 void ProcessClient(int client_socket) {
     int32_t params[4];
-    if (ReadArray(client_socket, params, 4) != Status::kOk) {
+    if (ReadArray(client_socket, params, 4) != IOStatus::kOk) {
         printf("ERROR: Cannot read params from client socket\n\r");
         return;
     }
@@ -96,8 +33,8 @@ void ProcessClient(int client_socket) {
     const int dma_buffer_size_ms = params[2];
     const int num_dma_buffers = params[3];
 
-    valiant::audio::SampleRate sample_rate;
-    if (!VerifySampleRate(sample_rate_hz, &sample_rate)) {
+    auto sample_rate = CheckSampleRate(sample_rate_hz);
+    if (!sample_rate.has_value()) {
         printf("ERROR: Invalid sample rate: %d\n\r", sample_rate_hz);
         return;
     }
@@ -113,8 +50,8 @@ void ProcessClient(int client_socket) {
     printf("  DMA buffer size (ms): %d\n\r", dma_buffer_size_ms);
     printf("  DMA buffer count: %d\n\r", num_dma_buffers);
 
-    valiant::AudioReader reader(sample_rate, dma_buffer_size_ms,
-                                num_dma_buffers);
+    AudioReader reader(sample_rate.value(), dma_buffer_size_ms,
+                       num_dma_buffers);
 
     int total_bytes = 0;
     auto& buffer32 = reader.Buffer();
@@ -122,7 +59,8 @@ void ProcessClient(int client_socket) {
     if (sample_format == kS32LE) {
         while (true) {
             auto size = reader.FillBuffer();
-            if (WriteArray(client_socket, buffer32.data(), size) != Status::kOk)
+            if (WriteArray(client_socket, buffer32.data(), size) !=
+                IOStatus::kOk)
                 break;
             total_bytes += size * sizeof(int32_t);
         }
@@ -131,7 +69,8 @@ void ProcessClient(int client_socket) {
         while (true) {
             auto size = reader.FillBuffer();
             for (size_t i = 0; i < size; ++i) buffer16[i] = buffer32[i] >> 16;
-            if (WriteArray(client_socket, buffer16.data(), size) != Status::kOk)
+            if (WriteArray(client_socket, buffer16.data(), size) !=
+                IOStatus::kOk)
                 break;
             total_bytes += size * sizeof(int16_t);
         }
@@ -144,44 +83,30 @@ void ProcessClient(int client_socket) {
 }
 
 void RunServer() {
-    const int server_socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    const int server_socket = SocketServer(kPort, 5);
     if (server_socket == -1) {
-        printf("ERROR: Cannot create server socket\n\r");
-        return;
-    }
-
-    struct sockaddr_in bind_address;
-    bind_address.sin_family = AF_INET;
-    bind_address.sin_port = PP_HTONS(kPort);
-    bind_address.sin_addr.s_addr = PP_HTONL(INADDR_ANY);
-
-    auto ret =
-        ::bind(server_socket, reinterpret_cast<struct sockaddr*>(&bind_address),
-               sizeof(bind_address));
-    if (ret == -1) {
-        printf("ERROR: Cannot bind server socket\n\r");
-        return;
-    }
-
-    ret = ::listen(server_socket, 1);
-    if (ret == -1) {
-        printf("ERROR: Cannot listen server socket\n\r");
+        printf("ERROR: Cannot start server.\n\r");
         return;
     }
 
     while (true) {
-        printf("=> Waiting for the client...\n\r");
+        printf("INFO: Waiting for the client...\n\r");
         const int client_socket = ::accept(server_socket, nullptr, nullptr);
-        printf("=> Client connected.\n\r");
+        if (client_socket == -1) {
+            printf("ERROR: Cannot connect client.\n\r");
+            continue;
+        }
+
+        printf("INFO: Client #%d connected.\n\r", client_socket);
         ProcessClient(client_socket);
         ::closesocket(client_socket);
-        printf("=> Client disconnected.\n\r");
+        printf("INFO: Client #%d disconnected.\n\r", client_socket);
     }
 }
-
 }  // namespace
+}  // namespace valiant
 
 extern "C" void app_main(void* param) {
-    RunServer();
-    vTaskSuspend(NULL);
+    valiant::RunServer();
+    vTaskSuspend(nullptr);
 }
