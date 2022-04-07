@@ -25,6 +25,10 @@ enum class SampleRate : uint32_t {
     k48000_Hz = 48000,
 };
 
+inline int MsToSamples(audio::SampleRate sample_rate, int ms) {
+    return ms * static_cast<int>(sample_rate) / 1000;
+}
+
 using AudioTaskCallback = void (*)(void* param, const int32_t* dma_buffer,
                                    size_t dma_buffer_size);
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 
@@ -103,50 +104,98 @@ class AudioReader {
     volatile int underflow_count_ = 0;
 };
 
-// Class to access fixed number of latest audio samples from the microphone.
-// Call `AccessLatestSamples()` at any time to access the latest
-// `latest_buffer_size_ms` of audio data. Samples start at `start_index`:
-//
-//   First part:  [samples.begin() + start_index, samples.end())
-//   Second part: [samples.begin(),               samples.begin() + start_index)
-//
-// Example:
-//
-// LatestAudioReader reader(audio::SampleRate::k16000_Hz,
-//                          /*dma_buffer_size_ms=*/100,
-//                          /*num_dma_buffers=*/10,
-//                          /*latest_buffer_size_ms=*/150);
-//
-// reader.AccessLatestSamples(
-//    [](const std::vector<int32_t>& samples, size_t start_index) { ... });
-//
-class LatestAudioReader {
+using AudioServiceCallback = bool (*)(void* context, const int32_t* samples,
+                                      size_t num_samples);
+
+// Class to get audio samples from the microphone. Each client must provide
+// the `AudioServiceCallback` function to continuously receive new microphone
+// samples. Internally microphone is only enabled when there is at least one
+// client, otherwise microphone is completely disabled (no power is consumed).
+class AudioService {
    public:
-    LatestAudioReader(audio::SampleRate sample_rate, int dma_buffer_size_ms,
-                      int num_dma_buffers, int latest_buffer_size_ms);
-    ~LatestAudioReader();
+    AudioService(audio::SampleRate sample_rate, int dma_buffer_size_ms,
+                 int num_dma_buffers);
+    AudioService(const AudioService&) = delete;
+    AudioService& operator=(const AudioService&) = delete;
+    ~AudioService();
 
-    size_t NumSamples() const { return samples_.size(); }
+    int AddCallback(void* ctx, AudioServiceCallback fn);
+    bool RemoveCallback(int id);
 
-    template <typename F>
-    void AccessLatestSamples(F f) {
-        MutexLock lock(mutex_);
-        f(samples_, pos_);
-    };
+    audio::SampleRate sample_rate() const { return sample_rate_; }
+    int dma_buffer_size_ms() const { return dma_buffer_size_ms_; }
+    int num_dma_buffers() const { return num_dma_buffers_; }
 
    private:
-    static void StaticRun(void* param);
-    void Run();
-
     audio::SampleRate sample_rate_;
     int dma_buffer_size_ms_;
     int num_dma_buffers_;
 
     TaskHandle_t task_;
+    QueueHandle_t queue_;
+
+    static void StaticRun(void* param);
+    void Run() const;
+};
+
+// Class to access fixed number of latest audio samples from the microphone.
+//
+// Typical setup to access the latest 1000 ms of audio samples:
+//
+//     AudioService* service = ...
+//
+//     LatestSamples latest(audio::MsToSamples(service->sample_rate(), 1000));
+//     service->AddCallback(
+//         &latest, +[](void* ctx, const int32_t* samples, size_t num_samples) {
+//             static_cast<LatestSamples*>(ctx)->Append(samples, num_samples);
+//             return true;
+//         });
+//
+// Call `AccessLatestSamples()` to access the latest `num_samples` without a
+// copy. Samples start at `start_index`:
+//
+//     latest.AccessLatestSamples([](const std::vector<int32_t>& samples,
+//                                   size_t start_index) {
+//         1st: [samples.begin() + start_index, samples.end())
+//         2nd: [samples.begin(),               samples.begin() + start_index)
+//     });
+//
+// Call `CopyLatestSamples()` to get a copy of latest `num_samples`:
+//
+//     auto last_second = latest.CopyLatestSamples();
+//
+class LatestSamples {
+   public:
+    LatestSamples(size_t num_samples);
+    LatestSamples(const LatestSamples&) = delete;
+    LatestSamples& operator=(const LatestSamples&) = delete;
+    ~LatestSamples();
+
+    size_t NumSamples() const { return samples_.size(); };
+
+    void Append(const int32_t* samples, size_t num_samples) {
+        for (size_t i = 0; i < num_samples; ++i)
+            samples_[(pos_ + i) % samples_.size()] = samples[i];
+        pos_ = (pos_ + num_samples) % samples_.size();
+    }
+
+    template <typename F>
+    void AccessLatestSamples(F f) const {
+        MutexLock lock(mutex_);
+        f(samples_, pos_);
+    };
+
+    std::vector<int32_t> CopyLatestSamples() const {
+        MutexLock lock(mutex_);
+        std::vector<int32_t> copy(samples_);
+        std::rotate(std::begin(copy), std::begin(copy) + pos_, std::end(copy));
+        return copy;
+    }
+
+   private:
     SemaphoreHandle_t mutex_;
-    std::vector<int32_t> samples_;  // protected by mutex_;
-    size_t pos_ = 0;                // protected by mutex_;
-    bool done_ = false;             // protected by mutex_;
+    size_t pos_ = 0;
+    std::vector<int32_t> samples_;
 };
 
 }  // namespace valiant
