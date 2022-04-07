@@ -11,14 +11,15 @@ function main {
     local usage=$(cat <<EOF
 Usage: docker_build.sh [-b <build_dir>]
   -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
-  -a               build arduino package
-  -n               build with ninja
+  -a               build arduino library archive
+  -s               build all arduino sketches
+  -n               build using ninja
 EOF
 )
-
     local build_dir
-    local arduino
-    local args=$(getopt hmanb: $*)
+    local build_arduino
+    local build_sketches
+    local args=$(getopt hmansb: $*)
     set -- $args
 
     for i; do
@@ -28,7 +29,11 @@ EOF
                 shift 2
                 ;;
             -a)
-                arduino=true
+                build_arduino=true
+                shift
+                ;;
+            -s)
+                build_sketches=true
                 shift
                 ;;
             -n)
@@ -46,8 +51,13 @@ EOF
     done
 
     local arduino_build_flags
-    if [[ ! -z "${arduino}" ]]; then
+    if [[ ! -z "${build_arduino}" ]]; then
         arduino_build_flags="-a"
+    fi
+
+    local sketch_build_flags
+    if [[ ! -z "${build_sketches}" ]]; then
+        sketch_build_flags="-s"
     fi
 
     local ninja_build_flags
@@ -71,7 +81,7 @@ EOF
         chmod a+w /
         groupadd --gid $(id -g) $(id -g -n)
         useradd -m -e '' -s /bin/bash --gid $(id -g) --uid $(id -u) $(id -u -n)
-        su $(id -u -n) -c 'bash ${ROOTDIR}/build.sh -b ${ROOTDIR}/build ${arduino_build_flags} ${ninja_build_flags}'
+        su $(id -u -n) -c 'bash ${ROOTDIR}/build.sh -b ${ROOTDIR}/build ${arduino_build_flags} ${sketch_build_flags} ${ninja_build_flags}'
     "
 }
 
