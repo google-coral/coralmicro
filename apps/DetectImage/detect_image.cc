@@ -17,8 +17,9 @@ constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
 constexpr char kImagePath[] = "/apps/DetectImage/cat_300x300.rgb";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
-static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
-__attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+struct TensorArena {
+    alignas(16) uint8_t data[kTensorArenaSize];
+};
 
 void Main() {
     std::vector<uint8_t> model;
@@ -45,8 +46,10 @@ void Main() {
     resolver.AddDetectionPostprocess();
     resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
+    // As an alternative check STATIC_TENSOR_ARENA_IN_SDRAM macro.
+    auto tensor_arena = std::make_unique<TensorArena>();
     tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
-                                         resolver, tensor_arena,
+                                         resolver, tensor_arena->data,
                                          kTensorArenaSize, &error_reporter);
     if (interpreter.AllocateTensors() != kTfLiteOk) {
         printf("ERROR: AllocateTensors() failed\r\n");

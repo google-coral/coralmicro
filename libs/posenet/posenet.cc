@@ -2,6 +2,7 @@
 
 #include "libs/base/filesystem.h"
 #include "libs/posenet/posenet_decoder_op.h"
+#include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_op.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
@@ -11,18 +12,18 @@ namespace valiant {
 namespace posenet {
 
 namespace {
-static tflite::ErrorReporter *error_reporter = nullptr;
-static const tflite::Model *model = nullptr;
-static tflite::MicroInterpreter *interpreter = nullptr;
-static TfLiteTensor *input_tensor = nullptr;
+tflite::ErrorReporter *error_reporter = nullptr;
+const tflite::Model *model = nullptr;
+tflite::MicroInterpreter *interpreter = nullptr;
+TfLiteTensor *input_tensor = nullptr;
 
-static const int kModelArenaSize = 1 * 1024 * 1024;
-static const int kExtraArenaSize = 1 * 1024 * 1024;
-static const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
-static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+constexpr int kModelArenaSize = 1 * 1024 * 1024;
+constexpr int kExtraArenaSize = 1 * 1024 * 1024;
+constexpr int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
-static std::vector<uint8_t> posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
-static std::vector<uint8_t> posenet_test_input_bin;
+std::vector<uint8_t> posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
+std::vector<uint8_t> posenet_test_input_bin;
 }  // namespace
 
 const char* const KeypointTypes[] = {

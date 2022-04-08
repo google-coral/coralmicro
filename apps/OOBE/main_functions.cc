@@ -18,6 +18,7 @@ limitations under the License.
 #include "third_party/freertos_kernel/include/task.h"
 
 #include "libs/base/filesystem.h"
+#include "libs/tensorflow/utils.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/detection_responder.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"
@@ -44,7 +45,7 @@ TfLiteTensor* input = nullptr;
 std::vector<uint8_t> g_person_detect_model_data_fs;
 // An area of memory to use for input, output, and intermediate arrays.
 constexpr int kTensorArenaSize = 136 * 1024;
-static uint8_t tensor_arena[kTensorArenaSize] __attribute__((section(".ocram_bss,\"aw\",%nobits @")));
+STATIC_TENSOR_ARENA_IN_OCRAM(tensor_arena, kTensorArenaSize);
 }  // namespace
 
 // The name of this function is important for Arduino compatibility.

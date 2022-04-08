@@ -13,29 +13,29 @@ namespace valiant {
 namespace yamnet {
 
 namespace {
-    constexpr int kTensorArenaSize = 1 * 1024 * 1024;
-    uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+constexpr int kTensorArenaSize = 1 * 1024 * 1024;
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
-    std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
-    std::shared_ptr<valiant::EdgeTpuContext> edgetpu_context = nullptr;
-    std::shared_ptr<tflite::MicroErrorReporter> error_reporter = nullptr;
-    std::shared_ptr<TfLiteTensor> input_tensor = nullptr;
+std::unique_ptr<tflite::MicroInterpreter> interpreter;
+std::shared_ptr<valiant::EdgeTpuContext> edgetpu_context;
+std::shared_ptr<tflite::MicroErrorReporter> error_reporter;
+std::shared_ptr<TfLiteTensor> input_tensor;
 
-    constexpr float kThreshold = 0.05;
-    constexpr int kTopK = 5;
+constexpr float kThreshold = 0.05;
+constexpr int kTopK = 5;
 
-    void PrintOutput(const std::shared_ptr<std::vector<tensorflow::Class>>& output) {
-        printf("YAMNet Results:\r\n");
-        for (const auto& classes : *output) {
-            printf("%d: %f\r\n", classes.id, classes.score);
-        }
-        printf("\r\n");
+void PrintOutput(const std::shared_ptr<std::vector<tensorflow::Class>>& output) {
+    printf("YAMNet Results:\r\n");
+    for (const auto& classes : *output) {
+        printf("%d: %f\r\n", classes.id, classes.score);
     }
+    printf("\r\n");
+}
 
 #ifdef YAMNET_CPU
-    constexpr char kModelName[] = "/models/yamnet.tflite";
+constexpr char kModelName[] = "/models/yamnet.tflite";
 #else
-    constexpr char kModelName[] = "/models/yamnet_edgetpu.tflite";
+constexpr char kModelName[] = "/models/yamnet_edgetpu.tflite";
 #endif
 }  // namespace
 

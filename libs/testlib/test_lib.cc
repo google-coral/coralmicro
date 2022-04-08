@@ -22,14 +22,17 @@
 #include <array>
 #include <map>
 
-// Map for containing uploaded resources.
-// Key is the output of StrHash with the resource name as the parameter.
-static std::map<std::string, std::vector<uint8_t>> uploaded_resources;
-
 namespace valiant {
 namespace testlib {
+namespace {
+constexpr int kTensorArenaSize = 8 * 1024 * 1024;
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
-static std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_name) {
+// Map for containing uploaded resources.
+// Key is the output of StrHash with the resource name as the parameter.
+std::map<std::string, std::vector<uint8_t>> uploaded_resources;
+
+std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_name) {
     const char *param_format = "$[0].%s";
     // +1 for null terminator.
     auto size = snprintf(nullptr, 0, param_format, param_name) + 1;
@@ -37,6 +40,7 @@ static std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_
     snprintf(param_pattern.get(), size, param_format, param_name);
     return param_pattern;
 }
+}  // namespace
 
 void JsonRpcReturnBadParam(struct jsonrpc_request* request, const char* message, const char* param_name) {
    jsonrpc_return_error(request, JSONRPC_ERROR_BAD_PARAMS, message, "{%Q:%Q}", "param", param_name);
@@ -246,14 +250,6 @@ void RunDetectionModel(struct jsonrpc_request* request) {
         jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
         return;
     }
-    constexpr size_t kTensorArenaSize{8 * 1024 * 1024};
-
-//    std::unique_ptr<uint8_t[]> tensor_arena(new(std::nothrow) uint8_t[kTensorArenaSize]);
-//    if (!tensor_arena) {
-//        jsonrpc_return_error(request, -1, "failed to allocate tensor arena", nullptr);
-//        return;
-//    }
-    static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16))) __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
     tflite::MicroMutableOpResolver<3> resolver;
     resolver.AddDequantize();
@@ -357,18 +353,9 @@ void RunClassificationModel(struct jsonrpc_request* request) {
         return;
     }
 
-    constexpr size_t kTensorArenaSize = 1 * 1024 * 1024;
-    // Use std::nothrow to detect out-of-memory condition specifically in the test lib and
-    // prevent a silent crash.
-    std::unique_ptr<uint8_t[]> tensor_arena(new(std::nothrow) uint8_t[kTensorArenaSize]);
-    if (!tensor_arena) {
-        jsonrpc_return_error(request, -1, "failed to allocate tensor arena", nullptr);
-        return;
-    }
-
     tflite::MicroMutableOpResolver<1> resolver;
     resolver.AddCustom(kCustomOp, RegisterCustomOp());
-    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena.get(),
+    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
                                          kTensorArenaSize, &error_reporter);
     if (interpreter.AllocateTensors() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
