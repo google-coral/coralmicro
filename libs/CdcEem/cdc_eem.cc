@@ -89,19 +89,15 @@ err_t CdcEem::StaticTxFunc(struct netif *netif, struct pbuf *p) {
 }
 
 err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
-    auto* combined_pbuf = new std::vector<uint8_t>(p->tot_len);
-    if (!combined_pbuf) {
+    auto* packet = new std::vector<uint8_t>(p->tot_len);
+    if (pbuf_copy_partial(p, packet->data(), p->tot_len, 0) != p->tot_len)
+        return ERR_IF;
+
+    if (xQueueSendToBack(tx_queue_, &packet, 0) != pdTRUE) {
+        delete packet;
         return ERR_IF;
     }
-    void *tx_ptr = pbuf_get_contiguous(p, combined_pbuf->data(), p->tot_len, p->tot_len, 0);
-    if (tx_ptr != combined_pbuf->data()) {
-        memcpy(combined_pbuf->data(), tx_ptr, p->tot_len);
-        tx_ptr = combined_pbuf->data();
-    }
-    if (xQueueSendToBack(tx_queue_, &combined_pbuf, 0) != pdTRUE) {
-        delete combined_pbuf;
-        return ERR_IF;
-    }
+
     return ERR_OK;
 }
 
