@@ -133,11 +133,11 @@ EOF
     --core_sha256=$(sha256sum ${build_dir}/coral-valiant-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
     --${flashtool_name}_flashtool_url=http://localhost:8000/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 \
     --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1)
-    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core update-index
-    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core install coral:valiant
+    ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core update-index
+    ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core install coral:valiant
     if [[ ! -z ${build_sketches} ]]; then
         for sketch in ${ROOTDIR}/sketches/*; do
-            ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:valiant:valiant ${sketch};
+            ${ROOTDIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli compile -b coral:valiant:valiant ${sketch};
         done
     fi
     kill ${http_pid}
