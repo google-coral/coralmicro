@@ -6,23 +6,25 @@
 
 namespace valiant {
 namespace {
+using filesystem::Lfs;
+
 HttpServer* g_server = nullptr;
 
-constexpr intptr_t kTagVector = 0b01;
-constexpr intptr_t kTagFileHolder = 0b10;
-constexpr intptr_t kTagMask = 0b11;
+constexpr uintptr_t kTagVector = 0b01;
+constexpr uintptr_t kTagFileHolder = 0b10;
+constexpr uintptr_t kTagMask = 0b11;
 
-template <intptr_t Tag, typename T>
+template <uintptr_t Tag, typename T>
 void* TaggedPointer(T* p) {
-    assert((reinterpret_cast<intptr_t>(p) & kTagMask) == 0);
-    return reinterpret_cast<void*>(reinterpret_cast<intptr_t>(p) | Tag);
+    assert((reinterpret_cast<uintptr_t>(p) & kTagMask) == 0);
+    return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(p) | Tag);
 }
 
-intptr_t Tag(void* p) { return reinterpret_cast<intptr_t>(p) & kTagMask; }
+uintptr_t Tag(void* p) { return reinterpret_cast<uintptr_t>(p) & kTagMask; }
 
 template <typename T>
 T* Pointer(void* p) {
-    return reinterpret_cast<T*>(reinterpret_cast<intptr_t>(p) & ~kTagMask);
+    return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(p) & ~kTagMask);
 }
 
 struct FileHolder {
@@ -30,7 +32,7 @@ struct FileHolder {
     bool opened = false;
 
     ~FileHolder() {
-        if (opened) filesystem::Close(&file);
+        if (opened) lfs_file_close(Lfs(), &file);
     }
 };
 }  // namespace
@@ -54,10 +56,12 @@ int HttpServer::FsOpenCustom(struct fs_file* file, const char* name) {
 
         if (auto* filename = std::get_if<std::string>(&content)) {
             auto file_holder = std::make_unique<FileHolder>();
-            if (filesystem::Open(&file_holder->file, filename->c_str())) {
+
+            if (lfs_file_open(Lfs(), &file_holder->file, filename->c_str(),
+                              LFS_O_RDONLY) >= 0) {
                 file_holder->opened = true;
                 file->data = nullptr;
-                file->len = filesystem::Size(&file_holder->file);
+                file->len = lfs_file_size(Lfs(), &file_holder->file);
                 file->index = 0;
                 file->flags = FS_FILE_FLAGS_HEADER_PERSISTENT;
                 file->pextension =
@@ -94,7 +98,9 @@ int HttpServer::FsReadCustom(struct fs_file* file, char* buffer, int count) {
 
     if (tag == kTagFileHolder) {
         auto* file_holder = Pointer<FileHolder>(file->pextension);
-        auto len = filesystem::Read(&file_holder->file, buffer, count);
+
+        auto len = lfs_file_read(Lfs(), &file_holder->file, buffer, count);
+        if (len < 0) return FS_READ_EOF;
         file->index += len;
         return len;
     }

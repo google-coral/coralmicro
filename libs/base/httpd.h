@@ -20,16 +20,36 @@ class HttpServer {
                             const char* http_request, u16_t http_request_len,
                             int content_len, char* response_uri,
                             u16_t response_uri_len, u8_t* post_auto_wnd) {
+        (void)connection;
+        (void)uri;
+        (void)http_request;
+        (void)http_request_len;
+        (void)content_len;
+        (void)response_uri;
+        (void)response_uri_len;
+        (void)post_auto_wnd;
         return ERR_ARG;
     }
     virtual err_t PostReceiveData(void* connection, struct pbuf* p) {
+        (void)connection;
+        (void)p;
         return ERR_ARG;
     };
     virtual void PostFinished(void* connection, char* response_uri,
-                              u16_t response_uri_len){};
+                              u16_t response_uri_len) {
+        (void)connection;
+        (void)response_uri;
+        (void)response_uri_len;
+    };
 
     virtual void CgiHandler(struct fs_file* file, const char* uri,
-                            int iNumParams, char** pcParam, char** pcValue){};
+                            int iNumParams, char** pcParam, char** pcValue) {
+        (void)file;
+        (void)uri;
+        (void)iNumParams;
+        (void)pcParam;
+        (void)pcValue;
+    };
 
     virtual int FsOpenCustom(struct fs_file* file, const char* name);
     virtual int FsReadCustom(struct fs_file* file, char* buffer, int count);
