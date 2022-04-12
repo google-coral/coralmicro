@@ -30,7 +30,7 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 // Map for containing uploaded resources.
 // Key is the output of StrHash with the resource name as the parameter.
-std::map<std::string, std::vector<uint8_t>> uploaded_resources;
+std::map<std::string, std::vector<uint8_t>> g_uploaded_resources;
 
 std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_name) {
     const char *param_format = "$[0].%s";
@@ -39,6 +39,12 @@ std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_name) {
     auto param_pattern = std::make_unique<char[]>(size);
     snprintf(param_pattern.get(), size, param_format, param_name);
     return param_pattern;
+}
+
+std::vector<uint8_t>* GetResource(const std::string& resource_name) {
+    auto it = g_uploaded_resources.find(resource_name);
+    if (it == g_uploaded_resources.end()) return nullptr;
+    return &it->second;
 }
 }  // namespace
 
@@ -110,17 +116,6 @@ bool JsonRpcGetBase64Param(struct jsonrpc_request* request, const char *param_na
     return true;
 }
 
-static uint8_t* GetResource(const std::string& resource_name, size_t *resource_size) {
-    auto it = uploaded_resources.find(resource_name);
-    if (it == uploaded_resources.end()) {
-        return nullptr;
-    }
-    if (resource_size) {
-        *resource_size = it->second.size();
-    }
-    return it->second.data();
-}
-
 // Implementation of "get_serial_number" RPC.
 // Returns JSON results with the key "serial_number" and the serial, as a string.
 void GetSerialNumber(struct jsonrpc_request *request) {
@@ -167,7 +162,7 @@ void BeginUploadResource(struct jsonrpc_request *request) {
     int resource_size;
     if (!JsonRpcGetIntegerParam(request, "size", &resource_size)) return;
 
-    uploaded_resources[resource_name].resize(resource_size);
+    g_uploaded_resources[resource_name].resize(resource_size);
     jsonrpc_return_success(request, "{}");
 }
 
@@ -175,7 +170,7 @@ void UploadResourceChunk(struct jsonrpc_request *request) {
     std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
-    uint8_t* resource = GetResource(resource_name, nullptr);
+    auto* resource = GetResource(resource_name);
     if (!resource) {
         jsonrpc_return_error(request, -1, "unknown resource", nullptr);
         return;
@@ -186,7 +181,7 @@ void UploadResourceChunk(struct jsonrpc_request *request) {
 
     std::vector<uint8_t> data;
     if (!JsonRpcGetBase64Param(request, "data", &data)) return;
-    std::memcpy(resource + offset, data.data(), data.size());
+    std::memcpy(resource->data() + offset, data.data(), data.size());
 
     jsonrpc_return_success(request, "{}");
 }
@@ -195,13 +190,13 @@ void DeleteResource(struct jsonrpc_request *request) {
     std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
-    auto it = uploaded_resources.find(resource_name);
-    if (it == uploaded_resources.end()) {
+    auto it = g_uploaded_resources.find(resource_name);
+    if (it == g_uploaded_resources.end()) {
         jsonrpc_return_error(request, -1, "unknown resource", nullptr);
         return;
     }
 
-    uploaded_resources.erase(it);
+    g_uploaded_resources.erase(it);
     jsonrpc_return_success(request, "{}");
 }
 
@@ -224,28 +219,25 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth))
         return;
 
-    size_t model_size;
-    uint8_t* model_resource = GetResource(model_resource_name, &model_size);
-    if (!model_resource || !model_size) {
+    const auto* model_resource = GetResource(model_resource_name);
+    if (!model_resource) {
         jsonrpc_return_error(request, -1, "missing model resource", nullptr);
         return;
     }
-    uint8_t* image_resource = GetResource(image_resource_name, nullptr);
+    const auto* image_resource = GetResource(image_resource_name);
     if (!image_resource) {
         jsonrpc_return_error(request, -1, "missing image resource", nullptr);
         return;
     }
 
-    const tflite::Model* model = tflite::GetModel(model_resource);
+    const tflite::Model* model = tflite::GetModel(model_resource->data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
-        char buf[50];
-        sprintf(buf, "model schema version unsupported: %ld", model->version());
-        jsonrpc_return_error(request, -1, buf, nullptr);
+        jsonrpc_return_error(request, -1, "model schema version unsupported", nullptr);
         return;
     }
 
     tflite::MicroErrorReporter error_reporter;
-    std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
+    std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
         return;
@@ -272,7 +264,7 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     };
     auto preprocess_start = valiant::timer::micros();
     if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
-                                 image_resource, tensor_dims, input_tensor_data)) {
+                                 image_resource->data(), tensor_dims, input_tensor_data)) {
         jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
         return;
     }
@@ -329,18 +321,18 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth))
         return;
 
-    uint8_t* model_resource = GetResource(model_resource_name, nullptr);
+    const auto* model_resource = GetResource(model_resource_name);
     if (!model_resource) {
         jsonrpc_return_error(request, -1, "missing model resource", nullptr);
         return;
     }
-    uint8_t* image_resource = GetResource(image_resource_name, nullptr);
+    const auto* image_resource = GetResource(image_resource_name);
     if (!image_resource) {
         jsonrpc_return_error(request, -1, "missing image resource", nullptr);
         return;
     }
 
-    const tflite::Model* model = tflite::GetModel(model_resource);
+    const tflite::Model* model = tflite::GetModel(model_resource->data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         jsonrpc_return_error(request, -1, "model schema version unsupported", nullptr);
         return;
@@ -382,7 +374,7 @@ void RunClassificationModel(struct jsonrpc_request* request) {
         input_tensor->dims->data[3]
     };
     if (!tensorflow::ResizeImage(
-        {image_height, image_width, image_depth}, image_resource,
+        {image_height, image_width, image_depth}, image_resource->data(),
         input_tensor_dims, tflite::GetTensorData<uint8_t>(input_tensor))) {
         jsonrpc_return_error(request, -1, "failed to resize input", nullptr);
         return;
