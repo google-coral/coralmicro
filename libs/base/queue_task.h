@@ -12,6 +12,8 @@ constexpr size_t kDefaultTaskStackDepth = configMINIMAL_STACK_SIZE;
 template <typename Request, typename Response, const char *Name, size_t StackDepth, UBaseType_t Priority, UBaseType_t QueueLength>
 class QueueTask {
   public:
+    virtual ~QueueTask() = default;
+
     // Initialization function for the QueueTask.
     // If overridden, implementors should ensure that the super method is still called.
     // Initialized any needed data here, but beware that the FreeRTOS scheduler may not yet be running.

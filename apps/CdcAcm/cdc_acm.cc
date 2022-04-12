@@ -3,8 +3,7 @@
 #include <cstdio>
 
 extern "C" void app_main(void *param) {
+    (void)param;
     printf("CdcAcm\r\n");
-    while (true) {
-        taskYIELD();
-    }
+    vTaskSuspend(nullptr);
 }

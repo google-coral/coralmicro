@@ -25,10 +25,12 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
 }
 
 static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
+    (void)data;
     vTaskResume(reinterpret_cast<TaskHandle_t>(param));
 }
 
 extern "C" void app_main(void *param) {
+    (void)param;
     valiant::IPCM4::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetCurrentTaskHandle());
     valiant::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));

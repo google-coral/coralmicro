@@ -82,6 +82,7 @@ void Main() {
 }  // namespace valiant
 
 extern "C" void app_main(void* param) {
+    (void)param;
     valiant::Main();
     vTaskSuspend(nullptr);
 }

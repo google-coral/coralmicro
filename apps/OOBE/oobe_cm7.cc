@@ -74,10 +74,12 @@ namespace valiant {
 namespace oobe {
 
 static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void* param) {
+    (void)data;
     vTaskResume(reinterpret_cast<TaskHandle_t>(param));
 }
 
 void CameraTask(void *param) {
+    (void)param;
     vTaskSuspend(nullptr);
 
     while (true) {
@@ -113,6 +115,7 @@ void CameraTask(void *param) {
 }
 
 void PosenetTask(void *param) {
+    (void)param;
     vTaskSuspend(nullptr);
 
     valiant::posenet::Output output;
@@ -187,7 +190,7 @@ static bool ConnectToWifi() {
 }
 #endif // defined(OOBE_DEMO_WIFI)
 
-void main() {
+void Main() {
     TaskHandle_t camera_task, posenet_task;
     xTaskCreate(CameraTask, "oobe_camera_task", configMINIMAL_STACK_SIZE * 30, nullptr, APP_TASK_PRIORITY, &camera_task);
     xTaskCreate(PosenetTask, "oobe_posenet_task", configMINIMAL_STACK_SIZE * 30, nullptr, APP_TASK_PRIORITY, &posenet_task);
@@ -276,6 +279,7 @@ void main() {
 }  // namespace valiant
 
 extern "C" void app_main(void *param) {
-    valiant::oobe::main();
+    (void)param;
+    valiant::oobe::Main();
     vTaskSuspend(nullptr);
 }
