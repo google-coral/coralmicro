@@ -81,7 +81,7 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
                 case ElfloaderTarget::Path: {
                         // TODO(atv): This stuff can fail. We should propagate errors back to the Python side if possible.
                         auto dir = valiant::filesystem::Dirname(elfloader_recv_path);
-                        valiant::filesystem::MakeDirs(dir.get());
+                        valiant::filesystem::MakeDirs(dir.c_str());
                         valiant::filesystem::Open(&file_handle, elfloader_recv_path, true);
                         free(elfloader_recv_path);
                         elfloader_recv_path = nullptr;

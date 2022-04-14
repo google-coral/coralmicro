@@ -22,7 +22,7 @@ bool OpenDir(lfs_dir_t *dir, const char *path);
 bool ReadDir(lfs_dir_t *dir, lfs_info *info);
 bool CloseDir(lfs_dir_t *dir);
 bool RewindDir(lfs_dir_t *dir);
-std::unique_ptr<char[]> Dirname(const char *path);
+std::string Dirname(const char* path);
 bool Seek(lfs_file_t *handle, size_t off, int whence);
 size_t Position(lfs_file_t *handle);
 bool Close(lfs_file_t *handle);

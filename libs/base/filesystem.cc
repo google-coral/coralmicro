@@ -155,22 +155,30 @@ int Write(lfs_file_t *handle, const void *buffer, size_t size) {
     return lfs_file_write(&g_lfs, handle, buffer, size);
 }
 
-std::unique_ptr<char[]> Dirname(const char *path) {
-    if (path[0] != '/') {
-        return nullptr;
-    }
+// Matches the specification of
+// https://docs.python.org/3/library/os.path.html#os.path.dirname
+// except it assumes only a single '/' in a row.
+//
+// assert(Dirname("")                == "");
+// assert(Dirname("/")               == "/");
+// assert(Dirname("/file")           == "/");
+// assert(Dirname("file")            == "");
+// assert(Dirname("/dir/")           == "/dir");
+// assert(Dirname("dir/")            == "dir");
+// assert(Dirname("/dir/file")       == "/dir");
+// assert(Dirname("dir/file")        == "dir");
+// assert(Dirname("/dir1/dir2/")     == "/dir1/dir2");
+// assert(Dirname("dir1/dir2/")      == "dir1/dir2");
+// assert(Dirname("/dir1/dir2/file") == "/dir1/dir2");
+// assert(Dirname("dir1/dir2/file")  == "dir1/dir2");
+std::string Dirname(const char *path) {
+    const std::string s(path);
+    if (s.empty()) return "";
 
-    int last_separator = 0;
-    for (size_t i = 0; i < strlen(path); ++i) {
-        if (path[i] == '/') {
-            last_separator = i;
-        }
-    }
-
-    std::unique_ptr<char[]> dir(new char[last_separator + 1]);
-    std::memset(dir.get(), 0, last_separator + 1);
-    std::memcpy(dir.get(), path, last_separator);
-    return dir;
+    const auto index = s.find_last_of('/');
+    if (index == std::string::npos) return "";
+    if (index == 0) return "/";  // e.g. "/", "/file"
+    return s.substr(0, index);  // e.g. "/dir/", "/dir/file"
 }
 
 bool MakeDirs(const char *path) {
