@@ -37,7 +37,6 @@ if (VALIANT_BOARD_REVISION STREQUAL P0 OR VALIANT_BOARD_REVISION STREQUAL P1)
         libs_tasks_AudioTask_freertos
         libs_tasks_CameraTask_freertos
         libs_tasks_PmicTask_freertos
-        libs_tasks_PowerMonitorTask_freertos
         libs_littlefs
         libs_nxp_rt1176-sdk_lwip
         libs_nxp_rt1176-sdk_lwip_httpd
