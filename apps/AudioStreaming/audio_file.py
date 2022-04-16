@@ -3,6 +3,7 @@ import socket
 import struct
 import wave
 
+
 def copy_data(sock, write, chunk_size=2048):
     num_bytes = 0
     try:
@@ -15,6 +16,7 @@ def copy_data(sock, write, chunk_size=2048):
     except KeyboardInterrupt:
         pass
     return num_bytes
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -29,6 +31,8 @@ def main():
     parser.add_argument('--num_dma_buffers', '-n', type=int, default=10)
     parser.add_argument('--output', '-o', type=str, required=True)
     parser.add_argument('--raw', action='store_true')
+    parser.add_argument('--drop_first_samples_ms', type=int, default=0)
+
     args = parser.parse_args()
 
     sample_format = {
@@ -38,10 +42,11 @@ def main():
 
     sock = socket.socket()
     sock.connect((args.host, args.port))
-    sock.send(struct.pack('<iiii', args.sample_rate_hz,
-                                   sample_format['id'],
-                                   args.dma_buffer_size_ms,
-                                   args.num_dma_buffers))
+    sock.send(struct.pack('<iiiii', args.sample_rate_hz,
+                          sample_format['id'],
+                          args.dma_buffer_size_ms,
+                          args.num_dma_buffers,
+                          args.drop_first_samples_ms))
 
     if args.raw:
         with open(args.output, 'wb') as f:
@@ -60,5 +65,6 @@ def main():
     print('Sample Count:', num_samples)
     print('Duration (ms):', 1000.0 * num_samples / args.sample_rate_hz)
 
+
 if __name__ == '__main__':
-   main()
+    main()

@@ -21,10 +21,16 @@ enum SampleFormat {
     kS32LE = 1,
 };
 
+int DropSamples(AudioReader* reader, int min_count) {
+    int count = 0;
+    while (count < min_count) count += reader->FillBuffer();
+    return count;
+}
+
 void ProcessClient(int client_socket) {
-    int32_t params[4];
-    if (ReadArray(client_socket, params, 4) != IOStatus::kOk) {
-        printf("ERROR: Cannot read params from client socket\n\r");
+    int32_t params[5];
+    if (ReadArray(client_socket, params, std::size(params)) != IOStatus::kOk) {
+        printf("ERROR: Cannot read params from client socket\r\n");
         return;
     }
 
@@ -32,30 +38,45 @@ void ProcessClient(int client_socket) {
     const int sample_format = params[1];
     const int dma_buffer_size_ms = params[2];
     const int num_dma_buffers = params[3];
+    const int drop_first_samples_ms = params[4];
 
     auto sample_rate = CheckSampleRate(sample_rate_hz);
     if (!sample_rate.has_value()) {
-        printf("ERROR: Invalid sample rate: %d\n\r", sample_rate_hz);
+        printf("ERROR: Invalid sample rate (Hz): %d\r\n", sample_rate_hz);
         return;
     }
 
     if (sample_format < 0 || sample_format >= kNumSampleFormats) {
-        printf("ERROR: Invalid sample format: %d\n\r", sample_format);
+        printf("ERROR: Invalid sample format: %d\r\n", sample_format);
         return;
     }
 
-    printf("Format:\n\r");
-    printf("  Sample rate (Hz): %d\n\r", sample_rate_hz);
-    printf("  Sample format: %s\n\r", kSampleFormatNames[sample_format]);
-    printf("  DMA buffer size (ms): %d\n\r", dma_buffer_size_ms);
-    printf("  DMA buffer count: %d\n\r", num_dma_buffers);
+    if (dma_buffer_size_ms <= 0) {
+        printf("ERROR: Invalid DMA buffer size (ms): %d\r\n",
+               dma_buffer_size_ms);
+        return;
+    }
 
-    AudioReader reader(sample_rate.value(), dma_buffer_size_ms,
-                       num_dma_buffers);
+    if (num_dma_buffers <= 0) {
+        printf("ERROR: Invalid number of DMA buffers: %d\r\n", num_dma_buffers);
+        return;
+    }
+
+    printf("Format:\r\n");
+    printf("  Sample rate (Hz): %d\r\n", sample_rate_hz);
+    printf("  Sample format: %s\r\n", kSampleFormatNames[sample_format]);
+    printf("  DMA buffer size (ms): %d\r\n", dma_buffer_size_ms);
+    printf("  DMA buffer count: %d\r\n", num_dma_buffers);
+    printf("Sending audio samples...\r\n");
+
+    AudioReader reader(*sample_rate, dma_buffer_size_ms, num_dma_buffers);
+
+    const auto& buffer32 = reader.Buffer();
+
+    const int num_dropped_samples = DropSamples(
+        &reader, audio::MsToSamples(*sample_rate, drop_first_samples_ms));
 
     int total_bytes = 0;
-    auto& buffer32 = reader.Buffer();
-
     if (sample_format == kS32LE) {
         while (true) {
             auto size = reader.FillBuffer();
@@ -76,31 +97,32 @@ void ProcessClient(int client_socket) {
         }
     }
 
-    printf("Statistics:\n\r");
-    printf("  Bytes sent: %d\n\r", total_bytes);
-    printf("  Ring buffer overflows: %d\n\r", reader.OverflowCount());
-    printf("  Ring buffer underflows: %d\n\r", reader.UnderflowCount());
+    printf("Bytes sent: %d\r\n", total_bytes);
+    printf("Ring buffer overflows: %d\r\n", reader.OverflowCount());
+    printf("Ring buffer underflows: %d\r\n", reader.UnderflowCount());
+    printf("Dropped first samples: %d\r\n", num_dropped_samples);
+    printf("Done.\r\n\r\n");
 }
 
 void RunServer() {
     const int server_socket = SocketServer(kPort, 5);
     if (server_socket == -1) {
-        printf("ERROR: Cannot start server.\n\r");
+        printf("ERROR: Cannot start server.\r\n");
         return;
     }
 
     while (true) {
-        printf("INFO: Waiting for the client...\n\r");
+        printf("INFO: Waiting for the client...\r\n");
         const int client_socket = ::accept(server_socket, nullptr, nullptr);
         if (client_socket == -1) {
-            printf("ERROR: Cannot connect client.\n\r");
+            printf("ERROR: Cannot connect client.\r\n");
             continue;
         }
 
-        printf("INFO: Client #%d connected.\n\r", client_socket);
+        printf("INFO: Client #%d connected.\r\n", client_socket);
         ProcessClient(client_socket);
         ::closesocket(client_socket);
-        printf("INFO: Client #%d disconnected.\n\r", client_socket);
+        printf("INFO: Client #%d disconnected.\r\n", client_socket);
     }
 }
 }  // namespace
