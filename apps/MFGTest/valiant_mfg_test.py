@@ -146,7 +146,7 @@ class ValiantMFGTest(object):
 
     @rpc
     def capture_audio(self, sample_rate_hz=16000, duration_ms=1000,
-                      num_buffers=2, buffer_size_ms=500):
+                      num_buffers=2, buffer_size_ms=50):
 
         """Captures one second of audio.
 

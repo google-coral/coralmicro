@@ -69,9 +69,16 @@ class FreeRTOSStreamBuffer {
 //
 // Example:
 //
-// AudioReader reader(audio::SampleRate::k16000_Hz,
-//                    /*dma_buffer_size_ms=*/100,
-//                    /*num_dma_buffers=*/10);
+// namespace {
+// AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024>
+//     g_audio_buffers;
+// AudioDriver g_audio_driver(g_audio_buffers);
+// }  // namespace
+//
+// const AudioDriverConfig config{audio::SampleRate::k16000_Hz,
+//                                /*num_dma_buffers=*/4,
+//                                /*dma_buffer_size_ms=*/30};
+// AudioReader reader(&g_audio_driver, config);
 //
 // auto& buffer = reader.Buffer();
 // while (true) {
@@ -81,13 +88,18 @@ class FreeRTOSStreamBuffer {
 //
 class AudioReader {
    public:
-    AudioReader(audio::SampleRate sample_rate, int dma_buffer_size_ms,
-                int num_dma_buffers);
+    AudioReader(AudioDriver* driver, const AudioDriverConfig& config);
     ~AudioReader();
 
     const std::vector<int32_t>& Buffer() const { return buffer_; }
 
     size_t FillBuffer();
+
+    int Drop(int min_count) {
+        int count = 0;
+        while (count < min_count) count += FillBuffer();
+        return count;
+    }
 
     int OverflowCount() const { return overflow_count_; }
     int UnderflowCount() const { return underflow_count_; }
@@ -95,42 +107,57 @@ class AudioReader {
    private:
     static void Callback(void* param, const int32_t* buf, size_t size);
 
+    AudioDriver* driver_;
+
     int dma_buffer_size_ms_;
     std::vector<int32_t> buffer_;
-    std::vector<int32_t> dma_buffer_;
     FreeRTOSStreamBuffer<int32_t> ring_buffer_;
 
     volatile int overflow_count_ = 0;
     volatile int underflow_count_ = 0;
 };
 
-using AudioServiceCallback = bool (*)(void* context, const int32_t* samples,
-                                      size_t num_samples);
-
 // Class to get audio samples from the microphone. Each client must provide
 // the `AudioServiceCallback` function to continuously receive new microphone
 // samples. Internally microphone is only enabled when there is at least one
 // client, otherwise microphone is completely disabled (no power is consumed).
+//
+// Example:
+//
+// namespace {
+// AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024>
+//     g_audio_buffers;
+// AudioDriver g_audio_driver(g_audio_buffers);
+// }  // namespace
+//
+// const AudioDriverConfig config{audio::SampleRate::k16000_Hz,
+//                                /*num_dma_buffers=*/4,
+//                                /*dma_buffer_size_ms=*/30};
+// AudioService service(&g_audio_driver, config);
+//
+// auto id = service.AddCallback(...);
+// service.RemoveCallback(id);
+//
 class AudioService {
    public:
-    AudioService(audio::SampleRate sample_rate, int dma_buffer_size_ms,
-                 int num_dma_buffers);
+    using Callback = bool (*)(void* ctx, const int32_t* samples,
+                              size_t num_samples);
+
+    AudioService(AudioDriver* driver, const AudioDriverConfig& config,
+                 int drop_first_samples_ms);
     AudioService(const AudioService&) = delete;
     AudioService& operator=(const AudioService&) = delete;
     ~AudioService();
 
-    int AddCallback(void* ctx, AudioServiceCallback fn);
+    int AddCallback(void* ctx, Callback fn);
     bool RemoveCallback(int id);
 
-    audio::SampleRate sample_rate() const { return sample_rate_; }
-    int dma_buffer_size_ms() const { return dma_buffer_size_ms_; }
-    int num_dma_buffers() const { return num_dma_buffers_; }
+    const AudioDriverConfig& Config() const { return config_; }
 
    private:
-    audio::SampleRate sample_rate_;
-    int dma_buffer_size_ms_;
-    int num_dma_buffers_;
-
+    AudioDriver* driver_;
+    AudioDriverConfig config_;
+    int drop_first_samples_;
     TaskHandle_t task_;
     QueueHandle_t queue_;
 
@@ -183,7 +210,7 @@ class LatestSamples {
     void AccessLatestSamples(F f) const {
         MutexLock lock(mutex_);
         f(samples_, pos_);
-    };
+    }
 
     std::vector<int32_t> CopyLatestSamples() const {
         MutexLock lock(mutex_);

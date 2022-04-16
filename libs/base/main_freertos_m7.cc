@@ -10,7 +10,6 @@
 #include "libs/base/timer.h"
 #include "libs/CdcEem/cdc_eem.h"
 #include "libs/nxp/rt1176-sdk/board_hardware.h"
-#include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -78,7 +77,6 @@ extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_
 
     valiant::PmicTask::GetSingleton()->Init(&i2c5_handle);
     valiant::CameraTask::GetSingleton()->Init(&i2c5_handle);
-    valiant::AudioTask::GetSingleton()->Init();
 #endif
 
     xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30, NULL, APP_TASK_PRIORITY, NULL);

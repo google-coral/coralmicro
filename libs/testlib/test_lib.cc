@@ -25,6 +25,9 @@
 namespace valiant {
 namespace testlib {
 namespace {
+AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024> g_audio_buffers;
+AudioDriver g_audio_driver(g_audio_buffers);
+
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
@@ -492,12 +495,8 @@ void CaptureAudio(struct jsonrpc_request *request) {
     if (!JsonRpcGetIntegerParam(request, "sample_rate_hz", &sample_rate_hz))
         return;
 
-    audio::SampleRate sample_rate;
-    if (sample_rate_hz == 16000) {
-        sample_rate = audio::SampleRate::k16000_Hz;
-    } else if (sample_rate_hz == 48000) {
-        sample_rate = audio::SampleRate::k48000_Hz;
-    } else {
+    auto sample_rate = CheckSampleRate(sample_rate_hz);
+    if (!sample_rate.has_value()) {
         JsonRpcReturnBadParam(request, "sample rate must be 16000 or 48000 Hz", "sample_rate_hz");
         return;
     }
@@ -513,38 +512,37 @@ void CaptureAudio(struct jsonrpc_request *request) {
     int num_buffers;
     if (!JsonRpcGetIntegerParam(request, "num_buffers", &num_buffers))
         return;
-    if (num_buffers > static_cast<int>(audio::kMaxNumBuffers)) {
-        JsonRpcReturnBadParam(request, "number of buffers is too big", "num_buffers");
+    if (num_buffers < 1 || num_buffers > static_cast<int>(g_audio_buffers.kNumDmaBuffers)) {
+        JsonRpcReturnBadParam(request, "invalid number of DMA buffers", "num_buffers");
         return;
     }
 
     int buffer_size_ms;
     if (!JsonRpcGetIntegerParam(request, "buffer_size_ms", &buffer_size_ms))
         return;
-    if (buffer_size_ms <= 0) {
-        JsonRpcReturnBadParam(request, "buffer size must be positive", "buffer_size_ms");
+    if (buffer_size_ms < 1) {
+        JsonRpcReturnBadParam(request, "invalid DMA buffer size", "buffer_size_ms");
         return;
     }
 
-    const int chunk_duration_ms = buffer_size_ms;
-    const int samples_per_chunk = chunk_duration_ms * (sample_rate_hz / 1000);
-    const int num_chunks = (duration_ms + chunk_duration_ms / 2) / chunk_duration_ms;
+    const AudioDriverConfig config{*sample_rate,
+                                   static_cast<size_t>(num_buffers),
+                                   static_cast<size_t>(buffer_size_ms)};
 
-    std::vector<int32_t> buffer(num_buffers * samples_per_chunk);
-    std::vector<int32_t*> buffers;
-    for (int i = 0; i < num_buffers; ++i)
-        buffers.push_back(buffer.data() + i*samples_per_chunk);
+    if (!g_audio_buffers.CanHandle(config)) {
+        jsonrpc_return_error(request, -1, "not enough static memory for DMA buffers", nullptr);
+        return;
+    }
 
-    std::vector<int32_t> samples(num_chunks * samples_per_chunk);
+    const int num_chunks = (duration_ms + buffer_size_ms / 2) / buffer_size_ms;
+
+    std::vector<int32_t> samples(num_chunks * config.dma_buffer_size_samples());
     struct AudioParams {
         int32_t* first;
         int32_t* last;
-    } params;
-    params.first = samples.data();
-    params.last = samples.data() + samples.size();
+    } params{samples.data(), samples.data() + samples.size()};
 
-    valiant::AudioTask::GetSingleton()->Enable(sample_rate,
-        buffers.data(), buffers.size(), samples_per_chunk, &params, +[](void* param,
+    g_audio_driver.Enable(config, &params, +[](void* param,
         const int32_t* buf, size_t size) {
             AudioParams* params = reinterpret_cast<AudioParams*>(param);
             if (params->first + size <= params->last) {
@@ -555,8 +553,8 @@ void CaptureAudio(struct jsonrpc_request *request) {
 
     // Add (chunk_duration_ms / 10) just in case. Capture is still limited by
     // the buffer size.
-    vTaskDelay(pdMS_TO_TICKS(num_chunks * chunk_duration_ms + chunk_duration_ms / 10));
-    valiant::AudioTask::GetSingleton()->Disable();
+    vTaskDelay(pdMS_TO_TICKS(num_chunks * buffer_size_ms + buffer_size_ms / 10));
+    g_audio_driver.Disable();
 
     jsonrpc_return_success(request, "{%Q: %V}", "data",
                            samples.size() * sizeof(samples[0]), samples.data());

@@ -1,75 +1,70 @@
 #ifndef _LIBS_TASKS_AUDIO_TASK_H_
 #define _LIBS_TASKS_AUDIO_TASK_H_
 
-#include <functional>
+#include <cstdint>
 #include <optional>
 
-#include "libs/base/queue_task.h"
 #include "libs/base/tasks.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_edma.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm_edma.h"
 
 namespace valiant {
-namespace audio {
 
-constexpr size_t kMaxNumBuffers = 32;
-
-enum class RequestType : uint8_t {
-    Enable,
-    Disable,
-};
-
-enum class SampleRate : uint32_t {
+enum class AudioSampleRate : int32_t {
     k16000_Hz = 16000,
     k48000_Hz = 48000,
 };
 
-inline int MsToSamples(audio::SampleRate sample_rate, int ms) {
+std::optional<AudioSampleRate> CheckSampleRate(int sample_rate_hz);
+
+inline int MsToSamples(AudioSampleRate sample_rate, int ms) {
     return ms * static_cast<int>(sample_rate) / 1000;
 }
 
-using AudioTaskCallback = void (*)(void* param, const int32_t* dma_buffer,
-                                   size_t dma_buffer_size);
-
-struct EnableRequest {
-    SampleRate sample_rate;
-
-    int32_t** dma_buffers;
+struct AudioDriverConfig {
+    AudioSampleRate sample_rate;
     size_t num_dma_buffers;
-    size_t dma_buffer_size;
+    size_t dma_buffer_size_ms;
 
-    void* callback_param;
-    AudioTaskCallback callback;
+    size_t dma_buffer_size_samples() const {
+        return MsToSamples(sample_rate, dma_buffer_size_ms);
+    }
 };
 
-struct Response {
-    RequestType type;
-    union {
-    } response;
+template <size_t NumDmaBuffers, size_t CombinedDmaBufferSize>
+struct AudioDriverBuffers {
+    static constexpr size_t kNumDmaBuffers = NumDmaBuffers;
+    static constexpr size_t kCombinedDmaBufferSize = CombinedDmaBufferSize;
+
+    static bool CanHandle(const AudioDriverConfig& config) {
+        return config.num_dma_buffers <= kNumDmaBuffers &&
+               config.num_dma_buffers * config.dma_buffer_size_samples() <=
+                   kCombinedDmaBufferSize;
+    }
+
+    alignas(16) int32_t dma_buffer[kCombinedDmaBufferSize];
+    alignas(32) edma_tcd_t edma_tcd[kNumDmaBuffers];
+    pdm_edma_transfer_t pdm_transfers[kNumDmaBuffers];
 };
-
-struct Request {
-    RequestType type;
-    union {
-        EnableRequest enable;
-    } request;
-    std::function<void(Response)> callback;
-};
-
-}  // namespace audio
-
-static constexpr size_t kAudioTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
-static constexpr UBaseType_t kAudioTaskQueueLength = 4;
-extern const char kAudioTaskName[];
-
-std::optional<audio::SampleRate> CheckSampleRate(int sample_rate_hz);
 
 class AudioDriver {
    public:
-    bool Enable(audio::SampleRate sample_rate, int32_t** dma_buffers,
-                size_t num_dma_buffers, size_t dma_buffer_size,
-                void* callback_param, audio::AudioTaskCallback callback);
+    using Callback = void (*)(void* param, const int32_t* dma_buffer,
+                              size_t dma_buffer_size);
+
+    template <size_t NumDmaBuffers, size_t CombinedDmaBufferSize>
+    AudioDriver(
+        AudioDriverBuffers<NumDmaBuffers, CombinedDmaBufferSize>& buffers)
+        : dma_buffer_(buffers.dma_buffer),
+          combined_dma_buffer_size_(CombinedDmaBufferSize),
+          max_num_dma_buffers_(NumDmaBuffers),
+          edma_tcd_(buffers.edma_tcd),
+          pdm_transfers_(buffers.pdm_transfers) {}
+
+    bool Enable(const AudioDriverConfig& config, void* callback_param,
+                Callback callback);
+
     void Disable();
 
    private:
@@ -81,35 +76,22 @@ class AudioDriver {
                      status_t status);
 
    private:
+    // Assigned from constructor call.
+    int32_t* dma_buffer_;
+    size_t combined_dma_buffer_size_;
+    size_t max_num_dma_buffers_;
+    edma_tcd_t* edma_tcd_;                // `max_num_dma_buffers_` items
+    pdm_edma_transfer_t* pdm_transfers_;  // `max_num_dma_buffers_` items
+
+    // Assigned from Enable() call.
     edma_handle_t edma_handle_;
     pdm_edma_handle_t pdm_edma_handle_;
-    alignas(32) edma_tcd_t edma_tcd_[audio::kMaxNumBuffers];
 
-    pdm_edma_transfer_t pdm_transfers_[audio::kMaxNumBuffers];
     volatile int pdm_transfer_index_;
     size_t pdm_transfer_count_;
 
-    void* callback_param_ = nullptr;
-    audio::AudioTaskCallback callback_ = nullptr;
-};
-
-class AudioTask : public QueueTask<audio::Request, audio::Response,
-                                   kAudioTaskName, kAudioTaskStackDepth,
-                                   AUDIO_TASK_PRIORITY, kAudioTaskQueueLength> {
-   public:
-    static AudioTask* GetSingleton() {
-        static AudioTask audio;
-        return &audio;
-    }
-    void Enable(audio::SampleRate sample_rate, int32_t** dma_buffers,
-                size_t num_dma_buffers, size_t dma_buffer_size,
-                void* callback_param, audio::AudioTaskCallback callback);
-    void Disable();
-
-   private:
-    void RequestHandler(audio::Request* req) override;
-
-    AudioDriver driver_;
+    void* callback_param_;
+    Callback callback_;
 };
 
 }  // namespace valiant

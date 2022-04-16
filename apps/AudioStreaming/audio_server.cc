@@ -13,6 +13,9 @@
 
 namespace valiant {
 namespace {
+AudioDriverBuffers</*NumDmaBuffers*/ 16, /*CombinedDmaBufferSize=*/28 * 1024>
+    g_audio_buffers;
+
 constexpr int kPort = 33000;
 constexpr int kNumSampleFormats = 2;
 constexpr const char* kSampleFormatNames[] = {"S16_LE", "S32_LE"};
@@ -20,12 +23,6 @@ enum SampleFormat {
     kS16LE = 0,
     kS32LE = 1,
 };
-
-int DropSamples(AudioReader* reader, int min_count) {
-    int count = 0;
-    while (count < min_count) count += reader->FillBuffer();
-    return count;
-}
 
 void ProcessClient(int client_socket) {
     int32_t params[5];
@@ -62,19 +59,33 @@ void ProcessClient(int client_socket) {
         return;
     }
 
+    AudioDriver driver(g_audio_buffers);
+    const AudioDriverConfig config{*sample_rate,
+                                   static_cast<size_t>(num_dma_buffers),
+                                   static_cast<size_t>(dma_buffer_size_ms)};
+    if (!g_audio_buffers.CanHandle(config)) {
+        printf("ERROR: Not enough static memory for DMA buffers\r\n");
+        return;
+    }
+
     printf("Format:\r\n");
     printf("  Sample rate (Hz): %d\r\n", sample_rate_hz);
     printf("  Sample format: %s\r\n", kSampleFormatNames[sample_format]);
-    printf("  DMA buffer size (ms): %d\r\n", dma_buffer_size_ms);
-    printf("  DMA buffer count: %d\r\n", num_dma_buffers);
+    printf("  DMA buffer size (ms): %d\r\n", config.dma_buffer_size_ms);
+    printf("  DMA buffer size (samples): %d\r\n",
+           config.dma_buffer_size_samples());
+    printf("  DMA buffer count: %d (max %d)\r\n", config.num_dma_buffers,
+           g_audio_buffers.kNumDmaBuffers);
+    printf("  Combined DMA buffer size (samples): %d (max %d)\r\n",
+           config.num_dma_buffers * config.dma_buffer_size_samples(),
+           g_audio_buffers.kCombinedDmaBufferSize);
     printf("Sending audio samples...\r\n");
 
-    AudioReader reader(*sample_rate, dma_buffer_size_ms, num_dma_buffers);
-
+    AudioReader reader(&driver, config);
     const auto& buffer32 = reader.Buffer();
 
-    const int num_dropped_samples = DropSamples(
-        &reader, audio::MsToSamples(*sample_rate, drop_first_samples_ms));
+    const int num_dropped_samples =
+        reader.Drop(MsToSamples(*sample_rate, drop_first_samples_ms));
 
     int total_bytes = 0;
     if (sample_format == kS32LE) {
@@ -129,6 +140,7 @@ void RunServer() {
 }  // namespace valiant
 
 extern "C" void app_main(void* param) {
+    (void)param;
     valiant::RunServer();
     vTaskSuspend(nullptr);
 }

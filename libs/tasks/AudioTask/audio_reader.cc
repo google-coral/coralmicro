@@ -24,7 +24,7 @@ struct Message {
     union {
         struct {
             void* ctx;
-            AudioServiceCallback fn;
+            AudioService::Callback fn;
         } add;
 
         struct {
@@ -33,13 +33,13 @@ struct Message {
     };
 };
 
-struct Callback {
+struct Cb {
     int id;
     void* ctx;
-    AudioServiceCallback fn;
+    AudioService::Callback fn;
 };
 
-bool EraseCallbackById(std::vector<Callback>& callbacks, int id) {
+bool EraseCallbackById(std::vector<Cb>& callbacks, int id) {
     auto it = std::find_if(std::begin(callbacks), std::end(callbacks),
                            [id](const auto& cb) { return cb.id == id; });
     if (it == std::end(callbacks)) return false;
@@ -48,30 +48,20 @@ bool EraseCallbackById(std::vector<Callback>& callbacks, int id) {
 }
 }  // namespace
 
-AudioReader::AudioReader(audio::SampleRate sample_rate, int dma_buffer_size_ms,
-                         int num_dma_buffers)
-    : dma_buffer_size_ms_(dma_buffer_size_ms) {
-    const int samples_per_dma_buffer =
-        audio::MsToSamples(sample_rate, dma_buffer_size_ms);
-
-    buffer_.resize(samples_per_dma_buffer);
-    dma_buffer_.resize(num_dma_buffers * samples_per_dma_buffer);
+AudioReader::AudioReader(AudioDriver* driver, const AudioDriverConfig& config)
+    : driver_(driver), dma_buffer_size_ms_(config.dma_buffer_size_ms) {
+    const auto dma_buffer_size_samples = config.dma_buffer_size_samples();
+    buffer_.resize(dma_buffer_size_samples);
 
     ring_buffer_.Create(
-        /*xBufferSize=*/samples_per_dma_buffer * num_dma_buffers,
-        /*xTriggerLevel=*/samples_per_dma_buffer);
+        /*xBufferSize=*/dma_buffer_size_samples * config.num_dma_buffers,
+        /*xTriggerLevel=*/dma_buffer_size_samples);
     CHECK(ring_buffer_.Ok());
 
-    std::vector<int32_t*> dma_buffers;
-    for (int i = 0; i < num_dma_buffers; ++i)
-        dma_buffers.push_back(dma_buffer_.data() + i * samples_per_dma_buffer);
-
-    AudioTask::GetSingleton()->Enable(sample_rate, dma_buffers.data(),
-                                      dma_buffers.size(),
-                                      samples_per_dma_buffer, this, Callback);
+    driver->Enable(config, this, Callback);
 }
 
-AudioReader::~AudioReader() { AudioTask::GetSingleton()->Disable(); }
+AudioReader::~AudioReader() { driver_->Disable(); }
 
 size_t AudioReader::FillBuffer() {
     auto received_size = ring_buffer_.Receive(
@@ -89,11 +79,12 @@ void AudioReader::Callback(void* param, const int32_t* buf, size_t size) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-AudioService::AudioService(audio::SampleRate sample_rate,
-                           int dma_buffer_size_ms, int num_dma_buffers)
-    : sample_rate_(sample_rate),
-      dma_buffer_size_ms_(dma_buffer_size_ms),
-      num_dma_buffers_(num_dma_buffers),
+AudioService::AudioService(AudioDriver* driver, const AudioDriverConfig& config,
+                           int drop_first_samples_ms)
+    : driver_(driver),
+      config_(config),
+      drop_first_samples_(
+          MsToSamples(config.sample_rate, drop_first_samples_ms)),
       queue_(xQueueCreate(5, sizeof(Message))) {
     CHECK(queue_);
     CHECK(xTaskCreate(StaticRun, "audio_service", configMINIMAL_STACK_SIZE * 30,
@@ -111,7 +102,7 @@ AudioService::~AudioService() {
     vQueueDelete(queue_);
 }
 
-int AudioService::AddCallback(void* ctx, AudioServiceCallback fn) {
+int AudioService::AddCallback(void* ctx, AudioService::Callback fn) {
     Message msg{};
     msg.type = MessageType::kAddCallback;
     msg.queue = xQueueCreate(1, sizeof(int));
@@ -144,7 +135,7 @@ void AudioService::StaticRun(void* param) {
 }
 
 void AudioService::Run() const {
-    std::vector<Callback> callbacks;
+    std::vector<Cb> callbacks;
     callbacks.reserve(3);
 
     std::vector<int> callbacks_to_remove;
@@ -182,9 +173,10 @@ void AudioService::Run() const {
             continue;
         }
 
-        if (!reader)
-            reader = std::make_unique<AudioReader>(
-                sample_rate_, dma_buffer_size_ms_, num_dma_buffers_);
+        if (!reader) {
+            reader = std::make_unique<AudioReader>(driver_, config_);
+            reader->Drop(drop_first_samples_);
+        }
 
         // Blocks until buffer is full or timeout.
         auto size = reader->FillBuffer();

@@ -2,8 +2,6 @@
 
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/semphr.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7/fsl_cache.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dmamux.h"
 
 extern "C" void PDM_ERROR_IRQHandler(void) {
@@ -32,16 +30,12 @@ constexpr int kDmaChannel = 0;
 constexpr int kPdmClock = 24577500;
 }  // namespace
 
-using namespace audio;
-
-constexpr const char kAudioTaskName[] = "audio_task";
-
-std::optional<audio::SampleRate> CheckSampleRate(int sample_rate_hz) {
+std::optional<AudioSampleRate> CheckSampleRate(int sample_rate_hz) {
     switch (sample_rate_hz) {
         case 16000:
-            return audio::SampleRate::k16000_Hz;
+            return AudioSampleRate::k16000_Hz;
         case 48000:
-            return audio::SampleRate::k48000_Hz;
+            return AudioSampleRate::k48000_Hz;
     }
     return std::nullopt;
 }
@@ -60,10 +54,24 @@ void AudioDriver::PdmCallback(PDM_Type* base, pdm_edma_handle_t* handle,
     __DSB();
 }
 
-bool AudioDriver::Enable(audio::SampleRate sample_rate, int32_t** dma_buffers,
-                         size_t num_dma_buffers, size_t dma_buffer_size,
-                         void* callback_param,
-                         audio::AudioTaskCallback callback) {
+bool AudioDriver::Enable(const AudioDriverConfig& config, void* callback_param,
+                         Callback callback) {
+    if (config.num_dma_buffers > max_num_dma_buffers_) {
+        printf("ERROR: Too many DMA buffers.\r\n");
+        return false;
+    }
+
+    const auto dma_buffer_size = config.dma_buffer_size_samples();
+    if (config.num_dma_buffers * dma_buffer_size > combined_dma_buffer_size_) {
+        printf("ERROR: Not enough DMA memory.\r\n");
+        return false;
+    }
+
+    pdm_transfer_index_ = 0;
+    pdm_transfer_count_ = config.num_dma_buffers;
+    callback_param_ = callback_param;
+    callback_ = callback;
+
     PmicTask::GetSingleton()->SetRailState(pmic::Rail::MIC_1V8, true);
 
     // TODO(atv): Make a header with DMA MUX configs so we don't end up with
@@ -96,8 +104,8 @@ bool AudioDriver::Enable(audio::SampleRate sample_rate, int32_t** dma_buffers,
     PDM_TransferSetChannelConfigEDMA(PDM, &pdm_edma_handle_, /*channel=*/0,
                                      &channel_config);
 
-    auto status = PDM_SetSampleRateConfig(PDM, kPdmClock,
-                                          static_cast<uint32_t>(sample_rate));
+    auto status = PDM_SetSampleRateConfig(
+        PDM, kPdmClock, static_cast<int32_t>(config.sample_rate));
     if (status != kStatus_Success) {
         // TODO(dkovalev): implement proper error handling.
         printf("ERROR: PDM_SetSampleRateConfig() failed.\n\r");
@@ -107,21 +115,16 @@ bool AudioDriver::Enable(audio::SampleRate sample_rate, int32_t** dma_buffers,
     PDM_EnableInterrupts(PDM, kPDM_ErrorInterruptEnable);
     EnableIRQ(PDM_ERROR_IRQn);
 
-    pdm_transfer_index_ = 0;
-    pdm_transfer_count_ = num_dma_buffers;
-
     PDM_TransferInstallEDMATCDMemory(&pdm_edma_handle_, edma_tcd_,
                                      pdm_transfer_count_);
 
     for (size_t i = 0; i < pdm_transfer_count_; ++i) {
-        pdm_transfers_[i].data = reinterpret_cast<uint8_t*>(dma_buffers[i]);
+        pdm_transfers_[i].data =
+            reinterpret_cast<uint8_t*>(dma_buffer_ + i * dma_buffer_size);
         pdm_transfers_[i].dataSize = dma_buffer_size * sizeof(int32_t);
         pdm_transfers_[i].linkTransfer =
             &pdm_transfers_[(i + 1) % pdm_transfer_count_];
     }
-
-    callback_param_ = callback_param;
-    callback_ = callback;
 
     status = PDM_TransferReceiveEDMA(PDM, &pdm_edma_handle_, pdm_transfers_);
     if (status != kStatus_Success) {
@@ -140,40 +143,6 @@ void AudioDriver::Disable() {
     DMAMUX_Deinit(DMAMUX0);
 
     PmicTask::GetSingleton()->SetRailState(pmic::Rail::MIC_1V8, false);
-}
-
-void AudioTask::Enable(audio::SampleRate sample_rate, int32_t** dma_buffers,
-                       size_t num_dma_buffers, size_t dma_buffer_size,
-                       void* callback_param,
-                       audio::AudioTaskCallback callback) {
-    Request req;
-    req.type = RequestType::Enable;
-    req.request.enable.sample_rate = sample_rate;
-    req.request.enable.dma_buffers = dma_buffers;
-    req.request.enable.num_dma_buffers = num_dma_buffers;
-    req.request.enable.dma_buffer_size = dma_buffer_size;
-    req.request.enable.callback_param = callback_param;
-    req.request.enable.callback = callback;
-    SendRequest(req);
-}
-
-void AudioTask::Disable() {
-    Request req;
-    req.type = RequestType::Disable;
-    SendRequest(req);
-}
-
-void AudioTask::RequestHandler(Request* req) {
-    switch (req->type) {
-        case RequestType::Enable: {
-            auto& r = req->request.enable;
-            driver_.Enable(r.sample_rate, r.dma_buffers, r.num_dma_buffers,
-                           r.dma_buffer_size, r.callback_param, r.callback);
-        } break;
-        case RequestType::Disable:
-            driver_.Disable();
-            break;
-    }
 }
 
 }  // namespace valiant
