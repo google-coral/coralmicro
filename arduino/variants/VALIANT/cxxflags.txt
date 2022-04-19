@@ -14,4 +14,4 @@
 -Os
 -fno-rtti
 -fno-exceptions
--std=gnu++14
+-std=gnu++17
