@@ -45,19 +45,6 @@ int FramebufferPtrToIndex(const uint8_t* framebuffer_ptr) {
 }
 }
 
-extern "C" void PXP_IRQHandler(void) {
-    CameraTask::GetSingleton()->PXP_IRQHandler();
-}
-
-void CameraTask::PXP_IRQHandler() {
-    if (kPXP_CompleteFlag & PXP_GetStatusFlags(PXP)) {
-        BaseType_t reschedule = pdFALSE;
-        PXP_ClearStatusFlags(PXP, kPXP_CompleteFlag);
-        xSemaphoreGiveFromISR(pxp_semaphore_, &reschedule);
-        portYIELD_FROM_ISR(reschedule);
-    }
-}
-
 bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
     bool ret = true;
     uint8_t* raw = nullptr;
@@ -248,6 +235,12 @@ pxp_output_pixel_format_t CameraTask::FormatToPXPOutputFormat(Format fmt) {
 }
 
 bool CameraTask::PXPOperation(const PXPConfiguration& input, const PXPConfiguration& output, bool preserve_ratio) {
+
+    PXP_Init(PXP);
+    PXP_SetProcessSurfaceBackGroundColor(PXP, 0xF04A00FF);
+    PXP_SetAlphaSurfacePosition(PXP, 0xFFFF, 0xFFFF, 0, 0);
+    PXP_EnableCsc1(PXP, false);
+
     int output_width = output.width, output_height = output.height;
     if (preserve_ratio) {
         float ratio_width = (float)output.width / (float)input.width;
@@ -271,7 +264,7 @@ bool CameraTask::PXPOperation(const PXPConfiguration& input, const PXPConfigurat
     output_buffer_config.interlacedMode = kPXP_OutputProgressive;
     output_buffer_config.buffer0Addr = reinterpret_cast<uint32_t>(output.data);
     output_buffer_config.buffer1Addr = 0;
-    output_buffer_config.pitchBytes = output.width * output_bpp;
+    output_buffer_config.pitchBytes = output_width * output_bpp;
     output_buffer_config.width = output_width;
     output_buffer_config.height = output_height;
 
@@ -279,10 +272,17 @@ bool CameraTask::PXPOperation(const PXPConfiguration& input, const PXPConfigurat
     PXP_SetProcessSurfacePosition(PXP, 0, 0, output_width - 1, output_height - 1);
     PXP_SetProcessSurfaceBufferConfig(PXP, &ps_buffer_config);
     PXP_SetOutputBufferConfig(PXP, &output_buffer_config);
+    __DSB();
     PXP_Start(PXP);
-    if (xSemaphoreTake(pxp_semaphore_, pdMS_TO_TICKS(200)) == pdFALSE) {
-        return false;
+    while ((PXP->CTRL & PXP_CTRL_ENABLE_MASK) || !(kPXP_CompleteFlag & PXP_GetStatusFlags(PXP))) {
+        taskYIELD();
     }
+    configASSERT(!(PXP->CTRL & PXP_CTRL_ENABLE_MASK));
+    configASSERT(kPXP_CompleteFlag & PXP_GetStatusFlags(PXP));
+    PXP_ClearStatusFlags(PXP, kPXP_CompleteFlag);
+    __DSB();
+    PXP_Deinit(PXP);
+    __DSB();
 
     return true;
 }
@@ -325,7 +325,6 @@ bool CameraTask::Write(CameraRegisters reg, uint8_t val) {
 void CameraTask::Init(lpi2c_rtos_handle_t *i2c_handle) {
     QueueTask::Init();
     i2c_handle_ = i2c_handle;
-    pxp_semaphore_ = xSemaphoreCreateBinary();
     mode_ = Mode::STANDBY;
 }
 
@@ -486,14 +485,6 @@ EnableResponse CameraTask::HandleEnableRequest(const Mode& mode) {
         status = CSI_TransferSubmitEmptyBuffer(CSI, &csi_handle_, reinterpret_cast<uint32_t>(framebuffers[i]));
     }
 
-    PXP_Init(PXP);
-    NVIC_SetPriority(PXP_IRQn, 5);
-    NVIC_EnableIRQ(PXP_IRQn);
-    PXP_EnableInterrupts(PXP, kPXP_CompleteInterruptEnable);
-    PXP_SetProcessSurfaceBackGroundColor(PXP, 0xF04A00FF);
-    PXP_SetAlphaSurfacePosition(PXP, 0xFFFF, 0xFFFF, 0, 0);
-    PXP_EnableCsc1(PXP, false);
-
     // Streaming
     status = CSI_TransferStart(CSI, &csi_handle_);
     SetMode(mode);
@@ -504,7 +495,6 @@ EnableResponse CameraTask::HandleEnableRequest(const Mode& mode) {
 void CameraTask::HandleDisableRequest() {
     SetMode(Mode::STANDBY);
     CSI_TransferStop(CSI, &csi_handle_);
-    NVIC_DisableIRQ(PXP_IRQn);
 }
 
 PowerResponse CameraTask::HandlePowerRequest(const PowerRequest& power) {

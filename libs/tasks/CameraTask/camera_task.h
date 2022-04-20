@@ -175,7 +175,6 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     static constexpr size_t kWidth = 324;
     static constexpr size_t kHeight = 324;
 
-    void PXP_IRQHandler();
     static int FormatToBPP(camera::Format fmt);
   private:
     void TaskInit() override;
@@ -209,7 +208,6 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     lpi2c_rtos_handle_t* i2c_handle_;
     csi_handle_t csi_handle_;
     csi_config_t csi_config_;
-    SemaphoreHandle_t pxp_semaphore_;
     camera::Mode mode_;
 };
 
