@@ -71,7 +71,7 @@ extern "C" void app_main(void* param) {
     // Setup audio
     valiant::AudioDriver driver(g_audio_buffers);
     valiant::AudioDriverConfig config{valiant::AudioSampleRate::k16000_Hz,
-                                      kNumDmaBuffers, kDmaBufferSize};
+                                      kNumDmaBuffers, kDmaBufferSizeMs};
     driver.Enable(
         config, nullptr,
         +[](void* param, const int32_t* buffer, size_t buffer_size) {
