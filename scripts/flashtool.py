@@ -62,6 +62,8 @@ BLOCK_COUNT = 64
 USB_IP_ADDRESS_FILE = '/usb_ip_address'
 WIFI_SSID_FILE = '/wifi_ssid'
 WIFI_PSK_FILE = '/wifi_psk'
+WIFI_COUNTRY_FILE = '/wifi_country'
+WIFI_REVISION_FILE = '/wifi_revision'
 
 ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
@@ -465,7 +467,7 @@ def StateProgramElfloader(elf_path, debug=False, serial_number=None):
             return StateDone
         return StateStartGdb
 
-def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, serial_number=None):
+def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         data_files.append((elf_path, '/default.elf'))
         data_files.append((str(usb_ip_address).encode(), USB_IP_ADDRESS_FILE))
@@ -473,6 +475,10 @@ def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, 
             data_files.append((wifi_ssid.encode(), WIFI_SSID_FILE))
         if wifi_psk is not None:
             data_files.append((wifi_psk.encode(), WIFI_PSK_FILE))
+        if wifi_country is not None:
+            data_files.append((wifi_country.encode(), WIFI_COUNTRY_FILE))
+        if wifi_revision is not None:
+            data_files.append((struct.pack('<H', wifi_revision), WIFI_REVISION_FILE))
         for src_file, target_file in sorted(data_files, key=lambda x: x[1]):
             if target_file[0] != '/':
                 target_file = '/' + target_file
@@ -554,6 +560,8 @@ def main():
     parser.add_argument('--usb_ip_address', type=str, required=False, default='10.10.10.1')
     parser.add_argument('--wifi_ssid', type=str, required=False, default=None)
     parser.add_argument('--wifi_psk', type=str, required=False, default=None)
+    parser.add_argument('--wifi_country', type=str, required=False, default=None)
+    parser.add_argument('--wifi_revision', type=int, required=False, default=None)
     # --strip and --toolchain are provided for Arduino uses.
     # CMake-built targets already generate a stripped binary.
     parser.add_argument('--strip', dest='strip', action='store_true')
@@ -651,6 +659,8 @@ def main():
         'usb_ip_address': usb_ip_address,
         'wifi_ssid': args.wifi_ssid,
         'wifi_psk': args.wifi_psk,
+        'wifi_country': args.wifi_country,
+        'wifi_revision': args.wifi_revision,
         'debug': args.debug,
         'jlink_path': args.jlink_path,
         'toolchain_path': toolchain_path,

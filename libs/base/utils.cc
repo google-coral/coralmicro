@@ -3,6 +3,7 @@
 #include "libs/base/filesystem.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/ip_addr.h"
+#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/wwd_constants.h"
 
 #include <vector>
 
@@ -55,6 +56,23 @@ bool GetWifiSSID(std::string* wifi_ssid_out) {
 
 bool GetWifiPSK(std::string* wifi_psk_out) {
     return valiant::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
+}
+
+extern "C" wiced_country_code_t valiant_get_wiced_country_code(void) {
+    std::string wifi_country_code_out, wifi_revision_out;
+    unsigned short wifi_revision = 0;
+    if (!valiant::filesystem::ReadFile("/wifi_country", &wifi_country_code_out)) {
+        DbgConsole_Printf("failed to read back country, returning WW\r\n");
+        return WICED_COUNTRY_WORLD_WIDE_XX;
+    }
+    if (wifi_country_code_out.length() != 2) {
+        DbgConsole_Printf("wifi_country must be 2 bytes, returning WW\r\n");
+        return WICED_COUNTRY_WORLD_WIDE_XX;
+    }
+    if (valiant::filesystem::ReadFile("/wifi_revision", &wifi_revision_out)) {
+        wifi_revision = *reinterpret_cast<uint16_t*>(wifi_revision_out.data());
+    }
+    return static_cast<wiced_country_code_t>(MK_CNTRY(wifi_country_code_out[0], wifi_country_code_out[1], wifi_revision));
 }
 
 }  // namespace utils
