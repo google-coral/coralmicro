@@ -64,6 +64,7 @@ def CreateFlashtoolExe(core_out_dir, root_dir):
     pyinstaller_dist_path = core_out_dir
     PyInstaller.__main__.run([
         '-F',
+        '--noupx',
         '--distpath', pyinstaller_dist_path,
         '--add-binary',
         os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost' + exe_extension) + pyinstaller_separator + os.path.join('third_party', 'nxp', 'blhost', 'bin', platform_dir),
