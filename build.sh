@@ -35,7 +35,8 @@ EOF
     for i; do
         case "$1" in
             -b) # build_dir
-                build_dir="$2"
+                mkdir -p "$2"
+                build_dir="$(cd "$2" && pwd)"
                 shift 2
                 ;;
             -a)
