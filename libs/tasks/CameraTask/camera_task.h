@@ -5,7 +5,6 @@
 #include "libs/base/queue_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pxp.h"
 
 #include <functional>
 #include <list>
@@ -189,19 +188,13 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     bool Read(camera::CameraRegisters reg, uint8_t *val);
     bool Write(camera::CameraRegisters reg, uint8_t val);
     void SetDefaultRegisters();
-    struct PXPConfiguration {
-        const uint8_t *data;
-        camera::Format fmt;
-        int width;
-        int height;
-    };
-    static pxp_ps_pixel_format_t FormatToPXPPSFormat(camera::Format fmt);
-    static pxp_output_pixel_format_t FormatToPXPOutputFormat(camera::Format fmt);
     static void BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
     static void BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
     static void BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height);
     static void RGBToGrayscale(const uint8_t *camera_rgb, uint8_t *camera_grayscale, int width, int height);
-    bool PXPOperation(const PXPConfiguration& input, const PXPConfiguration& output, bool preserve_ratio);
+    static void ResizeNearestNeighbor(const uint8_t *src, int src_width, int src_height,
+                                      uint8_t *dst, int dst_width, int dst_height,
+                                      int components, bool preserve_aspect);
 
     static constexpr uint8_t kModelIdHExpected = 0x01;
     static constexpr uint8_t kModelIdLExpected = 0xB0;

@@ -62,19 +62,11 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
                         BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height);
                     } else {
-                        auto buffer_rgba = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGBA) * kWidth * kHeight);
-                        BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
-                        PXPConfiguration input;
-                        input.data = buffer_rgba.get();
-                        input.fmt = Format::RGBA;
-                        input.width = kWidth;
-                        input.height = kHeight;
-                        PXPConfiguration output;
-                        output.data = fmt.buffer;
-                        output.fmt = Format::RGB;
-                        output.width = fmt.width;
-                        output.height = fmt.height;
-                        ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
+                        auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * kWidth * kHeight);
+                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight);
+                        ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, fmt.buffer,
+                                              fmt.width, fmt.height, FormatToBPP(Format::RGB),
+                                              fmt.preserve_ratio);
                     }
                 }
                 break;
@@ -82,21 +74,13 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
                         BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight);
                     } else {
-                        auto buffer_rgba = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGBA) * kWidth * kHeight);
-                        auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * fmt.width * fmt.height);
-                        BayerToRGBA(raw, buffer_rgba.get(), kWidth, kHeight);
-                        PXPConfiguration input;
-                        input.data = buffer_rgba.get();
-                        input.fmt = Format::RGBA;
-                        input.width = kWidth;
-                        input.height = kHeight;
-                        PXPConfiguration output;
-                        output.data = buffer_rgb.get();
-                        output.fmt = Format::RGB;
-                        output.width = fmt.width;
-                        output.height = fmt.height;
-                        ret = GetSingleton()->PXPOperation(input, output, fmt.preserve_ratio);
-                        RGBToGrayscale(buffer_rgb.get(), fmt.buffer, fmt.width, fmt.height);
+                        auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * kWidth * kHeight);
+                        auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * fmt.width * fmt.height);
+                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight);
+                        ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, buffer_rgb_scaled.get(),
+                                              fmt.width, fmt.height, FormatToBPP(Format::RGB),
+                                              fmt.preserve_ratio);
+                        RGBToGrayscale(buffer_rgb_scaled.get(), fmt.buffer, fmt.width, fmt.height);
                     }
                 }
                 break;
@@ -115,6 +99,42 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
 
     GetSingleton()->ReturnFrame(index);
     return ret;
+}
+
+void CameraTask::ResizeNearestNeighbor(const uint8_t *src, int src_w, int src_h,
+                                       uint8_t *dst, int dst_w, int dst_h,
+                                       int comps, bool preserve_aspect) {
+  int src_p = src_w * comps;
+  int dst_p = dst_w * comps;
+  float ratio_src = (float)src_w / src_h;
+  float ratio_dst = (float)dst_w / dst_h;
+  int scaled_w =
+      preserve_aspect
+          ? (ratio_dst > ratio_src ? src_w * (float)dst_h / src_h : dst_w)
+          : dst_w;
+  int scaled_h =
+      preserve_aspect
+          ? (ratio_dst > ratio_src ? dst_h : src_h * (float)dst_w / src_w)
+          : dst_h;
+  float ratio_x = (float)src_w / scaled_w;
+  float ratio_y = (float)src_h / scaled_h;
+
+  for (int y = 0; y < dst_h; y++) {
+    if (y >= scaled_h) {
+      memset(dst, 0, dst_p);
+      dst += dst_p;
+      continue;
+    }
+
+    int offset_y = static_cast<int>(y * ratio_y) * src_p;
+    for (int x = 0; x < dst_w; x++) {
+      int offset_x = static_cast<int>(x * ratio_x) * comps;
+      const uint8_t *src_y = src + offset_y;
+      for (int i = 0; i < comps; i++) {
+        *dst++ = x < scaled_w ? src_y[offset_x + i] : 0;
+      }
+    }
+  }
 }
 
 namespace {
@@ -208,83 +228,6 @@ int CameraTask::FormatToBPP(Format fmt) {
             return 1;
     }
     return 0;
-}
-
-pxp_ps_pixel_format_t CameraTask::FormatToPXPPSFormat(Format fmt) {
-    switch (fmt) {
-        case Format::RGBA:
-            return kPXP_PsPixelFormatRGB888;
-        case Format::Y8:
-            return kPXP_PsPixelFormatY8;
-        default:
-            assert(false);
-    }
-}
-
-pxp_output_pixel_format_t CameraTask::FormatToPXPOutputFormat(Format fmt) {
-    switch (fmt) {
-        case Format::RGBA:
-            return kPXP_OutputPixelFormatRGB888;
-        case Format::RGB:
-            return kPXP_OutputPixelFormatRGB888P;
-        case Format::Y8:
-            return kPXP_OutputPixelFormatY8;
-        default:
-            assert(false);
-    }
-}
-
-bool CameraTask::PXPOperation(const PXPConfiguration& input, const PXPConfiguration& output, bool preserve_ratio) {
-
-    PXP_Init(PXP);
-    PXP_SetProcessSurfaceBackGroundColor(PXP, 0xF04A00FF);
-    PXP_SetAlphaSurfacePosition(PXP, 0xFFFF, 0xFFFF, 0, 0);
-    PXP_EnableCsc1(PXP, false);
-
-    int output_width = output.width, output_height = output.height;
-    if (preserve_ratio) {
-        float ratio_width = (float)output.width / (float)input.width;
-        float ratio_height = (float)output.height / (float)input.height;
-        float scaling_ratio = MIN(ratio_width, ratio_height);
-        output_width = (int)((float)input.width * scaling_ratio);
-        output_height = (int)((float)input.height * scaling_ratio);
-    }
-    int input_bpp = FormatToBPP(input.fmt);
-    int output_bpp = FormatToBPP(output.fmt);
-    pxp_ps_buffer_config_t ps_buffer_config;
-    ps_buffer_config.pixelFormat = FormatToPXPPSFormat(input.fmt);
-    ps_buffer_config.swapByte = false;
-    ps_buffer_config.bufferAddr = reinterpret_cast<uint32_t>(input.data);
-    ps_buffer_config.bufferAddrU = 0;
-    ps_buffer_config.bufferAddrV = 0;
-    ps_buffer_config.pitchBytes = input.width * input_bpp;
-
-    pxp_output_buffer_config_t output_buffer_config;
-    output_buffer_config.pixelFormat = FormatToPXPOutputFormat(output.fmt);
-    output_buffer_config.interlacedMode = kPXP_OutputProgressive;
-    output_buffer_config.buffer0Addr = reinterpret_cast<uint32_t>(output.data);
-    output_buffer_config.buffer1Addr = 0;
-    output_buffer_config.pitchBytes = output_width * output_bpp;
-    output_buffer_config.width = output_width;
-    output_buffer_config.height = output_height;
-
-    PXP_SetProcessSurfaceScaler(PXP, input.width, input.height, output_width, output_height);
-    PXP_SetProcessSurfacePosition(PXP, 0, 0, output_width - 1, output_height - 1);
-    PXP_SetProcessSurfaceBufferConfig(PXP, &ps_buffer_config);
-    PXP_SetOutputBufferConfig(PXP, &output_buffer_config);
-    __DSB();
-    PXP_Start(PXP);
-    while ((PXP->CTRL & PXP_CTRL_ENABLE_MASK) || !(kPXP_CompleteFlag & PXP_GetStatusFlags(PXP))) {
-        taskYIELD();
-    }
-    configASSERT(!(PXP->CTRL & PXP_CTRL_ENABLE_MASK));
-    configASSERT(kPXP_CompleteFlag & PXP_GetStatusFlags(PXP));
-    PXP_ClearStatusFlags(PXP, kPXP_CompleteFlag);
-    __DSB();
-    PXP_Deinit(PXP);
-    __DSB();
-
-    return true;
 }
 
 constexpr const uint8_t kCameraAddress = 0x24;
