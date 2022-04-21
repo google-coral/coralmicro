@@ -1,3 +1,6 @@
+#ifndef _LIBS_TASKS_AUDIO_READER_
+#define _LIBS_TASKS_AUDIO_READER_
+
 #include <algorithm>
 #include <cstdint>
 #include <vector>
@@ -226,3 +229,5 @@ class LatestSamples {
 };
 
 }  // namespace valiant
+
+#endif  // _LIBS_TASKS_AUDIO_READER_
