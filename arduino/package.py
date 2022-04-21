@@ -77,6 +77,7 @@ def CreateFlashtoolExe(core_out_dir, root_dir):
         '--add-binary',
         os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin') + pyinstaller_separator + os.path.join('third_party', 'nxp', 'flashloader'),
         '--hidden-import', 'progress.bar',
+        '--hidden-import', 'progress',
         '--hidden-import', 'hexformat',
         '--hidden-import', 'hid',
         '--hidden-import', 'ipaddress',

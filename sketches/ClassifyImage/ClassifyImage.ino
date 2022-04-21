@@ -11,8 +11,9 @@
 namespace {
 tflite::MicroMutableOpResolver<1> resolver;
 const tflite::Model* model = nullptr;
-std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
+std::vector<uint8_t> model_data;
 std::vector<uint8_t> image_data;
+std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 std::shared_ptr<valiant::EdgeTpuContext> context = nullptr;
 
 const int kTensorArenaSize = 1024 * 1024;
@@ -26,7 +27,6 @@ void setup() {
     SD.begin();
 
     Serial.println("Loading Model");
-    std::vector<uint8_t> model_data;
 
     const char* model_name =
         "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
@@ -64,8 +64,8 @@ void setup() {
 
     resolver.AddCustom(valiant::kCustomOp, valiant::RegisterCustomOp());
     tflite::MicroErrorReporter error_reporter;
-    interpreter = std::unique_ptr<tflite::MicroInterpreter>(
-        new tflite::MicroInterpreter(model, resolver, tensor_arena, kTensorArenaSize, &error_reporter));
+    interpreter = std::make_unique<tflite::MicroInterpreter>(
+        model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
     interpreter->AllocateTensors();
 
     if (!interpreter) {

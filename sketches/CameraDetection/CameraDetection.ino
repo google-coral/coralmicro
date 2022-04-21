@@ -1,4 +1,8 @@
 #include <SD.h>
+#include <camera.h>
+
+#include <cstdint>
+#include <memory>
 
 #include "Arduino.h"
 #include "libs/tensorflow/detection.h"
@@ -9,23 +13,26 @@
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+using namespace valiant::arduino;
+
 namespace {
+tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
-    std::vector<uint8_t> model_data;
-constexpr char kModelPath[] =
-    "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
-
-std::vector<uint8_t> image_data;
-constexpr char kImagePath[] = "/apps/DetectImage/cat_300x300.rgb";
-
+std::vector<uint8_t> model_data;
 std::shared_ptr<valiant::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
-tflite::MicroMutableOpResolver<3> resolver;
+TfLiteTensor* input_tensor = nullptr;
+
+constexpr char kModelPath[] =
+    "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
+std::vector<uint8_t> image;
 
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 }  // namespace
+
+CameraClass cam;
 
 void setup() {
     Serial.begin(115200);
@@ -45,18 +52,6 @@ void setup() {
         Serial.print("Error loading model");
     }
 
-    Serial.println("Loading Input Image");
-    if (!SD.exists(kImagePath)) {
-        Serial.println("Image file not found");
-        return;
-    }
-    SDFile image_file = SD.open(kImagePath);
-    uint32_t image_size = image_file.size();
-    image_data.resize(image_size);
-    if (image_file.read(image_data.data(), image_size) != image_size) {
-        Serial.println("Error loading image");
-    }
-    Serial.println("Input image complete");
     model = tflite::GetModel(model_data.data());
     context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
@@ -65,10 +60,10 @@ void setup() {
     }
     Serial.println("model and context created");
 
+    tflite::MicroErrorReporter error_reporter;
     resolver.AddDequantize();
     resolver.AddDetectionPostprocess();
     resolver.AddCustom(valiant::kCustomOp, valiant::RegisterCustomOp());
-    tflite::MicroErrorReporter error_reporter;
 
     interpreter = std::make_unique<tflite::MicroInterpreter>(
         model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
@@ -86,26 +81,46 @@ void setup() {
         Serial.println(interpreter->inputs().size());
         return;
     }
+
+    input_tensor = interpreter->input_tensor(0);
+    int model_height = input_tensor->dims->data[1];
+    int model_width = input_tensor->dims->data[2];
+    int model_channels = input_tensor->dims->data[3];
+
+    Serial.print("width=");
+    Serial.print(model_width);
+    Serial.print("; height=");
+    Serial.println(model_height);
+    image.resize(model_width * model_height * model_channels);
+    if (cam.begin(model_width, model_height, valiant::camera::Format::RGB,
+                  true) != CameraStatus::SUCCESS) {
+        Serial.println("Failed to start camera");
+        return;
+    }
+
     Serial.println("Initialized");
 }
-
 void loop() {
+    input_tensor = interpreter->input_tensor(0);
     delay(1000);
+    if (cam.grab(image.data()) != CameraStatus::SUCCESS) {
+        Serial.println("cannot invoke because camera failed to grab frame");
+        return;
+    }
 
     if (!interpreter) {
         Serial.println("Cannot invoke because of a problem during setup!");
         return;
     }
 
-    auto* input_tensor = interpreter->input_tensor(0);
     if (input_tensor->type != kTfLiteUInt8 ||
-        input_tensor->bytes != image_data.size()) {
+        input_tensor->bytes != image.size()) {
         Serial.println("ERROR: Invalid input tensor size");
         return;
     }
 
-    std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image_data.data(),
-                image_data.size());
+    std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
+                image.size());
 
     if (interpreter->Invoke() != kTfLiteOk) {
         Serial.println("ERROR: Invoke() failed");
@@ -114,6 +129,8 @@ void loop() {
 
     auto results =
         valiant::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
+    Serial.print("Results count: ");
+    Serial.println(results.size());
     for (auto result : results) {
         Serial.print("id: ");
         Serial.print(result.id);
