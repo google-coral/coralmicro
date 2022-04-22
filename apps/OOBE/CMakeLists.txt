@@ -82,7 +82,7 @@ target_compile_definitions(OOBEDemoWifi PUBLIC
 
 target_link_libraries(OOBEDemoWifi
         ${OOBE_LINK_LIBRARIES}
-        libs_nxp_rt1176-sdk_wiced
+        libs_base-m7_wifi
 )
 
 add_executable_m7(OOBEDemoEthernet
