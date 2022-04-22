@@ -108,7 +108,6 @@ void CdcEem::SetClassHandle(class_handle_t class_handle) {
 
 err_t CdcEem::TransmitFrame(void* buffer, uint32_t length) {
     if (endianness_ == Endianness::kUnknown) {
-        DbgConsole_Printf("[EEM] Tried to send to remote with unknown endianness\r\n");
         return ERR_IF;
     }
     usb_status_t status;
