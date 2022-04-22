@@ -143,7 +143,7 @@ class PosenetTask : public OOBETask {
           TfLiteTensor *input = valiant::posenet::input();
           memcpy(tflite::GetTensorData<uint8_t>(input), camera_frame->data(),
                  camera_frame->size());
-          delete camera_output;
+          delete camera_frame;
 
           valiant::posenet::loop(&output, false);
           int good_poses_count = 0;
