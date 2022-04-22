@@ -178,7 +178,7 @@ class PosenetTask : public OOBETask {
 class CameraTask : public OOBETask {
  public:
   CameraTask(PosenetTask *posenet_task)
-      : OOBETask("posenet_task"), posenet_task_(posenet_task){};
+      : OOBETask("camera_task"), posenet_task_(posenet_task){};
 
  protected:
   void TaskFunc() override {
