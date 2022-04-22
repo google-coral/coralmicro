@@ -3,11 +3,15 @@ import collections
 import contextlib
 import socket
 import struct
+import sys
 import threading
 import wave
 
-# Third party libraries
-import pyaudio  # sudo apt-get install python3-pyaudio
+
+try:
+    import pyaudio  # sudo apt-get install python3-pyaudio
+except ImportError:
+    pyaudio = None
 
 
 class Overflow(Exception):
@@ -158,7 +162,7 @@ def CallbackMonoPlayer(sample_format, sample_rate_hz, frames_per_callback_ms):
         rb.read(buf)
         return bytes(buf), pyaudio.paContinue
 
-    with PyAudioStream(format=sample_format.pyaudio,
+    with PyAudioStream(format=pyaudio_format(sample_format),
                        frames_per_buffer=frames_per_buffer,
                        channels=1,
                        rate=sample_rate_hz,
@@ -173,7 +177,7 @@ def CallbackMonoPlayer(sample_format, sample_rate_hz, frames_per_callback_ms):
 
 @contextlib.contextmanager
 def BlockingMonoPlayer(sample_format, sample_rate_hz, frames_per_callback_ms):
-    with PyAudioStream(format=sample_format.pyaudio,
+    with PyAudioStream(format=pyaudio_format(sample_format),
                        channels=1,
                        rate=sample_rate_hz,
                        output=True) as stream:
@@ -181,12 +185,39 @@ def BlockingMonoPlayer(sample_format, sample_rate_hz, frames_per_callback_ms):
 
 
 @contextlib.contextmanager
-def WaveFileWriter(filename, sample_format, sample_rate_hz):
-    with wave.open(filename, 'wb') as f:
+def WavFileWriter(filename, sample_format, sample_rate_hz):
+    stdout = filename == '-'
+    with wave.open(sys.stdout.buffer if stdout else filename, 'wb') as f:
         f.setnchannels(1)
         f.setsampwidth(sample_format.bytes)
         f.setframerate(sample_rate_hz)
-        yield f.writeframes
+        try:
+            yield f.writeframes
+        finally:
+            if stdout:
+                return
+            print('File [WAV]:', filename)
+            print('Sample rate (Hz):', f.getframerate())
+            print('Sample size (bytes):', f.getsampwidth())
+            print('Sample count:', f.getnframes())
+            print('Duration (ms):', 1000.0 * f.getnframes() / f.getframerate())
+
+
+@contextlib.contextmanager
+def RawFileWriter(filename, sample_format, sample_rate_hz):
+    if filename == '-':
+        yield sys.stdout.buffer.write
+    else:
+        with open(filename, 'wb') as f:
+            try:
+                yield f.write
+            finally:
+                num_samples = f.tell() / sample_format.bytes
+                print('File [RAW]:', filename)
+                print('Sample rate (Hz):', sample_rate_hz)
+                print('Sample size (bytes):', sample_format.bytes)
+                print('Sample count:', num_samples)
+                print('Duration (ms):', 1000.0 * num_samples / sample_rate_hz)
 
 
 @contextlib.contextmanager
@@ -195,41 +226,66 @@ def Null(*args, **kwargs):
 
 
 SampleFormat = collections.namedtuple(
-    'SampleFormat', ['name', 'id', 'bytes', 'pyaudio'])
+    'SampleFormat', ['name', 'id', 'bytes', 'ffplay'])
 SAMPLE_FORMATS = {f.name: f for f in
-    [SampleFormat(name='S16_LE', id=0, bytes=2, pyaudio=pyaudio.paInt16),
-     SampleFormat(name='S32_LE', id=1, bytes=4, pyaudio=pyaudio.paInt32)]
+    [SampleFormat(name='S16_LE', id=0, bytes=2, ffplay='s16le'),
+     SampleFormat(name='S32_LE', id=1, bytes=4, ffplay='s32le')]
 }
+PLAYERS = {'blocking': BlockingMonoPlayer,
+           'callback': CallbackMonoPlayer,
+           'none': Null} if pyaudio else {'none': Null}
+FORMATS = {'raw': RawFileWriter,
+           'wav': WavFileWriter}
 
-PLAYERS = {
-    'blocking': BlockingMonoPlayer,
-    'callback': CallbackMonoPlayer,
-    'no': Null
-}
+
+def pyaudio_format(fmt):
+    return {2: pyaudio.paInt16, 4: pyaudio.paInt32}[fmt.bytes]
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Play audio from Valiant mic')
-    parser.add_argument('--host', type=str, default='10.10.10.1')
-    parser.add_argument('--port', type=int, default=33000)
-    parser.add_argument('--sample_rate_hz', '-r', type=int,
-                        choices=(16000, 48000), default=48000)
-    parser.add_argument('--sample_format', '-f', type=SAMPLE_FORMATS.get,
-                        choices=SAMPLE_FORMATS.values(),
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description='Play or/and save audio from the Valiant mic')
+    parser.add_argument('--host', type=str, default='10.10.10.1',
+                        help='host to connect')
+    parser.add_argument('--port', type=int, default=33000,
+                        help='port to connect')
+    parser.add_argument('--sample_rate_hz', '-sr', type=int,
+                        default=48000, choices=(16000, 48000),
+                        help='audio sample rate in Hz')
+    parser.add_argument('--sample_format', '-sf', type=SAMPLE_FORMATS.get,
+                        default='S32_LE', choices=SAMPLE_FORMATS.values(),
                         metavar='{%s}' % ','.join(SAMPLE_FORMATS.keys()),
-                        default='S32_LE')
-    parser.add_argument('--dma_buffer_size_ms', '-b', type=int, default=100,
-                        metavar='MS')
-    parser.add_argument('--num_dma_buffers', '-n', type=int, default=10,
-                        metavar='NUM')
-    parser.add_argument('--drop_first_samples_ms', type=int, default=0,
-                        metavar='MS')
-    parser.add_argument('--player',  type=str,
+                        help='audio sample format')
+    parser.add_argument('--num_dma_buffers', '-n', type=int, default=2,
+                        metavar='N', help='number of DMA buffers')
+    parser.add_argument('--dma_buffer_size_ms', '-b', type=int, default=50,
+                        metavar='MS',
+                        help='size of each DMA buffer in ms')
+    parser.add_argument('--drop_first_samples_ms', '-d', type=int, default=0,
+                        metavar='MS',
+                        help='do not send first audio samples to avoid clicks')
+    parser.add_argument('--player', '-p', type=str,
+                        default='callback' if pyaudio else 'none',
                         choices=PLAYERS.keys(),
-                        default='callback')
+                        help='audio player type')
+    parser.add_argument('--format', '-f', default='wav', choices=FORMATS.keys(),
+                        help='audio file format')
     parser.add_argument('--output', '-o', type=str, default=None,
-                        metavar='FILENAME')
+                        metavar='FILENAME',
+                        help='record audio to file')
+    parser.add_argument('--ffplay', action='store_true',
+                        help='only print ffplay command line')
     args = parser.parse_args()
+
+    if args.ffplay:
+        filename = args.output if args.output else '<filename>'
+        if args.format == 'wav':
+            print('ffplay %s' % filename)
+        else:
+            print('ffplay -f %s -ar %d -ac 1 %s' % \
+                  (args.sample_format.ffplay, args.sample_rate_hz, filename))
+        return
 
     sock = socket.socket()
     sock.connect((args.host, args.port))
@@ -240,7 +296,7 @@ def main():
                           args.drop_first_samples_ms))
 
     Player = PLAYERS[args.player]
-    FileWriter = WaveFileWriter if args.output else Null
+    FileWriter = FORMATS[args.format] if args.output else Null
     with FileWriter(filename=args.output,
                     sample_format=args.sample_format,
                     sample_rate_hz=args.sample_rate_hz) as write, \
