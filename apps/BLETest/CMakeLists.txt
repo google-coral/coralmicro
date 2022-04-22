@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-project(BLETest)
-
-include_directories(.)
-
 add_executable_m7(BLETest
     ble_hello_sensor.c
     ble_test.cc

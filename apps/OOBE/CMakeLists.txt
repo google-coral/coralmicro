@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-project(OOBE)
-
 set(OOBE_SOURCES
     oobe_cm7.cc
     oobe_json.cc

@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
 add_subdirectory(BlinkLEDM4FromM7)
 add_subdirectory(BlinkLEDM7)
 add_subdirectory(CameraDetection)

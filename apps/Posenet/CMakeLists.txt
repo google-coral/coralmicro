@@ -1,12 +1,5 @@
-cmake_minimum_required(VERSION 3.13)
-project(Posenet)
-
 add_executable_m7(Posenet
     posenet.cc
-)
-
-target_include_directories(Posenet PRIVATE
-    .
 )
 
 target_link_libraries(Posenet

@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-project(CameraDetection)
-
-include_directories(.)
-
 add_executable_m7(CameraDetection
     camera_detection.cc
     DATA

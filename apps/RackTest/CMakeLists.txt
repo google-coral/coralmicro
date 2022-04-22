@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-project(RackTest)
-
-include_directories(.)
-
 add_executable_m7(RackTest
     rack_test.cc
     M4_EXECUTABLE
