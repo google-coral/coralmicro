@@ -60,10 +60,10 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
         switch (fmt.fmt) {
             case Format::RGB: {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
-                        BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height);
+                        BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height, fmt.filter);
                     } else {
                         auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * kWidth * kHeight);
-                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight);
+                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter);
                         ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, fmt.buffer,
                                               fmt.width, fmt.height, FormatToBPP(Format::RGB),
                                               fmt.preserve_ratio);
@@ -72,11 +72,11 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
                 break;
             case Format::Y8: {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
-                        BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight);
+                        BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight, fmt.filter);
                     } else {
                         auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * kWidth * kHeight);
                         auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * fmt.width * fmt.height);
-                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight);
+                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter);
                         ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, buffer_rgb_scaled.get(),
                                               fmt.width, fmt.height, FormatToBPP(Format::RGB),
                                               fmt.preserve_ratio);
@@ -138,67 +138,185 @@ void CameraTask::ResizeNearestNeighbor(const uint8_t *src, int src_w, int src_h,
 }
 
 namespace {
-template<typename Callback>
-void BayerInternal(const uint8_t *camera_raw, int width, int height,
-                   Callback callback) {
-    bool blue = true, green = false;
-    for (int y = 2; y < height - 2; y++) {
-        int start = green ? 3 : 2;
-        for (int x = start; x < width - 2; x += 2) {
-            int g1x = x + 1, g1y = y;
-            int g2x = x + 2, g2y = y + 1;
-            int r1x, r1y, r2x, r2y;
-            int b1x, b1y, b2x, b2y;
-            if (blue) {
-                r1x = r2x = x + 1;
-                r1y = r2y = y + 1;
-                b1x = x;
-                b1y = y;
-                b2x = x + 2;
-                b2y = y;
-            } else {
-                r1x = x;
-                r1y = y;
-                r2x = x + 2;
-                r2y = y;
-                b1x = b2x = x + 1;
-                b1y = b2y = y + 1;
+template <typename Callback>
+void BayerInternal(const uint8_t* camera_raw, int width, int height,
+                   FilterMethod filter, Callback callback) {
+    if (filter == FilterMethod::NEAREST_NEIGHBOR) {
+        bool blue = true, green = false;
+        for (int y = 2; y < height - 2; y++) {
+            int start = green ? 3 : 2;
+            for (int x = start; x < width - 2; x += 2) {
+                int g1x = x + 1, g1y = y;
+                int g2x = x + 2, g2y = y + 1;
+                int r1x, r1y, r2x, r2y;
+                int b1x, b1y, b2x, b2y;
+                if (blue) {
+                    r1x = r2x = x + 1;
+                    r1y = r2y = y + 1;
+                    b1x = x;
+                    b1y = y;
+                    b2x = x + 2;
+                    b2y = y;
+                } else {
+                    r1x = x;
+                    r1y = y;
+                    r2x = x + 2;
+                    r2y = y;
+                    b1x = b2x = x + 1;
+                    b1y = b2y = y + 1;
+                }
+                uint8_t r1 = camera_raw[r1x + (r1y * width)];
+                uint8_t g1 = camera_raw[g1x + (g1y * width)];
+                uint8_t b1 = camera_raw[b1x + (b1y * width)];
+                uint8_t r2 = camera_raw[r2x + (r2y * width)];
+                uint8_t g2 = camera_raw[g2x + (g2y * width)];
+                uint8_t b2 = camera_raw[b2x + (b2y * width)];
+                callback(x, y, r1, g1, b1);
+                callback(x + 1, y, r2, g2, b2);
             }
-            uint8_t r1 = camera_raw[r1x + (r1y * width)];
-            uint8_t g1 = camera_raw[g1x + (g1y * width)];
-            uint8_t b1 = camera_raw[b1x + (b1y * width)];
-            uint8_t r2 = camera_raw[r2x + (r2y * width)];
-            uint8_t g2 = camera_raw[g2x + (g2y * width)];
-            uint8_t b2 = camera_raw[b2x + (b2y * width)];
-            callback(x, y, r1, g1, b1);
-            callback(x + 1, y, r2, g2, b2);
+            blue = !blue;
+            green = !green;
         }
-        blue = !blue;
-        green = !green;
+    } else if (filter == FilterMethod::BILINEAR) {
+        int rgb_stride = width * 3;
+        int bayer_stride = width;
+
+        size_t bayer_offset = 0;
+        for (int y = 2; y < height - 2; y++) {
+            bool odd_row = y & 1;
+            int x = 1;
+            size_t bayer_end = bayer_offset + (width - 2);
+
+            if (odd_row) {
+                uint8_t r =
+                    (static_cast<uint32_t>(camera_raw[bayer_offset + 1]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride * 2 + 1)]) +
+                     1) >>
+                    1;
+                uint8_t b =
+                    (static_cast<uint32_t>(
+                         camera_raw[bayer_offset + bayer_stride]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride + 2)]) +
+                     1) >>
+                    1;
+                uint8_t g = camera_raw[bayer_offset + (bayer_stride + 1)];
+                callback(x, y, r, g, b);
+                bayer_offset += 1;
+                ++x;
+            }
+
+            while (bayer_offset <= (bayer_end - 2)) {
+                uint8_t r1 = 0, g1 = 0, b1 = 0, r2 = 0, g2 = 0, b2 = 0;
+                uint8_t t0 =
+                    (static_cast<uint32_t>(camera_raw[bayer_offset]) +
+                     static_cast<uint32_t>(camera_raw[bayer_offset + 2]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride * 2)]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride * 2 + 2)]) +
+                     2) >>
+                    2;
+                g1 = (static_cast<uint32_t>(camera_raw[bayer_offset + 1]) +
+                      static_cast<uint32_t>(
+                          camera_raw[bayer_offset + bayer_stride]) +
+                      static_cast<uint32_t>(
+                          camera_raw[bayer_offset + (bayer_stride + 2)]) +
+                      static_cast<uint32_t>(
+                          camera_raw[bayer_offset + (bayer_stride * 2 + 1)]) +
+                      2) >>
+                     2;
+                uint8_t t1 =
+                    (static_cast<uint32_t>(camera_raw[bayer_offset + 2]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride * 2 + 2)]) +
+                     1) >>
+                    1;
+                uint8_t t2 =
+                    (static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride + 1)]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride + 3)]) +
+                     1) >>
+                    1;
+                uint8_t t3 = camera_raw[bayer_offset + (bayer_stride + 1)];
+                g2 = camera_raw[bayer_offset + (bayer_stride + 2)];
+                if (odd_row) {
+                    r1 = t0;
+                    b1 = t3;
+
+                    r2 = t1;
+                    b2 = t2;
+                } else {
+                    b1 = t0;
+                    r1 = t3;
+
+                    b2 = t1;
+                    r2 = t2;
+                }
+                callback(x, y, r1, g1, b1);
+                callback(x + 1, y, r2, g2, b2);
+                bayer_offset += 2;
+                x += 2;
+            }
+
+            while (bayer_offset < bayer_end) {
+                uint8_t t0 =
+                    (static_cast<uint32_t>(camera_raw[bayer_offset]) +
+                     static_cast<uint32_t>(camera_raw[bayer_offset + 2]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride * 2)]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride * 2 + 2)]) +
+                     2) >>
+                    2;
+                uint8_t g =
+                    (static_cast<uint32_t>(camera_raw[bayer_offset + 1]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + bayer_stride]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride + 2)]) +
+                     static_cast<uint32_t>(
+                         camera_raw[bayer_offset + (bayer_stride * 2 + 1)]) +
+                     2) >>
+                    2;
+                uint8_t t1 = camera_raw[bayer_offset + bayer_stride + 1];
+                if (odd_row) {
+                    callback(x, y, t0, g, t1);
+                } else {
+                    callback(x, y, t1, g, t0);
+                }
+                bayer_offset += 1;
+                ++x;
+            }
+
+            bayer_offset += 2;
+        }
     }
 }
 }  // namespace
 
-void CameraTask::BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height) {
+void CameraTask::BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height, FilterMethod filter) {
     memset(camera_rgb, 0, width * height * 3);
-    BayerInternal(camera_raw, width, height, [camera_rgb, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+    BayerInternal(camera_raw, width, height, filter, [camera_rgb, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
         camera_rgb[(x * 3) + (y * width * 3) + 0] = r;
         camera_rgb[(x * 3) + (y * width * 3) + 1] = g;
         camera_rgb[(x * 3) + (y * width * 3) + 2] = b;
     });
 }
 
-void CameraTask::BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgba, int width, int height) {
+void CameraTask::BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgba, int width, int height, FilterMethod filter) {
     memset(camera_rgba, 0, width * height * 4);
-    BayerInternal(camera_raw, width, height, [camera_rgba, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+    BayerInternal(camera_raw, width, height, filter, [camera_rgba, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
             camera_rgba[(x * 4) + (y * width * 4) + 0] = r;
             camera_rgba[(x * 4) + (y * width * 4) + 1] = g;
             camera_rgba[(x * 4) + (y * width * 4) + 2] = b;
     });
 }
 
-void CameraTask::BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height) {
-    BayerInternal(camera_raw, width, height, [camera_grayscale, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+void CameraTask::BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height, FilterMethod filter) {
+    BayerInternal(camera_raw, width, height, filter, [camera_grayscale, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
         float r_f = static_cast<float>(r) / kUint8Max;
         float g_f = static_cast<float>(g) / kUint8Max;
         float b_f = static_cast<float>(b) / kUint8Max;

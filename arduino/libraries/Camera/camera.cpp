@@ -19,11 +19,12 @@ int CameraClass::begin(uint32_t resolution) {
 }
 
 int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
-                       bool preserve_ratio) {
+                       camera::FilterMethod filter, bool preserve_ratio) {
     initialized_ = true;
     width_ = width;
     height_ = height;
     format_ = fmt;
+    filter_ = filter;
     preserve_ratio_ = preserve_ratio;
     camera_->SetPower(true);
     camera_->Enable(valiant::camera::Mode::STREAMING);
@@ -43,10 +44,12 @@ int CameraClass::grab(uint8_t* buffer) {
     }
     std::list<valiant::camera::FrameFormat> fmts;
     if (test_pattern_ != camera::TestPattern::NONE) {
-        fmts.push_back({camera::Format::RAW, CameraTask::kWidth,
-                        CameraTask::kHeight, preserve_ratio_, buffer});
+        fmts.push_back({camera::Format::RAW, camera::FilterMethod::BILINEAR,
+                        CameraTask::kWidth, CameraTask::kHeight,
+                        preserve_ratio_, buffer});
     } else {
-        fmts.push_back({format_, width_, height_, preserve_ratio_, buffer});
+        fmts.push_back(
+            {format_, filter_, width_, height_, preserve_ratio_, buffer});
     }
 
     auto success = valiant::CameraTask::GetFrame(fmts);

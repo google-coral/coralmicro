@@ -72,6 +72,7 @@ void PosenetStressRun(struct jsonrpc_request *request) {
     for (int i = 0; i < iterations; i++) {
         TfLiteTensor* input = valiant::posenet::input();
         valiant::camera::FrameFormat fmt{};
+        fmt.filter = valiant::camera::FilterMethod::BILINEAR;
         fmt.width = input->dims->data[2];
         fmt.height = input->dims->data[1];
         fmt.fmt = valiant::camera::Format::RGB;
@@ -181,6 +182,7 @@ void GetFrame(struct jsonrpc_request *request) {
     valiant::camera::FrameFormat fmt_rgb{};
 
     fmt_rgb.fmt = format;
+    fmt_rgb.filter = valiant::camera::FilterMethod::BILINEAR;
     fmt_rgb.width = width;
     fmt_rgb.height = height;
     fmt_rgb.preserve_ratio = false;

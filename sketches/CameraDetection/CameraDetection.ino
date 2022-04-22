@@ -86,6 +86,7 @@ void setup() {
     Serial.println(model_height);
     image.resize(model_width * model_height * model_channels);
     if (Camera.begin(model_width, model_height, valiant::camera::Format::RGB,
+                     valiant::camera::FilterMethod::BILINEAR,
                      true) != CameraStatus::SUCCESS) {
         Serial.println("Failed to start camera");
         return;

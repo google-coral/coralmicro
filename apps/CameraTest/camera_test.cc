@@ -41,24 +41,28 @@ static valiant::HttpServer::Content UriHandler(const char *name) {
 void GetFrame() {
     valiant::camera::FrameFormat fmt_rgb, fmt_rgb_posenet, fmt_grayscale, fmt_grayscale_small, fmt_raw;
     fmt_rgb.fmt = valiant::camera::Format::RGB;
+    fmt_rgb.filter = valiant::camera::FilterMethod::BILINEAR;
     fmt_rgb.width = valiant::CameraTask::kWidth;
     fmt_rgb.height = valiant::CameraTask::kHeight;
     fmt_rgb.preserve_ratio = false;
     fmt_rgb.buffer = camera_rgb;
 
     fmt_rgb_posenet.fmt = valiant::camera::Format::RGB;
+    fmt_rgb_posenet.filter = valiant::camera::FilterMethod::BILINEAR;
     fmt_rgb_posenet.width = valiant::posenet::kPosenetWidth;
     fmt_rgb_posenet.height = valiant::posenet::kPosenetHeight;
     fmt_rgb_posenet.preserve_ratio = false;
     fmt_rgb_posenet.buffer = camera_rgb_posenet;
 
     fmt_grayscale.fmt = valiant::camera::Format::Y8;
+    fmt_grayscale.filter = valiant::camera::FilterMethod::BILINEAR;
     fmt_grayscale.width = valiant::CameraTask::kWidth;
     fmt_grayscale.height = valiant::CameraTask::kHeight;
     fmt_grayscale.preserve_ratio = false;
     fmt_grayscale.buffer = camera_grayscale;
 
     fmt_grayscale_small.fmt = valiant::camera::Format::Y8;
+    fmt_grayscale_small.filter = valiant::camera::FilterMethod::BILINEAR;
     fmt_grayscale_small.width = 96;
     fmt_grayscale_small.height = 96;
     fmt_grayscale_small.preserve_ratio = false;

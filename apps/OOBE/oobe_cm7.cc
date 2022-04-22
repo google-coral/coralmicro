@@ -234,6 +234,7 @@ class CameraTask : public OOBETask {
           fmt.width = valiant::posenet::kPosenetWidth;
           fmt.height = valiant::posenet::kPosenetHeight;
           fmt.fmt = valiant::camera::Format::RGB;
+          fmt.filter = valiant::camera::FilterMethod::BILINEAR;
           fmt.preserve_ratio = false;
           fmt.buffer = input.data();
           valiant::CameraTask::GetFrame({fmt});

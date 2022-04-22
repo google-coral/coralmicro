@@ -37,7 +37,7 @@ void DetectFromCamera(struct jsonrpc_request* r) {
         valiant::camera::Mode::STREAMING);
 
     std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
-    valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB, model_width,
+    valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB, valiant::camera::FilterMethod::BILINEAR, model_width,
                                      model_height, false, image.data()};
 
     bool ret = valiant::CameraTask::GetFrame({fmt});

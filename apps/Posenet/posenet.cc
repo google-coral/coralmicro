@@ -27,6 +27,7 @@ extern "C" void app_main(void *param) {
         fmt.width = input->dims->data[2];
         fmt.height = input->dims->data[1];
         fmt.fmt = valiant::camera::Format::RGB;
+        fmt.filter = valiant::camera::FilterMethod::BILINEAR;
         fmt.preserve_ratio = false;
         fmt.buffer = tflite::GetTensorData<uint8_t>(input);
         valiant::CameraTask::GetFrame({fmt});

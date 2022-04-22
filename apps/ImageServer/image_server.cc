@@ -41,8 +41,9 @@ void get_image_from_camera(struct jsonrpc_request* request) {
     valiant::CameraTask::GetSingleton()->Enable(
         valiant::camera::Mode::STREAMING);
     std::vector<uint8_t> image(width * height * /*channels=*/3);
-    valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB, width,
-                                     height, false, image.data()};
+    valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB,
+                                     valiant::camera::FilterMethod::BILINEAR,
+                                     width, height, false, image.data()};
     auto ret = valiant::CameraTask::GetFrame({fmt});
     valiant::CameraTask::GetSingleton()->Disable();
     valiant::CameraTask::GetSingleton()->SetPower(false);

@@ -29,6 +29,7 @@ static void take_picture_rpc(struct jsonrpc_request *r) {
     );
     valiant::camera::FrameFormat fmt;
     fmt.fmt = valiant::camera::Format::RGB;
+    fmt.filter = valiant::camera::FilterMethod::BILINEAR;
     fmt.width = valiant::CameraTask::kWidth;
     fmt.height = valiant::CameraTask::kHeight;
     fmt.preserve_ratio = false;

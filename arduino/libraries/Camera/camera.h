@@ -32,6 +32,7 @@ class CameraClass {
           width_{0},
           height_{0},
           format_{camera::Format::RGB},
+          filter_{camera::FilterMethod::BILINEAR},
           test_pattern_{camera::TestPattern::NONE},
           preserve_ratio_{false},
           initialized_{false} {}
@@ -46,6 +47,7 @@ class CameraClass {
     int begin(uint32_t resolution = CAMERA_R320x320);
     int begin(int32_t width = 320, int32_t height = 320,
               camera::Format fmt = camera::Format::RGB,
+              camera::FilterMethod filter = camera::FilterMethod::BILINEAR,
               bool preserve_ratio = false);
     int end();
     int grab(uint8_t* buffer);
@@ -71,6 +73,7 @@ class CameraClass {
     int32_t width_;
     int32_t height_;
     valiant::camera::Format format_;
+    valiant::camera::FilterMethod filter_;
     valiant::camera::TestPattern test_pattern_;
     bool preserve_ratio_;
     bool initialized_;

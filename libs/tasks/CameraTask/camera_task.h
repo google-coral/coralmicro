@@ -135,8 +135,14 @@ enum class Format {
     RAW,
 };
 
+enum class FilterMethod {
+    BILINEAR = 0,
+    NEAREST_NEIGHBOR,
+};
+
 struct FrameFormat {
     Format fmt;
+    FilterMethod filter;
     int width;
     int height;
     bool preserve_ratio;
@@ -188,9 +194,9 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     bool Read(camera::CameraRegisters reg, uint8_t *val);
     bool Write(camera::CameraRegisters reg, uint8_t val);
     void SetDefaultRegisters();
-    static void BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
-    static void BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height);
-    static void BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height);
+    static void BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height, camera::FilterMethod filter);
+    static void BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height, camera::FilterMethod filter);
+    static void BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height, camera::FilterMethod filter);
     static void RGBToGrayscale(const uint8_t *camera_rgb, uint8_t *camera_grayscale, int width, int height);
     static void ResizeNearestNeighbor(const uint8_t *src, int src_width, int src_height,
                                       uint8_t *dst, int dst_width, int dst_height,
