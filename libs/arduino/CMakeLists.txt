@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
 add_library(libs_arduino STATIC
     CMakeLists.txt)
 target_link_libraries(libs_arduino

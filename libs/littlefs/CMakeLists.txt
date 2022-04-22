@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 add_library_m7(libs_littlefs
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/littlefs/lfs_util.c

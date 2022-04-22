@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 set(libs_CMSIS_SOURCES
     ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/BasicMathFunctions/arm_elementwise_add_s8.c
     ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/BasicMathFunctions/arm_elementwise_mul_s8.c

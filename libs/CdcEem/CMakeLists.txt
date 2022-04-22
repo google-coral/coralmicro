@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 set(libs_CdcEem_SOURCES
     cdc_eem.cc
 )

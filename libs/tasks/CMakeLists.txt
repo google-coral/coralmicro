@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
 add_subdirectory(AudioTask)
 add_subdirectory(CameraTask)
 add_subdirectory(EdgeTpuDfuTask)

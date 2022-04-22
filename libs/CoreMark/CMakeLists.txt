@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 add_library_m7(libs_coremark-m7 STATIC
     core_main.c
     core_portme.c

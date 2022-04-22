@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 set(libs_tpu_SOURCES
     edgetpu_executable.cc
     edgetpu_manager.cc

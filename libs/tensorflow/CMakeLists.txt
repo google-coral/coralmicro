@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 # python3 scripts/tflm-sources.py | xclip -selection c
 set(libs_tensorflow_SOURCES
     debug_log.c

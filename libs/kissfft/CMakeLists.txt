@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 add_library_m7(libs_kissfft-m7 STATIC
     ${VALIANT_SOURCE_DIR}/third_party/kissfft/kiss_fft.c
     ${VALIANT_SOURCE_DIR}/third_party/kissfft/tools/kiss_fftr.c

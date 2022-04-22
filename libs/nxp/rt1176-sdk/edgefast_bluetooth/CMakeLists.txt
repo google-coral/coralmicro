@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 add_library_m7(edgefast_bluetooth_internal
     BT_storage_pl.cc
     bt_ble_settings.cc

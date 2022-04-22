@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
 add_library_m7(libs_posenet STATIC
     posenet.cc
     posenet_decoder.cc

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 set(libs_usb_host_edgetpu_SOURCES
     usb_host_edgetpu.c
 )

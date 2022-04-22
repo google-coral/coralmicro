@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 add_library_m7(libs_base-m7_bm STATIC
     main_bm.cc
 )

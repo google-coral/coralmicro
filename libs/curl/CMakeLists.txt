@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 add_library_m7(libs_curl STATIC
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/altsvc.c
     ${VALIANT_SOURCE_DIR}/third_party/curl/lib/base64.c
