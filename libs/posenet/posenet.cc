@@ -22,7 +22,7 @@ constexpr int kExtraArenaSize = 1 * 1024 * 1024;
 constexpr int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
-std::vector<uint8_t> posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite;
+std::vector<uint8_t> posenet_tflite;
 std::vector<uint8_t> posenet_test_input_bin;
 }  // namespace
 
@@ -113,19 +113,19 @@ bool setup() {
     TF_LITE_REPORT_ERROR(error_reporter, "Posenet!");
 
     if (!valiant::filesystem::ReadFile(
-            "/models/posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu.tflite",
-            &posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite)) {
+            "/models/posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite",
+            &posenet_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
         return false;
     }
 
-    if (!valiant::filesystem::ReadFile("/models/posenet_test_input.bin",
+    if (!valiant::filesystem::ReadFile("/models/posenet_test_input_324.bin",
                                        &posenet_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
         return false;
     }
 
-    model = tflite::GetModel(posenet_mobilenet_v1_075_353_481_quant_decoder_edgetpu_tflite.data());
+    model = tflite::GetModel(posenet_tflite.data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",

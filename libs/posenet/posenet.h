@@ -10,6 +10,11 @@ namespace posenet {
 constexpr int kPoses = 10;
 constexpr int kKeypoints = 17;
 
+constexpr int kPosenetWidth = 324;
+constexpr int kPosenetHeight = 324;
+constexpr int kPosenetDepth = 3;
+constexpr int kPosenetSize = kPosenetWidth * kPosenetHeight * kPosenetDepth;
+
 struct Keypoint {
     float x;
     float y;

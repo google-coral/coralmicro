@@ -1,5 +1,6 @@
 #include "libs/base/gpio.h"
 #include "libs/base/httpd.h"
+#include "libs/posenet/posenet.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -12,12 +13,10 @@
 #include <cstdio>
 #include <cstring>
 
-constexpr const int kPosenetWidth = 481;
-constexpr const int kPosenetHeight = 353;
 static uint8_t camera_grayscale[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_grayscale_small[96 * 96] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_rgb[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
-static uint8_t camera_rgb_posenet[kPosenetWidth * kPosenetHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+static uint8_t camera_rgb_posenet[valiant::posenet::kPosenetWidth * valiant::posenet::kPosenetHeight * 3] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 static uint8_t camera_raw[valiant::CameraTask::kWidth * valiant::CameraTask::kHeight] __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 
 static valiant::HttpServer::Content UriHandler(const char *name) {
@@ -48,8 +47,8 @@ void GetFrame() {
     fmt_rgb.buffer = camera_rgb;
 
     fmt_rgb_posenet.fmt = valiant::camera::Format::RGB;
-    fmt_rgb_posenet.width = kPosenetWidth;
-    fmt_rgb_posenet.height = kPosenetHeight;
+    fmt_rgb_posenet.width = valiant::posenet::kPosenetWidth;
+    fmt_rgb_posenet.height = valiant::posenet::kPosenetHeight;
     fmt_rgb_posenet.preserve_ratio = false;
     fmt_rgb_posenet.buffer = camera_rgb_posenet;
 

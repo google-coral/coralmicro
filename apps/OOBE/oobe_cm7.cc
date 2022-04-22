@@ -32,10 +32,6 @@ namespace oobe {
 namespace {
 constexpr float kThreshold = 0.4;
 
-constexpr int kPosenetWidth = 481;
-constexpr int kPosenetHeight = 353;
-constexpr int kPosenetDepth = 3;
-constexpr int kPosenetSize = kPosenetWidth * kPosenetHeight * kPosenetDepth;
 constexpr int kCmdStart = 1;
 constexpr int kCmdStop = 2;
 constexpr int kCmdProcess = 3;
@@ -233,10 +229,10 @@ class CameraTask : public OOBETask {
             continue;
           }
 
-          std::vector<uint8_t> input(kPosenetSize);
+          std::vector<uint8_t> input(valiant::posenet::kPosenetSize);
           valiant::camera::FrameFormat fmt;
-          fmt.width = kPosenetWidth;
-          fmt.height = kPosenetHeight;
+          fmt.width = valiant::posenet::kPosenetWidth;
+          fmt.height = valiant::posenet::kPosenetHeight;
           fmt.fmt = valiant::camera::Format::RGB;
           fmt.preserve_ratio = false;
           fmt.buffer = input.data();

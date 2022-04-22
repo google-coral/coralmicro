@@ -14,8 +14,8 @@ import tkinter as tk
 
 from PIL import ImageTk, Image
 
-POSENET_INPUT_WIDTH = 481
-POSENET_INPUT_HEIGHT = 353
+POSENET_INPUT_WIDTH = 324
+POSENET_INPUT_HEIGHT = 324
 
 Keypoint = collections.namedtuple('Keypoint', ('point', 'score'))
 Point = collections.namedtuple('Point', ('x', 'y'))
@@ -131,7 +131,7 @@ def main():
     def update_image(image):
         nonlocal tk_image
         tk_image = ImageTk.PhotoImage(image=image)
-        canvas.itemconfigure(image_id, image=tk_image)        
+        canvas.itemconfigure(image_id, image=tk_image)
 
     def update_poses(poses, r=5, threshold=0.2):
         canvas.delete('pose')
