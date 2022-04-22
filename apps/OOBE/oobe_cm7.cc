@@ -138,11 +138,11 @@ class PosenetTask : public OOBETask {
           break;
         case kCmdProcess: {
           configASSERT(started_);
-          auto camera_output =
+          auto camera_frame =
               reinterpret_cast<std::vector<uint8_t> *>(message.data);
           TfLiteTensor *input = valiant::posenet::input();
-          memcpy(tflite::GetTensorData<uint8_t>(input), camera_output->data(),
-                 camera_output->size());
+          memcpy(tflite::GetTensorData<uint8_t>(input), camera_frame->data(),
+                 camera_frame->size());
           delete camera_output;
 
           valiant::posenet::loop(&output, false);
@@ -223,7 +223,7 @@ class CameraTask : public OOBETask {
           }
 
           // Signal posenet.
-          posenet_task_->QueueFrame(new std::vector<uint8_t>(input));
+          posenet_task_->QueueFrame(new std::vector<uint8_t>(camera_output));
 
           // Process next camera frame.
           QueueProcess();
