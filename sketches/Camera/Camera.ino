@@ -1,11 +1,12 @@
-#include "Arduino.h"
 #include <camera.h>
+
 #include <cstdint>
 #include <memory>
 
+#include "Arduino.h"
+
 using namespace valiant::arduino;
 
-CameraClass cam;
 constexpr int32_t width = 320;
 constexpr int32_t height = 320;
 constexpr int32_t channels = 3;
@@ -13,27 +14,28 @@ auto frame_buffer = std::make_unique<uint8_t[]>(width * height * channels);
 
 void setup() {
     Serial.begin(115200);
-    if (cam.begin(width, height) != CameraStatus::SUCCESS) {
+    if (Camera.begin(width, height) != CameraStatus::SUCCESS) {
         Serial.println("Failed to start camera");
         return;
     }
 }
 
 void loop() {
-    cam.testPattern(valiant::camera::TestPattern::WALKING_ONES);
+    Camera.testPattern(valiant::camera::TestPattern::WALKING_ONES);
     Serial.println("Discarding 100 frames...");
-    cam.discardFrames(100);
+    Camera.discardFrames(100);
     delay(5000);
 
-    if (cam.grab(frame_buffer.get()) == CameraStatus::SUCCESS /*0*/) {
+    if (Camera.grab(frame_buffer.get()) == CameraStatus::SUCCESS /*0*/) {
         bool success{true};
         uint8_t expected{0};
         for (uint32_t idx = 0; idx < (width * height); ++idx) {
             char buf[100];
             if (frame_buffer.get()[idx] != expected) {
-                sprintf(buf, "[ERROR] Test pattern mismatch at index %lu... 0x%x != 0x%x\r\n", idx,
-                        frame_buffer.get()[idx],
-                        expected);
+                sprintf(buf,
+                        "[ERROR] Test pattern mismatch at index %lu... 0x%x != "
+                        "0x%x\r\n",
+                        idx, frame_buffer.get()[idx], expected);
                 Serial.println(buf);
                 success = false;
                 break;

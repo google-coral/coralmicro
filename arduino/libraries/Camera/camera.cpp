@@ -1,4 +1,5 @@
 #include "camera.h"
+
 #include <cstdio>
 
 namespace valiant {
@@ -17,7 +18,8 @@ int CameraClass::begin(uint32_t resolution) {
     }
 }
 
-int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt, bool preserve_ratio) {
+int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
+                       bool preserve_ratio) {
     initialized_ = true;
     width_ = width;
     height_ = height;
@@ -28,6 +30,12 @@ int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt, bool p
     return CameraStatus::SUCCESS;
 }
 
+int CameraClass::end() {
+    camera_->Disable();
+    camera_->SetPower(false);
+    initialized_ = false;
+}
+
 int CameraClass::grab(uint8_t* buffer) {
     if (!initialized_) {
         printf("%s Camera is not initialized...\n", __func__);
@@ -35,17 +43,10 @@ int CameraClass::grab(uint8_t* buffer) {
     }
     std::list<valiant::camera::FrameFormat> fmts;
     if (test_pattern_ != camera::TestPattern::NONE) {
-        fmts.push_back({camera::Format::RAW,
-                        CameraTask::kWidth,
-                        CameraTask::kHeight,
-                        preserve_ratio_,
-                        buffer});
+        fmts.push_back({camera::Format::RAW, CameraTask::kWidth,
+                        CameraTask::kHeight, preserve_ratio_, buffer});
     } else {
-        fmts.push_back({format_,
-                        width_,
-                        height_,
-                        preserve_ratio_,
-                        buffer});
+        fmts.push_back({format_, width_, height_, preserve_ratio_, buffer});
     }
 
     auto success = valiant::CameraTask::GetFrame(fmts);
@@ -99,7 +100,8 @@ int CameraClass::motionDetection(bool enable) {
     return CameraStatus::UNIMPLEMENTED;
 }
 
-int CameraClass::motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+int CameraClass::motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w,
+                                       uint32_t h) {
     printf("%s not implemented\n", __func__);
     return CameraStatus::UNIMPLEMENTED;
 }
@@ -119,5 +121,7 @@ int CameraClass::framerate(uint32_t framerate) {
     return CameraStatus::UNIMPLEMENTED;
 }
 
-} // namespace arduino
-} // namespace valiant
+}  // namespace arduino
+}  // namespace valiant
+
+valiant::arduino::CameraClass Camera = valiant::arduino::CameraClass();

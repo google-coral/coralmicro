@@ -27,8 +27,6 @@ static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 }  // namespace
 
-CameraClass cam;
-
 void setup() {
     Serial.begin(115200);
     SD.begin();
@@ -87,8 +85,8 @@ void setup() {
     Serial.print("; height=");
     Serial.println(model_height);
     image.resize(model_width * model_height * model_channels);
-    if (cam.begin(model_width, model_height, valiant::camera::Format::RGB,
-                  true) != CameraStatus::SUCCESS) {
+    if (Camera.begin(model_width, model_height, valiant::camera::Format::RGB,
+                     true) != CameraStatus::SUCCESS) {
         Serial.println("Failed to start camera");
         return;
     }
@@ -98,7 +96,7 @@ void setup() {
 void loop() {
     input_tensor = interpreter->input_tensor(0);
     delay(1000);
-    if (cam.grab(image.data()) != CameraStatus::SUCCESS) {
+    if (Camera.grab(image.data()) != CameraStatus::SUCCESS) {
         Serial.println("cannot invoke because camera failed to grab frame");
         return;
     }
