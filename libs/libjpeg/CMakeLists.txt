@@ -1,0 +1,53 @@
+add_library_m7(libs_libjpeg
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jaricom.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcapimin.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcapistd.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcarith.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jccoefct.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jccolor.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcdctmgr.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jchuff.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcinit.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcmainct.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcmarker.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcmaster.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcomapi.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcparam.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcprepct.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jcsample.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jctrans.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdapimin.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdapistd.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdarith.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdatadst.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdatasrc.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdcoefct.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdcolor.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jddctmgr.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdhuff.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdinput.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdmainct.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdmarker.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdmaster.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdmerge.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdpostct.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdsample.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jdtrans.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jerror.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jfdctflt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jfdctfst.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jfdctint.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jidctflt.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jidctfst.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jidctint.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jmemmgr.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jmemnobs.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jquant1.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jquant2.c
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/src/jutils.c
+)
+
+target_include_directories(libs_libjpeg PUBLIC
+    .
+    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/inc
+)
