@@ -1,12 +1,8 @@
 #include <SD.h>
 
 #include "Arduino.h"
+#include "coral_micro.h"
 #include "libs/tensorflow/classification.h"
-#include "libs/tensorflow/utils.h"
-#include "libs/tpu/edgetpu_manager.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
-#include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
 namespace {
 tflite::MicroMutableOpResolver<1> resolver;
