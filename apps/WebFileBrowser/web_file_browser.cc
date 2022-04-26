@@ -6,39 +6,16 @@
 
 #include "libs/base/filesystem.h"
 #include "libs/base/httpd.h"
+#include "libs/base/strings.h"
 #include "libs/base/utils.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 using valiant::filesystem::Lfs;
 
+namespace valiant {
 namespace {
 constexpr char kUrlPrefix[] = "/fs/";
-
-template <size_t N>
-constexpr size_t StrLen(const char (&)[N]) {
-    return N - 1;
-}
-
-template <size_t N>
-bool StartsWith(const char* s, const char (&prefix)[N]) {
-    return std::strncmp(s, prefix, StrLen(prefix)) == 0;
-}
-
-template <size_t N>
-bool EndsWith(const std::string& s, const char (&suffix)[N]) {
-    if (s.size() < StrLen(suffix)) return false;
-    return std::strcmp(s.c_str() + s.size() - StrLen(suffix), suffix) == 0;
-}
-
-template <typename... T>
-void Append(std::vector<uint8_t>* v, const char* format, T... args) {
-    const int size = std::snprintf(nullptr, 0, format, args...) + 1;
-    v->resize(v->size() + size);
-    auto* s = reinterpret_cast<char*>(v->data() + v->size() - size);
-    std::snprintf(s, size, format, args...);
-    v->pop_back();  // remove null terminator
-}
 
 void RemoveDuplicateChar(std::string& s, char ch) {
     s.erase(std::unique(s.begin(), s.end(),
@@ -51,55 +28,55 @@ std::string GetPath(const char* uri) {
     std::string path(uri);
     RemoveDuplicateChar(path, '/');
 
-    if (EndsWith(path, kIndexShtml))
+    if (StrEndsWith(path, kIndexShtml))
         return path.substr(0, path.size() - StrLen(kIndexShtml));
     return path;
 }
 
 bool DirHtml(lfs_dir_t* dir, const char* dirname, std::vector<uint8_t>* html) {
-    Append(html, "<!DOCTYPE html>\r\n");
-    Append(html, "<html lang=\"en\">\r\n");
-    Append(html, "<head>\r\n");
-    Append(html,
-           "<meta http-equiv=\"Content-Type\" content=\"text/html; "
-           "charset=utf-8\">\r\n");
-    Append(html, "<title>Directory listing for %s</title>\r\n", dirname);
-    Append(html, "</head>\r\n");
-    Append(html, "<body>\r\n");
-    Append(html, "<h1>Directory listing for %s</h1>\r\n", dirname);
-    Append(html, "<hr>\r\n");
-    Append(html, "<table>\r\n");
+    StrAppend(html, "<!DOCTYPE html>\r\n");
+    StrAppend(html, "<html lang=\"en\">\r\n");
+    StrAppend(html, "<head>\r\n");
+    StrAppend(html,
+              "<meta http-equiv=\"Content-Type\" content=\"text/html; "
+              "charset=utf-8\">\r\n");
+    StrAppend(html, "<title>Directory listing for %s</title>\r\n", dirname);
+    StrAppend(html, "</head>\r\n");
+    StrAppend(html, "<body>\r\n");
+    StrAppend(html, "<h1>Directory listing for %s</h1>\r\n", dirname);
+    StrAppend(html, "<hr>\r\n");
+    StrAppend(html, "<table>\r\n");
     int res;
     lfs_info info;
     while ((res = lfs_dir_read(Lfs(), dir, &info)) != 0) {
         if (res < 0) return false;
 
         if (info.type == LFS_TYPE_REG) {
-            Append(html, "<tr>\r\n");
-            Append(html, "<td>&#128462;</td>\r\n");
-            Append(html, "<td><a href=\"%s%s%s\">%s</a></td>\r\n", kUrlPrefix,
-                   dirname + 1, info.name, info.name);
-            Append(html, "<td>%d</td>", info.size);
-            Append(html, "</tr>\r\n");
+            StrAppend(html, "<tr>\r\n");
+            StrAppend(html, "<td>&#128462;</td>\r\n");
+            StrAppend(html, "<td><a href=\"%s%s%s\">%s</a></td>\r\n",
+                      kUrlPrefix, dirname + 1, info.name, info.name);
+            StrAppend(html, "<td>%d</td>", info.size);
+            StrAppend(html, "</tr>\r\n");
         } else if (info.type == LFS_TYPE_DIR) {
             if (std::strcmp(info.name, ".") == 0) continue;
-            Append(html, "<tr>\r\n");
-            Append(html, "<td>&#128193;</td>\r\n");
-            Append(html, "<td><a href=\"%s%s%s/\">%s/</a></td>\r\n", kUrlPrefix,
-                   dirname + 1, info.name, info.name);
-            Append(html, "<td></td>\r\n");
-            Append(html, "</tr>\r\n");
+            StrAppend(html, "<tr>\r\n");
+            StrAppend(html, "<td>&#128193;</td>\r\n");
+            StrAppend(html, "<td><a href=\"%s%s%s/\">%s/</a></td>\r\n",
+                      kUrlPrefix, dirname + 1, info.name, info.name);
+            StrAppend(html, "<td></td>\r\n");
+            StrAppend(html, "</tr>\r\n");
         }
     }
-    Append(html, "</table>\r\n");
-    Append(html, "<hr>\r\n");
-    Append(html, "</body>\r\n");
-    Append(html, "</html>\r\n");
+    StrAppend(html, "</table>\r\n");
+    StrAppend(html, "<hr>\r\n");
+    StrAppend(html, "</body>\r\n");
+    StrAppend(html, "</html>\r\n");
     return true;
 }
 
-valiant::HttpServer::Content UriHandler(const char* uri) {
-    if (!StartsWith(uri, kUrlPrefix)) return {};
+HttpServer::Content UriHandler(const char* uri) {
+    if (!StrStartsWith(uri, kUrlPrefix)) return {};
     auto path = GetPath(uri + StrLen(kUrlPrefix) - 1);
     assert(!path.empty() && path.front() == '/');
 
@@ -108,7 +85,7 @@ valiant::HttpServer::Content UriHandler(const char* uri) {
     lfs_dir_t dir;
     int res = lfs_dir_open(Lfs(), &dir, path.c_str());
     if (res < 0) {
-        if (valiant::filesystem::FileExists(path.c_str())) return path;
+        if (filesystem::FileExists(path.c_str())) return path;
         return {};
     }
 
@@ -126,7 +103,7 @@ valiant::HttpServer::Content UriHandler(const char* uri) {
     return html;
 }
 
-class FileHttpServer : public valiant::HttpServer {
+class FileHttpServer : public HttpServer {
    public:
     err_t PostBegin(void* connection, const char* uri, const char* http_request,
                     u16_t http_request_len, int content_len, char* response_uri,
@@ -137,7 +114,7 @@ class FileHttpServer : public valiant::HttpServer {
         (void)response_uri_len;
         (void)post_auto_wnd;
 
-        if (!StartsWith(uri, kUrlPrefix)) return ERR_ARG;
+        if (!StrStartsWith(uri, kUrlPrefix)) return ERR_ARG;
         auto path = GetPath(uri + StrLen(kUrlPrefix) - 1);
         assert(!path.empty() && path.front() == '/');
 
@@ -146,8 +123,8 @@ class FileHttpServer : public valiant::HttpServer {
 
         printf("POST %s (%d bytes) => %s\r\n", uri, content_len, path.c_str());
 
-        auto dirname = valiant::filesystem::Dirname(path.c_str());
-        if (!valiant::filesystem::MakeDirs(dirname.c_str())) return ERR_ARG;
+        auto dirname = filesystem::Dirname(path.c_str());
+        if (!filesystem::MakeDirs(dirname.c_str())) return ERR_ARG;
 
         auto file = std::make_unique<lfs_file_t>();
         if (lfs_file_open(Lfs(), file.get(), path.c_str(),
@@ -190,12 +167,14 @@ class FileHttpServer : public valiant::HttpServer {
 };
 
 }  // namespace
+}  // namespace valiant
 
 extern "C" void app_main(void* param) {
+    using valiant::kUrlPrefix;
     (void)param;
     printf("WebFileBrowser\r\n");
-    FileHttpServer http_server;
-    http_server.AddUriHandler(UriHandler);
+    valiant::FileHttpServer http_server;
+    http_server.AddUriHandler(valiant::UriHandler);
     valiant::UseHttpServer(&http_server);
 
     std::string ip;

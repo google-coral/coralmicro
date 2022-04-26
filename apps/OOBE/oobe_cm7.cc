@@ -1,7 +1,7 @@
-#include "apps/OOBE/oobe_json.h"
 #include "libs/base/httpd.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/mutex.h"
+#include "libs/base/strings.h"
 #include "libs/base/utils.h"
 #include "libs/posenet/posenet.h"
 #include "libs/tasks/CameraTask/camera_task.h"
@@ -25,7 +25,11 @@
 #include <cstdio>
 #include <cstring>
 #include <list>
+#include <vector>
 
+namespace valiant {
+namespace oobe {
+namespace {
 constexpr float kThreshold = 0.4;
 
 constexpr int kPosenetWidth = 481;
@@ -36,15 +40,41 @@ constexpr int kCmdStart = 1;
 constexpr int kCmdStop = 2;
 constexpr int kCmdProcess = 3;
 
-static SemaphoreHandle_t camera_output_mtx;
+SemaphoreHandle_t camera_output_mtx;
 std::vector<uint8_t> camera_output;
 
-static SemaphoreHandle_t posenet_output_mtx;
+SemaphoreHandle_t posenet_output_mtx;
 std::unique_ptr<valiant::posenet::Output> posenet_output;
 TickType_t posenet_output_time;
 
+std::vector<uint8_t> CreatePoseJson(const posenet::Output& output,
+                                    float threshold) {
+    std::vector<uint8_t> s;
+    s.reserve(2048);
 
-static valiant::HttpServer::Content UriHandler(const char *name) {
+    int num_appended_poses = 0;
+    StrAppend(&s, "[");
+    for (int i = 0; i < output.num_poses; ++i) {
+        if (output.poses[i].score < threshold) continue;
+
+        StrAppend(&s, num_appended_poses != 0 ? ",\n" : "");
+        StrAppend(&s, "{\n");
+        StrAppend(&s, "  \"score\": %g,\n", output.poses[i].score);
+        StrAppend(&s, "  \"keypoints\": [\n");
+        for (int j = 0; j < posenet::kKeypoints; ++j) {
+            const auto& kp = output.poses[i].keypoints[j];
+            StrAppend(&s, "    [%g, %g, %g]", kp.score, kp.x, kp.y);
+            StrAppend(&s, j != posenet::kKeypoints - 1 ? ",\n" : "\n");
+        }
+        StrAppend(&s, "  ]\n");
+        StrAppend(&s, "}");
+        ++num_appended_poses;
+    }
+    StrAppend(&s, "]");
+    return s;
+}
+
+HttpServer::Content UriHandler(const char *name) {
   if (std::strcmp(name, "/camera") == 0) {
     valiant::MutexLock lock(camera_output_mtx);
     if (camera_output.empty()) return {};
@@ -54,7 +84,7 @@ static valiant::HttpServer::Content UriHandler(const char *name) {
   if (std::strcmp(name, "/pose") == 0) {
     valiant::MutexLock lock(posenet_output_mtx);
     if (!posenet_output) return {};
-    auto json = valiant::oobe::CreatePoseJSON(*posenet_output, kThreshold);
+    auto json = CreatePoseJson(*posenet_output, kThreshold);
     posenet_output.reset();
     return json;
   }
@@ -62,10 +92,7 @@ static valiant::HttpServer::Content UriHandler(const char *name) {
   return {};
 }
 
-namespace valiant {
-namespace oobe {
-
-static void HandleAppMessage(
+void HandleAppMessage(
     const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
   (void)data;
   vTaskResume(reinterpret_cast<TaskHandle_t>(param));
@@ -331,7 +358,7 @@ void Main() {
     vTaskSuspend(nullptr);
   }
 }
-
+}  // namespace
 }  // namespace oobe
 }  // namespace valiant
 

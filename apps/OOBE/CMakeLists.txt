@@ -1,6 +1,5 @@
 set(OOBE_SOURCES
     oobe_cm7.cc
-    oobe_json.cc
 )
 
 set(OOBE_LINK_LIBRARIES
