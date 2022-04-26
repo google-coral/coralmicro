@@ -63,6 +63,13 @@ target_link_libraries(libs_base-m7_wifi
     libs_nxp_rt1176-sdk_wiced
 )
 
+add_library_m7(libs_base-m7_ethernet STATIC
+    ethernet.cc
+)
+target_link_libraries(libs_base-m7_ethernet
+    libs_base-m7_freertos
+)
+
 add_library_m4(libs_base-m4_freertos STATIC
     console_m4.cc
     filesystem.cc

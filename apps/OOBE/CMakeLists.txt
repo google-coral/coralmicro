@@ -66,7 +66,7 @@ target_compile_definitions(OOBEDemo PUBLIC
 )
 
 target_link_libraries(OOBEDemo
-        ${OOBE_LINK_LIBRARIES}
+    ${OOBE_LINK_LIBRARIES}
 )
 
 add_executable_m7(OOBEDemoWifi
@@ -81,12 +81,11 @@ target_compile_definitions(OOBEDemoWifi PUBLIC
 )
 
 target_link_libraries(OOBEDemoWifi
-        ${OOBE_LINK_LIBRARIES}
-        libs_base-m7_wifi
+    ${OOBE_LINK_LIBRARIES}
+    libs_base-m7_wifi
 )
 
 add_executable_m7(OOBEDemoEthernet
-    ${VALIANT_SOURCE_DIR}/libs/base/ethernet.cc
     ${OOBE_SOURCES}
     M4_EXECUTABLE
     OOBEDemoM4
@@ -98,5 +97,6 @@ target_compile_definitions(OOBEDemoEthernet PUBLIC
 )
 
 target_link_libraries(OOBEDemoEthernet
-        ${OOBE_LINK_LIBRARIES}
+    ${OOBE_LINK_LIBRARIES}
+    libs_base-m7_ethernet
 )
