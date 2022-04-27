@@ -322,6 +322,12 @@ class CameraTask : public OOBETask {
   bool started_ = false;
 };
 
+#if defined(OOBE_SIMPLE)
+void Main() {
+  coral::micro::IPCM7::GetSingleton()->StartM4();
+  vTaskSuspend(nullptr);
+}
+#else
 void Main() {
   PosenetTask posenet_task;
   CameraTask camera_task(&posenet_task);
@@ -404,6 +410,8 @@ void Main() {
     vTaskSuspend(nullptr);
   }
 }
+#endif  // defined(OOBE_SIMPLE)
+
 }  // namespace
 }  // namespace oobe
 }  // namespace coral::micro

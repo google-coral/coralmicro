@@ -97,3 +97,29 @@ target_link_libraries(OOBEDemoEthernet
     ${OOBE_LINK_LIBRARIES}
     libs_base-m7_ethernet
 )
+
+add_executable_m7(OOBESimple
+    ${OOBE_SOURCES}
+    M4_EXECUTABLE
+    OOBESimpleM4
+)
+
+target_compile_definitions(OOBESimple PUBLIC
+    OOBE_SIMPLE
+)
+
+target_link_libraries(OOBESimple
+    libs_base-m7_freertos
+)
+
+add_executable_m4(OOBESimpleM4
+    ${OOBE_M4_SOURCES}
+)
+
+target_link_libraries(OOBESimpleM4
+    ${OOBE_M4_LINK_LIBRARIES}
+)
+
+target_compile_definitions(OOBESimpleM4 PUBLIC
+    OOBE_SIMPLE
+)

@@ -60,9 +60,11 @@ extern "C" void app_main(void *param) {
 
         while (true) {
             loop();
+#if !defined(OOBE_SIMPLE)
             if (g_person_detected) {
                 break;
             }
+#endif
         }
         printf("Person detected, let M7 take over.\r\n");
         coral::micro::CameraTask::GetSingleton()->Disable();
