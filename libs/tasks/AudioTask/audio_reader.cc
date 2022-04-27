@@ -2,13 +2,7 @@
 
 #include <memory>
 
-#define CHECK(a)                                                          \
-    do {                                                                  \
-        if (!(a)) {                                                       \
-            printf("%s:%d %s was not true.\r\n", __FILE__, __LINE__, #a); \
-            vTaskSuspend(nullptr);                                        \
-        }                                                                 \
-    } while (0)
+#include "libs/base/check.h"
 
 namespace valiant {
 namespace {
