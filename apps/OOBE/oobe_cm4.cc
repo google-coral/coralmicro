@@ -1,4 +1,5 @@
 #include "libs/base/ipc_m4.h"
+#include "libs/base/led.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -9,6 +10,7 @@
 #include <cstdio>
 
 static bool g_person_detected = false;
+static bool g_power_led_state = true;
 
 void RespondToDetection(tflite::ErrorReporter* error_reporter,
                         int8_t person_score, int8_t no_person_score){
@@ -37,6 +39,12 @@ extern "C" void app_main(void *param) {
     coral::micro::CameraTask::GetSingleton()->SetPower(true);
     setup();
     GPIO_PinWrite(GPIO13, 6, 1);
+    coral::micro::led::Set(coral::micro::led::LED::kPower, g_power_led_state);
+    auto power_led_timer = xTimerCreate("power_led_timer", pdMS_TO_TICKS(1000), pdTRUE, nullptr, [](TimerHandle_t xTimer) {
+        g_power_led_state = !g_power_led_state;
+        coral::micro::led::Set(coral::micro::led::LED::kPower, g_power_led_state);
+    });
+    xTimerStart(power_led_timer, 0);
 
 #if defined(OOBE_DEMO)
     TimerHandle_t m4_timer = xTimerCreate("m4_timer", pdMS_TO_TICKS(10000), pdFALSE, (void*) 0,

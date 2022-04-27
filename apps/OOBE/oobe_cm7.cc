@@ -19,7 +19,6 @@
 #endif  // defined(OOBE_DEMO_ETHERNET)
 
 #if defined(OOBE_DEMO_WIFI)
-#include "libs/base/gpio.h"
 #include "libs/base/wifi.h"
 #endif  // defined(OOBE_DEMO_WIFI)
 
@@ -201,11 +200,13 @@ class PosenetTask : public OOBETask {
           configASSERT(!started_);
           started_ = true;
           printf("Posenet: started\r\n");
+          coral::micro::led::Set(coral::micro::led::LED::kTpu, true);
           break;
         case kCmdStop:
           configASSERT(started_);
           started_ = false;
           printf("Posenet: stopped\r\n");
+          coral::micro::led::Set(coral::micro::led::LED::kTpu, false);
           break;
         case kCmdProcess: {
           configASSERT(started_);
