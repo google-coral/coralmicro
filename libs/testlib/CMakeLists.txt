@@ -1,5 +1,5 @@
 add_library_m7(libs_testlib STATIC
-	test_lib.cc
+    test_lib.cc
 )
 
 target_link_libraries(libs_testlib PUBLIC

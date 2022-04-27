@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-project(ImageServer)
-
-include_directories(.)
-
 set(IMAGE_SERVER_SRC image_server.cc)
 
 set(IMAGE_SERVER_LINK_LIBRARIES
