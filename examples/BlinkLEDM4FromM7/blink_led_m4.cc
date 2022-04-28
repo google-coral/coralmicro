@@ -1,4 +1,4 @@
-#include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include <cstdio>
@@ -8,9 +8,8 @@ extern "C" [[noreturn]] void app_main(void *param) {
     bool on = true;
     while (true) {
         on = !on;
-        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, on);
-        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, on);
-        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kTpuLED, on);
+        coral::micro::led::Set(coral::micro::led::LED::kPower, on);
+        coral::micro::led::Set(coral::micro::led::LED::kUser, on);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

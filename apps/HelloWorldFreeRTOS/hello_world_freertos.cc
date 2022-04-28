@@ -1,4 +1,6 @@
 #include "libs/base/gpio.h"
+#include "libs/base/led.h"
+#include "libs/base/pwm.h"
 #include "libs/base/console_m7.h"
 #include "libs/base/tasks.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -27,12 +29,28 @@ extern "C" void app_main(void *param) {
     coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
 
     xTaskCreate(read_task, "read_task", configMINIMAL_STACK_SIZE, nullptr, APP_TASK_PRIORITY, nullptr);
-    bool on = true;
+
+    bool up = true;
+    unsigned int brightness = 50;
     while (true) {
-        on = !on;
-        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, on);
-        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, on);
-        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kTpuLED, on);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        coral::micro::led::Set(coral::micro::led::LED::kPower, brightness > 50);
+        coral::micro::led::Set(coral::micro::led::LED::kUser, brightness > 50);
+        coral::micro::led::Set(coral::micro::led::LED::kTpu, true, brightness);
+
+        if (up) {
+            ++brightness;
+        } else {
+            --brightness;
+        }
+        if (brightness == 100) {
+            up = false;
+        }
+        if (brightness == 0) {
+            up = true;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
+
+    vTaskSuspend(NULL);
 }

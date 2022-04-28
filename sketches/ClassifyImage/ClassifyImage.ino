@@ -73,8 +73,6 @@ void setup() {
         return;
     }
     Serial.println("Initialized");
-
-    pinMode(tpuPin, OUTPUT);
 }
 
 void loop() {
@@ -85,7 +83,7 @@ void loop() {
         return;
     }
 
-    digitalWrite(tpuPin, HIGH);
+    analogWrite(tpuPin, 255);
     auto* input_tensor = interpreter->input_tensor(0);
     if (input_tensor->type != kTfLiteUInt8) {
         Serial.println("Bad input type");
@@ -114,5 +112,5 @@ void loop() {
         Serial.print(" Score: ");
         Serial.println(result.score);
     }
-    digitalWrite(tpuPin, LOW);
+    analogWrite(tpuPin, 0);
 }

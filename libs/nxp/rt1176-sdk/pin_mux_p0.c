@@ -84,9 +84,11 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05,
       0x2U);
   IOMUXC_SetPinMux(
-      IOMUXC_GPIO_AD_02_GPIO9_IO01, 0U);
+      IOMUXC_GPIO_AD_02_FLEXPWM1_PWM1_A, 0U
+  );
   IOMUXC_SetPinConfig(
-      IOMUXC_GPIO_AD_02_GPIO9_IO01, 0U);
+      IOMUXC_GPIO_AD_02_FLEXPWM1_PWM1_A, 0U
+  );
 
   // User button (pulled-up, input)
   IOMUXC_SetPinMux(

@@ -1,5 +1,6 @@
 #include "libs/base/http_server.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/base/led.h"
 #include "libs/base/mutex.h"
 #include "libs/base/strings.h"
 #include "libs/base/utils.h"
@@ -342,9 +343,8 @@ void Main() {
   coral::micro::TurnOnWiFi();
   if (!coral::micro::ConnectToWiFi()) {
     // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
-    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, true);
-    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, true);
-    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kTpuLED, true);
+    coral::micro::led::Set(coral::micro::led::LED::kPower, true);
+    coral::micro::led::Set(coral::micro::led::LED::kUser, true);
     vTaskSuspend(nullptr);
   }
 #endif  // defined(OOBE_DEMO_ETHERNET)

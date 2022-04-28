@@ -2,7 +2,6 @@
 
 #include "Arduino.h"
 #include "libs/base/gpio.h"
-#include "libs/tpu/edgetpu_manager.h"
 #include "pins_arduino.h"
 
 static coral::micro::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
@@ -13,8 +12,6 @@ static coral::micro::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
             return coral::micro::gpio::Gpio::kUserButton;
         case PIN_LED_POWER:
             return coral::micro::gpio::Gpio::kPowerLED;
-        case PIN_LED_TPU:
-            return coral::micro::gpio::Gpio::kTpuLED;
         case D0:
             return coral::micro::gpio::Gpio::kArduinoD0;
         case D1:
@@ -47,8 +44,6 @@ static coral::micro::gpio::InterruptMode PinStatusToInterruptMode(PinStatus mode
     }
 }
 
-std::shared_ptr<coral::micro::EdgeTpuContext> edgetpuContext = nullptr;
-
 void pinMode(pin_size_t pinNumber, PinMode pinMode) {
     coral::micro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
     switch (pinMode) {
@@ -64,15 +59,6 @@ void pinMode(pin_size_t pinNumber, PinMode pinMode) {
         case INPUT_PULLDOWN:
             coral::micro::gpio::SetMode(gpio, true, true, false);
             break;
-    }
-
-    if (gpio == coral::micro::gpio::kTpuLED) {
-        if (pinMode == OUTPUT) {
-            edgetpuContext = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
-        }
-        else {
-            edgetpuContext.reset();
-        }
     }
 }
 

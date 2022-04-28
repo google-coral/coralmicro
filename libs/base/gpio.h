@@ -15,7 +15,6 @@ enum Gpio {
 #endif
     kPowerLED,
     kUserLED,
-    kTpuLED,
     kEdgeTpuPgood,
     kEdgeTpuReset,
     kEdgeTpuPmic,

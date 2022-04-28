@@ -2,6 +2,7 @@
 #include "wiring_private.h"
 
 #include "libs/base/analog.h"
+#include "libs/base/led.h"
 #include "libs/base/pwm.h"
 
 #include <algorithm>
@@ -81,6 +82,13 @@ void analogWrite(pin_size_t pinNumber, int value) {
         pin_config = &pwm_config.B;
     } else if (pinNumber == DAC0) {
         analogWriteDAC(pinNumber, value);
+        return;
+    } else if (pinNumber == PIN_LED_TPU) {
+        coral::micro::led::Set(coral::micro::led::LED::kTpu, true,
+                               map(value,
+                                   0, 255,
+                                   coral::micro::led::kFullyOff, coral::micro::led::kFullyOn)
+                              );
         return;
     } else {
         assert(false);

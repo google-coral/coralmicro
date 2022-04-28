@@ -1,9 +1,8 @@
 #include "libs/base/filesystem.h"
-#include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/detection_responder.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/main_functions.h"
 
@@ -18,8 +17,8 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
             person_score, no_person_score);
 
     bool person_detected = person_score > no_person_score;
-    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, person_detected);
-    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, person_detected);
+    coral::micro::led::Set(coral::micro::led::LED::kUser, person_detected);
+    coral::micro::led::Set(coral::micro::led::LED::kPower, person_detected);
 }
 
 extern "C" void app_main(void *param) {

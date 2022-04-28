@@ -1,6 +1,7 @@
 #include "apps/MFGTest/mfg_test_iperf.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/base/mutex.h"
 #include "libs/base/utils.h"
@@ -188,11 +189,11 @@ extern "C" void app_main(void *param) {
 
     if (coral::micro::TurnOnWiFi()) {
         if (coral::micro::ConnectToWiFi()) {
-            coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, true);
+            coral::micro::led::Set(coral::micro::led::LED::kUser, true);
         }
     } else {
         printf("Wi-Fi failed to come up (is the Wi-Fi board attached?\r\n");
-        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, true);
+        coral::micro::led::Set(coral::micro::led::LED::kPower, true);
         vTaskSuspend(NULL);
     }
     coral::micro::gpio::SetGpio(coral::micro::gpio::kBtDevWake, false);

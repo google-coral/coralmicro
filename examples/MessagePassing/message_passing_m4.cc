@@ -1,6 +1,6 @@
 #include "examples/MessagePassing/example_message.h"
 #include "libs/base/ipc_m4.h"
-#include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 
@@ -11,11 +11,11 @@ extern "C" void app_main(void* param) {
         if (msg->type == mp_example::ExampleMessageType::LED_STATUS) {
             switch (msg->led_status) {
                 case mp_example::LEDStatus::ON: {
-                    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, true);
+                    coral::micro::led::Set(coral::micro::led::LED::kUser, true);
                     break;
                 }
                 case mp_example::LEDStatus::OFF: {
-                    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, false);
+                    coral::micro::led::Set(coral::micro::led::LED::kUser, false);
                     break;
                 }
                 default: {

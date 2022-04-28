@@ -1,5 +1,6 @@
 #include "third_party/freertos_kernel/include/projdefs.h"
 #include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "libs/base/tasks.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/testconv1/testconv1.h"
@@ -11,12 +12,11 @@ extern "C" void app_main(void *param) {
         vTaskSuspend(NULL);
     }
 
-    coral::micro::gpio::SetGpio(coral::micro::gpio::kTpuLED, true);
-
     size_t counter = 0;
     while (true) {
         coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
         coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
+        coral::micro::led::Set(coral::micro::led::LED::kTpu, true);
 
         bool run = true;
         for (int i = 0; i < 1000; ++i) {

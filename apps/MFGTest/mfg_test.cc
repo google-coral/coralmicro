@@ -4,6 +4,7 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/main_freertos_m7.h"
+#include "libs/base/led.h"
 #include "libs/base/utils.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -325,17 +326,17 @@ static void SetLedState(struct jsonrpc_request *request) {
     };
     switch (led) {
         case kPower:
-            coral::micro::gpio::SetGpio(coral::micro::gpio::kPowerLED, enable);
+            coral::micro::led::Set(coral::micro::led::LED::kPower, enable);
             break;
         case kUser:
-            coral::micro::gpio::SetGpio(coral::micro::gpio::kUserLED, enable);
+            coral::micro::led::Set(coral::micro::led::LED::kUser, enable);
             break;
         case kTpu:
             if (!coral::micro::EdgeTpuTask::GetSingleton()->GetPower()) {
                 jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
                 return;
             }
-            coral::micro::gpio::SetGpio(coral::micro::gpio::kTpuLED, enable);
+            coral::micro::led::Set(coral::micro::led::LED::kTpu, enable);
             break;
         default:
             jsonrpc_return_error(request, -1, "invalid led", nullptr);
