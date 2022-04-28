@@ -178,7 +178,6 @@ void BayerInternal(const uint8_t* camera_raw, int width, int height,
             green = !green;
         }
     } else if (filter == FilterMethod::BILINEAR) {
-        int rgb_stride = width * 3;
         int bayer_stride = width;
 
         size_t bayer_offset = 0;
