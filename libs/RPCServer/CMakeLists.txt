@@ -5,4 +5,5 @@ add_library_m7(libs_RPCServerIOHTTP STATIC
 target_link_libraries(libs_RPCServerIOHTTP
     libs_mjson
     libs_base-m7_freertos
+    libs_base-m7_http_server
 )

@@ -1,5 +1,4 @@
 #include "apps/RackTest/rack_test_ipc.h"
-#include "libs/base/httpd.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/utils.h"
 #include "libs/CoreMark/core_portme.h"

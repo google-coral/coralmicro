@@ -369,7 +369,6 @@ target_link_libraries(libs_nxp_rt1176-sdk_lwip
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_lwip_httpd
-    ${VALIANT_SOURCE_DIR}/libs/base/httpd.cc
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/fs.c
     ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/http/httpd.c
 )

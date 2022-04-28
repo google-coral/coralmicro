@@ -5,7 +5,6 @@
 #include <cstring>
 #include <utility>
 
-#include "libs/base/httpd.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/fs.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 

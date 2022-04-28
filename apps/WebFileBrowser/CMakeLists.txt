@@ -4,4 +4,5 @@ add_executable_m7(WebFileBrowser
 
 target_link_libraries(WebFileBrowser
     libs_base-m7_freertos
+    libs_base-m7_http_server
 )
