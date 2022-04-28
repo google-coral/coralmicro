@@ -22,9 +22,11 @@
 #include "libs/base/wifi.h"
 #endif  // defined(OOBE_DEMO_WIFI)
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <list>
+#include <numeric>
 #include <vector>
 
 namespace valiant {
@@ -70,7 +72,54 @@ std::vector<uint8_t> CreatePoseJson(const posenet::Output& output,
     return s;
 }
 
+void GenerateStatsHtml(std::vector<uint8_t>* html) {
+    std::vector<TaskStatus_t> infos(uxTaskGetNumberOfTasks());
+    unsigned long total_runtime;
+    auto n = uxTaskGetSystemState(infos.data(), infos.size(), &total_runtime);
+    std::vector<int> indices(infos.size());
+    std::iota(std::begin(indices), std::end(indices), 0);
+    std::sort(std::begin(indices), std::end(indices), [&infos](int i, int j) {
+        return infos[i].ulRunTimeCounter > infos[j].ulRunTimeCounter;
+    });
+
+    StrAppend(html, "<!DOCTYPE html>\r\n");
+    StrAppend(html, "<html lang=\"en\">\r\n");
+    StrAppend(html, "<head>\r\n"),
+    StrAppend(html, "<title>Run-time statistics</title>\r\n"),
+    StrAppend(html, "  <style>\r\n"),
+    StrAppend(html, "    th,td {padding: 2px;}\r\n"),
+    StrAppend(html, "  </style>\r\n"),
+    StrAppend(html, "</head>\r\n"),
+    StrAppend(html, "<body>\r\n");
+    StrAppend(html, "  <table>\r\n");
+    StrAppend(html, "    <tr><th>Task</th><th>Abs Time</th><th>% Time</th></tr>\r\n");
+    for (auto i = 0u; i < n; ++i) {
+        const auto& info = infos[indices[i]];
+        auto name = info.pcTaskName;
+        auto runtime = info.ulRunTimeCounter;
+        auto percent = runtime / (total_runtime / 100);
+        if (percent > 0) {
+            StrAppend(html,
+                      "    <tr><td>%s</td><td>%d</td><td>%d%%</td></tr>\r\n",
+                      name, runtime, percent);
+        } else {
+            StrAppend(html,
+                      "    <tr><td>%s</td><td>%d</td><td>&lt;1%%</td></tr>\r\n",
+                      name, runtime);
+        }
+    }
+    StrAppend(html, "  </table>\r\n");
+    StrAppend(html, "</body>\r\n");
+}
+
 HttpServer::Content UriHandler(const char *name) {
+  if (std::strcmp(name, "/stats.html") == 0) {
+    std::vector<uint8_t> html;
+    html.reserve(2048);
+    GenerateStatsHtml(&html);
+    return html;
+  }
+
   if (std::strcmp(name, "/camera") == 0) {
     valiant::MutexLock lock(camera_output_mtx);
     if (camera_output.empty()) return {};
