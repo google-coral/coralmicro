@@ -204,6 +204,7 @@ class LatestSamples {
     size_t NumSamples() const { return samples_.size(); };
 
     void Append(const int32_t* samples, size_t num_samples) {
+        MutexLock lock(mutex_);
         for (size_t i = 0; i < num_samples; ++i)
             samples_[(pos_ + i) % samples_.size()] = samples[i];
         pos_ = (pos_ + num_samples) % samples_.size();
@@ -224,8 +225,8 @@ class LatestSamples {
 
    private:
     SemaphoreHandle_t mutex_;
-    size_t pos_ = 0;
-    std::vector<int32_t> samples_;
+    size_t pos_ = 0;  // protected by mutex_;
+    std::vector<int32_t> samples_;  // protected by mutex_;
 };
 
 }  // namespace valiant
