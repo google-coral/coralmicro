@@ -1,5 +1,5 @@
-#ifndef _LIBS_RPC_SERVER_RPC_SERVER_IO_HTTP_H_
-#define _LIBS_RPC_SERVER_RPC_SERVER_IO_HTTP_H_
+#ifndef _LIBS_RPC_RPC_HTTP_SERVER_H_
+#define _LIBS_RPC_RPC_HTTP_SERVER_H_
 
 #include <map>
 #include <vector>
@@ -34,4 +34,4 @@ class JsonRpcHttpServer : public valiant::HttpServer {
 
 }  // namespace valiant
 
-#endif  // _LIBS_RPC_SERVER_RPC_SERVER_IO_HTTP_H_
+#endif  // _LIBS_RPC_RPC_HTTP_SERVER_H_

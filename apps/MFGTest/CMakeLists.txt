@@ -5,7 +5,7 @@ add_executable_m7(MFGTest
 
 target_link_libraries(MFGTest
     libs_base-m7_freertos
-    libs_RPCServerIOHTTP
+    libs_rpc_http_server
     libs_mjson
     libs_testconv1
     libs_testlib
@@ -20,7 +20,7 @@ add_executable_m7(MFGTestWiFi
 
 target_link_libraries(MFGTestWiFi
     libs_base-m7_freertos
-    libs_RPCServerIOHTTP
+    libs_rpc_http_server
     libs_mjson
     libs_testlib
     # put me before wiced include
@@ -36,7 +36,7 @@ add_executable_m7(MFGTestPOE
 target_link_libraries(MFGTestPOE
     libs_base-m7_freertos
     libs_base-m7_ethernet
-    libs_RPCServerIOHTTP
+    libs_rpc_http_server
     libs_mjson
     libs_testlib
 )

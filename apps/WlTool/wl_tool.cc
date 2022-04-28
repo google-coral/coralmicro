@@ -1,8 +1,8 @@
 #include <cstdio>
 #include <cstring>
 
+#include "libs/rpc/rpc_http_server.h"
 #include "libs/testlib/test_lib.h"
-#include "libs/RPCServer/rpc_server_io_http.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"

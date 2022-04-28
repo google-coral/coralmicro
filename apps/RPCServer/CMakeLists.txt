@@ -4,6 +4,6 @@ add_executable_m7(RPCServer
 
 target_link_libraries(RPCServer
     libs_base-m7_freertos
-    libs_RPCServerIOHTTP
+    libs_rpc_http_server
     libs_mjson
 )

@@ -2,7 +2,7 @@ set(IMAGE_SERVER_SRC image_server.cc)
 
 set(IMAGE_SERVER_LINK_LIBRARIES
     libs_base-m7_freertos
-    libs_RPCServerIOHTTP
+    libs_rpc_http_server
     libs_mjson
     libs_testlib
 )

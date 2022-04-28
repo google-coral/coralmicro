@@ -1,5 +1,5 @@
 #include "libs/base/utils.h"
-#include "libs/RPCServer/rpc_server_io_http.h"
+#include "libs/rpc/rpc_http_server.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"

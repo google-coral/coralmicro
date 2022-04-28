@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_HTTPD_H_
-#define _LIBS_BASE_HTTPD_H_
+#ifndef _LIBS_BASE_HTTP_SERVER_H_
+#define _LIBS_BASE_HTTP_SERVER_H_
 
 #include <cstring>
 #include <functional>
@@ -91,4 +91,4 @@ void UseHttpServer(HttpServer* server);
 
 }  // namespace valiant
 
-#endif  // _LIBS_BASE_HTTPD_H_
+#endif  // _LIBS_BASE_HTTP_SERVER_H_
