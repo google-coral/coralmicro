@@ -1,11 +1,11 @@
 add_executable_m7(ELFLoader
-    LINKER_SCRIPT ${VALIANT_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_elfloader.ld
+    LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_elfloader.ld
     elf_loader.cc
     usb_data.cc
-    ${VALIANT_SOURCE_DIR}/libs/base/filesystem.cc
-    ${VALIANT_SOURCE_DIR}/libs/base/reset.cc
-    ${VALIANT_SOURCE_DIR}/libs/base/utils.cc
-    ${VALIANT_SOURCE_DIR}/libs/tasks/UsbDeviceTask/usb_device_task.cc
+    ${PROJECT_SOURCE_DIR}/libs/base/filesystem.cc
+    ${PROJECT_SOURCE_DIR}/libs/base/reset.cc
+    ${PROJECT_SOURCE_DIR}/libs/base/utils.cc
+    ${PROJECT_SOURCE_DIR}/libs/tasks/UsbDeviceTask/usb_device_task.cc
 )
 
 target_compile_definitions(ELFLoader PUBLIC

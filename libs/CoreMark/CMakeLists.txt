@@ -2,10 +2,10 @@ add_library_m7(libs_coremark-m7 STATIC
     core_main.c
     core_portme.c
     core_valiant.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_list_join.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_matrix.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_state.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_util.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_list_join.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_matrix.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_state.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_util.c
 )
 
 target_link_libraries(libs_coremark-m7
@@ -14,7 +14,7 @@ target_link_libraries(libs_coremark-m7
 
 target_include_directories(libs_coremark-m7 PRIVATE
     .
-    ${VALIANT_SOURCE_DIR}/third_party/coremark
+    ${PROJECT_SOURCE_DIR}/third_party/coremark
 )
 
 target_compile_definitions(libs_coremark-m7 PRIVATE
@@ -25,10 +25,10 @@ add_library_m4(libs_coremark-m4 STATIC
     core_main.c
     core_portme.c
     core_valiant.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_list_join.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_matrix.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_state.c
-    ${VALIANT_SOURCE_DIR}/third_party/coremark/core_util.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_list_join.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_matrix.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_state.c
+    ${PROJECT_SOURCE_DIR}/third_party/coremark/core_util.c
 )
 
 target_link_libraries(libs_coremark-m4
@@ -37,7 +37,7 @@ target_link_libraries(libs_coremark-m4
 
 target_include_directories(libs_coremark-m4 PRIVATE
     .
-    ${VALIANT_SOURCE_DIR}/third_party/coremark
+    ${PROJECT_SOURCE_DIR}/third_party/coremark
 )
 
 target_compile_definitions(libs_coremark-m4 PRIVATE

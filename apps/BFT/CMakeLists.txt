@@ -3,9 +3,9 @@ add_executable_m7(BFT
     M4_EXECUTABLE
     BFTM4
     DATA
-    ${VALIANT_SOURCE_DIR}/models/testconv1-edgetpu.tflite
-    ${VALIANT_SOURCE_DIR}/models/testconv1-expected-output.bin
-    ${VALIANT_SOURCE_DIR}/models/testconv1-test-input.bin
+    ${PROJECT_SOURCE_DIR}/models/testconv1-edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/testconv1-expected-output.bin
+    ${PROJECT_SOURCE_DIR}/models/testconv1-test-input.bin
 )
 
 target_link_libraries(BFT

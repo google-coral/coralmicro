@@ -25,7 +25,7 @@ target_link_libraries(MFGTestWiFi
     libs_mjson
     libs_testlib
     # put me before wiced include
-    ${VALIANT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/libwicedble.a
+    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/libwicedble.a
     libs_base-m7_wifi
 )
 

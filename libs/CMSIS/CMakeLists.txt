@@ -1,30 +1,30 @@
 set(libs_CMSIS_SOURCES
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/BasicMathFunctions/arm_elementwise_add_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/BasicMathFunctions/arm_elementwise_mul_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_1_x_n_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_1x1_s8_fast.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_wrapper_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_3x3_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_s8_opt.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_wrapper_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_nn_mat_mult_kernel_s8_s16.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/FullyConnectedFunctions/arm_fully_connected_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/NNSupportFunctions/arm_q7_to_q15_with_offset.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/PoolingFunctions/arm_avgpool_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/PoolingFunctions/arm_max_pool_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/SVDFunctions/arm_svdf_s8.c
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/SoftmaxFunctions/arm_softmax_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/BasicMathFunctions/arm_elementwise_add_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/BasicMathFunctions/arm_elementwise_mul_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_1_x_n_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_1x1_s8_fast.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_convolve_wrapper_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_3x3_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_s8_opt.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_depthwise_conv_wrapper_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/ConvolutionFunctions/arm_nn_mat_mult_kernel_s8_s16.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/FullyConnectedFunctions/arm_fully_connected_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/NNSupportFunctions/arm_nn_mat_mult_nt_t_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/NNSupportFunctions/arm_q7_to_q15_with_offset.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/PoolingFunctions/arm_avgpool_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/PoolingFunctions/arm_max_pool_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/SVDFunctions/arm_svdf_s8.c
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Source/SoftmaxFunctions/arm_softmax_s8.c
 )
 
 set(libs_CMSIS_INCLUDE_DIRECTORIES
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/Core/Include
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/DSP/Include
-    ${VALIANT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Include
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/Core/Include
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/DSP/Include
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/NN/Include
 )
 
 add_library_m7(libs_CMSIS-m7 STATIC

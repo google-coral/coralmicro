@@ -57,9 +57,9 @@ def main():
         files = exclude(files, kernel_file)
 
     print('    debug_log.c')
-    print('    ${VALIANT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/test_helpers.cc  # IntArrayFromInts()')
+    print('    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/test_helpers.cc  # IntArrayFromInts()')
     for f in sorted(files):
-        print('    ' + os.path.join('${VALIANT_SOURCE_DIR}', 'third_party', 'tflite-micro', f))
+        print('    ' + os.path.join('${PROJECT_SOURCE_DIR}', 'third_party', 'tflite-micro', f))
 
 if __name__ == '__main__':
     main()

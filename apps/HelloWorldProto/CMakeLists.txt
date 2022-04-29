@@ -1,4 +1,4 @@
-list(APPEND CMAKE_MODULE_PATH ${VALIANT_SOURCE_DIR}/third_party/nanopb/extra)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third_party/nanopb/extra)
 find_package(Nanopb REQUIRED)
 include_directories(${NANOPB_INCLUDE_DIRS})
 

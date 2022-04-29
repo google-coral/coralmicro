@@ -23,7 +23,7 @@ set(OOBE_M4_SOURCES
     oobe_cm4.cc
     main_functions.cc
     DATA
-    ${VALIANT_SOURCE_DIR}/models/person_detect_model.tflite
+    ${PROJECT_SOURCE_DIR}/models/person_detect_model.tflite
 )
 
 set(OOBE_M4_LINK_LIBRARIES

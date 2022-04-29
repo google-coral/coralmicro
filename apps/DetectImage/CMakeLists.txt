@@ -2,7 +2,7 @@ add_executable_m7(DetectImage
     detect_image.cc
     DATA
     cat_300x300.rgb
-    ${VALIANT_SOURCE_DIR}/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
 )
 
 target_link_libraries(DetectImage

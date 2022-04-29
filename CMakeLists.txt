@@ -1,45 +1,46 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(VALIANT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
-include(${VALIANT_SOURCE_DIR}/cmake/bundle_static_library.cmake)
-
+# Toolchain must be set before project() call.
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE ${VALIANT_SOURCE_DIR}/cmake/toolchain-arm-none-eabi-gcc.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain-arm-none-eabi-gcc.cmake)
 endif()
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
+project(CoralMicroProject)
+
+include(cmake/bundle_static_library.cmake)
+
+if (NOT DEFINED CMAKE_BUILD_TYPE OR NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type" FORCE)
 endif()
 
 if (NOT DEFINED WIFI_SSID)
-    SET(WIFI_SSID "MyAccessPoint")
+    set(WIFI_SSID "MyAccessPoint")
 endif()
-ADD_DEFINITIONS(-DWIFI_SSID="${WIFI_SSID}")
+add_definitions(-DWIFI_SSID="${WIFI_SSID}")
 
-# Leave as-is for an open AP.
+# Leave as is for an open AP.
 # If a password is specified, we try to connect as WPA2.
 if (NOT DEFINED WIFI_PSK)
-    SET(WIFI_PSK "")
+    set(WIFI_PSK "")
 endif()
-ADD_DEFINITIONS(-DWIFI_PSK="${WIFI_PSK}")
+add_definitions(-DWIFI_PSK="${WIFI_PSK}")
 
 if (NOT DEFINED VALIANT_ARDUINO)
-    SET(VALIANT_ARDUINO 0)
+    set(VALIANT_ARDUINO 0)
 endif()
-ADD_DEFINITIONS(-DVALIANT_ARDUINO=${VALIANT_ARDUINO})
-
-project(valiant)
+add_definitions(-DVALIANT_ARDUINO=${VALIANT_ARDUINO})
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-include_directories(${VALIANT_SOURCE_DIR})
+include_directories(.)
 
-if (${CMAKE_SOURCE_DIR} STREQUAL ${VALIANT_SOURCE_DIR})
-    add_subdirectory(${VALIANT_SOURCE_DIR}/apps)
-    add_subdirectory(${VALIANT_SOURCE_DIR}/examples)
+if (${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
+    add_subdirectory(apps)
+    add_subdirectory(examples)
 else()
-    add_subdirectory(${VALIANT_SOURCE_DIR}/apps/ELFLoader)
+    add_subdirectory(apps/ELFLoader)
 endif()
 
-add_subdirectory(${VALIANT_SOURCE_DIR}/libs)
-add_subdirectory(${VALIANT_SOURCE_DIR}/third_party/nanopb)
+add_subdirectory(libs)
+add_subdirectory(third_party/nanopb)
