@@ -20,10 +20,10 @@
 #include <array>
 #include <map>
 
-using valiant::testlib::JsonRpcGetIntegerParam;
-using valiant::testlib::JsonRpcGetBooleanParam;
-using valiant::testlib::JsonRpcGetStringParam;
-using valiant::testlib::JsonRpcGetBase64Param;
+using coral::micro::testlib::JsonRpcGetIntegerParam;
+using coral::micro::testlib::JsonRpcGetBooleanParam;
+using coral::micro::testlib::JsonRpcGetStringParam;
+using coral::micro::testlib::JsonRpcGetBase64Param;
 
 // In the below maps, data about pins to be tested via the loopback fixture
 // is provided. Pins on J5 are numbered from 1-100, and pins on J6 are numbered from 101-200.
@@ -301,7 +301,7 @@ static void SetPmicRailState(struct jsonrpc_request *request) {
     bool enable;
     if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
-    valiant::PmicTask::GetSingleton()->SetRailState(static_cast<valiant::pmic::Rail>(rail), enable);
+    coral::micro::PmicTask::GetSingleton()->SetRailState(static_cast<coral::micro::pmic::Rail>(rail), enable);
     jsonrpc_return_success(request, "{}");
 }
 
@@ -325,17 +325,17 @@ static void SetLedState(struct jsonrpc_request *request) {
     };
     switch (led) {
         case kPower:
-            valiant::gpio::SetGpio(valiant::gpio::kPowerLED, enable);
+            coral::micro::gpio::SetGpio(coral::micro::gpio::kPowerLED, enable);
             break;
         case kUser:
-            valiant::gpio::SetGpio(valiant::gpio::kUserLED, enable);
+            coral::micro::gpio::SetGpio(coral::micro::gpio::kUserLED, enable);
             break;
         case kTpu:
-            if (!valiant::EdgeTpuTask::GetSingleton()->GetPower()) {
+            if (!coral::micro::EdgeTpuTask::GetSingleton()->GetPower()) {
                 jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
                 return;
             }
-            valiant::gpio::SetGpio(valiant::gpio::kTpuLED, enable);
+            coral::micro::gpio::SetGpio(coral::micro::gpio::kTpuLED, enable);
             break;
         default:
             jsonrpc_return_error(request, -1, "invalid led", nullptr);
@@ -439,8 +439,8 @@ static void SetGpio(struct jsonrpc_request *request) {
     if (pin != kDacPin) {
         GPIO_PinWrite(pin_gpio_values->second.first, pin_gpio_values->second.second, enable);
     } else {
-        valiant::analog::WriteDAC(enable ? 4095 : 1);
-        valiant::analog::EnableDAC(true);
+        coral::micro::analog::WriteDAC(enable ? 4095 : 1);
+        coral::micro::analog::EnableDAC(true);
     }
     jsonrpc_return_success(request, "{}", nullptr);
 }
@@ -483,8 +483,8 @@ static void SetDACValue(struct jsonrpc_request *request) {
         return;
     }
 
-    valiant::analog::WriteDAC(counts);
-    valiant::analog::EnableDAC(!!counts);
+    coral::micro::analog::WriteDAC(counts);
+    coral::micro::analog::EnableDAC(!!counts);
     jsonrpc_return_success(request, "{}");
 }
 
@@ -526,7 +526,7 @@ static void WriteFile(struct jsonrpc_request *request) {
     std::vector<uint8_t> data;
     if (!JsonRpcGetBase64Param(request, "data", &data)) return;
 
-    if (!valiant::filesystem::WriteFile(filename.c_str(), data.data(), data.size())) {
+    if (!coral::micro::filesystem::WriteFile(filename.c_str(), data.data(), data.size())) {
         jsonrpc_return_error(request, -1, "failed to write file", nullptr);
         return;
     }
@@ -542,7 +542,7 @@ static void ReadFile(struct jsonrpc_request *request) {
     if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
     std::vector<uint8_t> data;
-    if (!valiant::filesystem::ReadFile(filename.c_str(), &data)) {
+    if (!coral::micro::filesystem::ReadFile(filename.c_str(), &data)) {
         jsonrpc_return_error(request, -1, "failed to read file", nullptr);
     }
 
@@ -552,7 +552,7 @@ static void ReadFile(struct jsonrpc_request *request) {
 static void CheckA71CH(struct jsonrpc_request *request) {
     static bool a71ch_inited = false;
     if (!a71ch_inited) {
-        bool success = valiant::a71ch::Init();
+        bool success = coral::micro::a71ch::Init();
         if (!success) {
             jsonrpc_return_error(request, -1, "failed to init a71ch", nullptr);
             return;
@@ -611,7 +611,7 @@ static void FuseMACAddress(struct jsonrpc_request *request) {
 }
 
 static void ReadMACAddress(struct jsonrpc_request *request) {
-    valiant::MacAddress address = valiant::utils::GetMacAddress();
+    coral::micro::MacAddress address = coral::micro::utils::GetMacAddress();
     char address_str[255];
     memset(address_str, 0, sizeof(address_str));
     snprintf(address_str, sizeof(address_str), "%02X:%02X:%02X:%02X:%02X:%02X", address.a, address.b, address.c, address.d, address.e, address.f);
@@ -620,27 +620,27 @@ static void ReadMACAddress(struct jsonrpc_request *request) {
 
 extern "C" void app_main(void *param) {
     InitializeLoopbackMappings();
-    valiant::analog::Init(valiant::analog::Device::DAC1);
+    coral::micro::analog::Init(coral::micro::analog::Device::DAC1);
 
     jsonrpc_init(nullptr, nullptr);
-    jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
-                   valiant::testlib::GetSerialNumber);
-    jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
-                   valiant::testlib::GetSerialNumber);
+    jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
+                   coral::micro::testlib::GetSerialNumber);
+    jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
+                   coral::micro::testlib::GetSerialNumber);
     jsonrpc_export("set_pmic_rail_state", SetPmicRailState);
     jsonrpc_export("set_led_state", SetLedState);
     // TODO(atv): Special handling for the pair with DAC_OUT
     jsonrpc_export("set_pin_pair_to_gpio", SetPinPairToGpio);
     jsonrpc_export("set_gpio", SetGpio);
     jsonrpc_export("get_gpio", GetGpio);
-    jsonrpc_export(valiant::testlib::kMethodCaptureTestPattern,
-                   valiant::testlib::CaptureTestPattern);
-    jsonrpc_export(valiant::testlib::kMethodCaptureAudio,
-                   valiant::testlib::CaptureAudio);
-    jsonrpc_export(valiant::testlib::kMethodSetTPUPowerState,
-                   valiant::testlib::SetTPUPowerState);
-    jsonrpc_export(valiant::testlib::kMethodRunTestConv1,
-                   valiant::testlib::RunTestConv1);
+    jsonrpc_export(coral::micro::testlib::kMethodCaptureTestPattern,
+                   coral::micro::testlib::CaptureTestPattern);
+    jsonrpc_export(coral::micro::testlib::kMethodCaptureAudio,
+                   coral::micro::testlib::CaptureAudio);
+    jsonrpc_export(coral::micro::testlib::kMethodSetTPUPowerState,
+                   coral::micro::testlib::SetTPUPowerState);
+    jsonrpc_export(coral::micro::testlib::kMethodRunTestConv1,
+                   coral::micro::testlib::RunTestConv1);
     jsonrpc_export("get_tpu_chip_ids", GetTPUChipIds);
     jsonrpc_export("check_tpu_alarm", CheckTPUAlarm);
     jsonrpc_export("set_dac_value", SetDACValue);
@@ -651,7 +651,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("fuse_mac_address", FuseMACAddress);
     jsonrpc_export("read_mac_address", ReadMACAddress);
     IperfInit();
-    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
+    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
     vTaskSuspend(nullptr);
 }
 

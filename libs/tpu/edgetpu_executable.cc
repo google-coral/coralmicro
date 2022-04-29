@@ -2,7 +2,7 @@
 
 #include "third_party/tflite-micro/tensorflow/lite/kernels/kernel_util.h"
 
-namespace valiant {
+namespace coral::micro {
 
 EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe) :
     executable_(exe) {
@@ -312,4 +312,4 @@ int OutputLayer::GetBufferIndex(const YBufferIndex& y_buffer_index, int x,
         z;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

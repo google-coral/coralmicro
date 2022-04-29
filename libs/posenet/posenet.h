@@ -4,7 +4,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 #include <cstdint>
 
-namespace valiant {
+namespace coral::micro {
 namespace posenet {
 
 constexpr int kPoses = 10;
@@ -37,6 +37,6 @@ bool loop(Output* output, bool print);
 TfLiteTensor* input();
 
 }  // namespace posenet
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_POSENET_H_

@@ -6,7 +6,7 @@
 #include <limits>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 namespace tensorflow {
 
 template <typename T>
@@ -35,6 +35,6 @@ std::vector<Object> GetDetectionResults(
     size_t top_k = std::numeric_limits<size_t>::max());
 
 }  // namespace tensorflow
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TENSORFLOW_DETECTION_H_

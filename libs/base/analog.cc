@@ -3,7 +3,7 @@
 
 #include <cstdio>
 
-namespace valiant {
+namespace coral::micro {
 namespace analog {
 
 static constexpr int kLPADC1ChannelCount = 6;
@@ -95,4 +95,4 @@ void WriteDAC(uint16_t counts) {
 }
 
 }  // namespace analog
-}  // namespace valiant
+}  // namespace coral::micro

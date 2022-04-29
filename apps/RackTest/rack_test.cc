@@ -23,7 +23,7 @@ constexpr char kMethodGetFrame[] = "get_frame";
 
 std::vector<uint8_t> camera_rgb;
 
-void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
+void HandleAppMessage(const uint8_t data[coral::micro::ipc::kMessageBufferDataSize], void *param) {
     auto rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
     const auto* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
     switch (app_message->message_type) {
@@ -41,74 +41,74 @@ void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], 
 }
 
 void PosenetStressRun(struct jsonrpc_request *request) {
-    valiant::posenet::Output output{};
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::posenet::Output output{};
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(500));
-    valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
-    valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
-    valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::STREAMING);
+    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
+    coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(coral::micro::PerformanceMode::kMax);
     bool loopSuccess;
     int iterations;
 
-    if (!valiant::posenet::setup()) {
+    if (!coral::micro::posenet::setup()) {
         printf("setup() failed\r\n");
-        valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
-        valiant::CameraTask::GetSingleton()->SetPower(false);
+        coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
+        coral::micro::CameraTask::GetSingleton()->SetPower(false);
         jsonrpc_return_error(request, -1, "Posenet setup() failed", nullptr);
         return;
     }
-    valiant::posenet::loop(&output);
+    coral::micro::posenet::loop(&output);
     printf("Posenet static datatest finished.\r\n");
 
-    valiant::CameraTask::GetSingleton()->DiscardFrames(100);
-    if (!valiant::testlib::JsonRpcGetIntegerParam(request, "iterations", &iterations)) {
-         valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
-         valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::CameraTask::GetSingleton()->DiscardFrames(100);
+    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "iterations", &iterations)) {
+         coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
+         coral::micro::CameraTask::GetSingleton()->SetPower(false);
          return;
     }
 
     for (int i = 0; i < iterations; i++) {
-        TfLiteTensor* input = valiant::posenet::input();
-        valiant::camera::FrameFormat fmt{};
-        fmt.filter = valiant::camera::FilterMethod::BILINEAR;
+        TfLiteTensor* input = coral::micro::posenet::input();
+        coral::micro::camera::FrameFormat fmt{};
+        fmt.filter = coral::micro::camera::FilterMethod::BILINEAR;
         fmt.width = input->dims->data[2];
         fmt.height = input->dims->data[1];
-        fmt.fmt = valiant::camera::Format::RGB;
+        fmt.fmt = coral::micro::camera::Format::RGB;
         fmt.preserve_ratio = false;
         fmt.buffer = tflite::GetTensorData<uint8_t>(input);
-        valiant::CameraTask::GetFrame({fmt});
-        loopSuccess = valiant::posenet::loop(&output);
+        coral::micro::CameraTask::GetFrame({fmt});
+        loopSuccess = coral::micro::posenet::loop(&output);
         if (!loopSuccess) {
-            valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
-            valiant::CameraTask::GetSingleton()->SetPower(false);
+            coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
+            coral::micro::CameraTask::GetSingleton()->SetPower(false);
             jsonrpc_return_error(request, -1, "Posenet loop() returned failure", nullptr);
             return;
         }
 
     }
-    valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
     jsonrpc_return_success(request, "{}");
 }
 
 void M4XOR(struct jsonrpc_request *request) {
     std::string value_string;
-    if (!valiant::testlib::JsonRpcGetStringParam(request, "value", &value_string))
+    if (!coral::micro::testlib::JsonRpcGetStringParam(request, "value", &value_string))
         return;
 
-    if (!valiant::IPCM7::GetSingleton()->M4IsAlive(1000/*ms*/)) {
+    if (!coral::micro::IPCM7::GetSingleton()->M4IsAlive(1000/*ms*/)) {
         jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
         return;
     }
 
     auto value = reinterpret_cast<uint32_t>(strtoul(value_string.c_str(), nullptr, 10));
-    valiant::ipc::Message msg{};
-    msg.type = valiant::ipc::MessageType::APP;
+    coral::micro::ipc::Message msg{};
+    msg.type = coral::micro::ipc::MessageType::APP;
     auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
     app_message->message_type = RackTestAppMessageType::XOR;
     app_message->message.xor_value = value;
-    valiant::IPCM7::GetSingleton()->SendMessage(msg);
+    coral::micro::IPCM7::GetSingleton()->SendMessage(msg);
 
     // hang out here and wait for an event.
     uint32_t xor_value;
@@ -121,19 +121,19 @@ void M4XOR(struct jsonrpc_request *request) {
 }
 
 void M4CoreMark(struct jsonrpc_request *request) {
-    auto* ipc = valiant::IPCM7::GetSingleton();
+    auto* ipc = coral::micro::IPCM7::GetSingleton();
     if (!ipc->M4IsAlive(1000/*ms*/)) {
         jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
         return;
     }
 
     char coremark_buffer[MAX_COREMARK_BUFFER];
-    valiant::ipc::Message msg{};
-    msg.type = valiant::ipc::MessageType::APP;
+    coral::micro::ipc::Message msg{};
+    msg.type = coral::micro::ipc::MessageType::APP;
     auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
     app_message->message_type = RackTestAppMessageType::COREMARK;
     app_message->message.buffer_ptr = coremark_buffer;
-    valiant::IPCM7::GetSingleton()->SendMessage(msg);
+    coral::micro::IPCM7::GetSingleton()->SendMessage(msg);
 
     if (xTaskNotifyWait(0, 0, nullptr, pdMS_TO_TICKS(30000)) != pdTRUE) {
         jsonrpc_return_error(request, -1, "Timed out waiting for response from M4", nullptr);
@@ -152,43 +152,43 @@ void M7CoreMark(struct jsonrpc_request *request) {
 void GetFrame(struct jsonrpc_request *request) {
     int rpc_width, rpc_height;
     std::string rpc_format;
-    bool rpc_width_valid = valiant::testlib::JsonRpcGetIntegerParam(request, "width", &rpc_width);
-    bool rpc_height_valid = valiant::testlib::JsonRpcGetIntegerParam(request, "height", &rpc_height);
-    bool rpc_format_valid = valiant::testlib::JsonRpcGetStringParam(request, "format", &rpc_format);
+    bool rpc_width_valid = coral::micro::testlib::JsonRpcGetIntegerParam(request, "width", &rpc_width);
+    bool rpc_height_valid = coral::micro::testlib::JsonRpcGetIntegerParam(request, "height", &rpc_height);
+    bool rpc_format_valid = coral::micro::testlib::JsonRpcGetStringParam(request, "format", &rpc_format);
 
-    int width = rpc_width_valid ? rpc_width : valiant::CameraTask::kWidth;
-    int height = rpc_height_valid ? rpc_height : valiant::CameraTask::kHeight;
-    valiant::camera::Format format = valiant::camera::Format::RGB;
+    int width = rpc_width_valid ? rpc_width : coral::micro::CameraTask::kWidth;
+    int height = rpc_height_valid ? rpc_height : coral::micro::CameraTask::kHeight;
+    coral::micro::camera::Format format = coral::micro::camera::Format::RGB;
 
     if (rpc_format_valid) {
         constexpr char kFormatRGB[] = "RGB";
         constexpr char kFormatGrayscale[] = "L";
         if (memcmp(rpc_format.c_str(), kFormatRGB, std::min(rpc_format.length(), strlen(kFormatRGB))) == 0) {
-            format = valiant::camera::Format::RGB;
+            format = coral::micro::camera::Format::RGB;
         }
         if (memcmp(rpc_format.c_str(), kFormatGrayscale, std::min(rpc_format.length(), strlen(kFormatGrayscale))) == 0) {
-            format = valiant::camera::Format::Y8;
+            format = coral::micro::camera::Format::Y8;
         }
     }
 
     camera_rgb.resize(width * height *
-            valiant::CameraTask::FormatToBPP(format));
+            coral::micro::CameraTask::FormatToBPP(format));
 
-    valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::camera::TestPattern pattern = valiant::camera::TestPattern::COLOR_BAR;
-    valiant::CameraTask::GetSingleton()->SetTestPattern(pattern);
-    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
-    valiant::camera::FrameFormat fmt_rgb{};
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::camera::TestPattern pattern = coral::micro::camera::TestPattern::COLOR_BAR;
+    coral::micro::CameraTask::GetSingleton()->SetTestPattern(pattern);
+    coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::STREAMING);
+    coral::micro::camera::FrameFormat fmt_rgb{};
 
     fmt_rgb.fmt = format;
-    fmt_rgb.filter = valiant::camera::FilterMethod::BILINEAR;
+    fmt_rgb.filter = coral::micro::camera::FilterMethod::BILINEAR;
     fmt_rgb.width = width;
     fmt_rgb.height = height;
     fmt_rgb.preserve_ratio = false;
     fmt_rgb.buffer = camera_rgb.data();
 
-    bool success = (valiant::CameraTask::GetSingleton()->GetFrame({fmt_rgb}));
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    bool success = (coral::micro::CameraTask::GetSingleton()->GetFrame({fmt_rgb}));
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
 
     if (success)
         jsonrpc_return_success(request, "{}");
@@ -196,49 +196,49 @@ void GetFrame(struct jsonrpc_request *request) {
         jsonrpc_return_error(request, -1, "Call to GetFrame returned false.", nullptr);
 }
 
-valiant::HttpServer::Content UriHandler(const char* name) {
+coral::micro::HttpServer::Content UriHandler(const char* name) {
     if (std::strcmp("/camera.rgb", name) == 0)
-        return valiant::HttpServer::Content{std::move(camera_rgb)};
+        return coral::micro::HttpServer::Content{std::move(camera_rgb)};
     return {};
 }
 }  // namespace
 
 extern "C" void app_main(void *param) {
-    valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
+    coral::micro::IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
 
     jsonrpc_init(nullptr, nullptr);
-    jsonrpc_export(valiant::testlib::kMethodGetSerialNumber,
-                   valiant::testlib::GetSerialNumber);
-    jsonrpc_export(valiant::testlib::kMethodRunTestConv1,
-                   valiant::testlib::RunTestConv1);
-    jsonrpc_export(valiant::testlib::kMethodSetTPUPowerState,
-                   valiant::testlib::SetTPUPowerState);
-    jsonrpc_export(valiant::testlib::kMethodPosenetStressRun, PosenetStressRun);
-    jsonrpc_export(valiant::testlib::kMethodBeginUploadResource,
-                   valiant::testlib::BeginUploadResource);
-    jsonrpc_export(valiant::testlib::kMethodUploadResourceChunk,
-                   valiant::testlib::UploadResourceChunk);
-    jsonrpc_export(valiant::testlib::kMethodDeleteResource,
-                   valiant::testlib::DeleteResource);
-    jsonrpc_export(valiant::testlib::kMethodRunClassificationModel,
-                   valiant::testlib::RunClassificationModel);
-    jsonrpc_export(valiant::testlib::kMethodRunDetectionModel,
-                   valiant::testlib::RunDetectionModel);
-    jsonrpc_export(valiant::testlib::kMethodStartM4,
-                   valiant::testlib::StartM4);
-    jsonrpc_export(valiant::testlib::kMethodGetTemperature,
-                   valiant::testlib::GetTemperature);
+    jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
+                   coral::micro::testlib::GetSerialNumber);
+    jsonrpc_export(coral::micro::testlib::kMethodRunTestConv1,
+                   coral::micro::testlib::RunTestConv1);
+    jsonrpc_export(coral::micro::testlib::kMethodSetTPUPowerState,
+                   coral::micro::testlib::SetTPUPowerState);
+    jsonrpc_export(coral::micro::testlib::kMethodPosenetStressRun, PosenetStressRun);
+    jsonrpc_export(coral::micro::testlib::kMethodBeginUploadResource,
+                   coral::micro::testlib::BeginUploadResource);
+    jsonrpc_export(coral::micro::testlib::kMethodUploadResourceChunk,
+                   coral::micro::testlib::UploadResourceChunk);
+    jsonrpc_export(coral::micro::testlib::kMethodDeleteResource,
+                   coral::micro::testlib::DeleteResource);
+    jsonrpc_export(coral::micro::testlib::kMethodRunClassificationModel,
+                   coral::micro::testlib::RunClassificationModel);
+    jsonrpc_export(coral::micro::testlib::kMethodRunDetectionModel,
+                   coral::micro::testlib::RunDetectionModel);
+    jsonrpc_export(coral::micro::testlib::kMethodStartM4,
+                   coral::micro::testlib::StartM4);
+    jsonrpc_export(coral::micro::testlib::kMethodGetTemperature,
+                   coral::micro::testlib::GetTemperature);
     jsonrpc_export(kMethodM4XOR, M4XOR);
-    jsonrpc_export(valiant::testlib::kMethodCaptureTestPattern,
-                   valiant::testlib::CaptureTestPattern);
+    jsonrpc_export(coral::micro::testlib::kMethodCaptureTestPattern,
+                   coral::micro::testlib::CaptureTestPattern);
     jsonrpc_export(kMethodM4CoreMark, M4CoreMark);
     jsonrpc_export(kMethodM7CoreMark, M7CoreMark);
     jsonrpc_export(kMethodGetFrame, GetFrame);
-    jsonrpc_export(valiant::testlib::kMethodCaptureAudio,
-                   valiant::testlib::CaptureAudio);
+    jsonrpc_export(coral::micro::testlib::kMethodCaptureAudio,
+                   coral::micro::testlib::CaptureAudio);
 
-    valiant::JsonRpcHttpServer server;
+    coral::micro::JsonRpcHttpServer server;
     server.AddUriHandler(UriHandler);
-    valiant::UseHttpServer(&server);
+    coral::micro::UseHttpServer(&server);
     vTaskSuspend(nullptr);
 }

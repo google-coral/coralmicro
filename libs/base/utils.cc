@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 namespace utils {
 
 uint64_t GetUniqueID() {
@@ -18,7 +18,7 @@ uint64_t GetUniqueID() {
 }
 
 std::string GetSerialNumber() {
-    uint64_t id = valiant::utils::GetUniqueID();
+    uint64_t id = coral::micro::utils::GetUniqueID();
     char serial[17];  // 16 hex characters + \0
     snprintf(serial, sizeof(serial), "%08lx%08lx",
              static_cast<uint32_t>(id >> 32), static_cast<uint32_t>(id));
@@ -47,21 +47,21 @@ bool GetUSBIPAddress(ip4_addr_t* usb_ip_out) {
 }
 
 bool GetUSBIPAddress(std::string* usb_ip_out) {
-    return valiant::filesystem::ReadFile("/usb_ip_address", usb_ip_out);
+    return coral::micro::filesystem::ReadFile("/usb_ip_address", usb_ip_out);
 }
 
 bool GetWifiSSID(std::string* wifi_ssid_out) {
-    return valiant::filesystem::ReadFile("/wifi_ssid", wifi_ssid_out);
+    return coral::micro::filesystem::ReadFile("/wifi_ssid", wifi_ssid_out);
 }
 
 bool GetWifiPSK(std::string* wifi_psk_out) {
-    return valiant::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
+    return coral::micro::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
 }
 
 extern "C" wiced_country_code_t valiant_get_wiced_country_code(void) {
     std::string wifi_country_code_out, wifi_revision_out;
     unsigned short wifi_revision = 0;
-    if (!valiant::filesystem::ReadFile("/wifi_country", &wifi_country_code_out)) {
+    if (!coral::micro::filesystem::ReadFile("/wifi_country", &wifi_country_code_out)) {
         DbgConsole_Printf("failed to read back country, returning WW\r\n");
         return WICED_COUNTRY_WORLD_WIDE_XX;
     }
@@ -69,11 +69,11 @@ extern "C" wiced_country_code_t valiant_get_wiced_country_code(void) {
         DbgConsole_Printf("wifi_country must be 2 bytes, returning WW\r\n");
         return WICED_COUNTRY_WORLD_WIDE_XX;
     }
-    if (valiant::filesystem::ReadFile("/wifi_revision", &wifi_revision_out)) {
+    if (coral::micro::filesystem::ReadFile("/wifi_revision", &wifi_revision_out)) {
         wifi_revision = *reinterpret_cast<uint16_t*>(wifi_revision_out.data());
     }
     return static_cast<wiced_country_code_t>(MK_CNTRY(wifi_country_code_out[0], wifi_country_code_out[1], wifi_revision));
 }
 
 }  // namespace utils
-}  // namespace valiant
+}  // namespace coral::micro

@@ -16,7 +16,7 @@ lpi2c_rtos_handle_t i2c5_handle;
 extern "C" [[noreturn]] void app_main(void *param);
 
 void pre_app_main(void *param) {
-    valiant::IPCM4::GetSingleton()->Init();
+    coral::micro::IPCM4::GetSingleton()->Init();
     app_main(param);
 }
 
@@ -24,9 +24,9 @@ extern "C" int main(int argc, char **argv) __attribute__((weak));
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware(true);
 
-    valiant::ConsoleInit();
-    valiant::filesystem::Init();
-    valiant::gpio::Init();
+    coral::micro::ConsoleInit();
+    coral::micro::filesystem::Init();
+    coral::micro::gpio::Init();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     // Initialize I2C5 state
@@ -35,8 +35,8 @@ extern "C" int main(int argc, char **argv) {
     LPI2C_MasterGetDefaultConfig(&config);
     LPI2C_RTOS_Init(&i2c5_handle, (LPI2C_Type*)LPI2C5_BASE, &config, CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
-    valiant::PmicTask::GetSingleton()->Init(&i2c5_handle);
-    valiant::CameraTask::GetSingleton()->Init(&i2c5_handle);
+    coral::micro::PmicTask::GetSingleton()->Init(&i2c5_handle);
+    coral::micro::CameraTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
     constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;

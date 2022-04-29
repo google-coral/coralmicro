@@ -10,7 +10,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include <functional>
 
-namespace valiant {
+namespace coral::micro {
 
 constexpr int kEdgeTpuVid = 0x18d1;
 constexpr int kEdgeTpuPid = 0x9302;
@@ -117,6 +117,6 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeT
     uint8_t status_;
     int enabled_count_ = 0;
 };
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TASKS_EDGETPUTASK_EDGETPU_TASK_H_

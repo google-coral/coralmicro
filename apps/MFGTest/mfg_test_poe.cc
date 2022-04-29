@@ -8,7 +8,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
 
 static void EthGetIP(struct jsonrpc_request *request) {
-    struct netif* ethernet = valiant::GetEthernetInterface();
+    struct netif* ethernet = coral::micro::GetEthernetInterface();
     if (!ethernet) {
         jsonrpc_return_error(request, -1, "ethernet interface not found", nullptr);
         return;
@@ -30,12 +30,12 @@ static void EthGetIP(struct jsonrpc_request *request) {
 
 static void EthWritePHY(struct jsonrpc_request *request) {
     int reg;
-    if (!valiant::testlib::JsonRpcGetIntegerParam(request, "reg", &reg)) return;
+    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg)) return;
 
     int val;
-    if (!valiant::testlib::JsonRpcGetIntegerParam(request, "val", &val)) return;
+    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "val", &val)) return;
 
-    status_t status = valiant::EthernetPHYWrite(reg, val);
+    status_t status = coral::micro::EthernetPHYWrite(reg, val);
     if (status != kStatus_Success) {
         jsonrpc_return_error(request, -1, "EthernetPHYWrite failed", nullptr);
         return;
@@ -45,13 +45,13 @@ static void EthWritePHY(struct jsonrpc_request *request) {
 }
 
 extern "C" void app_main(void *param) {
-    valiant::InitializeEthernet(false);
+    coral::micro::InitializeEthernet(false);
 
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("eth_get_ip", EthGetIP);
     jsonrpc_export("eth_write_phy", EthWritePHY);
     IperfInit();
-    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
+    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }
 

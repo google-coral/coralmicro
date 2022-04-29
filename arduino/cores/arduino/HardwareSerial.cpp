@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 void HardwareSerial::begin(unsigned long baudrate) {
@@ -19,16 +19,16 @@ void HardwareSerial::end() {
 }
 
 int HardwareSerial::available() {
-    return static_cast<int>(valiant::ConsoleM7::GetSingleton()->available());
+    return static_cast<int>(coral::micro::ConsoleM7::GetSingleton()->available());
 }
 
 int HardwareSerial::peek() {
-    return static_cast<int>(valiant::ConsoleM7::GetSingleton()->peek());
+    return static_cast<int>(coral::micro::ConsoleM7::GetSingleton()->peek());
 }
 
 int HardwareSerial::read() {
     char ch;
-    int ret = valiant::ConsoleM7::GetSingleton()->Read(&ch, 1);
+    int ret = coral::micro::ConsoleM7::GetSingleton()->Read(&ch, 1);
     if (ret == -1)
         return -1;
     return static_cast<int>(ch);
@@ -38,7 +38,7 @@ void HardwareSerial::flush() {
 }
 
 size_t HardwareSerial::write(uint8_t c) {
-    valiant::ConsoleM7::GetSingleton()->Write(reinterpret_cast<char*>(&c), 1);
+    coral::micro::ConsoleM7::GetSingleton()->Write(reinterpret_cast<char*>(&c), 1);
     return 1;
 }
 
@@ -47,6 +47,6 @@ HardwareSerial::operator bool() {
 }
 
 }  // namespace arduino
-}  // namespace valiant
+}  // namespace coral::micro
 
-valiant::arduino::HardwareSerial Serial;
+coral::micro::arduino::HardwareSerial Serial;

@@ -29,7 +29,7 @@
 #include <numeric>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 namespace oobe {
 namespace {
 constexpr float kThreshold = 0.4;
@@ -42,7 +42,7 @@ SemaphoreHandle_t camera_output_mtx;
 std::vector<uint8_t> camera_output;
 
 SemaphoreHandle_t posenet_output_mtx;
-std::unique_ptr<valiant::posenet::Output> posenet_output;
+std::unique_ptr<coral::micro::posenet::Output> posenet_output;
 TickType_t posenet_output_time;
 
 std::vector<uint8_t> CreatePoseJson(const posenet::Output& output,
@@ -121,13 +121,13 @@ HttpServer::Content UriHandler(const char *name) {
   }
 
   if (std::strcmp(name, "/camera") == 0) {
-    valiant::MutexLock lock(camera_output_mtx);
+    coral::micro::MutexLock lock(camera_output_mtx);
     if (camera_output.empty()) return {};
-    return valiant::HttpServer::Content{std::move(camera_output)};
+    return coral::micro::HttpServer::Content{std::move(camera_output)};
   }
 
   if (std::strcmp(name, "/pose") == 0) {
-    valiant::MutexLock lock(posenet_output_mtx);
+    coral::micro::MutexLock lock(posenet_output_mtx);
     if (!posenet_output) return {};
     auto json = CreatePoseJson(*posenet_output, kThreshold);
     posenet_output.reset();
@@ -138,7 +138,7 @@ HttpServer::Content UriHandler(const char *name) {
 }
 
 void HandleAppMessage(
-    const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
+    const uint8_t data[coral::micro::ipc::kMessageBufferDataSize], void *param) {
   (void)data;
   vTaskResume(reinterpret_cast<TaskHandle_t>(param));
 }
@@ -191,7 +191,7 @@ class PosenetTask : public OOBETask {
  protected:
   void TaskFunc() override {
     TaskMessage message;
-    valiant::posenet::Output output;
+    coral::micro::posenet::Output output;
     while (true) {
       xQueueReceive(queue_, &message, portMAX_DELAY);
 
@@ -210,21 +210,21 @@ class PosenetTask : public OOBETask {
           configASSERT(started_);
           auto camera_frame =
               reinterpret_cast<std::vector<uint8_t> *>(message.data);
-          TfLiteTensor *input = valiant::posenet::input();
+          TfLiteTensor *input = coral::micro::posenet::input();
           memcpy(tflite::GetTensorData<uint8_t>(input), camera_frame->data(),
                  camera_frame->size());
           delete camera_frame;
 
-          valiant::posenet::loop(&output, false);
+          coral::micro::posenet::loop(&output, false);
           int good_poses_count = 0;
-          for (int i = 0; i < valiant::posenet::kPoses; ++i) {
+          for (int i = 0; i < coral::micro::posenet::kPoses; ++i) {
             if (output.poses[i].score > kThreshold) {
               good_poses_count++;
             }
           }
           if (good_poses_count) {
-            valiant::MutexLock lock(posenet_output_mtx);
-            posenet_output = std::make_unique<valiant::posenet::Output>(output);
+            coral::micro::MutexLock lock(posenet_output_mtx);
+            posenet_output = std::make_unique<coral::micro::posenet::Output>(output);
             posenet_output_time = xTaskGetTickCount();
           }
         } break;
@@ -260,15 +260,15 @@ class CameraTask : public OOBETask {
         case kCmdStart:
           configASSERT(!started_);
           started_ = true;
-          valiant::CameraTask::GetSingleton()->Enable(
-              valiant::camera::Mode::STREAMING);
+          coral::micro::CameraTask::GetSingleton()->Enable(
+              coral::micro::camera::Mode::STREAMING);
           printf("Camera: started\r\n");
           posenet_task_->Start();
           QueueProcess();
           break;
         case kCmdStop:
           configASSERT(started_);
-          valiant::CameraTask::GetSingleton()->Disable();
+          coral::micro::CameraTask::GetSingleton()->Disable();
           started_ = false;
           printf("Camera: stopped\r\n");
           posenet_task_->Stop();
@@ -278,18 +278,18 @@ class CameraTask : public OOBETask {
             continue;
           }
 
-          std::vector<uint8_t> input(valiant::posenet::kPosenetSize);
-          valiant::camera::FrameFormat fmt;
-          fmt.width = valiant::posenet::kPosenetWidth;
-          fmt.height = valiant::posenet::kPosenetHeight;
-          fmt.fmt = valiant::camera::Format::RGB;
-          fmt.filter = valiant::camera::FilterMethod::BILINEAR;
+          std::vector<uint8_t> input(coral::micro::posenet::kPosenetSize);
+          coral::micro::camera::FrameFormat fmt;
+          fmt.width = coral::micro::posenet::kPosenetWidth;
+          fmt.height = coral::micro::posenet::kPosenetHeight;
+          fmt.fmt = coral::micro::camera::Format::RGB;
+          fmt.filter = coral::micro::camera::FilterMethod::BILINEAR;
           fmt.preserve_ratio = false;
           fmt.buffer = input.data();
-          valiant::CameraTask::GetFrame({fmt});
+          coral::micro::CameraTask::GetFrame({fmt});
 
           {
-            valiant::MutexLock lock(camera_output_mtx);
+            coral::micro::MutexLock lock(camera_output_mtx);
             camera_output = std::move(input);
           }
 
@@ -331,34 +331,34 @@ void Main() {
 // For the OOBE Demo, bring up WiFi and Ethernet. For now these are active
 // but unused.
 #if defined(OOBE_DEMO_ETHERNET)
-  valiant::InitializeEthernet(false);
+  coral::micro::InitializeEthernet(false);
 #elif defined(OOBE_DEMO_WIFI)
-  valiant::TurnOnWiFi();
-  if (!valiant::ConnectToWiFi()) {
+  coral::micro::TurnOnWiFi();
+  if (!coral::micro::ConnectToWiFi()) {
     // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
-    valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, true);
-    valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, true);
-    valiant::gpio::SetGpio(valiant::gpio::Gpio::kTpuLED, true);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, true);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, true);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kTpuLED, true);
     vTaskSuspend(nullptr);
   }
 #endif  // defined(OOBE_DEMO_ETHERNET)
 
-  valiant::HttpServer http_server;
+  coral::micro::HttpServer http_server;
   http_server.AddUriHandler(UriHandler);
-  http_server.AddUriHandler(valiant::FileSystemUriHandler{});
-  valiant::UseHttpServer(&http_server);
+  http_server.AddUriHandler(coral::micro::FileSystemUriHandler{});
+  coral::micro::UseHttpServer(&http_server);
 
-  valiant::IPCM7::GetSingleton()->RegisterAppMessageHandler(
+  coral::micro::IPCM7::GetSingleton()->RegisterAppMessageHandler(
       HandleAppMessage, xTaskGetCurrentTaskHandle());
-  valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
-  valiant::EdgeTpuManager::GetSingleton()->OpenDevice(
-      valiant::PerformanceMode::kMax);
-  if (!valiant::posenet::setup()) {
+  coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
+  coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
+      coral::micro::PerformanceMode::kMax);
+  if (!coral::micro::posenet::setup()) {
     printf("setup() failed\r\n");
     vTaskSuspend(nullptr);
   }
 
-  valiant::IPCM7::GetSingleton()->StartM4();
+  coral::micro::IPCM7::GetSingleton()->StartM4();
 
 #if defined(OOBE_DEMO)
   int count = 0;
@@ -398,18 +398,18 @@ void Main() {
     // Stop camera_task processing. This will also stop posenet_task.
     camera_task.Stop();
 
-    valiant::ipc::Message msg;
-    msg.type = valiant::ipc::MessageType::APP;
-    valiant::IPCM7::GetSingleton()->SendMessage(msg);
+    coral::micro::ipc::Message msg;
+    msg.type = coral::micro::ipc::MessageType::APP;
+    coral::micro::IPCM7::GetSingleton()->SendMessage(msg);
     vTaskSuspend(nullptr);
   }
 }
 }  // namespace
 }  // namespace oobe
-}  // namespace valiant
+}  // namespace coral::micro
 
 extern "C" void app_main(void *param) {
   (void)param;
-  valiant::oobe::Main();
+  coral::micro::oobe::Main();
   vTaskSuspend(nullptr);
 }

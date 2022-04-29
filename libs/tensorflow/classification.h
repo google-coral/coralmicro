@@ -5,7 +5,7 @@
 #include <limits>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 namespace tensorflow {
 
 struct Class {
@@ -30,6 +30,6 @@ bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor);
 bool ClassificationPreprocess(TfLiteTensor* input_tensor);
 
 }  // namespace tensorflow
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TENSORFLOW_CLASSIFICATION_H_

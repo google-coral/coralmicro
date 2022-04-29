@@ -2,7 +2,7 @@
 #include "libs/base/tasks.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 
-namespace valiant {
+namespace coral::micro {
 
 void IPC::StaticFreeRtosMessageEventHandler(uint16_t eventData, void *context) {
     static_cast<IPC*>(context)->FreeRtosMessageEventHandler(eventData);
@@ -84,4 +84,4 @@ void IPC::Init() {
     vTaskSuspend(rx_task_);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

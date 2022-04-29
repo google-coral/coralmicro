@@ -11,14 +11,14 @@
 TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
                       int image_height, int channels, int8_t* image_data) {
     auto unsigned_image_data = std::make_unique<uint8_t[]>(image_width * image_height);
-    valiant::camera::FrameFormat fmt;
+    coral::micro::camera::FrameFormat fmt;
     fmt.width = image_width;
     fmt.height = image_height;
-    fmt.fmt = valiant::camera::Format::Y8;
-    fmt.filter = valiant::camera::FilterMethod::BILINEAR;
+    fmt.fmt = coral::micro::camera::Format::Y8;
+    fmt.filter = coral::micro::camera::FilterMethod::BILINEAR;
     fmt.preserve_ratio = false;
     fmt.buffer = unsigned_image_data.get();
-    bool ret = valiant::CameraTask::GetFrame({fmt});
+    bool ret = coral::micro::CameraTask::GetFrame({fmt});
     for (int i = 0; i < image_width * image_height; ++i) {
         image_data[i] = unsigned_image_data[i] - 128;
     }

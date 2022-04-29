@@ -4,7 +4,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpadc.h"
 #include <cstdint>
 
-namespace valiant {
+namespace coral::micro {
 namespace analog {
 
 enum class Device {
@@ -32,6 +32,6 @@ void EnableDAC(bool enable);
 void WriteDAC(uint16_t counts);
 
 }  // namespace analog
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_ANALOG_H_

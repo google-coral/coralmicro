@@ -94,9 +94,9 @@ extern "C" int rwl_read_serial_port(void *hndle, char *read_buf,
 
 extern "C" void app_main(void *param) {
   jsonrpc_init(nullptr, nullptr);
-  jsonrpc_export(valiant::testlib::kMethodWifiSetAntenna,
-                 valiant::testlib::WifiSetAntenna);
-  valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
+  jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
+                 coral::micro::testlib::WifiSetAntenna);
+  coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
 
   wwd_result_t err;
   err = (wwd_result_t)wiced_wlan_connectivity_init();

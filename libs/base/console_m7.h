@@ -7,7 +7,7 @@
 
 #include <array>
 
-namespace valiant {
+namespace coral::micro {
 
 class ConsoleM7 {
   public:
@@ -59,6 +59,6 @@ class ConsoleM7 {
     TaskHandle_t tx_task_, rx_task_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_CONSOLE_CONSOLE_M7_H__

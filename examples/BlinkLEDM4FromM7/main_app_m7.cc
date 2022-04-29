@@ -5,8 +5,8 @@
 
 
 extern "C" [[noreturn]] void app_main(void *param) {
-    valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
+    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
     printf("Starting M4...\r\n");
-    valiant::IPCM7::GetSingleton()->StartM4();
+    coral::micro::IPCM7::GetSingleton()->StartM4();
     vTaskSuspend(nullptr);
 }

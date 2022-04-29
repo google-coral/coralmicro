@@ -8,7 +8,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace posenet {
 
 namespace {
@@ -112,14 +112,14 @@ bool setup() {
     error_reporter = &micro_error_reporter;
     TF_LITE_REPORT_ERROR(error_reporter, "Posenet!");
 
-    if (!valiant::filesystem::ReadFile(
+    if (!coral::micro::filesystem::ReadFile(
             "/models/posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite",
             &posenet_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
         return false;
     }
 
-    if (!valiant::filesystem::ReadFile("/models/posenet_test_input_324.bin",
+    if (!coral::micro::filesystem::ReadFile("/models/posenet_test_input_324.bin",
                                        &posenet_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
         return false;
@@ -134,7 +134,7 @@ bool setup() {
     }
 
     static tflite::MicroMutableOpResolver<2> resolver;
-    resolver.AddCustom("edgetpu-custom-op", valiant::RegisterCustomOp());
+    resolver.AddCustom("edgetpu-custom-op", coral::micro::RegisterCustomOp());
     resolver.AddCustom(coral::kPosenetDecoderOp, coral::RegisterPosenetDecoderOp());
     static tflite::MicroInterpreter static_interpreter(
         model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
@@ -157,4 +157,4 @@ bool setup() {
 }
 
 }  // namespace posenet
-}  // namespace valiant
+}  // namespace coral::micro

@@ -6,7 +6,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace testconv1 {
 
 namespace {
@@ -35,18 +35,18 @@ bool setup() {
         return true;
     }
 
-    if (!valiant::filesystem::ReadFile("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite)) {
+    if (!coral::micro::filesystem::ReadFile("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
         return false;
 
     }
 
-    if (!valiant::filesystem::ReadFile("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin)) {
+    if (!coral::micro::filesystem::ReadFile("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load expected output!");
         return false;
     }
 
-    if (!valiant::filesystem::ReadFile("/models/testconv1-test-input.bin", &testconv1_test_input_bin)) {
+    if (!coral::micro::filesystem::ReadFile("/models/testconv1-test-input.bin", &testconv1_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
         return false;
     }
@@ -60,7 +60,7 @@ bool setup() {
     }
 
     static tflite::MicroMutableOpResolver<1> resolver;
-    resolver.AddCustom("edgetpu-custom-op", valiant::RegisterCustomOp());
+    resolver.AddCustom("edgetpu-custom-op", coral::micro::RegisterCustomOp());
     static tflite::MicroInterpreter static_interpreter(
         model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
     interpreter = &static_interpreter;
@@ -102,4 +102,4 @@ bool loop() {
 }
 
 }  // namespace testconv1
-}  // namespace valiant
+}  // namespace coral::micro

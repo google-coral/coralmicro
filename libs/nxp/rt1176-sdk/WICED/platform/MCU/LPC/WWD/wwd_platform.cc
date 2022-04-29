@@ -17,11 +17,11 @@ extern "C" resource_result_t platform_read_external_resource(const resource_hnd_
     int bytes_read;
 
     if (!resources_initialized) {
-        ret = valiant::filesystem::Open(&firmware, wifi_firmware_image.val.fs.filename);
+        ret = coral::micro::filesystem::Open(&firmware, wifi_firmware_image.val.fs.filename);
         if (!ret) {
             return RESOURCE_FILE_OPEN_FAIL;
         }
-        ret = valiant::filesystem::Open(&clm_blob, wifi_firmware_clm_blob.val.fs.filename);
+        ret = coral::micro::filesystem::Open(&clm_blob, wifi_firmware_clm_blob.val.fs.filename);
         if (!ret) {
             return RESOURCE_FILE_OPEN_FAIL;
         }
@@ -38,12 +38,12 @@ extern "C" resource_result_t platform_read_external_resource(const resource_hnd_
     } else {
         return RESOURCE_FILE_OPEN_FAIL;
     }
-    ret = valiant::filesystem::Seek(f, offset, LFS_SEEK_SET);
+    ret = coral::micro::filesystem::Seek(f, offset, LFS_SEEK_SET);
     if (!ret) {
         result = RESOURCE_FILE_SEEK_FAIL;
         goto exit_close;
     }
-    bytes_read = valiant::filesystem::Read(f, buffer, maxsize);
+    bytes_read = coral::micro::filesystem::Read(f, buffer, maxsize);
     if (bytes_read < 0) {
         result = RESOURCE_FILE_READ_FAIL;
         goto exit_close;

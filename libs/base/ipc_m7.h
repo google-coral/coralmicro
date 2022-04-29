@@ -6,7 +6,7 @@
 #include <functional>
 
 
-namespace valiant {
+namespace coral::micro {
 class IPCM7 : public IPC {
   public:
     static IPCM7* GetSingleton();
@@ -26,6 +26,6 @@ class IPCM7 : public IPC {
     static uint8_t tx_queue_storage_[kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
     static uint8_t rx_queue_storage_[kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 };
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_BASE_IPC_M7_H__

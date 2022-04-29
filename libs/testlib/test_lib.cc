@@ -22,7 +22,7 @@
 #include <array>
 #include <map>
 
-namespace valiant {
+namespace coral::micro {
 namespace testlib {
 namespace {
 AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024> g_audio_buffers;
@@ -122,7 +122,7 @@ bool JsonRpcGetBase64Param(struct jsonrpc_request* request, const char *param_na
 // Implementation of "get_serial_number" RPC.
 // Returns JSON results with the key "serial_number" and the serial, as a string.
 void GetSerialNumber(struct jsonrpc_request *request) {
-    std::string serial = valiant::utils::GetSerialNumber();
+    std::string serial = coral::micro::utils::GetSerialNumber();
     jsonrpc_return_success(request, "{%Q:%.*Q}", "serial_number", serial.size(),
                            serial.c_str());
 }
@@ -131,16 +131,16 @@ void GetSerialNumber(struct jsonrpc_request *request) {
 // Runs the simple "testconv1" model using the TPU.
 // NOTE: The TPU power must be enabled for this RPC to succeed.
 void RunTestConv1(struct jsonrpc_request *request) {
-    if (!valiant::EdgeTpuTask::GetSingleton()->GetPower()) {
+    if (!coral::micro::EdgeTpuTask::GetSingleton()->GetPower()) {
         jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
         return;
     }
-    valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
-    if (!valiant::testconv1::setup()) {
+    coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
+    if (!coral::micro::testconv1::setup()) {
         jsonrpc_return_error(request, -1, "testconv1 setup failed", nullptr);
         return;
     }
-    if (!valiant::testconv1::loop()) {
+    if (!coral::micro::testconv1::loop()) {
         jsonrpc_return_error(request, -1, "testconv1 loop failed", nullptr);
         return;
     }
@@ -154,7 +154,7 @@ void SetTPUPowerState(struct jsonrpc_request *request) {
     bool enable;
     if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
-    valiant::EdgeTpuTask::GetSingleton()->SetPower(enable);
+    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(enable);
     jsonrpc_return_success(request, "{}");
 }
 
@@ -265,13 +265,13 @@ void RunDetectionModel(struct jsonrpc_request* request) {
         input_tensor->dims->data[2],
         input_tensor->dims->data[3]
     };
-    auto preprocess_start = valiant::timer::micros();
+    auto preprocess_start = coral::micro::timer::micros();
     if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
                                  image_resource->data(), tensor_dims, input_tensor_data)) {
         jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
         return;
     }
-    auto preprocess_latency = valiant::timer::micros() - preprocess_start;
+    auto preprocess_latency = coral::micro::timer::micros() - preprocess_start;
 
     // The first Invoke is slow due to model transfer. Run an Invoke
     // but ignore the results.
@@ -280,12 +280,12 @@ void RunDetectionModel(struct jsonrpc_request* request) {
         return;
     }
 
-    auto invoke_start = valiant::timer::micros();
+    auto invoke_start = coral::micro::timer::micros();
     if (interpreter.Invoke() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
         return;
     }
-    auto invoke_latency = valiant::timer::micros() - invoke_start;
+    auto invoke_latency = coral::micro::timer::micros() - invoke_start;
 
     // Return results and check on host side
     auto results = tensorflow::GetDetectionResults(&interpreter, 0.7, 3);
@@ -361,12 +361,12 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     bool needs_preprocessing = tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
     uint32_t preprocess_latency = 0;
     if (needs_preprocessing) {
-        uint32_t preprocess_start = valiant::timer::micros();
+        uint32_t preprocess_start = coral::micro::timer::micros();
         if (!tensorflow::ClassificationPreprocess(input_tensor)) {
             jsonrpc_return_error(request, -1, "input preprocessing failed", nullptr);
             return;
         }
-        uint32_t preprocess_end = valiant::timer::micros();
+        uint32_t preprocess_end = coral::micro::timer::micros();
         preprocess_latency = preprocess_end - preprocess_start;
     }
 
@@ -390,12 +390,12 @@ void RunClassificationModel(struct jsonrpc_request* request) {
         return;
     }
 
-    uint32_t start = valiant::timer::micros();
+    uint32_t start = coral::micro::timer::micros();
     if (interpreter.Invoke() != kTfLiteOk) {
         jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
         return;
     }
-    uint32_t end = valiant::timer::micros();
+    uint32_t end = coral::micro::timer::micros();
     uint32_t latency = end - start;
 
     // Return results and check on host side
@@ -427,13 +427,13 @@ void GetTemperature(struct jsonrpc_request *request) {
     int sensor_num;
     if (!JsonRpcGetIntegerParam(request, "sensor", &sensor_num)) return;
 
-    auto sensor = static_cast<valiant::tempsense::TempSensor>(sensor_num);
-    if(sensor >= valiant::tempsense::TempSensor::kSensorCount) {
+    auto sensor = static_cast<coral::micro::tempsense::TempSensor>(sensor_num);
+    if(sensor >= coral::micro::tempsense::TempSensor::kSensorCount) {
         jsonrpc_return_error(request, -1, "Invalid temperature sensor", nullptr);
         return;
     }
 
-    float temperature = valiant::tempsense::GetTemperature(sensor);
+    float temperature = coral::micro::tempsense::GetTemperature(sensor);
     jsonrpc_return_success(request, "{%Q:%g}", "temperature", temperature);
 }
 
@@ -441,14 +441,14 @@ void GetTemperature(struct jsonrpc_request *request) {
 // Configures the sensor to test pattern mode, and captures via trigger.
 // Returns success if the test pattern has the expected data, failure otherwise.
 void CaptureTestPattern(struct jsonrpc_request *request) {
-    if (!valiant::CameraTask::GetSingleton()->SetPower(true)) {
-        valiant::CameraTask::GetSingleton()->SetPower(false);
+    if (!coral::micro::CameraTask::GetSingleton()->SetPower(true)) {
+        coral::micro::CameraTask::GetSingleton()->SetPower(false);
         jsonrpc_return_error(request, -1, "unable to detect camera", nullptr);
         return;
     }
-    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::TRIGGER);
-    valiant::CameraTask::GetSingleton()->SetTestPattern(
-        valiant::camera::TestPattern::WALKING_ONES);
+    coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::TRIGGER);
+    coral::micro::CameraTask::GetSingleton()->SetTestPattern(
+        coral::micro::camera::TestPattern::WALKING_ONES);
 
 
     bool success = true;
@@ -457,12 +457,12 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
     // Allow a small amount of retrying to smooth that over.
     constexpr const int kRetries = 3;
     for (int i = 0; i < kRetries; ++i) {
-       valiant::CameraTask::GetSingleton()->Trigger();
+       coral::micro::CameraTask::GetSingleton()->Trigger();
        uint8_t* buffer = nullptr;
-       int index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+       int index = coral::micro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
        uint8_t expected = 0;
        success = true;
-       for (unsigned int i = 0; i < valiant::CameraTask::kWidth * valiant::CameraTask::kHeight; ++i) {
+       for (unsigned int i = 0; i < coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight; ++i) {
           if (buffer[i] != expected) {
              success = false;
              break;
@@ -473,7 +473,7 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
              expected = expected << 1;
           }
        }
-       valiant::CameraTask::GetSingleton()->ReturnFrame(index);
+       coral::micro::CameraTask::GetSingleton()->ReturnFrame(index);
        if (success) {
           break;
        }
@@ -483,7 +483,7 @@ void CaptureTestPattern(struct jsonrpc_request *request) {
     } else {
         jsonrpc_return_error(request, -1, "camera test pattern mismatch", nullptr);
     }
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
 }
 
 // Implements the "capture_audio" RPC.
@@ -584,4 +584,4 @@ void WifiSetAntenna(struct jsonrpc_request *request) {
 }
 
 }  // namespace testlib
-}  // namespace valiant
+}  // namespace coral::micro

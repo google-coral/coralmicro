@@ -6,9 +6,9 @@
 #include <cstring>
 
 extern "C" void app_main(void *param) {
-    valiant::IPCM7::GetSingleton()->StartM4();
+    coral::micro::IPCM7::GetSingleton()->StartM4();
     while (true) {
-        valiant::MulticoreMutexLock lock(0);
+        coral::micro::MulticoreMutexLock lock(0);
         printf("[M7] Hello.\r\n");
         vTaskDelay(pdMS_TO_TICKS(500));
     }

@@ -1,6 +1,6 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_romapi.h"
 
-namespace valiant {
+namespace coral::micro {
 
 void ResetToBootloader() {
     uint32_t boot_arg = 0xeb100000;
@@ -8,4 +8,4 @@ void ResetToBootloader() {
     ROM_RunBootloader(&boot_arg);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

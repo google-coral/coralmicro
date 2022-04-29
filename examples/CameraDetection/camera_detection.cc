@@ -32,18 +32,18 @@ void DetectFromCamera(struct jsonrpc_request* r) {
 
     printf("width=%d; height=%d\n\r", model_width, model_height);
 
-    valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable(
-        valiant::camera::Mode::STREAMING);
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::CameraTask::GetSingleton()->Enable(
+        coral::micro::camera::Mode::STREAMING);
 
     std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
-    valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB, valiant::camera::FilterMethod::BILINEAR, model_width,
+    coral::micro::camera::FrameFormat fmt{coral::micro::camera::Format::RGB, coral::micro::camera::FilterMethod::BILINEAR, model_width,
                                      model_height, false, image.data()};
 
-    bool ret = valiant::CameraTask::GetFrame({fmt});
+    bool ret = coral::micro::CameraTask::GetFrame({fmt});
 
-    valiant::CameraTask::GetSingleton()->Disable();
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::CameraTask::GetSingleton()->Disable();
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
 
     if (!ret) {
         jsonrpc_return_error(r, -1, "Failed to get image from camera.",
@@ -60,7 +60,7 @@ void DetectFromCamera(struct jsonrpc_request* r) {
     }
 
     auto results =
-        valiant::tensorflow::GetDetectionResults(interpreter, 0.5, 1);
+        coral::micro::tensorflow::GetDetectionResults(interpreter, 0.5, 1);
     if (!results.empty()) {
         const auto& result = results[0];
         jsonrpc_return_success(
@@ -81,12 +81,12 @@ void DetectFromCamera(struct jsonrpc_request* r) {
 
 extern "C" void app_main(void* param) {
     std::vector<uint8_t> model;
-    if (!valiant::filesystem::ReadFile(kModelPath, &model)) {
+    if (!coral::micro::filesystem::ReadFile(kModelPath, &model)) {
         printf("ERROR: Failed to load %s\r\n", kModelPath);
         vTaskSuspend(nullptr);
     }
 
-    auto tpu_context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+    auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!tpu_context) {
         printf("ERROR: Failed to get EdgeTpu context\r\n");
         vTaskSuspend(nullptr);
@@ -96,7 +96,7 @@ extern "C" void app_main(void* param) {
     tflite::MicroMutableOpResolver<3> resolver;
     resolver.AddDequantize();
     resolver.AddDetectionPostprocess();
-    resolver.AddCustom(valiant::kCustomOp, valiant::RegisterCustomOp());
+    resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
 
     tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
                                          resolver, tensor_arena,
@@ -114,7 +114,7 @@ extern "C" void app_main(void* param) {
     printf("Initializing detection server...%p\r\n", &interpreter);
     jsonrpc_init(nullptr, &interpreter);
     jsonrpc_export("detect_from_camera", DetectFromCamera);
-    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
+    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
     printf("Detection server ready!\r\n");
     vTaskSuspend(nullptr);
 }

@@ -1,10 +1,10 @@
 #ifndef _LIBS_BASE_RESET_H_
 #define _LIBS_BASE_RESET_H_
 
-namespace valiant {
+namespace coral::micro {
 
 void ResetToBootloader();
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_RESET_H_

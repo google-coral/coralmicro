@@ -4,7 +4,7 @@
 #include "libs/base/ipc.h"
 #include <functional>
 
-namespace valiant {
+namespace coral::micro {
 class IPCM4 : public IPC {
   public:
     static IPCM4* GetSingleton();
@@ -15,6 +15,6 @@ class IPCM4 : public IPC {
   private:
     void HandleSystemMessage(const ipc::SystemMessage& message) override;
 };
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_BASE_IPC_M4_H__

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 
 template <size_t N>
 constexpr size_t StrLen(const char (&)[N]) {
@@ -33,6 +33,6 @@ void StrAppend(std::vector<uint8_t>* v, const char* format, T... args) {
     v->pop_back();  // remove null terminator
 }
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_BASE_STRINGS_H__

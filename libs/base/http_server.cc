@@ -4,7 +4,7 @@
 
 #include "libs/base/filesystem.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 using filesystem::Lfs;
 
@@ -158,4 +158,4 @@ int fs_read_custom(struct fs_file* file, char* buffer, int count) {
 
 void fs_close_custom(struct fs_file* file) { g_server->FsCloseCustom(file); }
 }  // extern "C"
-}  // namespace valiant
+}  // namespace coral::micro

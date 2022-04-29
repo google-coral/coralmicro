@@ -17,7 +17,7 @@ constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
 constexpr int kNumDmaBuffers = 10;
 constexpr int kDmaBufferSizeMs = 100;
 constexpr int kDmaBufferSize = kDmaBufferSizeMs * kSamplesPerMs;
-valiant::AudioDriverBuffers<kNumDmaBuffers, kNumDmaBuffers * kDmaBufferSize>
+coral::micro::AudioDriverBuffers<kNumDmaBuffers, kNumDmaBuffers * kDmaBufferSize>
     g_audio_buffers;
 
 constexpr int kAudioBufferSizeMs = 1000;
@@ -69,8 +69,8 @@ extern "C" void app_main(void* param) {
     printf("Micro speech\r\n");
 
     // Setup audio
-    valiant::AudioDriver driver(g_audio_buffers);
-    valiant::AudioDriverConfig config{valiant::AudioSampleRate::k16000_Hz,
+    coral::micro::AudioDriver driver(g_audio_buffers);
+    coral::micro::AudioDriverConfig config{coral::micro::AudioSampleRate::k16000_Hz,
                                       kNumDmaBuffers, kDmaBufferSizeMs};
     driver.Enable(
         config, nullptr,

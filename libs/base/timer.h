@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace valiant {
+namespace coral::micro {
 namespace timer {
 
 void Init();
@@ -15,6 +15,6 @@ uint32_t millis();
 uint32_t micros();
 
 }  // namespace timer
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_TIMER_H_

@@ -4,7 +4,7 @@
 #include <queue>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 namespace tensorflow {
 namespace {
 // Defines a comparator which allows us to rank Class based on their score and
@@ -88,4 +88,4 @@ bool ClassificationPreprocess(TfLiteTensor* input_tensor) {
 }
 
 }  // namespace tensorflow
-}  // namespace valiant
+}  // namespace coral::micro

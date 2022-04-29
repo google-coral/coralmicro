@@ -11,9 +11,9 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-using valiant::filesystem::Lfs;
+using coral::micro::filesystem::Lfs;
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 constexpr char kUrlPrefix[] = "/fs/";
 
@@ -167,18 +167,18 @@ class FileHttpServer : public HttpServer {
 };
 
 }  // namespace
-}  // namespace valiant
+}  // namespace coral::micro
 
 extern "C" void app_main(void* param) {
-    using valiant::kUrlPrefix;
+    using coral::micro::kUrlPrefix;
     (void)param;
     printf("WebFileBrowser\r\n");
-    valiant::FileHttpServer http_server;
-    http_server.AddUriHandler(valiant::UriHandler);
-    valiant::UseHttpServer(&http_server);
+    coral::micro::FileHttpServer http_server;
+    http_server.AddUriHandler(coral::micro::UriHandler);
+    coral::micro::UseHttpServer(&http_server);
 
     std::string ip;
-    if (valiant::utils::GetUSBIPAddress(&ip)) {
+    if (coral::micro::utils::GetUSBIPAddress(&ip)) {
         printf("BROWSE:   http://%s%s\r\n", ip.c_str(), kUrlPrefix);
         printf("UPLOAD:   curl -X POST http://%s%sfile --data-binary @file\r\n",
                ip.c_str(), kUrlPrefix);

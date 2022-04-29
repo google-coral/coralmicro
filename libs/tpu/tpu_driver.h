@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 
 static const uint8_t kSingleBulkOutEndpoint = 1;
 static const uint8_t kEventInEndpoint = 2;
@@ -72,6 +72,6 @@ class TpuDriver {
     usb_host_edgetpu_instance_t* usb_instance_ = nullptr;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TPU_TPU_DRIVER_H_

@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace valiant {
+namespace coral::micro {
 namespace gpio {
 
 enum Gpio {
@@ -52,6 +52,6 @@ void SetIntMode(Gpio gpio, InterruptMode mode);
 void RegisterIRQHandler(Gpio gpio, GpioCallback cb);
 
 }  // namespace gpio
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_GPIO_H_

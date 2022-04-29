@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 namespace testlib {
 
 inline constexpr char kMethodGetSerialNumber[] = "get_serial_number";
@@ -44,6 +44,6 @@ void CaptureAudio(struct jsonrpc_request* request);
 void WifiSetAntenna(struct jsonrpc_request *request);
 
 }  // namespace testlib
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TESTLIB_TEST_LIB_H_

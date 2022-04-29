@@ -5,7 +5,7 @@
 #include "third_party/freertos_kernel/include/message_buffer.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 
-namespace valiant {
+namespace coral::micro {
 
 namespace ipc {
 
@@ -51,6 +51,6 @@ static_assert(sizeof(SystemMessage) <= kMessageBufferDataSize);
 #endif
 
 }  // namespace ipc
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __APPS_HELLOWORLDMULTICOREFREERTOS_MESSAGE_BUFFER_H_

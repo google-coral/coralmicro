@@ -5,70 +5,70 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "pins_arduino.h"
 
-static valiant::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
+static coral::micro::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
     switch (pinNumber) {
         case PIN_LED_USER:
-            return valiant::gpio::Gpio::kUserLED;
+            return coral::micro::gpio::Gpio::kUserLED;
         case PIN_BTN:
-            return valiant::gpio::Gpio::kUserButton;
+            return coral::micro::gpio::Gpio::kUserButton;
         case PIN_LED_POWER:
-            return valiant::gpio::Gpio::kPowerLED;
+            return coral::micro::gpio::Gpio::kPowerLED;
         case PIN_LED_TPU:
-            return valiant::gpio::Gpio::kTpuLED;
+            return coral::micro::gpio::Gpio::kTpuLED;
         case D0:
-            return valiant::gpio::Gpio::kArduinoD0;
+            return coral::micro::gpio::Gpio::kArduinoD0;
         case D1:
-            return valiant::gpio::Gpio::kArduinoD1;
+            return coral::micro::gpio::Gpio::kArduinoD1;
         case D2:
-            return valiant::gpio::Gpio::kArduinoD2;
+            return coral::micro::gpio::Gpio::kArduinoD2;
         case D3:
-            return valiant::gpio::Gpio::kArduinoD3;
+            return coral::micro::gpio::Gpio::kArduinoD3;
         default:
             assert(false);
-            return valiant::gpio::Gpio::kCount;
+            return coral::micro::gpio::Gpio::kCount;
     }
 }
 
-static valiant::gpio::InterruptMode PinStatusToInterruptMode(PinStatus mode) {
+static coral::micro::gpio::InterruptMode PinStatusToInterruptMode(PinStatus mode) {
     switch (mode) {
         case HIGH:
-            return valiant::gpio::kIntModeHigh;
+            return coral::micro::gpio::kIntModeHigh;
         case LOW:
-            return valiant::gpio::kIntModeLow;
+            return coral::micro::gpio::kIntModeLow;
         case CHANGE:
-            return valiant::gpio::kIntModeChanging;
+            return coral::micro::gpio::kIntModeChanging;
         case RISING:
-            return valiant::gpio::kIntModeRising;
+            return coral::micro::gpio::kIntModeRising;
         case FALLING:
-            return valiant::gpio::kIntModeFalling;
+            return coral::micro::gpio::kIntModeFalling;
         default:
             assert(false);
-            return valiant::gpio::kIntModeCount;
+            return coral::micro::gpio::kIntModeCount;
     }
 }
 
-std::shared_ptr<valiant::EdgeTpuContext> edgetpuContext = nullptr;
+std::shared_ptr<coral::micro::EdgeTpuContext> edgetpuContext = nullptr;
 
 void pinMode(pin_size_t pinNumber, PinMode pinMode) {
-    valiant::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
+    coral::micro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
     switch (pinMode) {
         case INPUT:
-            valiant::gpio::SetMode(gpio, true, false, false);
+            coral::micro::gpio::SetMode(gpio, true, false, false);
             break;
         case OUTPUT:
-            valiant::gpio::SetMode(gpio, false, false, false);
+            coral::micro::gpio::SetMode(gpio, false, false, false);
             break;
         case INPUT_PULLUP:
-            valiant::gpio::SetMode(gpio, true, true, true);
+            coral::micro::gpio::SetMode(gpio, true, true, true);
             break;
         case INPUT_PULLDOWN:
-            valiant::gpio::SetMode(gpio, true, true, false);
+            coral::micro::gpio::SetMode(gpio, true, true, false);
             break;
     }
 
-    if (gpio == valiant::gpio::kTpuLED) {
+    if (gpio == coral::micro::gpio::kTpuLED) {
         if (pinMode == OUTPUT) {
-            edgetpuContext = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+            edgetpuContext = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
         }
         else {
             edgetpuContext.reset();
@@ -78,26 +78,26 @@ void pinMode(pin_size_t pinNumber, PinMode pinMode) {
 
 void digitalWrite(pin_size_t pinNumber, PinStatus status) {
     assert(status == LOW || status == HIGH);
-    valiant::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
-    valiant::gpio::SetGpio(gpio, status == LOW ? false : true);
+    coral::micro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
+    coral::micro::gpio::SetGpio(gpio, status == LOW ? false : true);
 }
 
 PinStatus digitalRead(pin_size_t pinNumber) {
-    valiant::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
-    bool status = valiant::gpio::GetGpio(gpio);
+    coral::micro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
+    bool status = coral::micro::gpio::GetGpio(gpio);
     return status ? HIGH : LOW;
 }
 
 void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback,
                      PinStatus mode) {
-    valiant::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
+    coral::micro::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
     auto interrupt_mode = PinStatusToInterruptMode(mode);
-    valiant::gpio::SetIntMode(gpio, interrupt_mode);
-    valiant::gpio::RegisterIRQHandler(gpio, callback);
+    coral::micro::gpio::SetIntMode(gpio, interrupt_mode);
+    coral::micro::gpio::RegisterIRQHandler(gpio, callback);
 }
 
 void detachInterrupt(pin_size_t interruptNumber) {
-    valiant::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
-    valiant::gpio::RegisterIRQHandler(gpio, nullptr);
-    valiant::gpio::SetIntMode(gpio, valiant::gpio::kIntModeNone);
+    coral::micro::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
+    coral::micro::gpio::RegisterIRQHandler(gpio, nullptr);
+    coral::micro::gpio::SetIntMode(gpio, coral::micro::gpio::kIntModeNone);
 }

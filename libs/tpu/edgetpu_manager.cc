@@ -8,7 +8,7 @@
 
 #include <cstdio>
 
-namespace valiant {
+namespace coral::micro {
 
 constexpr char kKeyVersion[] = "1";
 constexpr char kKeyChipName[] = "2";
@@ -156,4 +156,4 @@ float EdgeTpuManager::GetTemperature() {
     return tpu_driver_.GetTemperature();
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

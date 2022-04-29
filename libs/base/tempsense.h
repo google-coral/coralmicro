@@ -1,7 +1,7 @@
 #ifndef _LIBS_BASE_TEMPSENSE_H_
 #define _LIBS_BASE_TEMPSENSE_H_
 
-namespace valiant {
+namespace coral::micro {
 namespace tempsense {
 
 enum class TempSensor : unsigned int {
@@ -16,6 +16,6 @@ void Init();
 float GetTemperature(TempSensor sensor);
 
 }  // namespace tempsense
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_TEMPSENSE_H_

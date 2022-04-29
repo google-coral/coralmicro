@@ -47,9 +47,9 @@ static void CURLRequest(const char *url) {
 extern "C" void app_main(void *param) {
     printf("Hello world Ethernet.\r\n");
 
-    valiant::InitializeEthernet(true);
+    coral::micro::InitializeEthernet(true);
 
-    struct netif *ethernet = valiant::GetEthernetInterface();
+    struct netif *ethernet = coral::micro::GetEthernetInterface();
 
     printf("Waiting on DHCP...\r\n");
     while (true) {

@@ -16,7 +16,7 @@ extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
-using valiant::testlib::JsonRpcGetStringParam;
+using coral::micro::testlib::JsonRpcGetStringParam;
 
 extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;
 extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
@@ -62,7 +62,7 @@ static bool ble_ready = false;
 static SemaphoreHandle_t ble_scan_sema;
 static void BLEFind(struct jsonrpc_request *request) {
     {
-        valiant::MutexLock lock(ble_ready_mtx);
+        coral::micro::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
             jsonrpc_return_error(request, -1, "bt not ready yet", nullptr);
             return;
@@ -115,7 +115,7 @@ static void BLEFind(struct jsonrpc_request *request) {
 
 static void BLEScan(struct jsonrpc_request *request) {
     {
-        valiant::MutexLock lock(ble_ready_mtx);
+        coral::micro::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
             jsonrpc_return_error(request, -1, "bt not ready yet", nullptr);
             return;
@@ -157,7 +157,7 @@ static wiced_result_t ble_management_callback(wiced_bt_management_evt_t event,
     switch (event) {
         case BTM_ENABLED_EVT:
             {
-                valiant::MutexLock lock(ble_ready_mtx);
+                coral::micro::MutexLock lock(ble_ready_mtx);
                 if (((wiced_bt_dev_enabled_t*)(p_event_data))->status == WICED_SUCCESS) {
                     ble_ready = true;
                 } else {
@@ -179,33 +179,33 @@ extern unsigned int brcm_patch_ram_length;
 extern "C" void app_main(void *param) {
     ble_scan_sema = xSemaphoreCreateBinary();
     ble_ready_mtx = xSemaphoreCreateMutex();
-    if (valiant::filesystem::ReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
+    if (coral::micro::filesystem::ReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
                                       brcm_patchram_buf,
                                       brcm_patch_ram_length) != brcm_patch_ram_length) {
         printf("Reading patchram failed\r\n");
         vTaskSuspend(NULL);
     }
 
-    if (valiant::TurnOnWiFi()) {
-        if (valiant::ConnectToWiFi()) {
-            valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, true);
+    if (coral::micro::TurnOnWiFi()) {
+        if (coral::micro::ConnectToWiFi()) {
+            coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, true);
         }
     } else {
         printf("Wi-Fi failed to come up (is the Wi-Fi board attached?\r\n");
-        valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, true);
+        coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, true);
         vTaskSuspend(NULL);
     }
-    valiant::gpio::SetGpio(valiant::gpio::kBtDevWake, false);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::kBtDevWake, false);
     wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings, wiced_bt_cfg_buf_pools);
 
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("wifi_get_ap", WifiGetAP);
-    jsonrpc_export(valiant::testlib::kMethodWifiSetAntenna,
-                   valiant::testlib::WifiSetAntenna);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
+                   coral::micro::testlib::WifiSetAntenna);
     jsonrpc_export("ble_scan", BLEScan);
     jsonrpc_export("ble_find", BLEFind);
     IperfInit();
-    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
+    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
     vTaskSuspend(NULL);
 }
 

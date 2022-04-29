@@ -6,7 +6,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace valiant {
+namespace coral::micro {
 
 constexpr size_t kDefaultTaskStackDepth = configMINIMAL_STACK_SIZE;
 template <typename Request, typename Response, const char *Name, size_t StackDepth, UBaseType_t Priority, UBaseType_t QueueLength>
@@ -74,6 +74,6 @@ class QueueTask {
     virtual void RequestHandler(Request* msg) = 0;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_QUEUE_TASK_H_

@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 int CameraClass::begin(uint32_t resolution) {
@@ -27,7 +27,7 @@ int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
     filter_ = filter;
     preserve_ratio_ = preserve_ratio;
     camera_->SetPower(true);
-    camera_->Enable(valiant::camera::Mode::STREAMING);
+    camera_->Enable(coral::micro::camera::Mode::STREAMING);
     return CameraStatus::SUCCESS;
 }
 
@@ -42,7 +42,7 @@ int CameraClass::grab(uint8_t* buffer) {
         printf("%s Camera is not initialized...\n", __func__);
         return CameraStatus::NOT_INITIALIZED;
     }
-    std::list<valiant::camera::FrameFormat> fmts;
+    std::list<coral::micro::camera::FrameFormat> fmts;
     if (test_pattern_ != camera::TestPattern::NONE) {
         fmts.push_back({camera::Format::RAW, camera::FilterMethod::BILINEAR,
                         CameraTask::kWidth, CameraTask::kHeight,
@@ -52,7 +52,7 @@ int CameraClass::grab(uint8_t* buffer) {
             {format_, filter_, width_, height_, preserve_ratio_, buffer});
     }
 
-    auto success = valiant::CameraTask::GetFrame(fmts);
+    auto success = coral::micro::CameraTask::GetFrame(fmts);
     if (!success) {
         printf("Failed to get frame from camera\r\n");
         return CameraStatus::FAILURE;
@@ -61,14 +61,14 @@ int CameraClass::grab(uint8_t* buffer) {
 }
 
 int CameraClass::testPattern(bool walking) {
-    auto test_pattern = walking ? valiant::camera::TestPattern::WALKING_ONES
-                                : valiant::camera::TestPattern::NONE;
+    auto test_pattern = walking ? coral::micro::camera::TestPattern::WALKING_ONES
+                                : coral::micro::camera::TestPattern::NONE;
     test_pattern_ = test_pattern;
     camera_->SetTestPattern(test_pattern_);
     return CameraStatus::SUCCESS;
 }
 
-int CameraClass::testPattern(valiant::camera::TestPattern pattern) {
+int CameraClass::testPattern(coral::micro::camera::TestPattern pattern) {
     test_pattern_ = pattern;
     camera_->SetTestPattern(test_pattern_);
     return CameraStatus::SUCCESS;
@@ -76,9 +76,9 @@ int CameraClass::testPattern(valiant::camera::TestPattern pattern) {
 
 int CameraClass::standby(bool enable) {
     if (enable) {
-        camera_->Enable(valiant::camera::Mode::STREAMING);
+        camera_->Enable(coral::micro::camera::Mode::STREAMING);
     } else {
-        camera_->Enable(valiant::camera::Mode::STANDBY);
+        camera_->Enable(coral::micro::camera::Mode::STANDBY);
     }
     return CameraStatus::SUCCESS;
 }
@@ -88,7 +88,7 @@ int CameraClass::preserveRatio(bool preserve_ratio) {
     return CameraStatus::SUCCESS;
 }
 
-int CameraClass::format(valiant::camera::Format fmt) {
+int CameraClass::format(coral::micro::camera::Format fmt) {
     format_ = fmt;
     return CameraStatus::SUCCESS;
 }
@@ -125,6 +125,6 @@ int CameraClass::framerate(uint32_t framerate) {
 }
 
 }  // namespace arduino
-}  // namespace valiant
+}  // namespace coral::micro
 
-valiant::arduino::CameraClass Camera = valiant::arduino::CameraClass();
+coral::micro::arduino::CameraClass Camera = coral::micro::arduino::CameraClass();

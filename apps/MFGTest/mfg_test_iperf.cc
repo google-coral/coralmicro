@@ -6,9 +6,9 @@
 
 #include <vector>
 
-using valiant::testlib::JsonRpcGetBooleanParam;
-using valiant::testlib::JsonRpcGetIntegerParam;
-using valiant::testlib::JsonRpcGetStringParam;
+using coral::micro::testlib::JsonRpcGetBooleanParam;
+using coral::micro::testlib::JsonRpcGetIntegerParam;
+using coral::micro::testlib::JsonRpcGetStringParam;
 
 struct IperfContext {
     SemaphoreHandle_t mutex;
@@ -20,7 +20,7 @@ static IperfContext iperf_ctx;
 static void lwiperf_report(void *arg, enum lwiperf_report_type report_type, const ip_addr_t *local_addr,
                            u16_t local_port, const ip_addr_t *remote_addr, u16_t remote_port,
                            u64_t bytes_transferred, u32_t ms_duration, u32_t bandwidth_kbitspec) {
-    valiant::MutexLock lock(iperf_ctx.mutex);
+    coral::micro::MutexLock lock(iperf_ctx.mutex);
     switch (report_type) {
         case LWIPERF_TCP_DONE_CLIENT:
         case LWIPERF_TCP_ABORTED_REMOTE:
@@ -33,7 +33,7 @@ static void lwiperf_report(void *arg, enum lwiperf_report_type report_type, cons
 }
 
 static void IperfStart(struct jsonrpc_request *request) {
-    valiant::MutexLock lock(iperf_ctx.mutex);
+    coral::micro::MutexLock lock(iperf_ctx.mutex);
     if (iperf_ctx.session) {
         jsonrpc_return_error(request, -1, "iperf is already running!", nullptr);
         return;
@@ -70,7 +70,7 @@ static void IperfStart(struct jsonrpc_request *request) {
 }
 
 static void IperfStop(struct jsonrpc_request *request) {
-    valiant::MutexLock lock(iperf_ctx.mutex);
+    coral::micro::MutexLock lock(iperf_ctx.mutex);
     if (!iperf_ctx.session) {
         jsonrpc_return_error(request, -1, "iperf is already stopped!", nullptr);
         return;

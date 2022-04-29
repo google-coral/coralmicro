@@ -13,6 +13,6 @@
 void analogReadResolution(int bits);
 void analogWriteResolution(int bits);
 
-extern valiant::arduino::HardwareSerial Serial;
+extern coral::micro::arduino::HardwareSerial Serial;
 
 #endif  // Arduino_h

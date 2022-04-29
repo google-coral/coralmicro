@@ -4,7 +4,7 @@
 #include "libs/base/console_m4.h"
 #include <unistd.h>
 
-static valiant::ipc::StreamBuffer *console_buffer = nullptr;
+static coral::micro::ipc::StreamBuffer *console_buffer = nullptr;
 
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
 extern "C" int _write(int handle, char *buffer, int size) {
@@ -31,7 +31,7 @@ extern "C" int _read(int handle, char *buffer, int size) {
     return -1;
 }
 
-namespace valiant {
+namespace coral::micro {
 
 void ConsoleInit() {
 }
@@ -40,4 +40,4 @@ void SetM4ConsoleBufferPtr(ipc::StreamBuffer* buffer) {
     console_buffer = buffer;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

@@ -8,7 +8,7 @@
 
 #include <functional>
 
-namespace valiant {
+namespace coral::micro {
 
 class IPC {
   public:
@@ -34,6 +34,6 @@ class IPC {
     ipc::MessageBuffer *tx_queue_, *rx_queue_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_IPC_H_

@@ -13,7 +13,7 @@
 
 #include <memory>
 
-namespace valiant {
+namespace coral::micro {
 
 using namespace camera;
 
@@ -666,4 +666,4 @@ void CameraTask::RequestHandler(Request *req) {
         req->callback(resp);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

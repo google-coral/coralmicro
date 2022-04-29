@@ -7,7 +7,7 @@
 
 #include <functional>
 
-namespace valiant {
+namespace coral::micro {
 
 namespace pmic {
 
@@ -98,6 +98,6 @@ class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName, 
     lpi2c_rtos_handle_t* i2c_handle_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TASKS_PMIC_TASK_H_

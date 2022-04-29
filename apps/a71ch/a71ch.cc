@@ -10,7 +10,7 @@
 #include <cstdio>
 
 extern "C" [[noreturn]] void app_main(void* param) {
-    valiant::a71ch::Init();
+    coral::micro::a71ch::Init();
     uint8_t uid[A71CH_MODULE_UNIQUE_ID_LEN];
     uint16_t uidLen = A71CH_MODULE_UNIQUE_ID_LEN;
     uint16_t ret = A71_GetUniqueID(uid, &uidLen);
@@ -56,7 +56,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
 
     std::vector<uint8_t> model;
     constexpr const char kModelPath[] = "/models/testconv1-edgetpu.tflite";
-    if (!valiant::filesystem::ReadFile(kModelPath, &model)) {
+    if (!coral::micro::filesystem::ReadFile(kModelPath, &model)) {
         printf("%s missing\r\n", kModelPath);
         vTaskSuspend(NULL);
     }

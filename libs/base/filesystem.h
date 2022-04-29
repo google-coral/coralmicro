@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 namespace filesystem {
 
 lfs_t* Lfs();
@@ -41,6 +41,6 @@ size_t ReadFile(const char* path, uint8_t* buf, size_t size);
 bool WriteFile(const char* path, const uint8_t* buf, size_t size);
 
 }  // namespace filesystem
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_FILESYSTEM_H_

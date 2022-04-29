@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace valiant {
+namespace coral::micro {
 
 struct DeviceDescriptor {
     uint8_t length;
@@ -143,6 +143,6 @@ struct LangIdDescriptor {
     uint16_t lang_id;
 } __attribute__((packed));
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_USB_DESCRIPTORS_H__

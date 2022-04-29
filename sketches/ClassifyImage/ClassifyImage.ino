@@ -10,7 +10,7 @@ const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
 std::vector<uint8_t> image_data;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
-std::shared_ptr<valiant::EdgeTpuContext> context = nullptr;
+std::shared_ptr<coral::micro::EdgeTpuContext> context = nullptr;
 
 const int kTensorArenaSize = 1024 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
@@ -52,13 +52,13 @@ void setup() {
     }
 
     model = tflite::GetModel(model_data.data());
-    context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+    context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         Serial.println("Failed to get EdgeTpuContext");
         return;
     }
 
-    resolver.AddCustom(valiant::kCustomOp, valiant::RegisterCustomOp());
+    resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
     tflite::MicroErrorReporter error_reporter;
     interpreter = std::make_unique<tflite::MicroInterpreter>(
         model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
@@ -92,12 +92,12 @@ void loop() {
         return;
     }
 
-    if (valiant::tensorflow::ClassificationInputNeedsPreprocessing(
+    if (coral::micro::tensorflow::ClassificationInputNeedsPreprocessing(
             *input_tensor)) {
-        valiant::tensorflow::ClassificationPreprocess(input_tensor);
+        coral::micro::tensorflow::ClassificationPreprocess(input_tensor);
     }
 
-    valiant::tensorflow::TensorSize(input_tensor);
+    coral::micro::tensorflow::TensorSize(input_tensor);
     auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
     memcpy(input_tensor_data, image_data.data(), input_tensor->bytes);
 
@@ -106,7 +106,7 @@ void loop() {
         return;
     }
 
-    auto results = valiant::tensorflow::GetClassificationResults(
+    auto results = coral::micro::tensorflow::GetClassificationResults(
         interpreter.get(), 0.0f, 3);
     for (auto result : results) {
         Serial.print("Label ID: ");

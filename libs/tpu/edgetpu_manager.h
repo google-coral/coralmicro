@@ -13,7 +13,7 @@
 #include <map>
 #include <memory>
 
-namespace valiant {
+namespace coral::micro {
 
 class EdgeTpuContext {
   public:
@@ -69,6 +69,6 @@ class EdgeTpuManager {
     SemaphoreHandle_t mutex_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TPU_EDGETPU_MANAGER_H_

@@ -20,7 +20,7 @@ typedef struct _usb_host_cdc_line_coding_struct
     uint8_t bDataBits;   /*!< Data bits (5, 6, 7, 8 or 16).*/
 } __attribute__((packed)) usb_host_cdc_line_coding_struct_t;
 
-namespace valiant {
+namespace coral::micro {
 
 class CdcAcm {
   using RxHandler = std::function<void(const uint8_t*, const uint32_t)>;
@@ -184,6 +184,6 @@ class CdcAcm {
     static std::map<class_handle_t, CdcAcm*> handle_map_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_CDCACM_CDC_ACM_H_

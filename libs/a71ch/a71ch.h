@@ -1,5 +1,5 @@
-namespace valiant {
+namespace coral::micro {
 namespace a71ch {
 bool Init();
 }
-}  // namespace valiant
+}  // namespace coral::micro

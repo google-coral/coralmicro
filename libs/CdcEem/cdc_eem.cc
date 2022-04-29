@@ -17,7 +17,7 @@ extern "C" {
 #define DATA_OUT (1)
 #define DATA_IN  (0)
 
-namespace valiant {
+namespace coral::micro {
 
 std::map<class_handle_t, CdcEem*> CdcEem::handle_map_;
 
@@ -315,4 +315,4 @@ usb_status_t CdcEem::Handler(class_handle_t class_handle, uint32_t event, void *
     return handle_map_[class_handle]->Handler(event, param);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

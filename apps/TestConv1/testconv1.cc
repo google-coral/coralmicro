@@ -6,22 +6,22 @@
 #include "libs/tpu/edgetpu_manager.h"
 
 extern "C" void app_main(void *param) {
-    if (!valiant::testconv1::setup()) {
+    if (!coral::micro::testconv1::setup()) {
         printf("setup() failed\r\n");
         vTaskSuspend(NULL);
     }
 
-    valiant::gpio::SetGpio(valiant::gpio::kTpuLED, true);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::kTpuLED, true);
 
     size_t counter = 0;
     while (true) {
-        valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
-        valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+        coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
+        coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
 
         bool run = true;
         for (int i = 0; i < 1000; ++i) {
             if (run) {
-                run = valiant::testconv1::loop();
+                run = coral::micro::testconv1::loop();
                 ++counter;
                 if ((counter % 100) == 0) {
                     printf("Execution %u...\r\n", counter);
@@ -30,7 +30,7 @@ extern "C" void app_main(void *param) {
         }
 
         printf("Reset EdgeTPU...\r\n");
-        valiant::EdgeTpuTask::GetSingleton()->SetPower(false);
+        coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
     vTaskSuspend(NULL);

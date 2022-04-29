@@ -10,7 +10,7 @@
 
 extern "C" nand_handle_t* BOARD_GetNANDHandle(void);
 
-namespace valiant {
+namespace coral::micro {
 namespace filesystem {
 namespace {
 lfs_t g_lfs;
@@ -355,4 +355,4 @@ bool WriteFile(const char* path, const uint8_t* buf, size_t size) {
     return n >= 0 && static_cast<size_t>(n) == size;
 }
 }  // namespace filesystem
-}  // namespace valiant
+}  // namespace coral::micro

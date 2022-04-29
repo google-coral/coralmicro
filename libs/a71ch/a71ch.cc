@@ -4,12 +4,12 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace a71ch {
 bool Init() {
-  valiant::gpio::SetGpio(valiant::gpio::kCryptoRst, false);
+  coral::micro::gpio::SetGpio(coral::micro::gpio::kCryptoRst, false);
   vTaskDelay(pdMS_TO_TICKS(1));
-  valiant::gpio::SetGpio(valiant::gpio::kCryptoRst, true);
+  coral::micro::gpio::SetGpio(coral::micro::gpio::kCryptoRst, true);
 
   SE_Connect_Ctx_t sessionCtxt = {0};
   sss_status_t status = sss_session_open(nullptr, kType_SSS_SE_A71CH, 0, kSSS_ConnectionType_Plain, &sessionCtxt);
@@ -19,4 +19,4 @@ bool Init() {
   return true;
 }
 }  // namespace a71ch
-}  // namespace valiant
+}  // namespace coral::micro

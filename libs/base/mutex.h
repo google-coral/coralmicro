@@ -6,7 +6,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_sema4.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/fsl_device_registers.h"
 
-namespace valiant {
+namespace coral::micro {
 
 class MutexLock {
   public:
@@ -63,6 +63,6 @@ class MulticoreMutexLock {
     uint8_t core_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_MUTEX_H_

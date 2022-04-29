@@ -3,7 +3,7 @@
 #include <cmath>
 #include <queue>
 
-namespace valiant {
+namespace coral::micro {
 namespace tensorflow {
 
 namespace {
@@ -73,4 +73,4 @@ std::vector<Object> GetDetectionResults(
 }
 
 }  // namespace tensorflow
-}  // namespace valiant
+}  // namespace coral::micro

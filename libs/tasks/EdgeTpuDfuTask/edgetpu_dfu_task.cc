@@ -11,7 +11,7 @@
 
 using namespace std::placeholders;
 
-namespace valiant {
+namespace coral::micro {
 
 using namespace edgetpu_dfu;
 constexpr const char kEdgeTpuDfuTaskName[] = "edgetpu_dfu";
@@ -205,7 +205,7 @@ void EdgeTpuDfuTask::CheckStatusCallback(void *param,
 }
 
 void EdgeTpuDfuTask::TaskInit() {
-    valiant::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(kDfuVid, kDfuPid,
+    coral::micro::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(kDfuVid, kDfuPid,
             std::bind(&EdgeTpuDfuTask::USB_DFUHostEvent, this, _1, _2, _3, _4));
 }
 
@@ -322,4 +322,4 @@ void EdgeTpuDfuTask::RequestHandler(Request *req) {
     }
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

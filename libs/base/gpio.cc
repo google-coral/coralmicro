@@ -5,7 +5,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace gpio {
 static void IRQHandler(GPIO_Type* gpio, uint32_t pin);
 }
@@ -17,7 +17,7 @@ extern "C" void GPIO13_Combined_0_31_IRQHandler(void) {
     int i = 0;
     while (pins) {
         if (pins & 1) {
-            valiant::gpio::IRQHandler(GPIO13, i);
+            coral::micro::gpio::IRQHandler(GPIO13, i);
         }
         ++i;
         pins = pins >> 1;
@@ -32,7 +32,7 @@ extern "C" void GPIO6_Combined_0_15_IRQHandler(void) {
     int i = 0;
     while (pins) {
         if (pins & 1) {
-            valiant::gpio::IRQHandler(GPIO6, i);
+            coral::micro::gpio::IRQHandler(GPIO6, i);
         }
         ++i;
         pins = pins >> 1;
@@ -46,7 +46,7 @@ extern "C" void GPIO2_Combined_0_15_IRQHandler(void) {
     int i = 0;
     while (pins) {
         if (pins & 1) {
-            valiant::gpio::IRQHandler(GPIO2, i);
+            coral::micro::gpio::IRQHandler(GPIO2, i);
         }
         ++i;
         pins = pins >> 1;
@@ -55,7 +55,7 @@ extern "C" void GPIO2_Combined_0_15_IRQHandler(void) {
 }
 #endif
 
-namespace valiant {
+namespace coral::micro {
 namespace gpio {
 
 static SemaphoreHandle_t gpio_semaphore;
@@ -460,4 +460,4 @@ void SetPinConfig(Gpio gpio, gpio_pin_config_t config) {
 }
 
 }  // namespace gpio
-}  // namespace valiant
+}  // namespace coral::micro

@@ -17,7 +17,7 @@ extern "C" int _write(int handle, char *buffer, int size) {
         return -1;
     }
 
-    valiant::ConsoleM7::GetSingleton()->Write(buffer, size);
+    coral::micro::ConsoleM7::GetSingleton()->Write(buffer, size);
 
     return size;
 }
@@ -27,11 +27,11 @@ extern "C" int _read(int handle, char *buffer, int size) {
         return -1;
     }
 
-    int bytes_read = valiant::ConsoleM7::GetSingleton()->Read(buffer, size);
+    int bytes_read = coral::micro::ConsoleM7::GetSingleton()->Read(buffer, size);
     return bytes_read > 0 ? bytes_read : -1;
 }
 
-namespace valiant {
+namespace coral::micro {
 
 uint8_t ConsoleM7::m4_console_buffer_storage_[kM4ConsoleBufferSize] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
@@ -146,7 +146,7 @@ void ConsoleM7::M7ConsoleTaskTxFn(void *param) {
 
 void usb_device_task(void *param) {
     while (true) {
-        valiant::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
+        coral::micro::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
         taskYIELD();
     }
 }
@@ -157,15 +157,15 @@ void ConsoleM7::Init(bool init_tx, bool init_rx) {
         xStreamBufferCreateStatic(kM4ConsoleBufferBytes, 1, m4_console_buffer_->stream_buffer_storage, &m4_console_buffer_->static_stream_buffer);
 
     cdc_acm_.Init(
-            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-            valiant::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-            valiant::UsbDeviceTask::GetSingleton()->next_interface_value(),
-            valiant::UsbDeviceTask::GetSingleton()->next_interface_value(),
+            coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+            coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
+            coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
             nullptr /*ReceiveHandler*/);
-    valiant::UsbDeviceTask::GetSingleton()->AddDevice(cdc_acm_.config_data(),
-            std::bind(&valiant::CdcAcm::SetClassHandle, &cdc_acm_, _1),
-            std::bind(&valiant::CdcAcm::HandleEvent, &cdc_acm_, _1, _2),
+    coral::micro::UsbDeviceTask::GetSingleton()->AddDevice(cdc_acm_.config_data(),
+            std::bind(&coral::micro::CdcAcm::SetClassHandle, &cdc_acm_, _1),
+            std::bind(&coral::micro::CdcAcm::HandleEvent, &cdc_acm_, _1, _2),
             cdc_acm_.descriptor_data(), cdc_acm_.descriptor_data_size());
 
     console_queue_ = xQueueCreate(16, sizeof(ConsoleMessage));
@@ -192,4 +192,4 @@ ipc::StreamBuffer* ConsoleM7::GetM4ConsoleBufferPtr() {
     return m4_console_buffer_;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

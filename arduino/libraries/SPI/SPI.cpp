@@ -6,7 +6,7 @@
 extern "C" uint32_t LPSPI_GetInstance(LPSPI_Type *);
 static IRQn_Type const kLpspiIrqs[] = LPSPI_IRQS;
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 HardwareSPI::HardwareSPI(LPSPI_Type *base) : base_(base) {}
@@ -133,6 +133,6 @@ void HardwareSPI::detachInterrupt() {
 }
 
 }  // namespace arduino
-}  // namespace valiant
+}  // namespace coral::micro
 
-valiant::arduino::HardwareSPI SPI(LPSPI6);
+coral::micro::arduino::HardwareSPI SPI(LPSPI6);

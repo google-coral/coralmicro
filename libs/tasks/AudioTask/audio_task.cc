@@ -24,7 +24,7 @@ extern "C" void PDM_ERROR_IRQHandler(void) {
     __DSB();
 }
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 constexpr int kDmaChannel = 0;
 constexpr int kPdmClock = 24577500;
@@ -145,4 +145,4 @@ void AudioDriver::Disable() {
     PmicTask::GetSingleton()->SetRailState(pmic::Rail::MIC_1V8, false);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

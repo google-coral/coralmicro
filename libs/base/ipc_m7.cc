@@ -14,7 +14,7 @@ unsigned int m4_binary_start __attribute__((weak)) = 0xdeadbeef;
 unsigned int m4_binary_end __attribute__((weak)) = 0xdeadbeef;
 unsigned int m4_binary_size __attribute__((weak)) = 0xdeadbeef;
 
-namespace valiant {
+namespace coral::micro {
 
 uint8_t IPCM7::tx_queue_storage_[IPCM7::kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 uint8_t IPCM7::rx_queue_storage_[IPCM7::kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
@@ -113,4 +113,4 @@ void IPCM7::StartM4() {
     MCMGR_StartCore(kMCMGR_Core1, (void*)CORE1_BOOT_ADDRESS, reinterpret_cast<uint32_t>(tx_queue_), kMCMGR_Start_Asynchronous);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

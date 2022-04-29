@@ -7,7 +7,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpspi.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpspi_freertos.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 class HardwareSPI : public ::arduino::HardwareSPI {
@@ -45,8 +45,8 @@ class HardwareSPI : public ::arduino::HardwareSPI {
 };
 
 }  // namespace arduino
-}  // namespace valiant
+}  // namespace coral::micro
 
-extern valiant::arduino::HardwareSPI SPI;
+extern coral::micro::arduino::HardwareSPI SPI;
 
 #endif  // SPI_H_

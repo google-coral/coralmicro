@@ -10,7 +10,7 @@ extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 constexpr int kDefaultRetryCount = 5;
 }  // namespace
@@ -47,15 +47,15 @@ bool ConnectToWiFi(const char* ssid, const char* psk, int retry_count) {
 
 bool ConnectToWiFi() {
     std::string wifi_ssid;
-    if (!valiant::utils::GetWifiSSID(&wifi_ssid)) {
+    if (!coral::micro::utils::GetWifiSSID(&wifi_ssid)) {
         printf("No Wi-Fi SSID provided\r\n");
         return false;
     }
 
     std::string wifi_psk;
-    bool have_psk = valiant::utils::GetWifiPSK(&wifi_psk);
+    bool have_psk = coral::micro::utils::GetWifiPSK(&wifi_psk);
     return ConnectToWiFi(wifi_ssid.c_str(),
                          have_psk ? wifi_psk.c_str() : nullptr,
                          kDefaultRetryCount);
 }
-}  // namespace valiant
+}  // namespace coral::micro

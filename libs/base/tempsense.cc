@@ -2,7 +2,7 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_tempsensor.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace tempsense {
 
 void Init() {
@@ -34,4 +34,4 @@ float GetTemperature(TempSensor sensor) {
 }
 
 }  // namespace tempsense
-}  // namespace valiant
+}  // namespace coral::micro

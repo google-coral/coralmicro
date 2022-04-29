@@ -8,7 +8,7 @@
 #define FILE_WRITE 1
 #define DONT_CARE 0
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 namespace SDLib {
@@ -78,10 +78,10 @@ class SDClass {
 
 }  // namespace SDLib
 }  // namespace arduino
-}  // namespace valiant
-// using namespace valiant::arduino::SDLib;
+}  // namespace coral::micro
+// using namespace coral::micro::arduino::SDLib;
 
-typedef valiant::arduino::SDLib::File SDFile;
-extern valiant::arduino::SDLib::SDClass SD;
+typedef coral::micro::arduino::SDLib::File SDFile;
+extern coral::micro::arduino::SDLib::SDClass SD;
 
 #endif  // SD_h

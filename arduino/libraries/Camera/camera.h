@@ -6,7 +6,7 @@
 
 #include "libs/tasks/CameraTask/camera_task.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 enum {
@@ -28,7 +28,7 @@ class CameraClass {
     // Note: based on Portenta's API, we do requires that user calls "begin" to
     // set the resolution.
     CameraClass()
-        : camera_{valiant::CameraTask::GetSingleton()},
+        : camera_{coral::micro::CameraTask::GetSingleton()},
           width_{0},
           height_{0},
           format_{camera::Format::RGB},
@@ -53,12 +53,12 @@ class CameraClass {
     int grab(uint8_t* buffer);
     int standby(bool enable);
     int testPattern(bool walking);
-    int testPattern(valiant::camera::TestPattern pattern);
+    int testPattern(coral::micro::camera::TestPattern pattern);
 
     // Followings APIs are adds on to extends features that we have and Portenta
     // doesn't.
     int preserveRatio(bool preserve_ratio);
-    int format(valiant::camera::Format fmt);
+    int format(coral::micro::camera::Format fmt);
     int discardFrames(int num_frames);
 
     // Unimplemented APIs left over from Portenta.
@@ -72,15 +72,15 @@ class CameraClass {
     std::unique_ptr<CameraTask> camera_;
     int32_t width_;
     int32_t height_;
-    valiant::camera::Format format_;
-    valiant::camera::FilterMethod filter_;
-    valiant::camera::TestPattern test_pattern_;
+    coral::micro::camera::Format format_;
+    coral::micro::camera::FilterMethod filter_;
+    coral::micro::camera::TestPattern test_pattern_;
     bool preserve_ratio_;
     bool initialized_;
 };
 }  // namespace arduino
-}  // namespace valiant
+}  // namespace coral::micro
 
-extern valiant::arduino::CameraClass Camera;
+extern coral::micro::arduino::CameraClass Camera;
 
 #endif  // VALIANT_CAMERACLASS_H

@@ -7,7 +7,7 @@
 
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
-namespace valiant {
+namespace coral::micro {
 
 IOStatus ReadBytes(int fd, void* bytes, size_t size) {
     assert(fd >= 0);
@@ -74,4 +74,4 @@ int SocketServer(int port, int backlog) {
     return s;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

@@ -15,7 +15,7 @@ struct RackTestAppMessage {
         char* buffer_ptr;
     } message;
 };
-static_assert(sizeof(RackTestAppMessage) <= valiant::ipc::kMessageBufferDataSize);
+static_assert(sizeof(RackTestAppMessage) <= coral::micro::ipc::kMessageBufferDataSize);
 
 
 #endif  // _APPS_RACKTEST_RACK_TEST_IPC_H_

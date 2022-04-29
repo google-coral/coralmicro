@@ -20,9 +20,9 @@ void delayMicroseconds(unsigned int us) {
 }
 
 unsigned long millis() {
-    return valiant::timer::millis();
+    return coral::micro::timer::millis();
 }
 
 unsigned long micros() {
-    return valiant::timer::micros();
+    return coral::micro::timer::micros();
 }

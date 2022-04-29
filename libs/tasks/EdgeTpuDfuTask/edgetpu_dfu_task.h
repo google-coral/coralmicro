@@ -13,7 +13,7 @@
 extern unsigned char apex_latest_single_ep_bin[];
 extern unsigned int apex_latest_single_ep_bin_len;
 
-namespace valiant {
+namespace coral::micro {
 
 constexpr int kDfuVid = 0x1A6E;
 constexpr int kDfuPid = 0x089A;
@@ -187,6 +187,6 @@ class EdgeTpuDfuTask : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Respo
     uint8_t *read_back_data_ = nullptr;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _APPS_LSUSB_DFU_H_

@@ -9,7 +9,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 
-namespace valiant {
+namespace coral::micro {
 
 static struct netif netif;
 struct netif* eth_netif = nullptr;
@@ -42,7 +42,7 @@ void InitializeEthernet(bool default_iface) {
     // Populate the low bytes of the MAC address with our device's
     // unique ID.
     // In production units, addresses should be in fuses that we can read.
-    uint64_t unique_id = valiant::utils::GetUniqueID();
+    uint64_t unique_id = coral::micro::utils::GetUniqueID();
     enet_config.macAddress[3] = (unique_id >> 56) & 0xFF;
     enet_config.macAddress[4] = (unique_id >> 48) & 0xFF;
     enet_config.macAddress[5] = (unique_id >> 40) & 0xFF;
@@ -79,4 +79,4 @@ void InitializeEthernet(bool default_iface) {
     eth_netif = &netif;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

@@ -7,9 +7,9 @@
 #include "libs/base/http_server.h"
 #include "third_party/mjson/src/mjson.h"
 
-namespace valiant {
+namespace coral::micro {
 
-class JsonRpcHttpServer : public valiant::HttpServer {
+class JsonRpcHttpServer : public coral::micro::HttpServer {
    public:
     JsonRpcHttpServer(struct jsonrpc_ctx* ctx = &jsonrpc_default_context)
         : ctx_(ctx) {}
@@ -32,6 +32,6 @@ class JsonRpcHttpServer : public valiant::HttpServer {
     std::map<void*, std::vector<char>> buffers_;  // connection-to-buffer map
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_RPC_RPC_HTTP_SERVER_H_

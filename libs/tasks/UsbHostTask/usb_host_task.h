@@ -7,7 +7,7 @@
 #include <functional>
 #include <map>
 
-namespace valiant {
+namespace coral::micro {
 
 class UsbHostTask {
   public:
@@ -40,6 +40,6 @@ class UsbHostTask {
     std::map<uint32_t, usb_host_event_callback> host_event_callbacks_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TASKS_USBHOSTTASK_USBHOSTTASK_H_

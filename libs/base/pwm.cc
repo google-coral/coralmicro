@@ -4,7 +4,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_xbara.h"
 #include <cstdio>
 
-namespace valiant {
+namespace coral::micro {
 namespace pwm {
 
 static pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
@@ -75,4 +75,4 @@ void Enable(const PwmModuleConfig& config, bool enable) {
 }
 
 }  // namespace pwm
-}  // namespace valiant
+}  // namespace coral::micro

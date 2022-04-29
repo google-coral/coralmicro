@@ -7,7 +7,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 #include <cstdio>
 
-namespace valiant {
+namespace coral::micro {
 
 IPCM4* IPCM4::GetSingleton() {
     static IPCM4 ipc;
@@ -51,4 +51,4 @@ void IPCM4::Init() {
     MCMGR_TriggerEvent(kMCMGR_RemoteApplicationEvent, 1);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

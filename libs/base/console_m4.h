@@ -3,11 +3,11 @@
 
 #include "libs/base/message_buffer.h"
 
-namespace valiant {
+namespace coral::micro {
 
 void ConsoleInit();
 void SetM4ConsoleBufferPtr(ipc::StreamBuffer* buffer);
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_CONSOLE_CONSOLE_M4_H__

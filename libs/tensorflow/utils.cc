@@ -3,7 +3,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/kernels/kernel_runner.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/test_helpers.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace tensorflow {
 
 bool ResizeImage(const ImageDims& in_dims, const uint8_t *uin,
@@ -79,4 +79,4 @@ bool ResizeImage(const ImageDims& in_dims, const uint8_t *uin,
 }
 
 }  // namespace tensorflow
-}  // namespace valiant
+}  // namespace coral::micro

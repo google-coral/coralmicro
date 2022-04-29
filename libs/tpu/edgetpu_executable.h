@@ -9,7 +9,7 @@
 #include <cstring>
 #include <map>
 
-namespace valiant {
+namespace coral::micro {
 
 class OutputLayer {
   public:
@@ -79,6 +79,6 @@ class EdgeTpuExecutable {
     std::map<const char*, OutputLayer*, Less> output_layers_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TPU_EDGETPU_EXECUTABLE_H_

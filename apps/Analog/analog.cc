@@ -5,19 +5,19 @@
 #include <cstdio>
 
 extern "C" void app_main(void *param) {
-    valiant::analog::Init(valiant::analog::Device::ADC1);
-    valiant::analog::Init(valiant::analog::Device::DAC1);
-    valiant::analog::ADCConfig config;
-    valiant::analog::CreateConfig(
+    coral::micro::analog::Init(coral::micro::analog::Device::ADC1);
+    coral::micro::analog::Init(coral::micro::analog::Device::DAC1);
+    coral::micro::analog::ADCConfig config;
+    coral::micro::analog::CreateConfig(
         config,
-        valiant::analog::Device::ADC1, 0,
-        valiant::analog::Side::B,
+        coral::micro::analog::Device::ADC1, 0,
+        coral::micro::analog::Side::B,
         false
     );
-    valiant::analog::EnableDAC(true);
+    coral::micro::analog::EnableDAC(true);
     while (true) {
-        uint16_t val = valiant::analog::ReadADC(config);
-        valiant::analog::WriteDAC(val);
+        uint16_t val = coral::micro::analog::ReadADC(config);
+        coral::micro::analog::WriteDAC(val);
         printf("ADC val: %u\r\n", val);
     }
 }

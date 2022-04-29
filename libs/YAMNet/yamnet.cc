@@ -9,7 +9,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace yamnet {
 
 namespace {
@@ -17,7 +17,7 @@ constexpr int kTensorArenaSize = 1 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 std::unique_ptr<tflite::MicroInterpreter> interpreter;
-std::shared_ptr<valiant::EdgeTpuContext> edgetpu_context;
+std::shared_ptr<coral::micro::EdgeTpuContext> edgetpu_context;
 std::shared_ptr<tflite::MicroErrorReporter> error_reporter;
 std::shared_ptr<TfLiteTensor> input_tensor;
 
@@ -49,13 +49,13 @@ bool setup() {
     TF_LITE_REPORT_ERROR(error_reporter.get(), "YAMNet!");
 
     std::vector<uint8_t> yamnet_edgetpu_tflite;
-    if (!valiant::filesystem::ReadFile(kModelName, &yamnet_edgetpu_tflite)) {
+    if (!coral::micro::filesystem::ReadFile(kModelName, &yamnet_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Failed to load model!");
         return false;
     }
 
     std::vector<uint8_t> yamnet_test_input_bin;
-    if (!valiant::filesystem::ReadFile("/models/yamnet_test_input.bin",
+    if (!coral::micro::filesystem::ReadFile("/models/yamnet_test_input.bin",
                                        &yamnet_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Failed to load test input!");
         return false;
@@ -69,7 +69,7 @@ bool setup() {
         return false;
     }
 
-    edgetpu_context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice(valiant::PerformanceMode::kMax);
+    edgetpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(coral::micro::PerformanceMode::kMax);
     if (!edgetpu_context) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Failed to get TPU context");
         return false;
@@ -138,5 +138,5 @@ bool loop(std::shared_ptr<std::vector<tensorflow::Class>> output, bool print) {
 }
 
 } // namespace yamnet
-} // namespace valiant
+} // namespace coral::micro
 

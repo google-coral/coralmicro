@@ -24,17 +24,17 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
 #endif // !defined(OOBE_DEMO)
 }
 
-static void HandleAppMessage(const uint8_t data[valiant::ipc::kMessageBufferDataSize], void *param) {
+static void HandleAppMessage(const uint8_t data[coral::micro::ipc::kMessageBufferDataSize], void *param) {
     (void)data;
     vTaskResume(reinterpret_cast<TaskHandle_t>(param));
 }
 
 extern "C" void app_main(void *param) {
     (void)param;
-    valiant::IPCM4::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetCurrentTaskHandle());
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::IPCM4::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, xTaskGetCurrentTaskHandle());
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));
-    valiant::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
     setup();
     GPIO_PinWrite(GPIO13, 6, 1);
 
@@ -49,7 +49,7 @@ extern "C" void app_main(void *param) {
 
     while (true) {
         printf("M4 main loop\r\n");
-        valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
+        coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::STREAMING);
         gpio_pin_config_t user_led = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
         GPIO_PinInit(GPIO13, 6, &user_led);
 #if defined(OOBE_DEMO)
@@ -65,10 +65,10 @@ extern "C" void app_main(void *param) {
             }
         }
         printf("Person detected, let M7 take over.\r\n");
-        valiant::CameraTask::GetSingleton()->Disable();
-        valiant::ipc::Message msg;
-        msg.type = valiant::ipc::MessageType::APP;
-        valiant::IPCM4::GetSingleton()->SendMessage(msg);
+        coral::micro::CameraTask::GetSingleton()->Disable();
+        coral::micro::ipc::Message msg;
+        msg.type = coral::micro::ipc::MessageType::APP;
+        coral::micro::IPCM4::GetSingleton()->SendMessage(msg);
         vTaskSuspend(nullptr);
     }
 }

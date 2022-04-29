@@ -15,7 +15,7 @@ extern "C" void app_main(void *param) {
     WIFIScanResult_t xScanResults[ucNumNetworks] = {0};
 
     // Uncomment me to use the external antenna.
-    // valiant::gpio::SetGpio(valiant::gpio::Gpio::kAntennaSelect, true);
+    // coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kAntennaSelect, true);
 
     do {
         xWifiStatus = WIFI_On();

@@ -42,7 +42,7 @@ constexpr int kTxEndpoint = 0;
 constexpr int kRxEndpoint = 1;
 extern uint8_t elfloader_hid_report[];
 extern uint16_t elfloader_hid_report_size;
-extern valiant::HidClassDescriptor elfloader_descriptor_data;
+extern coral::micro::HidClassDescriptor elfloader_descriptor_data;
 extern usb_device_endpoint_struct_t elfloader_hid_endpoints[];
 extern usb_device_interface_struct_t elfloader_hid_interface[];
 extern usb_device_interfaces_struct_t elfloader_interfaces[];

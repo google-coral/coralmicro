@@ -10,7 +10,7 @@
 
 #include <map>
 
-namespace valiant {
+namespace coral::micro {
 
 class CdcEem {
   public:
@@ -128,6 +128,6 @@ class CdcEem {
     void DetectEndianness(uint32_t packet_length);
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // __LIBS_CDCEEM_CDC_EEM_H_

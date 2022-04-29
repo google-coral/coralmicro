@@ -9,7 +9,7 @@
 
 #include <functional>
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 class HardwareI2C : public ::arduino::HardwareI2C {
@@ -69,8 +69,8 @@ class HardwareI2C : public ::arduino::HardwareI2C {
 };
 
 }  // namespace arduino
-}  // namespace valiant
+}  // namespace coral::micro
 
-extern valiant::arduino::HardwareI2C Wire;
+extern coral::micro::arduino::HardwareI2C Wire;
 
 #endif  // Wire_h

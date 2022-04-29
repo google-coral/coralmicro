@@ -7,11 +7,11 @@
 #include <algorithm>
 #include <cassert>
 
-using valiant::analog::ADCConfig;
-using valiant::analog::Device;
-using valiant::analog::Side;
-using valiant::pwm::PwmModuleConfig;
-using valiant::pwm::PwmPinConfig;
+using coral::micro::analog::ADCConfig;
+using coral::micro::analog::Device;
+using coral::micro::analog::Side;
+using coral::micro::pwm::PwmModuleConfig;
+using coral::micro::pwm::PwmPinConfig;
 
 static constexpr int kAdcFullResolutionBits = 12;
 // 12-bits for the real DAC (A2).
@@ -28,14 +28,14 @@ void wiringAnalogInit() {
     pwm_config.module = kPWM_Module_0;
     pwm_config.A.enabled = false;
     pwm_config.B.enabled = false;
-    valiant::analog::Init(Device::ADC1);
-    valiant::analog::Init(Device::DAC1);
-    valiant::analog::CreateConfig(
+    coral::micro::analog::Init(Device::ADC1);
+    coral::micro::analog::Init(Device::DAC1);
+    coral::micro::analog::CreateConfig(
         Config_A0,
         Device::ADC1, 0,
         Side::B, false
     );
-    valiant::analog::CreateConfig(
+    coral::micro::analog::CreateConfig(
         Config_A1,
         Device::ADC1, 0,
         Side::A, false
@@ -57,17 +57,17 @@ static void analogWriteDAC(pin_size_t pinNumber, int value) {
     int dac_shift = kDacFullResolutionBits - dac_resolution_bits;
     int shift_value = dac_resolution_bits;
     if (value) {
-        valiant::analog::EnableDAC(true);
-        valiant::analog::WriteDAC(value << dac_shift);
+        coral::micro::analog::EnableDAC(true);
+        coral::micro::analog::WriteDAC(value << dac_shift);
     } else {
-        valiant::analog::EnableDAC(false);
+        coral::micro::analog::EnableDAC(false);
     }
 }
 
 int analogRead(pin_size_t pinNumber) {
     int adc_shift = kAdcFullResolutionBits - adc_resolution_bits;
     const ADCConfig& config = pinToADCConfig(pinNumber);
-    return (valiant::analog::ReadADC(config) >> adc_shift);
+    return (coral::micro::analog::ReadADC(config) >> adc_shift);
 }
 
 void analogReference(uint8_t mode) {}
@@ -87,8 +87,8 @@ void analogWrite(pin_size_t pinNumber, int value) {
     }
     pin_config->enabled = true;
     pin_config->duty_cycle = map(value, 0, 255, 0, 100);
-    valiant::pwm::Init(pwm_config);
-    valiant::pwm::Enable(pwm_config, true);
+    coral::micro::pwm::Init(pwm_config);
+    coral::micro::pwm::Enable(pwm_config, true);
 }
 
 void analogReadResolution(int bits) {

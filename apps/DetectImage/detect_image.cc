@@ -11,7 +11,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
@@ -84,10 +84,10 @@ void Main() {
     }
 }
 }  // namespace
-}  // namespace valiant
+}  // namespace coral::micro
 
 extern "C" void app_main(void* param) {
     (void)param;
-    valiant::Main();
+    coral::micro::Main();
     vTaskSuspend(nullptr);
 }

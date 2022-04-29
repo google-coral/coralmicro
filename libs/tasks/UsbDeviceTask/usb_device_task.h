@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace valiant {
+namespace coral::micro {
 
 using usb_set_handle_callback = std::function<void(class_handle_t)>;
 using usb_handle_event_callback = std::function<bool(uint32_t, void*)>;
@@ -73,6 +73,6 @@ class UsbDeviceTask {
     std::string serial_number_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TASKS_USBDEVICETASK_USBDEVICETASK_H_

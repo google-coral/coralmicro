@@ -3,7 +3,7 @@
 
 #include <climits>
 
-namespace valiant {
+namespace coral::micro {
 namespace timer {
 
 // Number of times the microseconds counter has rolled over.
@@ -43,8 +43,8 @@ uint32_t micros() {
 }
 
 }  // namespace timer
-}  // namespace valiant
+}  // namespace coral::micro
 
 extern "C" uint32_t vPortGetRunTimeCounterValue(void) {
-    return valiant::timer::micros();
+    return coral::micro::timer::micros();
 }

@@ -8,13 +8,13 @@
 #include "coral_micro.h"
 #include "libs/tensorflow/detection.h"
 
-using namespace valiant::arduino;
+using namespace coral::micro::arduino;
 
 namespace {
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
-std::shared_ptr<valiant::EdgeTpuContext> context = nullptr;
+std::shared_ptr<coral::micro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 TfLiteTensor* input_tensor = nullptr;
 
@@ -46,7 +46,7 @@ void setup() {
     }
 
     model = tflite::GetModel(model_data.data());
-    context = valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+    context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         Serial.println("Failed to get EdgeTpuContext");
         return;
@@ -56,7 +56,7 @@ void setup() {
     tflite::MicroErrorReporter error_reporter;
     resolver.AddDequantize();
     resolver.AddDetectionPostprocess();
-    resolver.AddCustom(valiant::kCustomOp, valiant::RegisterCustomOp());
+    resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
 
     interpreter = std::make_unique<tflite::MicroInterpreter>(
         model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
@@ -85,8 +85,8 @@ void setup() {
     Serial.print("; height=");
     Serial.println(model_height);
     image.resize(model_width * model_height * model_channels);
-    if (Camera.begin(model_width, model_height, valiant::camera::Format::RGB,
-                     valiant::camera::FilterMethod::BILINEAR,
+    if (Camera.begin(model_width, model_height, coral::micro::camera::Format::RGB,
+                     coral::micro::camera::FilterMethod::BILINEAR,
                      true) != CameraStatus::SUCCESS) {
         Serial.println("Failed to start camera");
         return;
@@ -122,7 +122,7 @@ void loop() {
     }
 
     auto results =
-        valiant::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
+        coral::micro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
     Serial.print("Results count: ");
     Serial.println(results.size());
     for (auto result : results) {

@@ -10,7 +10,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/fs.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 
-namespace valiant {
+namespace coral::micro {
 
 class HttpServer {
    public:
@@ -89,6 +89,6 @@ struct FileSystemUriHandler {
 
 void UseHttpServer(HttpServer* server);
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_HTTP_SERVER_H_

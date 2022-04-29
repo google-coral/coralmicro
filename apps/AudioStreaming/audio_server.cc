@@ -11,7 +11,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 AudioDriverBuffers</*NumDmaBuffers*/ 16, /*CombinedDmaBufferSize=*/28 * 1024>
     g_audio_buffers;
@@ -137,10 +137,10 @@ void RunServer() {
     }
 }
 }  // namespace
-}  // namespace valiant
+}  // namespace coral::micro
 
 extern "C" void app_main(void* param) {
     (void)param;
-    valiant::RunServer();
+    coral::micro::RunServer();
     vTaskSuspend(nullptr);
 }

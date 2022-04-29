@@ -4,7 +4,7 @@
 
 #include "libs/base/check.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 enum class MessageType : uint8_t {
     kAddCallback,
@@ -193,4 +193,4 @@ LatestSamples::LatestSamples(size_t num_samples)
 
 LatestSamples::~LatestSamples() { vSemaphoreDelete(mutex_); }
 
-}  // namespace valiant
+}  // namespace coral::micro

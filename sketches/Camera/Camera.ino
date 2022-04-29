@@ -5,7 +5,7 @@
 
 #include "Arduino.h"
 
-using namespace valiant::arduino;
+using namespace coral::micro::arduino;
 
 constexpr int32_t width = 320;
 constexpr int32_t height = 320;
@@ -21,7 +21,7 @@ void setup() {
 }
 
 void loop() {
-    Camera.testPattern(valiant::camera::TestPattern::WALKING_ONES);
+    Camera.testPattern(coral::micro::camera::TestPattern::WALKING_ONES);
     Serial.println("Discarding 100 frames...");
     Camera.discardFrames(100);
     delay(5000);

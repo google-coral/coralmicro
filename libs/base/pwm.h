@@ -3,7 +3,7 @@
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.h"
 
-namespace valiant {
+namespace coral::micro {
 namespace pwm {
 
 struct PwmPinConfig {
@@ -22,6 +22,6 @@ void Init(const PwmModuleConfig& config);
 void Enable(const PwmModuleConfig& config, bool enable);
 
 }  // namespace pwm
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_PWM_H_

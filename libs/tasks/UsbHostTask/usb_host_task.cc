@@ -14,7 +14,7 @@
 constexpr int kUSBControllerId = kUSB_ControllerEhci1;
 
 extern "C" void USB_OTG2_IRQHandler(void) {
-    USB_HostEhciIsrFunction(valiant::UsbHostTask::GetSingleton()->host_handle());
+    USB_HostEhciIsrFunction(coral::micro::UsbHostTask::GetSingleton()->host_handle());
 }
 
 static uint32_t vidpid_to_key(uint32_t vid, uint32_t pid) {
@@ -24,10 +24,10 @@ static uint32_t vidpid_to_key(uint32_t vid, uint32_t pid) {
 static usb_status_t USB_HostEvent(usb_device_handle device_handle,
                                   usb_host_configuration_handle config_handle,
                                   uint32_t event_code) {
-    return valiant::UsbHostTask::GetSingleton()->HostEvent(device_handle, config_handle, event_code);
+    return coral::micro::UsbHostTask::GetSingleton()->HostEvent(device_handle, config_handle, event_code);
 }
 
-namespace valiant {
+namespace coral::micro {
 usb_status_t UsbHostTask::HostEvent(usb_device_handle device_handle,
                                   usb_host_configuration_handle config_handle,
                                   uint32_t event_code) {
@@ -98,4 +98,4 @@ UsbHostTask::UsbHostTask() {
 #endif
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

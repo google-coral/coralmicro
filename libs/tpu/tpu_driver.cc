@@ -11,7 +11,7 @@
 
 #include <cassert>
 
-namespace valiant {
+namespace coral::micro {
 namespace {
 constexpr uint32_t kMaxBulkBufferSize = 32 * 1024;
 uint8_t BulkTransferBuffer[kMaxBulkBufferSize];
@@ -559,4 +559,4 @@ float TpuDriver::GetTemperature() {
     return temperature / 1000;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

@@ -13,7 +13,7 @@
 #endif  // defined(IMAGE_SERVER_ETHERNET)
 
 namespace {
-using valiant::testlib::JsonRpcGetIntegerParam;
+using coral::micro::testlib::JsonRpcGetIntegerParam;
 
 #if defined(IMAGE_SERVER_ETHERNET)
 char* get_ethernet_ip(struct netif* ethernet) {
@@ -37,16 +37,16 @@ void get_image_from_camera(struct jsonrpc_request* request) {
         return;
     }
 
-    valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable(
-        valiant::camera::Mode::STREAMING);
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::CameraTask::GetSingleton()->Enable(
+        coral::micro::camera::Mode::STREAMING);
     std::vector<uint8_t> image(width * height * /*channels=*/3);
-    valiant::camera::FrameFormat fmt{valiant::camera::Format::RGB,
-                                     valiant::camera::FilterMethod::BILINEAR,
+    coral::micro::camera::FrameFormat fmt{coral::micro::camera::Format::RGB,
+                                     coral::micro::camera::FilterMethod::BILINEAR,
                                      width, height, false, image.data()};
-    auto ret = valiant::CameraTask::GetFrame({fmt});
-    valiant::CameraTask::GetSingleton()->Disable();
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    auto ret = coral::micro::CameraTask::GetFrame({fmt});
+    coral::micro::CameraTask::GetSingleton()->Disable();
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
 
     if (!ret) {
         jsonrpc_return_error(request, -1, "Failed to get image from camera.",
@@ -62,8 +62,8 @@ void get_image_from_camera(struct jsonrpc_request* request) {
 
 extern "C" void app_main(void* param) {
 #if defined(IMAGE_SERVER_ETHERNET)
-    valiant::InitializeEthernet(true);
-    auto* ethernet = valiant::GetEthernetInterface();
+    coral::micro::InitializeEthernet(true);
+    auto* ethernet = coral::micro::GetEthernetInterface();
     if (!ethernet) {
         printf("Unable to bring up ethernet...\r\n");
         vTaskSuspend(nullptr);
@@ -81,7 +81,7 @@ extern "C" void app_main(void* param) {
     jsonrpc_init(nullptr, nullptr);
 #endif  // defined(IMAGE_SERVER_ETHERNET)
     jsonrpc_export("get_image_from_camera", get_image_from_camera);
-    valiant::UseHttpServer(new valiant::JsonRpcHttpServer);
+    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
     printf("Server started...\r\n");
     vTaskSuspend(nullptr);
 }

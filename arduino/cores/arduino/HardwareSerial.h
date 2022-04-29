@@ -3,7 +3,7 @@
 
 #include <api/HardwareSerial.h>
 
-namespace valiant {
+namespace coral::micro {
 namespace arduino {
 
 class HardwareSerial : public ::arduino::HardwareSerial {
@@ -24,6 +24,6 @@ class HardwareSerial : public ::arduino::HardwareSerial {
 };
 
 }  // namespace arduino
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // HardwareSerial_h

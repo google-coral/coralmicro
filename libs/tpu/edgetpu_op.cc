@@ -2,7 +2,7 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
-namespace valiant {
+namespace coral::micro {
 
 static void* CustomOpInit(TfLiteContext *context, const char *buffer, size_t length) {
     return EdgeTpuManager::GetSingleton()->RegisterPackage(buffer, length);
@@ -32,4 +32,4 @@ TfLiteRegistration* RegisterCustomOp() {
     return &registration;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

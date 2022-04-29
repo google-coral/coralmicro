@@ -30,30 +30,30 @@ static uint8_t sdram_memory[sdram_memory_size] __attribute__((section(".sdram_bs
 TF_LITE_MICRO_TESTS_BEGIN
 
 TF_LITE_MICRO_TEST(MulticoreTest_CheckM4) {
-    auto* ipc = valiant::IPCM7::GetSingleton();
+    auto* ipc = coral::micro::IPCM7::GetSingleton();
     TF_LITE_MICRO_EXPECT_NE(ipc, nullptr);
     ipc->StartM4();
     TF_LITE_MICRO_EXPECT(ipc->M4IsAlive(1000/*ms*/));
 }
 
 TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
-    valiant::EdgeTpuTask::GetSingleton()->SetPower(true);
-    valiant::EdgeTpuManager::GetSingleton()->OpenDevice();
+    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
+    coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
 
-    if (!valiant::filesystem::ReadFile("/models/testconv1-edgetpu.tflite",
+    if (!coral::micro::filesystem::ReadFile("/models/testconv1-edgetpu.tflite",
                                        &testconv1_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load model!");
         return false;
     }
 
-    if (!valiant::filesystem::ReadFile("/models/testconv1-expected-output.bin",
+    if (!coral::micro::filesystem::ReadFile("/models/testconv1-expected-output.bin",
                                        &testconv1_expected_output_bin)) {
         TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load expected output!");
         return false;
 
     }
 
-    if (!valiant::filesystem::ReadFile("/models/testconv1-test-input.bin",
+    if (!coral::micro::filesystem::ReadFile("/models/testconv1-test-input.bin",
                                        &testconv1_test_input_bin)) {
         TF_LITE_REPORT_ERROR(micro_test::reporter, "Failed to load test input!");
         return false;
@@ -62,7 +62,7 @@ TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
     const tflite::Model *model = tflite::GetModel(testconv1_edgetpu_tflite.data());
     TF_LITE_MICRO_EXPECT_EQ(static_cast<int>(model->version()), TFLITE_SCHEMA_VERSION);
 
-    resolver.AddCustom("edgetpu-custom-op", valiant::RegisterCustomOp());
+    resolver.AddCustom("edgetpu-custom-op", coral::micro::RegisterCustomOp());
     tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, kTensorArenaSize, micro_test::reporter);
     TF_LITE_MICRO_EXPECT_EQ(interpreter.AllocateTensors(), kTfLiteOk);
 
@@ -82,21 +82,21 @@ TF_LITE_MICRO_TEST(TPUTest_CheckTestConv1) {
 }
 
 TF_LITE_MICRO_TEST(CameraTest_CheckTestPattern) {
-    valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
-    valiant::CameraTask::GetSingleton()->SetTestPattern(
-            valiant::camera::TestPattern::WALKING_ONES);
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::STREAMING);
+    coral::micro::CameraTask::GetSingleton()->SetTestPattern(
+            coral::micro::camera::TestPattern::WALKING_ONES);
 
     uint8_t *buffer = nullptr;
     int index = -1;
-    index = valiant::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+    index = coral::micro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
 
     TF_LITE_MICRO_EXPECT_GE(index, 0);
     TF_LITE_MICRO_EXPECT(buffer);
 
     uint8_t expected = 0;
     uint8_t mismatch_count = 0;
-    for (unsigned int i = 0; i < valiant::CameraTask::kWidth * valiant::CameraTask::kHeight; ++i) {
+    for (unsigned int i = 0; i < coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight; ++i) {
         if (buffer[i] != expected) {
             mismatch_count++;
         }
@@ -108,9 +108,9 @@ TF_LITE_MICRO_TEST(CameraTest_CheckTestPattern) {
     }
     TF_LITE_MICRO_EXPECT_EQ(mismatch_count, 0);
 
-    valiant::CameraTask::GetSingleton()->ReturnFrame(index);
-    valiant::CameraTask::GetSingleton()->Disable();
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::CameraTask::GetSingleton()->ReturnFrame(index);
+    coral::micro::CameraTask::GetSingleton()->Disable();
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
 }
 
 TF_LITE_MICRO_TEST(SDRAMTest_CheckReadWrite) {
@@ -123,7 +123,7 @@ TF_LITE_MICRO_TEST(SDRAMTest_CheckReadWrite) {
 }
 
 TF_LITE_MICRO_TEST(PmicTest_CheckChipId) {
-    TF_LITE_MICRO_EXPECT_EQ(valiant::PmicTask::GetSingleton()->GetChipId(), 0x62);
+    TF_LITE_MICRO_EXPECT_EQ(coral::micro::PmicTask::GetSingleton()->GetChipId(), 0x62);
 }
 
 TF_LITE_MICRO_TEST(RandomTest_CheckRandom) {
@@ -133,7 +133,7 @@ TF_LITE_MICRO_TEST(RandomTest_CheckRandom) {
     uint32_t data[kRandomValues];
     memset(data, kConstByte, sizeof(data));
 
-    bool success = valiant::Random::GetSingleton()->GetRandomNumber(data, sizeof(data));
+    bool success = coral::micro::Random::GetSingleton()->GetRandomNumber(data, sizeof(data));
     TF_LITE_MICRO_EXPECT(success);
 
     for (size_t i = 0; i < ARRAY_SIZE(data); ++i) {

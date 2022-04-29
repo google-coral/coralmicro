@@ -18,21 +18,21 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
             person_score, no_person_score);
 
     bool person_detected = person_score > no_person_score;
-    valiant::gpio::SetGpio(valiant::gpio::Gpio::kUserLED, person_detected);
-    valiant::gpio::SetGpio(valiant::gpio::Gpio::kPowerLED, person_detected);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kUserLED, person_detected);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::Gpio::kPowerLED, person_detected);
 }
 
 extern "C" void app_main(void *param) {
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));
-    valiant::CameraTask::GetSingleton()->SetPower(true);
-    valiant::CameraTask::GetSingleton()->Enable(valiant::camera::Mode::STREAMING);
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::STREAMING);
 
     setup();
     while (true) {
         loop();
     }
-    valiant::CameraTask::GetSingleton()->Disable();
-    valiant::CameraTask::GetSingleton()->SetPower(false);
+    coral::micro::CameraTask::GetSingleton()->Disable();
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
     vTaskSuspend(NULL);
 }

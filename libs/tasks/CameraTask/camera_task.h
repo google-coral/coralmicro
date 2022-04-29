@@ -9,7 +9,7 @@
 #include <functional>
 #include <list>
 
-namespace valiant {
+namespace coral::micro {
 
 namespace camera {
 
@@ -210,6 +210,6 @@ class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTa
     camera::Mode mode_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TASKS_CAMERA_TASK_H_

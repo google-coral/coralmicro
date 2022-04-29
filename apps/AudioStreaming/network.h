@@ -1,6 +1,6 @@
 #include <cstddef>
 
-namespace valiant {
+namespace coral::micro {
 
 enum class IOStatus { kOk, kEof, kError };
 
@@ -21,4 +21,4 @@ IOStatus WriteArray(int fd, const T* array, size_t array_size) {
 
 int SocketServer(int port, int backlog);
 
-}  // namespace valiant
+}  // namespace coral::micro

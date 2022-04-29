@@ -4,7 +4,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.h"
 #include <cstdio>
 
-namespace valiant {
+namespace coral::micro {
 
 using namespace random;
 
@@ -28,4 +28,4 @@ bool Random::GetRandomNumber(void *out, size_t len) {
     return resp.success;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

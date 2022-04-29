@@ -73,14 +73,14 @@ static void bt_ready_internal(int err_param) {
 }
 
 void InitEdgefastBluetooth(bt_ready_cb_t cb) {
-    if (valiant::filesystem::ReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
+    if (coral::micro::filesystem::ReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
                                       brcm_patchram_buf,
                                       brcm_patch_ram_length) != brcm_patch_ram_length) {
         printf("Reading patchram failed\r\n");
         assert(false);
     }
     wiced_wlan_connectivity_init();
-    valiant::gpio::SetGpio(valiant::gpio::kBtDevWake, false);
+    coral::micro::gpio::SetGpio(coral::micro::gpio::kBtDevWake, false);
     ble_pwr_on();
     g_cb = cb;
     int err = bt_enable(bt_ready_internal);

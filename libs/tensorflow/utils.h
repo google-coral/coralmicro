@@ -15,7 +15,7 @@
 #define STATIC_TENSOR_ARENA_IN_OCRAM(name, size) \
     static uint8_t name[size] __attribute__((aligned(16))) __attribute__((section(".ocram_bss,\"aw\",%nobits @")))
 
-namespace valiant {
+namespace coral::micro {
 namespace tensorflow {
 
 struct ImageDims {
@@ -66,6 +66,6 @@ std::vector<T> DequantizeTensor(TfLiteTensor* tensor) {
   return result;
 }
 }  // namespace tensorflow
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TENSORFLOW_UTILS_H_

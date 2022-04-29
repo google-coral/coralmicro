@@ -11,7 +11,7 @@
 constexpr int kUSBControllerId = kUSB_ControllerEhci0;
 
 extern "C" void USB_OTG1_IRQHandler(void) {
-    USB_DeviceEhciIsrFunction(valiant::UsbDeviceTask::GetSingleton()->device_handle());
+    USB_DeviceEhciIsrFunction(coral::micro::UsbDeviceTask::GetSingleton()->device_handle());
 }
 
 // Super-basic unicode "conversion" function (no conversion really, just
@@ -35,10 +35,10 @@ void ToUsbStringDescriptor(const char* s,
 }
 
 
-namespace valiant {
+namespace coral::micro {
 
 usb_status_t UsbDeviceTask::StaticHandler(usb_device_handle device_handle, uint32_t event, void *param) {
-    return valiant::UsbDeviceTask::GetSingleton()->Handler(device_handle, event, param);
+    return coral::micro::UsbDeviceTask::GetSingleton()->Handler(device_handle, event, param);
 }
 
 usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t event, void *param) {
@@ -156,7 +156,7 @@ bool UsbDeviceTask::Init() {
 }
 
 UsbDeviceTask::UsbDeviceTask() {
-    serial_number_ = valiant::utils::GetSerialNumber();
+    serial_number_ = coral::micro::utils::GetSerialNumber();
 
     uint32_t usbClockFreq = 24000000;
     usb_phy_config_struct_t phyConfig = {
@@ -193,4 +193,4 @@ void UsbDeviceTask::UsbDeviceTaskFn() {
     USB_DeviceEhciTaskFunction(device_handle_);
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

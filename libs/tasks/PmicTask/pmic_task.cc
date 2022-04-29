@@ -4,7 +4,7 @@
 
 #include <cstdio>
 
-namespace valiant {
+namespace coral::micro {
 
 using namespace pmic;
 
@@ -129,4 +129,4 @@ uint8_t PmicTask::GetChipId() {
     return resp.response.chip_id;
 }
 
-}  // namespace valiant
+}  // namespace coral::micro

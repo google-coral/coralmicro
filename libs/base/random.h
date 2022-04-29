@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <functional>
 
-namespace valiant {
+namespace coral::micro {
 
 namespace random {
 
@@ -37,6 +37,6 @@ class Random : public QueueTask<random::Request, random::Response, kRandomTaskNa
     void RequestHandler(random::Request *req) override;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_RANDOM_H_

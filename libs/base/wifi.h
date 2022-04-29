@@ -1,7 +1,7 @@
 #ifndef _LIBS_BASE_WIFI_H_
 #define _LIBS_BASE_WIFI_H_
 
-namespace valiant {
+namespace coral::micro {
 
 bool TurnOnWiFi();
 bool TurnOffWiFi();
@@ -9,6 +9,6 @@ bool TurnOffWiFi();
 bool ConnectToWiFi(const char* ssid, const char* psk, int retry_count);
 bool ConnectToWiFi();
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_BASE_WIFI_H_

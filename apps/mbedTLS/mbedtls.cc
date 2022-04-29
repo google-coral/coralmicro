@@ -62,7 +62,7 @@ const selftest_t selftests[] =
 };
 
 extern "C" void app_main(void *param) {
-    if (!valiant::a71ch::Init()) {
+    if (!coral::micro::a71ch::Init()) {
         printf("A71CH init failed\r\n");
         vTaskSuspend(NULL);
     }

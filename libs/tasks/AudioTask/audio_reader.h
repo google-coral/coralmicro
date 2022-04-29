@@ -11,7 +11,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 
-namespace valiant {
+namespace coral::micro {
 
 template <typename T>
 class FreeRTOSStreamBuffer {
@@ -229,6 +229,6 @@ class LatestSamples {
     std::vector<int32_t> samples_;  // protected by mutex_;
 };
 
-}  // namespace valiant
+}  // namespace coral::micro
 
 #endif  // _LIBS_TASKS_AUDIO_READER_
