@@ -128,6 +128,7 @@ EOF
 
     python3 -m http.server --directory ${build_dir} &
     http_pid="$!"
+    trap "kill ${http_pid}" EXIT
     python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --manifest \
     --manifest_revision=9.9.9 \
     --core_url=http://localhost:8000/coral-valiant-$(git rev-parse HEAD).tar.bz2 \
@@ -141,8 +142,6 @@ EOF
             ${ROOTDIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli compile -b coral:valiant:valiant ${sketch};
         done
     fi
-    kill ${http_pid}
-    wait
     fi
 }
 
