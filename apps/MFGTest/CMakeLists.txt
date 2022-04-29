@@ -5,6 +5,7 @@ add_executable_m7(MFGTest
 
 target_link_libraries(MFGTest
     libs_base-m7_freertos
+    libs_a71ch
     libs_rpc_http_server
     libs_mjson
     libs_testconv1

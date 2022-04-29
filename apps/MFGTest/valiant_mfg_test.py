@@ -243,6 +243,14 @@ class ValiantMFGTest(object):
         """
 
     @rpc
+    def check_a71ch(self):
+      """Checks the status of the A71CH peripheral.
+
+      Returns:
+        A JSON-RPC result packet.
+      """
+
+    @rpc
     def wifi_get_ap(self, name):
         """Scans for an access point of the provided name.
 
@@ -381,6 +389,7 @@ if __name__ == '__main__':
     print(mfg_test.set_dac_value(2048))
     print(mfg_test.set_dac_value(0))
     print(mfg_test.test_sdram_pattern())
+    print(mfg_test.check_a71ch())
 
     capture_audio_result = mfg_test.capture_audio()
     import tempfile

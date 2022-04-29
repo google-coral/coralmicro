@@ -1,4 +1,5 @@
 #include "apps/MFGTest/mfg_test_iperf.h"
+#include "libs/a71ch/a71ch.h"
 #include "libs/base/analog.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
@@ -10,6 +11,7 @@
 #include "libs/testconv1/testconv1.h"
 #include "libs/testlib/test_lib.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
@@ -547,6 +549,28 @@ static void ReadFile(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(), data.data());
 }
 
+static void CheckA71CH(struct jsonrpc_request *request) {
+    static bool a71ch_inited = false;
+    if (!a71ch_inited) {
+        bool success = valiant::a71ch::Init();
+        if (!success) {
+            jsonrpc_return_error(request, -1, "failed to init a71ch", nullptr);
+            return;
+        }
+        a71ch_inited = true;
+    }
+
+    uint8_t uid[A71CH_MODULE_UNIQUE_ID_LEN];
+    uint16_t uidLen = A71CH_MODULE_UNIQUE_ID_LEN;
+    uint16_t ret = A71_GetUniqueID(uid, &uidLen);
+
+    if (ret == SMCOM_OK) {
+        jsonrpc_return_success(request, "{}");
+    } else {
+        jsonrpc_return_error(request, -1, "failed to retrieve a71ch id", nullptr);
+    }
+}
+
 static void FuseMACAddress(struct jsonrpc_request *request) {
     std::string address;
     if (!JsonRpcGetStringParam(request, "address", &address)) return;
@@ -623,6 +647,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("test_sdram_pattern", TestSDRamPattern);
     jsonrpc_export("write_file", WriteFile);
     jsonrpc_export("read_file", ReadFile);
+    jsonrpc_export("check_a71ch", CheckA71CH);
     jsonrpc_export("fuse_mac_address", FuseMACAddress);
     jsonrpc_export("read_mac_address", ReadMACAddress);
     IperfInit();
