@@ -147,7 +147,7 @@ class AudioService {
                               size_t num_samples);
 
     AudioService(AudioDriver* driver, const AudioDriverConfig& config,
-                 int drop_first_samples_ms);
+                 int task_priority, int drop_first_samples_ms);
     AudioService(const AudioService&) = delete;
     AudioService& operator=(const AudioService&) = delete;
     ~AudioService();

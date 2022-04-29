@@ -74,7 +74,7 @@ void AudioReader::Callback(void* param, const int32_t* buf, size_t size) {
 }
 
 AudioService::AudioService(AudioDriver* driver, const AudioDriverConfig& config,
-                           int drop_first_samples_ms)
+                           int task_priority, int drop_first_samples_ms)
     : driver_(driver),
       config_(config),
       drop_first_samples_(
@@ -82,7 +82,7 @@ AudioService::AudioService(AudioDriver* driver, const AudioDriverConfig& config,
       queue_(xQueueCreate(5, sizeof(Message))) {
     CHECK(queue_);
     CHECK(xTaskCreate(StaticRun, "audio_service", configMINIMAL_STACK_SIZE * 30,
-                      this, APP_TASK_PRIORITY, &task_) == pdPASS);
+                      this, task_priority, &task_) == pdPASS);
 }
 
 AudioService::~AudioService() {
