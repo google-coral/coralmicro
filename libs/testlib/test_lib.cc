@@ -1,31 +1,36 @@
+#include "libs/testlib/test_lib.h"
+
+#include <array>
+#include <map>
+
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/base/strings.h"
 #include "libs/base/tempsense.h"
 #include "libs/base/timer.h"
 #include "libs/base/utils.h"
 #include "libs/tasks/AudioTask/audio_task.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/testconv1/testconv1.h"
-#include "libs/testlib/test_lib.h"
 #include "libs/tensorflow/classification.h"
 #include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/utils.h"
+#include "libs/testconv1/testconv1.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
+extern "C" {
+#include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
+}
 
-#include <array>
-#include <map>
-
-namespace coral::micro {
-namespace testlib {
+namespace coral::micro::testlib {
 namespace {
-AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024> g_audio_buffers;
+AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024>
+    g_audio_buffers;
 AudioDriver g_audio_driver(g_audio_buffers);
 
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
@@ -35,8 +40,8 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 // Key is the output of StrHash with the resource name as the parameter.
 std::map<std::string, std::vector<uint8_t>> g_uploaded_resources;
 
-std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char *param_name) {
-    const char *param_format = "$[0].%s";
+std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char* param_name) {
+    const char* param_format = "$[0].%s";
     // +1 for null terminator.
     auto size = snprintf(nullptr, 0, param_format, param_name) + 1;
     auto param_pattern = std::make_unique<char[]>(size);
@@ -51,15 +56,19 @@ std::vector<uint8_t>* GetResource(const std::string& resource_name) {
 }
 }  // namespace
 
-void JsonRpcReturnBadParam(struct jsonrpc_request* request, const char* message, const char* param_name) {
-   jsonrpc_return_error(request, JSONRPC_ERROR_BAD_PARAMS, message, "{%Q:%Q}", "param", param_name);
+void JsonRpcReturnBadParam(struct jsonrpc_request* request, const char* message,
+                           const char* param_name) {
+    jsonrpc_return_error(request, JSONRPC_ERROR_BAD_PARAMS, message, "{%Q:%Q}",
+                         "param", param_name);
 }
 
-bool JsonRpcGetIntegerParam(struct jsonrpc_request* request, const char *param_name, int* out) {
+bool JsonRpcGetIntegerParam(struct jsonrpc_request* request,
+                            const char* param_name, int* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
 
     double value;
-    if (mjson_get_number(request->params, request->params_len, param_pattern.get(), &value) == 0) {
+    if (mjson_get_number(request->params, request->params_len,
+                         param_pattern.get(), &value) == 0) {
         JsonRpcReturnBadParam(request, "invalid param", param_name);
         return false;
     }
@@ -68,11 +77,13 @@ bool JsonRpcGetIntegerParam(struct jsonrpc_request* request, const char *param_n
     return true;
 }
 
-bool JsonRpcGetBooleanParam(struct jsonrpc_request* request, const char *param_name, bool *out) {
+bool JsonRpcGetBooleanParam(struct jsonrpc_request* request,
+                            const char* param_name, bool* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
 
     int value;
-    if (mjson_get_bool(request->params, request->params_len, param_pattern.get(), &value) == 0) {
+    if (mjson_get_bool(request->params, request->params_len,
+                       param_pattern.get(), &value) == 0) {
         JsonRpcReturnBadParam(request, "invalid param", param_name);
         return false;
     }
@@ -81,11 +92,13 @@ bool JsonRpcGetBooleanParam(struct jsonrpc_request* request, const char *param_n
     return true;
 }
 
-bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char *param_name, std::string* out) {
+bool JsonRpcGetStringParam(struct jsonrpc_request* request,
+                           const char* param_name, std::string* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
 
     ssize_t size = 0;
-    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, &size);
+    int tok = mjson_find(request->params, request->params_len,
+                         param_pattern.get(), nullptr, &size);
     if (tok != MJSON_TOK_STRING) {
         JsonRpcReturnBadParam(request, "invalid param", param_name);
         return false;
@@ -98,11 +111,13 @@ bool JsonRpcGetStringParam(struct jsonrpc_request* request, const char *param_na
     return true;
 }
 
-bool JsonRpcGetBase64Param(struct jsonrpc_request* request, const char *param_name, std::vector<uint8_t>* out) {
+bool JsonRpcGetBase64Param(struct jsonrpc_request* request,
+                           const char* param_name, std::vector<uint8_t>* out) {
     auto param_pattern = JSONRPCCreateParamFormatString(param_name);
 
     ssize_t size = 0;
-    int tok = mjson_find(request->params, request->params_len, param_pattern.get(), nullptr, &size);
+    int tok = mjson_find(request->params, request->params_len,
+                         param_pattern.get(), nullptr, &size);
     if (tok != MJSON_TOK_STRING) {
         JsonRpcReturnBadParam(request, "invalid param", param_name);
         return false;
@@ -120,8 +135,9 @@ bool JsonRpcGetBase64Param(struct jsonrpc_request* request, const char *param_na
 }
 
 // Implementation of "get_serial_number" RPC.
-// Returns JSON results with the key "serial_number" and the serial, as a string.
-void GetSerialNumber(struct jsonrpc_request *request) {
+// Returns JSON results with the key "serial_number" and the serial, as a
+// string.
+void GetSerialNumber(struct jsonrpc_request* request) {
     std::string serial = coral::micro::utils::GetSerialNumber();
     jsonrpc_return_success(request, "{%Q:%.*Q}", "serial_number", serial.size(),
                            serial.c_str());
@@ -130,7 +146,7 @@ void GetSerialNumber(struct jsonrpc_request *request) {
 // Implements the "run_testconv1" RPC.
 // Runs the simple "testconv1" model using the TPU.
 // NOTE: The TPU power must be enabled for this RPC to succeed.
-void RunTestConv1(struct jsonrpc_request *request) {
+void RunTestConv1(struct jsonrpc_request* request) {
     if (!coral::micro::EdgeTpuTask::GetSingleton()->GetPower()) {
         jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
         return;
@@ -150,7 +166,7 @@ void RunTestConv1(struct jsonrpc_request *request) {
 // Implements the "set_tpu_power_state" RPC.
 // Takes one parameter, "enable" -- a boolean indicating the state to set.
 // Returns success or failure.
-void SetTPUPowerState(struct jsonrpc_request *request) {
+void SetTPUPowerState(struct jsonrpc_request* request) {
     bool enable;
     if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
@@ -158,7 +174,7 @@ void SetTPUPowerState(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-void BeginUploadResource(struct jsonrpc_request *request) {
+void BeginUploadResource(struct jsonrpc_request* request) {
     std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
@@ -169,7 +185,7 @@ void BeginUploadResource(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-void UploadResourceChunk(struct jsonrpc_request *request) {
+void UploadResourceChunk(struct jsonrpc_request* request) {
     std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
@@ -189,7 +205,7 @@ void UploadResourceChunk(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-void DeleteResource(struct jsonrpc_request *request) {
+void DeleteResource(struct jsonrpc_request* request) {
     std::string resource_name;
     if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
@@ -207,20 +223,19 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     std::string model_resource_name, image_resource_name;
     int image_width, image_height, image_depth;
 
-    if (!JsonRpcGetStringParam(request, "model_resource_name", &model_resource_name))
+    if (!JsonRpcGetStringParam(request, "model_resource_name",
+                               &model_resource_name))
         return;
 
-    if (!JsonRpcGetStringParam(request, "image_resource_name", &image_resource_name))
+    if (!JsonRpcGetStringParam(request, "image_resource_name",
+                               &image_resource_name))
         return;
 
-    if (!JsonRpcGetIntegerParam(request, "image_width", &image_width))
-        return;
+    if (!JsonRpcGetIntegerParam(request, "image_width", &image_width)) return;
 
-    if (!JsonRpcGetIntegerParam(request, "image_height", &image_height))
-        return;
+    if (!JsonRpcGetIntegerParam(request, "image_height", &image_height)) return;
 
-    if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth))
-        return;
+    if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth)) return;
 
     const auto* model_resource = GetResource(model_resource_name);
     if (!model_resource) {
@@ -235,12 +250,14 @@ void RunDetectionModel(struct jsonrpc_request* request) {
 
     const tflite::Model* model = tflite::GetModel(model_resource->data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
-        jsonrpc_return_error(request, -1, "model schema version unsupported", nullptr);
+        jsonrpc_return_error(request, -1, "model schema version unsupported",
+                             nullptr);
         return;
     }
 
     tflite::MicroErrorReporter error_reporter;
-    std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice();
+    std::shared_ptr<EdgeTpuContext> context =
+        EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
         return;
@@ -254,21 +271,22 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
                                          kTensorArenaSize, &error_reporter);
     if (interpreter.AllocateTensors() != kTfLiteOk) {
-        jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
+        jsonrpc_return_error(request, -1, "failed to allocate tensors",
+                             nullptr);
         return;
     }
 
     auto* input_tensor = interpreter.input_tensor(0);
     auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
-    tensorflow::ImageDims tensor_dims = {
-        input_tensor->dims->data[1],
-        input_tensor->dims->data[2],
-        input_tensor->dims->data[3]
-    };
+    tensorflow::ImageDims tensor_dims = {input_tensor->dims->data[1],
+                                         input_tensor->dims->data[2],
+                                         input_tensor->dims->data[3]};
     auto preprocess_start = coral::micro::timer::micros();
     if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
-                                 image_resource->data(), tensor_dims, input_tensor_data)) {
-        jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
+                                 image_resource->data(), tensor_dims,
+                                 input_tensor_data)) {
+        jsonrpc_return_error(request, -1, "Failed to resize input image",
+                             nullptr);
         return;
     }
     auto preprocess_latency = coral::micro::timer::micros() - preprocess_start;
@@ -276,13 +294,15 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     // The first Invoke is slow due to model transfer. Run an Invoke
     // but ignore the results.
     if (interpreter.Invoke() != kTfLiteOk) {
-        jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter",
+                             nullptr);
         return;
     }
 
     auto invoke_start = coral::micro::timer::micros();
     if (interpreter.Invoke() != kTfLiteOk) {
-        jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter",
+                             nullptr);
         return;
     }
     auto invoke_latency = coral::micro::timer::micros() - invoke_start;
@@ -290,39 +310,36 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     // Return results and check on host side
     auto results = tensorflow::GetDetectionResults(&interpreter, 0.7, 3);
     if (results.empty()) {
-        jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
+        jsonrpc_return_error(request, -1, "no results above threshold",
+                             nullptr);
         return;
     }
     const auto& top_result = results.at(0);
-    jsonrpc_return_success(request,
-                           "{%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q:%d}",
-                           "id", top_result.id,
-                           "score", top_result.score,
-                           "xmin", top_result.bbox.xmin,
-                           "xmax", top_result.bbox.xmax,
-                           "ymin", top_result.bbox.ymin,
-                           "ymax", top_result.bbox.ymax,
-                           "latency", (preprocess_latency + invoke_latency));
+    jsonrpc_return_success(
+        request, "{%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q:%d}",
+        "id", top_result.id, "score", top_result.score, "xmin",
+        top_result.bbox.xmin, "xmax", top_result.bbox.xmax, "ymin",
+        top_result.bbox.ymin, "ymax", top_result.bbox.ymax, "latency",
+        (preprocess_latency + invoke_latency));
 }
 
 void RunClassificationModel(struct jsonrpc_request* request) {
     std::string model_resource_name, image_resource_name;
     int image_width, image_height, image_depth;
 
-    if (!JsonRpcGetStringParam(request, "model_resource_name", &model_resource_name))
+    if (!JsonRpcGetStringParam(request, "model_resource_name",
+                               &model_resource_name))
         return;
 
-    if (!JsonRpcGetStringParam(request, "image_resource_name", &image_resource_name))
+    if (!JsonRpcGetStringParam(request, "image_resource_name",
+                               &image_resource_name))
         return;
 
-    if (!JsonRpcGetIntegerParam(request, "image_width", &image_width))
-        return;
+    if (!JsonRpcGetIntegerParam(request, "image_width", &image_width)) return;
 
-    if (!JsonRpcGetIntegerParam(request, "image_height", &image_height))
-        return;
+    if (!JsonRpcGetIntegerParam(request, "image_height", &image_height)) return;
 
-    if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth))
-        return;
+    if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth)) return;
 
     const auto* model_resource = GetResource(model_resource_name);
     if (!model_resource) {
@@ -337,12 +354,14 @@ void RunClassificationModel(struct jsonrpc_request* request) {
 
     const tflite::Model* model = tflite::GetModel(model_resource->data());
     if (model->version() != TFLITE_SCHEMA_VERSION) {
-        jsonrpc_return_error(request, -1, "model schema version unsupported", nullptr);
+        jsonrpc_return_error(request, -1, "model schema version unsupported",
+                             nullptr);
         return;
     }
 
     tflite::MicroErrorReporter error_reporter;
-    std::shared_ptr<EdgeTpuContext> context = EdgeTpuManager::GetSingleton()->OpenDevice();
+    std::shared_ptr<EdgeTpuContext> context =
+        EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
         return;
@@ -353,17 +372,20 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
                                          kTensorArenaSize, &error_reporter);
     if (interpreter.AllocateTensors() != kTfLiteOk) {
-        jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
+        jsonrpc_return_error(request, -1, "failed to allocate tensors",
+                             nullptr);
         return;
     }
 
     auto* input_tensor = interpreter.input_tensor(0);
-    bool needs_preprocessing = tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
+    bool needs_preprocessing =
+        tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
     uint32_t preprocess_latency = 0;
     if (needs_preprocessing) {
         uint32_t preprocess_start = coral::micro::timer::micros();
         if (!tensorflow::ClassificationPreprocess(input_tensor)) {
-            jsonrpc_return_error(request, -1, "input preprocessing failed", nullptr);
+            jsonrpc_return_error(request, -1, "input preprocessing failed",
+                                 nullptr);
             return;
         }
         uint32_t preprocess_end = coral::micro::timer::micros();
@@ -371,14 +393,12 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     }
 
     // Resize into input tensor
-    tensorflow::ImageDims input_tensor_dims = {
-        input_tensor->dims->data[1],
-        input_tensor->dims->data[2],
-        input_tensor->dims->data[3]
-    };
+    tensorflow::ImageDims input_tensor_dims = {input_tensor->dims->data[1],
+                                               input_tensor->dims->data[2],
+                                               input_tensor->dims->data[3]};
     if (!tensorflow::ResizeImage(
-        {image_height, image_width, image_depth}, image_resource->data(),
-        input_tensor_dims, tflite::GetTensorData<uint8_t>(input_tensor))) {
+            {image_height, image_width, image_depth}, image_resource->data(),
+            input_tensor_dims, tflite::GetTensorData<uint8_t>(input_tensor))) {
         jsonrpc_return_error(request, -1, "failed to resize input", nullptr);
         return;
     }
@@ -386,13 +406,15 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     // The first Invoke is slow due to model transfer. Run an Invoke
     // but ignore the results.
     if (interpreter.Invoke() != kTfLiteOk) {
-        jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter",
+                             nullptr);
         return;
     }
 
     uint32_t start = coral::micro::timer::micros();
     if (interpreter.Invoke() != kTfLiteOk) {
-        jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter",
+                             nullptr);
         return;
     }
     uint32_t end = coral::micro::timer::micros();
@@ -401,13 +423,16 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     // Return results and check on host side
     auto results = tensorflow::GetClassificationResults(&interpreter, 0.0f, 1);
     if (results.empty()) {
-        jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
+        jsonrpc_return_error(request, -1, "no results above threshold",
+                             nullptr);
         return;
     }
-    jsonrpc_return_success(request, "{%Q:%d, %Q:%g, %Q:%d}", "id", results[0].id, "score", results[0].score, "latency", latency + preprocess_latency);
+    jsonrpc_return_success(request, "{%Q:%d, %Q:%g, %Q:%d}", "id",
+                           results[0].id, "score", results[0].score, "latency",
+                           latency + preprocess_latency);
 }
 
-void StartM4(struct jsonrpc_request *request) {
+void StartM4(struct jsonrpc_request* request) {
     auto* ipc = IPCM7::GetSingleton();
     if (!ipc->HasM4Application()) {
         jsonrpc_return_error(request, -1, "No M4 application present", nullptr);
@@ -423,13 +448,14 @@ void StartM4(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-void GetTemperature(struct jsonrpc_request *request) {
+void GetTemperature(struct jsonrpc_request* request) {
     int sensor_num;
     if (!JsonRpcGetIntegerParam(request, "sensor", &sensor_num)) return;
 
     auto sensor = static_cast<coral::micro::tempsense::TempSensor>(sensor_num);
-    if(sensor >= coral::micro::tempsense::TempSensor::kSensorCount) {
-        jsonrpc_return_error(request, -1, "Invalid temperature sensor", nullptr);
+    if (sensor >= coral::micro::tempsense::TempSensor::kSensorCount) {
+        jsonrpc_return_error(request, -1, "Invalid temperature sensor",
+                             nullptr);
         return;
     }
 
@@ -440,80 +466,86 @@ void GetTemperature(struct jsonrpc_request *request) {
 // Implements the "capture_test_pattern" RPC.
 // Configures the sensor to test pattern mode, and captures via trigger.
 // Returns success if the test pattern has the expected data, failure otherwise.
-void CaptureTestPattern(struct jsonrpc_request *request) {
+void CaptureTestPattern(struct jsonrpc_request* request) {
     if (!coral::micro::CameraTask::GetSingleton()->SetPower(true)) {
         coral::micro::CameraTask::GetSingleton()->SetPower(false);
         jsonrpc_return_error(request, -1, "unable to detect camera", nullptr);
         return;
     }
-    coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::TRIGGER);
+    coral::micro::CameraTask::GetSingleton()->Enable(
+        coral::micro::camera::Mode::TRIGGER);
     coral::micro::CameraTask::GetSingleton()->SetTestPattern(
         coral::micro::camera::TestPattern::WALKING_ONES);
 
-
     bool success = true;
-    // Getting this test pattern doesn't seem to always work on the first try, maybe there is some
-    // undocumented pattern change time in the sensor.
-    // Allow a small amount of retrying to smooth that over.
+    // Getting this test pattern doesn't seem to always work on the first try,
+    // maybe there is some undocumented pattern change time in the sensor. Allow
+    // a small amount of retrying to smooth that over.
     constexpr const int kRetries = 3;
     for (int i = 0; i < kRetries; ++i) {
-       coral::micro::CameraTask::GetSingleton()->Trigger();
-       uint8_t* buffer = nullptr;
-       int index = coral::micro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
-       uint8_t expected = 0;
-       success = true;
-       for (unsigned int i = 0; i < coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight; ++i) {
-          if (buffer[i] != expected) {
-             success = false;
-             break;
-          }
-          if (expected == 0) {
-             expected = 1;
-          } else {
-             expected = expected << 1;
-          }
-       }
-       coral::micro::CameraTask::GetSingleton()->ReturnFrame(index);
-       if (success) {
-          break;
-       }
+        coral::micro::CameraTask::GetSingleton()->Trigger();
+        uint8_t* buffer = nullptr;
+        int index =
+            coral::micro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+        uint8_t expected = 0;
+        success = true;
+        for (unsigned int i = 0; i < coral::micro::CameraTask::kWidth *
+                                         coral::micro::CameraTask::kHeight;
+             ++i) {
+            if (buffer[i] != expected) {
+                success = false;
+                break;
+            }
+            if (expected == 0) {
+                expected = 1;
+            } else {
+                expected = expected << 1;
+            }
+        }
+        coral::micro::CameraTask::GetSingleton()->ReturnFrame(index);
+        if (success) {
+            break;
+        }
     }
     if (success) {
         jsonrpc_return_success(request, "{}", nullptr);
     } else {
-        jsonrpc_return_error(request, -1, "camera test pattern mismatch", nullptr);
+        jsonrpc_return_error(request, -1, "camera test pattern mismatch",
+                             nullptr);
     }
     coral::micro::CameraTask::GetSingleton()->SetPower(false);
 }
 
 // Implements the "capture_audio" RPC.
 // Attempts to capture 1 second of audio.
-// Returns success, with a parameter "data" containing the captured audio in base64 (or failure).
-// The audio captured is 32-bit signed PCM @ 16000Hz.
-void CaptureAudio(struct jsonrpc_request *request) {
+// Returns success, with a parameter "data" containing the captured audio in
+// base64 (or failure). The audio captured is 32-bit signed PCM @ 16000Hz.
+void CaptureAudio(struct jsonrpc_request* request) {
     int sample_rate_hz;
     if (!JsonRpcGetIntegerParam(request, "sample_rate_hz", &sample_rate_hz))
         return;
 
     auto sample_rate = CheckSampleRate(sample_rate_hz);
     if (!sample_rate.has_value()) {
-        JsonRpcReturnBadParam(request, "sample rate must be 16000 or 48000 Hz", "sample_rate_hz");
+        JsonRpcReturnBadParam(request, "sample rate must be 16000 or 48000 Hz",
+                              "sample_rate_hz");
         return;
     }
 
     int duration_ms;
-    if (!JsonRpcGetIntegerParam(request, "duration_ms", &duration_ms))
-        return;
+    if (!JsonRpcGetIntegerParam(request, "duration_ms", &duration_ms)) return;
     if (duration_ms <= 0) {
-        JsonRpcReturnBadParam(request, "duration must be positive", "duration_ms");
+        JsonRpcReturnBadParam(request, "duration must be positive",
+                              "duration_ms");
         return;
     }
 
     int num_buffers;
-    if (!JsonRpcGetIntegerParam(request, "num_buffers", &num_buffers))
-        return;
-    if (num_buffers < 1 || num_buffers > static_cast<int>(g_audio_buffers.kNumDmaBuffers)) {
-        JsonRpcReturnBadParam(request, "invalid number of DMA buffers", "num_buffers");
+    if (!JsonRpcGetIntegerParam(request, "num_buffers", &num_buffers)) return;
+    if (num_buffers < 1 ||
+        num_buffers > static_cast<int>(g_audio_buffers.kNumDmaBuffers)) {
+        JsonRpcReturnBadParam(request, "invalid number of DMA buffers",
+                              "num_buffers");
         return;
     }
 
@@ -521,7 +553,8 @@ void CaptureAudio(struct jsonrpc_request *request) {
     if (!JsonRpcGetIntegerParam(request, "buffer_size_ms", &buffer_size_ms))
         return;
     if (buffer_size_ms < 1) {
-        JsonRpcReturnBadParam(request, "invalid DMA buffer size", "buffer_size_ms");
+        JsonRpcReturnBadParam(request, "invalid DMA buffer size",
+                              "buffer_size_ms");
         return;
     }
 
@@ -530,7 +563,8 @@ void CaptureAudio(struct jsonrpc_request *request) {
                                    static_cast<size_t>(buffer_size_ms)};
 
     if (!g_audio_buffers.CanHandle(config)) {
-        jsonrpc_return_error(request, -1, "not enough static memory for DMA buffers", nullptr);
+        jsonrpc_return_error(
+            request, -1, "not enough static memory for DMA buffers", nullptr);
         return;
     }
 
@@ -542,9 +576,9 @@ void CaptureAudio(struct jsonrpc_request *request) {
         int32_t* last;
     } params{samples.data(), samples.data() + samples.size()};
 
-    g_audio_driver.Enable(config, &params, +[](void* param,
-        const int32_t* buf, size_t size) {
-            AudioParams* params = reinterpret_cast<AudioParams*>(param);
+    g_audio_driver.Enable(
+        config, &params, +[](void* param, const int32_t* buf, size_t size) {
+            auto* params = reinterpret_cast<AudioParams*>(param);
             if (params->first + size <= params->last) {
                 std::memcpy(params->first, buf, size * sizeof(buf[0]));
                 params->first += size;
@@ -553,14 +587,44 @@ void CaptureAudio(struct jsonrpc_request *request) {
 
     // Add (chunk_duration_ms / 10) just in case. Capture is still limited by
     // the buffer size.
-    vTaskDelay(pdMS_TO_TICKS(num_chunks * buffer_size_ms + buffer_size_ms / 10));
+    vTaskDelay(
+        pdMS_TO_TICKS(num_chunks * buffer_size_ms + buffer_size_ms / 10));
     g_audio_driver.Disable();
 
     jsonrpc_return_success(request, "{%Q: %V}", "data",
                            samples.size() * sizeof(samples[0]), samples.data());
 }
 
-void WifiSetAntenna(struct jsonrpc_request *request) {
+void WifiScan(struct jsonrpc_request* request) {
+    constexpr int kNumResults = 50;
+    WIFIScanResult_t xScanResults[kNumResults] = {0};
+    auto wifi_ret = WIFI_Scan(xScanResults, kNumResults);
+
+    if (wifi_ret != eWiFiSuccess) {
+        jsonrpc_return_error(request, -1, "wifi scan failed", nullptr);
+        return;
+    }
+
+    std::vector<uint8_t> json;
+    json.reserve(2048);
+
+    coral::micro::StrAppend(&json, "[");
+    int count{0};
+    for (const auto& xScanResult : xScanResults) {
+        if (xScanResult.cSSID[0] != '\0') {
+            coral::micro::StrAppend(&json, "\"%s\",", xScanResult.cSSID);
+            count++;
+        }
+    }
+    if (count > 0) {
+        json.pop_back();  // Remove the last comma.
+    }
+    coral::micro::StrAppend(&json, "]");
+    jsonrpc_return_success(request, "{%Q:%s}", "SSIDs",
+                           reinterpret_cast<const char*>(json.data()));
+}
+
+void WifiSetAntenna(struct jsonrpc_request* request) {
     int antenna;
     if (!JsonRpcGetIntegerParam(request, "antenna", &antenna)) return;
 
@@ -577,11 +641,11 @@ void WifiSetAntenna(struct jsonrpc_request *request) {
             gpio::SetGpio(gpio::Gpio::kAntennaSelect, true);
             break;
         default:
-            jsonrpc_return_error(request, -1, "invalid antenna selection", nullptr);
+            jsonrpc_return_error(request, -1, "invalid antenna selection",
+                                 nullptr);
             return;
     }
     jsonrpc_return_success(request, "{}");
 }
 
-}  // namespace testlib
-}  // namespace coral::micro
+}  // namespace coral::micro::testlib

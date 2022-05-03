@@ -4,6 +4,7 @@
 #include "libs/base/led.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/base/mutex.h"
+#include "libs/base/strings.h"
 #include "libs/base/utils.h"
 #include "libs/base/wifi.h"
 #include "libs/rpc/rpc_http_server.h"
@@ -22,7 +23,7 @@ using coral::micro::testlib::JsonRpcGetStringParam;
 extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;
 extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
 
-static void WifiGetAP(struct jsonrpc_request *request) {
+static void WifiGetAP(struct jsonrpc_request* request) {
     std::string name;
     if (!JsonRpcGetStringParam(request, "name", &name)) return;
 
@@ -43,15 +44,15 @@ static void WifiGetAP(struct jsonrpc_request *request) {
         }
     }
 
-    if (scan_indices.size() == 0) {
+    if (scan_indices.empty()) {
         jsonrpc_return_error(request, -1, "network not found", nullptr);
         return;
     }
 
     int8_t best_rssi = SCHAR_MIN;
-    for (unsigned int i = 0; i < scan_indices.size(); ++i) {
-        if (xScanResults[scan_indices[i]].cRSSI > best_rssi) {
-            best_rssi = xScanResults[scan_indices[i]].cRSSI;
+    for (auto scan_indice : scan_indices) {
+        if (xScanResults[scan_indice].cRSSI > best_rssi) {
+            best_rssi = xScanResults[scan_indice].cRSSI;
         }
     }
 
@@ -61,7 +62,7 @@ static void WifiGetAP(struct jsonrpc_request *request) {
 static SemaphoreHandle_t ble_ready_mtx;
 static bool ble_ready = false;
 static SemaphoreHandle_t ble_scan_sema;
-static void BLEFind(struct jsonrpc_request *request) {
+static void BLEFind(struct jsonrpc_request* request) {
     {
         coral::micro::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
@@ -74,9 +75,11 @@ static void BLEFind(struct jsonrpc_request *request) {
     if (!JsonRpcGetStringParam(request, "address", &address)) return;
 
     unsigned int a, b, c, d, e, f;
-    int tokens = sscanf(address.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b, &c, &d, &e, &f);
+    int tokens = sscanf(address.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X", &a,
+                        &b, &c, &d, &e, &f);
     if (tokens != 6) {
-        jsonrpc_return_error(request, -1, "could not get six octets from 'address'", nullptr);
+        jsonrpc_return_error(
+            request, -1, "could not get six octets from 'address'", nullptr);
         return;
     }
     static int8_t rssi;
@@ -88,22 +91,26 @@ static void BLEFind(struct jsonrpc_request *request) {
     search_address[4] = static_cast<uint8_t>(e);
     search_address[5] = static_cast<uint8_t>(f);
 
-    // This static here is because there isn't a way to pass a parameter into the scan.
-    // Reset the value each time through the method.
+    // This static here is because there isn't a way to pass a parameter into
+    // the scan. Reset the value each time through the method.
     static bool found_match;
     found_match = false;
-    wiced_result_t ret = wiced_bt_ble_observe(WICED_TRUE, 3, [](wiced_bt_ble_scan_results_t *p_scan_result, uint8_t *p_adv_data) {
-        if (p_scan_result) {
-            if (memcmp(search_address, p_scan_result->remote_bd_addr, sizeof(wiced_bt_device_address_t)) == 0) {
-                found_match = true;
-                rssi = p_scan_result->rssi;
+    wiced_result_t ret = wiced_bt_ble_observe(
+        WICED_TRUE, 3,
+        [](wiced_bt_ble_scan_results_t* p_scan_result, uint8_t* p_adv_data) {
+            if (p_scan_result) {
+                if (memcmp(search_address, p_scan_result->remote_bd_addr,
+                           sizeof(wiced_bt_device_address_t)) == 0) {
+                    found_match = true;
+                    rssi = p_scan_result->rssi;
+                }
+            } else {
+                xSemaphoreGive(ble_scan_sema);
             }
-        } else {
-            xSemaphoreGive(ble_scan_sema);
-        }
-    });
+        });
     if (ret != WICED_BT_PENDING) {
-        jsonrpc_return_error(request, -1, "failed to initiate bt scan", nullptr);
+        jsonrpc_return_error(request, -1, "failed to initiate bt scan",
+                             nullptr);
         return;
     }
     xSemaphoreTake(ble_scan_sema, portMAX_DELAY);
@@ -114,7 +121,7 @@ static void BLEFind(struct jsonrpc_request *request) {
     }
 }
 
-static void BLEScan(struct jsonrpc_request *request) {
+static void BLEScan(struct jsonrpc_request* request) {
     {
         coral::micro::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
@@ -126,46 +133,50 @@ static void BLEScan(struct jsonrpc_request *request) {
     static int8_t rssi;
     static char address[18] = "00:00:00:00:00:00";
 
-    // This static here is because there isn't a way to pass a parameter into the scan.
-    // Reset the value each time through the method.
+    // This static here is because there isn't a way to pass a parameter into
+    // the scan. Reset the value each time through the method.
     static bool found_address;
     found_address = false;
-    wiced_result_t ret = wiced_bt_ble_observe(WICED_TRUE, 3, [](wiced_bt_ble_scan_results_t *p_scan_result, uint8_t *p_adv_data) {
-        if (p_scan_result) {
-            found_address = true;
-            auto s = p_scan_result->remote_bd_addr;
-            sprintf(address, "%02X:%02X:%02X:%02X:%02X:%02X", s[0], s[1], s[2], s[3], s[4], s[5]);
-            rssi = p_scan_result->rssi;
-        } else {
-            xSemaphoreGive(ble_scan_sema);
-        }
-    });
+    wiced_result_t ret = wiced_bt_ble_observe(
+        WICED_TRUE, 3,
+        [](wiced_bt_ble_scan_results_t* p_scan_result, uint8_t* p_adv_data) {
+            if (p_scan_result) {
+                found_address = true;
+                auto s = p_scan_result->remote_bd_addr;
+                sprintf(address, "%02X:%02X:%02X:%02X:%02X:%02X", s[0], s[1],
+                        s[2], s[3], s[4], s[5]);
+                rssi = p_scan_result->rssi;
+            } else {
+                xSemaphoreGive(ble_scan_sema);
+            }
+        });
     if (ret != WICED_BT_PENDING) {
-        jsonrpc_return_error(request, -1, "failed to initiate bt scan", nullptr);
+        jsonrpc_return_error(request, -1, "failed to initiate bt scan",
+                             nullptr);
         return;
     }
     xSemaphoreTake(ble_scan_sema, portMAX_DELAY);
     if (found_address) {
-        jsonrpc_return_success(request, "{%Q:%Q, %Q:%d}", "address", address, "signal_strength", rssi);
+        jsonrpc_return_success(request, "{%Q:%Q, %Q:%d}", "address", address,
+                               "signal_strength", rssi);
     } else {
         jsonrpc_return_error(request, -1, "failed to find 'address'", nullptr);
     }
 }
 
-
-static wiced_result_t ble_management_callback(wiced_bt_management_evt_t event,
-                                                       wiced_bt_management_evt_data_t *p_event_data) {
+static wiced_result_t ble_management_callback(
+    wiced_bt_management_evt_t event,
+    wiced_bt_management_evt_data_t* p_event_data) {
     switch (event) {
-        case BTM_ENABLED_EVT:
-            {
-                coral::micro::MutexLock lock(ble_ready_mtx);
-                if (((wiced_bt_dev_enabled_t*)(p_event_data))->status == WICED_SUCCESS) {
-                    ble_ready = true;
-                } else {
-                    ble_ready = false;
-                }
+        case BTM_ENABLED_EVT: {
+            coral::micro::MutexLock lock(ble_ready_mtx);
+            if (((wiced_bt_dev_enabled_t*)(p_event_data))->status ==
+                WICED_SUCCESS) {
+                ble_ready = true;
+            } else {
+                ble_ready = false;
             }
-            break;
+        } break;
         case BTM_LPM_STATE_LOW_POWER:
             break;
         default:
@@ -177,14 +188,15 @@ static wiced_result_t ble_management_callback(wiced_bt_management_evt_t event,
 
 extern unsigned char brcm_patchram_buf[];
 extern unsigned int brcm_patch_ram_length;
-extern "C" void app_main(void *param) {
+extern "C" void app_main(void* param) {
     ble_scan_sema = xSemaphoreCreateBinary();
     ble_ready_mtx = xSemaphoreCreateMutex();
-    if (coral::micro::filesystem::ReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
-                                      brcm_patchram_buf,
-                                      brcm_patch_ram_length) != brcm_patch_ram_length) {
+    if (coral::micro::filesystem::ReadFile(
+            "/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
+            brcm_patchram_buf,
+            brcm_patch_ram_length) != brcm_patch_ram_length) {
         printf("Reading patchram failed\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     if (coral::micro::TurnOnWiFi()) {
@@ -197,9 +209,12 @@ extern "C" void app_main(void *param) {
         vTaskSuspend(NULL);
     }
     coral::micro::gpio::SetGpio(coral::micro::gpio::kBtDevWake, false);
-    wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings, wiced_bt_cfg_buf_pools);
+    wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings,
+                        wiced_bt_cfg_buf_pools);
 
     jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiScan,
+                   coral::micro::testlib::WifiScan);
     jsonrpc_export("wifi_get_ap", WifiGetAP);
     jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
                    coral::micro::testlib::WifiSetAntenna);
@@ -207,9 +222,9 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("ble_find", BLEFind);
     IperfInit();
     coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }
 
-extern "C" int main(int argc, char **argv) {
+extern "C" int main(int argc, char** argv) {
     return real_main(argc, argv, false, false);
 }

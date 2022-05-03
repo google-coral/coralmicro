@@ -2,12 +2,18 @@
 
 import base64
 import copy
+import enum
 import math
 import os
 from typing import Any
 
 from PIL import Image
 import requests
+
+
+class Antenna(enum.IntEnum):
+    INTERNAL = 0
+    EXTERNAL = 1
 
 
 class ValiantRPCHelper(object):
@@ -55,6 +61,18 @@ class ValiantRPCHelper(object):
         """Calls specified method in RPC server."""
         payload = self.get_new_payload()
         payload['method'] = method
+        return self.send_rpc(payload)
+
+    def wifi_set_antenna(self, antenna: Antenna):
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_set_antenna'
+        payload['params'].append({'antenna': antenna})
+        return self.send_rpc(payload)
+
+
+    def wifi_scan(self):
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_scan'
         return self.send_rpc(payload)
 
     def set_tpu_power_state(self, enable):

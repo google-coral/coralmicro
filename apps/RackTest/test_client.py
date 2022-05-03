@@ -6,25 +6,25 @@ detection test.
   python3 apps/RackTest/test_client.py --model models/mobilenet_v1_1.0_224_quant_edgetpu.tflite --test_image test_data/cat.bmp --test classification
 - detection:
   python3 apps/RackTest/test_client.py --model models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite --test_image test_data/cat.bmp --test detection
+- wifi_scan:
+  python3 apps/RackTest/test_client.py --test wifi_scan
 """
 import argparse
 import os
+import json
 from rpc_helper import ValiantRPCHelper
+from rpc_helper import Antenna
 
 parser = argparse.ArgumentParser(
     description='Local client for the rack test to quickly test on local valiant devices without g3.')
 parser.add_argument('--host', type=str, default='10.10.10.1', help='Ip address of the valiant')
 parser.add_argument('--port', type=int, default=80, help='Port of the valiant')
 parser.add_argument('--test', type=str, default='detection',
-                    help='Test to run, currently support ["detection", "classification"]')
+                    help='Test to run, currently support ["detection", "classification", "wifi_scan", '
+                         '"wifi_set_antenna"]')
 parser.add_argument('--test_image', type=str, default='test_data/cat.bmp')
 parser.add_argument('--model', type=str, default='models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite')
 args = parser.parse_args()
-
-
-def display_result(result, test):
-    outcome = "failed" if "error" in result else "passed"
-    print(f'{test} {outcome}: {result}')
 
 
 def run_model(url, test):
@@ -57,15 +57,25 @@ def run_model(url, test):
     rpc_helper.delete_resource(rpc_helper.image_resource_name)
     rpc_helper.delete_resource(model_name)
 
+def run_test(url, test):
+    rpc_helper = ValiantRPCHelper(url)
+    if test == "wifi_set_antenna":
+        print(json.dumps(rpc_helper.wifi_set_antenna(Antenna.EXTERNAL), indent=2))
+        print(json.dumps(rpc_helper.wifi_set_antenna(Antenna.INTERNAL), indent=2))
+    elif test == "wifi_scan":
+        print(json.dumps(rpc_helper.wifi_scan(), indent=2))
 
 def main():
-    supported_tests = ["classification", "detection"]
-    if args.test not in supported_tests:
-        parser.print_help()
-        exit(1)
     url = f"http://{args.host}:{args.port}/jsonrpc"
     print(f"Valiant url: {url}")
-    run_model(url, args.test)
+    if args.test in ["classification", "detection"]:
+        run_model(url, args.test)
+    elif args.test in ["wifi_scan", "wifi_set_antenna"]:
+        run_test(url, args.test)
+    else:
+        print('Test not supported')
+        parser.print_help()
+        exit(1)
 
 
 if __name__ == '__main__':

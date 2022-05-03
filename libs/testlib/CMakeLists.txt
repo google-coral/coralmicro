@@ -9,4 +9,5 @@ target_link_libraries(libs_testlib PUBLIC
     libs_tensorflow-m7
     libs_testconv1
     libs_tpu_freertos
+    libs_base-m7_wifi
 )

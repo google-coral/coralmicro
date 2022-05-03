@@ -251,6 +251,14 @@ class ValiantMFGTest(object):
       """
 
     @rpc
+    def wifi_scan(self):
+      """Scans for all SSIDs.
+
+      Returns: A JSON-RPC result with a list of SSIDs, or JSON-RPC error. Example: {'id': 1, 'result': {'SSIDs': [
+      'GoogleGuest', 'GoogleGuest-IPv4', ...]}}
+      """
+
+    @rpc
     def wifi_get_ap(self, name):
         """Scans for an access point of the provided name.
 
