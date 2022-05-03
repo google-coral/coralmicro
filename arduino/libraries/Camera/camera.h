@@ -1,5 +1,5 @@
-#ifndef VALIANT_CAMERACLASS_H
-#define VALIANT_CAMERACLASS_H
+#ifndef CORAL_MICRO_CAMERACLASS_H
+#define CORAL_MICRO_CAMERACLASS_H
 
 #include <cstdint>
 #include <memory>
@@ -83,4 +83,4 @@ class CameraClass {
 
 extern coral::micro::arduino::CameraClass Camera;
 
-#endif  // VALIANT_CAMERACLASS_H
+#endif  // CORAL_MICRO_CAMERACLASS_H

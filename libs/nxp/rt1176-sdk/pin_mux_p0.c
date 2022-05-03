@@ -190,7 +190,7 @@ void BOARD_InitPins(void) {
                                                  Pull Up / Down Config. Field: Weak pull down
                                                  Open Drain Field: Disabled */
 
-#ifndef VALIANT_ARDUINO
+#ifndef CORAL_MICRO_ARDUINO
   IOMUXC_SetPinMux(
       IOMUXC_GPIO_EMC_B2_00_LPUART6_CTS_B, 0U);
   IOMUXC_SetPinMux(
@@ -203,7 +203,7 @@ void BOARD_InitPins(void) {
       IOMUXC_GPIO_EMC_B1_41_LPUART6_RXD,
       0U);
 
-#ifndef VALIANT_ARDUINO
+#ifndef CORAL_MICRO_ARDUINO
   IOMUXC_SetPinConfig(
       IOMUXC_GPIO_EMC_B2_00_LPUART6_CTS_B,
       0x0EU);
@@ -614,12 +614,12 @@ void BOARD_InitPins(void) {
 
 #endif
 
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     InitArduinoPins();
 #endif
 }
 
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
 void InitArduinoPins(void) {
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_06_GPIO_MUX6_IO06, 0U);

@@ -31,7 +31,7 @@ add_library_m7(libs_base-m7_freertos STATIC
     utils.cc
 )
 
-if (VALIANT_BOARD_REVISION STREQUAL P0 OR VALIANT_BOARD_REVISION STREQUAL P1)
+if (CORAL_MICRO_BOARD_REVISION STREQUAL P0 OR CORAL_MICRO_BOARD_REVISION STREQUAL P1)
     set(libs_base-m7_freertos_LINK_LIBRARIES_REVISION
         libs_tasks_AudioTask_freertos
         libs_tasks_CameraTask_freertos

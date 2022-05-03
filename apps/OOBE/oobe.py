@@ -114,13 +114,13 @@ def fetch(*args):
         thread.join()
  
 def main():
-    parser = argparse.ArgumentParser(description='Valiant OOBE visualizer',
+    parser = argparse.ArgumentParser(description='Dev Board Micro OOBE visualizer',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--device_ip_address', type=ipaddress.ip_address, default='10.10.10.1')
     args = parser.parse_args()
 
     root = tk.Tk()
-    root.title("Valiant OOBE")
+    root.title("Dev Board Micro OOBE")
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
     canvas = tk.Canvas(root, width=POSENET_INPUT_WIDTH, height=POSENET_INPUT_HEIGHT)

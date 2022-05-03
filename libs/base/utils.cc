@@ -58,7 +58,7 @@ bool GetWifiPSK(std::string* wifi_psk_out) {
     return coral::micro::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
 }
 
-extern "C" wiced_country_code_t valiant_get_wiced_country_code(void) {
+extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
     std::string wifi_country_code_out, wifi_revision_out;
     unsigned short wifi_revision = 0;
     if (!coral::micro::filesystem::ReadFile("/wifi_country", &wifi_country_code_out)) {

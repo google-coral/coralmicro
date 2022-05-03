@@ -83,7 +83,7 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
                     ret = kStatus_USB_Success;
                     break;
                 case 2:
-                    ToUsbStringDescriptor("Valiant", string_desc);
+                    ToUsbStringDescriptor("Coral Dev Board Micro", string_desc);
                     ret = kStatus_USB_Success;
                     break;
                 case 3:

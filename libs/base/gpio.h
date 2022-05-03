@@ -7,7 +7,7 @@ namespace coral::micro {
 namespace gpio {
 
 enum Gpio {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     kArduinoD0,
     kArduinoD1,
     kArduinoD2,

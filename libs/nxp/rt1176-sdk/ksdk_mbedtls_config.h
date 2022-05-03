@@ -3146,12 +3146,12 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-int valiant_mbedtls_printf(const char *format, ...);
+int coral_micro_mbedtls_printf(const char *format, ...);
 #if defined(__cplusplus)
 }
 #endif
 
-#define MBEDTLS_PLATFORM_STD_PRINTF        valiant_mbedtls_printf /**< Default printf to use, can be undefined */
+#define MBEDTLS_PLATFORM_STD_PRINTF        coral_micro_mbedtls_printf /**< Default printf to use, can be undefined */
 /* Note: your snprintf must correclty zero-terminate the buffer! */
 //#define MBEDTLS_PLATFORM_STD_SNPRINTF    snprintf /**< Default snprintf to use, can be undefined */
 //#define MBEDTLS_PLATFORM_STD_EXIT_SUCCESS       0 /**< Default exit value to use, can be undefined */

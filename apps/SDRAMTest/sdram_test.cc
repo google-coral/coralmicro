@@ -3,7 +3,7 @@
 
 #include <cstdio>
 
-// Valiant has 64 MB.
+// Dev Board Micro has 64 MB.
 // EVK claims to have 64MB as well, but seems to wrap at 32MB.
 // Leave 1MB for a fixed pattern test.
 #define SDRAM_SIZE (10 << 20)

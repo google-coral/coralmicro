@@ -10,7 +10,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/platform.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/ssl.h"
 
-extern "C" int valiant_mbedtls_printf(const char *format, ...) {
+extern "C" int coral_micro_mbedtls_printf(const char *format, ...) {
   va_list args;
   va_start(args, format);
   int formatted_size = vsnprintf(NULL, 0, format, args) + 1;

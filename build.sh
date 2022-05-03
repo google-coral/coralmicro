@@ -131,15 +131,15 @@ EOF
     trap "kill ${http_pid}" EXIT
     python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --manifest \
     --manifest_revision=9.9.9 \
-    --core_url=http://localhost:8000/coral-valiant-$(git rev-parse HEAD).tar.bz2 \
-    --core_sha256=$(sha256sum ${build_dir}/coral-valiant-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
+    --core_url=http://localhost:8000/coral-micro-$(git rev-parse HEAD).tar.bz2 \
+    --core_sha256=$(sha256sum ${build_dir}/coral-micro-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
     --${flashtool_name}_flashtool_url=http://localhost:8000/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 \
     --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1)
     ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core update-index
-    ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core install coral:valiant
+    ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core install coral:coral_micro
     if [[ ! -z ${build_sketches} ]]; then
         for sketch in ${ROOTDIR}/sketches/*; do
-            ${ROOTDIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli compile -b coral:valiant:valiant ${sketch};
+            ${ROOTDIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli compile -b coral:coral_micro:coral_micro ${sketch};
         done
     fi
     fi

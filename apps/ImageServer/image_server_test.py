@@ -9,9 +9,9 @@ import itertools
 from PIL import Image
 
 parser = argparse.ArgumentParser(description='Image server client')
-parser.add_argument('--usb_ip', type=str, required=True, help='Valiant USB IP address.')
+parser.add_argument('--usb_ip', type=str, required=True, help='Dev Board Micro USB IP address.')
 parser.add_argument('--ethernet', action='store_true', help='Get image from ethernet ip.')
-parser.add_argument('--ethernet_ip', type=str, required=False, help='Valiant Ethernet IP address.')
+parser.add_argument('--ethernet_ip', type=str, required=False, help='Dev Board Micro Ethernet IP address.')
 parser.add_argument('--image_width', type=int, default=700, help="Specify image width.")
 parser.add_argument('--image_height', type=int, default=700, help="Specify image height.")
 

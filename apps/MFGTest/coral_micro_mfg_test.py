@@ -28,10 +28,10 @@ def rpc(func):
         return self.send_rpc(func.__name__, params)
     return rpc_impl
 
-class ValiantMFGTest(object):
-    """Manufacturing test runner for Valiant.
+class CoralMicroMFGTest(object):
+    """Manufacturing test runner for Dev Board Micro.
 
-    Implements methods for sending JSON-RPC requests to a Valiant device,
+    Implements methods for sending JSON-RPC requests to a Dev Board Micro device,
     and retrieving the response data.
     """
     def __init__(self, url, print_payloads=False):
@@ -369,10 +369,10 @@ if __name__ == '__main__':
     Sample runner for the RPCs implemented in this class.
     """
     import argparse
-    parser = argparse.ArgumentParser(description='Valiant MFGTest')
+    parser = argparse.ArgumentParser(description='Dev Board Micro MFGTest')
     parser.add_argument('--ip_address', type=str, required=False, default='10.10.10.1')
     args = parser.parse_args()
-    mfg_test = ValiantMFGTest(f'http://{args.ip_address}:80/jsonrpc', print_payloads=True)
+    mfg_test = CoralMicroMFGTest(f'http://{args.ip_address}:80/jsonrpc', print_payloads=True)
     print(mfg_test.get_serial_number())
     print(mfg_test.set_pmic_rail_state(PMICRails.CAM_2V8, True))
     print(mfg_test.set_pmic_rail_state(PMICRails.CAM_1V8, True))

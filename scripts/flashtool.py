@@ -50,8 +50,8 @@ FLASHLOADER_PID = 0x0073
 ELFLOADER_VID = 0x18d1
 ELFLOADER_PID = 0x93fe
 
-VALIANT_VID = 0x18d1
-VALIANT_PID = 0x93ff
+CORAL_MICRO_VID = 0x18d1
+CORAL_MICRO_PID = 0x93ff
 
 OPEN_HID_RETRY_INTERVAL_S = 0.1
 OPEN_HID_RETRY_TIME_S = 15
@@ -103,8 +103,8 @@ def sdp_vidpid():
 def flashloader_vidpid():
     return '{},{}'.format(hex(FLASHLOADER_VID), hex(FLASHLOADER_PID))
 
-def is_valiant_connected(serial_number):
-    return serial_number in EnumerateValiant()
+def is_coral_micro_connected(serial_number):
+    return serial_number in EnumerateCoralMicro()
 
 def is_elfloader_connected(serial_number):
     for device in usb.core.find(idVendor=ELFLOADER_VID, idProduct=ELFLOADER_PID,
@@ -129,7 +129,7 @@ def EnumerateElfloader():
     return hid.enumerate(ELFLOADER_VID, ELFLOADER_PID)
 
 SERIAL_PORT_RE = re.compile('USB VID:PID=18D1:93FF SER=([0-9A-Fa-f]+)')
-def EnumerateValiant():
+def EnumerateCoralMicro():
     serial_list = []
     for port in serial.tools.list_ports.comports():
         matches = SERIAL_PORT_RE.match(port.hwid)
@@ -288,8 +288,8 @@ def StateFlashtoolError():
 
 def StateCheckForAny(serial_number=None):
     for i in range(10):
-        if is_valiant_connected(serial_number):
-            return StateCheckForValiant
+        if is_coral_micro_connected(serial_number):
+            return StateCheckForCoralMicro
         if is_elfloader_connected(serial_number):
             return StateCheckForElfloader
         if is_sdp_connected():
@@ -299,15 +299,15 @@ def StateCheckForAny(serial_number=None):
         time.sleep(1)
     return StateFlashtoolError
 
-def StateCheckForValiant(serial_number=None):
+def StateCheckForCoralMicro(serial_number=None):
     for i in range(10):
-        if is_valiant_connected(serial_number):
+        if is_coral_micro_connected(serial_number):
             # port is needed later as well, wait for it.
             port = FindSerialPortForDevice(serial_number)
             if port:
                 return StateResetToSdp
         time.sleep(1)
-    # If we don't see Valiant on the bus, just check for SDP.
+    # If we don't see a Dev Board Micro on the bus, just check for SDP.
     return StateCheckForSdp
 
 def StateCheckForElfloader(serial_number=None):
@@ -411,7 +411,7 @@ def OpenHidDevice(vid, pid, serial_number):
         except:
             time.sleep(OPEN_HID_RETRY_INTERVAL_S)
 
-    raise Exception('Failed to open Valiant HID device')
+    raise Exception('Failed to open Dev Board Micro HID device')
 
 def StateResetElfloader(serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
@@ -548,7 +548,7 @@ def main():
         root_dir = os.path.abspath(os.path.dirname(__file__))
     else:
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    parser = argparse.ArgumentParser(description='Valiant flashtool',
+    parser = argparse.ArgumentParser(description='Coral Dev Board Micro flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--build_dir', type=str, required=True)
     parser.add_argument('--subapp', type=str, required=False)
@@ -684,22 +684,22 @@ def main():
     for elfloader in EnumerateElfloader():
         serial_list.append(elfloader['serial_number'])
 
-    serial_list += EnumerateValiant()
+    serial_list += EnumerateCoralMicro()
 
     if args.list:
         print(serial_list)
         return
 
-    serial_number = os.getenv('VALIANT_SERIAL')
+    serial_number = os.getenv('CORAL_MICRO_SERIAL')
     if not serial_number:
         serial_number = args.serial
     if len(serial_list) > 1 and not serial_number:
-        print('Multiple valiants detected, please provide a serial number.')
+        print('Multiple Dev Board Micros detected, please provide a serial number.')
         return
     if not serial_number and len(serial_list) == 1:
         serial_number = serial_list[0]
     if not serial_number:
-        print('No Valiant devices detected!')
+        print('No Dev Board Micro devices detected!')
         return
 
     with tempfile.TemporaryDirectory() as workdir:

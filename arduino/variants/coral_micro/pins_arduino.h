@@ -2,7 +2,7 @@
 #define __PINS_ARDUINO_H__
 
 /*
-Valiant Arduino pin assignment diagram:
+Coral Dev Board Micro Arduino pin assignment diagram:
 Pin (Arduino pin) | Silk label | Silk label | Pin (Arduino pin)
 
 -              VSYS         SCL1         16

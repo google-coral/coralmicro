@@ -25,7 +25,7 @@ extern "C" void GPIO13_Combined_0_31_IRQHandler(void) {
     SDK_ISR_EXIT_BARRIER;
 }
 
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
 extern "C" void GPIO6_Combined_0_15_IRQHandler(void) {
     uint32_t pins = GPIO_PortGetInterruptFlags(GPIO6);
     GPIO_PortClearInterruptFlags(GPIO6, pins);
@@ -61,7 +61,7 @@ namespace gpio {
 static SemaphoreHandle_t gpio_semaphore;
 static StaticSemaphore_t gpio_semaphore_static;
 static GPIO_Type* PinNameToModule[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = GPIO6,
     [Gpio::kArduinoD1] = GPIO2,
     [Gpio::kArduinoD2] = GPIO2,
@@ -85,7 +85,7 @@ static GPIO_Type* PinNameToModule[Gpio::kCount] = {
 };
 
 static uint32_t PinNameToPin[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 7,
     [Gpio::kArduinoD1] = 11,
     [Gpio::kArduinoD2] = 10,
@@ -109,7 +109,7 @@ static uint32_t PinNameToPin[Gpio::kCount] = {
 };
 
 static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = {
         .direction = kGPIO_DigitalInput,
         .outputLogic = 0,
@@ -209,7 +209,7 @@ static gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
 };
 
 static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = GPIO6_Combined_0_15_IRQn,
     [Gpio::kArduinoD1] = GPIO2_Combined_0_15_IRQn,
     [Gpio::kArduinoD2] = GPIO2_Combined_0_15_IRQn,
@@ -233,7 +233,7 @@ static IRQn_Type PinNameToIRQ[Gpio::kCount] = {
 };
 
 static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = {IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07},
     [Gpio::kArduinoD1] = {IOMUXC_GPIO_EMC_B2_01_GPIO_MUX2_IO11},
     [Gpio::kArduinoD2] = {IOMUXC_GPIO_EMC_B2_00_GPIO_MUX2_IO10},
@@ -257,7 +257,7 @@ static uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
 };
 
 static uint32_t PinNameToPullMask[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x0000000C,
     [Gpio::kArduinoD1] = 0x0000000C,
     [Gpio::kArduinoD2] = 0x0000000C,
@@ -275,7 +275,7 @@ static uint32_t PinNameToPullMask[Gpio::kCount] = {
 };
 
 static uint32_t PinNameToNoPull[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x00000000,
     [Gpio::kArduinoD1] = 0x0000000C,
     [Gpio::kArduinoD2] = 0x0000000C,
@@ -293,7 +293,7 @@ static uint32_t PinNameToNoPull[Gpio::kCount] = {
 };
 
 static uint32_t PinNameToPullUp[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x0000000C,
     [Gpio::kArduinoD1] = 0x00000004,
     [Gpio::kArduinoD2] = 0x00000004,
@@ -311,7 +311,7 @@ static uint32_t PinNameToPullUp[Gpio::kCount] = {
 };
 
 static uint32_t PinNameToPullDown[Gpio::kCount] = {
-#if defined(VALIANT_ARDUINO) && (VALIANT_ARDUINO == 1)
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x00000004,
     [Gpio::kArduinoD1] = 0x00000008,
     [Gpio::kArduinoD2] = 0x00000008,

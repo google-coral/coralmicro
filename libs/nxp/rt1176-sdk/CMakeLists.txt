@@ -1,6 +1,6 @@
 enable_language(ASM)
 
-if(VALIANT_BOARD_REVISION STREQUAL EVK)
+if(CORAL_MICRO_BOARD_REVISION STREQUAL EVK)
     set(libs_nxp_rt1176-sdk_SOURCES_REVISION
         evkmimxrt1170_flexspi_nor_config.c
         fsl_flexspi_nor_boot.c
@@ -9,14 +9,14 @@ if(VALIANT_BOARD_REVISION STREQUAL EVK)
     set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
         CPU_MIMXRT1176DVMAA_cm7
     )
-elseif(VALIANT_BOARD_REVISION STREQUAL P0)
+elseif(CORAL_MICRO_BOARD_REVISION STREQUAL P0)
     set(libs_nxp_rt1176-sdk_SOURCES_REVISION
         pin_mux_p0.c
     )
     set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
         CPU_MIMXRT1176DVMAA_cm7
     )
-elseif(VALIANT_BOARD_REVISION STREQUAL P1)
+elseif(CORAL_MICRO_BOARD_REVISION STREQUAL P1)
     set(libs_nxp_rt1176-sdk_SOURCES_REVISION
         pin_mux_p0.c
     )

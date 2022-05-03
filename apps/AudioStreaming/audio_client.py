@@ -245,7 +245,7 @@ def pyaudio_format(fmt):
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Play or/and save audio from the Valiant mic')
+        description='Play or/and save audio from the Dev Board Micro mic')
     parser.add_argument('--host', type=str, default='10.10.10.1',
                         help='host to connect')
     parser.add_argument('--port', type=int, default=33000,

@@ -1,7 +1,7 @@
 add_library_m7(libs_coremark-m7 STATIC
+    core_coral_micro.c
     core_main.c
     core_portme.c
-    core_valiant.c
     ${PROJECT_SOURCE_DIR}/third_party/coremark/core_list_join.c
     ${PROJECT_SOURCE_DIR}/third_party/coremark/core_matrix.c
     ${PROJECT_SOURCE_DIR}/third_party/coremark/core_state.c
@@ -22,9 +22,9 @@ target_compile_definitions(libs_coremark-m7 PRIVATE
 )
 
 add_library_m4(libs_coremark-m4 STATIC
+    core_coral_micro.c
     core_main.c
     core_portme.c
-    core_valiant.c
     ${PROJECT_SOURCE_DIR}/third_party/coremark/core_list_join.c
     ${PROJECT_SOURCE_DIR}/third_party/coremark/core_matrix.c
     ${PROJECT_SOURCE_DIR}/third_party/coremark/core_state.c

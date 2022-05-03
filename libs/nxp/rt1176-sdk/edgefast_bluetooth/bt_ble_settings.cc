@@ -1,6 +1,6 @@
 // Port of
 // third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/platform/bt_ble_settings.c
-// to use Valiant's filesystem APIs.
+// to use Dev Board Micro's filesystem APIs.
 
 #include "libs/base/filesystem.h"
 

@@ -70,7 +70,7 @@ EOF
         build_dir="${ROOTDIR}/build"
     fi
 
-    docker build -t valiant ${ROOTDIR}/docker
+    docker build -t coral-micro ${ROOTDIR}/docker
     rm -rf ${build_dir}
     mkdir -p ${build_dir}
     if [[ -t 1 ]]; then
@@ -78,7 +78,7 @@ EOF
     else
         INTERACTIVE=""
     fi
-    docker run --rm ${INTERACTIVE} -w ${ROOTDIR} -v ${ROOTDIR}:${ROOTDIR} -v ${build_dir}:${ROOTDIR}/build valiant bash -xc "
+    docker run --rm ${INTERACTIVE} -w ${ROOTDIR} -v ${ROOTDIR}:${ROOTDIR} -v ${build_dir}:${ROOTDIR}/build coral-micro bash -xc "
         chmod a+w /
         groupadd --gid $(id -g) $(id -g -n)
         useradd -m -e '' -s /bin/bash --gid $(id -g) --uid $(id -u) $(id -u -n)

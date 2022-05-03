@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Generate package for Valiant Arduino core.
+Generate package for Coral Dev Board Micro Arduino core.
 """
 
 import argparse
@@ -93,7 +93,7 @@ def CreateFlashtoolExe(core_out_dir, root_dir):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Valiant Arduino packager',
+        description='Coral Dev Board Micro Arduino packager',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('--output_dir', type=str, required=True)
@@ -219,16 +219,16 @@ def manifest_main(args, **kwargs):
             print('Provided core checksum does not match downloaded!')
             return
         core_json = {
-            'name': 'Valiant',
-            'architecture': 'valiant',
+            'name': 'Coral Dev Board Micro',
+            'architecture': 'coral_micro',
             'version': manifest_revision,
             'url': core_url,
-            'archiveFileName': 'coral-valiant.tar.bz2',
+            'archiveFileName': 'coral-micro.tar.bz2',
             'checksum': 'SHA-256:%s' % sha256sum,
             'size': str(size),
             'boards': [
                 {
-                    'name': 'Coral Valiant',
+                    'name': 'Coral Dev Board Micro',
                 }
             ],
             'toolsDependencies': [
@@ -305,7 +305,7 @@ def core_main(args, **kwargs):
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Copy out arduino core to temp directory
-        core_out_dir = os.path.join(tmpdir, 'coral-valiant-%s' % git_revision)
+        core_out_dir = os.path.join(tmpdir, 'coral-micro-%s' % git_revision)
         flashtool_out_dir = os.path.join(tmpdir, 'coral-flashtool-%s-%s' % (platform_name, git_revision))
         os.makedirs(flashtool_out_dir, exist_ok=True)
         shutil.copytree(arduino_dir, core_out_dir)
@@ -314,9 +314,9 @@ def core_main(args, **kwargs):
         # and build the arduino library bundle.
         build_dir = os.path.join(tmpdir, 'build')
         os.makedirs(build_dir)
-        subprocess.check_call(['cmake', root_dir, '-DVALIANT_ARDUINO=1', '-G', 'Ninja'], cwd=build_dir)
+        subprocess.check_call(['cmake', root_dir, '-DCORAL_MICRO_ARDUINO=1', '-G', 'Ninja'], cwd=build_dir)
         subprocess.check_call(['ninja', '-C', build_dir, 'bundling_target', 'ELFLoader'])
-        libs_dir = os.path.join(core_out_dir, 'variants', 'VALIANT', 'libs')
+        libs_dir = os.path.join(core_out_dir, 'variants', 'coral_micro', 'libs')
         os.makedirs(libs_dir, exist_ok=True)
 
         ar_path = os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-ar' + exe_extension)
@@ -340,15 +340,15 @@ def core_main(args, **kwargs):
                             subprocess.check_call([ar_path, 'q', arduino_rebundled_path, obj_full_path], cwd=build_dir)
                             unique_objects.add(unique_path)
 
-        bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'VALIANT')
+        bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'coral_micro')
         os.makedirs(bootloader_dir)
         shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'), bootloader_dir)
         shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'), bootloader_dir)
 
         # tbz2 everything
-        tar_path = os.path.join(args.output_dir, 'coral-valiant-%s.tar.bz2' % git_revision)
+        tar_path = os.path.join(args.output_dir, 'coral-micro-%s.tar.bz2' % git_revision)
         with tarfile.open(name=tar_path, mode='w:bz2') as arduino_tar:
-            arduino_tar.add(core_out_dir, arcname='coral-valiant-%s' % git_revision)
+            arduino_tar.add(core_out_dir, arcname='coral-micro-%s' % git_revision)
 
         tar_sha256sum = hashlib.sha256()
         with open(tar_path, 'rb') as f:

@@ -1,4 +1,4 @@
-"""Establishes communication to the RPC server on valiant device."""
+"""Establishes communication to the RPC server on Dev Board Micro device."""
 
 import base64
 import copy
@@ -16,10 +16,10 @@ class Antenna(enum.IntEnum):
     EXTERNAL = 1
 
 
-class ValiantRPCHelper(object):
-    """Test rack runner for Valiant.
+class CoralMicroRPCHelper(object):
+    """Test rack runner for Dev Board Micro.
 
-      Implements methods for sending JSON-RPC requests to a Valiant device,
+      Implements methods for sending JSON-RPC requests to a Dev Board Micro device,
       and retrieving the response data.
     """
 
@@ -164,7 +164,7 @@ class ValiantRPCHelper(object):
                 print('[{} - {:.2f}% ({} of {})]'.format(resource_name, (x / uploads) * 100, x, uploads))
             self.upload_resource_chunk(resource_name, resource_data,
                                        x * self.resource_max_chunk_size())
-        print(f'Finished uploading: {resource_name} to the valiant.')
+        print(f'Finished uploading: {resource_name} to the Dev Board Micro.')
 
     def upload_test_image(self, image_file_path: str) -> None:
         """Uploads test image to device.

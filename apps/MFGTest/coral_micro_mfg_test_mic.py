@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from valiant_mfg_test import ValiantMFGTest
+from coral_micro_mfg_test import CoralMicroMFGTest
 
 import argparse
 import base64
@@ -12,7 +12,7 @@ def main():
     Sample runner for the RPCs implemented in this class.
     """
 
-    parser = argparse.ArgumentParser(description='Valiant MFGTest')
+    parser = argparse.ArgumentParser(description='Dev Board Micro MFGTest')
     parser.add_argument('--ip_address', type=str, default='10.10.10.1')
     parser.add_argument('--output', '-o', type=str, required=True)
     parser.add_argument('--sample_rate_hz', '-r', type=int,
@@ -24,7 +24,7 @@ def main():
     parser.add_argument('--raw', action='store_true')
 
     args = parser.parse_args()
-    mfg_test = ValiantMFGTest(f'http://{args.ip_address}:80/jsonrpc',
+    mfg_test = CoralMicroMFGTest(f'http://{args.ip_address}:80/jsonrpc',
                               print_payloads=args.verbose)
 
     result = mfg_test.capture_audio(sample_rate_hz=args.sample_rate_hz,

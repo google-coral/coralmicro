@@ -12,13 +12,13 @@ detection test.
 import argparse
 import os
 import json
-from rpc_helper import ValiantRPCHelper
+from rpc_helper import CoralMicroRPCHelper
 from rpc_helper import Antenna
 
 parser = argparse.ArgumentParser(
-    description='Local client for the rack test to quickly test on local valiant devices without g3.')
-parser.add_argument('--host', type=str, default='10.10.10.1', help='Ip address of the valiant')
-parser.add_argument('--port', type=int, default=80, help='Port of the valiant')
+    description='Local client for the rack test to quickly test on local devices.')
+parser.add_argument('--host', type=str, default='10.10.10.1', help='Ip address of the Dev Board Micro')
+parser.add_argument('--port', type=int, default=80, help='Port of the Dev Board Micro')
 parser.add_argument('--test', type=str, default='detection',
                     help='Test to run, currently support ["detection", "classification", "wifi_scan", '
                          '"wifi_set_antenna"]')
@@ -28,7 +28,7 @@ args = parser.parse_args()
 
 
 def run_model(url, test):
-    rpc_helper = ValiantRPCHelper(url)
+    rpc_helper = CoralMicroRPCHelper(url)
     test_image = args.test_image
     if not os.path.exists(test_image):
         print(f"Test image: {test_image} doesn't exist")
@@ -58,7 +58,7 @@ def run_model(url, test):
     rpc_helper.delete_resource(model_name)
 
 def run_test(url, test):
-    rpc_helper = ValiantRPCHelper(url)
+    rpc_helper = CoralMicroRPCHelper(url)
     if test == "wifi_set_antenna":
         print(json.dumps(rpc_helper.wifi_set_antenna(Antenna.EXTERNAL), indent=2))
         print(json.dumps(rpc_helper.wifi_set_antenna(Antenna.INTERNAL), indent=2))
@@ -67,7 +67,7 @@ def run_test(url, test):
 
 def main():
     url = f"http://{args.host}:{args.port}/jsonrpc"
-    print(f"Valiant url: {url}")
+    print(f"Dev Board Micro url: {url}")
     if args.test in ["classification", "detection"]:
         run_model(url, args.test)
     elif args.test in ["wifi_scan", "wifi_set_antenna"]:

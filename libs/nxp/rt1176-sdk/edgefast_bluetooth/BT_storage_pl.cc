@@ -1,6 +1,6 @@
 // Port of
 // third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/BT_storage_pl.c
-// to use Valiant's filesystem APIs.
+// to use Dev Board Micro's filesystem APIs.
 
 #include "libs/base/filesystem.h"
 
