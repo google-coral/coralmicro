@@ -54,7 +54,8 @@ void UsbHostTask::RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid, usb_h
     host_event_callbacks_[vidpid] = fn;
 
     IRQn_Type irqNumber = USB_OTG2_IRQn;
-    NVIC_SetPriority(irqNumber, 6);
+    // Highest possible prio for TPU stability.
+    NVIC_SetPriority(irqNumber, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
     NVIC_EnableIRQ(irqNumber);
 }
 
