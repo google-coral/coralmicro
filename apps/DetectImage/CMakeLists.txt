@@ -1,7 +1,7 @@
 add_executable_m7(DetectImage
     detect_image.cc
     DATA
-    ${VALIANT_SOURCE_DIR}/apps/DetectImage/cat_300x300.rgb
+    cat_300x300.rgb
     ${VALIANT_SOURCE_DIR}/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
 )
 
