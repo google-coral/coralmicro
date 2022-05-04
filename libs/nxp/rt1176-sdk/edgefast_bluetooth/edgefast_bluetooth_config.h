@@ -200,7 +200,7 @@ Select this for LE Peripheral role support.
  * NULL termination). Can be empty string.
  */
 #ifndef CONFIG_BT_DEVICE_NAME
-    #define CONFIG_BT_DEVICE_NAME "BLE Peripheral"
+    #define CONFIG_BT_DEVICE_NAME "Coral Dev Board Micro"
 #endif
 
 /*! @brief Bluetooth device appearance
