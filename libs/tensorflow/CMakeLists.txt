@@ -190,10 +190,3 @@ target_link_libraries(libs_tensorflow-m4
     libs_kissfft-m4
     libs_ruy
 )
-
-add_library_m7(libs_tensorflow_model_hello_world STATIC
-    ${PROJECT_SOURCE_DIR}/libs/tensorflow/hello_world_model.cc
-)
-target_include_directories(libs_tensorflow_model_hello_world PUBLIC
-    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro
-)
