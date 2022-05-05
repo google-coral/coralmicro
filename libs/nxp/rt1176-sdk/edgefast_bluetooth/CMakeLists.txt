@@ -105,6 +105,7 @@ target_compile_definitions(edgefast_bluetooth_internal PUBLIC
     CONFIG_BT_SETTINGS
     CONFIG_BT_KEYS_OVERWRITE_OLDEST
     CONFIG_BT_PRIVACY
+    CONFIG_BT_OBSERVER
 )
 
 target_link_libraries(edgefast_bluetooth_internal PUBLIC

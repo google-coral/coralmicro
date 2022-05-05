@@ -4,6 +4,7 @@
 /* clang-format off */
 #include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include/toolchain.h"
 #include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include/bluetooth/bluetooth.h"
+#include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include/bluetooth/hci.h"
 /* clang-format on */
 
 void InitEdgefastBluetooth(bt_ready_cb_t cb);
