@@ -68,7 +68,6 @@ iterate(void *pres)
         res->crc = crcu16(crc, res->crc);
         if (i == 0)
             res->crclist = res->crc;
-        vTaskDelay(1);
     }
     return NULL;
 }
