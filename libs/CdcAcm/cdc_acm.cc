@@ -1,4 +1,5 @@
 #include "libs/CdcAcm/cdc_acm.h"
+#include "libs/base/check.h"
 #include "libs/base/reset.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 
@@ -25,6 +26,7 @@ void CdcAcm::Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_
     cdc_acm_interfaces_[0].interfaceNumber = comm_iface;
     cdc_acm_interfaces_[1].interfaceNumber = data_iface;
     tx_semaphore_ = xSemaphoreCreateBinary();
+    CHECK(tx_semaphore_);
 }
 
 void CdcAcm::SetClassHandle(class_handle_t class_handle) {
@@ -147,7 +149,7 @@ usb_status_t CdcAcm::Handler(uint32_t event, void *param) {
                 ret = USB_DeviceCdcAcmSend(class_handle_, bulk_in_ep_, nullptr, 0);
             } else {
                 if (ep_cb->buffer || (!ep_cb->buffer && ep_cb->length == 0)) {
-                    xSemaphoreGive(tx_semaphore_);
+                    CHECK(xSemaphoreGive(tx_semaphore_) == pdTRUE);
                     ret = USB_DeviceCdcAcmRecv(
                             class_handle_,
                             bulk_out_ep_,

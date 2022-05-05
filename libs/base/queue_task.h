@@ -1,6 +1,7 @@
 #ifndef _LIBS_BASE_QUEUE_TASK_H_
 #define _LIBS_BASE_QUEUE_TASK_H_
 
+#include "libs/base/check.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/queue.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -19,9 +20,9 @@ class QueueTask {
     // Initialized any needed data here, but beware that the FreeRTOS scheduler may not yet be running.
     virtual void Init() {
         request_queue_ = xQueueCreate(QueueLength, sizeof(Request));
-        xTaskCreateStatic(
-                StaticTaskMain, Name, stack_depth_, this,
-                Priority, task_stack_, &task_);
+        CHECK(request_queue_);
+        CHECK(xTaskCreateStatic(StaticTaskMain, Name, stack_depth_, this,
+                                Priority, task_stack_, &task_));
     }
   protected:
     Response SendRequest(Request& req) {

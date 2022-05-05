@@ -102,6 +102,7 @@ int AudioService::AddCallback(void* ctx, AudioService::Callback fn) {
     msg.queue = xQueueCreate(1, sizeof(int));
     msg.add.ctx = ctx;
     msg.add.fn = fn;
+    CHECK(msg.queue);
     CHECK(xQueueSendToBack(queue_, &msg, portMAX_DELAY) == pdTRUE);
 
     int id;
@@ -115,6 +116,7 @@ bool AudioService::RemoveCallback(int id) {
     msg.type = MessageType::kRemoveCallback;
     msg.queue = xQueueCreate(1, sizeof(int));
     msg.remove.id = id;
+    CHECK(msg.queue);
     CHECK(xQueueSendToBack(queue_, &msg, portMAX_DELAY) == pdTRUE);
 
     int found;

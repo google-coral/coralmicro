@@ -1,3 +1,4 @@
+#include "libs/base/check.h"
 #include "libs/base/console_m7.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/message_buffer.h"
@@ -169,22 +170,28 @@ void ConsoleM7::Init(bool init_tx, bool init_rx) {
             cdc_acm_.descriptor_data(), cdc_acm_.descriptor_data_size());
 
     console_queue_ = xQueueCreate(16, sizeof(ConsoleMessage));
-    if (!console_queue_) {
-        DbgConsole_Printf("Failed to create console_queue\r\n");
-        vTaskSuspend(NULL);
-    }
+    CHECK(console_queue_);
 
     rx_mutex_ = xSemaphoreCreateMutex();
+    CHECK(rx_mutex_);
 
-    xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, NULL);
+    CHECK(xTaskCreate(usb_device_task, "usb_device_task",
+                      configMINIMAL_STACK_SIZE * 10, nullptr,
+                      USB_DEVICE_TASK_PRIORITY, nullptr) == pdPASS);
     if (init_tx) {
-        xTaskCreate(StaticM7ConsoleTaskTxFn, "m7_console_task_tx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, &tx_task_);
+        CHECK(xTaskCreate(StaticM7ConsoleTaskTxFn, "m7_console_task_tx",
+                          configMINIMAL_STACK_SIZE * 10, nullptr,
+                          CONSOLE_TASK_PRIORITY, &tx_task_) == pdPASS);
     }
     if (init_rx) {
-        xTaskCreate(StaticM7ConsoleTaskRxFn, "m7_console_task_rx", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, &rx_task_);
+        CHECK(xTaskCreate(StaticM7ConsoleTaskRxFn, "m7_console_task_rx",
+                          configMINIMAL_STACK_SIZE * 10, nullptr,
+                          CONSOLE_TASK_PRIORITY, &rx_task_) == pdPASS);
     }
     if (IPCM7::HasM4Application()) {
-        xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task", configMINIMAL_STACK_SIZE * 10, NULL, CONSOLE_TASK_PRIORITY, NULL);
+        CHECK(xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task",
+                          configMINIMAL_STACK_SIZE * 10, nullptr,
+                          CONSOLE_TASK_PRIORITY, nullptr) == pdPASS);
     }
 }
 

@@ -3,6 +3,7 @@
 
 #include <cstdio>
 
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 #define CHECK(a)                                                          \

@@ -1,3 +1,4 @@
+#include "libs/base/check.h"
 #include "libs/base/mutex.h"
 #include "libs/testlib/test_lib.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/lwiperf.h"
@@ -82,6 +83,7 @@ static void IperfStop(struct jsonrpc_request *request) {
 
 void IperfInit() {
     iperf_ctx.mutex = xSemaphoreCreateMutex();
+    CHECK(iperf_ctx.mutex);
     iperf_ctx.session = nullptr;
     jsonrpc_export("iperf_start", IperfStart);
     jsonrpc_export("iperf_stop", IperfStop);

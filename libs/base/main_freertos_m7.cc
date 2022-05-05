@@ -1,5 +1,6 @@
 #include "libs/base/main_freertos_m7.h"
 
+#include "libs/base/check.h"
 #include "libs/base/console_m7.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
@@ -58,7 +59,7 @@ extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_
     coral::micro::IPCM7::GetSingleton()->Init();
     coral::micro::Random::GetSingleton()->Init();
     coral::micro::ConsoleM7::GetSingleton()->Init(init_console_tx, init_console_rx);
-    assert(coral::micro::filesystem::Init());
+    CHECK(coral::micro::filesystem::Init());
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(NULL, NULL);
     InitializeCDCEEM();
@@ -79,9 +80,9 @@ extern "C" int real_main(int argc, char **argv, bool init_console_tx, bool init_
     coral::micro::CameraTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
-    xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30, NULL, APP_TASK_PRIORITY, NULL);
+    CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30, NULL,
+                      APP_TASK_PRIORITY, NULL) == pdPASS);
 
     vTaskStartScheduler();
-
     return 0;
 }

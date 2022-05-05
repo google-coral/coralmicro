@@ -1,3 +1,4 @@
+#include "libs/base/check.h"
 #include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/clock_config.h"
@@ -70,7 +71,9 @@ void UsbHostTask::TaskMain() {
 }
 
 void UsbHostTask::Init() {
-    xTaskCreate(UsbHostTask::StaticTaskMain, "UsbHostTask", configMINIMAL_STACK_SIZE * 10, this, USB_HOST_TASK_PRIORITY, NULL);
+    CHECK(xTaskCreate(UsbHostTask::StaticTaskMain, "UsbHostTask",
+                      configMINIMAL_STACK_SIZE * 10, this,
+                      USB_HOST_TASK_PRIORITY, NULL) == pdPASS);
 }
 
 UsbHostTask::UsbHostTask() {

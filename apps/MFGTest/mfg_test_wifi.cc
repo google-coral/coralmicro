@@ -1,4 +1,5 @@
 #include "apps/MFGTest/mfg_test_iperf.h"
+#include "libs/base/check.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/led.h"
@@ -105,7 +106,7 @@ static void BLEFind(struct jsonrpc_request* request) {
                     rssi = p_scan_result->rssi;
                 }
             } else {
-                xSemaphoreGive(ble_scan_sema);
+                CHECK(xSemaphoreGive(ble_scan_sema) == pdTRUE);
             }
         });
     if (ret != WICED_BT_PENDING) {
@@ -113,7 +114,7 @@ static void BLEFind(struct jsonrpc_request* request) {
                              nullptr);
         return;
     }
-    xSemaphoreTake(ble_scan_sema, portMAX_DELAY);
+    CHECK(xSemaphoreTake(ble_scan_sema, portMAX_DELAY) == pdTRUE);
     if (found_match) {
         jsonrpc_return_success(request, "{%Q:%d}", "signal_strength", rssi);
     } else {
@@ -147,7 +148,7 @@ static void BLEScan(struct jsonrpc_request* request) {
                         s[2], s[3], s[4], s[5]);
                 rssi = p_scan_result->rssi;
             } else {
-                xSemaphoreGive(ble_scan_sema);
+                CHECK(xSemaphoreGive(ble_scan_sema) == pdTRUE);
             }
         });
     if (ret != WICED_BT_PENDING) {
@@ -155,7 +156,7 @@ static void BLEScan(struct jsonrpc_request* request) {
                              nullptr);
         return;
     }
-    xSemaphoreTake(ble_scan_sema, portMAX_DELAY);
+    CHECK(xSemaphoreTake(ble_scan_sema, portMAX_DELAY) == pdTRUE);
     if (found_address) {
         jsonrpc_return_success(request, "{%Q:%Q, %Q:%d}", "address", address,
                                "signal_strength", rssi);
@@ -190,7 +191,9 @@ extern unsigned char brcm_patchram_buf[];
 extern unsigned int brcm_patch_ram_length;
 extern "C" void app_main(void* param) {
     ble_scan_sema = xSemaphoreCreateBinary();
+    CHECK(ble_scan_sema);
     ble_ready_mtx = xSemaphoreCreateMutex();
+    CHECK(ble_ready_mtx);
     if (coral::micro::filesystem::ReadFile(
             "/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
             brcm_patchram_buf,

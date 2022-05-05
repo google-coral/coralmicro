@@ -1,5 +1,6 @@
 #include "libs/tpu/edgetpu_manager.h"
 
+#include "libs/base/check.h"
 #include "libs/base/mutex.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
@@ -23,8 +24,8 @@ EdgeTpuContext::~EdgeTpuContext() {
     EdgeTpuTask::GetSingleton()->SetPower(false);
 }
 
-EdgeTpuManager::EdgeTpuManager() {
-    mutex_ = xSemaphoreCreateMutex();
+EdgeTpuManager::EdgeTpuManager(): mutex_(xSemaphoreCreateMutex()) {
+    CHECK(mutex_);
 }
 
 void EdgeTpuManager::NotifyConnected(usb_host_edgetpu_instance_t* usb_instance) {

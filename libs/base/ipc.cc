@@ -1,3 +1,4 @@
+#include "libs/base/check.h"
 #include "libs/base/ipc.h"
 #include "libs/base/tasks.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
@@ -77,9 +78,15 @@ void IPC::RxTaskFn() {
 
 void IPC::Init() {
     tx_semaphore_ = xSemaphoreCreateBinary();
-    MCMGR_RegisterEvent(kMCMGR_FreeRtosMessageBuffersEvent, StaticFreeRtosMessageEventHandler, this);
-    xTaskCreate(IPC::StaticTxTaskFn, "ipc_tx_task", configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY, &tx_task_);
-    xTaskCreate(IPC::StaticRxTaskFn, "ipc_rx_task", configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY, &rx_task_);
+    CHECK(tx_semaphore_);
+    MCMGR_RegisterEvent(kMCMGR_FreeRtosMessageBuffersEvent,
+                        StaticFreeRtosMessageEventHandler, this);
+    CHECK(xTaskCreate(IPC::StaticTxTaskFn, "ipc_tx_task",
+                      configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY,
+                      &tx_task_) == pdPASS);
+    CHECK(xTaskCreate(IPC::StaticRxTaskFn, "ipc_rx_task",
+                      configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY,
+                      &rx_task_) == pdPASS);
     vTaskSuspend(tx_task_);
     vTaskSuspend(rx_task_);
 }

@@ -1,3 +1,4 @@
+#include "libs/base/check.h"
 #include "libs/base/console_m4.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
@@ -25,7 +26,7 @@ extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware(true);
 
     coral::micro::ConsoleInit();
-    coral::micro::filesystem::Init();
+    CHECK(coral::micro::filesystem::Init());
     coral::micro::gpio::Init();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
@@ -42,9 +43,9 @@ extern "C" int main(int argc, char **argv) {
     constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;
     static StaticTask_t xTaskBuffer;
     static StackType_t xStack[stack_size];
-    xTaskCreateStatic(pre_app_main, "app_main", stack_size, NULL, APP_TASK_PRIORITY, xStack, &xTaskBuffer);
+    CHECK(xTaskCreateStatic(pre_app_main, "app_main", stack_size, NULL,
+                            APP_TASK_PRIORITY, xStack, &xTaskBuffer));
 
     vTaskStartScheduler();
-
     return 0;
 }

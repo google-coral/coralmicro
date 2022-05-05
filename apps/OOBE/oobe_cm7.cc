@@ -152,8 +152,9 @@ struct TaskMessage {
 class OOBETask {
    public:
     OOBETask(const char* name) : queue_(xQueueCreate(2, sizeof(TaskMessage))) {
-        xTaskCreate(StaticTaskFunc, name, configMINIMAL_STACK_SIZE * 30, this,
-                    APP_TASK_PRIORITY, &task_);
+        CHECK(xTaskCreate(StaticTaskFunc, name, configMINIMAL_STACK_SIZE * 30,
+                          this, APP_TASK_PRIORITY, &task_) == pdPASS);
+        CHECK(queue_);
     }
 
     void Start() { SendCommandBlocking(kCmdStart); }
@@ -172,8 +173,10 @@ class OOBETask {
 
     void SendCommandBlocking(int command) {
         TaskMessage message = {command, xSemaphoreCreateBinary()};
-        xQueueSend(queue_, &message, portMAX_DELAY);
-        xSemaphoreTake(message.completion_semaphore, portMAX_DELAY);
+        CHECK(message.completion_semaphore);
+        CHECK(xQueueSend(queue_, &message, portMAX_DELAY) == pdTRUE);
+        CHECK(xSemaphoreTake(message.completion_semaphore, portMAX_DELAY) ==
+              pdTRUE);
         vSemaphoreDelete(message.completion_semaphore);
     }
 
@@ -185,7 +188,7 @@ class PosenetTask : public OOBETask {
     PosenetTask() : OOBETask("posenet_task"){};
     void QueueFrame(std::vector<uint8_t>* frame) {
         TaskMessage message = {kCmdProcess, nullptr, frame};
-        xQueueSend(queue_, &message, portMAX_DELAY);
+        CHECK(xQueueSend(queue_, &message, portMAX_DELAY) == pdTRUE);
     }
 
    protected:
@@ -193,7 +196,7 @@ class PosenetTask : public OOBETask {
         TaskMessage message;
         coral::micro::posenet::Output output;
         while (true) {
-            xQueueReceive(queue_, &message, portMAX_DELAY);
+            CHECK(xQueueReceive(queue_, &message, portMAX_DELAY) == pdTRUE);
 
             switch (message.command) {
                 case kCmdStart:
@@ -240,7 +243,7 @@ class PosenetTask : public OOBETask {
 
             // Signal the command completion semaphore, if present.
             if (message.completion_semaphore) {
-                xSemaphoreGive(message.completion_semaphore);
+                CHECK(xSemaphoreGive(message.completion_semaphore) == pdTRUE);
             }
         }
     }
@@ -258,7 +261,7 @@ class CameraTask : public OOBETask {
     void TaskFunc() override {
         TaskMessage message;
         while (true) {
-            xQueueReceive(queue_, &message, portMAX_DELAY);
+            CHECK(xQueueReceive(queue_, &message, portMAX_DELAY) == pdTRUE);
 
             switch (message.command) {
                 case kCmdStart:
@@ -313,7 +316,7 @@ class CameraTask : public OOBETask {
 
             // Signal the command completion semaphore, if present.
             if (message.completion_semaphore) {
-                xSemaphoreGive(message.completion_semaphore);
+                CHECK(xSemaphoreGive(message.completion_semaphore) == pdTRUE);
             }
         }
     }
@@ -321,7 +324,7 @@ class CameraTask : public OOBETask {
    private:
     void QueueProcess() {
         TaskMessage message = {kCmdProcess};
-        xQueueSend(queue_, &message, portMAX_DELAY);
+        CHECK(xQueueSend(queue_, &message, portMAX_DELAY) == pdTRUE);
     }
 
     PosenetTask* posenet_task_ = nullptr;
@@ -338,7 +341,9 @@ void Main() {
     PosenetTask posenet_task;
     CameraTask camera_task(&posenet_task);
     camera_output_mtx = xSemaphoreCreateMutex();
+    CHECK(camera_output_mtx);
     posenet_output_mtx = xSemaphoreCreateMutex();
+    CHECK(posenet_output_mtx);
 
 // For the OOBE Demo, bring up WiFi and Ethernet. For now these are active
 // but unused.

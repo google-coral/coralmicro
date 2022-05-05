@@ -1,7 +1,8 @@
 #include "libs/CdcEem/cdc_eem.h"
 
-#include "libs/base/utils.h"
+#include "libs/base/check.h"
 #include "libs/base/tasks.h"
+#include "libs/base/utils.h"
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/etharp.h"
@@ -30,7 +31,10 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
     cdc_eem_data_endpoints_[DATA_OUT].endpointAddress = bulk_out_ep | (USB_OUT << 7);
     cdc_eem_interfaces_[0].interfaceNumber = data_iface;
     tx_queue_ = xQueueCreate(10, sizeof(void*));
-    xTaskCreate(CdcEem::StaticTaskFunction, "cdc_eem_task", configMINIMAL_STACK_SIZE * 10, this, USB_DEVICE_TASK_PRIORITY, nullptr);
+    CHECK(tx_queue_);
+    CHECK(xTaskCreate(CdcEem::StaticTaskFunction, "cdc_eem_task",
+                      configMINIMAL_STACK_SIZE * 10, this,
+                      USB_DEVICE_TASK_PRIORITY, nullptr) == pdPASS);
 
     if (!utils::GetUSBIPAddress(&netif_ipaddr_)) {
         IP4_ADDR(&netif_ipaddr_, 10, 10, 10, 1);
