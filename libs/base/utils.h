@@ -31,6 +31,7 @@ bool GetUSBIPAddress(ip4_addr_t* usb_ip_out);
 bool GetUSBIPAddress(std::string* usb_ip_out);
 bool GetWifiSSID(std::string* wifi_ssid_out);
 bool GetWifiPSK(std::string* wifi_psk_out);
+int GetEthernetSpeed();
 }  // namespace utils
 }  // namespace coral::micro
 

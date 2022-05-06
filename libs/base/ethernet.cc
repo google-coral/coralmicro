@@ -3,7 +3,6 @@
 #include "libs/base/gpio.h"
 #include "libs/base/utils.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.h"
-#include "third_party/nxp/rt1176-sdk/components/phy/fsl_phy.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
@@ -14,17 +13,57 @@ namespace coral::micro {
 namespace {
 struct netif netif;
 struct netif* eth_netif = nullptr;
+
 mdio_handle_t mdioHandle = {
     .ops = &enet_ops,
 };
+
 phy_handle_t phyHandle = {
     .phyAddr = 1,
     .mdioHandle = &mdioHandle,
     .ops = &phyrtl8211f_ops,
 };
+
+
+constexpr uint32_t kBasicModeControlReg = 0;
+constexpr uint32_t kGigBaseControlReg = 9;
+constexpr uint32_t kRXCSSCReg = 19;
+constexpr uint32_t kSystemClockSSCInitReg = 23;
+constexpr uint32_t kSystemClockSSCReg = 25;
+constexpr uint32_t kPageSelectReg = 31;
+
+status_t EthernetPHYEnableSSC(bool auto_neg) {
+    uint32_t reg;
+    status_t status;
+    const uint32_t reset = auto_neg ? 0x9200 : 0x8000;
+    // Enable RXC SSC
+    status = EthernetPHYWrite(kPageSelectReg, 0x0C44);
+    status |= EthernetPHYWrite(kRXCSSCReg, 0x5F00);
+    status |= EthernetPHYWrite(kPageSelectReg, 0x0);
+    status |= EthernetPHYWrite(kBasicModeControlReg, reset);
+
+    // Enable System Clock SSC
+    status |= EthernetPHYWrite(kPageSelectReg, 0x0C44);
+    status |= EthernetPHYWrite(kSystemClockSSCInitReg, 0x4F00);
+    status |= EthernetPHYWrite(kPageSelectReg, 0x0A43);
+    status |= PHY_Read(&phyHandle, kSystemClockSSCReg, &reg);
+    status |= EthernetPHYWrite(kSystemClockSSCReg, reg | (1U << 3));
+    status |= EthernetPHYWrite(kPageSelectReg, 0x0);
+    status |= EthernetPHYWrite(kBasicModeControlReg, reset);
+
+    // Disable CLK_OUT
+    status |= EthernetPHYWrite(kPageSelectReg, 0x0A43);
+    status |= PHY_Read(&phyHandle, kSystemClockSSCReg, &reg);
+    status |= EthernetPHYWrite(kSystemClockSSCReg, reg & ~1U);
+    status |= EthernetPHYWrite(kPageSelectReg, 0x0);
+    status |= EthernetPHYWrite(kBasicModeControlReg, reset);
+    return status;
+}
 }  // namespace
 
-struct netif* GetEthernetInterface() { return eth_netif; }
+struct netif* GetEthernetInterface() {
+    return eth_netif;
+}
 
 status_t EthernetPHYWrite(uint32_t phyReg, uint32_t data) {
     return PHY_Write(&phyHandle, phyReg, data);
@@ -32,8 +71,33 @@ status_t EthernetPHYWrite(uint32_t phyReg, uint32_t data) {
 
 void InitializeEthernet(bool default_iface) {
     ip4_addr_t netif_ipaddr, netif_netmask, netif_gw;
+
+    phy_config_t phyConfig = {
+        .phyAddr = 1,
+        .duplex = kPHY_FullDuplex,
+        .autoNeg = false,
+        .enableEEE = true,
+    };
+
+    int speed = coral::micro::utils::GetEthernetSpeed();
+    switch (speed) {
+        case 1000:
+            phyConfig.speed = kPHY_Speed1000M;
+            break;
+        case 100:
+            phyConfig.speed = kPHY_Speed100M;
+            break;
+        case 10:
+            phyConfig.speed = kPHY_Speed10M;
+            break;
+        default:
+            printf("Invalid ethernet speed, assuming 100M\r\n");
+            phyConfig.speed = kPHY_Speed100M;
+    }
+
     ethernetif_config_t enet_config = {
         .phyHandle = &phyHandle,
+        .phyConfig = &phyConfig,
         // MAC Address w/ Google prefix, and blank final 3 octets.
         // They will be populated below.
         .macAddress = {0x00, 0x1A, 0x11, 0x00, 0x00, 0x00},
@@ -70,11 +134,16 @@ void InitializeEthernet(bool default_iface) {
     IP4_ADDR(&netif_netmask, 0, 0, 0, 0);
     IP4_ADDR(&netif_gw, 0, 0, 0, 0);
 
+    if(EthernetPHYEnableSSC(phyConfig.autoNeg)) {
+        printf("Failed enabling PHY SSC, proceeding.\r\n");
+    }
+
     netifapi_netif_add(&netif, &netif_ipaddr, &netif_netmask, &netif_gw,
                        &enet_config, ethernetif1_init, tcpip_input);
     if (default_iface) {
         netifapi_netif_set_default(&netif);
     }
+
     netifapi_netif_set_up(&netif);
     netifapi_dhcp_start(&netif);
     eth_netif = &netif;
