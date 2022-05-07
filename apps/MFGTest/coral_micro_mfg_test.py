@@ -52,7 +52,6 @@ class CoralMicroMFGTest(object):
             print(payload)
         return requests.post(self.url, json=payload).json()
 
-    @rpc
     def get_serial_number(self):
         """Gets the serial number from the device
 
@@ -62,9 +61,11 @@ class CoralMicroMFGTest(object):
             {'id': 0, 'result': {'serial_number': '350a280e828f2c4f'}}
         """
 
-    @rpc
     def set_pmic_rail_state(self, rail, enable):
         """Sets the state of a PMIC rail.
+
+        We can't use decorator here because Manufacturing framework uses Python 2.7, and the
+        decorator produces incompatible output for enum parameters. Create the RPC manually.
 
         Args:
           rail: A value from the PMICRails enum
@@ -75,10 +76,17 @@ class CoralMicroMFGTest(object):
           Example:
             {'id': 1, 'result': {}}
         """
+        return self.send_rpc('set_pmic_rail_state', {
+            'set_pmic_rail_state': rail.value,
+            'enable': enable,
+        })
 
-    @rpc
+
     def set_led_state(self, led, enable):
         """Sets the state of an LED.
+
+        We can't use decorator here because Manufacturing framework uses Python 2.7, and the
+        decorator produces incompatible output for enum parameters. Create the RPC manually.
 
         Args:
           led: A value from the LEDs enum
@@ -92,6 +100,11 @@ class CoralMicroMFGTest(object):
         Notes:
           Setting the state of the TPU LED requires the TPU power to be enabled.
         """
+        return self.send_rpc('set_led_state', {
+            'led': led.value,
+            'enable': enable,
+        })
+
 
     @rpc
     def set_pin_pair_to_gpio(self, output_pin, input_pin):
@@ -271,9 +284,11 @@ class CoralMicroMFGTest(object):
             {'id': 1, 'result': {'signal_strength': -52}}
         """
 
-    @rpc
     def wifi_set_antenna(self, antenna):
         """Sets which antenna to use for WiFi.
+
+        We can't use decorator here because Manufacturing framework uses Python 2.7, and the
+        decorator produces incompatible output for enum parameters. Create the RPC manually.
 
         Args:
           antenna: A value from the Antenna Enum.
@@ -283,6 +298,10 @@ class CoralMicroMFGTest(object):
           Example:
             {'id': 2, 'result': {}}
         """
+        return self.send_rpc('wifi_set_antenna', {
+            'antenna': antenna.value,
+        })
+
 
     @rpc
     def ble_find(self, address):
