@@ -39,7 +39,7 @@ sudo apt-get install -y \
 
 Also, be sure to setup udev rules, or the scripts will have permission and path issues:
 ```
-sudo cp scripts/99-coral-micro.rules scripts/50-cmsis-dap.rules scripts/99-secure-provisioning.rules /etc/udev/rules.d
+sudo cp scripts/99-coral-micro.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```

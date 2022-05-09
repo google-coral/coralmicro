@@ -59,9 +59,9 @@ class UsbDeviceTask {
         .max_packet_size = 0x40,
         .id_vendor = 0x18d1,
 #if defined(ELFLOADER)
-        .id_product = 0x93FE,
+        0x9307,
 #else
-        .id_product = 0x93FF,
+        0x9308,
 #endif
         .bcd_device = 0x0001,
         .manufacturer = 1,
@@ -76,6 +76,7 @@ class UsbDeviceTask {
         .descriptor_type = 0x03,
         .lang_id = 0x0409,
     };
+
 
     static usb_status_t StaticHandler(usb_device_handle device_handle,
                                       uint32_t event, void* param);

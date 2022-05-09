@@ -48,10 +48,8 @@ FLASHLOADER_VID = 0x15a2
 FLASHLOADER_PID = 0x0073
 
 ELFLOADER_VID = 0x18d1
-ELFLOADER_PID = 0x93fe
-
-CORAL_MICRO_VID = 0x18d1
-CORAL_MICRO_PID = 0x93ff
+ELFLOADER_PID = 0x9307
+ELFLOADER_OLD_PID = 0x93fe
 
 OPEN_HID_RETRY_INTERVAL_S = 0.1
 OPEN_HID_RETRY_TIME_S = 15
@@ -116,6 +114,10 @@ def is_elfloader_connected(serial_number):
                                 find_all=True):
         if not serial_number or device.serial_number == serial_number:
             return True
+    for device in usb.core.find(idVendor=ELFLOADER_VID, idProduct=ELFLOADER_OLD_PID,
+                                find_all=True):
+        if not serial_number or device.serial_number == serial_number:
+            return True
     return False
 
 def is_sdp_connected():
@@ -133,13 +135,13 @@ def EnumerateFlashloader():
 def EnumerateElfloader():
     return hid.enumerate(ELFLOADER_VID, ELFLOADER_PID)
 
-SERIAL_PORT_RE = re.compile('USB VID:PID=18D1:93FF SER=([0-9A-Fa-f]+)')
+SERIAL_PORT_RE = re.compile(f'USB VID:PID=18D1:(9308|93FF) SER=([0-9A-Fa-f]+)')
 def EnumerateCoralMicro():
     serial_list = []
     for port in serial.tools.list_ports.comports():
         matches = SERIAL_PORT_RE.match(port.hwid)
         if matches:
-            serial_list.append(matches.group(1).lower())
+            serial_list.append(matches.group(2).lower())
     return serial_list
 
 def FindElfloader(build_dir, cached_files):
