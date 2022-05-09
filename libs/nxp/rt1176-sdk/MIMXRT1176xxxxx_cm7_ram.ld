@@ -144,6 +144,27 @@ SECTIONS
      . = ALIGN(4);
   } > m_ocram
 
+  .arduino :
+  {
+     . = ALIGN(4);
+     __arduino_start = .;
+     *liblibs_arduino.a:*(.text .text*)
+     *liblibs_arduino.a:*(.data .data*)
+     *liblibs_arduino.a:*(.rodata .rodata*)
+     __arduino_end = .;
+     . = ALIGN(4);
+  } > m_ocram
+
+  .arduino_bundled :
+  {
+     . = ALIGN(4);
+     __arduino_bundled_start = .;
+     *liblibs_arduino_bundled.a:*(.text .text*)
+     *liblibs_arduino_bundled.a:*(.data .data*)
+     *liblibs_arduino_bundled.a:*(.rodata .rodata*)
+     __arduino_bundled_end = .;
+     . = ALIGN(4);
+  } > m_ocram
 
   /* The program code and other data goes into internal RAM */
   .text :
