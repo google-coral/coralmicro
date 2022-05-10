@@ -160,7 +160,7 @@ void SampleTensorAtMultipleChannels(const float* tensor, const int height,
   BuildBilinearInterpolation(y, x, height, width, num_channels, &top_left,
                              &top_right, &bottom_left, &bottom_right, &y_lerp,
                              &x_lerp);
-  for (int i = 0; i < n_result_channels; ++i) {
+  for (size_t i = 0; i < n_result_channels; ++i) {
     const int c = result_channels[i];
     result[i] = (1 - y_lerp) * ((1 - x_lerp) * tensor[top_left + c] +
                                 x_lerp * tensor[top_right + c]) +
@@ -216,7 +216,7 @@ Point FindDisplacedPosition(const float* short_offsets,
 // Build an adjacency list of the pose graph.
 AdjacencyList BuildAdjacencyList() {
   AdjacencyList adjacency_list(posenet_decoder_op::kNumKeypoints);
-  for (int k = 0; k < kEdgeList.size(); ++k) {
+  for (size_t k = 0; k < kEdgeList.size(); ++k) {
     const int parent_id = kEdgeList[k].first;
     const int child_id = kEdgeList[k].second;
     adjacency_list.child_ids[parent_id].push_back(child_id);
@@ -404,7 +404,7 @@ void PerformSoftKeypointNMS(const std::vector<int>& decreasing_indices,
 float ComputeSumSquaredDistance(const std::vector<Point>& embedding,
                                 const PoseKeypoints& pose) {
   float distance = 0;
-  for (int p = 0; p < embedding.size(); p++) {
+  for (size_t p = 0; p < embedding.size(); p++) {
     distance += ComputeSquaredDistance(embedding[p], pose.keypoint[p]);
   }
   return distance;
@@ -447,7 +447,7 @@ int MatchEmbeddingToInstance(const int y_location, const int x_location,
   }
   std::vector<float> dists;
   dists.reserve(num_poses);
-  for (int k = 0; k < num_poses; k++) {
+  for (size_t k = 0; k < num_poses; k++) {
     dists.push_back(ComputeSumSquaredDistance(embeddings, poses[k]));
   }
   return std::distance(dists.begin(),
