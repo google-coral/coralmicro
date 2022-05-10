@@ -1,6 +1,6 @@
 add_subdirectory(CMSIS)
-add_subdirectory(CdcAcm)
-add_subdirectory(CdcEem)
+add_subdirectory(cdc_acm)
+add_subdirectory(cdc_eem)
 add_subdirectory(CoreMark)
 add_subdirectory(FreeRTOS)
 add_subdirectory(rpc)

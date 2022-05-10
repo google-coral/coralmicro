@@ -1,7 +1,7 @@
 #ifndef __LIBS_CONSOLE_CONSOLE_M7_H__
 #define __LIBS_CONSOLE_CONSOLE_M7_H__
 
-#include "libs/CdcAcm/cdc_acm.h"
+#include "libs/cdc_acm/cdc_acm.h"
 #include "libs/base/message_buffer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 

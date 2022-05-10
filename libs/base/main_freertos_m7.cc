@@ -9,7 +9,7 @@
 #include "libs/base/tasks.h"
 #include "libs/base/tempsense.h"
 #include "libs/base/timer.h"
-#include "libs/CdcEem/cdc_eem.h"
+#include "libs/cdc_eem/cdc_eem.h"
 #include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"

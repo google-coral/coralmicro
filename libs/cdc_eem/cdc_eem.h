@@ -1,5 +1,5 @@
-#ifndef __LIBS_CDCEEM_CDC_EEM_H_
-#define __LIBS_CDCEEM_CDC_EEM_H_
+#ifndef _LIBS_CDC_EEM_CDC_EEM_H_
+#define _LIBS_CDC_EEM_CDC_EEM_H_
 
 #include "libs/usb/descriptors.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
@@ -130,4 +130,4 @@ class CdcEem {
 
 }  // namespace coral::micro
 
-#endif  // __LIBS_CDCEEM_CDC_EEM_H_
+#endif  // _LIBS_CDC_EEM_CDC_EEM_H_

@@ -46,8 +46,8 @@ target_link_libraries(libs_base-m7_freertos
     libs_nxp_rt1176-sdk-mbedtls
     libs_nxp_rt1176-sdk_freertos
     libs_nxp_rt1176-sdk-mcmgr_m7
-    libs_CdcAcm_freertos
-    libs_CdcEem_freertos
+    libs_cdc_acm_freertos
+    libs_cdc_eem_freertos
     libs_tasks_EdgeTpuTask_freertos
     libs_tasks_EdgeTpuDfuTask_freertos
     libs_tasks_UsbDeviceTask_freertos

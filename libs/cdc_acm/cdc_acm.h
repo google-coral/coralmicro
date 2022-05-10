@@ -1,5 +1,5 @@
-#ifndef __LIBS_CDCACM_CDC_ACM_H_
-#define __LIBS_CDCACM_CDC_ACM_H_
+#ifndef _LIBS_CDC_ACM_CDC_ACM_H_
+#define _LIBS_CDC_ACM_CDC_ACM_H_
 
 #include "libs/usb/descriptors.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -186,4 +186,4 @@ class CdcAcm {
 
 }  // namespace coral::micro
 
-#endif  // __LIBS_CDCACM_CDC_ACM_H_
+#endif  // _LIBS_CDC_ACM_CDC_ACM_H_

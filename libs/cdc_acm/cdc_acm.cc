@@ -1,4 +1,5 @@
-#include "libs/CdcAcm/cdc_acm.h"
+#include "libs/cdc_acm/cdc_acm.h"
+
 #include "libs/base/check.h"
 #include "libs/base/reset.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
