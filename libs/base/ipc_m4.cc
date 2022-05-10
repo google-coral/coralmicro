@@ -1,11 +1,13 @@
-#include "libs/base/console_m4.h"
 #include "libs/base/ipc_m4.h"
+
+#include <cstdio>
+
+#include "libs/base/console_m4.h"
 #include "libs/base/message_buffer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/message_buffer.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
-#include <cstdio>
 
 namespace coral::micro {
 
@@ -17,17 +19,19 @@ IPCM4* IPCM4::GetSingleton() {
 void IPCM4::HandleSystemMessage(const ipc::SystemMessage& message) {
     switch (message.type) {
         case ipc::SystemMessageType::CONSOLE_BUFFER_PTR:
-            SetM4ConsoleBufferPtr(
-                    reinterpret_cast<ipc::StreamBuffer*>(message.message.console_buffer_ptr));
+            SetM4ConsoleBufferPtr(reinterpret_cast<ipc::StreamBuffer*>(
+                message.message.console_buffer_ptr));
             break;
         default:
-            printf("Unhandled system message type: %d\r\n", static_cast<int>(message.type));
+            printf("Unhandled system message type: %d\r\n",
+                   static_cast<int>(message.type));
     }
 }
 
 void IPCM4::RxTaskFn() {
     size_t rx_bytes;
-    rx_bytes = xMessageBufferReceive(rx_queue_->message_buffer, &tx_queue_, sizeof(tx_queue_), portMAX_DELAY);
+    rx_bytes = xMessageBufferReceive(rx_queue_->message_buffer, &tx_queue_,
+                                     sizeof(tx_queue_), portMAX_DELAY);
     if (!rx_bytes) {
         vTaskSuspend(NULL);
     }

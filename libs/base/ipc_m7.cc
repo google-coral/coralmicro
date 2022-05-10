@@ -1,13 +1,15 @@
-#include "libs/base/console_m7.h"
 #include "libs/base/ipc_m7.h"
+
+#include <cstdio>
+#include <cstring>
+#include <memory>
+
+#include "libs/base/console_m7.h"
 #include "libs/base/message_buffer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/message_buffer.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
-#include <cstdio>
-#include <cstring>
-#include <memory>
 
 #define CORE1_BOOT_ADDRESS 0x20200000
 unsigned int m4_binary_start __attribute__((weak)) = 0xdeadbeef;
@@ -16,34 +18,42 @@ unsigned int m4_binary_size __attribute__((weak)) = 0xdeadbeef;
 
 namespace coral::micro {
 
-uint8_t IPCM7::tx_queue_storage_[IPCM7::kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
-uint8_t IPCM7::rx_queue_storage_[IPCM7::kMessageBufferSize + sizeof(ipc::MessageBuffer)] __attribute__((section(".noinit.$rpmsg_sh_mem")));
+uint8_t IPCM7::tx_queue_storage_[IPCM7::kMessageBufferSize +
+                                 sizeof(ipc::MessageBuffer)]
+    __attribute__((section(".noinit.$rpmsg_sh_mem")));
+uint8_t IPCM7::rx_queue_storage_[IPCM7::kMessageBufferSize +
+                                 sizeof(ipc::MessageBuffer)]
+    __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
 IPCM7* IPCM7::GetSingleton() {
     static IPCM7 ipc;
     return &ipc;
 }
 
-void IPCM7::StaticRemoteAppEventHandler(uint16_t eventData, void *context) {
-    static_cast<IPCM7*>(GetSingleton())->RemoteAppEventHandler(eventData, context);
+void IPCM7::StaticRemoteAppEventHandler(uint16_t eventData, void* context) {
+    static_cast<IPCM7*>(GetSingleton())
+        ->RemoteAppEventHandler(eventData, context);
 }
 
-void IPCM7::RemoteAppEventHandler(uint16_t eventData, void *context) {
-    BaseType_t reschedule = xTaskResumeFromISR(tx_task_) | xTaskResumeFromISR(rx_task_);
+void IPCM7::RemoteAppEventHandler(uint16_t eventData, void* context) {
+    BaseType_t reschedule =
+        xTaskResumeFromISR(tx_task_) | xTaskResumeFromISR(rx_task_);
     portYIELD_FROM_ISR(reschedule);
 }
 
 void IPCM7::HandleSystemMessage(const ipc::SystemMessage& message) {
     switch (message.type) {
         default:
-            printf("Unhandled system message type: %d\r\n", static_cast<int>(message.type));
+            printf("Unhandled system message type: %d\r\n",
+                   static_cast<int>(message.type));
     }
 }
 
 void IPCM7::TxTaskFn() {
     // Send the rx_queue_ address to the M4.
     size_t tx_bytes;
-    tx_bytes = xMessageBufferSend(tx_queue_->message_buffer, &rx_queue_, sizeof(rx_queue_), portMAX_DELAY);
+    tx_bytes = xMessageBufferSend(tx_queue_->message_buffer, &rx_queue_,
+                                  sizeof(rx_queue_), portMAX_DELAY);
     if (tx_bytes == 0) {
         printf("Failed to send s2p buffer address\r\n");
     }
@@ -69,9 +79,7 @@ bool IPCM7::M4IsAlive(uint32_t millis) {
     return false;
 }
 
-bool IPCM7::HasM4Application() {
-    return (m4_binary_start != 0xdeadbeef);
-}
+bool IPCM7::HasM4Application() { return (m4_binary_start != 0xdeadbeef); }
 
 void IPCM7::Init() {
     if (!HasM4Application()) {
@@ -79,13 +87,17 @@ void IPCM7::Init() {
     }
 
     tx_queue_ = reinterpret_cast<ipc::MessageBuffer*>(tx_queue_storage_);
-    tx_queue_->message_buffer = xMessageBufferCreateStatic(kMessageBufferSize, tx_queue_->message_buffer_storage, &tx_queue_->static_message_buffer);
+    tx_queue_->message_buffer = xMessageBufferCreateStatic(
+        kMessageBufferSize, tx_queue_->message_buffer_storage,
+        &tx_queue_->static_message_buffer);
     if (!tx_queue_->message_buffer) {
         return;
     }
 
     rx_queue_ = reinterpret_cast<ipc::MessageBuffer*>(rx_queue_storage_);
-    rx_queue_->message_buffer = xMessageBufferCreateStatic(kMessageBufferSize, rx_queue_->message_buffer_storage, &rx_queue_->static_message_buffer);
+    rx_queue_->message_buffer = xMessageBufferCreateStatic(
+        kMessageBufferSize, rx_queue_->message_buffer_storage,
+        &rx_queue_->static_message_buffer);
     if (!rx_queue_->message_buffer) {
         return;
     }
@@ -96,11 +108,11 @@ void IPCM7::Init() {
     memcpy((void*)CORE1_BOOT_ADDRESS, (void*)m4_start, m4_size);
 
     // Register callbacks for communication with the other core.
-    MCMGR_RegisterEvent(kMCMGR_RemoteApplicationEvent, IPCM7::StaticRemoteAppEventHandler, NULL);
+    MCMGR_RegisterEvent(kMCMGR_RemoteApplicationEvent,
+                        IPCM7::StaticRemoteAppEventHandler, NULL);
 
     IPC::Init();
 }
-
 
 void IPCM7::StartM4() {
     if (!HasM4Application()) {
@@ -110,7 +122,9 @@ void IPCM7::StartM4() {
     // Start up the remote core.
     // Provide the address of the P->S message queue so that the remote core can
     // receive messages from this core.
-    MCMGR_StartCore(kMCMGR_Core1, (void*)CORE1_BOOT_ADDRESS, reinterpret_cast<uint32_t>(tx_queue_), kMCMGR_Start_Asynchronous);
+    MCMGR_StartCore(kMCMGR_Core1, (void*)CORE1_BOOT_ADDRESS,
+                    reinterpret_cast<uint32_t>(tx_queue_),
+                    kMCMGR_Start_Asynchronous);
 }
 
 }  // namespace coral::micro

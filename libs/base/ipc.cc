@@ -1,11 +1,12 @@
-#include "libs/base/check.h"
 #include "libs/base/ipc.h"
+
+#include "libs/base/check.h"
 #include "libs/base/tasks.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 
 namespace coral::micro {
 
-void IPC::StaticFreeRtosMessageEventHandler(uint16_t eventData, void *context) {
+void IPC::StaticFreeRtosMessageEventHandler(uint16_t eventData, void* context) {
     static_cast<IPC*>(context)->FreeRtosMessageEventHandler(eventData);
 }
 
@@ -18,7 +19,7 @@ void IPC::FreeRtosMessageEventHandler(uint16_t eventData) {
     portYIELD_FROM_ISR(higher_priority_woken);
 }
 
-void IPC::RegisterAppMessageHandler(AppMessageHandler handler, void *param) {
+void IPC::RegisterAppMessageHandler(AppMessageHandler handler, void* param) {
     app_handler_ = handler;
     app_handler_param_ = param;
 }
@@ -33,23 +34,23 @@ void IPC::SendMessage(const ipc::Message& message) {
     if (!tx_task_ || !tx_semaphore_) {
         return;
     }
-    xTaskNotifyIndexed(tx_task_, kSendMessageNotification, (uint32_t)&message, eSetValueWithOverwrite);
+    xTaskNotifyIndexed(tx_task_, kSendMessageNotification, (uint32_t)&message,
+                       eSetValueWithOverwrite);
     xSemaphoreTake(tx_semaphore_, portMAX_DELAY);
 }
 
-void IPC::StaticTxTaskFn(void *param) {
-    static_cast<IPC*>(param)->TxTaskFn();
-}
+void IPC::StaticTxTaskFn(void* param) { static_cast<IPC*>(param)->TxTaskFn(); }
 
-void IPC::StaticRxTaskFn(void *param) {
-    static_cast<IPC*>(param)->RxTaskFn();
-}
+void IPC::StaticRxTaskFn(void* param) { static_cast<IPC*>(param)->RxTaskFn(); }
 
 void IPC::TxTaskFn() {
     while (true) {
         ipc::Message* message;
-        xTaskNotifyWaitIndexed(kSendMessageNotification, 0, 0, reinterpret_cast<uint32_t*>(&message), portMAX_DELAY);
-        xMessageBufferSend(tx_queue_->message_buffer, message, sizeof(*message), portMAX_DELAY);
+        xTaskNotifyWaitIndexed(kSendMessageNotification, 0, 0,
+                               reinterpret_cast<uint32_t*>(&message),
+                               portMAX_DELAY);
+        xMessageBufferSend(tx_queue_->message_buffer, message, sizeof(*message),
+                           portMAX_DELAY);
         xSemaphoreGive(tx_semaphore_);
     }
 }
@@ -58,10 +59,10 @@ void IPC::RxTaskFn() {
     size_t rx_bytes;
     while (true) {
         ipc::Message rx_message;
-        rx_bytes = xMessageBufferReceive(rx_queue_->message_buffer, &rx_message, sizeof(rx_message), portMAX_DELAY);
-        if (rx_bytes == 0) {
-            continue;
-        }
+        rx_bytes = xMessageBufferReceive(rx_queue_->message_buffer, &rx_message,
+                                         sizeof(rx_message), portMAX_DELAY);
+        if (rx_bytes == 0) continue;
+
         switch (rx_message.type) {
             case ipc::MessageType::SYSTEM:
                 HandleSystemMessage(rx_message.message.system);
@@ -70,7 +71,8 @@ void IPC::RxTaskFn() {
                 HandleAppMessage(rx_message.message.data);
                 break;
             default:
-                printf("Unhandled IPC message type %d\r\n", static_cast<int>(rx_message.type));
+                printf("Unhandled IPC message type %d\r\n",
+                       static_cast<int>(rx_message.type));
                 break;
         }
     }
