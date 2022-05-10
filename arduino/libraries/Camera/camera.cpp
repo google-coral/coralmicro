@@ -19,12 +19,14 @@ int CameraClass::begin(uint32_t resolution) {
 }
 
 int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
-                       camera::FilterMethod filter, bool preserve_ratio) {
+                       camera::FilterMethod filter, camera::Rotation rotation,
+                       bool preserve_ratio) {
     initialized_ = true;
     width_ = width;
     height_ = height;
     format_ = fmt;
     filter_ = filter;
+    rotation_ = rotation;
     preserve_ratio_ = preserve_ratio;
     camera_->SetPower(true);
     camera_->Enable(coral::micro::camera::Mode::STREAMING);
@@ -45,11 +47,12 @@ int CameraClass::grab(uint8_t* buffer) {
     std::list<coral::micro::camera::FrameFormat> fmts;
     if (test_pattern_ != camera::TestPattern::NONE) {
         fmts.push_back({camera::Format::RAW, camera::FilterMethod::BILINEAR,
+                        camera::Rotation::k0,
                         CameraTask::kWidth, CameraTask::kHeight,
                         preserve_ratio_, buffer});
     } else {
         fmts.push_back(
-            {format_, filter_, width_, height_, preserve_ratio_, buffer});
+            {format_, filter_, rotation_, width_, height_, preserve_ratio_, buffer});
     }
 
     auto success = coral::micro::CameraTask::GetFrame(fmts);

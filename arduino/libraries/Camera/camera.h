@@ -48,6 +48,7 @@ class CameraClass {
     int begin(int32_t width = 320, int32_t height = 320,
               camera::Format fmt = camera::Format::RGB,
               camera::FilterMethod filter = camera::FilterMethod::BILINEAR,
+              camera::Rotation rotation = camera::Rotation::k0,
               bool preserve_ratio = false);
     int end();
     int grab(uint8_t* buffer);
@@ -74,6 +75,7 @@ class CameraClass {
     int32_t height_;
     coral::micro::camera::Format format_;
     coral::micro::camera::FilterMethod filter_;
+    coral::micro::camera::Rotation rotation_;
     coral::micro::camera::TestPattern test_pattern_;
     bool preserve_ratio_;
     bool initialized_;

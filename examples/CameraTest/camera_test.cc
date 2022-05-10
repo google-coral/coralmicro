@@ -18,6 +18,12 @@ uint8_t camera_grayscale_small[96 * 96]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 uint8_t camera_rgb[CameraTask::kWidth * CameraTask::kHeight * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+uint8_t camera_rgb_90[coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight * 3]
+    __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+uint8_t camera_rgb_180[coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight * 3]
+    __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+uint8_t camera_rgb_270[coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight * 3]
+    __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 uint8_t camera_rgb_posenet[posenet::kPosenetWidth * posenet::kPosenetHeight * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 uint8_t camera_raw[CameraTask::kWidth * CameraTask::kHeight]
@@ -26,6 +32,15 @@ uint8_t camera_raw[CameraTask::kWidth * CameraTask::kHeight]
 HttpServer::Content UriHandler(const char* name) {
     if (std::strcmp(name, "/camera.rgb") == 0)
         return HttpServer::StaticBuffer{camera_rgb, sizeof(camera_rgb)};
+
+    if (std::strcmp(name, "/camera-90.rgb") == 0)
+        return HttpServer::StaticBuffer{camera_rgb_90, sizeof(camera_rgb_90)};
+
+    if (std::strcmp(name, "/camera-180.rgb") == 0)
+        return HttpServer::StaticBuffer{camera_rgb_180, sizeof(camera_rgb_180)};
+
+    if (std::strcmp(name, "/camera-270.rgb") == 0)
+        return HttpServer::StaticBuffer{camera_rgb_270, sizeof(camera_rgb_270)};
 
     if (std::strcmp(name, "/camera-posenet.rgb") == 0)
         return HttpServer::StaticBuffer{camera_rgb_posenet,
@@ -46,14 +61,40 @@ HttpServer::Content UriHandler(const char* name) {
 }
 
 void GetFrame() {
-    camera::FrameFormat fmt_rgb, fmt_rgb_posenet, fmt_grayscale,
+    camera::FrameFormat fmt_rgb, fmt_rgb_90, fmt_rgb_180, fmt_rgb_270,
+        fmt_rgb_posenet, fmt_grayscale,
         fmt_grayscale_small, fmt_raw;
     fmt_rgb.fmt = camera::Format::RGB;
     fmt_rgb.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb.rotation = camera::Rotation::k0;
     fmt_rgb.width = CameraTask::kWidth;
     fmt_rgb.height = CameraTask::kHeight;
     fmt_rgb.preserve_ratio = false;
     fmt_rgb.buffer = camera_rgb;
+
+    fmt_rgb_90.fmt = camera::Format::RGB;
+    fmt_rgb_90.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb_90.rotation = camera::Rotation::k90;
+    fmt_rgb_90.width = CameraTask::kWidth;
+    fmt_rgb_90.height = CameraTask::kHeight;
+    fmt_rgb_90.preserve_ratio = false;
+    fmt_rgb_90.buffer = camera_rgb_90;
+
+    fmt_rgb_180.fmt = camera::Format::RGB;
+    fmt_rgb_180.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb_180.rotation = camera::Rotation::k180;
+    fmt_rgb_180.width = CameraTask::kWidth;
+    fmt_rgb_180.height = CameraTask::kHeight;
+    fmt_rgb_180.preserve_ratio = false;
+    fmt_rgb_180.buffer = camera_rgb_180;
+
+    fmt_rgb_270.fmt = camera::Format::RGB;
+    fmt_rgb_270.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb_270.rotation = camera::Rotation::k270;
+    fmt_rgb_270.width = CameraTask::kWidth;
+    fmt_rgb_270.height = CameraTask::kHeight;
+    fmt_rgb_270.preserve_ratio = false;
+    fmt_rgb_270.buffer = camera_rgb_270;
 
     fmt_rgb_posenet.fmt = camera::Format::RGB;
     fmt_rgb_posenet.filter = camera::FilterMethod::BILINEAR;
@@ -82,7 +123,8 @@ void GetFrame() {
     fmt_raw.preserve_ratio = true;
     fmt_raw.buffer = camera_raw;
 
-    CameraTask::GetFrame({fmt_rgb, fmt_rgb_posenet, fmt_grayscale,
+    CameraTask::GetFrame({fmt_rgb, fmt_rgb_90, fmt_rgb_180, fmt_rgb_270,
+                          fmt_rgb_posenet, fmt_grayscale,
                           fmt_grayscale_small, fmt_raw});
 }
 

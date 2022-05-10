@@ -48,6 +48,7 @@ void get_image_from_camera(struct jsonrpc_request* request) {
     coral::micro::camera::FrameFormat fmt{
         coral::micro::camera::Format::RGB,
         coral::micro::camera::FilterMethod::BILINEAR,
+        coral::micro::camera::Rotation::k0,
         width,
         height,
         false,

@@ -1,3 +1,4 @@
+#include "libs/base/check.h"
 #include "libs/base/gpio.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
@@ -107,10 +108,10 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
         switch (fmt.fmt) {
             case Format::RGB: {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
-                        BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height, fmt.filter);
+                        BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height, fmt.filter, fmt.rotation);
                     } else {
                         auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * kWidth * kHeight);
-                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter);
+                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter, fmt.rotation);
                         ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, fmt.buffer,
                                               fmt.width, fmt.height, FormatToBPP(Format::RGB),
                                               fmt.preserve_ratio);
@@ -119,11 +120,11 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
                 break;
             case Format::Y8: {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
-                        BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight, fmt.filter);
+                        BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight, fmt.filter, fmt.rotation);
                     } else {
                         auto buffer_rgb = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * kWidth * kHeight);
                         auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(FormatToBPP(Format::RGB) * fmt.width * fmt.height);
-                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter);
+                        BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter, fmt.rotation);
                         ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, buffer_rgb_scaled.get(),
                                               fmt.width, fmt.height, FormatToBPP(Format::RGB),
                                               fmt.preserve_ratio);
@@ -341,32 +342,82 @@ void BayerInternal(const uint8_t* camera_raw, int width, int height,
         }
     }
 }
+
+void RotateXY(Rotation rotation, int in_x, int in_y, int* out_x, int* out_y) {
+    CHECK(out_x);
+    CHECK(out_y);
+
+    // Short-circuit for no rotation
+    if (rotation == Rotation::k0) {
+        *out_x = in_x;
+        *out_y = in_y;
+        return;
+    }
+
+    // Shift our coordinates so that the center of the image is 0,0
+    in_x = in_x - (CameraTask::kWidth / 2);
+    in_y = in_y - (CameraTask::kHeight / 2);
+
+    // Simple rotation around origin
+    switch (rotation) {
+        case Rotation::k90:
+            *out_x = -in_y;
+            *out_y = in_x;
+            break;
+        case Rotation::k180:
+            *out_x = -in_x;
+            *out_y = -in_y;
+            break;
+        case Rotation::k270:
+            *out_x = in_y;
+            *out_y = -in_x;
+            break;
+        case Rotation::k0:
+        default:
+            CHECK(false);
+    }
+
+    // Undo coordinate space shift
+    *out_x = *out_x + (CameraTask::kWidth / 2);
+    *out_y = *out_y + (CameraTask::kHeight / 2);
+    CHECK(*out_x >= 0);
+    CHECK(*out_x < static_cast<int>(CameraTask::kWidth));
+    CHECK(*out_y >= 0);
+    CHECK(*out_y < static_cast<int>(CameraTask::kHeight));
+}
+
 }  // namespace
 
-void CameraTask::BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height, FilterMethod filter) {
+void CameraTask::BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height, FilterMethod filter, Rotation rotation) {
     memset(camera_rgb, 0, width * height * 3);
-    BayerInternal(camera_raw, width, height, filter, [camera_rgb, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
-        camera_rgb[(x * 3) + (y * width * 3) + 0] = r;
-        camera_rgb[(x * 3) + (y * width * 3) + 1] = g;
-        camera_rgb[(x * 3) + (y * width * 3) + 2] = b;
+    BayerInternal(camera_raw, width, height, filter, [camera_rgb, width, height, rotation](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+        int rot_x, rot_y;
+        RotateXY(rotation, x, y, &rot_x, &rot_y);
+        camera_rgb[(rot_x * 3) + (rot_y * width * 3) + 0] = r;
+        camera_rgb[(rot_x * 3) + (rot_y * width * 3) + 1] = g;
+        camera_rgb[(rot_x * 3) + (rot_y * width * 3) + 2] = b;
     });
 }
 
-void CameraTask::BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgba, int width, int height, FilterMethod filter) {
+void CameraTask::BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgba, int width, int height, FilterMethod filter, Rotation rotation) {
     memset(camera_rgba, 0, width * height * 4);
-    BayerInternal(camera_raw, width, height, filter, [camera_rgba, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
-            camera_rgba[(x * 4) + (y * width * 4) + 0] = r;
-            camera_rgba[(x * 4) + (y * width * 4) + 1] = g;
-            camera_rgba[(x * 4) + (y * width * 4) + 2] = b;
+    BayerInternal(camera_raw, width, height, filter, [camera_rgba, width, height, rotation](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+        int rot_x, rot_y;
+        RotateXY(rotation, x, y, &rot_x, &rot_y);
+        camera_rgba[(rot_x * 4) + (rot_y * width * 4) + 0] = r;
+        camera_rgba[(rot_x * 4) + (rot_y * width * 4) + 1] = g;
+        camera_rgba[(rot_x * 4) + (rot_y * width * 4) + 2] = b;
     });
 }
 
-void CameraTask::BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height, FilterMethod filter) {
-    BayerInternal(camera_raw, width, height, filter, [camera_grayscale, width, height](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+void CameraTask::BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height, FilterMethod filter, Rotation rotation) {
+    BayerInternal(camera_raw, width, height, filter, [camera_grayscale, width, height, rotation](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+        int rot_x, rot_y;
+        RotateXY(rotation, x, y, &rot_x, &rot_y);
         float r_f = static_cast<float>(r) / kUint8Max;
         float g_f = static_cast<float>(g) / kUint8Max;
         float b_f = static_cast<float>(b) / kUint8Max;
-        camera_grayscale[x + (y * width)] = static_cast<uint8_t>(((kRedCoefficient * r_f * r_f) + (kGreenCoefficient * g_f * g_f) + (kBlueCoefficient * b_f * b_f)) * kUint8Max);
+        camera_grayscale[rot_x + (rot_y * width)] = static_cast<uint8_t>(((kRedCoefficient * r_f * r_f) + (kGreenCoefficient * g_f * g_f) + (kBlueCoefficient * b_f * b_f)) * kUint8Max);
     });
 }
 
