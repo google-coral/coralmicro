@@ -117,21 +117,61 @@ def main():
     parser = argparse.ArgumentParser(description='Dev Board Micro OOBE visualizer',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--device_ip_address', type=ipaddress.ip_address, default='10.10.10.1')
+    parser.add_argument('--mirror', action='store_true')
+    parser.add_argument('--fullscreen', action='store_true')
     args = parser.parse_args()
 
     root = tk.Tk()
     root.title("Dev Board Micro OOBE")
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
-    canvas = tk.Canvas(root, width=POSENET_INPUT_WIDTH, height=POSENET_INPUT_HEIGHT)
-    image_id = canvas.create_image(0, 0, anchor='nw')
+    if args.fullscreen:
+        root.attributes('-fullscreen', True)
+        w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+        (w,h) = (h,h) if h < w else (w,w)
+        scale_x = w / POSENET_INPUT_WIDTH
+        scale_y = h / POSENET_INPUT_HEIGHT
+        start_x = (root.winfo_screenwidth() - w) / 2
+        end_x = start_x + w
+        canvas = tk.Canvas(root, highlightthickness=0, bg='black')
+    else:
+        canvas = tk.Canvas(root, width=POSENET_INPUT_WIDTH, height=POSENET_INPUT_HEIGHT)
+        scale_x = 1
+        scale_y = 1
+        start_x = 0
+        start_y = 0
+        end_x = POSENET_INPUT_WIDTH
+
+    image_id = canvas.create_image(start_x, 0, anchor='nw')
     canvas.grid(column=0, row=0, sticky='nwes')
 
     tk_image = None
     def update_image(image):
         nonlocal tk_image
-        tk_image = ImageTk.PhotoImage(image=image)
+        if args.fullscreen:
+            if args.mirror:
+                tk_image = ImageTk.PhotoImage(image=(image.resize((w,h)).transpose(Image.FLIP_LEFT_RIGHT)))
+            else:
+                tk_image = ImageTk.PhotoImage(image=(image.resize((w,h))))
+        else:
+            if args.mirror:
+                tk_image = ImageTk.PhotoImage(image=image.transpose(Image.FLIP_LEFT_RIGHT))
+            else:
+                tk_image = ImageTk.PhotoImage(image=image)
+
         canvas.itemconfigure(image_id, image=tk_image)
+
+    def get_pixel_location(x,y, r=0):
+        if args.fullscreen:
+            if args.mirror:
+                return end_x - (x * scale_x) + r, (y * scale_y) + r
+            else:
+                return start_x + (x * scale_x) + r, (y * scale_y) + r
+        else:
+            if args.mirror:
+                return POSENET_INPUT_WIDTH - x + r, y + r
+            else:
+                return x + r, y + r
 
     def update_poses(poses, r=5, threshold=0.2):
         canvas.delete('pose')
@@ -141,14 +181,14 @@ def main():
                 e = pose.keypoints[end]
                 if s.score < threshold or e.score < threshold:
                     continue
-                canvas.create_line(s.point.x, s.point.y, e.point.x, e.point.y, 
-                                   fill='yellow', tags=('pose',))
+                canvas.create_line(get_pixel_location(s.point.x, s.point.y),
+                    get_pixel_location(e.point.x, e.point.y), fill='yellow', tags=('pose',))
 
             for keypoint in pose.keypoints.values():
                 if keypoint.score < threshold: 
                     continue
                 x, y = keypoint.point
-                canvas.create_oval(x - r, y - r, x + r, y + r, 
+                canvas.create_oval(get_pixel_location(x,y,-r), get_pixel_location(x,y,r),
                                    fill='cyan', outline='yellow', tags=('pose',))
 
 
