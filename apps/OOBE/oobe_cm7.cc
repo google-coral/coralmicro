@@ -73,7 +73,7 @@ std::vector<uint8_t> CreatePoseJson(const posenet::Output& output,
 
 void GenerateStatsHtml(std::vector<uint8_t>* html) {
     std::vector<TaskStatus_t> infos(uxTaskGetNumberOfTasks());
-    unsigned long total_runtime;
+    uint32_t total_runtime;
     auto n = uxTaskGetSystemState(infos.data(), infos.size(), &total_runtime);
     std::vector<int> indices(infos.size());
     std::iota(std::begin(indices), std::end(indices), 0);
@@ -96,16 +96,10 @@ void GenerateStatsHtml(std::vector<uint8_t>* html) {
         const auto& info = infos[indices[i]];
         auto name = info.pcTaskName;
         auto runtime = info.ulRunTimeCounter;
-        auto percent = runtime / (total_runtime / 100);
-        if (percent > 0) {
-            StrAppend(html,
-                      "    <tr><td>%s</td><td>%d</td><td>%d%%</td></tr>\r\n",
-                      name, runtime, percent);
-        } else {
-            StrAppend(html,
-                      "    <tr><td>%s</td><td>%d</td><td>&lt;1%%</td></tr>\r\n",
-                      name, runtime);
-        }
+        float percent = static_cast<float>(runtime) / (total_runtime / 100.0);
+        coral::micro::StrAppend(
+            html, "    <tr><td>%s</td><td>%lu</td><td>%.1f%%</td></tr>\r\n", name,
+            runtime, percent);
     }
     StrAppend(html, "  </table>\r\n");
     StrAppend(html, "</body>\r\n");
