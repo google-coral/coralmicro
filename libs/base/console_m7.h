@@ -1,43 +1,47 @@
 #ifndef __LIBS_CONSOLE_CONSOLE_M7_H__
 #define __LIBS_CONSOLE_CONSOLE_M7_H__
 
-#include "libs/cdc_acm/cdc_acm.h"
-#include "libs/base/message_buffer.h"
-#include "third_party/freertos_kernel/include/FreeRTOS.h"
-
 #include <array>
+
+#include "libs/base/message_buffer.h"
+#include "libs/cdc_acm/cdc_acm.h"
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
 
 namespace coral::micro {
 
 class ConsoleM7 {
-  public:
+   public:
     static ConsoleM7* GetSingleton() {
         static ConsoleM7 console;
         return &console;
     }
     void Init(bool init_tx, bool init_rx);
     ipc::StreamBuffer* GetM4ConsoleBufferPtr();
-    void Write(char *buffer, int size);
-    // NOTE: This reads from the internal buffer, not directly from a serial device.
-    int Read(char *buffer, int size);
+    void Write(char* buffer, int size);
+    // NOTE: This reads from the internal buffer, not directly from a serial
+    // device.
+    int Read(char* buffer, int size);
     size_t available() { return rx_buffer_available_; }
-    uint8_t peek() { return (rx_buffer_available_ ? rx_buffer_[rx_buffer_read_] : -1); }
-  private:
+    uint8_t peek() {
+        return (rx_buffer_available_ ? rx_buffer_[rx_buffer_read_] : -1);
+    }
+
+   private:
     struct ConsoleMessage {
         int len;
-        uint8_t *str;
+        uint8_t* str;
 #ifdef BLOCKING_PRINTF
         SemaphoreHandle_t semaphore;
         StaticSemaphore_t semaphore_storage;
 #endif
     };
 
-    static void StaticM4ConsoleTaskFn(void *param);
-    void M4ConsoleTaskFn(void *param);
-    static void StaticM7ConsoleTaskTxFn(void *param);
-    void M7ConsoleTaskTxFn(void *param);
-    static void StaticM7ConsoleTaskRxFn(void *param);
-    void M7ConsoleTaskRxFn(void *param);
+    static void StaticM4ConsoleTaskFn(void* param);
+    void M4ConsoleTaskFn(void* param);
+    static void StaticM7ConsoleTaskTxFn(void* param);
+    void M7ConsoleTaskTxFn(void* param);
+    static void StaticM7ConsoleTaskRxFn(void* param);
+    void M7ConsoleTaskRxFn(void* param);
 
     ConsoleM7() {}
     ConsoleM7(const ConsoleM7&) = delete;
@@ -46,9 +50,10 @@ class ConsoleM7 {
     QueueHandle_t console_queue_ = nullptr;
     CdcAcm cdc_acm_;
 
-    ipc::StreamBuffer *m4_console_buffer_ = nullptr;
+    ipc::StreamBuffer* m4_console_buffer_ = nullptr;
     static constexpr size_t kM4ConsoleBufferBytes = 128;
-    static constexpr size_t kM4ConsoleBufferSize = kM4ConsoleBufferBytes + sizeof(ipc::StreamBuffer);
+    static constexpr size_t kM4ConsoleBufferSize =
+        kM4ConsoleBufferBytes + sizeof(ipc::StreamBuffer);
     static uint8_t m4_console_buffer_storage_[kM4ConsoleBufferSize];
 
     static constexpr size_t kRxBufferSize = 64;

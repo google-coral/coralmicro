@@ -1,19 +1,22 @@
-#include "libs/base/check.h"
 #include "libs/base/console_m7.h"
+
+#include <unistd.h>
+
+#include <cstdio>
+#include <functional>
+
+#include "libs/base/check.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/message_buffer.h"
 #include "libs/base/mutex.h"
 #include "libs/base/tasks.h"
 #include "libs/tasks/UsbDeviceTask/usb_device_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
-#include <cstdio>
-#include <functional>
-#include <unistd.h>
 
 using namespace std::placeholders;
 
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
-extern "C" int _write(int handle, char *buffer, int size) {
+extern "C" int _write(int handle, char* buffer, int size) {
     if ((handle != STDOUT_FILENO) && (handle != STDERR_FILENO)) {
         return -1;
     }
@@ -23,25 +26,28 @@ extern "C" int _write(int handle, char *buffer, int size) {
     return size;
 }
 
-extern "C" int _read(int handle, char *buffer, int size) {
+extern "C" int _read(int handle, char* buffer, int size) {
     if (handle != STDIN_FILENO) {
         return -1;
     }
 
-    int bytes_read = coral::micro::ConsoleM7::GetSingleton()->Read(buffer, size);
+    int bytes_read =
+        coral::micro::ConsoleM7::GetSingleton()->Read(buffer, size);
     return bytes_read > 0 ? bytes_read : -1;
 }
 
 namespace coral::micro {
 
-uint8_t ConsoleM7::m4_console_buffer_storage_[kM4ConsoleBufferSize] __attribute__((section(".noinit.$rpmsg_sh_mem")));
+uint8_t ConsoleM7::m4_console_buffer_storage_[kM4ConsoleBufferSize]
+    __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
-void ConsoleM7::Write(char *buffer, int size) {
+void ConsoleM7::Write(char* buffer, int size) {
     if (!tx_task_) {
         return;
     }
     ConsoleMessage msg = {
-        size, (uint8_t*)malloc(size),
+        size,
+        (uint8_t*)malloc(size),
     };
 #ifdef BLOCKING_PRINTF
     msg.semaphore = xSemaphoreCreateBinaryStatic(&msg.semaphore_storage);
@@ -54,12 +60,13 @@ void ConsoleM7::Write(char *buffer, int size) {
 #endif
 }
 
-int ConsoleM7::Read(char *buffer, int size) {
+int ConsoleM7::Read(char* buffer, int size) {
     if (!rx_task_) {
         return -1;
     }
     MutexLock lock(rx_mutex_);
-    int bytes_to_return = std::min(size, static_cast<int>(rx_buffer_available_));
+    int bytes_to_return =
+        std::min(size, static_cast<int>(rx_buffer_available_));
 
     if (!bytes_to_return) {
         return -1;
@@ -67,10 +74,12 @@ int ConsoleM7::Read(char *buffer, int size) {
 
     int bytes_to_read = bytes_to_return;
     if (rx_buffer_read_ > rx_buffer_write_) {
-        memcpy(buffer, &rx_buffer_[rx_buffer_read_], kRxBufferSize - rx_buffer_read_);
+        memcpy(buffer, &rx_buffer_[rx_buffer_read_],
+               kRxBufferSize - rx_buffer_read_);
         bytes_to_read -= kRxBufferSize - rx_buffer_read_;
         if (bytes_to_read) {
-            memcpy(buffer + (bytes_to_return - bytes_to_read), &rx_buffer_[0], bytes_to_read);
+            memcpy(buffer + (bytes_to_return - bytes_to_read), &rx_buffer_[0],
+                   bytes_to_read);
         }
     } else {
         memcpy(buffer, &rx_buffer_[rx_buffer_read_], bytes_to_read);
@@ -81,33 +90,36 @@ int ConsoleM7::Read(char *buffer, int size) {
     return bytes_to_return;
 }
 
-void ConsoleM7::StaticM4ConsoleTaskFn(void *param) {
+void ConsoleM7::StaticM4ConsoleTaskFn(void* param) {
     GetSingleton()->M4ConsoleTaskFn(param);
 }
 
-void ConsoleM7::M4ConsoleTaskFn(void *param) {
+void ConsoleM7::M4ConsoleTaskFn(void* param) {
     ipc::Message m4_console_buffer_msg;
     m4_console_buffer_msg.type = ipc::MessageType::SYSTEM;
-    m4_console_buffer_msg.message.system.type = ipc::SystemMessageType::CONSOLE_BUFFER_PTR;
-    m4_console_buffer_msg.message.system.message.console_buffer_ptr = GetM4ConsoleBufferPtr();
+    m4_console_buffer_msg.message.system.type =
+        ipc::SystemMessageType::CONSOLE_BUFFER_PTR;
+    m4_console_buffer_msg.message.system.message.console_buffer_ptr =
+        GetM4ConsoleBufferPtr();
     IPCM7::GetSingleton()->SendMessage(m4_console_buffer_msg);
 
     size_t rx_bytes;
     char buf[16];
     while (true) {
-        rx_bytes = xStreamBufferReceive(m4_console_buffer_->stream_buffer, buf, sizeof(buf), pdMS_TO_TICKS(10));
+        rx_bytes = xStreamBufferReceive(m4_console_buffer_->stream_buffer, buf,
+                                        sizeof(buf), pdMS_TO_TICKS(10));
         if (rx_bytes > 0) {
             fwrite(buf, 1, rx_bytes, stdout);
         }
     }
 }
 
-void ConsoleM7::StaticM7ConsoleTaskRxFn(void *param) {
+void ConsoleM7::StaticM7ConsoleTaskRxFn(void* param) {
     GetSingleton()->M7ConsoleTaskRxFn(param);
 }
 
 // TODO(atv): At the moment, this only reads from DbgConsole, not USB.
-void ConsoleM7::M7ConsoleTaskRxFn(void *param) {
+void ConsoleM7::M7ConsoleTaskRxFn(void* param) {
     while (true) {
         uint8_t ch = static_cast<uint8_t>(DbgConsole_Getchar());
         MutexLock lock(rx_mutex_);
@@ -126,11 +138,11 @@ void ConsoleM7::M7ConsoleTaskRxFn(void *param) {
     }
 }
 
-void ConsoleM7::StaticM7ConsoleTaskTxFn(void *param) {
+void ConsoleM7::StaticM7ConsoleTaskTxFn(void* param) {
     GetSingleton()->M7ConsoleTaskTxFn(param);
 }
 
-void ConsoleM7::M7ConsoleTaskTxFn(void *param) {
+void ConsoleM7::M7ConsoleTaskTxFn(void* param) {
     while (true) {
         ConsoleMessage msg;
         if (xQueueReceive(console_queue_, &msg, portMAX_DELAY) == pdTRUE) {
@@ -145,7 +157,7 @@ void ConsoleM7::M7ConsoleTaskTxFn(void *param) {
     }
 }
 
-void usb_device_task(void *param) {
+void usb_device_task(void* param) {
     while (true) {
         coral::micro::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
         taskYIELD();
@@ -153,21 +165,24 @@ void usb_device_task(void *param) {
 }
 
 void ConsoleM7::Init(bool init_tx, bool init_rx) {
-    m4_console_buffer_ = reinterpret_cast<ipc::StreamBuffer*>(m4_console_buffer_storage_);
-    m4_console_buffer_->stream_buffer =
-        xStreamBufferCreateStatic(kM4ConsoleBufferBytes, 1, m4_console_buffer_->stream_buffer_storage, &m4_console_buffer_->static_stream_buffer);
+    m4_console_buffer_ =
+        reinterpret_cast<ipc::StreamBuffer*>(m4_console_buffer_storage_);
+    m4_console_buffer_->stream_buffer = xStreamBufferCreateStatic(
+        kM4ConsoleBufferBytes, 1, m4_console_buffer_->stream_buffer_storage,
+        &m4_console_buffer_->static_stream_buffer);
 
     cdc_acm_.Init(
-            coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-            coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-            coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-            coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
-            coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
-            nullptr /*ReceiveHandler*/);
-    coral::micro::UsbDeviceTask::GetSingleton()->AddDevice(cdc_acm_.config_data(),
-            std::bind(&coral::micro::CdcAcm::SetClassHandle, &cdc_acm_, _1),
-            std::bind(&coral::micro::CdcAcm::HandleEvent, &cdc_acm_, _1, _2),
-            cdc_acm_.descriptor_data(), cdc_acm_.descriptor_data_size());
+        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
+        coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
+        nullptr /*ReceiveHandler*/);
+    coral::micro::UsbDeviceTask::GetSingleton()->AddDevice(
+        cdc_acm_.config_data(),
+        std::bind(&coral::micro::CdcAcm::SetClassHandle, &cdc_acm_, _1),
+        std::bind(&coral::micro::CdcAcm::HandleEvent, &cdc_acm_, _1, _2),
+        cdc_acm_.descriptor_data(), cdc_acm_.descriptor_data_size());
 
     console_queue_ = xQueueCreate(16, sizeof(ConsoleMessage));
     CHECK(console_queue_);
