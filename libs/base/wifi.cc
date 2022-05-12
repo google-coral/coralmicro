@@ -4,12 +4,6 @@
 #include <cstring>
 #include <string>
 
-#include "libs/base/utils.h"
-
-extern "C" {
-#include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
-}
-
 namespace coral::micro {
 namespace {
 constexpr int kDefaultRetryCount = 5;
@@ -18,6 +12,16 @@ constexpr int kDefaultRetryCount = 5;
 bool TurnOnWiFi() { return WIFI_On() == eWiFiSuccess; }
 
 bool TurnOffWiFi() { return WIFI_Off() == eWiFiSuccess; }
+
+bool ConnectToWifi(const WIFINetworkParams_t* network_params, int retry_count) {
+    while (retry_count != 0) {
+        if (WIFI_ConnectAP(network_params) == eWiFiSuccess) return true;
+        --retry_count;
+    }
+
+    printf("Failed to connect to %s\r\n", network_params->pcSSID);
+    return false;
+}
 
 bool ConnectToWiFi(const char* ssid, const char* psk, int retry_count) {
     assert(ssid);
@@ -35,14 +39,7 @@ bool ConnectToWiFi(const char* ssid, const char* psk, int retry_count) {
         params.ucPasswordLength = 0;
         params.xSecurity = eWiFiSecurityOpen;
     }
-
-    while (retry_count != 0) {
-        if (WIFI_ConnectAP(&params) == eWiFiSuccess) return true;
-        --retry_count;
-    }
-
-    printf("Failed to connect to %s\r\n", ssid);
-    return false;
+    return ConnectToWifi(&params, retry_count);
 }
 
 bool ConnectToWiFi() {

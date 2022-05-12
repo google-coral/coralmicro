@@ -214,8 +214,7 @@ void GetFrame(struct jsonrpc_request* request) {
     fmt_rgb.preserve_ratio = false;
     fmt_rgb.buffer = camera_rgb.data();
 
-    bool success =
-        (coral::micro::CameraTask::GetSingleton()->GetFrame({fmt_rgb}));
+    bool success = coral::micro::CameraTask::GetFrame({fmt_rgb});
     coral::micro::CameraTask::GetSingleton()->SetPower(false);
 
     if (success)
@@ -236,6 +235,24 @@ extern "C" void app_main(void* param) {
     coral::micro::IPCM7::GetSingleton()->RegisterAppMessageHandler(
         HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
     jsonrpc_init(nullptr, nullptr);
+#if defined(TEST_WIFI)
+    if (!coral::micro::TurnOnWiFi()) {
+        printf("Wi-Fi failed to come up (is the Wi-Fi board attached?)\r\n");
+        vTaskSuspend(nullptr);
+    }
+    jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
+                   coral::micro::testlib::WifiSetAntenna);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiScan,
+                   coral::micro::testlib::WifiScan);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiConnect,
+                   coral::micro::testlib::WifiConnect);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiDisconnect,
+                   coral::micro::testlib::WifiDisconnect);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiGetIp,
+                   coral::micro::testlib::WifiGetIp);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiGetStatus,
+                   coral::micro::testlib::WifiGetStatus);
+#endif
     jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
                    coral::micro::testlib::GetSerialNumber);
     jsonrpc_export(coral::micro::testlib::kMethodRunTestConv1,
@@ -266,16 +283,6 @@ extern "C" void app_main(void* param) {
     jsonrpc_export(kMethodGetFrame, GetFrame);
     jsonrpc_export(coral::micro::testlib::kMethodCaptureAudio,
                    coral::micro::testlib::CaptureAudio);
-#if defined TEST_WIFI
-    if (!coral::micro::TurnOnWiFi()) {
-        printf("Wi-Fi failed to come up (is the Wi-Fi board attached?)\r\n");
-        vTaskSuspend(nullptr);
-    }
-    jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
-                   coral::micro::testlib::WifiSetAntenna);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiScan,
-                   coral::micro::testlib::WifiScan);
-#endif
     coral::micro::JsonRpcHttpServer server;
     server.AddUriHandler(UriHandler);
     coral::micro::UseHttpServer(&server);

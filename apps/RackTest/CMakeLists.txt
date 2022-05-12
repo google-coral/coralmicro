@@ -43,4 +43,5 @@ target_compile_definitions(RackTestWifi PUBLIC TEST_WIFI)
 
 target_link_libraries(RackTestWifi
     ${RACK_TEST_LINK_LIBRARIES}
+    libs_base-m7_wifi
 )

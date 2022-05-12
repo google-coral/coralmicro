@@ -69,10 +69,30 @@ class CoralMicroRPCHelper(object):
         payload['params'].append({'antenna': antenna})
         return self.send_rpc(payload)
 
+    def wifi_connect(self, ssid, psk='', retries=5):
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_connect'
+        payload['params'].append({'ssid': ssid, 'password': psk, 'retries': retries})
+        return self.send_rpc(payload)
+
+    def wifi_disconnect(self):
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_disconnect'
+        return self.send_rpc(payload)
+
+    def wifi_get_status(self):
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_get_status'
+        return self.send_rpc(payload)
 
     def wifi_scan(self):
         payload = self.get_new_payload()
         payload['method'] = 'wifi_scan'
+        return self.send_rpc(payload)
+
+    def wifi_get_ip(self):
+        payload = self.get_new_payload()
+        payload['method'] = 'wifi_get_ip'
         return self.send_rpc(payload)
 
     def set_tpu_power_state(self, enable):
