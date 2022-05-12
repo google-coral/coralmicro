@@ -1,11 +1,12 @@
 #include "libs/base/ethernet.h"
+
 #include "libs/base/gpio.h"
 #include "libs/base/utils.h"
+#include "third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.h"
+#include "third_party/nxp/rt1176-sdk/components/phy/fsl_phy.h"
+#include "third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
-#include "third_party/nxp/rt1176-sdk/components/phy/fsl_phy.h"
-#include "third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.h"
-#include "third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 
@@ -22,9 +23,7 @@ static phy_handle_t phyHandle = {
     .ops = &phyrtl8211f_ops,
 };
 
-struct netif* GetEthernetInterface() {
-    return eth_netif;
-}
+struct netif* GetEthernetInterface() { return eth_netif; }
 
 status_t EthernetPHYWrite(uint32_t phyReg, uint32_t data) {
     return PHY_Write(&phyHandle, phyReg, data);
@@ -36,7 +35,7 @@ void InitializeEthernet(bool default_iface) {
         .phyHandle = &phyHandle,
         // MAC Address w/ Google prefix, and blank final 3 octets.
         // They will be populated below.
-        .macAddress = { 0x00, 0x1A, 0x11, 0x00, 0x00, 0x00 },
+        .macAddress = {0x00, 0x1A, 0x11, 0x00, 0x00, 0x00},
     };
 
     // Populate the low bytes of the MAC address with our device's
@@ -69,8 +68,9 @@ void InitializeEthernet(bool default_iface) {
     IP4_ADDR(&netif_ipaddr, 0, 0, 0, 0);
     IP4_ADDR(&netif_netmask, 0, 0, 0, 0);
     IP4_ADDR(&netif_gw, 0, 0, 0, 0);
-    
-    netifapi_netif_add(&netif, &netif_ipaddr, &netif_netmask, &netif_gw, &enet_config, ethernetif1_init, tcpip_input);
+
+    netifapi_netif_add(&netif, &netif_ipaddr, &netif_netmask, &netif_gw,
+                       &enet_config, ethernetif1_init, tcpip_input);
     if (default_iface) {
         netifapi_netif_set_default(&netif);
     }
