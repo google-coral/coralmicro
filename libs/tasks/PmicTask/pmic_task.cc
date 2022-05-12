@@ -1,8 +1,9 @@
 #include "libs/tasks/PmicTask/pmic_task.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
 #include <cstdio>
+
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
 namespace coral::micro {
 
@@ -11,7 +12,7 @@ using namespace pmic;
 constexpr const uint8_t kPmicAddress = 0x58;
 constexpr const char kPmicTaskName[] = "pmic_task";
 
-void PmicTask::Read(PmicRegisters reg, uint8_t *val) {
+void PmicTask::Read(PmicRegisters reg, uint8_t* val) {
     uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
 
     SetPage(static_cast<uint16_t>(reg));
@@ -43,7 +44,9 @@ void PmicTask::Write(PmicRegisters reg, uint8_t val) {
 
 void PmicTask::SetPage(uint16_t reg) {
     uint8_t page = (reg >> 7) & 0x3;
-    uint8_t page_con_reg = 0x80 | page; // Revert after transaction (probably not ideal. cache our page and only change as needed)
+    // Revert after transaction (probably not ideal. cache our page and only
+    // change as needed)
+    uint8_t page_con_reg = 0x80 | page;
 
     lpi2c_master_transfer_t transfer;
     transfer.flags = kLPI2C_TransferDefaultFlag;
@@ -56,13 +59,12 @@ void PmicTask::SetPage(uint16_t reg) {
     /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
 }
 
-void PmicTask::Init(lpi2c_rtos_handle_t *i2c_handle) {
+void PmicTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
     QueueTask::Init();
     i2c_handle_ = i2c_handle;
 }
 
-void PmicTask::TaskInit() {
-}
+void PmicTask::TaskInit() {}
 
 void PmicTask::HandleRailRequest(const RailRequest& rail) {
     PmicRegisters reg = PmicRegisters::UNKNOWN;
@@ -87,8 +89,7 @@ void PmicTask::HandleRailRequest(const RailRequest& rail) {
     Write(reg, val);
 }
 
-void PmicTask::HandleGpioRequest(const GpioRequest& gpio) {
-}
+void PmicTask::HandleGpioRequest(const GpioRequest& gpio) {}
 
 uint8_t PmicTask::HandleChipIdRequest() {
     uint8_t device_id = 0xff;
@@ -96,7 +97,7 @@ uint8_t PmicTask::HandleChipIdRequest() {
     return device_id;
 }
 
-void PmicTask::RequestHandler(Request *req) {
+void PmicTask::RequestHandler(Request* req) {
     Response resp;
     resp.type = req->type;
     switch (req->type) {
@@ -110,8 +111,7 @@ void PmicTask::RequestHandler(Request *req) {
             resp.response.chip_id = HandleChipIdRequest();
             break;
     }
-    if (req->callback)
-        req->callback(resp);
+    if (req->callback) req->callback(resp);
 }
 
 void PmicTask::SetRailState(Rail rail, bool enable) {
