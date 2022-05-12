@@ -7,7 +7,8 @@
 extern "C" {
 #endif
 
-int real_main(int argc, char **argv, bool init_console_tx, bool init_console_rx);
+int real_main(int argc, char** argv, bool init_console_tx,
+              bool init_console_rx);
 lpi2c_rtos_handle_t* I2C5Handle();
 
 #if defined(__cplusplus)
