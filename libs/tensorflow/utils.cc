@@ -1,12 +1,13 @@
 #include "libs/tensorflow/utils.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+
 #include "third_party/tflite-micro/tensorflow/lite/micro/kernels/kernel_runner.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/test_helpers.h"
 
 namespace coral::micro {
 namespace tensorflow {
 
-bool ResizeImage(const ImageDims& in_dims, const uint8_t *uin,
+bool ResizeImage(const ImageDims& in_dims, const uint8_t* uin,
                  const ImageDims& out_dims, uint8_t* uout) {
     if (in_dims == out_dims) {
         memcpy(uout, uin, ImageSize(in_dims));
@@ -23,44 +24,46 @@ bool ResizeImage(const ImageDims& in_dims, const uint8_t *uin,
     auto out_tmp = std::make_unique<int8_t[]>(out_size);
     int8_t* out = out_tmp.get();
 
-    for (int i = 0; i < in_size; ++i)
-        in[i] = static_cast<int>(uin[i]) - 128;
+    for (int i = 0; i < in_size; ++i) in[i] = static_cast<int>(uin[i]) - 128;
 
     // Array with 4 values: batch, rows, columns, depth
-    int input_dims_ints[] = {4, 1, in_dims.height, in_dims.width, in_dims.depth};
-    TfLiteIntArray* input_dims = tflite::testing::IntArrayFromInts(input_dims_ints);
+    int input_dims_ints[] = {4, 1, in_dims.height, in_dims.width,
+                             in_dims.depth};
+    TfLiteIntArray* input_dims =
+        tflite::testing::IntArrayFromInts(input_dims_ints);
     // Array with 1 value: the number of dimensions.
     int size_dims_ints[] = {1, 2};
-    TfLiteIntArray* size_dims = tflite::testing::IntArrayFromInts(size_dims_ints);
+    TfLiteIntArray* size_dims =
+        tflite::testing::IntArrayFromInts(size_dims_ints);
     // Array with 4 values: batch, rows, columns, depth
-    int output_dims_ints[] = {4, 1, out_dims.height, out_dims.width, out_dims.depth};
-    TfLiteIntArray* output_dims = tflite::testing::IntArrayFromInts(output_dims_ints);
+    int output_dims_ints[] = {4, 1, out_dims.height, out_dims.width,
+                              out_dims.depth};
+    TfLiteIntArray* output_dims =
+        tflite::testing::IntArrayFromInts(output_dims_ints);
 
     constexpr int tensors_size = 3;
     int32_t expected_size[] = {out_dims.height, out_dims.width};
     TfLiteTensor tensors[tensors_size] = {
         tflite::testing::CreateQuantizedTensor(in, input_dims, 0, 255),
         tflite::testing::CreateTensor(expected_size, size_dims),
-        tflite::testing::CreateQuantizedTensor(out, output_dims, 0, 255)
-    };
+        tflite::testing::CreateQuantizedTensor(out, output_dims, 0, 255)};
     tensors[1].allocation_type = kTfLiteMmapRo;
 
-    // Array with 2 values, representing the indices of the input tensors in the tensors array.
+    // Array with 2 values, representing the indices of the input tensors in the
+    // tensors array.
     int inputs_ints[] = {2, 0, 1};
     TfLiteIntArray* inputs = tflite::testing::IntArrayFromInts(inputs_ints);
-    // Array with 1 value, representing the indices of the output tensors in the tensors array.
+    // Array with 1 value, representing the indices of the output tensors in the
+    // tensors array.
     int outputs_ints[] = {1, 2};
     TfLiteIntArray* outputs = tflite::testing::IntArrayFromInts(outputs_ints);
 
-    TfLiteResizeNearestNeighborParams params = {
-        false, /* align_corners */
-        false /* half_pixel_centers */};
+    TfLiteResizeNearestNeighborParams params = {false, /* align_corners */
+                                                false /* half_pixel_centers */};
 
     tflite::micro::KernelRunner runner(
-        tflite::ops::micro::Register_RESIZE_NEAREST_NEIGHBOR(),
-        tensors, tensors_size,
-        inputs, outputs, &params
-    );
+        tflite::ops::micro::Register_RESIZE_NEAREST_NEIGHBOR(), tensors,
+        tensors_size, inputs, outputs, &params);
 
     if (runner.InitAndPrepare() != kTfLiteOk) {
         printf("failed to init and prepare\r\n");
@@ -72,8 +75,7 @@ bool ResizeImage(const ImageDims& in_dims, const uint8_t *uin,
         return false;
     }
 
-    for (int i = 0; i < out_size; ++i)
-        uout[i] = static_cast<int>(out[i]) + 128;
+    for (int i = 0; i < out_size; ++i) uout[i] = static_cast<int>(out[i]) + 128;
 
     return true;
 }

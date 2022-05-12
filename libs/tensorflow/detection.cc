@@ -8,16 +8,15 @@ namespace tensorflow {
 
 namespace {
 struct ObjectComparator {
-  bool operator()(const Object& lhs, const Object& rhs) const {
-    return std::tie(lhs.score, lhs.id) > std::tie(rhs.score, rhs.id);
-  }
+    bool operator()(const Object& lhs, const Object& rhs) const {
+        return std::tie(lhs.score, lhs.id) > std::tie(rhs.score, rhs.id);
+    }
 };
 }  // namespace
 
-std::vector<Object> GetDetectionResults(
-    const float *bboxes, const float *ids,
-    const float *scores, size_t count,
-    float threshold, size_t top_k) {
+std::vector<Object> GetDetectionResults(const float* bboxes, const float* ids,
+                                        const float* scores, size_t count,
+                                        float threshold, size_t top_k) {
     std::priority_queue<Object, std::vector<Object>, ObjectComparator> q;
 
     for (unsigned int i = 0; i < count; ++i) {
@@ -46,10 +45,8 @@ std::vector<Object> GetDetectionResults(
     return ret;
 }
 
-std::vector<Object> GetDetectionResults(
-    tflite::MicroInterpreter* interpreter,
-    float threshold, size_t top_k) {
-
+std::vector<Object> GetDetectionResults(tflite::MicroInterpreter* interpreter,
+                                        float threshold, size_t top_k) {
     if (interpreter->outputs().size() != 4) {
         printf("Output size mismatch\r\n");
         return std::vector<Object>();
@@ -68,8 +65,8 @@ std::vector<Object> GetDetectionResults(
         count = tflite::GetTensorData<float>(interpreter->output_tensor(3));
     }
 
-    return GetDetectionResults(bboxes, ids, scores, static_cast<size_t>(count[0]),
-                               threshold, top_k);
+    return GetDetectionResults(bboxes, ids, scores,
+                               static_cast<size_t>(count[0]), threshold, top_k);
 }
 
 }  // namespace tensorflow

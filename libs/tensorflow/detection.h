@@ -1,10 +1,10 @@
 #ifndef _LIBS_TENSORFLOW_DETECTION_H_
 #define _LIBS_TENSORFLOW_DETECTION_H_
 
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
-
 #include <limits>
 #include <vector>
+
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 namespace coral::micro {
 namespace tensorflow {
@@ -24,8 +24,7 @@ struct Object {
 };
 
 std::vector<Object> GetDetectionResults(
-    const float *bboxes, const float *ids,
-    const float *scores, size_t count,
+    const float* bboxes, const float* ids, const float* scores, size_t count,
     float threshold = -std::numeric_limits<float>::infinity(),
     size_t top_k = std::numeric_limits<size_t>::max());
 
