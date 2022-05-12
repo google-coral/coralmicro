@@ -16,7 +16,7 @@ enum class SystemMessageType : uint8_t {
 struct SystemMessage {
     SystemMessageType type;
     union {
-        void *console_buffer_ptr;
+        void* console_buffer_ptr;
     } message;
 } __attribute__((packed));
 

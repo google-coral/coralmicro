@@ -1,12 +1,13 @@
 #include "libs/base/filesystem.h"
-#include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/semphr.h"
-#include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
 
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <memory>
+
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/semphr.h"
+#include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
 
 extern "C" nand_handle_t* BOARD_GetNANDHandle(void);
 
@@ -22,12 +23,12 @@ constexpr int kFilesystemBaseBlock = 12;
 constexpr lfs_size_t kPageSize = 2048;
 
 struct AutoClose {
-  lfs_file_t* file;
-  ~AutoClose() { lfs_file_close(&g_lfs, file); }
+    lfs_file_t* file;
+    ~AutoClose() { lfs_file_close(&g_lfs, file); }
 };
 
-int LfsRead(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
-            void *buffer, lfs_size_t size) {
+int LfsRead(const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
+            void* buffer, lfs_size_t size) {
     nand_handle_t* nand = BOARD_GetNANDHandle();
     if (!nand) return LFS_ERR_IO;
 
@@ -35,8 +36,8 @@ int LfsRead(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
     while (size != 0) {
         auto page_index = off / kPageSize;
         auto read_size = std::min(kPageSize, size);
-        status_t status = Nand_Flash_Read_Page(nand,
-            (kFilesystemBaseBlock + block) * kPagesPerBlock + page_index,
+        status_t status = Nand_Flash_Read_Page(
+            nand, (kFilesystemBaseBlock + block) * kPagesPerBlock + page_index,
             buf, read_size);
         if (status != kStatus_Success) return LFS_ERR_IO;
 
@@ -47,8 +48,8 @@ int LfsRead(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
     return LFS_ERR_OK;
 }
 
-int LfsProg(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
-            const void *buffer, lfs_size_t size) {
+int LfsProg(const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
+            const void* buffer, lfs_size_t size) {
     nand_handle_t* nand = BOARD_GetNANDHandle();
     if (!nand) return LFS_ERR_IO;
 
@@ -56,8 +57,8 @@ int LfsProg(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
     while (size != 0) {
         auto page_index = off / kPageSize;
         auto write_size = std::min(kPageSize, size);
-        status_t status = Nand_Flash_Page_Program(nand,
-            (kFilesystemBaseBlock + block) * kPagesPerBlock + page_index,
+        status_t status = Nand_Flash_Page_Program(
+            nand, (kFilesystemBaseBlock + block) * kPagesPerBlock + page_index,
             buf, write_size);
         if (status != kStatus_Success) return LFS_ERR_IO;
 
@@ -69,27 +70,24 @@ int LfsProg(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
     return LFS_ERR_OK;
 }
 
-int LfsErase(const struct lfs_config *c, lfs_block_t block) {
+int LfsErase(const struct lfs_config* c, lfs_block_t block) {
     nand_handle_t* nand = BOARD_GetNANDHandle();
     if (!nand) return LFS_ERR_IO;
-    status_t status = Nand_Flash_Erase_Block(nand, kFilesystemBaseBlock + block);
+    status_t status =
+        Nand_Flash_Erase_Block(nand, kFilesystemBaseBlock + block);
     if (status != kStatus_Success) return LFS_ERR_IO;
     return LFS_ERR_OK;
 }
 
-int LfsSync(const struct lfs_config *c) {
-    return LFS_ERR_OK;
-}
+int LfsSync(const struct lfs_config* c) { return LFS_ERR_OK; }
 
-int LfsLock(const struct lfs_config *c) {
-    if (xSemaphoreTake(g_lfs_mutex, portMAX_DELAY) != pdTRUE)
-        return -1;
+int LfsLock(const struct lfs_config* c) {
+    if (xSemaphoreTake(g_lfs_mutex, portMAX_DELAY) != pdTRUE) return -1;
     return 0;
 }
 
-int LfsUnlock(const struct lfs_config *c) {
-    if (xSemaphoreGive(g_lfs_mutex) != pdTRUE)
-        return -1;
+int LfsUnlock(const struct lfs_config* c) {
+    if (xSemaphoreGive(g_lfs_mutex) != pdTRUE) return -1;
     return 0;
 }
 }  // namespace
@@ -142,16 +140,19 @@ bool Init(bool force_format) {
     return true;
 }
 
-bool Open(lfs_file_t* handle, const char *path) {
+bool Open(lfs_file_t* handle, const char* path) {
     return Open(handle, path, false);
 }
 
-bool Open(lfs_file_t* handle, const char *path, bool writable, bool append) {
-    int ret = lfs_file_open(&g_lfs, handle, path, writable ? ((append ? LFS_O_APPEND : LFS_O_TRUNC) | LFS_O_CREAT | LFS_O_RDWR) : LFS_O_RDONLY);
+bool Open(lfs_file_t* handle, const char* path, bool writable, bool append) {
+    int ret = lfs_file_open(&g_lfs, handle, path,
+                            writable ? ((append ? LFS_O_APPEND : LFS_O_TRUNC) |
+                                        LFS_O_CREAT | LFS_O_RDWR)
+                                     : LFS_O_RDONLY);
     return (ret == LFS_ERR_OK);
 }
 
-int Write(lfs_file_t *handle, const void *buffer, size_t size) {
+int Write(lfs_file_t* handle, const void* buffer, size_t size) {
     return lfs_file_write(&g_lfs, handle, buffer, size);
 }
 
@@ -171,17 +172,17 @@ int Write(lfs_file_t *handle, const void *buffer, size_t size) {
 // assert(Dirname("dir1/dir2/")      == "dir1/dir2");
 // assert(Dirname("/dir1/dir2/file") == "/dir1/dir2");
 // assert(Dirname("dir1/dir2/file")  == "dir1/dir2");
-std::string Dirname(const char *path) {
+std::string Dirname(const char* path) {
     const std::string s(path);
     if (s.empty()) return "";
 
     const auto index = s.find_last_of('/');
     if (index == std::string::npos) return "";
     if (index == 0) return "/";  // e.g. "/", "/file"
-    return s.substr(0, index);  // e.g. "/dir/", "/dir/file"
+    return s.substr(0, index);   // e.g. "/dir/", "/dir/file"
 }
 
-bool MakeDirs(const char *path) {
+bool MakeDirs(const char* path) {
     int ret;
     size_t path_len = strlen(path);
     if (path_len > g_lfs.name_max) {
@@ -210,32 +211,31 @@ bool MakeDirs(const char *path) {
     return true;
 }
 
-bool OpenDir(lfs_dir_t *dir, const char *path) {
+bool OpenDir(lfs_dir_t* dir, const char* path) {
     int ret = lfs_dir_open(&g_lfs, dir, path);
     if (ret < 0) return false;
     return true;
 }
 
-bool ReadDir(lfs_dir_t *dir, lfs_info *info)  {
+bool ReadDir(lfs_dir_t* dir, lfs_info* info) {
     int ret = lfs_dir_read(&g_lfs, dir, info);
     if (ret <= 0) return false;
     return true;
 }
 
-
-bool CloseDir(lfs_dir_t *dir) {
+bool CloseDir(lfs_dir_t* dir) {
     int ret = lfs_dir_close(&g_lfs, dir);
     if (ret < 0) return false;
     return true;
 }
 
-bool RewindDir(lfs_dir_t *dir) {
+bool RewindDir(lfs_dir_t* dir) {
     int ret = lfs_dir_rewind(&g_lfs, dir);
     if (ret < 0) return false;
     return true;
 }
 
-int Read(lfs_file_t* handle, void *buffer, size_t size) {
+int Read(lfs_file_t* handle, void* buffer, size_t size) {
     return lfs_file_read(&g_lfs, handle, buffer, size);
 }
 
@@ -253,7 +253,7 @@ bool Close(lfs_file_t* handle) {
     return (ret == LFS_ERR_OK) ? true : false;
 }
 
-ssize_t Size(const char *path) {
+ssize_t Size(const char* path) {
     lfs_file_t handle;
     if (!Open(&handle, path)) {
         return -1;
@@ -264,33 +264,31 @@ ssize_t Size(const char *path) {
     return ret;
 }
 
-lfs_soff_t Size(lfs_file_t* handle) {
-    return lfs_file_size(&g_lfs, handle);
-}
+lfs_soff_t Size(lfs_file_t* handle) { return lfs_file_size(&g_lfs, handle); }
 
-bool Remove(const char *path) {
+bool Remove(const char* path) {
     int ret = lfs_remove(&g_lfs, path);
     if (ret < 0) return false;
     return true;
 }
 
-bool Stat(const char *path, struct lfs_info *info) {
+bool Stat(const char* path, struct lfs_info* info) {
     int ret = lfs_stat(&g_lfs, path, info);
     if (ret < 0) return false;
     return true;
 }
 
-bool DirOpen(lfs_dir_t *dir, const char *path) {
+bool DirOpen(lfs_dir_t* dir, const char* path) {
     int ret = lfs_dir_open(&g_lfs, dir, path);
     if (ret < 0) return false;
     return true;
 }
 
-int DirRead(lfs_dir_t *dir, struct lfs_info *info) {
+int DirRead(lfs_dir_t* dir, struct lfs_info* info) {
     return lfs_dir_read(&g_lfs, dir, info);
 }
 
-bool DirClose(lfs_dir_t *dir) {
+bool DirClose(lfs_dir_t* dir) {
     int ret = lfs_dir_close(&g_lfs, dir);
     if (ret < 0) return false;
     return true;

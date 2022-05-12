@@ -1,7 +1,8 @@
 #include "libs/base/timer.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.h"
 
 #include <climits>
+
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.h"
 
 namespace coral::micro {
 namespace timer {
@@ -21,7 +22,6 @@ void Init() {
     GPT_GetDefaultConfig(&gpt_config);
     gpt_config.clockSource = kGPT_ClockSource_Periph;
 
-
     uint32_t root_freq = CLOCK_GetRootClockFreq(kCLOCK_Root_Gpt1);
 
     GPT_Init(GPT1, &gpt_config);
@@ -35,12 +35,11 @@ void Init() {
 }
 
 uint32_t millis() {
-    return (micros_rollover * (UINT_MAX / 1000)) + (GPT_GetCurrentTimerCount(GPT1) / 1000);
+    return (micros_rollover * (UINT_MAX / 1000)) +
+           (GPT_GetCurrentTimerCount(GPT1) / 1000);
 }
 
-uint32_t micros() {
-    return GPT_GetCurrentTimerCount(GPT1);
-}
+uint32_t micros() { return GPT_GetCurrentTimerCount(GPT1); }
 
 }  // namespace timer
 }  // namespace coral::micro

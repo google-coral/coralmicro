@@ -1,4 +1,5 @@
 #include "libs/base/tempsense.h"
+
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_tempsensor.h"
 
@@ -9,7 +10,7 @@ void Init() {
     /* Configure CPU for just single measurement mode. */
     tmpsns_config_t config;
     TMPSNS_GetDefaultConfig(&config);
-    config.measureMode   = kTEMPSENSOR_SingleMode;
+    config.measureMode = kTEMPSENSOR_SingleMode;
 
     TMPSNS_Init(TMPSNS, &config);
 }
@@ -23,8 +24,7 @@ float GetTemperature(TempSensor sensor) {
             TMPSNS_StartMeasure(TMPSNS);
             temperature = TMPSNS_GetCurrentTemperature(TMPSNS);
             return temperature;
-        case TempSensor::kTPU:
-        {
+        case TempSensor::kTPU: {
             const auto& context = EdgeTpuManager::GetSingleton()->OpenDevice();
             return EdgeTpuManager::GetSingleton()->GetTemperature();
         }

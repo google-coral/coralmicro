@@ -1,8 +1,10 @@
 #include "libs/base/pwm.h"
+
+#include <cstdio>
+
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_xbara.h"
-#include <cstdio>
 
 namespace coral::micro {
 namespace pwm {
@@ -26,10 +28,14 @@ void Init(const PwmModuleConfig& config) {
     static bool xbar_inited = false;
     if (!xbar_inited) {
         XBARA_Init(XBARA1);
-        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault0);
-        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault1);
-        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1234Fault2);
-        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1234Fault3);
+        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh,
+                                   kXBARA1_OutputFlexpwm1Fault0);
+        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh,
+                                   kXBARA1_OutputFlexpwm1Fault1);
+        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh,
+                                   kXBARA1_OutputFlexpwm1234Fault2);
+        XBARA_SetSignalsConnection(XBARA1, kXBARA1_InputLogicHigh,
+                                   kXBARA1_OutputFlexpwm1234Fault3);
         xbar_inited = true;
     }
 
@@ -61,7 +67,8 @@ void Init(const PwmModuleConfig& config) {
     }
 
     assert(signal > 0);
-    PWM_SetupPwm(config.base, config.module, &signal_param[0], signal, kPWM_SignedCenterAligned, 1000, source_clock_hz);
+    PWM_SetupPwm(config.base, config.module, &signal_param[0], signal,
+                 kPWM_SignedCenterAligned, 1000, source_clock_hz);
 
     PWM_SetPwmLdok(config.base, PwmModuleToControl(config.module), true);
 }

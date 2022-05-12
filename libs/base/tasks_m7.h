@@ -3,22 +3,23 @@
 
 #include "libs/FreeRTOS/FreeRTOSConfig.h"
 
-#define IPC_TASK_PRIORITY           (configMAX_PRIORITIES - 1)
-#define CONSOLE_TASK_PRIORITY       (configMAX_PRIORITIES - 2)
-#define APP_TASK_PRIORITY           (configMAX_PRIORITIES - 2)
-#define USB_DEVICE_TASK_PRIORITY    (configMAX_PRIORITIES - 1)
-#define USB_HOST_TASK_PRIORITY      (configMAX_PRIORITIES - 1)
-#define EDGETPU_DFU_TASK_PRIORITY   (configMAX_PRIORITIES - 2)
-#define EDGETPU_TASK_PRIORITY       (configMAX_PRIORITIES - 2)
-#define RANDOM_TASK_PRIORITY        (configMAX_PRIORITIES - 1)
-#define PMIC_TASK_PRIORITY          (configMAX_PRIORITIES - 1)
+#define IPC_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+#define CONSOLE_TASK_PRIORITY (configMAX_PRIORITIES - 2)
+#define APP_TASK_PRIORITY (configMAX_PRIORITIES - 2)
+#define USB_DEVICE_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+#define USB_HOST_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+#define EDGETPU_DFU_TASK_PRIORITY (configMAX_PRIORITIES - 2)
+#define EDGETPU_TASK_PRIORITY (configMAX_PRIORITIES - 2)
+#define RANDOM_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+#define PMIC_TASK_PRIORITY (configMAX_PRIORITIES - 1)
 #define POWER_MONITOR_TASK_PRIORITY (configMAX_PRIORITIES - 2)
-#define CAMERA_TASK_PRIORITY        (configMAX_PRIORITIES - 1)
-#define AUDIO_TASK_PRIORITY         (configMAX_PRIORITIES - 1)
+#define CAMERA_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+#define AUDIO_TASK_PRIORITY (configMAX_PRIORITIES - 1)
 
 #if defined(__cplusplus)
-#define VALIDATE_TASK_PRIORITY(prio) \
-    static_assert(0 <= (prio) && (prio) < configMAX_PRIORITIES, "Invalid value for task priority")
+#define VALIDATE_TASK_PRIORITY(prio)                            \
+    static_assert(0 <= (prio) && (prio) < configMAX_PRIORITIES, \
+                  "Invalid value for task priority")
 
 VALIDATE_TASK_PRIORITY(IPC_TASK_PRIORITY);
 VALIDATE_TASK_PRIORITY(CONSOLE_TASK_PRIORITY);
@@ -32,6 +33,6 @@ VALIDATE_TASK_PRIORITY(PMIC_TASK_PRIORITY);
 VALIDATE_TASK_PRIORITY(POWER_MONITOR_TASK_PRIORITY);
 VALIDATE_TASK_PRIORITY(CAMERA_TASK_PRIORITY);
 VALIDATE_TASK_PRIORITY(AUDIO_TASK_PRIORITY);
-#endif // __cplusplus
+#endif  // __cplusplus
 
 #endif  // __LIBS_BASE_TASKS_M7_H__

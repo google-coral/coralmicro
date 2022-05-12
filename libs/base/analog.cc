@@ -1,7 +1,8 @@
 #include "libs/base/analog.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.h"
 
 #include <cstdio>
+
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.h"
 
 namespace coral::micro {
 namespace analog {
@@ -41,23 +42,28 @@ static void GetDefaultConfig(ADCConfig& config) {
     LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
 }
 
-void CreateConfig(ADCConfig& config, Device device, int channel, Side primary_side, bool differential) {
+void CreateConfig(ADCConfig& config, Device device, int channel,
+                  Side primary_side, bool differential) {
     GetDefaultConfig(config);
     config.device = DeviceToADC(device);
 
     if (differential) {
         switch (primary_side) {
             case Side::A:
-                config.conv_config.sampleChannelMode = kLPADC_SampleChannelDiffBothSideAB;
+                config.conv_config.sampleChannelMode =
+                    kLPADC_SampleChannelDiffBothSideAB;
             case Side::B:
-                config.conv_config.sampleChannelMode = kLPADC_SampleChannelDiffBothSideBA;
+                config.conv_config.sampleChannelMode =
+                    kLPADC_SampleChannelDiffBothSideBA;
         }
     } else {
         switch (primary_side) {
             case Side::A:
-                config.conv_config.sampleChannelMode = kLPADC_SampleChannelSingleEndSideA;
+                config.conv_config.sampleChannelMode =
+                    kLPADC_SampleChannelSingleEndSideA;
             case Side::B:
-                config.conv_config.sampleChannelMode = kLPADC_SampleChannelSingleEndSideB;
+                config.conv_config.sampleChannelMode =
+                    kLPADC_SampleChannelSingleEndSideB;
         }
     }
 
@@ -79,14 +85,13 @@ uint16_t ReadADC(const ADCConfig& config) {
     LPADC_SetConvCommandConfig(config.device, 1, &config.conv_config);
     LPADC_SetConvTriggerConfig(config.device, 0, &config.trigger_config);
     LPADC_DoSoftwareTrigger(config.device, 1);
-    while (!LPADC_GetConvResult(config.device, &result)) {}
+    while (!LPADC_GetConvResult(config.device, &result)) {
+    }
 
     return (result.convValue >> 3) & 0xFFF;
 }
 
-void EnableDAC(bool enable) {
-    DAC12_Enable(DAC, enable);
-}
+void EnableDAC(bool enable) { DAC12_Enable(DAC, enable); }
 
 void WriteDAC(uint16_t counts) {
     // 12-bit DAC, values range from 0 - 4095.
