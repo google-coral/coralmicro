@@ -23,13 +23,11 @@ struct Request {
 
 }  // namespace random
 
-static constexpr size_t kRandomTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
-static constexpr UBaseType_t kRandomTaskQueueLength = 4;
-extern const char kRandomTaskName[];
+inline constexpr char kRandomTaskName[] = "random_task";
 
 class Random : public QueueTask<random::Request, random::Response,
-                                kRandomTaskName, kRandomTaskStackDepth,
-                                RANDOM_TASK_PRIORITY, kRandomTaskQueueLength> {
+                                kRandomTaskName, configMINIMAL_STACK_SIZE * 10,
+                                RANDOM_TASK_PRIORITY, /*QueueLength=*/4> {
    public:
     static Random* GetSingleton() {
         static Random random;

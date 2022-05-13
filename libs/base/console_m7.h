@@ -36,14 +36,22 @@ class ConsoleM7 {
 #endif
     };
 
-    static void StaticM4ConsoleTaskFn(void* param);
+    static void StaticM4ConsoleTaskFn(void* param) {
+        GetSingleton()->M4ConsoleTaskFn(param);
+    }
     void M4ConsoleTaskFn(void* param);
-    static void StaticM7ConsoleTaskTxFn(void* param);
+
+    static void StaticM7ConsoleTaskTxFn(void* param) {
+        GetSingleton()->M7ConsoleTaskTxFn(param);
+    }
     void M7ConsoleTaskTxFn(void* param);
-    static void StaticM7ConsoleTaskRxFn(void* param);
+
+    static void StaticM7ConsoleTaskRxFn(void* param) {
+        GetSingleton()->M7ConsoleTaskRxFn(param);
+    }
     void M7ConsoleTaskRxFn(void* param);
 
-    ConsoleM7() {}
+    ConsoleM7() = default;
     ConsoleM7(const ConsoleM7&) = delete;
     ConsoleM7& operator=(const ConsoleM7&) = delete;
 

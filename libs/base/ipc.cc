@@ -39,10 +39,6 @@ void IPC::SendMessage(const ipc::Message& message) {
     xSemaphoreTake(tx_semaphore_, portMAX_DELAY);
 }
 
-void IPC::StaticTxTaskFn(void* param) { static_cast<IPC*>(param)->TxTaskFn(); }
-
-void IPC::StaticRxTaskFn(void* param) { static_cast<IPC*>(param)->RxTaskFn(); }
-
 void IPC::TxTaskFn() {
     while (true) {
         ipc::Message* message;

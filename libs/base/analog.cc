@@ -6,11 +6,11 @@
 
 namespace coral::micro {
 namespace analog {
+namespace {
+constexpr int kLPADC1ChannelCount = 6;
+constexpr int kLPADC2ChannelCount = 7;
 
-static constexpr int kLPADC1ChannelCount = 6;
-static constexpr int kLPADC2ChannelCount = 7;
-
-static ADC_Type* DeviceToADC(Device d) {
+ADC_Type* DeviceToADC(Device d) {
     switch (d) {
         case Device::ADC1:
             return LPADC1;
@@ -21,6 +21,12 @@ static ADC_Type* DeviceToADC(Device d) {
     }
     assert(false);
 }
+
+void GetDefaultConfig(ADCConfig& config) {
+    LPADC_GetDefaultConvCommandConfig(&config.conv_config);
+    LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
+}
+} // namespace
 
 void Init(Device device) {
     if (device == Device::ADC1 || device == Device::ADC2) {
@@ -35,11 +41,6 @@ void Init(Device device) {
         dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
         DAC12_Init(DAC, &dac_config);
     }
-}
-
-static void GetDefaultConfig(ADCConfig& config) {
-    LPADC_GetDefaultConvCommandConfig(&config.conv_config);
-    LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
 }
 
 void CreateConfig(ADCConfig& config, Device device, int channel,

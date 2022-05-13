@@ -19,10 +19,7 @@ extern "C" {
 #define DATA_IN  (0)
 
 namespace coral::micro {
-
 std::map<class_handle_t, CdcEem*> CdcEem::handle_map_;
-
-CdcEem::CdcEem() {}
 
 void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
     bulk_in_ep_ = bulk_in_ep;
@@ -318,5 +315,4 @@ usb_status_t CdcEem::Handler(uint32_t event, void *param) {
 usb_status_t CdcEem::Handler(class_handle_t class_handle, uint32_t event, void *param) {
     return handle_map_[class_handle]->Handler(event, param);
 }
-
 }  // namespace coral::micro

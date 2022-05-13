@@ -72,13 +72,11 @@ enum class PmicRegisters : uint16_t {
 
 }  // namespace pmic
 
-static constexpr size_t kPmicTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
-static constexpr UBaseType_t kPmicTaskQueueLength = 4;
-extern const char kPmicTaskName[];
+inline constexpr char kPmicTaskName[] = "pmic_task";
 
 class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName,
-                                  kPmicTaskStackDepth, PMIC_TASK_PRIORITY,
-                                  kPmicTaskQueueLength> {
+                                  configMINIMAL_STACK_SIZE * 10,
+                                  PMIC_TASK_PRIORITY, /*QueueLength=*/4> {
    public:
     void Init(lpi2c_rtos_handle_t* i2c_handle);
     static PmicTask* GetSingleton() {
@@ -89,7 +87,6 @@ class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName,
     uint8_t GetChipId();
 
    private:
-    void TaskInit() override;
     void RequestHandler(pmic::Request* req) override;
     void HandleRailRequest(const pmic::RailRequest& rail);
     void HandleGpioRequest(const pmic::GpioRequest& gpio);

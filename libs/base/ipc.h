@@ -22,8 +22,14 @@ class IPC {
     static void StaticFreeRtosMessageEventHandler(uint16_t eventData,
                                                   void* context);
     void FreeRtosMessageEventHandler(uint16_t eventData);
-    static void StaticTxTaskFn(void* param);
-    static void StaticRxTaskFn(void* param);
+    static void StaticTxTaskFn(void* param) {
+        static_cast<IPC*>(param)->TxTaskFn();
+    }
+
+    static void StaticRxTaskFn(void* param) {
+        static_cast<IPC*>(param)->RxTaskFn();
+    }
+
     AppMessageHandler app_handler_ = nullptr;
     constexpr static int kSendMessageNotification = 1;
     void* app_handler_param_ = nullptr;

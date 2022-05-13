@@ -14,20 +14,20 @@
 #include <memory>
 
 namespace coral::micro {
-
 using namespace camera;
 
-static constexpr int kFramebufferCount = 4;
-static constexpr const float kRedCoefficient = .2126;
-static constexpr const float kGreenCoefficient = .7152;
-static constexpr const float kBlueCoefficient = .0722;
-static constexpr const float kUint8Max = 255.0;
+namespace {
+constexpr uint8_t kCameraAddress = 0x24;
+constexpr int kFramebufferCount = 4;
+constexpr float kRedCoefficient = .2126;
+constexpr float kGreenCoefficient = .7152;
+constexpr float kBlueCoefficient = .0722;
+constexpr float kUint8Max = 255.0;
 
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")))
 __attribute__((aligned(64)))
 uint8_t framebuffers[kFramebufferCount][CameraTask::kHeight][CameraTask::kWidth];
 
-namespace {
 uint8_t* IndexToFramebufferPtr(int index) {
     if (index < 0 || index >= kFramebufferCount) {
         return nullptr;
@@ -43,7 +43,7 @@ int FramebufferPtrToIndex(const uint8_t* framebuffer_ptr) {
     }
     return -1;
 }
-}
+}  // namespace
 
 bool CameraTask::GetFrame(const std::list<camera::FrameFormat> &fmts) {
     bool ret = true;
@@ -346,9 +346,6 @@ int CameraTask::FormatToBPP(Format fmt) {
     }
     return 0;
 }
-
-constexpr const uint8_t kCameraAddress = 0x24;
-constexpr const char kCameraTaskName[] = "camera_task";
 
 extern "C" void CSI_DriverIRQHandler(void);
 extern "C" void CSI_IRQHandler(void) {

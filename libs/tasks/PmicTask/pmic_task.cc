@@ -6,11 +6,10 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
 namespace coral::micro {
-
 using namespace pmic;
-
-constexpr const uint8_t kPmicAddress = 0x58;
-constexpr const char kPmicTaskName[] = "pmic_task";
+namespace {
+constexpr uint8_t kPmicAddress = 0x58;
+}  // namespace
 
 void PmicTask::Read(PmicRegisters reg, uint8_t* val) {
     uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
@@ -63,8 +62,6 @@ void PmicTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
     QueueTask::Init();
     i2c_handle_ = i2c_handle;
 }
-
-void PmicTask::TaskInit() {}
 
 void PmicTask::HandleRailRequest(const RailRequest& rail) {
     PmicRegisters reg = PmicRegisters::UNKNOWN;

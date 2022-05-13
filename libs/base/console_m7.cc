@@ -90,10 +90,6 @@ int ConsoleM7::Read(char* buffer, int size) {
     return bytes_to_return;
 }
 
-void ConsoleM7::StaticM4ConsoleTaskFn(void* param) {
-    GetSingleton()->M4ConsoleTaskFn(param);
-}
-
 void ConsoleM7::M4ConsoleTaskFn(void* param) {
     ipc::Message m4_console_buffer_msg;
     m4_console_buffer_msg.type = ipc::MessageType::SYSTEM;
@@ -114,10 +110,6 @@ void ConsoleM7::M4ConsoleTaskFn(void* param) {
     }
 }
 
-void ConsoleM7::StaticM7ConsoleTaskRxFn(void* param) {
-    GetSingleton()->M7ConsoleTaskRxFn(param);
-}
-
 // TODO(atv): At the moment, this only reads from DbgConsole, not USB.
 void ConsoleM7::M7ConsoleTaskRxFn(void* param) {
     while (true) {
@@ -136,10 +128,6 @@ void ConsoleM7::M7ConsoleTaskRxFn(void* param) {
             assert(rx_buffer_available_ <= kRxBufferSize);
         }
     }
-}
-
-void ConsoleM7::StaticM7ConsoleTaskTxFn(void* param) {
-    GetSingleton()->M7ConsoleTaskTxFn(param);
 }
 
 void ConsoleM7::M7ConsoleTaskTxFn(void* param) {

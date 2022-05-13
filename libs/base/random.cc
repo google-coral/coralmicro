@@ -10,8 +10,6 @@ namespace coral::micro {
 
 using namespace random;
 
-constexpr const char kRandomTaskName[] = "random_task";
-
 void Random::RequestHandler(Request* req) {
     Response resp;
     caam_handle_t handle;

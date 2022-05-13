@@ -14,7 +14,7 @@ namespace coral::micro {
 
 class CdcEem {
   public:
-    CdcEem();
+    CdcEem() = default;
     CdcEem(const CdcEem&) = delete;
     CdcEem& operator=(const CdcEem&) = delete;
     void Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface);

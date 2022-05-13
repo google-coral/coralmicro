@@ -8,8 +8,8 @@
 
 namespace coral::micro {
 namespace pwm {
-
-static pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
+namespace {
+pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
     switch (module) {
         case kPWM_Module_0:
             return kPWM_Control_Module_0;
@@ -23,6 +23,7 @@ static pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
             assert(false);
     }
 }
+}  // namespace
 
 void Init(const PwmModuleConfig& config) {
     static bool xbar_inited = false;
@@ -80,6 +81,5 @@ void Enable(const PwmModuleConfig& config, bool enable) {
         PWM_StopTimer(config.base, PwmModuleToControl(config.module));
     }
 }
-
 }  // namespace pwm
 }  // namespace coral::micro

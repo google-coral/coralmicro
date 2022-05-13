@@ -10,9 +10,9 @@
 
 namespace coral::micro {
 
-static const uint8_t kSingleBulkOutEndpoint = 1;
-static const uint8_t kEventInEndpoint = 2;
-static const uint8_t kInterruptInEndpoint = 3;
+inline constexpr uint8_t kSingleBulkOutEndpoint = 1;
+inline constexpr uint8_t kEventInEndpoint = 2;
+inline constexpr uint8_t kInterruptInEndpoint = 3;
 
 enum class PerformanceMode {
     kLow,

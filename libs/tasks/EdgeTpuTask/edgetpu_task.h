@@ -62,12 +62,12 @@ struct Request {
 
 }  // namespace edgetpu
 
-static constexpr size_t kEdgeTpuTaskStackDepth = configMINIMAL_STACK_SIZE * 3;
-static constexpr UBaseType_t kEdgeTpuTaskQueueLength = 4;
-extern const char kEdgeTpuTaskName[];
+inline constexpr char kEdgeTpuTaskName[] = "edgetpu_task";
 
-class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeTpuTaskName,
-                                     kEdgeTpuTaskStackDepth, EDGETPU_TASK_PRIORITY, kEdgeTpuTaskQueueLength> {
+class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response,
+                                    kEdgeTpuTaskName,
+                                    configMINIMAL_STACK_SIZE * 3,
+                                    EDGETPU_TASK_PRIORITY, /*QueueLength=*/4> {
   public:
     bool GetPower();
     void SetPower(bool enable);

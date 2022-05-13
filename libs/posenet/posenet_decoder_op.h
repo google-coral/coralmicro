@@ -5,7 +5,7 @@
 
 namespace coral {
 
-static const char kPosenetDecoderOp[] = "PosenetDecoderOp";
+inline constexpr char kPosenetDecoderOp[] = "PosenetDecoderOp";
 
 TfLiteRegistration* RegisterPosenetDecoderOp();
 

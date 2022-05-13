@@ -14,7 +14,6 @@ using namespace std::placeholders;
 namespace coral::micro {
 
 using namespace edgetpu_dfu;
-constexpr const char kEdgeTpuDfuTaskName[] = "edgetpu_dfu";
 
 void EdgeTpuDfuTask::SetNextState(enum dfu_state next_state) {
     Request req;

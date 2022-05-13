@@ -31,8 +31,7 @@ IPCM7* IPCM7::GetSingleton() {
 }
 
 void IPCM7::StaticRemoteAppEventHandler(uint16_t eventData, void* context) {
-    static_cast<IPCM7*>(GetSingleton())
-        ->RemoteAppEventHandler(eventData, context);
+    GetSingleton()->RemoteAppEventHandler(eventData, context);
 }
 
 void IPCM7::RemoteAppEventHandler(uint16_t eventData, void* context) {

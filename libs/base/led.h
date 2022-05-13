@@ -10,8 +10,8 @@ enum class LED {
     kTpu,
 };
 
-constexpr const unsigned int kFullyOn = 100;
-constexpr const unsigned int kFullyOff = 0;
+inline constexpr unsigned int kFullyOn = 100;
+inline constexpr unsigned int kFullyOff = 0;
 
 bool Set(LED led, bool enable);
 bool Set(LED led, bool enable, unsigned int brightness);

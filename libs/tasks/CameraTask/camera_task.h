@@ -151,11 +151,12 @@ struct FrameFormat {
 
 }  // namespace camera
 
-static constexpr size_t kCameraTaskStackDepth = configMINIMAL_STACK_SIZE * 10;
-static constexpr UBaseType_t kCameraTaskQueueLength = 4;
-extern const char kCameraTaskName[];
+inline constexpr char kCameraTaskName[] = "camera_task";
 
-class CameraTask : public QueueTask<camera::Request, camera::Response, kCameraTaskName, kCameraTaskStackDepth, CAMERA_TASK_PRIORITY, kCameraTaskQueueLength> {
+class CameraTask : public QueueTask<camera::Request, camera::Response,
+                                   kCameraTaskName,
+                                   configMINIMAL_STACK_SIZE * 10,
+                                   CAMERA_TASK_PRIORITY, /*QueueLength=*/4> {
   public:
     void Init(lpi2c_rtos_handle_t *i2c_handle);
     static CameraTask *GetSingleton() {

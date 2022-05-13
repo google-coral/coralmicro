@@ -23,9 +23,10 @@ typedef struct _usb_host_cdc_line_coding_struct
 namespace coral::micro {
 
 class CdcAcm {
-  using RxHandler = std::function<void(const uint8_t*, const uint32_t)>;
   public:
-    CdcAcm();
+    using RxHandler = std::function<void(const uint8_t*, const uint32_t)>;
+
+    CdcAcm() = default;
     CdcAcm(const CdcAcm&) = delete;
     CdcAcm& operator=(const CdcAcm&) = delete;
     void Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t comm_iface, uint8_t data_iface, RxHandler rx_handler);

@@ -481,7 +481,7 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
     // Getting this test pattern doesn't seem to always work on the first try,
     // maybe there is some undocumented pattern change time in the sensor. Allow
     // a small amount of retrying to smooth that over.
-    constexpr const int kRetries = 3;
+    constexpr int kRetries = 3;
     for (int i = 0; i < kRetries; ++i) {
         coral::micro::CameraTask::GetSingleton()->Trigger();
         uint8_t* buffer = nullptr;
@@ -578,7 +578,7 @@ void CaptureAudio(struct jsonrpc_request* request) {
 
     g_audio_driver.Enable(
         config, &params, +[](void* param, const int32_t* buf, size_t size) {
-            auto* params = reinterpret_cast<AudioParams*>(param);
+            auto* params = static_cast<AudioParams*>(param);
             if (params->first + size <= params->last) {
                 std::memcpy(params->first, buf, size * sizeof(buf[0]));
                 params->first += size;

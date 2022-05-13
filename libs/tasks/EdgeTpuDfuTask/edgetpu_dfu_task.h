@@ -57,12 +57,10 @@ struct Request {
 
 }  // namespace edgetpu_dfu
 
-static constexpr size_t kEdgeTpuDfuTaskStackDepth = configMINIMAL_STACK_SIZE * 3;
-static constexpr UBaseType_t kEdgeTpuDfuTaskQueueLength = 4;
-extern const char kEdgeTpuDfuTaskName[];
+inline constexpr char kEdgeTpuDfuTaskName[] = "edgetpu_dfu_task";
 
 class EdgeTpuDfuTask : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Response, kEdgeTpuDfuTaskName,
-                                        kEdgeTpuDfuTaskStackDepth, EDGETPU_DFU_TASK_PRIORITY, kEdgeTpuDfuTaskQueueLength> {
+                                        configMINIMAL_STACK_SIZE * 3, EDGETPU_DFU_TASK_PRIORITY, /*QueueLength=*/4> {
   public:
     static EdgeTpuDfuTask* GetSingleton() {
         static EdgeTpuDfuTask task;
