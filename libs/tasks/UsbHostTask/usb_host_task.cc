@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "libs/base/check.h"
 #include "libs/base/tasks.h"
 #include "libs/nxp/rt1176-sdk/board.h"
@@ -10,58 +12,58 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.h"
 
-#include <cstdio>
-
-constexpr int kUSBControllerId = kUSB_ControllerEhci1;
-
 extern "C" void USB_OTG2_IRQHandler(void) {
-    USB_HostEhciIsrFunction(coral::micro::UsbHostTask::GetSingleton()->host_handle());
-}
-
-static uint32_t vidpid_to_key(uint32_t vid, uint32_t pid) {
-    return ((vid & 0xFFFF) << 16) | (pid & 0xFFFF);
-}
-
-static usb_status_t USB_HostEvent(usb_device_handle device_handle,
-                                  usb_host_configuration_handle config_handle,
-                                  uint32_t event_code) {
-    return coral::micro::UsbHostTask::GetSingleton()->HostEvent(device_handle, config_handle, event_code);
+    USB_HostEhciIsrFunction(
+        coral::micro::UsbHostTask::GetSingleton()->host_handle());
 }
 
 namespace coral::micro {
-usb_status_t UsbHostTask::HostEvent(usb_device_handle device_handle,
-                                  usb_host_configuration_handle config_handle,
-                                  uint32_t event_code) {
-    uint32_t vid, pid, vidpid;
+namespace {
+constexpr int kUSBControllerId = kUSB_ControllerEhci1;
 
-    USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDeviceVID, &vid);
-    USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDevicePID, &pid);
+uint32_t vidpid_to_key(uint32_t vid, uint32_t pid) {
+    return ((vid & 0xFFFF) << 16) | (pid & 0xFFFF);
+}
+
+usb_status_t USB_HostEvent(usb_device_handle device_handle,
+                           usb_host_configuration_handle config_handle,
+                           uint32_t event_code) {
+    return UsbHostTask::GetSingleton()->HostEvent(device_handle, config_handle,
+                                                  event_code);
+}
+}  // namespace
+
+usb_status_t UsbHostTask::HostEvent(usb_device_handle device_handle,
+                                    usb_host_configuration_handle config_handle,
+                                    uint32_t event_code) {
+    uint32_t vid, pid;
+    USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDeviceVID,
+                                           &vid);
+    USB_HostHelperGetPeripheralInformation(device_handle, kUSB_HostGetDevicePID,
+                                           &pid);
 #if 0
     printf("USB_HostEvent event_code: %lu status: %lu vid: 0x%lx pid: 0x%lx\r\n",
            event_code & 0xFFFF, event_code >> 16, vid, pid);
 #endif
 
-    vidpid = vidpid_to_key(vid, pid);
+    const uint32_t vidpid = vidpid_to_key(vid, pid);
     if (host_event_callbacks_.find(vidpid) == host_event_callbacks_.end()) {
-            return kStatus_USB_Error;
+        return kStatus_USB_Error;
     }
     usb_host_event_callback callback_fn = host_event_callbacks_[vidpid];
 
     return callback_fn(host_handle(), device_handle, config_handle, event_code);
 }
 
-void UsbHostTask::RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid, usb_host_event_callback fn) {
-    uint32_t vidpid = vidpid_to_key(vid, pid);
+void UsbHostTask::RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid,
+                                               usb_host_event_callback fn) {
+    const uint32_t vidpid = vidpid_to_key(vid, pid);
     host_event_callbacks_[vidpid] = fn;
 
-    IRQn_Type irqNumber = USB_OTG2_IRQn;
+    const IRQn_Type irq_number = USB_OTG2_IRQn;
     // Highest possible prio for TPU stability.
-    NVIC_SetPriority(irqNumber, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
-    NVIC_EnableIRQ(irqNumber);
-}
-
-void UsbHostTask::StaticTaskMain(void *param) {
-    reinterpret_cast<UsbHostTask*>(param)->TaskMain();
+    NVIC_SetPriority(irq_number, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+    NVIC_EnableIRQ(irq_number);
 }
 
 void UsbHostTask::TaskMain() {
@@ -77,19 +79,19 @@ void UsbHostTask::Init() {
 }
 
 UsbHostTask::UsbHostTask() {
-    usb_status_t status;
-    uint32_t usbClockFreq = 24000000;
+    constexpr uint32_t usb_clock_freq = 24000000;
     usb_phy_config_struct_t phyConfig = {
         BOARD_USB_PHY_D_CAL,
         BOARD_USB_PHY_TXCAL45DP,
         BOARD_USB_PHY_TXCAL45DM,
     };
 
-    CLOCK_EnableUsbhs1PhyPllClock(kCLOCK_Usbphy480M, usbClockFreq);
-    CLOCK_EnableUsbhs1Clock(kCLOCK_Usb480M, usbClockFreq);
+    CLOCK_EnableUsbhs1PhyPllClock(kCLOCK_Usbphy480M, usb_clock_freq);
+    CLOCK_EnableUsbhs1Clock(kCLOCK_Usb480M, usb_clock_freq);
     USB_EhciPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phyConfig);
 
-    status = USB_HostInit(kUSBControllerId, &host_handle_, USB_HostEvent);
+    const usb_status_t status =
+        USB_HostInit(kUSBControllerId, &host_handle_, USB_HostEvent);
     if (status != kStatus_USB_Success) {
         printf("USB_HostInit failed\r\n");
         return;

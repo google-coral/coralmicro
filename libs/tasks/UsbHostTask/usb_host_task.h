@@ -1,37 +1,41 @@
 #ifndef _LIBS_TASKS_USBHOSTTASK_USBHOSTTASK_H_
 #define _LIBS_TASKS_USBHOSTTASK_USBHOSTTASK_H_
 
-#include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
-
 #include <functional>
 #include <map>
+
+#include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 
 namespace coral::micro {
 
 class UsbHostTask {
-  public:
+   public:
     UsbHostTask();
     UsbHostTask(const UsbHostTask&) = delete;
-    UsbHostTask &operator=(const UsbHostTask&) = delete;
+    UsbHostTask& operator=(const UsbHostTask&) = delete;
 
     static UsbHostTask* GetSingleton() {
-      static UsbHostTask task;
+        static UsbHostTask task;
         return &task;
     }
     void Init();
 
-    using usb_host_event_callback = std::function<usb_status_t(usb_host_handle, usb_device_handle, usb_host_configuration_handle, uint32_t)>;
-    void RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid, usb_host_event_callback fn);
+    using usb_host_event_callback =
+        std::function<usb_status_t(usb_host_handle, usb_device_handle,
+                                   usb_host_configuration_handle, uint32_t)>;
+    void RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid,
+                                      usb_host_event_callback fn);
     usb_status_t HostEvent(usb_device_handle device_handle,
                            usb_host_configuration_handle config_handle,
                            uint32_t event_code);
 
-    usb_host_handle host_handle() {
-      return host_handle_;
+    usb_host_handle host_handle() { return host_handle_; }
+
+   private:
+    static void StaticTaskMain(void* param) {
+        static_cast<UsbHostTask*>(param)->TaskMain();
     }
-  private:
-    static void StaticTaskMain(void *param);
     void TaskMain();
     usb_host_handle host_handle_;
 
