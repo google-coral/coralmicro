@@ -92,8 +92,11 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
                     break;
             }
             break;
-        case ElfloaderCommand::Reset:
+        case ElfloaderCommand::ResetToBootloader:
             coral::micro::ResetToBootloader();
+            break;
+        case ElfloaderCommand::ResetToFlash:
+            coral::micro::ResetToFlash();
             break;
         case ElfloaderCommand::Target:
             elfloader_target = *target;

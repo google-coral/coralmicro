@@ -13,8 +13,9 @@ enum class ElfloaderCommand : uint8_t {
     SetSize = 0,
     Bytes = 1,
     Done = 2,
-    Reset = 3,
+    ResetToBootloader = 3,
     Target = 4,
+    ResetToFlash = 5,
 };
 
 enum class ElfloaderTarget : uint8_t {

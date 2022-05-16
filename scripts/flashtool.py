@@ -68,8 +68,9 @@ WIFI_REVISION_FILE = '/wifi_revision'
 ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
 ELFLOADER_DONE = 2
-ELFLOADER_RESET = 3
+ELFLOADER_RESET_TO_BOOTLOADER = 3
 ELFLOADER_TARGET = 4
+ELFLOADER_RESET_TO_FLASH = 5
 
 ELFLOADER_TARGET_RAM = 0
 ELFLOADER_TARGET_PATH = 1
@@ -87,11 +88,14 @@ def elfloader_msg_bytes(offset, data):
 def elfloader_msg_done():
     return struct.pack('=BB', 0, ELFLOADER_DONE)
 
-def elfloader_msg_reset():
-    return struct.pack('=BB', 0, ELFLOADER_RESET)
+def elfloader_msg_reset_to_bootloader():
+    return struct.pack('=BB', 0, ELFLOADER_RESET_TO_BOOTLOADER)
 
 def elfloader_msg_target(target):
     return struct.pack('=BBB', 0, ELFLOADER_TARGET, target)
+
+def elfloader_msg_reset_to_flash():
+    return struct.pack('=BB', 0, ELFLOADER_RESET_TO_FLASH)
 
 def read_file(path):
     with open(path, 'rb') as f:
@@ -415,7 +419,7 @@ def OpenHidDevice(vid, pid, serial_number):
 
 def StateResetElfloader(serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
-        h.write(elfloader_msg_reset())
+        h.write(elfloader_msg_reset_to_bootloader())
     return StateCheckForSdp
 
 def StateProgram(blhost_path, sbfile_path):
@@ -456,7 +460,6 @@ def ElfloaderTransferData(h, data, target, bar=None):
     read_byte()
     if bar:
         bar.finish()
-    return StateReset
 
 def StateProgramElfloader(elf_path, debug=False, serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
@@ -496,11 +499,18 @@ def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, 
             ElfloaderTransferData(h, data, ELFLOADER_TARGET_FILESYSTEM,
                                   bar=Bar(target_file, max=len(data)))
 
-        return StateReset
+        return StateResetToFlash
 
-def StateReset(serial_number=None):
-    with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
-        h.write(elfloader_msg_reset())
+def StateResetToBootloader(serial_number=None, reset=False):
+    if reset:
+        with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
+            h.write(elfloader_msg_reset_to_bootloader())
+    return StateDone
+
+def StateResetToFlash(serial_number=None, reset=False):
+    if reset:
+        with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
+            h.write(elfloader_msg_reset_to_flash())
     return StateDone
 
 def StateStartGdb(jlink_path, toolchain_path, unstripped_elf_path):
@@ -554,6 +564,8 @@ def main():
     parser.add_argument('--subapp', type=str, required=False)
     parser.add_argument('--ram', dest='ram', action='store_true')
     parser.add_argument('--noram', dest='ram', action='store_false')
+    parser.add_argument('--reset', dest='reset', action='store_true')
+    parser.add_argument('--noreset', dest='reset', action='store_false')
     parser.add_argument('--elfloader_path', type=str, required=False)
     parser.add_argument('--serial', type=str, required=False)
     parser.add_argument('--list', dest='list', action='store_true')
@@ -651,6 +663,7 @@ def main():
         'blhost_path': blhost_path,
         'flashloader_path': flashloader_path,
         'ram': args.ram,
+        'reset': args.reset,
         'elfloader_path': elfloader_path,
         'elfloader_elf_path': elfloader_elf_path,
         'elf_path': elf_path,

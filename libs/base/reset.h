@@ -17,6 +17,7 @@ inline constexpr src_general_purpose_register_index_t kRebootedByLockupCount =
     kSRC_GeneralPurposeRegister14;
 
 void ResetToBootloader();
+void ResetToFlash();
 void StoreResetReason();
 const ResetStats GetResetStats();
 
