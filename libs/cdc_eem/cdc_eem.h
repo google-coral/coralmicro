@@ -18,26 +18,41 @@ class CdcEem {
     CdcEem(const CdcEem&) = delete;
     CdcEem& operator=(const CdcEem&) = delete;
     void Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface);
-    usb_device_class_config_struct_t* config_data() { return &config_; }
-    void *descriptor_data() { return &descriptor_; }
-    size_t descriptor_data_size() { return sizeof(descriptor_); }
-    void SetClassHandle(class_handle_t class_handle);
+    const usb_device_class_config_struct_t& config_data() const { return config_; }
+    const void *descriptor_data() const { return &descriptor_; }
+    size_t descriptor_data_size() const { return sizeof(descriptor_); }
+    void SetClassHandle(class_handle_t class_handle) {
+        handle_map_[class_handle] = this;
+        class_handle_ = class_handle;
+    }
     bool HandleEvent(uint32_t event, void *param);
-    bool Initialized() { return initialized_; }
-  private:
 
+  private:
     usb_status_t SetControlLineState(usb_device_cdc_eem_request_param_struct_t* eem_param);
     void ProcessPacket(uint32_t packet_length);
-    static usb_status_t Handler(class_handle_t class_handle, uint32_t event, void *param);
+
+    static std::map<class_handle_t, CdcEem*> handle_map_;
+    static usb_status_t StaticHandler(class_handle_t class_handle, uint32_t event, void *param) {
+        return handle_map_[class_handle]->Handler(event, param);
+    }
     usb_status_t Handler(uint32_t event, void *param);
 
     // LwIP hooks
-    static err_t StaticNetifInit(struct netif *netif);
+    static err_t StaticNetifInit(struct netif *netif) {
+        return static_cast<CdcEem*>(netif->state)->NetifInit(netif);
+    }
     err_t NetifInit(struct netif *netif);
-    static err_t StaticTxFunc(struct netif *netif, struct pbuf *p);
-    static void StaticTaskFunction(void *param);
-    void TaskFunction(void *param);
+
+    static err_t StaticTxFunc(struct netif *netif, struct pbuf *p) {
+        return static_cast<CdcEem*>(netif->state)->TxFunc(netif, p);
+    }
     err_t TxFunc(struct netif *netif, struct pbuf *p);
+
+    static void StaticTaskFunction(void *param) {
+        static_cast<CdcEem*>(param)->TaskFunction(param);
+    }
+    void TaskFunction(void *param);
+
     err_t TransmitFrame(void *buffer, uint32_t length);
     err_t ReceiveFrame(uint8_t *buffer, uint32_t length);
 
@@ -83,11 +98,11 @@ class CdcEem {
         ARRAY_SIZE(cdc_eem_interface_list_),
     };
     usb_device_class_config_struct_t config_ {
-        Handler,
+        StaticHandler,
         nullptr,
         &class_struct_,
     };
-    CdcEemClassDescriptor descriptor_ = {
+    static constexpr CdcEemClassDescriptor descriptor_ = {
         {
             sizeof(InterfaceDescriptor),
             0x4,
@@ -106,7 +121,6 @@ class CdcEem {
         }, // EndpointDescriptor
     }; // CdcEemClassDescriptor
 
-    bool initialized_ = false;
     uint8_t serial_state_buffer_[10];
     uint8_t tx_buffer_[512];
     uint8_t rx_buffer_[512];
@@ -114,12 +128,10 @@ class CdcEem {
     QueueHandle_t tx_queue_;
     class_handle_t class_handle_;
 
-    static std::map<class_handle_t, CdcEem*> handle_map_;
-
     ip4_addr_t netif_ipaddr_, netif_netmask_, netif_gw_;
     struct netif netif_;
 
-    enum Endianness {
+    enum class Endianness {
         kUnknown,
         kLittleEndian,
         kBigEndian,

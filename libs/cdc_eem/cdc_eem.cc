@@ -12,6 +12,7 @@ extern "C" {
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/app/dhcp_server.h"
 }
 
+#include <cstring>
 #include <memory>
 #include <vector>
 
@@ -45,16 +46,6 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
     start_dhcp_server(netif_ipaddr_.addr);
 }
 
-err_t CdcEem::StaticNetifInit(struct netif *netif) {
-    CdcEem *instance = reinterpret_cast<CdcEem*>(netif->state);
-    return instance->NetifInit(netif);
-}
-
-void CdcEem::StaticTaskFunction(void *param) {
-    CdcEem *instance = reinterpret_cast<CdcEem*>(param);
-    instance->TaskFunction(param);
-}
-
 void CdcEem::TaskFunction(void *param) {
     while (true) {
         std::vector<uint8_t>* packet;
@@ -84,11 +75,6 @@ err_t CdcEem::NetifInit(struct netif *netif) {
     return ERR_OK;
 }
 
-err_t CdcEem::StaticTxFunc(struct netif *netif, struct pbuf *p) {
-    CdcEem *instance = reinterpret_cast<CdcEem*>(netif->state);
-    return instance->TxFunc(netif, p);
-}
-
 err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
     auto* packet = new std::vector<uint8_t>(p->tot_len);
     if (pbuf_copy_partial(p, packet->data(), p->tot_len, 0) != p->tot_len)
@@ -102,11 +88,6 @@ err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
     return ERR_OK;
 }
 
-void CdcEem::SetClassHandle(class_handle_t class_handle) {
-    handle_map_[class_handle] = this;
-    class_handle_ = class_handle;
-}
-
 err_t CdcEem::TransmitFrame(void* buffer, uint32_t length) {
     if (endianness_ == Endianness::kUnknown) {
         return ERR_IF;
@@ -118,8 +99,8 @@ err_t CdcEem::TransmitFrame(void* buffer, uint32_t length) {
     if (endianness_ == Endianness::kBigEndian) {
         *header = htons(*header);
     }
-    memcpy(tx_buffer_ + sizeof(uint16_t), buffer, length);
-    memcpy(tx_buffer_ + sizeof(uint16_t) + length, &crc, sizeof(uint32_t));
+    std::memcpy(tx_buffer_ + sizeof(uint16_t), buffer, length);
+    std::memcpy(tx_buffer_ + sizeof(uint16_t) + length, &crc, sizeof(uint32_t));
     while (true) {
         status = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, tx_buffer_, sizeof(uint16_t) + length + sizeof(uint32_t));
         if (status == kStatus_USB_Busy) {
@@ -272,7 +253,6 @@ bool CdcEem::HandleEvent(uint32_t event, void *param) {
         case kUSB_DeviceEventSetConfiguration:
             break;
         case kUSB_DeviceEventSetInterface:
-            initialized_ = true;
             USB_DeviceCdcEemRecv(class_handle_, bulk_out_ep_, rx_buffer_, cdc_eem_data_endpoints_[DATA_OUT].maxPacketSize);
             break;
         default:
@@ -312,7 +292,4 @@ usb_status_t CdcEem::Handler(uint32_t event, void *param) {
     return ret;
 }
 
-usb_status_t CdcEem::Handler(class_handle_t class_handle, uint32_t event, void *param) {
-    return handle_map_[class_handle]->Handler(event, param);
-}
 }  // namespace coral::micro

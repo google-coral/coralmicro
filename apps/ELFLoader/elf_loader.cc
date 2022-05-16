@@ -244,7 +244,7 @@ extern "C" int main(int argc, char **argv) {
     elfloader_interfaces[0].interfaceNumber =
         coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value();
     coral::micro::UsbDeviceTask::GetSingleton()->AddDevice(
-        &elfloader_config_data_,
+        elfloader_config_data_,
         elfloader_SetClassHandle,
         elfloader_HandleEvent,
         &elfloader_descriptor_data,

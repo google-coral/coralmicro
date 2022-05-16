@@ -21,7 +21,7 @@ class UsbDeviceTask {
     UsbDeviceTask(const UsbDeviceTask&) = delete;
     UsbDeviceTask &operator=(const UsbDeviceTask&) = delete;
 
-    void AddDevice(usb_device_class_config_struct_t* config, usb_set_handle_callback sh_cb, usb_handle_event_callback he_cb, void* descriptor_data, size_t descriptor_data_size);
+    void AddDevice(const usb_device_class_config_struct_t& config, usb_set_handle_callback sh_cb, usb_handle_event_callback he_cb, const void* descriptor_data, size_t descriptor_data_size);
     bool Init();
     static UsbDeviceTask* GetSingleton() {
         static UsbDeviceTask task;

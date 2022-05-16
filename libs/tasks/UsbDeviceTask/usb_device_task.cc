@@ -123,9 +123,9 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
     return ret;
 }
 
-void UsbDeviceTask::AddDevice(usb_device_class_config_struct_t* config, usb_set_handle_callback sh_cb,
-        usb_handle_event_callback he_cb, void *descriptor_data, size_t descriptor_data_size) {
-    configs_.push_back(*config);
+void UsbDeviceTask::AddDevice(const usb_device_class_config_struct_t& config, usb_set_handle_callback sh_cb,
+        usb_handle_event_callback he_cb, const void *descriptor_data, size_t descriptor_data_size) {
+    configs_.push_back(config);
     set_handle_callbacks_.push_back(sh_cb);
     handle_event_callbacks_.push_back(he_cb);
 

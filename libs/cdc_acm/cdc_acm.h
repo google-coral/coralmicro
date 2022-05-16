@@ -30,19 +30,27 @@ class CdcAcm {
     CdcAcm(const CdcAcm&) = delete;
     CdcAcm& operator=(const CdcAcm&) = delete;
     void Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t comm_iface, uint8_t data_iface, RxHandler rx_handler);
-    usb_device_class_config_struct_t* config_data() { return &config_; }
-    void *descriptor_data() { return &descriptor_; }
-    size_t descriptor_data_size() { return sizeof(descriptor_); }
+    const usb_device_class_config_struct_t& config_data() const { return config_; }
+    const void *descriptor_data() const { return &descriptor_; }
+    size_t descriptor_data_size() const { return sizeof(descriptor_); }
     // TODO(atv): Make me private
-    void SetClassHandle(class_handle_t class_handle);
+    void SetClassHandle(class_handle_t class_handle) {
+        handle_map_[class_handle] = this;
+        class_handle_ = class_handle;
+    }
     bool HandleEvent(uint32_t event, void *param);
     bool Transmit(const uint8_t *buffer, const size_t length);
   private:
     bool can_transmit_ = false;
     void SetConfiguration();
     usb_status_t SetControlLineState(usb_device_cdc_acm_request_param_struct_t* acm_param);
-    static usb_status_t Handler(class_handle_t class_handle, uint32_t event, void *param);
+
+    static std::map<class_handle_t, CdcAcm*> handle_map_;
+    static usb_status_t StaticHandler(class_handle_t class_handle, uint32_t event, void *param) {
+        return handle_map_[class_handle]->Handler(event, param);
+    }
     usb_status_t Handler(uint32_t event, void *param);
+
     usb_device_endpoint_struct_t cdc_acm_comm_endpoints_[1] = {
         {
             0, // set in constructor
@@ -111,11 +119,11 @@ class CdcAcm {
         ARRAY_SIZE(cdc_acm_interface_list_),
     };
     usb_device_class_config_struct_t config_ {
-        Handler,
+        StaticHandler,
         nullptr,
         &class_struct_,
     };
-    CdcAcmClassDescriptor descriptor_ = {
+    static constexpr CdcAcmClassDescriptor descriptor_ = {
         {
             sizeof(InterfaceAssociationDescriptor),
             0x0B,
@@ -181,8 +189,6 @@ class CdcAcm {
     RxHandler rx_handler_;
     class_handle_t class_handle_;
     usb_host_cdc_line_coding_struct_t line_coding_;
-
-    static std::map<class_handle_t, CdcAcm*> handle_map_;
 };
 
 }  // namespace coral::micro

@@ -5,6 +5,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 
 #include <cstdio>
+#include <cstring>
 
 #define DATA_OUT (1)
 #define DATA_IN  (0)
@@ -25,11 +26,6 @@ void CdcAcm::Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_
     cdc_acm_interfaces_[1].interfaceNumber = data_iface;
     tx_semaphore_ = xSemaphoreCreateBinary();
     CHECK(tx_semaphore_);
-}
-
-void CdcAcm::SetClassHandle(class_handle_t class_handle) {
-    handle_map_[class_handle] = this;
-    class_handle_ = class_handle;
 }
 
 usb_status_t CdcAcm::SetControlLineState(usb_device_cdc_acm_request_param_struct_t* acm_param) {
@@ -107,7 +103,7 @@ bool CdcAcm::Transmit(const uint8_t *buffer, const size_t length) {
         return false;
     }
 
-    memcpy(tx_buffer_, buffer, length);
+    std::memcpy(tx_buffer_, buffer, length);
     status = USB_DeviceCdcAcmSend(
             class_handle_, bulk_in_ep_, tx_buffer_, length);
 
@@ -185,7 +181,4 @@ usb_status_t CdcAcm::Handler(uint32_t event, void *param) {
     return ret;
 }
 
-usb_status_t CdcAcm::Handler(class_handle_t class_handle, uint32_t event, void *param) {
-    return handle_map_[class_handle]->Handler(event, param);
-}
 }  // namespace coral::micro
