@@ -1,4 +1,7 @@
 #include "libs/a71ch/a71ch.h"
+
+#include <cstdio>
+
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
@@ -7,7 +10,6 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
-#include <cstdio>
 
 extern "C" [[noreturn]] void app_main(void* param) {
     coral::micro::a71ch::Init();
@@ -55,7 +57,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
     }
 
     std::vector<uint8_t> model;
-    constexpr const char kModelPath[] = "/models/testconv1-edgetpu.tflite";
+    constexpr char kModelPath[] = "/models/testconv1-edgetpu.tflite";
     if (!coral::micro::filesystem::ReadFile(kModelPath, &model)) {
         printf("%s missing\r\n", kModelPath);
         vTaskSuspend(NULL);
