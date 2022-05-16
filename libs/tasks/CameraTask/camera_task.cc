@@ -24,6 +24,53 @@ constexpr float kGreenCoefficient = .7152;
 constexpr float kBlueCoefficient = .0722;
 constexpr float kUint8Max = 255.0;
 
+struct CameraRegisters {
+    enum : uint16_t {
+        MODEL_ID_H = 0x0000,
+        MODEL_ID_L = 0x0001,
+        MODE_SELECT = 0x0100,
+        SW_RESET = 0x0103,
+        ANALOG_GAIN = 0x0205,
+        DIGITAL_GAIN_H = 0x020E,
+        DIGITAL_GAIN_L = 0x020F,
+        DGAIN_CONTROL = 0x0350,
+        TEST_PATTERN_MODE = 0x0601,
+        BLC_CFG = 0x1000,
+        BLC_DITHER = 0x1001,
+        BLC_DARKPIXEL = 0x1002,
+        BLC_TGT = 0x1003,
+        BLI_EN = 0x1006,
+        BLC2_TGT = 0x1007,
+        DPC_CTRL = 0x1008,
+        CLUSTER_THR_HOT = 0x1009,
+        CLUSTER_THR_COLD = 0x100A,
+        SINGLE_THR_HOT = 0x100B,
+        SINGLE_THR_COLD = 0x100C,
+        VSYNC_HSYNC_PIXEL_SHIFT_EN = 0x1012,
+        AE_CTRL = 0x2100,
+        AE_TARGET_MEAN = 0x2101,
+        AE_MIN_MEAN = 0x2102,
+        CONVERGE_IN_TH = 0x2103,
+        CONVERGE_OUT_TH = 0x2104,
+        MAX_INTG_H = 0x2105,
+        MAX_INTG_L = 0x2106,
+        MIN_INTG = 0x2107,
+        MAX_AGAIN_FULL = 0x2108,
+        MAX_AGAIN_BIN2 = 0x2109,
+        MIN_AGAIN = 0x210A,
+        MAX_DGAIN = 0x210B,
+        MIN_DGAIN = 0x210C,
+        DAMPING_FACTOR = 0x210D,
+        FS_CTRL = 0x210E,
+        FS_60HZ_H = 0x210F,
+        FS_60HZ_L = 0x2110,
+        FS_50HZ_H = 0x2111,
+        FS_50HZ_L = 0x2112,
+        BIT_CONTROL = 0x3059,
+        OSC_CLK_DIV = 0x3060,
+    };
+};
+
 __attribute__((section(".sdram_bss,\"aw\",%nobits @")))
 __attribute__((aligned(64)))
 uint8_t framebuffers[kFramebufferCount][CameraTask::kHeight][CameraTask::kWidth];
@@ -353,7 +400,7 @@ extern "C" void CSI_IRQHandler(void) {
     __DSB();
 }
 
-bool CameraTask::Read(CameraRegisters reg, uint8_t *val) {
+bool CameraTask::Read(uint16_t reg, uint8_t *val) {
     lpi2c_master_transfer_t transfer;
     transfer.flags = kLPI2C_TransferDefaultFlag;
     transfer.slaveAddress = kCameraAddress;
@@ -366,7 +413,7 @@ bool CameraTask::Read(CameraRegisters reg, uint8_t *val) {
     return status == kStatus_Success;
 }
 
-bool CameraTask::Write(CameraRegisters reg, uint8_t val) {
+bool CameraTask::Write(uint16_t reg, uint8_t val) {
     lpi2c_master_transfer_t transfer;
     transfer.flags = kLPI2C_TransferDefaultFlag;
     transfer.slaveAddress = kCameraAddress;
@@ -470,18 +517,18 @@ void CameraTask::SetDefaultRegisters() {
     Write(CameraRegisters::BLC2_TGT, 0x08);
     /* These registers are RESERVED in the datasheet,
      * but without them the picture is bad. */
-    Write(static_cast<CameraRegisters>(0x3044), 0x0A);
-    Write(static_cast<CameraRegisters>(0x3045), 0x00);
-    Write(static_cast<CameraRegisters>(0x3047), 0x0A);
-    Write(static_cast<CameraRegisters>(0x3050), 0xC0);
-    Write(static_cast<CameraRegisters>(0x3051), 0x42);
-    Write(static_cast<CameraRegisters>(0x3052), 0x50);
-    Write(static_cast<CameraRegisters>(0x3053), 0x00);
-    Write(static_cast<CameraRegisters>(0x3054), 0x03);
-    Write(static_cast<CameraRegisters>(0x3055), 0xF7);
-    Write(static_cast<CameraRegisters>(0x3056), 0xF8);
-    Write(static_cast<CameraRegisters>(0x3057), 0x29);
-    Write(static_cast<CameraRegisters>(0x3058), 0x1F);
+    Write(0x3044, 0x0A);
+    Write(0x3045, 0x00);
+    Write(0x3047, 0x0A);
+    Write(0x3050, 0xC0);
+    Write(0x3051, 0x42);
+    Write(0x3052, 0x50);
+    Write(0x3053, 0x00);
+    Write(0x3054, 0x03);
+    Write(0x3055, 0xF7);
+    Write(0x3056, 0xF8);
+    Write(0x3057, 0x29);
+    Write(0x3058, 0x1F);
     Write(CameraRegisters::BIT_CONTROL, 0x1E);
     /* Digital settings */
     Write(CameraRegisters::BLC_CFG, 0x43);
