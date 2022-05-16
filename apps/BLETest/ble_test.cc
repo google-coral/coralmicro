@@ -14,10 +14,10 @@ extern "C" void app_main(void *param) {
                                       brcm_patchram_buf,
                                       brcm_patch_ram_length) != brcm_patch_ram_length) {
         printf("Reading patchram failed\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
     printf("Done reading patchram\r\n");
     wiced_wlan_connectivity_init();
     hello_sensor_start();
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

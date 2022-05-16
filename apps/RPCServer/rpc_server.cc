@@ -53,5 +53,5 @@ extern "C" void app_main(void* param) {
     jsonrpc_export("take_picture", take_picture_rpc);
     coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
     printf("RPC server ready\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

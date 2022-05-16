@@ -74,7 +74,7 @@ extern "C" void app_main(void *param) {
         TF_LITE_REPORT_ERROR(error_reporter,
             "Model schema version is %d, supported is %d",
             model->version(), TFLITE_SCHEMA_VERSION);
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     static tflite::MicroMutableOpResolver<3> resolver(error_reporter);
@@ -88,7 +88,7 @@ extern "C" void app_main(void *param) {
     TfLiteStatus allocate_status = interpreter->AllocateTensors();
     if (allocate_status != kTfLiteOk) {
         TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors failed.");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     input = interpreter->input(0);
@@ -97,7 +97,7 @@ extern "C" void app_main(void *param) {
     int ret;
     // High water mark testing showed that this task consumes about 218 words.
     // Set our stack size sufficiently large to accomodate.
-    ret = xTaskCreate(hello_task, "HelloTask", configMINIMAL_STACK_SIZE * 3, NULL, configMAX_PRIORITIES - 1, NULL);
+    ret = xTaskCreate(hello_task, "HelloTask", configMINIMAL_STACK_SIZE * 3, nullptr, configMAX_PRIORITIES - 1, nullptr);
     if (ret != pdPASS) {
         printf("Failed to start HelloTask\r\n");
     }

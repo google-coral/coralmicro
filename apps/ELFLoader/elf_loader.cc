@@ -76,7 +76,7 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
         case ElfloaderCommand::Done:
             switch (elfloader_target) {
                 case ElfloaderTarget::Ram:
-                    xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, elfloader_recv_image, APP_TASK_PRIORITY, NULL);
+                    xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, elfloader_recv_image, APP_TASK_PRIORITY, nullptr);
                     break;
                 case ElfloaderTarget::Path: {
                         // TODO(atv): This stuff can fail. We should propagate errors back to the Python side if possible.
@@ -184,7 +184,7 @@ static void elfloader_main(void *param) {
     // Otherwise, suspend the USB thread so that the host cannot try to talk to us
     // and cause confusion.
     if (!application_elf || (!param && elf_size == -1)) {
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     } else {
         vTaskSuspend(reinterpret_cast<TaskHandle_t>(pvTimerGetTimerID(usb_timer)));
     }
@@ -207,7 +207,7 @@ static void elfloader_main(void *param) {
     entry_point entry_point_fn = reinterpret_cast<entry_point>(elf_header->e_entry);
     entry_point_fn();
 
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }
 
 void usb_device_task(void *param) {
@@ -218,7 +218,7 @@ void usb_device_task(void *param) {
 }
 
 static void usb_timer_callback(TimerHandle_t timer) {
-    xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, nullptr, APP_TASK_PRIORITY, NULL);
+    xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, nullptr, APP_TASK_PRIORITY, nullptr);
 }
 
 extern "C" int main(int argc, char **argv) {
@@ -226,7 +226,7 @@ extern "C" int main(int argc, char **argv) {
     coral::micro::filesystem::Init();
 
     TaskHandle_t usb_task;
-    xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, NULL, USB_DEVICE_TASK_PRIORITY, &usb_task);
+    xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10, nullptr, USB_DEVICE_TASK_PRIORITY, &usb_task);
     usb_timer = xTimerCreate("usb_timer", pdMS_TO_TICKS(1000), pdFALSE, usb_task, usb_timer_callback);
 
     // See TRM chapter 10.3.1 for boot mode choices.

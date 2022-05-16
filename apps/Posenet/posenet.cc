@@ -14,7 +14,7 @@ extern "C" void app_main(void *param) {
     coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(coral::micro::PerformanceMode::kMax);
     if (!coral::micro::posenet::setup()) {
         printf("setup() failed\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
     coral::micro::posenet::loop(&output);
     printf("Posenet static datatest finished.\r\n");
@@ -35,5 +35,5 @@ extern "C" void app_main(void *param) {
     }
     coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
     coral::micro::CameraTask::GetSingleton()->SetPower(false);
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

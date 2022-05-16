@@ -102,7 +102,7 @@ extern "C" void app_main(void *param) {
   err = (wwd_result_t)wiced_wlan_connectivity_init();
   if (err != WWD_SUCCESS) {
     printf("wlan init failed\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
   }
 
   // Configure UART root clock to target ~24MHz (PLL2 = 533MHz)
@@ -133,13 +133,13 @@ extern "C" void app_main(void *param) {
 
   if (status != kStatus_SerialManager_Success) {
     printf("UART init failed\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
   }
 
   status = SerialManager_OpenReadHandle(lpuart7_handle, lpuart7_read_handle);
   if (status != kStatus_SerialManager_Success) {
     printf("UART read handle failed\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
   }
 
   lpuart7_rx_mtx = xSemaphoreCreateBinary();
@@ -147,13 +147,13 @@ extern "C" void app_main(void *param) {
                                            lpuart7_Callback, lpuart7_rx_mtx);
   if (status != kStatus_SerialManager_Success) {
     printf("Failed to install UART read callback\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
   }
 
   status = SerialManager_OpenWriteHandle(lpuart7_handle, lpuart7_write_handle);
   if (status != kStatus_SerialManager_Success) {
     printf("UART write handle failed\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
   }
 
   lpuart7_tx_mtx = xSemaphoreCreateBinary();
@@ -161,7 +161,7 @@ extern "C" void app_main(void *param) {
                                            lpuart7_Callback, lpuart7_tx_mtx);
   if (status != kStatus_SerialManager_Success) {
     printf("Failed to install UART write callback\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
   }
 
   remote_server_exec(0, nullptr, nullptr);
@@ -169,5 +169,5 @@ extern "C" void app_main(void *param) {
   SerialManager_CloseReadHandle(lpuart7_read_handle);
   SerialManager_CloseWriteHandle(lpuart7_write_handle);
 
-  vTaskSuspend(NULL);
+  vTaskSuspend(nullptr);
 }

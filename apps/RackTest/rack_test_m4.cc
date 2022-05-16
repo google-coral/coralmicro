@@ -37,5 +37,5 @@ static void HandleAppMessage(const uint8_t data[coral::micro::ipc::kMessageBuffe
 
 extern "C" void app_main(void *param) {
     coral::micro::IPCM4::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, nullptr);
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

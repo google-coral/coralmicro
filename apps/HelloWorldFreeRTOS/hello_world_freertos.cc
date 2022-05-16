@@ -52,5 +52,5 @@ extern "C" void app_main(void *param) {
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

@@ -209,7 +209,7 @@ extern "C" void app_main(void* param) {
     } else {
         printf("Wi-Fi failed to come up (is the Wi-Fi board attached?\r\n");
         coral::micro::led::Set(coral::micro::led::LED::kPower, true);
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
     coral::micro::gpio::SetGpio(coral::micro::gpio::kBtDevWake, false);
     wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings,

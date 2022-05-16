@@ -30,5 +30,5 @@ extern "C" void app_main(void* param) {
         closesocket(accepted_socket);
     }
 
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

@@ -33,5 +33,5 @@ extern "C" void app_main(void *param) {
     }
     coral::micro::CameraTask::GetSingleton()->Disable();
     coral::micro::CameraTask::GetSingleton()->SetPower(false);
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

@@ -57,5 +57,5 @@ static void bt_ready(int err) {
 
 extern "C" void app_main(void *param) {
     InitEdgefastBluetooth(bt_ready);
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

@@ -64,5 +64,5 @@ extern "C" void app_main(void *param) {
     } while (false);
     WIFI_Off();
     printf("WifiTest end\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

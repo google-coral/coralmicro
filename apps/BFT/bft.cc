@@ -152,6 +152,6 @@ TF_LITE_MICRO_TESTS_END
 }  // namespace testing
 
 extern "C" void app_main(void *param) {
-    testing::main(0, NULL);
-    vTaskSuspend(NULL);
+    testing::main(0, nullptr);
+    vTaskSuspend(nullptr);
 }

@@ -85,5 +85,5 @@ extern "C" void app_main(void *param) {
     CURLRequest("https://www.google.com");
     curl_global_cleanup();
 
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

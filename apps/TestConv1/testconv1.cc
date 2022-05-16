@@ -9,7 +9,7 @@
 extern "C" void app_main(void *param) {
     if (!coral::micro::testconv1::setup()) {
         printf("setup() failed\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     size_t counter = 0;
@@ -33,5 +33,5 @@ extern "C" void app_main(void *param) {
         coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }

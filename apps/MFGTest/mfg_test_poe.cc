@@ -52,7 +52,7 @@ extern "C" void app_main(void *param) {
     jsonrpc_export("eth_write_phy", EthWritePHY);
     IperfInit();
     coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }
 
 extern "C" int main(int argc, char **argv) {

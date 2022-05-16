@@ -25,7 +25,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
         printf("\r\n");
     } else {
         printf("Failed to retrieve A71's unique ID\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     constexpr uint8_t randomLen = 16;
@@ -39,7 +39,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
         printf("\r\n");
     } else {
         printf("Failed to get random data from A71\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     uint16_t publicKeyLen = 65;
@@ -53,14 +53,14 @@ extern "C" [[noreturn]] void app_main(void* param) {
         printf("\r\n");
     } else {
         printf("couldn't get keypair\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     std::vector<uint8_t> model;
     constexpr char kModelPath[] = "/models/testconv1-edgetpu.tflite";
     if (!coral::micro::filesystem::ReadFile(kModelPath, &model)) {
         printf("%s missing\r\n", kModelPath);
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     uint16_t shaLen = 32;
@@ -74,7 +74,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
         printf("\r\n");
     } else {
         printf("Failed to sha256sum\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
 
     uint16_t signature_len = 256;
@@ -88,7 +88,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
         printf("\r\n");
     } else {
         printf("Failed to sign\r\n");
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
 }
