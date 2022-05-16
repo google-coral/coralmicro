@@ -1,10 +1,10 @@
+#include <cstdio>
+
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
-#include <cstdio>
-
-extern "C" void app_main(void *param) {
+extern "C" void app_main(void* param) {
     printf("Hello socket.\r\n");
 
     int listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -19,10 +19,11 @@ extern "C" void app_main(void *param) {
     bind_address.sin_port = PP_HTONS(31337);
     bind_address.sin_addr.s_addr = PP_HTONL(INADDR_ANY);
 
-    bind(listening_socket, reinterpret_cast<struct sockaddr*>(&bind_address), sizeof(bind_address));
+    bind(listening_socket, reinterpret_cast<struct sockaddr*>(&bind_address),
+         sizeof(bind_address));
     listen(listening_socket, 1);
 
-    const char *fixed_str = "Hello socket.\r\n";
+    const char* fixed_str = "Hello socket.\r\n";
     while (true) {
         int accepted_socket = accept(listening_socket, nullptr, nullptr);
         send(accepted_socket, fixed_str, strlen(fixed_str), 0);
