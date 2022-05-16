@@ -41,9 +41,13 @@ void get_image_from_camera(struct jsonrpc_request* request) {
     coral::micro::CameraTask::GetSingleton()->Enable(
         coral::micro::camera::Mode::STREAMING);
     std::vector<uint8_t> image(width * height * /*channels=*/3);
-    coral::micro::camera::FrameFormat fmt{coral::micro::camera::Format::RGB,
-                                     coral::micro::camera::FilterMethod::BILINEAR,
-                                     width, height, false, image.data()};
+    coral::micro::camera::FrameFormat fmt{
+        coral::micro::camera::Format::RGB,
+        coral::micro::camera::FilterMethod::BILINEAR,
+        width,
+        height,
+        false,
+        image.data()};
     auto ret = coral::micro::CameraTask::GetFrame({fmt});
     coral::micro::CameraTask::GetSingleton()->Disable();
     coral::micro::CameraTask::GetSingleton()->SetPower(false);
