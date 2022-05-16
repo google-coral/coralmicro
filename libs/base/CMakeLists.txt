@@ -29,6 +29,7 @@ add_library_m7(libs_base-m7_freertos STATIC
     tempsense.cc
     timer.cc
     utils.cc
+    watchdog.cc
 )
 
 if (CORAL_MICRO_BOARD_REVISION STREQUAL P0 OR CORAL_MICRO_BOARD_REVISION STREQUAL P1)

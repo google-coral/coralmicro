@@ -7,6 +7,7 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/base/reset.h"
 #include "libs/base/random.h"
 #include "libs/base/tasks.h"
 #include "libs/base/tempsense.h"
@@ -55,6 +56,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
                          bool init_console_rx) {
     BOARD_InitHardware(true);
     SEMA4_Init(SEMA4);
+    coral::micro::StoreResetReason();
     coral::micro::timer::Init();
     coral::micro::gpio::Init();
     coral::micro::IPCM7::GetSingleton()->Init();

@@ -2,8 +2,10 @@
 #include "libs/base/ipc_m7.h"
 #include "libs/base/led.h"
 #include "libs/base/mutex.h"
+#include "libs/base/reset.h"
 #include "libs/base/strings.h"
 #include "libs/base/utils.h"
+#include "libs/base/watchdog.h"
 #include "libs/posenet/posenet.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
@@ -331,6 +333,12 @@ void HandleAppMessage(
 }
 
 void Main() {
+    constexpr coral::micro::watchdog::WatchdogConfig wdt_config = {
+        .timeout_s = 8,
+        .pet_rate_s = 3,
+        .enable_irq = false,
+    };
+    coral::micro::watchdog::StartWatchdog(wdt_config);
     PosenetTask posenet_task;
     CameraTask camera_task(&posenet_task);
     camera_output_mtx = xSemaphoreCreateMutex();
@@ -366,7 +374,6 @@ void Main() {
         printf("setup() failed\r\n");
         vTaskSuspend(nullptr);
     }
-
     coral::micro::IPCM7::GetSingleton()->StartM4();
 
 #if defined(OOBE_DEMO)
