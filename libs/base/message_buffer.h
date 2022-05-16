@@ -1,5 +1,5 @@
-#ifndef __APPS_HELLOWORLDMULTICOREFREERTOS_MESSAGE_BUFFER_H_
-#define __APPS_HELLOWORLDMULTICOREFREERTOS_MESSAGE_BUFFER_H_
+#ifndef LIBS_BASE_MESSAGE_BUFFER_H_
+#define LIBS_BASE_MESSAGE_BUFFER_H_
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/message_buffer.h"
@@ -53,4 +53,4 @@ static_assert(sizeof(SystemMessage) <= kMessageBufferDataSize);
 }  // namespace ipc
 }  // namespace coral::micro
 
-#endif  // __APPS_HELLOWORLDMULTICOREFREERTOS_MESSAGE_BUFFER_H_
+#endif  // LIBS_BASE_MESSAGE_BUFFER_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_TPU_EDGETPU_EXECUTABLE_H_
-#define _LIBS_TPU_EDGETPU_EXECUTABLE_H_
+#ifndef LIBS_TPU_EDGETPU_EXECUTABLE_H_
+#define LIBS_TPU_EDGETPU_EXECUTABLE_H_
 
 #include "libs/tpu/executable_generated.h"
 #include "libs/tpu/tpu_driver.h"
@@ -81,4 +81,4 @@ class EdgeTpuExecutable {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TPU_EDGETPU_EXECUTABLE_H_
+#endif  // LIBS_TPU_EDGETPU_EXECUTABLE_H_

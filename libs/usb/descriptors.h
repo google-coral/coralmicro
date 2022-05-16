@@ -1,5 +1,5 @@
-#ifndef __LIBS_USB_DESCRIPTORS_H__
-#define __LIBS_USB_DESCRIPTORS_H__
+#ifndef LIBS_USB_DESCRIPTORS_H_
+#define LIBS_USB_DESCRIPTORS_H_
 
 #include <cstdint>
 
@@ -145,4 +145,4 @@ struct LangIdDescriptor {
 
 }  // namespace coral::micro
 
-#endif  // __LIBS_USB_DESCRIPTORS_H__
+#endif  // LIBS_USB_DESCRIPTORS_H_

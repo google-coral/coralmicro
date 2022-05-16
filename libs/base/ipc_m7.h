@@ -1,5 +1,5 @@
-#ifndef __LIBS_BASE_IPC_M7_H__
-#define __LIBS_BASE_IPC_M7_H__
+#ifndef LIBS_BASE_IPC_M7_H_
+#define LIBS_BASE_IPC_M7_H_
 
 #include <cstdint>
 #include <functional>
@@ -34,4 +34,4 @@ class IPCM7 : public IPC {
 };
 }  // namespace coral::micro
 
-#endif  // __LIBS_BASE_IPC_M7_H__
+#endif  // LIBS_BASE_IPC_M7_H_

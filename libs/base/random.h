@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_RANDOM_H_
-#define _LIBS_BASE_RANDOM_H_
+#ifndef LIBS_BASE_RANDOM_H_
+#define LIBS_BASE_RANDOM_H_
 
 #include <cstddef>
 #include <functional>
@@ -41,4 +41,4 @@ class Random : public QueueTask<random::Request, random::Response,
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_RANDOM_H_
+#endif  // LIBS_BASE_RANDOM_H_

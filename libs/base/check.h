@@ -1,5 +1,5 @@
-#ifndef _LIBS_CHECK_H_
-#define _LIBS_CHECK_H_
+#ifndef LIBS_BASE_CHECK_H_
+#define LIBS_BASE_CHECK_H_
 
 #include <cstdio>
 
@@ -14,4 +14,4 @@
         }                                                                 \
     } while (0)
 
-#endif  // _LIBS_CHECK_H_
+#endif  // LIBS_BASE_CHECK_H_

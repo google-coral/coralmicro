@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_UTILS_H_
-#define _LIBS_BASE_UTILS_H_
+#ifndef LIBS_BASE_UTILS_H_
+#define LIBS_BASE_UTILS_H_
 
 #include <cstdint>
 #include <string>
@@ -34,4 +34,4 @@ bool GetWifiPSK(std::string* wifi_psk_out);
 }  // namespace utils
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_UTILS_H_
+#endif  // LIBS_BASE_UTILS_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_IPC_H_
-#define _LIBS_BASE_IPC_H_
+#ifndef LIBS_BASE_IPC_H_
+#define LIBS_BASE_IPC_H_
 
 #include <functional>
 
@@ -46,4 +46,4 @@ class IPC {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_IPC_H_
+#endif  // LIBS_BASE_IPC_H_

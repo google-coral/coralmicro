@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_MUTEX_H_
-#define _LIBS_BASE_MUTEX_H_
+#ifndef LIBS_BASE_MUTEX_H_
+#define LIBS_BASE_MUTEX_H_
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -64,4 +64,4 @@ class MulticoreMutexLock {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_MUTEX_H_
+#endif  // LIBS_BASE_MUTEX_H_

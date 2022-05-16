@@ -1,5 +1,5 @@
-#ifndef __LIBS_BASE_STRINGS_H__
-#define __LIBS_BASE_STRINGS_H__
+#ifndef LIBS_BASE_STRINGS_H_
+#define LIBS_BASE_STRINGS_H_
 
 #include <cstdio>
 #include <cstring>
@@ -35,4 +35,4 @@ void StrAppend(std::vector<uint8_t>* v, const char* format, T... args) {
 
 }  // namespace coral::micro
 
-#endif  // __LIBS_BASE_STRINGS_H__
+#endif  // LIBS_BASE_STRINGS_H_

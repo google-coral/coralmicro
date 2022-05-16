@@ -1,5 +1,5 @@
-#ifndef _APPS_ELFLOADER_ELF_LOADER_H_
-#define _APPS_ELFLOADER_ELF_LOADER_H_
+#ifndef APPS_ELFLOADER_ELF_LOADER_H_
+#define APPS_ELFLOADER_ELF_LOADER_H_
 
 #include "libs/usb/descriptors.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
@@ -50,4 +50,4 @@ extern usb_device_interface_list_t elfloader_interface_list[];
 extern usb_device_class_struct_t elfloader_class_struct;
 extern usb_device_class_config_struct_t elfloader_config_data;
 
-#endif  // _APPS_ELFLOADER_ELF_LOADER_H_
+#endif  // APPS_ELFLOADER_ELF_LOADER_H_

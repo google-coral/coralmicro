@@ -1,3 +1,6 @@
+#ifndef APPS_AUDIOSTREAMING_NETWORK_H_
+#define APPS_AUDIOSTREAMING_NETWORK_H_
+
 #include <cstddef>
 
 namespace coral::micro {
@@ -22,3 +25,5 @@ IOStatus WriteArray(int fd, const T* array, size_t array_size) {
 int SocketServer(int port, int backlog);
 
 }  // namespace coral::micro
+
+#endif  // APPS_AUDIOSTREAMING_NETWORK_H_

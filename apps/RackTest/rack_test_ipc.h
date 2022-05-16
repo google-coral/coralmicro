@@ -1,5 +1,5 @@
-#ifndef _APPS_RACKTEST_RACK_TEST_IPC_H_
-#define _APPS_RACKTEST_RACK_TEST_IPC_H_
+#ifndef APPS_RACKTEST_RACK_TEST_IPC_H_
+#define APPS_RACKTEST_RACK_TEST_IPC_H_
 
 #include "libs/base/message_buffer.h"
 
@@ -18,4 +18,4 @@ struct RackTestAppMessage {
 static_assert(sizeof(RackTestAppMessage) <= coral::micro::ipc::kMessageBufferDataSize);
 
 
-#endif  // _APPS_RACKTEST_RACK_TEST_IPC_H_
+#endif  // APPS_RACKTEST_RACK_TEST_IPC_H_

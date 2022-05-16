@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_FILESYSTEM_H_
-#define _LIBS_BASE_FILESYSTEM_H_
+#ifndef LIBS_BASE_FILESYSTEM_H_
+#define LIBS_BASE_FILESYSTEM_H_
 
 #include <cstdlib>
 #include <memory>
@@ -44,4 +44,4 @@ bool WriteFile(const char* path, const uint8_t* buf, size_t size);
 }  // namespace filesystem
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_FILESYSTEM_H_
+#endif  // LIBS_BASE_FILESYSTEM_H_

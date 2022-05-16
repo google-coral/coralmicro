@@ -1,5 +1,5 @@
-#ifndef _LIBS_TPU_EDGETPU_MANAGER_H_
-#define _LIBS_TPU_EDGETPU_MANAGER_H_
+#ifndef LIBS_TPU_EDGETPU_MANAGER_H_
+#define LIBS_TPU_EDGETPU_MANAGER_H_
 
 #include "libs/tpu/edgetpu_executable.h"
 #include "libs/tpu/executable_generated.h"
@@ -71,4 +71,4 @@ class EdgeTpuManager {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TPU_EDGETPU_MANAGER_H_
+#endif  // LIBS_TPU_EDGETPU_MANAGER_H_

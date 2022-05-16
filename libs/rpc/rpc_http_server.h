@@ -1,5 +1,5 @@
-#ifndef _LIBS_RPC_RPC_HTTP_SERVER_H_
-#define _LIBS_RPC_RPC_HTTP_SERVER_H_
+#ifndef LIBS_RPC_RPC_HTTP_SERVER_H_
+#define LIBS_RPC_RPC_HTTP_SERVER_H_
 
 #include <map>
 #include <vector>
@@ -34,4 +34,4 @@ class JsonRpcHttpServer : public coral::micro::HttpServer {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_RPC_RPC_HTTP_SERVER_H_
+#endif  // LIBS_RPC_RPC_HTTP_SERVER_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_PWM_H_
-#define _LIBS_BASE_PWM_H_
+#ifndef LIBS_BASE_PWM_H_
+#define LIBS_BASE_PWM_H_
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.h"
 
@@ -24,4 +24,4 @@ void Enable(const PwmModuleConfig& config, bool enable);
 }  // namespace pwm
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_PWM_H_
+#endif  // LIBS_BASE_PWM_H_

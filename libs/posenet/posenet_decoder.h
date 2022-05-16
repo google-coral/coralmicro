@@ -1,5 +1,5 @@
-#ifndef THIRD_PARTY_CORAL_LIBCORAL_CORAL_POSENET_POSENET_DECODER_H_
-#define THIRD_PARTY_CORAL_LIBCORAL_CORAL_POSENET_POSENET_DECODER_H_
+#ifndef LIBS_POSENET_POSENET_DECODER_H_
+#define LIBS_POSENET_POSENET_DECODER_H_
 
 #include <ostream>
 #include <queue>
@@ -215,4 +215,4 @@ int MatchEmbeddingToInstance(const int y_location, const int x_location,
 
 }  // namespace coral
 
-#endif  // THIRD_PARTY_CORAL_LIBCORAL_CORAL_POSENET_POSENET_DECODER_H_
+#endif  // LIBS_POSENET_POSENET_DECODER_H_

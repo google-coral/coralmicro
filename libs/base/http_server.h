@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_HTTP_SERVER_H_
-#define _LIBS_BASE_HTTP_SERVER_H_
+#ifndef LIBS_BASE_HTTP_SERVER_H_
+#define LIBS_BASE_HTTP_SERVER_H_
 
 #include <cstring>
 #include <functional>
@@ -91,4 +91,4 @@ void UseHttpServer(HttpServer* server);
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_HTTP_SERVER_H_
+#endif  // LIBS_BASE_HTTP_SERVER_H_

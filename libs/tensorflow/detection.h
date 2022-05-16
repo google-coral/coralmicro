@@ -1,5 +1,5 @@
-#ifndef _LIBS_TENSORFLOW_DETECTION_H_
-#define _LIBS_TENSORFLOW_DETECTION_H_
+#ifndef LIBS_TENSORFLOW_DETECTION_H_
+#define LIBS_TENSORFLOW_DETECTION_H_
 
 #include <limits>
 #include <vector>
@@ -36,4 +36,4 @@ std::vector<Object> GetDetectionResults(
 }  // namespace tensorflow
 }  // namespace coral::micro
 
-#endif  // _LIBS_TENSORFLOW_DETECTION_H_
+#endif  // LIBS_TENSORFLOW_DETECTION_H_

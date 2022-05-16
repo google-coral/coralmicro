@@ -1,5 +1,5 @@
-#ifndef __LIBS_BASE_IPC_M4_H__
-#define __LIBS_BASE_IPC_M4_H__
+#ifndef LIBS_BASE_IPC_M4_H_
+#define LIBS_BASE_IPC_M4_H_
 
 #include <functional>
 
@@ -20,4 +20,4 @@ class IPCM4 : public IPC {
 };
 }  // namespace coral::micro
 
-#endif  // __LIBS_BASE_IPC_M4_H__
+#endif  // LIBS_BASE_IPC_M4_H_

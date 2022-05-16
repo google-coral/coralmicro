@@ -1,5 +1,5 @@
-#ifndef _LIBS_TPU_EDGETPU_OP_H_
-#define _LIBS_TPU_EDGETPU_OP_H_
+#ifndef LIBS_TPU_EDGETPU_OP_H_
+#define LIBS_TPU_EDGETPU_OP_H_
 
 #include "tensorflow/lite/c/common.h"
 
@@ -11,4 +11,4 @@ TfLiteRegistration* RegisterCustomOp();
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TPU_EDGETPU_OP_H_
+#endif  // LIBS_TPU_EDGETPU_OP_H_

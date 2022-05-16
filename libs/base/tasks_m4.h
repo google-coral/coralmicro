@@ -1,5 +1,5 @@
-#ifndef __LIBS_BASE_TASKS_M4_H__
-#define __LIBS_BASE_TASKS_M4_H__
+#ifndef LIBS_BASE_TASKS_M4_H_
+#define LIBS_BASE_TASKS_M4_H_
 
 #include "libs/FreeRTOS/FreeRTOSConfig.h"
 
@@ -21,4 +21,4 @@ VALIDATE_TASK_PRIORITY(CAMERA_TASK_PRIORITY);
 VALIDATE_TASK_PRIORITY(PMIC_TASK_PRIORITY);
 #endif  // __cplusplus
 
-#endif  // __LIBS_BASE_TASKS_M4_H__
+#endif  // LIBS_BASE_TASKS_M4_H_

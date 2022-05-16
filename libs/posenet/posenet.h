@@ -1,5 +1,5 @@
-#ifndef _LIBS_POSENET_H_
-#define _LIBS_POSENET_H_
+#ifndef LIBS_POSENET_POSENET_H_
+#define LIBS_POSENET_POSENET_H_
 
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 #include <cstdint>
@@ -39,4 +39,4 @@ TfLiteTensor* input();
 }  // namespace posenet
 }  // namespace coral::micro
 
-#endif  // _LIBS_POSENET_H_
+#endif  // LIBS_POSENET_POSENET_H_

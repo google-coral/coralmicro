@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_RESET_H_
-#define _LIBS_BASE_RESET_H_
+#ifndef LIBS_BASE_RESET_H_
+#define LIBS_BASE_RESET_H_
 
 namespace coral::micro {
 
@@ -7,4 +7,4 @@ void ResetToBootloader();
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_RESET_H_
+#endif  // LIBS_BASE_RESET_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_CURL_CURL_CONFIG_H_
-#define _LIBS_CURL_CURL_CONFIG_H_
+#ifndef LIBS_CURL_CURL_CONFIG_H_
+#define LIBS_CURL_CURL_CONFIG_H_
 
 #define HAVE_ARPA_INET_H 1
 #define HAVE_NETDB_H 1
@@ -59,4 +59,4 @@
 
 #define CURL_CA_BUNDLE "/ca-certificates.crt"
 
-#endif  // _LIBS_CURL_CURL_CONFIG_H_
+#endif  // LIBS_CURL_CURL_CONFIG_H_

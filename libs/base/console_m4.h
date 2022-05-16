@@ -1,5 +1,5 @@
-#ifndef __LIBS_CONSOLE_CONSOLE_M4_H__
-#define __LIBS_CONSOLE_CONSOLE_M4_H__
+#ifndef LIBS_BASE_CONSOLE_M4_H_
+#define LIBS_BASE_CONSOLE_M4_H_
 
 #include "libs/base/message_buffer.h"
 
@@ -10,4 +10,4 @@ void SetM4ConsoleBufferPtr(ipc::StreamBuffer* buffer);
 
 }  // namespace coral::micro
 
-#endif  // __LIBS_CONSOLE_CONSOLE_M4_H__
+#endif  // LIBS_BASE_CONSOLE_M4_H_

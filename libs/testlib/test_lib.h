@@ -1,5 +1,5 @@
-#ifndef _LIBS_TESTLIB_TEST_LIB_H_
-#define _LIBS_TESTLIB_TEST_LIB_H_
+#ifndef LIBS_TESTLIB_TEST_LIB_H_
+#define LIBS_TESTLIB_TEST_LIB_H_
 
 #include <string>
 #include <vector>
@@ -51,4 +51,4 @@ void WifiScan(struct jsonrpc_request* request);
 
 }  // namespace coral::micro::testlib
 
-#endif  // _LIBS_TESTLIB_TEST_LIB_H_
+#endif  // LIBS_TESTLIB_TEST_LIB_H_

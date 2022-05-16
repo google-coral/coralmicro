@@ -1,5 +1,5 @@
-#ifndef __LIBS_CONSOLE_CONSOLE_M7_H__
-#define __LIBS_CONSOLE_CONSOLE_M7_H__
+#ifndef LIBS_BASE_CONSOLE_M7_H_
+#define LIBS_BASE_CONSOLE_M7_H_
 
 #include <array>
 
@@ -74,4 +74,4 @@ class ConsoleM7 {
 
 }  // namespace coral::micro
 
-#endif  // __LIBS_CONSOLE_CONSOLE_M7_H__
+#endif  // LIBS_BASE_CONSOLE_M7_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_LED_H_
-#define _LIBS_BASE_LED_H_
+#ifndef LIBS_BASE_LED_H_
+#define LIBS_BASE_LED_H_
 
 namespace coral::micro {
 namespace led {
@@ -19,4 +19,4 @@ bool Set(LED led, bool enable, unsigned int brightness);
 }  // namespace led
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_LED_H_
+#endif  // LIBS_BASE_LED_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_TENSORFLOW_CLASSIFICATION_H_
-#define _LIBS_TENSORFLOW_CLASSIFICATION_H_
+#ifndef LIBS_TENSORFLOW_CLASSIFICATION_H_
+#define LIBS_TENSORFLOW_CLASSIFICATION_H_
 
 #include <limits>
 #include <vector>
@@ -31,4 +31,4 @@ bool ClassificationPreprocess(TfLiteTensor* input_tensor);
 }  // namespace tensorflow
 }  // namespace coral::micro
 
-#endif  // _LIBS_TENSORFLOW_CLASSIFICATION_H_
+#endif  // LIBS_TENSORFLOW_CLASSIFICATION_H_

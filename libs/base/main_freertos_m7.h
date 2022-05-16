@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_MAIN_FREERTOS_M7_H_
-#define _LIBS_BASE_MAIN_FREERTOS_M7_H_
+#ifndef LIBS_BASE_MAIN_FREERTOS_M7_H_
+#define LIBS_BASE_MAIN_FREERTOS_M7_H_
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
@@ -15,4 +15,4 @@ lpi2c_rtos_handle_t* I2C5Handle();
 }
 #endif
 
-#endif  // _LIBS_BASE_MAIN_FREERTOS_M7_H_
+#endif  // LIBS_BASE_MAIN_FREERTOS_M7_H_

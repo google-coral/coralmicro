@@ -1,5 +1,5 @@
-#ifndef __LIBS_BASE_TASKS_H_
-#define __LIBS_BASE_TASKS_H_
+#ifndef LIBS_BASE_TASKS_H_
+#define LIBS_BASE_TASKS_H_
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/fsl_device_registers.h"
 
@@ -11,4 +11,4 @@
 #error "__CORTEX_M not defined"
 #endif
 
-#endif  // __LIBS_BASE_TASKS_H_
+#endif  // LIBS_BASE_TASKS_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_GPIO_H_
-#define _LIBS_BASE_GPIO_H_
+#ifndef LIBS_BASE_GPIO_H_
+#define LIBS_BASE_GPIO_H_
 
 #include <functional>
 
@@ -53,4 +53,4 @@ void RegisterIRQHandler(Gpio gpio, GpioCallback cb);
 }  // namespace gpio
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_GPIO_H_
+#endif  // LIBS_BASE_GPIO_H_

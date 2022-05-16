@@ -1,5 +1,5 @@
-#ifndef _LIBS_YAMNET_H_
-#define _LIBS_YAMNET_H_
+#ifndef LIBS_YAMNET_YAMNET_H_
+#define LIBS_YAMNET_YAMNET_H_
 
 #include <vector>
 #include "libs/tensorflow/classification.h"
@@ -14,4 +14,4 @@ namespace yamnet {
 } // namespace yamnet
 } // namespace coral::micro
 
-#endif  // _LIBS_YAMNET_H_
+#endif  // LIBS_YAMNET_YAMNET_H_

@@ -1,5 +1,5 @@
-#ifndef _LIBS_BASE_ANALOG_H_
-#define _LIBS_BASE_ANALOG_H_
+#ifndef LIBS_BASE_ANALOG_H_
+#define LIBS_BASE_ANALOG_H_
 
 #include <cstdint>
 
@@ -36,4 +36,4 @@ void WriteDAC(uint16_t counts);
 }  // namespace analog
 }  // namespace coral::micro
 
-#endif  // _LIBS_BASE_ANALOG_H_
+#endif  // LIBS_BASE_ANALOG_H_

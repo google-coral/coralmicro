@@ -1,5 +1,5 @@
-#ifndef _LIBS_TENSORFLOW_UTILS_H_
-#define _LIBS_TENSORFLOW_UTILS_H_
+#ifndef LIBS_TENSORFLOW_UTILS_H_
+#define LIBS_TENSORFLOW_UTILS_H_
 
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
@@ -73,4 +73,4 @@ std::vector<T> DequantizeTensor(TfLiteTensor* tensor) {
 }  // namespace tensorflow
 }  // namespace coral::micro
 
-#endif  // _LIBS_TENSORFLOW_UTILS_H_
+#endif  // LIBS_TENSORFLOW_UTILS_H_
