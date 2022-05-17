@@ -24,15 +24,13 @@ usb_status_t EdgeTpuTask::USBHostEvent(
             usb_device_handle device_handle,
             usb_host_configuration_handle config_handle,
             uint32_t event_code) {
-    uint8_t id;
     usb_host_configuration_t *configuration_ptr;
-    usb_host_interface_t *interface_ptr;
     switch (event_code & 0xFFFF) {
         case kUSB_HostEventAttach:
-            configuration_ptr = (usb_host_configuration_t*)config_handle;
+            configuration_ptr = reinterpret_cast<usb_host_configuration_t*>(config_handle);
             for (unsigned int i = 0; i < configuration_ptr->interfaceCount; ++i) {
-                interface_ptr = &configuration_ptr->interfaceList[i];
-                id = interface_ptr->interfaceDesc->bInterfaceClass;
+                auto* interface_ptr = &configuration_ptr->interfaceList[i];
+                uint8_t id = interface_ptr->interfaceDesc->bInterfaceClass;
 
                 if (id != USB_HOST_EDGETPU_CLASS_CODE) {
                     continue;
@@ -62,7 +60,7 @@ usb_status_t EdgeTpuTask::USBHostEvent(
 }
 
 void EdgeTpuTask::SetInterfaceCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status) {
-    EdgeTpuTask *task = (EdgeTpuTask*)param;
+    auto *task = static_cast<EdgeTpuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in EdgeTpuSetInterface\r\n");
         task->SetNextState(EDGETPU_STATE_ERROR);
@@ -72,7 +70,7 @@ void EdgeTpuTask::SetInterfaceCallback(void *param, uint8_t *data, uint32_t data
 }
 
 void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status) {
-    EdgeTpuTask *task = (EdgeTpuTask*)param;
+    auto *task = static_cast<EdgeTpuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in EdgeTpuGetStatus\r\n");
         task->SetNextState(EDGETPU_STATE_ERROR);
@@ -145,7 +143,7 @@ void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
                 SetNextState(EDGETPU_STATE_ERROR);
             }
             // Thunderchild notifies EdgeTpuManager that it's connected. Should this be in callback?
-            EdgeTpuManager::GetSingleton()->NotifyConnected((usb_host_edgetpu_instance_t*)class_handle());
+            EdgeTpuManager::GetSingleton()->NotifyConnected(reinterpret_cast<usb_host_edgetpu_instance_t*>(class_handle()));
             break;
         case EDGETPU_STATE_GET_STATUS:
             ret = USB_HostEdgeTpuGetStatus(class_handle(), &status_, GetStatusCallback, this);
@@ -154,7 +152,7 @@ void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
             }
             break;
         // case EDGETPU_STATE_CONNECTED:
-        //     EdgeTpuManager::GetSingleton()->NotifyConnected((usb_host_edgetpu_instance_t*)class_handle());
+        //     EdgeTpuManager::GetSingleton()->NotifyConnected(reinterpret_cast<usb_host_edgetpu_instance_t*>(class_handle()));
         //     break;
         case EDGETPU_STATE_ERROR:
             printf("EdgeTPU error\r\n");
