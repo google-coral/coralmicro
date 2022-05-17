@@ -44,99 +44,6 @@ SemaphoreHandle_t posenet_output_mtx;
 std::unique_ptr<coral::micro::posenet::Output> posenet_output;
 TickType_t posenet_output_time;
 
-std::vector<uint8_t> CreatePoseJson(const posenet::Output& output,
-                                    float threshold) {
-    std::vector<uint8_t> s;
-    s.reserve(2048);
-
-    int num_appended_poses = 0;
-    StrAppend(&s, "[");
-    for (int i = 0; i < output.num_poses; ++i) {
-        if (output.poses[i].score < threshold) continue;
-
-        StrAppend(&s, num_appended_poses != 0 ? ",\n" : "");
-        StrAppend(&s, "{\n");
-        StrAppend(&s, "  \"score\": %g,\n", output.poses[i].score);
-        StrAppend(&s, "  \"keypoints\": [\n");
-        for (int j = 0; j < posenet::kKeypoints; ++j) {
-            const auto& kp = output.poses[i].keypoints[j];
-            StrAppend(&s, "    [%g, %g, %g]", kp.score, kp.x, kp.y);
-            StrAppend(&s, j != posenet::kKeypoints - 1 ? ",\n" : "\n");
-        }
-        StrAppend(&s, "  ]\n");
-        StrAppend(&s, "}");
-        ++num_appended_poses;
-    }
-    StrAppend(&s, "]");
-    return s;
-}
-
-void GenerateStatsHtml(std::vector<uint8_t>* html) {
-    std::vector<TaskStatus_t> infos(uxTaskGetNumberOfTasks());
-    uint32_t total_runtime;
-    auto n = uxTaskGetSystemState(infos.data(), infos.size(), &total_runtime);
-    std::vector<int> indices(infos.size());
-    std::iota(std::begin(indices), std::end(indices), 0);
-    std::sort(std::begin(indices), std::end(indices), [&infos](int i, int j) {
-        return infos[i].ulRunTimeCounter > infos[j].ulRunTimeCounter;
-    });
-
-    StrAppend(html, "<!DOCTYPE html>\r\n");
-    StrAppend(html, "<html lang=\"en\">\r\n");
-    StrAppend(html, "<head>\r\n"),
-        StrAppend(html, "<title>Run-time statistics</title>\r\n"),
-        StrAppend(html, "  <style>\r\n"),
-        StrAppend(html, "    th,td {padding: 2px;}\r\n"),
-        StrAppend(html, "  </style>\r\n"), StrAppend(html, "</head>\r\n"),
-        StrAppend(html, "<body>\r\n");
-    StrAppend(html, "  <table>\r\n");
-    StrAppend(html,
-              "    <tr><th>Task</th><th>Abs Time</th><th>% Time</th></tr>\r\n");
-    for (auto i = 0u; i < n; ++i) {
-        const auto& info = infos[indices[i]];
-        auto name = info.pcTaskName;
-        auto runtime = info.ulRunTimeCounter;
-        float percent = static_cast<float>(runtime) / (total_runtime / 100.0);
-        coral::micro::StrAppend(
-            html, "    <tr><td>%s</td><td>%lu</td><td>%.1f%%</td></tr>\r\n", name,
-            runtime, percent);
-    }
-    StrAppend(html, "  </table>\r\n");
-    StrAppend(html, "</body>\r\n");
-}
-
-HttpServer::Content UriHandler(const char* name) {
-    if (std::strcmp(name, "/stats.html") == 0) {
-        std::vector<uint8_t> html;
-        html.reserve(2048);
-        GenerateStatsHtml(&html);
-        return html;
-    }
-
-    if (std::strcmp(name, "/camera") == 0) {
-        coral::micro::MutexLock lock(camera_output_mtx);
-        if (camera_output.empty()) return {};
-        return coral::micro::HttpServer::Content{std::move(camera_output)};
-    }
-
-    if (std::strcmp(name, "/pose") == 0) {
-        coral::micro::MutexLock lock(posenet_output_mtx);
-        if (!posenet_output) return {};
-        auto json = CreatePoseJson(*posenet_output, kThreshold);
-        posenet_output.reset();
-        return json;
-    }
-
-    return {};
-}
-
-void HandleAppMessage(
-    const uint8_t data[coral::micro::ipc::kMessageBufferDataSize],
-    void* param) {
-    (void)data;
-    vTaskResume(reinterpret_cast<TaskHandle_t>(param));
-}
-
 struct TaskMessage {
     int command;
     SemaphoreHandle_t completion_semaphore;
@@ -161,8 +68,7 @@ class OOBETask {
 
    private:
     static void StaticTaskFunc(void* param) {
-        auto thiz = reinterpret_cast<OOBETask*>(param);
-        thiz->TaskFunc();
+        static_cast<OOBETask*>(param)->TaskFunc();
     }
 
     void SendCommandBlocking(int command) {
@@ -331,6 +237,99 @@ void Main() {
     vTaskSuspend(nullptr);
 }
 #else
+std::vector<uint8_t> CreatePoseJson(const posenet::Output& output,
+                                    float threshold) {
+    std::vector<uint8_t> s;
+    s.reserve(2048);
+
+    int num_appended_poses = 0;
+    StrAppend(&s, "[");
+    for (int i = 0; i < output.num_poses; ++i) {
+        if (output.poses[i].score < threshold) continue;
+
+        StrAppend(&s, num_appended_poses != 0 ? ",\n" : "");
+        StrAppend(&s, "{\n");
+        StrAppend(&s, "  \"score\": %g,\n", output.poses[i].score);
+        StrAppend(&s, "  \"keypoints\": [\n");
+        for (int j = 0; j < posenet::kKeypoints; ++j) {
+            const auto& kp = output.poses[i].keypoints[j];
+            StrAppend(&s, "    [%g, %g, %g]", kp.score, kp.x, kp.y);
+            StrAppend(&s, j != posenet::kKeypoints - 1 ? ",\n" : "\n");
+        }
+        StrAppend(&s, "  ]\n");
+        StrAppend(&s, "}");
+        ++num_appended_poses;
+    }
+    StrAppend(&s, "]");
+    return s;
+}
+
+void GenerateStatsHtml(std::vector<uint8_t>* html) {
+    std::vector<TaskStatus_t> infos(uxTaskGetNumberOfTasks());
+    uint32_t total_runtime;
+    auto n = uxTaskGetSystemState(infos.data(), infos.size(), &total_runtime);
+    std::vector<int> indices(infos.size());
+    std::iota(std::begin(indices), std::end(indices), 0);
+    std::sort(std::begin(indices), std::end(indices), [&infos](int i, int j) {
+        return infos[i].ulRunTimeCounter > infos[j].ulRunTimeCounter;
+    });
+
+    StrAppend(html, "<!DOCTYPE html>\r\n");
+    StrAppend(html, "<html lang=\"en\">\r\n");
+    StrAppend(html, "<head>\r\n"),
+        StrAppend(html, "<title>Run-time statistics</title>\r\n"),
+        StrAppend(html, "  <style>\r\n"),
+        StrAppend(html, "    th,td {padding: 2px;}\r\n"),
+        StrAppend(html, "  </style>\r\n"), StrAppend(html, "</head>\r\n"),
+        StrAppend(html, "<body>\r\n");
+    StrAppend(html, "  <table>\r\n");
+    StrAppend(html,
+              "    <tr><th>Task</th><th>Abs Time</th><th>% Time</th></tr>\r\n");
+    for (auto i = 0u; i < n; ++i) {
+        const auto& info = infos[indices[i]];
+        auto name = info.pcTaskName;
+        auto runtime = info.ulRunTimeCounter;
+        float percent = static_cast<float>(runtime) / (total_runtime / 100.0);
+        coral::micro::StrAppend(
+            html, "    <tr><td>%s</td><td>%lu</td><td>%.1f%%</td></tr>\r\n", name,
+            runtime, percent);
+    }
+    StrAppend(html, "  </table>\r\n");
+    StrAppend(html, "</body>\r\n");
+}
+
+HttpServer::Content UriHandler(const char* name) {
+    if (std::strcmp(name, "/stats.html") == 0) {
+        std::vector<uint8_t> html;
+        html.reserve(2048);
+        GenerateStatsHtml(&html);
+        return html;
+    }
+
+    if (std::strcmp(name, "/camera") == 0) {
+        coral::micro::MutexLock lock(camera_output_mtx);
+        if (camera_output.empty()) return {};
+        return coral::micro::HttpServer::Content{std::move(camera_output)};
+    }
+
+    if (std::strcmp(name, "/pose") == 0) {
+        coral::micro::MutexLock lock(posenet_output_mtx);
+        if (!posenet_output) return {};
+        auto json = CreatePoseJson(*posenet_output, kThreshold);
+        posenet_output.reset();
+        return json;
+    }
+
+    return {};
+}
+
+void HandleAppMessage(
+    const uint8_t data[coral::micro::ipc::kMessageBufferDataSize],
+    void* param) {
+    (void)data;
+    vTaskResume(static_cast<TaskHandle_t>(param));
+}
+
 void Main() {
     PosenetTask posenet_task;
     CameraTask camera_task(&posenet_task);
