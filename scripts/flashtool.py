@@ -550,7 +550,7 @@ def main():
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     parser = argparse.ArgumentParser(description='Coral Dev Board Micro flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--build_dir', type=str, required=True)
+    parser.add_argument('--build_dir', '-b', type=str, required=True)
     parser.add_argument('--subapp', type=str, required=False)
     parser.add_argument('--ram', dest='ram', action='store_true')
     parser.add_argument('--noram', dest='ram', action='store_false')
@@ -571,8 +571,8 @@ def main():
     parser.add_argument('--cached', dest='cached', action='store_true')
 
     app_elf_group = parser.add_mutually_exclusive_group(required=True)
-    app_elf_group.add_argument('--app', type=str)
-    app_elf_group.add_argument('--example', type=str)
+    app_elf_group.add_argument('--app', '-a', type=str)
+    app_elf_group.add_argument('--example', '-e', type=str)
     app_elf_group.add_argument('--elf_path', type=str)
 
     args = parser.parse_args()
