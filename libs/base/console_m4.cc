@@ -6,7 +6,9 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 
-static coral::micro::ipc::StreamBuffer* console_buffer = nullptr;
+namespace {
+coral::micro::ipc::StreamBuffer* console_buffer = nullptr;
+}  // namespace
 
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
 extern "C" int _write(int handle, char* buffer, int size) {

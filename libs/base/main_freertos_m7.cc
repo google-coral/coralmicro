@@ -26,14 +26,13 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_sema4.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
-using namespace std::placeholders;
 
-static lpi2c_rtos_handle_t i2c5_handle;
-static coral::micro::CdcEem cdc_eem;
-
-extern "C" lpi2c_rtos_handle_t* I2C5Handle() { return &i2c5_handle; }
+namespace {
+lpi2c_rtos_handle_t i2c5_handle;
+coral::micro::CdcEem cdc_eem;
 
 void InitializeCDCEEM() {
+    using namespace std::placeholders;
     cdc_eem.Init(
         coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
         coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
@@ -44,6 +43,9 @@ void InitializeCDCEEM() {
         std::bind(&coral::micro::CdcEem::HandleEvent, &cdc_eem, _1, _2),
         cdc_eem.descriptor_data(), cdc_eem.descriptor_data_size());
 }
+}  // namespace
+
+extern "C" lpi2c_rtos_handle_t* I2C5Handle() { return &i2c5_handle; }
 
 extern "C" void app_main(void* param);
 extern "C" int main(int argc, char** argv) __attribute__((weak));
@@ -65,7 +67,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
                                                   init_console_rx);
     CHECK(coral::micro::filesystem::Init());
     // Make sure this happens before EEM or WICED are initialized.
-    tcpip_init(NULL, NULL);
+    tcpip_init(nullptr, nullptr);
     InitializeCDCEEM();
     coral::micro::UsbDeviceTask::GetSingleton()->Init();
     coral::micro::UsbHostTask::GetSingleton()->Init();
@@ -85,8 +87,8 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
     coral::micro::CameraTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
-    CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30, NULL,
-                      APP_TASK_PRIORITY, NULL) == pdPASS);
+    CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30,
+                      nullptr, APP_TASK_PRIORITY, nullptr) == pdPASS);
 
     vTaskStartScheduler();
     return 0;

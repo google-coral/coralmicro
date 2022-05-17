@@ -6,16 +6,10 @@
 
 namespace coral::micro {
 namespace timer {
-
+namespace {
 // Number of times the microseconds counter has rolled over.
-static uint32_t micros_rollover = 0;
-
-extern "C" void GPT1_IRQHandler(void) {
-    if (GPT_GetStatusFlags(GPT1, kGPT_RollOverFlag)) {
-        GPT_ClearStatusFlags(GPT1, kGPT_RollOverFlag);
-        micros_rollover++;
-    }
-}
+uint32_t micros_rollover = 0;
+} // namespace
 
 void Init() {
     gpt_config_t gpt_config;
@@ -44,6 +38,13 @@ uint32_t micros() { return GPT_GetCurrentTimerCount(GPT1); }
 }  // namespace timer
 }  // namespace coral::micro
 
-extern "C" uint32_t vPortGetRunTimeCounterValue(void) {
+extern "C" void GPT1_IRQHandler() {
+    if (GPT_GetStatusFlags(GPT1, kGPT_RollOverFlag)) {
+        GPT_ClearStatusFlags(GPT1, kGPT_RollOverFlag);
+        coral::micro::timer::micros_rollover++;
+    }
+}
+
+extern "C" uint32_t vPortGetRunTimeCounterValue() {
     return coral::micro::timer::micros();
 }

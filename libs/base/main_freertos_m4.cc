@@ -14,13 +14,16 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
-lpi2c_rtos_handle_t i2c5_handle;
 extern "C" [[noreturn]] void app_main(void* param);
+
+namespace {
+lpi2c_rtos_handle_t i2c5_handle;
 
 void pre_app_main(void* param) {
     coral::micro::IPCM4::GetSingleton()->Init();
     app_main(param);
 }
+}  // namespace
 
 extern "C" int main(int argc, char** argv) __attribute__((weak));
 extern "C" int main(int argc, char** argv) {

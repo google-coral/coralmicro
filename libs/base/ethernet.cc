@@ -11,17 +11,18 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 
 namespace coral::micro {
-
-static struct netif netif;
+namespace {
+struct netif netif;
 struct netif* eth_netif = nullptr;
-static mdio_handle_t mdioHandle = {
+mdio_handle_t mdioHandle = {
     .ops = &enet_ops,
 };
-static phy_handle_t phyHandle = {
+phy_handle_t phyHandle = {
     .phyAddr = 1,
     .mdioHandle = &mdioHandle,
     .ops = &phyrtl8211f_ops,
 };
+}  // namespace
 
 struct netif* GetEthernetInterface() { return eth_netif; }
 
