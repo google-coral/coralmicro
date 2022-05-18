@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "apps/HelloTensorflowFreeRTOS/hello_world_model.h"
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/peripherals.h"
@@ -8,18 +10,17 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-#include <cstdio>
-
-extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask,
+                                              char* pcTaskName) {
     printf("Stack overflow in %s\r\n", pcTaskName);
 }
 
 namespace {
-tflite::ErrorReporter *error_reporter = nullptr;
-const tflite::Model *model = nullptr;
-tflite::MicroInterpreter *interpreter = nullptr;
-TfLiteTensor *input = nullptr;
-TfLiteTensor *output = nullptr;
+tflite::ErrorReporter* error_reporter = nullptr;
+const tflite::Model* model = nullptr;
+tflite::MicroInterpreter* interpreter = nullptr;
+TfLiteTensor* input = nullptr;
+TfLiteTensor* output = nullptr;
 
 int inference_count = 0;
 const int kInferencesPerCycle = 1000;
@@ -41,22 +42,22 @@ static void loop() {
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
         TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed on x_val: %f",
-                static_cast<double>(x_val));
+                             static_cast<double>(x_val));
         return;
     }
 
     float y_val = output->data.f[0];
 
     TF_LITE_REPORT_ERROR(error_reporter, "x_val: %f y_val: %f",
-        static_cast<double>(x_val),
-        static_cast<double>(y_val));
+                         static_cast<double>(x_val),
+                         static_cast<double>(y_val));
 
     ++inference_count;
     if (inference_count >= kInferencesPerCycle) {
         inference_count = 0;
     }
 }
-static void hello_task(void *param) {
+static void hello_task(void* param) {
     printf("Starting inference task...\r\n");
     while (true) {
         loop();
@@ -64,7 +65,7 @@ static void hello_task(void *param) {
     }
 }
 
-extern "C" void app_main(void *param) {
+extern "C" void app_main(void* param) {
     static tflite::MicroErrorReporter micro_error_reporter;
     error_reporter = &micro_error_reporter;
     TF_LITE_REPORT_ERROR(error_reporter, "HelloTensorflowFreeRTOS!");
@@ -72,8 +73,8 @@ extern "C" void app_main(void *param) {
     model = tflite::GetModel(g_model);
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
-            "Model schema version is %d, supported is %d",
-            model->version(), TFLITE_SCHEMA_VERSION);
+                             "Model schema version is %d, supported is %d",
+                             model->version(), TFLITE_SCHEMA_VERSION);
         vTaskSuspend(nullptr);
     }
 
@@ -97,7 +98,8 @@ extern "C" void app_main(void *param) {
     int ret;
     // High water mark testing showed that this task consumes about 218 words.
     // Set our stack size sufficiently large to accomodate.
-    ret = xTaskCreate(hello_task, "HelloTask", configMINIMAL_STACK_SIZE * 3, nullptr, configMAX_PRIORITIES - 1, nullptr);
+    ret = xTaskCreate(hello_task, "HelloTask", configMINIMAL_STACK_SIZE * 3,
+                      nullptr, configMAX_PRIORITIES - 1, nullptr);
     if (ret != pdPASS) {
         printf("Failed to start HelloTask\r\n");
     }
