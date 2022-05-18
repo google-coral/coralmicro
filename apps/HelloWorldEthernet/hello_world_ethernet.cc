@@ -1,10 +1,11 @@
+#include <cstdio>
+
 #include "libs/base/ethernet.h"
 #include "libs/base/gpio.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/dns.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
-#include <cstdio>
 
 /* clang-format off */
 #include "libs/curl/curl.h"
@@ -15,13 +16,14 @@ struct DnsCallbackArg {
     ip_addr_t ip_addr;
 };
 
-static size_t curl_writefunction(void* contents, size_t size, size_t nmemb, void* param) {
+static size_t curl_writefunction(void* contents, size_t size, size_t nmemb,
+                                 void* param) {
     size_t* bytes_curled = reinterpret_cast<size_t*>(param);
     *bytes_curled = *bytes_curled + (size * nmemb);
     return size * nmemb;
 }
 
-static void CURLRequest(const char *url) {
+static void CURLRequest(const char* url) {
     CURL* curl;
     CURLcode res;
 
@@ -38,23 +40,24 @@ static void CURLRequest(const char *url) {
         if (res != CURLE_OK) {
             printf("curl_easy_perform failed: %s\r\n", curl_easy_strerror(res));
         } else {
-            printf("Curling of %s successful! (%d bytes curled)\r\n", url, bytes_curled);
+            printf("Curling of %s successful! (%d bytes curled)\r\n", url,
+                   bytes_curled);
         }
         curl_easy_cleanup(curl);
     }
 }
 
-extern "C" void app_main(void *param) {
+extern "C" void app_main(void* param) {
     printf("Hello world Ethernet.\r\n");
 
     coral::micro::InitializeEthernet(true);
 
-    struct netif *ethernet = coral::micro::GetEthernetInterface();
+    struct netif* ethernet = coral::micro::GetEthernetInterface();
 
     printf("Waiting on DHCP...\r\n");
     while (true) {
         if (netif_is_up(ethernet)) {
-            struct dhcp *dhcp = netif_dhcp_data(ethernet);
+            struct dhcp* dhcp = netif_dhcp_data(ethernet);
             if (dhcp->state == DHCP_STATE_BOUND) {
                 break;
             }
@@ -66,15 +69,17 @@ extern "C" void app_main(void *param) {
     DnsCallbackArg dns_arg;
     dns_arg.sema = xSemaphoreCreateBinary();
     LOCK_TCPIP_CORE();
-    dns_gethostbyname("google.com", &dns_arg.ip_addr,
-        [](const char *name, const ip_addr_t *ipaddr, void *callback_arg) {
-            DnsCallbackArg* dns_arg = reinterpret_cast<DnsCallbackArg*>(callback_arg);
+    dns_gethostbyname(
+        "google.com", &dns_arg.ip_addr,
+        [](const char* name, const ip_addr_t* ipaddr, void* callback_arg) {
+            DnsCallbackArg* dns_arg =
+                reinterpret_cast<DnsCallbackArg*>(callback_arg);
             if (ipaddr) {
                 memcpy(&dns_arg->ip_addr, ipaddr, sizeof(ipaddr));
             }
             xSemaphoreGive(dns_arg->sema);
         },
-    &dns_arg);
+        &dns_arg);
     UNLOCK_TCPIP_CORE();
     xSemaphoreTake(dns_arg.sema, portMAX_DELAY);
     vSemaphoreDelete(dns_arg.sema);
