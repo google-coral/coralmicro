@@ -7,59 +7,10 @@
 
 namespace coral::micro {
 namespace gpio {
-static void IRQHandler(GPIO_Type* gpio, uint32_t pin);
-}  // namespace gpio
-}  // namespace coral::micro
-
-extern "C" void GPIO13_Combined_0_31_IRQHandler() {
-    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO13);
-    GPIO_PortClearInterruptFlags(GPIO13, pins);
-    int i = 0;
-    while (pins) {
-        if (pins & 1) {
-            coral::micro::gpio::IRQHandler(GPIO13, i);
-        }
-        ++i;
-        pins = pins >> 1;
-    }
-    SDK_ISR_EXIT_BARRIER;
-}
-
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-extern "C" void GPIO6_Combined_0_15_IRQHandler() {
-    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO6);
-    GPIO_PortClearInterruptFlags(GPIO6, pins);
-    int i = 0;
-    while (pins) {
-        if (pins & 1) {
-            coral::micro::gpio::IRQHandler(GPIO6, i);
-        }
-        ++i;
-        pins = pins >> 1;
-    }
-    SDK_ISR_EXIT_BARRIER;
-}
-
-extern "C" void GPIO2_Combined_0_15_IRQHandler() {
-    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO2);
-    GPIO_PortClearInterruptFlags(GPIO2, pins);
-    int i = 0;
-    while (pins) {
-        if (pins & 1) {
-            coral::micro::gpio::IRQHandler(GPIO2, i);
-        }
-        ++i;
-        pins = pins >> 1;
-    }
-    SDK_ISR_EXIT_BARRIER;
-}
-#endif
-
-namespace coral::micro {
-namespace gpio {
 namespace {
-SemaphoreHandle_t gpio_semaphore;
-StaticSemaphore_t gpio_semaphore_static;
+StaticSemaphore_t g_mutex_storage;
+SemaphoreHandle_t g_mutex;
+
 GPIO_Type* PinNameToModule[Gpio::kCount] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = GPIO6,
@@ -84,7 +35,7 @@ GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kCryptoRst] = GPIO12,
 };
 
-uint32_t PinNameToPin[Gpio::kCount] = {
+constexpr uint32_t PinNameToPin[Gpio::kCount] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 7,
     [Gpio::kArduinoD1] = 11,
@@ -208,7 +159,7 @@ gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
     },
 };
 
-IRQn_Type PinNameToIRQ[Gpio::kCount] = {
+constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = GPIO6_Combined_0_15_IRQn,
     [Gpio::kArduinoD1] = GPIO2_Combined_0_15_IRQn,
@@ -232,7 +183,7 @@ IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kCryptoRst] = HardFault_IRQn,
 };
 
-uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
+constexpr uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = {IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07},
     [Gpio::kArduinoD1] = {IOMUXC_GPIO_EMC_B2_01_GPIO_MUX2_IO11},
@@ -256,7 +207,7 @@ uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
     [Gpio::kCryptoRst] = {IOMUXC_GPIO_LPSR_08_GPIO12_IO08},
 };
 
-uint32_t PinNameToPullMask[Gpio::kCount] = {
+constexpr uint32_t PinNameToPullMask[Gpio::kCount] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x0000000C,
     [Gpio::kArduinoD1] = 0x0000000C,
@@ -274,7 +225,7 @@ uint32_t PinNameToPullMask[Gpio::kCount] = {
     [Gpio::kAntennaSelect] = 0x0000000C,
 };
 
-uint32_t PinNameToNoPull[Gpio::kCount] = {
+constexpr uint32_t PinNameToNoPull[Gpio::kCount] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x00000000,
     [Gpio::kArduinoD1] = 0x0000000C,
@@ -292,7 +243,7 @@ uint32_t PinNameToNoPull[Gpio::kCount] = {
     [Gpio::kAntennaSelect] = 0x00000000,
 };
 
-uint32_t PinNameToPullUp[Gpio::kCount] = {
+constexpr uint32_t PinNameToPullUp[Gpio::kCount] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x0000000C,
     [Gpio::kArduinoD1] = 0x00000004,
@@ -310,7 +261,7 @@ uint32_t PinNameToPullUp[Gpio::kCount] = {
     [Gpio::kAntennaSelect] = 0x0000000C,
 };
 
-uint32_t PinNameToPullDown[Gpio::kCount] = {
+constexpr uint32_t PinNameToPullDown[Gpio::kCount] = {
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
     [Gpio::kArduinoD0] = 0x00000004,
     [Gpio::kArduinoD1] = 0x00000008,
@@ -328,7 +279,7 @@ uint32_t PinNameToPullDown[Gpio::kCount] = {
     [Gpio::kAntennaSelect] = 0x00000004,
 };
 
-gpio_interrupt_mode_t InterruptModeToGpioIntMode[InterruptMode::kIntModeCount] = {
+constexpr gpio_interrupt_mode_t InterruptModeToGpioIntMode[InterruptMode::kIntModeCount] = {
     [InterruptMode::kIntModeNone] = kGPIO_NoIntmode,
     [InterruptMode::kIntModeLow] = kGPIO_IntLowLevel,
     [InterruptMode::kIntModeHigh] = kGPIO_IntHighLevel,
@@ -341,12 +292,8 @@ GpioCallback IRQHandlers[Gpio::kCount];
 }  // namespace
 
 void Init() {
-    gpio_semaphore = xSemaphoreCreateMutexStatic(&gpio_semaphore_static);
+    g_mutex = xSemaphoreCreateMutexStatic(&g_mutex_storage);
 
-    bool m4{false};
-#if (__CORTEX_M == 4)
-    m4 = true;
-#endif
     for (int i = 0; i < Gpio::kCount; ++i) {
         IRQHandlers[i] = nullptr;
         switch (i) {
@@ -356,12 +303,12 @@ void Init() {
             case Gpio::kBtHostWake:
             case Gpio::kBtDevWake:
             case Gpio::kEthPhyRst:
-                if (m4)  break; // Do not initialize tpu or ethernet gpios for the m4.
+#if (__CORTEX_M == 4)
+                break; // Do not initialize tpu or ethernet gpios for the m4.
+#endif
             default:
-               GPIO_PinInit(
-                PinNameToModule[i],
-                PinNameToPin[i],
-                &PinNameToConfig[i]);
+               GPIO_PinInit(PinNameToModule[i], PinNameToPin[i],
+                            &PinNameToConfig[i]);
         }
         if (PinNameToConfig[i].interruptMode != kGPIO_NoIntmode) {
             GPIO_PinSetInterruptConfig(PinNameToModule[i], PinNameToPin[i], PinNameToConfig[i].interruptMode);
@@ -374,17 +321,13 @@ void Init() {
 }
 
 void SetGpio(Gpio gpio, bool enable) {
-    MutexLock lock(gpio_semaphore);
-    GPIO_PinWrite(
-        PinNameToModule[gpio],
-        PinNameToPin[gpio],
-        enable
-    );
+    MutexLock lock(g_mutex);
+    GPIO_PinWrite(PinNameToModule[gpio], PinNameToPin[gpio], enable);
 }
 
 bool GetGpio(Gpio gpio) {
-    MutexLock lock(gpio_semaphore);
-    return !!GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
+    MutexLock lock(g_mutex);
+    return GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
 }
 
 void SetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
@@ -448,3 +391,47 @@ void SetPinConfig(Gpio gpio, gpio_pin_config_t config) {
 
 }  // namespace gpio
 }  // namespace coral::micro
+
+extern "C" void GPIO13_Combined_0_31_IRQHandler() {
+    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO13);
+    GPIO_PortClearInterruptFlags(GPIO13, pins);
+    int i = 0;
+    while (pins) {
+        if (pins & 1) {
+            coral::micro::gpio::IRQHandler(GPIO13, i);
+        }
+        ++i;
+        pins = pins >> 1;
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
+#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
+extern "C" void GPIO6_Combined_0_15_IRQHandler() {
+    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO6);
+    GPIO_PortClearInterruptFlags(GPIO6, pins);
+    int i = 0;
+    while (pins) {
+        if (pins & 1) {
+            coral::micro::gpio::IRQHandler(GPIO6, i);
+        }
+        ++i;
+        pins = pins >> 1;
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
+extern "C" void GPIO2_Combined_0_15_IRQHandler() {
+    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO2);
+    GPIO_PortClearInterruptFlags(GPIO2, pins);
+    int i = 0;
+    while (pins) {
+        if (pins & 1) {
+            coral::micro::gpio::IRQHandler(GPIO2, i);
+        }
+        ++i;
+        pins = pins >> 1;
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+#endif
