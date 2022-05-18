@@ -8,11 +8,13 @@
 
 #include <cstdio>
 
-constexpr int kUSBControllerId = kUSB_ControllerEhci0;
-
 extern "C" void USB_OTG1_IRQHandler(void) {
     USB_DeviceEhciIsrFunction(coral::micro::UsbDeviceTask::GetSingleton()->device_handle());
 }
+
+namespace coral::micro {
+namespace {
+constexpr int kUSBControllerId = kUSB_ControllerEhci0;
 
 // Super-basic unicode "conversion" function (no conversion really, just
 // ascii into 2-byte expansion).
@@ -33,9 +35,7 @@ void ToUsbStringDescriptor(const char* s,
         param->length += 2;
     }
 }
-
-
-namespace coral::micro {
+}  // namespace
 
 usb_status_t UsbDeviceTask::StaticHandler(usb_device_handle device_handle, uint32_t event, void *param) {
     return coral::micro::UsbDeviceTask::GetSingleton()->Handler(device_handle, event, param);
@@ -45,27 +45,26 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
     static uint8_t string_buffer[64];
     bool event_ret = true;
     usb_status_t ret = kStatus_USB_Error;
-    usb_device_get_device_descriptor_struct_t *device_desc;
-    usb_device_get_configuration_descriptor_struct_t *config_desc;
-    usb_device_get_string_descriptor_struct_t *string_desc;
     switch (event) {
         case kUSB_DeviceEventBusReset:
             ret = kStatus_USB_Success;
             break;
-        case kUSB_DeviceEventGetDeviceDescriptor:
-            device_desc = (usb_device_get_device_descriptor_struct_t*)param;
-            device_desc->buffer = (uint8_t*)&device_descriptor_;
+        case kUSB_DeviceEventGetDeviceDescriptor: {
+            auto* device_desc = static_cast<usb_device_get_device_descriptor_struct_t*>(param);
+            device_desc->buffer = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(&device_descriptor_));
             device_desc->length = sizeof(device_descriptor_);
             ret = kStatus_USB_Success;
             break;
-        case kUSB_DeviceEventGetConfigurationDescriptor:
-            config_desc = (usb_device_get_configuration_descriptor_struct_t*)param;
+        }
+        case kUSB_DeviceEventGetConfigurationDescriptor: {
+            auto* config_desc = static_cast<usb_device_get_configuration_descriptor_struct_t*>(param);
             config_desc->buffer = composite_descriptor_.data();
             config_desc->length = composite_descriptor_.size();
             ret = kStatus_USB_Success;
             break;
-        case kUSB_DeviceEventGetStringDescriptor:
-            string_desc = (usb_device_get_string_descriptor_struct_t*)param;
+        }
+        case kUSB_DeviceEventGetStringDescriptor: {
+            auto* string_desc = static_cast<usb_device_get_string_descriptor_struct_t*>(param);
             string_desc->buffer = string_buffer;
             if (string_desc->stringIndex == 0) {
                 string_desc->length = sizeof(lang_id_desc_);
@@ -96,6 +95,7 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
                     break;
             }
             break;
+        }
         case kUSB_DeviceEventSetConfiguration:
             for (size_t i = 0; i < set_handle_callbacks_.size(); i++) {
                 set_handle_callbacks_[i](configs_[i].classHandle);
@@ -123,8 +123,11 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle, uint32_t ev
     return ret;
 }
 
-void UsbDeviceTask::AddDevice(const usb_device_class_config_struct_t& config, usb_set_handle_callback sh_cb,
-        usb_handle_event_callback he_cb, const void *descriptor_data, size_t descriptor_data_size) {
+void UsbDeviceTask::AddDevice(const usb_device_class_config_struct_t& config,
+                              usb_set_handle_callback sh_cb,
+                              usb_handle_event_callback he_cb,
+                              const void *descriptor_data,
+                              size_t descriptor_data_size) {
     configs_.push_back(config);
     set_handle_callbacks_.push_back(sh_cb);
     handle_event_callbacks_.push_back(he_cb);
@@ -133,15 +136,13 @@ void UsbDeviceTask::AddDevice(const usb_device_class_config_struct_t& config, us
     composite_descriptor_size_ += descriptor_data_size;
     memcpy(composite_descriptor_.data() + old_size, descriptor_data, descriptor_data_size);
 
-    CompositeDescriptor *p_composite_descriptor = reinterpret_cast<CompositeDescriptor*>(composite_descriptor_.data());
+    auto* p_composite_descriptor = reinterpret_cast<CompositeDescriptor*>(composite_descriptor_.data());
     p_composite_descriptor->conf.total_length = composite_descriptor_size_;
 }
 
 bool UsbDeviceTask::Init() {
-    usb_status_t ret;
-
-    config_list_ = { configs_.data(), &UsbDeviceTask::StaticHandler, (uint8_t)configs_.size() };
-    ret = USB_DeviceClassInit(kUSBControllerId, &config_list_, &device_handle_);
+    config_list_ = { configs_.data(), &UsbDeviceTask::StaticHandler, static_cast<uint8_t>(configs_.size()) };
+    usb_status_t ret = USB_DeviceClassInit(kUSBControllerId, &config_list_, &device_handle_);
     if (ret != kStatus_USB_Success) {
         printf("USB_DeviceClassInit failed %d\r\n", ret);
         return false;
@@ -158,34 +159,33 @@ bool UsbDeviceTask::Init() {
 UsbDeviceTask::UsbDeviceTask() {
     serial_number_ = coral::micro::utils::GetSerialNumber();
 
-    uint32_t usbClockFreq = 24000000;
-    usb_phy_config_struct_t phyConfig = {
+    constexpr uint32_t usb_clock_freq = 24000000;
+    usb_phy_config_struct_t phy_config = {
         BOARD_USB_PHY_D_CAL,
         BOARD_USB_PHY_TXCAL45DP,
         BOARD_USB_PHY_TXCAL45DM,
     };
 
-    CLOCK_EnableUsbhs0PhyPllClock(kCLOCK_Usbphy480M, usbClockFreq);
-    CLOCK_EnableUsbhs0Clock(kCLOCK_Usb480M, usbClockFreq);
-    USB_EhciPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phyConfig);
+    CLOCK_EnableUsbhs0PhyPllClock(kCLOCK_Usbphy480M, usb_clock_freq);
+    CLOCK_EnableUsbhs0Clock(kCLOCK_Usb480M, usb_clock_freq);
+    USB_EhciPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phy_config);
 
-    IRQn_Type irqNumber = USB_OTG1_IRQn;
-    NVIC_SetPriority(irqNumber, 6);
-    NVIC_EnableIRQ(irqNumber);
-    CompositeDescriptor composite_descriptor = {
-        {
-            sizeof(ConfigurationDescriptor),
-            0x02,
-            sizeof(CompositeDescriptor),
-            0, // Managed by next_interface_value
-            1,
-            0,
-            0x80, // kUsb11AndHigher
-            250, // kUses500mA
-        }, // ConfigurationDescriptor
+    constexpr IRQn_Type irq_number = USB_OTG1_IRQn;
+    NVIC_SetPriority(irq_number, 6);
+    NVIC_EnableIRQ(irq_number);
+    constexpr CompositeDescriptor composite_descriptor = {
+        .conf = {
+            .length = sizeof(ConfigurationDescriptor),
+            .descriptor_type = 0x02,
+            .total_length = sizeof(CompositeDescriptor),
+            .num_interfaces = 0, // Managed by next_interface_value
+            .config_value = 1,
+            .config = 0,
+            .attributes = 0x80, // kUsb11AndHigher
+            .max_power = 250, // kUses500mA
+        },
     };
     composite_descriptor_size_ = sizeof(composite_descriptor);
-    // composite_descriptor_.resize(sizeof(composite_descriptor));
     memcpy(composite_descriptor_.data(), &composite_descriptor, sizeof(composite_descriptor));
 }
 

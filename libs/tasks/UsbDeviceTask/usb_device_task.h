@@ -13,10 +13,11 @@
 
 namespace coral::micro {
 
-using usb_set_handle_callback = std::function<void(class_handle_t)>;
-using usb_handle_event_callback = std::function<bool(uint32_t, void*)>;
 class UsbDeviceTask {
   public:
+    using usb_set_handle_callback = std::function<void(class_handle_t)>;
+    using usb_handle_event_callback = std::function<bool(uint32_t, void*)>;
+
     UsbDeviceTask();
     UsbDeviceTask(const UsbDeviceTask&) = delete;
     UsbDeviceTask &operator=(const UsbDeviceTask&) = delete;
@@ -36,29 +37,38 @@ class UsbDeviceTask {
       p_composite_descriptor->conf.num_interfaces = ++next_interface_value_;
       return next_interface;
     }
-    usb_device_handle device_handle() { return device_handle_; }
+    usb_device_handle device_handle() const { return device_handle_; }
   private:
     uint8_t next_descriptor_value_ = 0;
     uint8_t next_interface_value_ = 0;
-    DeviceDescriptor device_descriptor_ = {
-        sizeof(DeviceDescriptor), 0x01, 0x0200,
-        0xEF, 0x02, 0x01, 0x40,
-        0x18d1,
+
+    static constexpr DeviceDescriptor device_descriptor_ = {
+        .length = sizeof(DeviceDescriptor),
+        .descriptor_type = 0x01,
+        .bcd_usb = 0x0200,
+        .device_class = 0xEF,
+        .device_subclass = 0x02,
+        .device_protocol = 0x01,
+        .max_packet_size = 0x40,
+        .id_vendor = 0x18d1,
 #if defined(ELFLOADER)
-        0x93FE,
+        .id_product = 0x93FE,
 #else
-        0x93FF,
+        .id_product = 0x93FF,
 #endif
-        0x0001,
-        1, 2, 3, 1
+        .bcd_device = 0x0001,
+        .manufacturer = 1,
+        .product = 2,
+        .serial_number = 3,
+        .num_configurations = 1
     };
     std::array<uint8_t, 1024> composite_descriptor_;
     size_t composite_descriptor_size_ = 0;
 
-    LangIdDescriptor lang_id_desc_ = {
-        sizeof(LangIdDescriptor),
-        0x03,
-        0x0409,
+    static constexpr LangIdDescriptor lang_id_desc_ = {
+        .length = sizeof(LangIdDescriptor),
+        .descriptor_type = 0x03,
+        .lang_id = 0x0409,
     };
 
     static usb_status_t StaticHandler(usb_device_handle device_handle, uint32_t event, void *param);
