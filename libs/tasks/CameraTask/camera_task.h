@@ -1,14 +1,14 @@
 #ifndef _LIBS_TASKS_CAMERA_TASK_H_
 #define _LIBS_TASKS_CAMERA_TASK_H_
 
-#include "libs/base/tasks.h"
-#include "libs/base/queue_task.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
-
 #include <cstdint>
 #include <functional>
 #include <list>
+
+#include "libs/base/queue_task.h"
+#include "libs/base/tasks.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
 namespace coral::micro {
 
@@ -54,9 +54,9 @@ struct PowerResponse {
 };
 
 enum class TestPattern : uint8_t {
-  NONE = 0x00,
-  COLOR_BAR = 0x01,
-  WALKING_ONES = 0x11,
+    NONE = 0x00,
+    COLOR_BAR = 0x01,
+    WALKING_ONES = 0x11,
 };
 
 struct TestPatternRequest {
@@ -64,12 +64,12 @@ struct TestPatternRequest {
 };
 
 struct Response {
-  RequestType type;
-  union {
-      FrameResponse frame;
-      EnableResponse enable;
-      PowerResponse power;
-  } response;
+    RequestType type;
+    union {
+        FrameResponse frame;
+        EnableResponse enable;
+        PowerResponse power;
+    } response;
 };
 
 struct Request {
@@ -111,27 +111,28 @@ struct FrameFormat {
     int width;
     int height;
     bool preserve_ratio;
-    uint8_t *buffer;
+    uint8_t* buffer;
+    bool white_balance = true;
 };
 
 }  // namespace camera
 
 inline constexpr char kCameraTaskName[] = "camera_task";
 
-class CameraTask : public QueueTask<camera::Request, camera::Response,
-                                   kCameraTaskName,
-                                   configMINIMAL_STACK_SIZE * 10,
-                                   CAMERA_TASK_PRIORITY, /*QueueLength=*/4> {
-  public:
-    void Init(lpi2c_rtos_handle_t *i2c_handle);
-    static CameraTask *GetSingleton() {
+class CameraTask
+    : public QueueTask<camera::Request, camera::Response, kCameraTaskName,
+                       configMINIMAL_STACK_SIZE * 10, CAMERA_TASK_PRIORITY,
+                       /*QueueLength=*/4> {
+   public:
+    void Init(lpi2c_rtos_handle_t* i2c_handle);
+    static CameraTask* GetSingleton() {
         static CameraTask camera;
         return &camera;
     }
     void Enable(camera::Mode mode);
     void Disable();
     // TODO(atv): Convert this to return a class that cleans up?
-    int GetFrame(uint8_t **buffer, bool block);
+    int GetFrame(uint8_t** buffer, bool block);
     static bool GetFrame(const std::list<camera::FrameFormat>& fmts);
     void ReturnFrame(int index);
     bool SetPower(bool enable);
@@ -147,23 +148,26 @@ class CameraTask : public QueueTask<camera::Request, camera::Response,
     static constexpr size_t kHeight = 324;
 
     static int FormatToBPP(camera::Format fmt);
-  private:
+
+   private:
     void TaskInit() override;
-    void RequestHandler(camera::Request *req) override;
+    void RequestHandler(camera::Request* req) override;
     camera::EnableResponse HandleEnableRequest(const camera::Mode& mode);
     void HandleDisableRequest();
     camera::PowerResponse HandlePowerRequest(const camera::PowerRequest& power);
     camera::FrameResponse HandleFrameRequest(const camera::FrameRequest& frame);
-    void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
+    void HandleTestPatternRequest(
+        const camera::TestPatternRequest& test_pattern);
     void HandleDiscardRequest(const camera::DiscardRequest& discard);
     void SetMode(const camera::Mode& mode);
-    bool Read(uint16_t reg, uint8_t *val);
+    bool Read(uint16_t reg, uint8_t* val);
     bool Write(uint16_t reg, uint8_t val);
     void SetDefaultRegisters();
     static void BayerToRGB(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height, camera::FilterMethod filter, camera::Rotation rotation);
     static void BayerToRGBA(const uint8_t *camera_raw, uint8_t *camera_rgb, int width, int height, camera::FilterMethod filter, camera::Rotation rotation);
     static void BayerToGrayscale(const uint8_t *camera_raw, uint8_t *camera_grayscale, int width, int height, camera::FilterMethod filter, camera::Rotation rotation);
     static void RGBToGrayscale(const uint8_t *camera_rgb, uint8_t *camera_grayscale, int width, int height);
+    static void AutoWhiteBalance(uint8_t* camera_rgb, int width, int height);
     static void ResizeNearestNeighbor(const uint8_t *src, int src_width, int src_height,
                                       uint8_t *dst, int dst_width, int dst_height,
                                       int components, bool preserve_aspect);
@@ -174,6 +178,7 @@ class CameraTask : public QueueTask<camera::Request, camera::Response,
     csi_handle_t csi_handle_;
     csi_config_t csi_config_;
     camera::Mode mode_;
+    camera::TestPattern test_pattern_;
 };
 
 }  // namespace coral::micro
