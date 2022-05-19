@@ -25,3 +25,12 @@ coral_micro.bootloader.file={runtime.platform.path}/bootloaders/coral_micro/imag
 coral_micro.upload.tool=flashtool
 coral_micro.upload.protocol=
 coral_micro.upload.pattern={cmd.path} --elfloader_path {bootloader.file} --build_dir . --ram --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path}
+
+coral_micro.vid.0=0x18d1
+coral_micro.pid.0=0x93ff
+coral_micro.vid.1=0x18d1
+coral_micro.pid.1=0x93fe
+coral_micro.vid.2=0x0d28
+coral_micro.pid.2=0x0204
+coral_micro.vid.3=0x1fc9
+coral_micro.pid.3=0x0094
