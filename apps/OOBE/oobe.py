@@ -75,6 +75,7 @@ def fetch_data(done, device_ip, update_image, update_poses, fps_target=10):
     last_pose_report = time.monotonic()
 
     frame_count = 0
+    blank_frames = 0
     while not done.is_set():
         start = time.monotonic()
         try:
@@ -83,6 +84,12 @@ def fetch_data(done, device_ip, update_image, update_poses, fps_target=10):
                 rgb_image = Image.frombytes('RGB', (POSENET_INPUT_WIDTH, POSENET_INPUT_HEIGHT), r.content)
                 update_image(rgb_image)
                 frame_count += 1
+                blank_frames = 0
+            elif r.status_code == requests.codes.not_found:
+                blank_frames += 1
+                if (blank_frames > 10): # In case low power mode immediately exits
+                    update_image(None)
+                    blank_frames = 0
 
             r = requests.get('http://%s/pose' % device_ip, timeout=1)
             if r.status_code == requests.codes.ok:
@@ -135,19 +142,30 @@ def main():
         end_x = start_x + w
         canvas = tk.Canvas(root, highlightthickness=0, bg='black')
     else:
-        canvas = tk.Canvas(root, width=POSENET_INPUT_WIDTH, height=POSENET_INPUT_HEIGHT)
+        canvas = tk.Canvas(root, width=POSENET_INPUT_WIDTH, height=POSENET_INPUT_HEIGHT, bg='black')
         scale_x = 1
         scale_y = 1
         start_x = 0
         start_y = 0
+        w = POSENET_INPUT_WIDTH
+        h = POSENET_INPUT_HEIGHT
         end_x = POSENET_INPUT_WIDTH
 
     image_id = canvas.create_image(start_x, 0, anchor='nw')
+    text_id = canvas.create_text(start_x + w/2, h/2, font=f"Helvetica {int(h/20)} bold", fill='white', text="Waiting for Person Detection", state=tk.HIDDEN)
     canvas.grid(column=0, row=0, sticky='nwes')
 
     tk_image = None
     def update_image(image):
         nonlocal tk_image
+        if not image:
+            canvas.itemconfigure(text_id, state=tk.NORMAL)
+            canvas.itemconfigure(image_id, state=tk.HIDDEN)
+            return
+
+        canvas.itemconfigure(text_id, state=tk.HIDDEN)
+        canvas.itemconfigure(image_id, state=tk.NORMAL)
+
         if args.fullscreen:
             if args.mirror:
                 tk_image = ImageTk.PhotoImage(image=(image.resize((w,h)).transpose(Image.FLIP_LEFT_RIGHT)))
