@@ -2,6 +2,7 @@
 
 #include "libs/base/ipc_m4.h"
 #include "libs/base/led.h"
+#include "libs/base/main_freertos_m4.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -37,6 +38,7 @@ extern "C" void app_main(void* param) {
     (void)param;
     coral::micro::IPCM4::GetSingleton()->RegisterAppMessageHandler(
         HandleAppMessage, xTaskGetCurrentTaskHandle());
+    coral::micro::CameraTask::GetSingleton()->Init(I2C5Handle());
     coral::micro::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));
     coral::micro::CameraTask::GetSingleton()->SetPower(true);

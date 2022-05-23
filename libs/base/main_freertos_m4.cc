@@ -25,6 +25,8 @@ void pre_app_main(void* param) {
 }
 }  // namespace
 
+extern "C" lpi2c_rtos_handle_t* I2C5Handle() { return &i2c5_handle; }
+
 extern "C" int main(int argc, char** argv) __attribute__((weak));
 extern "C" int main(int argc, char** argv) {
     BOARD_InitHardware(true);
@@ -42,7 +44,6 @@ extern "C" int main(int argc, char** argv) {
                     CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
     coral::micro::PmicTask::GetSingleton()->Init(&i2c5_handle);
-    coral::micro::CameraTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
     constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;
