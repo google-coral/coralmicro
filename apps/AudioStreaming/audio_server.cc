@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "apps/AudioStreaming/network.h"
+#include "libs/base/network.h"
 #include "libs/tasks/AudioTask/audio_reader.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"

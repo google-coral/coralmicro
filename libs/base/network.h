@@ -1,7 +1,8 @@
-#ifndef APPS_AUDIOSTREAMING_NETWORK_H_
-#define APPS_AUDIOSTREAMING_NETWORK_H_
+#ifndef LIBS_BASE_NETWORK_H_
+#define LIBS_BASE_NETWORK_H_
 
 #include <cstddef>
+#include <cstdint>
 
 namespace coral::micro {
 
@@ -22,8 +23,17 @@ IOStatus WriteArray(int fd, const T* array, size_t array_size) {
     return WriteBytes(fd, array, array_size * sizeof(T));
 }
 
+IOStatus WriteMessage(int fd, uint8_t type, const void* bytes, size_t size,
+                      size_t chunk_size = 1024);
+
+bool SocketHasPendingInput(int sockfd);
+
 int SocketServer(int port, int backlog);
+
+int SocketAccept(int sockfd);
+
+void SocketClose(int sockfd);
 
 }  // namespace coral::micro
 
-#endif  // APPS_AUDIOSTREAMING_NETWORK_H_
+#endif  // LIBS_BASE_NETWORK_H_

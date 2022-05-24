@@ -1,4 +1,4 @@
-#include "apps/AudioStreaming/network.h"
+#include "libs/base/network.h"
 
 #include <errno.h>
 
@@ -13,7 +13,7 @@ IOStatus ReadBytes(int fd, void* bytes, size_t size) {
     assert(fd >= 0);
     assert(bytes);
 
-    char* buf = reinterpret_cast<char*>(bytes);
+    char* buf = static_cast<char*>(bytes);
     while (size != 0) {
         auto ret = ::read(fd, buf, size);
         if (ret == 0) return IOStatus::kEof;
@@ -31,7 +31,7 @@ IOStatus WriteBytes(int fd, const void* bytes, size_t size, size_t chunk_size) {
     assert(fd >= 0);
     assert(bytes);
 
-    const char* buf = reinterpret_cast<const char*>(bytes);
+    const char* buf = static_cast<const char*>(bytes);
     while (size != 0) {
         auto len = std::min(size, chunk_size);
         auto ret = ::write(fd, buf, len);
@@ -46,32 +46,45 @@ IOStatus WriteBytes(int fd, const void* bytes, size_t size, size_t chunk_size) {
     return IOStatus::kOk;
 }
 
-int SocketServer(int port, int backlog) {
-    const int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (s == -1) {
-        printf("ERROR: Cannot create server socket\n\r");
-        return -1;
-    }
+IOStatus WriteMessage(int fd, uint8_t type, const void* bytes, size_t size,
+                      size_t chunk_size) {
+    const uint8_t header[] = {static_cast<uint8_t>(size),
+                              static_cast<uint8_t>(size >> 8),
+                              static_cast<uint8_t>(size >> 16),
+                              static_cast<uint8_t>(size >> 24), type};
 
-    struct sockaddr_in bind_address;
+    auto ret = WriteBytes(fd, header, sizeof(header), chunk_size);
+    if (ret != IOStatus::kOk) return ret;
+
+    return WriteBytes(fd, bytes, size, chunk_size);
+}
+
+bool SocketHasPendingInput(int sockfd) {
+    char buf;
+    return ::recv(sockfd, &buf, 1, MSG_DONTWAIT) == 1;
+}
+
+int SocketServer(int port, int backlog) {
+    const int sockfd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sockfd == -1) return -1;
+
+    struct sockaddr_in bind_address = {};
     bind_address.sin_family = AF_INET;
     bind_address.sin_port = PP_HTONS(port);
     bind_address.sin_addr.s_addr = PP_HTONL(INADDR_ANY);
 
-    auto ret = ::bind(s, reinterpret_cast<struct sockaddr*>(&bind_address),
+    auto ret = ::bind(sockfd, reinterpret_cast<struct sockaddr*>(&bind_address),
                       sizeof(bind_address));
-    if (ret == -1) {
-        printf("ERROR: Cannot bind server socket\n\r");
-        return -1;
-    }
+    if (ret == -1) return -1;
 
-    ret = ::listen(s, backlog);
-    if (ret == -1) {
-        printf("ERROR: Cannot listen server socket\n\r");
-        return -1;
-    }
+    ret = ::listen(sockfd, backlog);
+    if (ret == -1) return -1;
 
-    return s;
+    return sockfd;
 }
+
+int SocketAccept(int sockfd) { return ::accept(sockfd, nullptr, nullptr); }
+
+void SocketClose(int sockfd) { ::close(sockfd); }
 
 }  // namespace coral::micro

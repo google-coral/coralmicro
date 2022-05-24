@@ -56,6 +56,13 @@ target_link_libraries(libs_base-m7_freertos
     ${libs_base-m7_freertos_LINK_LIBRARIES_REVISION}
 )
 
+add_library_m7(libs_base-m7_network STATIC
+    network.cc
+)
+target_link_libraries(libs_base-m7_network
+    libs_base-m7_freertos
+)
+
 add_library_m7(libs_base-m7_wifi STATIC
     wifi.cc
 )
