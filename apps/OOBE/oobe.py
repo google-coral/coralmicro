@@ -161,6 +161,7 @@ def main():
         if not image:
             canvas.itemconfigure(text_id, state=tk.NORMAL)
             canvas.itemconfigure(image_id, state=tk.HIDDEN)
+            canvas.delete('pose')
             return
 
         canvas.itemconfigure(text_id, state=tk.HIDDEN)
