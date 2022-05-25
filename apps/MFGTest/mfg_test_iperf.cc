@@ -1,11 +1,16 @@
 #include "libs/base/check.h"
 #include "libs/base/mutex.h"
 #include "libs/testlib/test_lib.h"
+#include "third_party/freertos_kernel/include/timers.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/lwiperf.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/tcpip.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/inet.h"
 #include "third_party/mjson/src/mjson.h"
 
 #include <vector>
+
+/*  -u (UDP), -i (interval), -l (data length) and -b (bandwidth) */
+
 
 using coral::micro::testlib::JsonRpcGetBooleanParam;
 using coral::micro::testlib::JsonRpcGetIntegerParam;
@@ -13,6 +18,7 @@ using coral::micro::testlib::JsonRpcGetStringParam;
 
 struct IperfContext {
     SemaphoreHandle_t mutex;
+    TimerHandle_t poll_timer;
     void *session;
 };
 
@@ -23,14 +29,23 @@ static void lwiperf_report(void *arg, enum lwiperf_report_type report_type, cons
                            u64_t bytes_transferred, u32_t ms_duration, u32_t bandwidth_kbitspec) {
     coral::micro::MutexLock lock(iperf_ctx.mutex);
     switch (report_type) {
-        case LWIPERF_TCP_DONE_CLIENT:
         case LWIPERF_TCP_ABORTED_REMOTE:
-        case LWIPERF_TCP_ABORTED_LOCAL:
+        case LWIPERF_UDP_ABORTED_REMOTE:
             lwiperf_abort(iperf_ctx.session);
+        case LWIPERF_TCP_DONE_CLIENT:
+        case LWIPERF_UDP_DONE_CLIENT:
             iperf_ctx.session = nullptr;
         default:
             break;
     }
+}
+
+static void poll_udp_client(void *arg) {
+    lwiperf_poll_udp_client();
+}
+
+static void timer_poll_udp_client(TimerHandle_t timer) {
+    tcpip_try_callback(poll_udp_client, nullptr);
 }
 
 static void IperfStart(struct jsonrpc_request *request) {
@@ -43,8 +58,15 @@ static void IperfStart(struct jsonrpc_request *request) {
     bool server;
     if (!JsonRpcGetBooleanParam(request, "is_server", &server)) return;
 
+    bool udp = false;
+    JsonRpcGetBooleanParam(request, "udp", &udp);
+
     if (server) {
-        iperf_ctx.session = lwiperf_start_tcp_server_default(lwiperf_report, &iperf_ctx);
+        if (udp) {
+            iperf_ctx.session = lwiperf_start_udp_server(&ip_addr_any, LWIPERF_TCP_PORT_DEFAULT, lwiperf_report, &iperf_ctx);
+        } else {
+            iperf_ctx.session = lwiperf_start_tcp_server_default(lwiperf_report, &iperf_ctx);
+        }
     } else { // client
         std::string server_ip_address;
         int duration_seconds;
@@ -60,7 +82,15 @@ static void IperfStart(struct jsonrpc_request *request) {
             jsonrpc_return_error(request, -1, "failed to parse `server_ip_address`", nullptr);
             return;
         }
-        iperf_ctx.session = lwiperf_start_tcp_client(&addr, LWIPERF_TCP_PORT_DEFAULT, LWIPERF_CLIENT, amount, lwiperf_report, &iperf_ctx);
+        if (udp) {
+            int bandwidth = 1024 * 1024;
+            JsonRpcGetIntegerParam(request, "bandwidth", &bandwidth);
+            iperf_ctx.session = lwiperf_start_udp_client(&ip_addr_any, LWIPERF_TCP_PORT_DEFAULT,
+                                                         &addr, LWIPERF_TCP_PORT_DEFAULT, LWIPERF_CLIENT, amount,
+                                                         bandwidth, 0, lwiperf_report, &iperf_ctx);
+        } else {
+            iperf_ctx.session = lwiperf_start_tcp_client(&addr, LWIPERF_TCP_PORT_DEFAULT, LWIPERF_CLIENT, amount, lwiperf_report, &iperf_ctx);
+        }
     }
 
     if (iperf_ctx.session) {
@@ -85,6 +115,11 @@ void IperfInit() {
     iperf_ctx.mutex = xSemaphoreCreateMutex();
     CHECK(iperf_ctx.mutex);
     iperf_ctx.session = nullptr;
+
+    iperf_ctx.poll_timer = xTimerCreate("UDP poll timer", 1 / portTICK_PERIOD_MS, pdTRUE, nullptr, timer_poll_udp_client);
+    CHECK(iperf_ctx.poll_timer);
+    CHECK(xTimerStart(iperf_ctx.poll_timer, 0) == pdPASS);
+
     jsonrpc_export("iperf_start", IperfStart);
     jsonrpc_export("iperf_stop", IperfStop);
 }

@@ -367,7 +367,7 @@ class CoralMicroMFGTest(object):
       """
 
     @rpc
-    def iperf_start(self, is_server, server_ip_address=None, duration=10):
+    def iperf_start(self, is_server, server_ip_address=None, duration=10, udp=False, bandwidth=1024*1024):
       """Starts Iperf.
 
       Returns:
