@@ -15,6 +15,7 @@ inline constexpr char kMethodPosenetStressRun[] = "posenet_stress_run";
 inline constexpr char kMethodBeginUploadResource[] = "begin_upload_resource";
 inline constexpr char kMethodUploadResourceChunk[] = "upload_resource_chunk";
 inline constexpr char kMethodDeleteResource[] = "delete_resource";
+inline constexpr char kMethodFetchResource[] = "fetch_resource";
 inline constexpr char kMethodRunClassificationModel[] =
     "run_classification_model";
 inline constexpr char kMethodRunDetectionModel[] = "run_detection_model";
@@ -44,6 +45,7 @@ void SetTPUPowerState(struct jsonrpc_request* request);
 void BeginUploadResource(struct jsonrpc_request* request);
 void UploadResourceChunk(struct jsonrpc_request* request);
 void DeleteResource(struct jsonrpc_request* request);
+void FetchResource(struct jsonrpc_request* request);
 void RunClassificationModel(struct jsonrpc_request* request);
 void RunDetectionModel(struct jsonrpc_request* request);
 void StartM4(struct jsonrpc_request* request);

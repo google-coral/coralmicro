@@ -267,6 +267,8 @@ extern "C" void app_main(void* param) {
                    coral::micro::testlib::UploadResourceChunk);
     jsonrpc_export(coral::micro::testlib::kMethodDeleteResource,
                    coral::micro::testlib::DeleteResource);
+    jsonrpc_export(coral::micro::testlib::kMethodFetchResource,
+                   coral::micro::testlib::FetchResource);
     jsonrpc_export(coral::micro::testlib::kMethodRunClassificationModel,
                    coral::micro::testlib::RunClassificationModel);
     jsonrpc_export(coral::micro::testlib::kMethodRunDetectionModel,

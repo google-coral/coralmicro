@@ -147,7 +147,7 @@ bool JsonRpcGetBase64Param(struct jsonrpc_request* request,
         return false;
     }
 
-    // `size` includes both quotes, `size - 2` is the real sting size. Base64
+    // `size` includes both quotes, `size - 2` is the real string size. Base64
     // encodes every 3 bytes as 4 chars. Buffer size of `3 * ceil(size - 2) / 4`
     // should be enough.
     out->resize(3 * (((size - 2) + 3) / 4));
@@ -241,6 +241,22 @@ void DeleteResource(struct jsonrpc_request* request) {
 
     g_uploaded_resources.erase(it);
     jsonrpc_return_success(request, "{}");
+}
+
+void FetchResource(struct jsonrpc_request* request) {
+    std::string resource_name;
+    if (!JsonRpcGetStringParam(request, "name", &resource_name)) {
+        jsonrpc_return_error(request, -1, "missing resource name", nullptr);
+        return;
+    }
+
+    auto* resource = GetResource(resource_name);
+    if (!resource) {
+        jsonrpc_return_error(request, -1, "Unknown resource", nullptr);
+        return;
+    }
+    jsonrpc_return_success(request, "{%Q:%V}", "data", resource->size(),
+                           resource->data());
 }
 
 void RunDetectionModel(struct jsonrpc_request* request) {
