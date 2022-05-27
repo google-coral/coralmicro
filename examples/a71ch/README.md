@@ -17,7 +17,7 @@ Signature: 3045022046e163fdfa889ff781fd6df7ae248a8be46573a29eb4f6adedfa5cc765b9f
 
 ## Getting a public key file for desktop use (replace key string with the string from your device)
 ```
-bash apps/a71ch/pubkey.sh 04b5dba65692068705adcc2aa090267bd33c3d9f3f3cc4f31492f3a967effa5bc85ca8ebe29c4d4e9feb49a771c221f350cfbc7fa745c5c6018e055b3421a9aca6 > pubkey.pem
+bash examples/a71ch/pubkey.sh 04b5dba65692068705adcc2aa090267bd33c3d9f3f3cc4f31492f3a967effa5bc85ca8ebe29c4d4e9feb49a771c221f350cfbc7fa745c5c6018e055b3421a9aca6 > pubkey.pem
 ```
 
 ## Verify signature (replace signature with string from your device)

@@ -1,4 +1,4 @@
-#include "apps/BFT/micro_test.h"
+#include "examples/BFT/micro_test.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/random.h"

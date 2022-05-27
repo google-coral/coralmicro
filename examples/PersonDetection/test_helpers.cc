@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "apps/PersonDetection/test_helpers.h"
+#include "examples/PersonDetection/test_helpers.h"
 
 #include <cstdarg>
 #include <cstddef>

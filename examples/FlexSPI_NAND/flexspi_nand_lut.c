@@ -1,4 +1,4 @@
-#include "apps/FlexSPI_NAND/flexspi_nand_lut.h"
+#include "examples/FlexSPI_NAND/flexspi_nand_lut.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_flexspi.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_romapi.h"
 

@@ -1,4 +1,4 @@
-#include "apps/BLETest/ble_hello_sensor.h"
+#include "examples/BLETest/ble_hello_sensor.h"
 #include "libs/base/filesystem.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"

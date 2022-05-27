@@ -15,7 +15,7 @@ namespace coral::micro {
 namespace {
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
-constexpr char kImagePath[] = "/apps/DetectImage/cat_300x300.rgb";
+constexpr char kImagePath[] = "/examples/DetectImage/cat_300x300.rgb";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 struct TensorArena {
     alignas(16) uint8_t data[kTensorArenaSize];

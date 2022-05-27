@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "apps/HelloTensorflowFreeRTOS/hello_world_model.h"
+#include "examples/HelloTensorflowFreeRTOS/hello_world_model.h"
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/peripherals.h"
 #include "libs/nxp/rt1176-sdk/pin_mux.h"

@@ -1,4 +1,4 @@
-#include "apps/PersonDetection/test_helpers.h"
+#include "examples/PersonDetection/test_helpers.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
