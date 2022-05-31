@@ -15,7 +15,7 @@ IOStatus ReadBytes(int fd, void* bytes, size_t size) {
 
     char* buf = static_cast<char*>(bytes);
     while (size != 0) {
-        auto ret = ::read(fd, buf, size);
+        auto ret = lwip_read(fd, buf, size);
         if (ret == 0) return IOStatus::kEof;
         if (ret == -1) {
             if (errno == EINTR) continue;
@@ -34,7 +34,7 @@ IOStatus WriteBytes(int fd, const void* bytes, size_t size, size_t chunk_size) {
     const char* buf = static_cast<const char*>(bytes);
     while (size != 0) {
         auto len = std::min(size, chunk_size);
-        auto ret = ::write(fd, buf, len);
+        auto ret = lwip_write(fd, buf, len);
         if (ret == -1) {
             if (errno == EINTR) continue;
             return IOStatus::kError;
@@ -61,11 +61,11 @@ IOStatus WriteMessage(int fd, uint8_t type, const void* bytes, size_t size,
 
 bool SocketHasPendingInput(int sockfd) {
     char buf;
-    return ::recv(sockfd, &buf, 1, MSG_DONTWAIT) == 1;
+    return lwip_recv(sockfd, &buf, 1, MSG_DONTWAIT) == 1;
 }
 
 int SocketServer(int port, int backlog) {
-    const int sockfd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    const int sockfd = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd == -1) return -1;
 
     struct sockaddr_in bind_address = {};
@@ -73,18 +73,18 @@ int SocketServer(int port, int backlog) {
     bind_address.sin_port = PP_HTONS(port);
     bind_address.sin_addr.s_addr = PP_HTONL(INADDR_ANY);
 
-    auto ret = ::bind(sockfd, reinterpret_cast<struct sockaddr*>(&bind_address),
+    auto ret = lwip_bind(sockfd, reinterpret_cast<struct sockaddr*>(&bind_address),
                       sizeof(bind_address));
     if (ret == -1) return -1;
 
-    ret = ::listen(sockfd, backlog);
+    ret = lwip_listen(sockfd, backlog);
     if (ret == -1) return -1;
 
     return sockfd;
 }
 
-int SocketAccept(int sockfd) { return ::accept(sockfd, nullptr, nullptr); }
+int SocketAccept(int sockfd) { return lwip_accept(sockfd, nullptr, nullptr); }
 
-void SocketClose(int sockfd) { ::close(sockfd); }
+void SocketClose(int sockfd) { lwip_close(sockfd); }
 
 }  // namespace coral::micro

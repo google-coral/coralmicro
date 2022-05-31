@@ -34,7 +34,7 @@ extern "C" int coral_micro_mbedtls_printf(const char *format, ...) {
 static int net_would_block(const mbedtls_net_context *ctx) {
   int err = errno;
 
-  if ((fcntl(ctx->fd, F_GETFL, 0) & O_NONBLOCK) != O_NONBLOCK) {
+  if ((lwip_fcntl(ctx->fd, F_GETFL, 0) & O_NONBLOCK) != O_NONBLOCK) {
     errno = err;
     return 0;
   }
@@ -55,7 +55,7 @@ extern "C" int mbedtls_net_send(void *ctx, unsigned char const *buf,
     return MBEDTLS_ERR_NET_INVALID_CONTEXT;
   }
 
-  ret = write(fd, buf, len);
+  ret = lwip_write(fd, buf, len);
 
   if (ret < 0) {
     if (net_would_block(reinterpret_cast<mbedtls_net_context *>(ctx)) != 0) {
@@ -84,7 +84,7 @@ extern "C" int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len) {
     return MBEDTLS_ERR_NET_INVALID_CONTEXT;
   }
 
-  ret = (int)read(fd, buf, len);
+  ret = (int)lwip_read(fd, buf, len);
 
   if (ret < 0) {
     if (net_would_block(reinterpret_cast<mbedtls_net_context *>(ctx)) != 0) {
