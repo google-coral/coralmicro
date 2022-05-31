@@ -564,7 +564,7 @@ def main():
     parser.add_argument('--subapp', type=str, required=False)
     parser.add_argument('--ram', dest='ram', action='store_true')
     parser.add_argument('--noram', dest='ram', action='store_false')
-    parser.add_argument('--reset', dest='reset', action='store_true')
+    parser.add_argument('--reset', dest='reset', action='store_true', default=True)
     parser.add_argument('--noreset', dest='reset', action='store_false')
     parser.add_argument('--elfloader_path', type=str, required=False)
     parser.add_argument('--serial', type=str, required=False)
