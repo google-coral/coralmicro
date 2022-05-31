@@ -79,6 +79,7 @@ target_link_libraries(libs_base-m7_ethernet
 
 add_library_m7(libs_base-m7_http_server STATIC
     http_server.cc
+    http_server_handlers.cc
 )
 target_link_libraries(libs_base-m7_http_server
     libs_nxp_rt1176-sdk_lwip_httpd

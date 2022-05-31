@@ -1,4 +1,5 @@
 #include "libs/base/http_server.h"
+#include "libs/base/http_server_handlers.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/led.h"
 #include "libs/base/mutex.h"
@@ -24,11 +25,10 @@
 #include "libs/base/wifi.h"
 #endif  // defined(OOBE_DEMO_WIFI)
 
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <list>
-#include <numeric>
+#include <memory>
+#include <utility>
 #include <vector>
 
 namespace coral::micro {
@@ -266,48 +266,7 @@ std::vector<uint8_t> CreatePoseJson(const posenet::Output& output,
     return s;
 }
 
-void GenerateStatsHtml(std::vector<uint8_t>* html) {
-    std::vector<TaskStatus_t> infos(uxTaskGetNumberOfTasks());
-    uint32_t total_runtime;
-    auto n = uxTaskGetSystemState(infos.data(), infos.size(), &total_runtime);
-    std::vector<int> indices(infos.size());
-    std::iota(std::begin(indices), std::end(indices), 0);
-    std::sort(std::begin(indices), std::end(indices), [&infos](int i, int j) {
-        return infos[i].ulRunTimeCounter > infos[j].ulRunTimeCounter;
-    });
-
-    StrAppend(html, "<!DOCTYPE html>\r\n");
-    StrAppend(html, "<html lang=\"en\">\r\n");
-    StrAppend(html, "<head>\r\n"),
-        StrAppend(html, "<title>Run-time statistics</title>\r\n"),
-        StrAppend(html, "  <style>\r\n"),
-        StrAppend(html, "    th,td {padding: 2px;}\r\n"),
-        StrAppend(html, "  </style>\r\n"), StrAppend(html, "</head>\r\n"),
-        StrAppend(html, "<body>\r\n");
-    StrAppend(html, "  <table>\r\n");
-    StrAppend(html,
-              "    <tr><th>Task</th><th>Abs Time</th><th>% Time</th></tr>\r\n");
-    for (auto i = 0u; i < n; ++i) {
-        const auto& info = infos[indices[i]];
-        auto name = info.pcTaskName;
-        auto runtime = info.ulRunTimeCounter;
-        float percent = static_cast<float>(runtime) / (total_runtime / 100.0);
-        coral::micro::StrAppend(
-            html, "    <tr><td>%s</td><td>%lu</td><td>%.1f%%</td></tr>\r\n", name,
-            runtime, percent);
-    }
-    StrAppend(html, "  </table>\r\n");
-    StrAppend(html, "</body>\r\n");
-}
-
 HttpServer::Content UriHandler(const char* name) {
-    if (std::strcmp(name, "/stats.html") == 0) {
-        std::vector<uint8_t> html;
-        html.reserve(2048);
-        GenerateStatsHtml(&html);
-        return html;
-    }
-
     if (std::strcmp(name, "/camera") == 0) {
         coral::micro::MutexLock lock(camera_output_mtx);
         if (camera_output.empty()) return {};
@@ -362,6 +321,7 @@ void Main() {
 
     coral::micro::HttpServer http_server;
     http_server.AddUriHandler(UriHandler);
+    http_server.AddUriHandler(coral::micro::TaskStatsUriHandler{});
     http_server.AddUriHandler(coral::micro::FileSystemUriHandler{});
     coral::micro::UseHttpServer(&http_server);
 

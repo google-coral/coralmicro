@@ -76,17 +76,6 @@ class HttpServer {
     std::vector<UriHandler> uri_handlers_;
 };
 
-struct FileSystemUriHandler {
-    static constexpr char kPrefix[] = "/fs/";
-    static constexpr size_t kPrefixLength = sizeof(kPrefix) - 1;
-
-    HttpServer::Content operator()(const char* uri) {
-        if (std::strncmp(uri, kPrefix, kPrefixLength) == 0)
-            return std::string{uri + kPrefixLength - 1};
-        return {};
-    }
-};
-
 void UseHttpServer(HttpServer* server);
 
 }  // namespace coral::micro
