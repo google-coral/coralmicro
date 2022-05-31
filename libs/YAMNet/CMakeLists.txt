@@ -10,8 +10,7 @@ add_library_m7(libs_yamnet STATIC
     yamnet.cc
 
     DATA
-    ${PROJECT_SOURCE_DIR}/models/${model_name}
-    ${PROJECT_SOURCE_DIR}/models/yamnet_test_audio.bin
+    ${CMAKE_SOURCE_DIR}/models/${model_name}
 )
 target_include_directories(libs_yamnet PUBLIC
     .
