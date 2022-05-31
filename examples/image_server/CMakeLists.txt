@@ -29,3 +29,17 @@ target_link_libraries(image_server_ethernet
     ${IMAGE_SERVER_LINK_LIBRARIES}
     libs_base-m7_ethernet
 )
+
+# WIFI
+add_executable_m7(image_server_wifi
+    ${IMAGE_SERVER_SRC}
+)
+
+target_compile_definitions(image_server_wifi PUBLIC
+    IMAGE_SERVER_WIFI
+)
+
+target_link_libraries(image_server_wifi
+    ${IMAGE_SERVER_LINK_LIBRARIES}
+    libs_nxp_rt1176-sdk_wiced
+)

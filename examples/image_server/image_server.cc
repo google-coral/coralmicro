@@ -12,6 +12,10 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
 #endif  // defined(IMAGE_SERVER_ETHERNET)
 
+#if defined(IMAGE_SERVER_WIFI)
+#include "libs/base/wifi.h"
+#endif  // defined(IMAGE_SERVER_WIFI)
+
 namespace {
 using coral::micro::testlib::JsonRpcGetIntegerParam;
 
@@ -80,6 +84,17 @@ extern "C" void app_main(void* param) {
             request, "{%Q: %Q}", "ethernet_ip",
             reinterpret_cast<char*>(request->ctx->response_cb_data));
     });
+#elif defined(IMAGE_SERVER_WIFI)
+    if (!coral::micro::TurnOnWiFi()) {
+        printf("Unable to bring up wifi...\r\n");
+    }
+    jsonrpc_export(coral::micro::testlib::kMethodWifiConnect,
+                   coral::micro::testlib::WifiConnect);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiGetIp,
+                   coral::micro::testlib::WifiGetIp);
+    jsonrpc_export(coral::micro::testlib::kMethodWifiGetStatus,
+                   coral::micro::testlib::WifiGetStatus);
+
 #else
     printf("Starting Image RPC Server...\r\n");
     jsonrpc_init(nullptr, nullptr);
