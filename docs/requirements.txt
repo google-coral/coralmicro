@@ -1,0 +1,6 @@
+# Python packages required to build the docs
+sphinx==3.0
+Jinja2<3.1
+sphinx_rtd_theme
+breathe==4.22.0
+beautifulsoup4
