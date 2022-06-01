@@ -655,7 +655,3 @@ extern "C" void app_main(void *param) {
     coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
     vTaskSuspend(nullptr);
 }
-
-extern "C" int main(int argc, char **argv) {
-    return real_main(argc, argv, false, false);
-}
