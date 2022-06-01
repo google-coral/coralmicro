@@ -1,4 +1,3 @@
-#include "libs/base/http_server.h"
 #include "libs/base/http_server_handlers.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/led.h"
@@ -8,6 +7,7 @@
 #include "libs/base/utils.h"
 #include "libs/base/watchdog.h"
 #include "libs/posenet/posenet.h"
+#include "libs/rpc/rpc_http_server.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tpu/edgetpu_manager.h"
@@ -284,6 +284,14 @@ HttpServer::Content UriHandler(const char* name) {
     return {};
 }
 
+static void reset_count_rpc(struct jsonrpc_request* r) {
+    const auto reset_stats = coral::micro::GetResetStats();
+    jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %d}", "watchdog_resets",
+                           reset_stats.watchdog_resets, "lockup_resets",
+                           reset_stats.lockup_resets, "reset_register",
+                           reset_stats.reset_reason);
+}
+
 void HandleAppMessage(
     const uint8_t data[coral::micro::ipc::kMessageBufferDataSize],
     void* param) {
@@ -319,7 +327,9 @@ void Main() {
     }
 #endif  // defined(OOBE_DEMO_ETHERNET)
 
-    coral::micro::HttpServer http_server;
+    coral::micro::JsonRpcHttpServer http_server;
+    jsonrpc_init(nullptr, nullptr);
+    jsonrpc_export("reset_count", reset_count_rpc);
     http_server.AddUriHandler(UriHandler);
     http_server.AddUriHandler(coral::micro::TaskStatsUriHandler{});
     http_server.AddUriHandler(coral::micro::FileSystemUriHandler{});

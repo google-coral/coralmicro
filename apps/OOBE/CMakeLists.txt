@@ -4,8 +4,8 @@ set(OOBE_SOURCES
 
 set(OOBE_LINK_LIBRARIES
     libs_base-m7_freertos
-    libs_base-m7_http_server
     libs_posenet
+    libs_rpc_http_server
 )
 
 add_executable_m7(OOBE
