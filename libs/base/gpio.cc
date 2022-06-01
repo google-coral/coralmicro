@@ -289,6 +289,18 @@ constexpr gpio_interrupt_mode_t InterruptModeToGpioIntMode[InterruptMode::kIntMo
 };
 
 GpioCallback IRQHandlers[Gpio::kCount];
+
+void IRQHandler(GPIO_Type* gpio, uint32_t pin) {
+    for (int i = 0; i < Gpio::kCount; ++i) {
+        if (PinNameToModule[i] == gpio && PinNameToPin[i] == pin) {
+            GpioCallback handler = IRQHandlers[i];
+            if (handler) {
+                handler();
+            }
+            return;
+        }
+    }
+}
 }  // namespace
 
 void Init() {
@@ -367,18 +379,6 @@ void SetIntMode(Gpio gpio, InterruptMode mode) {
 
 void RegisterIRQHandler(Gpio gpio, GpioCallback cb) {
     IRQHandlers[gpio] = cb;
-}
-
-static void IRQHandler(GPIO_Type* gpio, uint32_t pin) {
-    for (int i = 0; i < Gpio::kCount; ++i) {
-        if (PinNameToModule[i] == gpio && PinNameToPin[i] == pin) {
-            GpioCallback handler = IRQHandlers[i];
-            if (handler) {
-                handler();
-            }
-            return;
-        }
-    }
 }
 
 gpio_pin_config_t GetPinConfig(Gpio gpio) {

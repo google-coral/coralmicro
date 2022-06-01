@@ -7,7 +7,8 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
 
-static void EthGetIP(struct jsonrpc_request *request) {
+namespace {
+void EthGetIP(struct jsonrpc_request *request) {
     struct netif* ethernet = coral::micro::GetEthernetInterface();
     if (!ethernet) {
         jsonrpc_return_error(request, -1, "ethernet interface not found", nullptr);
@@ -28,7 +29,7 @@ static void EthGetIP(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%Q}", "ip", ip4addr_ntoa(netif_ip4_addr(ethernet)));
 }
 
-static void EthWritePHY(struct jsonrpc_request *request) {
+void EthWritePHY(struct jsonrpc_request *request) {
     int reg;
     if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg)) return;
 
@@ -43,6 +44,7 @@ static void EthWritePHY(struct jsonrpc_request *request) {
 
     jsonrpc_return_success(request, "{}");
 }
+}  // namespace
 
 extern "C" void app_main(void *param) {
     coral::micro::InitializeEthernet(false);

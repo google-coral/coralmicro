@@ -4,7 +4,8 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-static void HandleAppMessage(const uint8_t data[coral::micro::ipc::kMessageBufferDataSize], void *param) {
+namespace {
+void HandleAppMessage(const uint8_t data[coral::micro::ipc::kMessageBufferDataSize], void *param) {
     const RackTestAppMessage* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
     switch (app_message->message_type) {
         case RackTestAppMessageType::XOR: {
@@ -34,6 +35,7 @@ static void HandleAppMessage(const uint8_t data[coral::micro::ipc::kMessageBuffe
             printf("Unknown message type\r\n");
     }
 }
+}  // namespace
 
 extern "C" void app_main(void *param) {
     coral::micro::IPCM4::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage, nullptr);

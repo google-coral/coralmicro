@@ -19,12 +19,13 @@ extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
-using coral::micro::testlib::JsonRpcGetStringParam;
-
 extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;
 extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
 
-static void WifiGetAP(struct jsonrpc_request* request) {
+namespace {
+using coral::micro::testlib::JsonRpcGetStringParam;
+
+void WifiGetAP(struct jsonrpc_request* request) {
     std::string name;
     if (!JsonRpcGetStringParam(request, "name", &name)) return;
 
@@ -60,10 +61,10 @@ static void WifiGetAP(struct jsonrpc_request* request) {
     jsonrpc_return_success(request, "{%Q:%d}", "signal_strength", best_rssi);
 }
 
-static SemaphoreHandle_t ble_ready_mtx;
-static bool ble_ready = false;
-static SemaphoreHandle_t ble_scan_sema;
-static void BLEFind(struct jsonrpc_request* request) {
+SemaphoreHandle_t ble_ready_mtx;
+bool ble_ready = false;
+SemaphoreHandle_t ble_scan_sema;
+void BLEFind(struct jsonrpc_request* request) {
     {
         coral::micro::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
@@ -122,7 +123,7 @@ static void BLEFind(struct jsonrpc_request* request) {
     }
 }
 
-static void BLEScan(struct jsonrpc_request* request) {
+void BLEScan(struct jsonrpc_request* request) {
     {
         coral::micro::MutexLock lock(ble_ready_mtx);
         if (!ble_ready) {
@@ -165,7 +166,7 @@ static void BLEScan(struct jsonrpc_request* request) {
     }
 }
 
-static wiced_result_t ble_management_callback(
+wiced_result_t ble_management_callback(
     wiced_bt_management_evt_t event,
     wiced_bt_management_evt_data_t* p_event_data) {
     switch (event) {
@@ -186,6 +187,7 @@ static wiced_result_t ble_management_callback(
     }
     return WICED_BT_SUCCESS;
 }
+}  // namespace
 
 extern unsigned char brcm_patchram_buf[];
 extern unsigned int brcm_patch_ram_length;

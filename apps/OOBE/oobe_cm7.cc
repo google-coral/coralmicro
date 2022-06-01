@@ -284,7 +284,7 @@ HttpServer::Content UriHandler(const char* name) {
     return {};
 }
 
-static void reset_count_rpc(struct jsonrpc_request* r) {
+void reset_count_rpc(struct jsonrpc_request* r) {
     const auto reset_stats = coral::micro::GetResetStats();
     jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %d}", "watchdog_resets",
                            reset_stats.watchdog_resets, "lockup_resets",

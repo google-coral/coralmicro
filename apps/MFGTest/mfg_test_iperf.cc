@@ -11,7 +11,7 @@
 
 /*  -u (UDP), -i (interval), -l (data length) and -b (bandwidth) */
 
-
+namespace {
 using coral::micro::testlib::JsonRpcGetBooleanParam;
 using coral::micro::testlib::JsonRpcGetIntegerParam;
 using coral::micro::testlib::JsonRpcGetStringParam;
@@ -22,11 +22,11 @@ struct IperfContext {
     void *session;
 };
 
-static IperfContext iperf_ctx;
+IperfContext iperf_ctx;
 
-static void lwiperf_report(void *arg, enum lwiperf_report_type report_type, const ip_addr_t *local_addr,
-                           u16_t local_port, const ip_addr_t *remote_addr, u16_t remote_port,
-                           u64_t bytes_transferred, u32_t ms_duration, u32_t bandwidth_kbitspec) {
+void lwiperf_report(void *arg, enum lwiperf_report_type report_type, const ip_addr_t *local_addr,
+                    u16_t local_port, const ip_addr_t *remote_addr, u16_t remote_port,
+                    u64_t bytes_transferred, u32_t ms_duration, u32_t bandwidth_kbitspec) {
     coral::micro::MutexLock lock(iperf_ctx.mutex);
     switch (report_type) {
         case LWIPERF_TCP_ABORTED_REMOTE:
@@ -40,15 +40,15 @@ static void lwiperf_report(void *arg, enum lwiperf_report_type report_type, cons
     }
 }
 
-static void poll_udp_client(void *arg) {
+void poll_udp_client(void *arg) {
     lwiperf_poll_udp_client();
 }
 
-static void timer_poll_udp_client(TimerHandle_t timer) {
+void timer_poll_udp_client(TimerHandle_t timer) {
     tcpip_try_callback(poll_udp_client, nullptr);
 }
 
-static void IperfStart(struct jsonrpc_request *request) {
+void IperfStart(struct jsonrpc_request *request) {
     coral::micro::MutexLock lock(iperf_ctx.mutex);
     if (iperf_ctx.session) {
         jsonrpc_return_error(request, -1, "iperf is already running!", nullptr);
@@ -100,7 +100,7 @@ static void IperfStart(struct jsonrpc_request *request) {
     }
 }
 
-static void IperfStop(struct jsonrpc_request *request) {
+void IperfStop(struct jsonrpc_request *request) {
     coral::micro::MutexLock lock(iperf_ctx.mutex);
     if (!iperf_ctx.session) {
         jsonrpc_return_error(request, -1, "iperf is already stopped!", nullptr);
@@ -110,6 +110,7 @@ static void IperfStop(struct jsonrpc_request *request) {
     iperf_ctx.session = nullptr;
     jsonrpc_return_success(request, "{}");
 }
+}  // namespace
 
 void IperfInit() {
     iperf_ctx.mutex = xSemaphoreCreateMutex();

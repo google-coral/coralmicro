@@ -21,6 +21,7 @@
 #include <array>
 #include <map>
 
+namespace {
 using coral::micro::testlib::JsonRpcGetIntegerParam;
 using coral::micro::testlib::JsonRpcGetBooleanParam;
 using coral::micro::testlib::JsonRpcGetStringParam;
@@ -31,17 +32,17 @@ using coral::micro::testlib::JsonRpcGetBase64Param;
 
 // Map from pin-to-pin: Used to validate that the provided
 // pair will be connected via loopback fixture.
-static std::map<int, int> j5_j6_loopback_mapping;
+std::map<int, int> j5_j6_loopback_mapping;
 
 // IOMUXC entries for each pin to be tested.
-static std::map<int, std::array<uint32_t, 5>> j5_j6_iomuxc;
+std::map<int, std::array<uint32_t, 5>> j5_j6_iomuxc;
 
 // GPIO module / pin number for each pin to be tested.
-static std::map<int, std::pair<GPIO_Type*, int>> j5_j6_gpio_pins;
+std::map<int, std::pair<GPIO_Type*, int>> j5_j6_gpio_pins;
 
-constexpr static int kDacPin = 95;
+constexpr int kDacPin = 95;
 
-static void InitializeLoopbackMappings() {
+void InitializeLoopbackMappings() {
     j5_j6_loopback_mapping = {
         {1, 3},
         {3, 1},
@@ -295,7 +296,7 @@ static void InitializeLoopbackMappings() {
 //    "rail" is an enumerated value indicating the rail to change.
 //    "enable" is a boolean state to set the rail to.
 // Returns success or failure to set the requested state.
-static void SetPmicRailState(struct jsonrpc_request *request) {
+void SetPmicRailState(struct jsonrpc_request *request) {
     int rail;
     if (!JsonRpcGetIntegerParam(request, "rail", &rail)) return;
 
@@ -312,7 +313,7 @@ static void SetPmicRailState(struct jsonrpc_request *request) {
 //    "enable" is a boolean state to set the rail to.
 // Returns success or failure to set the requested state.
 // NOTE: The TPU LED requires that the TPU power is enabled.
-static void SetLedState(struct jsonrpc_request *request) {
+void SetLedState(struct jsonrpc_request *request) {
     int led;
     if (!JsonRpcGetIntegerParam(request, "led", &led)) return;
 
@@ -350,7 +351,7 @@ static void SetLedState(struct jsonrpc_request *request) {
 //    "input_pin" is the pin which will be set to input mode
 //    "output_pin" is the pin which will be set to output mode
 // Returns success or failure to set the pin states.
-static void SetPinPairToGpio(struct jsonrpc_request *request) {
+void SetPinPairToGpio(struct jsonrpc_request *request) {
     int output_pin, input_pin;
 
     if (!JsonRpcGetIntegerParam(request, "output_pin", &output_pin)) return;
@@ -424,7 +425,7 @@ static void SetPinPairToGpio(struct jsonrpc_request *request) {
 //    "pin" is the numerical value of the pin to set a state for.
 //    "enable" is whether to drive the pin high or low.
 // Returns success or failure.
-static void SetGpio(struct jsonrpc_request *request) {
+void SetGpio(struct jsonrpc_request *request) {
     int pin;
     if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
 
@@ -450,7 +451,7 @@ static void SetGpio(struct jsonrpc_request *request) {
 // Takes one parameter:
 //    "pin" is the numerical value of the pin to get the state of.
 // Returns success or failure.
-static void GetGpio(struct jsonrpc_request *request) {
+void GetGpio(struct jsonrpc_request *request) {
     int pin;
     if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
 
@@ -464,18 +465,18 @@ static void GetGpio(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q:%d}", "value", pin_value);
 }
 
-static void GetTPUChipIds(struct jsonrpc_request *request) {
+void GetTPUChipIds(struct jsonrpc_request *request) {
     jsonrpc_return_error(request, -1, "get_tpu_chip_ids not implemented", nullptr);
 }
 
-static void CheckTPUAlarm(struct jsonrpc_request *request) {
+void CheckTPUAlarm(struct jsonrpc_request *request) {
     jsonrpc_return_error(request, -1, "check_tpu_alarm not implemented", nullptr);
 }
 
 // Implements the "set_dac_value" RPC.
 // Takes one parameter, "counts". This represents the number of DAC counts to set, from 0-4095.
 // Returns success or failure.
-static void SetDACValue(struct jsonrpc_request *request) {
+void SetDACValue(struct jsonrpc_request *request) {
     int counts;
     if (!JsonRpcGetIntegerParam(request, "counts", &counts)) return;
 
@@ -492,7 +493,7 @@ static void SetDACValue(struct jsonrpc_request *request) {
 // Implements "test_sdram_pattern" RPC.
 // Allocates memory from SDRAM, writes and verifies a test pattern.
 // Returns success or failure.
-static void TestSDRamPattern(struct jsonrpc_request *request) {
+void TestSDRamPattern(struct jsonrpc_request *request) {
     size_t sdram_area_size = 1024 * 1024; // 1 MB
     auto sdram_area = std::make_unique<uint8_t[]>(sdram_area_size);
     if (sdram_area.get() < reinterpret_cast<void*>(0x80000000U)) {
@@ -520,7 +521,7 @@ static void TestSDRamPattern(struct jsonrpc_request *request) {
 //    "filename": Path in the filesystem to write to.
 //    "data": base64-encoded data to decode and write into the file.
 // Returns success or failure.
-static void WriteFile(struct jsonrpc_request *request) {
+void WriteFile(struct jsonrpc_request *request) {
     std::string filename;
     if (!JsonRpcGetStringParam(request, "filename", &filename))  return;
 
@@ -538,7 +539,7 @@ static void WriteFile(struct jsonrpc_request *request) {
 // Implements the "read_file" RPC.
 // Takes one parameter, "filename".
 // Base64-encodes and returns the data in the file, if it exists.
-static void ReadFile(struct jsonrpc_request *request) {
+void ReadFile(struct jsonrpc_request *request) {
     std::string filename;
     if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
@@ -550,7 +551,7 @@ static void ReadFile(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(), data.data());
 }
 
-static void CheckA71CH(struct jsonrpc_request *request) {
+void CheckA71CH(struct jsonrpc_request *request) {
     static bool a71ch_inited = false;
     if (!a71ch_inited) {
         bool success = coral::micro::a71ch::Init();
@@ -572,7 +573,7 @@ static void CheckA71CH(struct jsonrpc_request *request) {
     }
 }
 
-static void FuseMACAddress(struct jsonrpc_request *request) {
+void FuseMACAddress(struct jsonrpc_request *request) {
     std::string address;
     if (!JsonRpcGetStringParam(request, "address", &address)) return;
 
@@ -611,13 +612,14 @@ static void FuseMACAddress(struct jsonrpc_request *request) {
     jsonrpc_return_success(request, "{}");
 }
 
-static void ReadMACAddress(struct jsonrpc_request *request) {
+void ReadMACAddress(struct jsonrpc_request *request) {
     coral::micro::MacAddress address = coral::micro::utils::GetMacAddress();
     char address_str[255];
     memset(address_str, 0, sizeof(address_str));
     snprintf(address_str, sizeof(address_str), "%02X:%02X:%02X:%02X:%02X:%02X", address.a, address.b, address.c, address.d, address.e, address.f);
     jsonrpc_return_success(request, "{%Q:%Q}", "address", address_str);
 }
+}  // namespace
 
 extern "C" void app_main(void *param) {
     InitializeLoopbackMappings();
