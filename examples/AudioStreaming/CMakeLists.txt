@@ -5,5 +5,5 @@ add_executable_m7(AudioStreaming
 target_link_libraries(AudioStreaming
     libs_base-m7_freertos
     libs_base-m7_network
-    libs_tasks_AudioTask_freertos
+    libs_audio_freertos
 )

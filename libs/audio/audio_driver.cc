@@ -1,4 +1,4 @@
-#include "libs/tasks/AudioTask/audio_task.h"
+#include "libs/audio/audio_driver.h"
 
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"

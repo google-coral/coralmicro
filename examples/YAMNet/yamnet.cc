@@ -1,7 +1,7 @@
 #include "libs/YAMNet/yamnet.h"
 
+#include "libs/audio/audio_service.h"
 #include "libs/base/filesystem.h"
-#include "libs/tasks/AudioTask/audio_reader.h"
 
 namespace {
 constexpr int kNumDmaBuffers = 2;

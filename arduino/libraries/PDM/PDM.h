@@ -5,8 +5,8 @@
 #include <optional>
 
 #include "Arduino.h"
-#include "libs/tasks/AudioTask/audio_reader.h"
-#include "libs/tasks/AudioTask/audio_task.h"
+#include "libs/audio/audio_driver.h"
+#include "libs/audio/audio_service.h"
 
 namespace {
 // from micro_model_settings.h

@@ -1,3 +1,4 @@
+add_subdirectory(audio)
 add_subdirectory(CMSIS)
 add_subdirectory(cdc_acm)
 add_subdirectory(cdc_eem)

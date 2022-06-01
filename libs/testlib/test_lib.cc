@@ -11,7 +11,7 @@
 #include "libs/base/timer.h"
 #include "libs/base/utils.h"
 #include "libs/base/wifi.h"
-#include "libs/tasks/AudioTask/audio_task.h"
+#include "libs/audio/audio_driver.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tensorflow/classification.h"

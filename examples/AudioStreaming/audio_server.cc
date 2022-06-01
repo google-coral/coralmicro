@@ -5,7 +5,7 @@
 #include <cstring>
 
 #include "libs/base/network.h"
-#include "libs/tasks/AudioTask/audio_reader.h"
+#include "libs/audio/audio_service.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 #include "third_party/freertos_kernel/include/task.h"

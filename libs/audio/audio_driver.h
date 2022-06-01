@@ -1,5 +1,5 @@
-#ifndef _LIBS_TASKS_AUDIO_TASK_H_
-#define _LIBS_TASKS_AUDIO_TASK_H_
+#ifndef LIBS_AUDIO_AUDIO_DRIVER_H_
+#define LIBS_AUDIO_AUDIO_DRIVER_H_
 
 #include <cstdint>
 #include <optional>
@@ -96,4 +96,4 @@ class AudioDriver {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TASKS_AUDIO_TASK_H_
+#endif  // LIBS_AUDIO_AUDIO_DRIVER_H_

@@ -1,12 +1,12 @@
-#ifndef _LIBS_TASKS_AUDIO_READER_
-#define _LIBS_TASKS_AUDIO_READER_
+#ifndef LIBS_AUDIO_AUDIO_SERVICE_H_
+#define LIBS_AUDIO_AUDIO_SERVICE_H_
 
 #include <algorithm>
 #include <cstdint>
 #include <vector>
 
+#include "libs/audio/audio_driver.h"
 #include "libs/base/mutex.h"
-#include "libs/tasks/AudioTask/audio_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
@@ -231,4 +231,4 @@ class LatestSamples {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TASKS_AUDIO_READER_
+#endif  // LIBS_AUDIO_AUDIO_SERVICE_H_

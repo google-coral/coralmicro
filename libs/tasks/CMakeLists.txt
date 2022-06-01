@@ -1,4 +1,3 @@
-add_subdirectory(AudioTask)
 add_subdirectory(CameraTask)
 add_subdirectory(EdgeTpuDfuTask)
 add_subdirectory(EdgeTpuTask)
