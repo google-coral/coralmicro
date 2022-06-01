@@ -1,6 +1,6 @@
 #include "apps/RackTest/rack_test_ipc.h"
 #include "libs/base/ipc_m4.h"
-#include "libs/CoreMark/core_portme.h"
+#include "libs/coremark/core_portme.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
