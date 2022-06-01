@@ -3,19 +3,11 @@ GENERATE_HTML          = NO
 GENERATE_LATEX         = NO
 OUTPUT_DIRECTORY       = _build
 XML_OUTPUT             = xml
-STRIP_FROM_PATH        =
-LAYOUT_FILE            =
-HTML_HEADER            =
-HTML_FOOTER            =
-CASE_SENSE_NAMES       = NO
 SORT_GROUP_NAMES       = YES
 EXTRACT_ALL            = YES
 INPUT_FILTER           = ./doxygenate.sh
-
 INPUT                  = ../libs/tpu/ \
                          ../libs/tensorflow/
-
 EXCLUDE                = ../libs/tpu/tpu_driver.h
-
 FILE_PATTERNS          = *.h
 RECURSIVE              = YES

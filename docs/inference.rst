@@ -1,34 +1,39 @@
 Micro inferencing APIs
 ======================
 
-TensorFlow Lite utilities
--------------------------
+Utilities
+---------
 
 The following APIs simplify your code when working with
 `tflite::MicroInterpreter
 <https://github.com/tensorflow/tflite-micro/blob/main/tensorflow/lite/micro/micro_interpreter.h>`_.
 
-`[utils.h source] <https://github.com/google-coral/micro/blob/master/libs/tensorflow/utils.h>`_
+`[utils.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/utils.h>`_
 
 .. doxygenfile:: tensorflow/utils.h
+   :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
 
 
 Image classification
 --------------------
 
-Use the following APIs with image classification models.
-s
-`[classification.h source] <https://github.com/google-coral/micro/blob/master/libs/tensorflow/classification.h>`_
+The following APIs assist when running image classification models on a
+microcontroller with an Edge TPU.
+
+`[classification.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/classification.h>`_
 
 .. doxygenfile:: tensorflow/classification.h
+   :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
 
 
 Object detection
 ----------------
 
-Use the following APIs with object detection models.
+The following APIs assist when running object detection models on a
+microcontroller with an Edge TPU.
 
-`[detection.h source] <https://github.com/google-coral/micro/blob/master/libs/tensorflow/detection.h>`_
+`[detection.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/detection.h>`_
 
 .. doxygenfile:: tensorflow/detection.h
+   :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
 

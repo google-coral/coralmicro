@@ -9,23 +9,53 @@
 namespace coral::micro {
 namespace tensorflow {
 
+// Represents a classification result.
 struct Class {
+    // The class label id.
     int id;
+    // The prediction score.
     float score;
 };
 
+// Converts a classification output tensor into a list of ordered classes.
+//
+// @param scores The dequantized output tensor.
+// @param scores_count The number of scores in the output (the size of
+//   the output tensor).
+// @param threshold The score threshold for results. All returned results have
+//   a score greater-than-or-equal-to this value.
+// @param top_k The maximum number of predictions to return.
+// @returns The top_k Class predictions (id, score), ordered by score
+// (first element has the highest score).
 std::vector<Class> GetClassificationResults(
     const float* scores, ssize_t scores_count,
     float threshold = -std::numeric_limits<float>::infinity(),
     size_t top_k = std::numeric_limits<size_t>::max());
 
+// Gets results from a classification model as a list of ordered classes.
+//
+// @param interpreter The already-invoked interpreter for your classification
+//   model.
+// @param threshold The score threshold for results. All returned results have
+//   a score greater-than-or-equal-to this value.
+// @param top_k The maximum number of predictions to return.
+// @returns The top_k Class predictions (id, score), ordered by score
+// (first element has the highest score).
 std::vector<Class> GetClassificationResults(
     tflite::MicroInterpreter* interpreter,
     float threshold = -std::numeric_limits<float>::infinity(),
     size_t top_k = std::numeric_limits<size_t>::max());
 
+// Checks whether an input tensor needs pre-processing for classification.
+// @param intput_tensor The tensor intended as input for a classification model.
+// @returns True if the input tensor requires normalization AND quantization
+//   (you should run ClassificationPreprocess()); false otherwise.
 bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor);
 
+// Performs normalization and quantization pre-processing on the given tensor.
+// @param input_tensor The tensor you want to pre-process for a clasification
+//   model.
+// @returns True upon success; false if the tensor type is the wrong format.
 bool ClassificationPreprocess(TfLiteTensor* input_tensor);
 
 }  // namespace tensorflow

@@ -20,9 +20,13 @@
 namespace coral::micro {
 namespace tensorflow {
 
+// Represents the dimensions of an image.
 struct ImageDims {
+    // Pixel height.
     int height;
+    // Pixel width.
     int width;
+    // Channel depth.
     int depth;
 };
 
@@ -33,9 +37,16 @@ inline int ImageSize(const ImageDims& dims) {
     return dims.height * dims.width * dims.depth;
 }
 
+
+// Resizes a bitmap image.
+// @param in_dims The current dimensions for image `uin`.
+// @param uin The input image location.
+// @param out_dims The desired dimensions for image `uout`.
+// @param uout The output image location.
 bool ResizeImage(const ImageDims& in_dims, const uint8_t* uin,
                  const ImageDims& out_dims, uint8_t* uout);
 
+// Gets the size of a tensor.
 inline int TensorSize(TfLiteTensor* tensor) {
     int size = 1;
     for (int i = 0; i < tensor->dims->size; ++i) {
@@ -44,6 +55,9 @@ inline int TensorSize(TfLiteTensor* tensor) {
     return size;
 }
 
+// Dequantizes data.
+//
+// You should instead use `DequantizeTensor()`.
 template <typename I, typename O>
 void Dequantize(int count, I* tensor_data, O* dequant_data, float scale,
                 float zero_point) {
@@ -52,6 +66,10 @@ void Dequantize(int count, I* tensor_data, O* dequant_data, float scale,
     }
 }
 
+// Dequantizes a tensor.
+//
+// When using a model adapter API such as `GetClassificationResults()`,
+// this dequantization is done for you.
 template <typename T>
 std::vector<T> DequantizeTensor(TfLiteTensor* tensor) {
     const auto scale = tensor->params.scale;

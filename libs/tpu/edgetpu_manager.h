@@ -15,12 +15,50 @@
 
 namespace coral::micro {
 
+// This class is essentially a representation of the Edge TPU, so there is one
+// shared `EdgeTpuContext` used by all model interpreters. Instances of this
+// class should always be allocated with `EdgeTpuManager::OpenDevice()`.
+//
+// Unlike the libcoral C++ API, when using this coralmicro C++ API, you do not
+// need to pass the `EdgeTpuContext` to the `tflite::MicroInterpreter`, but the
+// context must be opened and the custom op must be registered before you create
+// an interpreter. (This is different because libcoral is based on TensorFlow
+// Lite and coralmicro is based on TensorFlow Lite for Microcontrollers.)
+//
+// For example:
+//
+// ```
+// auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
+// if (!tpu_context) {
+//     printf("ERROR: Failed to get EdgeTpu context\r\n");
+//     return;
+// }
+//
+// tflite::MicroErrorReporter error_reporter;
+// tflite::MicroMutableOpResolver<1> resolver;
+// resolver.AddCustom(kCustomOp, RegisterCustomOp());
+//
+// auto tensor_arena = std::make_unique<TensorArena>();
+// tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
+//                                      resolver, tensor_arena->data,
+//                                      kTensorArenaSize, &error_reporter);
+// ```
+//
+// To see the rest of this code example, see
+// `examples/classify_image/classify_image.cc`.
+//
+// The lifetime of the Edge TPU context must be longer than all associated
+// `tflite::MicroInterpreter` instances.
+//
+// The life of this object is directly tied to the Edge TPU power. So when this
+// object is destroyed, the Edge TPU powers down.
 class EdgeTpuContext {
    public:
     EdgeTpuContext();
     ~EdgeTpuContext();
 };
 
+// @cond Internal only, do not generate docs
 class EdgeTpuPackage {
    public:
     EdgeTpuPackage(
@@ -41,24 +79,49 @@ class EdgeTpuPackage {
     std::unique_ptr<EdgeTpuExecutable> inference_;
     std::unique_ptr<EdgeTpuExecutable> parameter_caching_;
 };
+// @endcond
 
+// Singleton Edge TPU manager for allocating new instances of `EdgeTpuContext`.
 class EdgeTpuManager {
    public:
     EdgeTpuManager();
     EdgeTpuManager(const EdgeTpuManager&) = delete;
     EdgeTpuManager& operator=(const EdgeTpuManager&) = delete;
 
+    // Gets a pointer to the EdgeTpuManager singleton object.
     static EdgeTpuManager* GetSingleton() {
         static EdgeTpuManager manager;
         return &manager;
     }
 
+    // @cond Internal only, do not generate docs
     EdgeTpuPackage* RegisterPackage(const char* package_content, size_t length);
     TfLiteStatus Invoke(EdgeTpuPackage* package, TfLiteContext* context,
                         TfLiteNode* node);
+    // @endcond
+
+    // Opens the default Edge TPU device.
+    //
+    // The Edge TPU device (represented as `EdgeTpuContext`) can be shared among
+    // multiple software components. The device is closed after the last
+    // reference leaves scope.
+    //
+    // @param mode The `PerformanceMode` to use for the Edge TPU. Options are:
+    // `kMax` (500Mhz), `kHigh` (250Mhz), `kMedium` (125Mhz), or `kLow` (63Mhz).
+    // If omitted, the default is `kHigh`.
+    //
+    // @return A shared pointer to Edge TPU device. The shared_ptr can point to
+    // nullptr in case of error.
     std::shared_ptr<EdgeTpuContext> OpenDevice(
         PerformanceMode mode = PerformanceMode::kHigh);
+
+    // @cond Internal only, do not generate docs
     void NotifyConnected(usb_host_edgetpu_instance_t* usb_instance);
+    // @endcond
+
+    // Gets the current Edge TPU junction temperature.
+    // @returns The temperature in Celcius, or -276.88 if the `EdgeTpuContext`
+    //   is empty.
     float GetTemperature();
 
    private:
