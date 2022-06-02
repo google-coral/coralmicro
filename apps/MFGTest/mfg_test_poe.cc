@@ -8,33 +8,38 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
 
 namespace {
-void EthGetIP(struct jsonrpc_request *request) {
+void EthGetIP(struct jsonrpc_request* request) {
     struct netif* ethernet = coral::micro::GetEthernetInterface();
     if (!ethernet) {
-        jsonrpc_return_error(request, -1, "ethernet interface not found", nullptr);
+        jsonrpc_return_error(request, -1, "ethernet interface not found",
+                             nullptr);
         return;
     }
 
     if (!netif_is_up(ethernet)) {
-        jsonrpc_return_error(request, -1, "ethernet interface is not up", nullptr);
+        jsonrpc_return_error(request, -1, "ethernet interface is not up",
+                             nullptr);
         return;
     }
 
-    struct dhcp *dhcp = netif_dhcp_data(ethernet);
+    struct dhcp* dhcp = netif_dhcp_data(ethernet);
     if (dhcp->state != DHCP_STATE_BOUND) {
         jsonrpc_return_error(request, -1, "dhcp not complete", nullptr);
         return;
     }
 
-    jsonrpc_return_success(request, "{%Q:%Q}", "ip", ip4addr_ntoa(netif_ip4_addr(ethernet)));
+    jsonrpc_return_success(request, "{%Q:%Q}", "ip",
+                           ip4addr_ntoa(netif_ip4_addr(ethernet)));
 }
 
-void EthWritePHY(struct jsonrpc_request *request) {
+void EthWritePHY(struct jsonrpc_request* request) {
     int reg;
-    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg)) return;
+    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg))
+        return;
 
     int val;
-    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "val", &val)) return;
+    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "val", &val))
+        return;
 
     status_t status = coral::micro::EthernetPHYWrite(reg, val);
     if (status != kStatus_Success) {
@@ -46,7 +51,7 @@ void EthWritePHY(struct jsonrpc_request *request) {
 }
 }  // namespace
 
-extern "C" void app_main(void *param) {
+extern "C" void app_main(void* param) {
     coral::micro::InitializeEthernet(false);
 
     jsonrpc_init(nullptr, nullptr);
