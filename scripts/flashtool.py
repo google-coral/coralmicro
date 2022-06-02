@@ -196,7 +196,9 @@ def GetLibs(build_dir, libs_path, scanned, cached_files):
         sublibs |= GetLibs(build_dir, lib, scanned | libs_found, cached_files)
     return libs_found | sublibs
 
-def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files):
+def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino):
+    if is_arduino:
+        return list()
     libs_path = os.path.splitext(elf_path)[0] + '.libs'
     m4_exe_path = os.path.splitext(elf_path)[0] + '.m4_executable'
     libs = GetLibs(build_dir, libs_path, set(), cached_files)
@@ -558,6 +560,9 @@ def main():
         root_dir = os.path.abspath(os.path.dirname(__file__))
     else:
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    is_arduino = os.getenv('ARDUINO_USER_AGENT') is not None
+
     parser = argparse.ArgumentParser(description='Coral Dev Board Micro flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--build_dir', '-b', type=str, required=True)
@@ -720,7 +725,7 @@ def main():
         data_files = None
         if not args.ram:
             print('Creating Filesystem')
-            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files)
+            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino)
             if data_files is None:
                 print('Creating filesystem failed, exit')
                 return
