@@ -1,4 +1,4 @@
-add_executable_m7(MicroSpeech
+add_executable_m7(micro_speech
     main_functions.cc # @fcc4b966f1265f466e82617020af93670141b009
     micro_speech.cc
     model.cc
@@ -9,7 +9,7 @@ add_executable_m7(MicroSpeech
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/recognize_commands.cc
 )
 
-target_link_libraries(MicroSpeech
+target_link_libraries(micro_speech
     libs_base-m7_freertos
     libs_tensorflow-m7
 )

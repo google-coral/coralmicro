@@ -1,4 +1,4 @@
-#include "examples/MessagePassing/example_message.h"
+#include "examples/message_passing/example_message.h"
 #include "libs/base/ipc_m4.h"
 #include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/task.h"

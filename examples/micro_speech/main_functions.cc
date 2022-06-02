@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-#include "examples/MicroSpeech/model.h"
+#include "examples/micro_speech/model.h"
 
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
