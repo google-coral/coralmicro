@@ -10,11 +10,12 @@
 #include <cstdio>
 
 namespace coral::micro {
-
+namespace {
 constexpr char kKeyVersion[] = "1";
 constexpr char kKeyChipName[] = "2";
 constexpr char kKeyParamCache_DEPRECATED[] = "3";
 constexpr char kKeyExecutable[] = "4";
+}  // namespace
 
 EdgeTpuContext::EdgeTpuContext() {
     EdgeTpuTask::GetSingleton()->SetPower(true);

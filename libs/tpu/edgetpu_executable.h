@@ -65,7 +65,7 @@ class EdgeTpuExecutable {
 
     TfLiteStatus Invoke(const TpuDriver& tpu_driver, TfLiteContext* context, TfLiteNode *node);
 
-    uint64_t ParameterCachingToken() {
+    uint64_t ParameterCachingToken() const {
       return executable_->parameter_caching_token();
     }
   private:

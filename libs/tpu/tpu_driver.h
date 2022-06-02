@@ -1,18 +1,14 @@
 #ifndef LIBS_TPU_TPU_DRIVER_H_
 #define LIBS_TPU_TPU_DRIVER_H_
 
-#include "libs/usb_host_edgetpu/usb_host_edgetpu.h"
-#include "third_party/darwinn/driver/hardware_structures.h"
-#include "third_party/darwinn/driver/config/beagle/beagle_chip_config.h"
-
 #include <cstdint>
 #include <vector>
 
-namespace coral::micro {
+#include "libs/usb_host_edgetpu/usb_host_edgetpu.h"
+#include "third_party/darwinn/driver/config/beagle/beagle_chip_config.h"
+#include "third_party/darwinn/driver/hardware_structures.h"
 
-inline constexpr uint8_t kSingleBulkOutEndpoint = 1;
-inline constexpr uint8_t kEventInEndpoint = 2;
-inline constexpr uint8_t kInterruptInEndpoint = 3;
+namespace coral::micro {
 
 enum class PerformanceMode {
     kLow,
@@ -34,34 +30,40 @@ enum class DescriptorTag {
 };
 
 class TpuDriver {
-  public:
-    TpuDriver();
+   public:
+    TpuDriver() = default;
     TpuDriver(const TpuDriver&) = delete;
     TpuDriver& operator=(const TpuDriver&) = delete;
-    bool Initialize(usb_host_edgetpu_instance_t *usb_instance, PerformanceMode mode);
-    bool SendParameters(const uint8_t *data, uint32_t length) const;
-    bool SendInputs(const uint8_t *data, uint32_t length) const;
-    bool SendInstructions(const uint8_t *data, uint32_t length) const;
-    bool GetOutputs(uint8_t *data, uint32_t length) const;
+    bool Initialize(usb_host_edgetpu_instance_t* usb_instance,
+                    PerformanceMode mode);
+    bool SendParameters(const uint8_t* data, uint32_t length) const;
+    bool SendInputs(const uint8_t* data, uint32_t length) const;
+    bool SendInstructions(const uint8_t* data, uint32_t length) const;
+    bool GetOutputs(uint8_t* data, uint32_t length) const;
     bool ReadEvent() const;
     float GetTemperature();
 
-  private:
+   private:
     enum class RegisterSize {
-      kRegSize32,
-      kRegSize64,
+        kRegSize32,
+        kRegSize64,
     };
 
-    bool BulkOutTransfer(const uint8_t *data, uint32_t data_length) const;
-    ssize_t BulkOutTransferInternal(uint8_t endpoint, const uint8_t *data, uint32_t data_length) const;
-    bool BulkInTransfer(uint8_t *data, uint32_t data_length) const;
-    ssize_t BulkInTransferInternal(uint8_t endpoint, uint8_t *data, uint32_t data_length) const;
+    bool BulkOutTransfer(const uint8_t* data, uint32_t data_length) const;
+    ssize_t BulkOutTransferInternal(uint8_t endpoint, const uint8_t* data,
+                                    uint32_t data_length) const;
+    bool BulkInTransfer(uint8_t* data, uint32_t data_length) const;
+    ssize_t BulkInTransferInternal(uint8_t endpoint, uint8_t* data,
+                                   uint32_t data_length) const;
 
-    bool SendData(DescriptorTag tag, const uint8_t *data, uint32_t length) const;
+    bool SendData(DescriptorTag tag, const uint8_t* data,
+                  uint32_t length) const;
     bool WriteHeader(DescriptorTag tag, uint32_t length) const;
-    std::vector<uint8_t> PrepareHeader(DescriptorTag tag, uint32_t length) const;
+    std::vector<uint8_t> PrepareHeader(DescriptorTag tag,
+                                       uint32_t length) const;
 
-    bool CSRTransfer(uint64_t reg, void *data, bool read, RegisterSize reg_size);
+    bool CSRTransfer(uint64_t reg, void* data, bool read,
+                     RegisterSize reg_size);
     bool Read32(uint64_t reg, uint32_t* val);
     bool Read64(uint64_t reg, uint64_t* val);
     bool Write32(uint64_t reg, uint32_t val);

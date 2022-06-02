@@ -13,6 +13,9 @@
 
 namespace coral::micro {
 namespace {
+constexpr uint8_t kSingleBulkOutEndpoint = 1;
+constexpr uint8_t kEventInEndpoint = 2;
+constexpr uint8_t kInterruptInEndpoint = 3;
 constexpr uint32_t kMaxBulkBufferSize = 32 * 1024;
 uint8_t BulkTransferBuffer[kMaxBulkBufferSize];
 
@@ -24,9 +27,6 @@ struct UsbTransferMetadata {
 }  // namespace
 
 namespace registers = platforms::darwinn::driver::config::registers;
-
-TpuDriver::TpuDriver() {
-}
 
 bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance, PerformanceMode mode) {
     if (usb_instance == nullptr) {
@@ -551,10 +551,9 @@ bool TpuDriver::DoRunControl(platforms::darwinn::driver::RunControl run_state) {
 
 float TpuDriver::GetTemperature() {
     uint32_t omc0_dc_reg;
-    float temperature;
     CHECK(Read32(chip_config_.GetApexCsrOffsets().omc0_dc, &omc0_dc_reg));
     registers::Omc0DC omc0_dc(omc0_dc_reg);
-    temperature = (662 - omc0_dc.data()) * 250 + 550;
+    float temperature = (662 - omc0_dc.data()) * 250 + 550;
     // temerature is currently in mC, divide by 1000 for C.
     return temperature / 1000;
 }
