@@ -56,8 +56,8 @@ class EdgeTpuManager {
     EdgeTpuPackage* RegisterPackage(const char* package_content, size_t length);
     TfLiteStatus Invoke(EdgeTpuPackage* package, TfLiteContext* context,
                         TfLiteNode* node);
-    std::shared_ptr<EdgeTpuContext> OpenDevice(const PerformanceMode mode);
-    std::shared_ptr<EdgeTpuContext> OpenDevice();
+    std::shared_ptr<EdgeTpuContext> OpenDevice(
+        PerformanceMode mode = PerformanceMode::kHigh);
     void NotifyConnected(usb_host_edgetpu_instance_t* usb_instance);
     float GetTemperature();
 
