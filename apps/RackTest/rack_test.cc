@@ -2,9 +2,9 @@
 #include <memory>
 
 #include "apps/RackTest/rack_test_ipc.h"
-#include "libs/coremark/core_portme.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/utils.h"
+#include "libs/coremark/core_portme.h"
 #include "libs/posenet/posenet.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tasks/CameraTask/camera_task.h"
