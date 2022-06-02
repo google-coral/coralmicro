@@ -1,12 +1,13 @@
-#include "third_party/freertos_kernel/include/projdefs.h"
+#include "libs/testconv1/testconv1.h"
+
 #include "libs/base/gpio.h"
 #include "libs/base/led.h"
 #include "libs/base/tasks.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/testconv1/testconv1.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "third_party/freertos_kernel/include/projdefs.h"
 
-extern "C" void app_main(void *param) {
+extern "C" [[noreturn]] void app_main(void* param) {
     if (!coral::micro::testconv1::setup()) {
         printf("setup() failed\r\n");
         vTaskSuspend(nullptr);
@@ -14,8 +15,8 @@ extern "C" void app_main(void *param) {
 
     size_t counter = 0;
     while (true) {
-        coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
-        coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
+        auto tpu_context =
+            coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
         coral::micro::led::Set(coral::micro::led::LED::kTpu, true);
 
         bool run = true;
@@ -30,7 +31,6 @@ extern "C" void app_main(void *param) {
         }
 
         printf("Reset EdgeTPU...\r\n");
-        coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
     vTaskSuspend(nullptr);

@@ -54,15 +54,13 @@ void PosenetStressRun(struct jsonrpc_request* request) {
     coral::micro::CameraTask::GetSingleton()->SetPower(true);
     coral::micro::CameraTask::GetSingleton()->Enable(
         coral::micro::camera::Mode::STREAMING);
-    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
-    coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
+    auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
         coral::micro::PerformanceMode::kMax);
     bool loopSuccess;
     int iterations;
 
     if (!coral::micro::posenet::setup()) {
         printf("setup() failed\r\n");
-        coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
         coral::micro::CameraTask::GetSingleton()->SetPower(false);
         jsonrpc_return_error(request, -1, "Posenet setup() failed", nullptr);
         return;
@@ -73,7 +71,6 @@ void PosenetStressRun(struct jsonrpc_request* request) {
     coral::micro::CameraTask::GetSingleton()->DiscardFrames(100);
     if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "iterations",
                                                        &iterations)) {
-        coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
         coral::micro::CameraTask::GetSingleton()->SetPower(false);
         return;
     }
@@ -90,14 +87,12 @@ void PosenetStressRun(struct jsonrpc_request* request) {
         coral::micro::CameraTask::GetFrame({fmt});
         loopSuccess = coral::micro::posenet::loop(&output);
         if (!loopSuccess) {
-            coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
             coral::micro::CameraTask::GetSingleton()->SetPower(false);
             jsonrpc_return_error(request, -1, "Posenet loop() returned failure",
                                  nullptr);
             return;
         }
     }
-    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(false);
     coral::micro::CameraTask::GetSingleton()->SetPower(false);
     jsonrpc_return_success(request, "{}");
 }

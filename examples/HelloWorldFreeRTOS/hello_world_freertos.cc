@@ -1,15 +1,14 @@
-#include "libs/base/gpio.h"
-#include "libs/base/led.h"
-#include "libs/base/pwm.h"
+#include <cstdio>
+
 #include "libs/base/console_m7.h"
+#include "libs/base/led.h"
 #include "libs/base/tasks.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/PmicTask/pmic_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include <cstdio>
 
-void read_task(void* param) {
+[[noreturn]] void read_task(void* param) {
     char ch;
     do {
         int bytes = coral::micro::ConsoleM7::GetSingleton()->Read(&ch, 1);
@@ -20,15 +19,19 @@ void read_task(void* param) {
     } while (true);
 }
 
-extern "C" void app_main(void *param) {
+extern "C" [[noreturn]] void app_main(void* param) {
     printf("Hello world FreeRTOS.\r\n");
 
-    coral::micro::PmicTask::GetSingleton()->SetRailState(coral::micro::pmic::Rail::CAM_2V8, true);
-    coral::micro::PmicTask::GetSingleton()->SetRailState(coral::micro::pmic::Rail::CAM_1V8, true);
-    coral::micro::PmicTask::GetSingleton()->SetRailState(coral::micro::pmic::Rail::MIC_1V8, true);
+    coral::micro::PmicTask::GetSingleton()->SetRailState(
+        coral::micro::pmic::Rail::CAM_2V8, true);
+    coral::micro::PmicTask::GetSingleton()->SetRailState(
+        coral::micro::pmic::Rail::CAM_1V8, true);
+    coral::micro::PmicTask::GetSingleton()->SetRailState(
+        coral::micro::pmic::Rail::MIC_1V8, true);
     coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
 
-    xTaskCreate(read_task, "read_task", configMINIMAL_STACK_SIZE, nullptr, APP_TASK_PRIORITY, nullptr);
+    xTaskCreate(read_task, "read_task", configMINIMAL_STACK_SIZE, nullptr,
+                APP_TASK_PRIORITY, nullptr);
 
     bool up = true;
     unsigned int brightness = 50;

@@ -4,12 +4,10 @@
 #include "libs/base/mutex.h"
 #include "libs/base/reset.h"
 #include "libs/base/strings.h"
-#include "libs/base/utils.h"
 #include "libs/base/watchdog.h"
 #include "libs/posenet/posenet.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tasks/CameraTask/camera_task.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -337,8 +335,7 @@ void Main() {
 
     coral::micro::IPCM7::GetSingleton()->RegisterAppMessageHandler(
         HandleAppMessage, xTaskGetCurrentTaskHandle());
-    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
-    coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
+    auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
         coral::micro::PerformanceMode::kMax);
     if (!coral::micro::posenet::setup()) {
         printf("setup() failed\r\n");
