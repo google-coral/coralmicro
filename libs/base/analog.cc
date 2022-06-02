@@ -7,8 +7,6 @@
 namespace coral::micro {
 namespace analog {
 namespace {
-constexpr int kLPADC1ChannelCount = 6;
-constexpr int kLPADC2ChannelCount = 7;
 
 ADC_Type* DeviceToADC(Device d) {
     switch (d) {

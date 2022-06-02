@@ -7,7 +7,9 @@ SORT_GROUP_NAMES       = YES
 EXTRACT_ALL            = YES
 INPUT_FILTER           = ./doxygenate.sh
 INPUT                  = ../libs/tpu/ \
-                         ../libs/tensorflow/
+                         ../libs/tensorflow/ \
+                         ../libs/base/
+
 EXCLUDE                = ../libs/tpu/tpu_driver.h
 FILE_PATTERNS          = *.h
 RECURSIVE              = YES
