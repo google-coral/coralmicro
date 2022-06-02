@@ -12,15 +12,6 @@
 #include <elf.h>
 #include <memory>
 
-/* Function definitions */
-static void elfloader_main(void *param);
-static void elfloader_recv(const uint8_t *buffer, uint32_t length);
-static void usb_timer_callback(TimerHandle_t timer);
-static bool elfloader_HandleEvent(uint32_t event, void *param);
-static void elfloader_SetClassHandle(class_handle_t class_handle);
-static usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t event, void *param);
-void usb_device_task(void *param);
-
 extern "C" uint32_t disable_usb_timeout;
 uint32_t disable_usb_timeout __attribute__ ((section (".noinit_rpmsg_sh_mem")));
 
@@ -28,17 +19,19 @@ extern "C" uint32_t vPortGetRunTimeCounterValue(void) {
     return 0;
 }
 
-/* Static data definitions */
-TimerHandle_t usb_timer;
-static uint8_t* elfloader_recv_image = nullptr;
-static char* elfloader_recv_path = nullptr;
-static uint8_t elfloader_data[64];
-static class_handle_t elfloader_class_handle;
-static ElfloaderTarget elfloader_target = ElfloaderTarget::Ram;
-static lfs_file_t file_handle;
-static bool filesystem_formatted = false;
+namespace {
+void elfloader_main(void *param);
 
-static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
+TimerHandle_t usb_timer;
+uint8_t* elfloader_recv_image = nullptr;
+char* elfloader_recv_path = nullptr;
+uint8_t elfloader_data[64];
+class_handle_t elfloader_class_handle;
+ElfloaderTarget elfloader_target = ElfloaderTarget::Ram;
+lfs_file_t file_handle;
+bool filesystem_formatted = false;
+
+void elfloader_recv(const uint8_t *buffer, uint32_t length) {
     ElfloaderCommand cmd = static_cast<ElfloaderCommand>(buffer[0]);
     const ElfloaderSetSize *set_size = reinterpret_cast<const ElfloaderSetSize*>(&buffer[1]);
     const ElfloaderBytes *bytes = reinterpret_cast<const ElfloaderBytes*>(&buffer[1]);
@@ -54,7 +47,7 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
                     elfloader_recv_image = new uint8_t[set_size->size];
                     break;
                 case ElfloaderTarget::Path:
-                    elfloader_recv_path = (char*)malloc(set_size->size + 1);
+                    elfloader_recv_path = static_cast<char*>(malloc(set_size->size + 1));
                     memset(elfloader_recv_path, 0, set_size->size + 1);
                     break;
             }
@@ -113,7 +106,7 @@ static void elfloader_recv(const uint8_t *buffer, uint32_t length) {
     }
 }
 
-static bool elfloader_HandleEvent(uint32_t event, void *param) {
+bool elfloader_HandleEvent(uint32_t event, void *param) {
     bool ret = true;
     usb_device_get_hid_descriptor_struct_t* get_hid_descriptor =
         static_cast<usb_device_get_hid_descriptor_struct_t*>(param);
@@ -133,11 +126,11 @@ static bool elfloader_HandleEvent(uint32_t event, void *param) {
     return ret;
 }
 
-static void elfloader_SetClassHandle(class_handle_t class_handle) {
+void elfloader_SetClassHandle(class_handle_t class_handle) {
     elfloader_class_handle = class_handle;
 }
 
-static usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t event, void *param) {
+usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t event, void *param) {
     uint8_t dummy = 0;
     usb_status_t ret = kStatus_USB_Success;
     usb_device_endpoint_callback_message_struct_t *message =
@@ -163,12 +156,12 @@ static usb_status_t elfloader_Handler(class_handle_t class_handle, uint32_t even
     return ret;
 }
 
-static usb_device_class_config_struct_t elfloader_config_data_ = {
+usb_device_class_config_struct_t elfloader_config_data_ = {
     elfloader_Handler, nullptr, &elfloader_class_struct,
 };
 
 typedef void (*entry_point)(void);
-static void elfloader_main(void *param) {
+void elfloader_main(void *param) {
     ssize_t elf_size = -1;
     std::unique_ptr<uint8_t[]> application_elf;
     if (!param) {
@@ -220,9 +213,10 @@ void usb_device_task(void *param) {
     }
 }
 
-static void usb_timer_callback(TimerHandle_t timer) {
+void usb_timer_callback(TimerHandle_t timer) {
     xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10, nullptr, APP_TASK_PRIORITY, nullptr);
 }
+}  // namespace
 
 extern "C" int main(int argc, char **argv) {
     BOARD_InitHardware(false);
