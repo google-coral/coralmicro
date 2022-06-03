@@ -23,35 +23,36 @@ class QueueTask {
     virtual void Init() {
         request_queue_ = xQueueCreate(QueueLength, sizeof(Request));
         CHECK(request_queue_);
-        CHECK(xTaskCreateStatic(StaticTaskMain, Name, stack_depth_, this,
+        CHECK(xTaskCreateStatic(StaticTaskMain, Name, StackDepth, this,
                                 Priority, task_stack_, &task_));
     }
 
    protected:
     Response SendRequest(Request& req) {
         Response resp;
-        SemaphoreHandle_t req_semaphore = xSemaphoreCreateBinary();
-        req.callback = [req_semaphore, &resp](Response cb_resp) {
+        SemaphoreHandle_t sem = xSemaphoreCreateBinary();
+        req.callback = [sem, &resp](Response cb_resp) {
             resp = cb_resp;
-            xSemaphoreGive(req_semaphore);
+            CHECK(xSemaphoreGive(sem) == pdTRUE);
         };
-        xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200));
-        xSemaphoreTake(req_semaphore, pdMS_TO_TICKS(200));
-        vSemaphoreDelete(req_semaphore);
+        CHECK(xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200)) == pdTRUE);
+        CHECK(xSemaphoreTake(sem, pdMS_TO_TICKS(200)) == pdTRUE);
+        vSemaphoreDelete(sem);
         return resp;
     }
 
     void SendRequestAsync(Request& req) {
-        xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200));
+        CHECK(xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200)) == pdTRUE);
     }
 
-    const size_t stack_depth_ = StackDepth;
     StaticTask_t task_;
     StackType_t task_stack_[StackDepth];
     QueueHandle_t request_queue_;
 
    private:
-    static void StaticTaskMain(void* param) { ((QueueTask*)param)->TaskMain(); }
+    static void StaticTaskMain(void* param) {
+        static_cast<QueueTask*>(param)->TaskMain();
+    }
 
     // Main QueueTask FreeRTOS task function.
     // Calls implementation-specific initialization, and then starts receiving
