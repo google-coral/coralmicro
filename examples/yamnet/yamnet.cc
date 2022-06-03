@@ -1,4 +1,4 @@
-#include "libs/YAMNet/yamnet.h"
+#include "libs/yamnet/yamnet.h"
 
 #include "libs/audio/audio_service.h"
 #include "libs/base/filesystem.h"

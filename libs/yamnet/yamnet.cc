@@ -1,4 +1,4 @@
-#include "libs/YAMNet/yamnet.h"
+#include "libs/yamnet/yamnet.h"
 
 #include "libs/base/check.h"
 #include "libs/base/filesystem.h"
