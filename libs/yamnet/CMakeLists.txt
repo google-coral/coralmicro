@@ -8,9 +8,8 @@ endif()
 
 add_library_m7(libs_yamnet STATIC
     yamnet.cc
-
     DATA
-    ${CMAKE_SOURCE_DIR}/models/${model_name}
+    ${PROJECT_SOURCE_DIR}/models/${model_name}>/models/${model_name}
 )
 target_include_directories(libs_yamnet PUBLIC
     .

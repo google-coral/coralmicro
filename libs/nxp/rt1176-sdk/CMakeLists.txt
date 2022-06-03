@@ -483,9 +483,9 @@ add_library_m7(libs_nxp_rt1176-sdk_wiced
     WICED/WWD/internal/chips/43455/resources.c
     ${libs_nxp_rt1176-sdk_wiced_SOURCES}
     DATA
-    ${PROJECT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.bin
-    ${PROJECT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.clm_blob
-    ${PROJECT_SOURCE_DIR}/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd
+    ${PROJECT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.bin>/third_party/firmware/cypress/43455C0.bin
+    ${PROJECT_SOURCE_DIR}/third_party/firmware/cypress/43455C0.clm_blob>/third_party/firmware/cypress/43455C0.clm_blob
+    ${PROJECT_SOURCE_DIR}/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd>/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd
 )
 
 target_include_directories(libs_nxp_rt1176-sdk_wiced PUBLIC

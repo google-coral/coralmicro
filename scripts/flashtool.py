@@ -223,20 +223,20 @@ def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_ar
         # If the key is not found, don't panic.
         pass
 
-
-    data_files = list(data_files)
-    absolute_file_paths = list()
+    data_files = dict((file.split('>')[0], file.split('>')[0] if len(file.split('>')) == 1 else file.split('>')[1])
+                      for file in data_files)
     all_files_exist = True
-    for file in data_files:
-        path = os.path.join(build_dir, file)
-        if not os.path.exists(path):
-            print('%s does not exist!' % path)
+    for relative_src in list(data_files.keys()):
+        absolute_src = os.path.join(build_dir, relative_src)
+        if not os.path.exists(absolute_src):
+            print('%s does not exist!' % absolute_src)
             all_files_exist = False
-        absolute_file_paths.append(path)
+        else:
+            data_files[absolute_src] = data_files.pop(relative_src)
     if not all_files_exist:
         return None
 
-    return list(zip(absolute_file_paths, data_files))
+    return data_files
 
 def CreateSbFile(workdir, elftosb_path, srec_path):
     spinand_bdfile_path = os.path.join(workdir, 'program_flexspinand_image.bd')
@@ -475,19 +475,19 @@ def StateProgramElfloader(elf_path, debug=False, serial_number=None):
 
 def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
-        data_files.append((elf_path, '/default.elf'))
-        data_files.append((str(usb_ip_address).encode(), USB_IP_ADDRESS_FILE))
+        data_files[elf_path] = '/default.elf'
+        data_files[str(usb_ip_address).encode()] = USB_IP_ADDRESS_FILE
         if wifi_ssid is not None:
-            data_files.append((wifi_ssid.encode(), WIFI_SSID_FILE))
+            data_files[wifi_ssid.encode()] = WIFI_SSID_FILE
         if wifi_psk is not None:
-            data_files.append((wifi_psk.encode(), WIFI_PSK_FILE))
+            data_files[wifi_psk.encode()] = WIFI_PSK_FILE
         if wifi_country is not None:
-            data_files.append((wifi_country.encode(), WIFI_COUNTRY_FILE))
+            data_files[wifi_country.encode()] = WIFI_COUNTRY_FILE
         if wifi_revision is not None:
-            data_files.append((struct.pack('<H', wifi_revision), WIFI_REVISION_FILE))
+            data_files[struct.pack('<H', wifi_revision)] = WIFI_REVISION_FILE
         if ethernet_speed is not None:
-            data_files.append((struct.pack('<H', ethernet_speed), ETHERNET_SPEED_FILE))
-        for src_file, target_file in sorted(data_files, key=lambda x: x[1]):
+            data_files[struct.pack('<H', ethernet_speed)] = ETHERNET_SPEED_FILE
+        for src_file, target_file in data_files.items():
             if target_file[0] != '/':
                 target_file = '/' + target_file
             # If we are running on something with the wrong directory separator, fix it.
