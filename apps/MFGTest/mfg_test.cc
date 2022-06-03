@@ -309,7 +309,7 @@ void SetPmicRailState(struct jsonrpc_request* request) {
     if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
     coral::micro::PmicTask::GetSingleton()->SetRailState(
-        static_cast<coral::micro::pmic::Rail>(rail), enable);
+        static_cast<coral::micro::PmicRail>(rail), enable);
     jsonrpc_return_success(request, "{}");
 }
 

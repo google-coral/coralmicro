@@ -605,9 +605,9 @@ PowerResponse CameraTask::HandlePowerRequest(const PowerRequest& power) {
     PowerResponse resp;
     resp.success = true;
     PmicTask::GetSingleton()->SetRailState(
-            pmic::Rail::CAM_2V8, power.enable);
+            PmicRail::kCam2V8, power.enable);
     PmicTask::GetSingleton()->SetRailState(
-            pmic::Rail::CAM_1V8, power.enable);
+            PmicRail::kCam1V8, power.enable);
     vTaskDelay(pdMS_TO_TICKS(10));
 
     if (power.enable) {
