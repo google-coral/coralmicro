@@ -2,6 +2,7 @@
 #define LIBS_TPU_EDGETPU_MANAGER_H_
 
 #include <cstdlib>
+#include <optional>
 #include <map>
 #include <memory>
 
@@ -120,9 +121,9 @@ class EdgeTpuManager {
     // @endcond
 
     // Gets the current Edge TPU junction temperature.
-    // @returns The temperature in Celcius, or -276.88 if the `EdgeTpuContext`
-    //   is empty.
-    float GetTemperature();
+    // @returns The temperature in Celcius, or `std::nullopt` if
+    // `EdgeTpuContext` is empty.
+    std::optional<float> GetTemperature();
 
    private:
     TpuDriver tpu_driver_;

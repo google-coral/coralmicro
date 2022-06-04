@@ -37,11 +37,11 @@ void EdgeTpuManager::NotifyConnected(
 std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice(
     PerformanceMode mode) {
     MutexLock lock(mutex_);
-    if (!context_.expired()) {
-        return context_.lock();
-    }
 
-    auto shared_context = std::make_shared<EdgeTpuContext>();
+    auto context = context_.lock();
+    if (context) return context;
+
+    context = std::make_shared<EdgeTpuContext>();
 
     while (!usb_instance_) {
         vTaskDelay(pdMS_TO_TICKS(200));
@@ -50,8 +50,8 @@ std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice(
         return nullptr;
     }
 
-    context_ = shared_context;
-    return shared_context;
+    context_ = context;
+    return context;
 }
 
 EdgeTpuPackage* EdgeTpuManager::RegisterPackage(const char* package_content,
@@ -161,14 +161,12 @@ TfLiteStatus EdgeTpuManager::Invoke(EdgeTpuPackage* package,
     return package->inference_exe()->Invoke(tpu_driver_, context, node);
 }
 
-float EdgeTpuManager::GetTemperature() {
+std::optional<float> EdgeTpuManager::GetTemperature() {
     MutexLock lock(mutex_);
     // Only attempt to read the temperature if the device has been opened.
-    if (context_.expired()) {
-        return -276.88f;
-    }
-
-    return tpu_driver_.GetTemperature();
+    auto context = context_.lock();
+    if (context) return tpu_driver_.GetTemperature();
+    return std::nullopt;
 }
 
 }  // namespace coral::micro
