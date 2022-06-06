@@ -1,9 +1,12 @@
 set(OOBE_SOURCES
+    jpeg.cc
     oobe_cm7.cc
 )
 
 set(OOBE_LINK_LIBRARIES
     libs_base-m7_freertos
+    libs_base-m7_network
+    libs_libjpeg
     libs_posenet
     libs_rpc_http_server
 )
@@ -30,7 +33,6 @@ set(OOBE_M4_LINK_LIBRARIES
     libs_base-m4_freertos
     libs_tensorflow-m4
 )
-
 
 add_executable_m4(OOBEM4
     ${OOBE_M4_SOURCES}
@@ -99,7 +101,7 @@ target_link_libraries(OOBEDemoEthernet
 )
 
 add_executable_m7(OOBESimple
-    ${OOBE_SOURCES}
+    oobe_simple_cm7.cc
     M4_EXECUTABLE
     OOBESimpleM4
 )

@@ -166,6 +166,17 @@ SECTIONS
      . = ALIGN(4);
   } > m_ocram
 
+  .libjpeg :
+  {
+     . = ALIGN(4);
+     __libjpeg_start = .;
+     *liblibs_libjpeg.a:*(.text .text*)
+     *liblibs_libjpeg.a:*(.data .data*)
+     *liblibs_libjpeg.a:*(.rodata .rodata*)
+     __libjpeg_end = .;
+     . = ALIGN(4);
+  } > m_ocram
+
   /* The program code and other data goes into internal RAM */
   .text :
   {
