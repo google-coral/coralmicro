@@ -21,6 +21,10 @@ class OutputLayer {
     OutputLayer& operator=(const OutputLayer&) = delete;
     uint8_t *output_buffer() { return output_buffer_.get(); }
 
+    static bool SignedDataType(platforms::darwinn::DataType type);
+    static void TransformSignedDataType(uint8_t *buffer, int buffer_size,
+                                        int data_type_size, int x_dim,
+                                        int y_dim, int z_dim);
     void Relayout(uint8_t *dest) const;
     void TransformSignedDataType(uint8_t *buffer, int buffer_size) const;
   private:

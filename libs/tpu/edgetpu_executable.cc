@@ -2,6 +2,30 @@
 
 #include "third_party/tflite-micro/tensorflow/lite/kernels/kernel_util.h"
 
+namespace {
+int TensorDataTypeSize(platforms::darwinn::DataType data_type) {
+    switch (data_type) {
+        case platforms::darwinn::DataType_FIXED_POINT8:
+        case platforms::darwinn::DataType_SIGNED_FIXED_POINT8:
+            return 1;
+        case platforms::darwinn::DataType_FIXED_POINT16:
+        case platforms::darwinn::DataType_SIGNED_FIXED_POINT16:
+            return 2;
+        case platforms::darwinn::DataType_SIGNED_FIXED_POINT32:
+            return 4;
+        case platforms::darwinn::DataType_BFLOAT:
+            return 2;
+        case platforms::darwinn::DataType_HALF:
+            return 2;
+        case platforms::darwinn::DataType_SINGLE:
+            return 4;
+        default:
+            printf("Invalid DataType passed to TensorDataTypeSize().");
+            return 0;
+    }
+}
+}  // namespace
+
 namespace coral::micro {
 
 EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe) :
@@ -44,6 +68,20 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
                             dma_hint->size_in_bytes()));
                         break;
                     case platforms::darwinn::Description_BASE_ADDRESS_INPUT_ACTIVATION:
+                        name = dma_hint->meta()->name()->c_str();
+                        if (executable_->input_layers()) {
+                            for (const auto *input_layer : *(executable_->input_layers())) {
+                                if (!strcmp(input_layer->name()->c_str(), name)) {
+                                    if (OutputLayer::SignedDataType(input_layer->data_type())) {
+                                        OutputLayer::TransformSignedDataType(
+                                            input_tensor->data.uint8, input_tensor->bytes,
+                                            TensorDataTypeSize(input_layer->data_type()),
+                                            input_layer->x_dim(), input_layer->y_dim(),
+                                            input_layer->z_dim());
+                                    }
+                                }
+                            }
+                        }
                         RETURN_IF_ERROR(tpu_driver.SendInputs(
                             input_tensor->data.uint8 + dma_hint->offset_in_bytes(),
                             dma_hint->size_in_bytes()));
@@ -94,36 +132,16 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver, TfLiteContex
     return kTfLiteOk;
 }
 
-namespace {
-int TensorDataTypeSize(platforms::darwinn::DataType data_type) {
-    switch (data_type) {
-        case platforms::darwinn::DataType_FIXED_POINT8:
-        case platforms::darwinn::DataType_SIGNED_FIXED_POINT8:
-            return 1;
-        case platforms::darwinn::DataType_FIXED_POINT16:
-        case platforms::darwinn::DataType_SIGNED_FIXED_POINT16:
-            return 2;
-        case platforms::darwinn::DataType_SIGNED_FIXED_POINT32:
-            return 4;
-        case platforms::darwinn::DataType_BFLOAT:
-            return 2;
-        case platforms::darwinn::DataType_HALF:
-            return 2;
-        case platforms::darwinn::DataType_SINGLE:
-            return 4;
-        default:
-            printf("Invalid DataType passed to TensorDataTypeSize().");
-            return 0;
-    }
-}
-}  // namespace
-
 int OutputLayer::DataTypeSize() const {
       return TensorDataTypeSize(output_layer_->data_type());
 }
 
 bool OutputLayer::SignedDataType() const {
-    switch (output_layer_->data_type()) {
+    return SignedDataType(output_layer_->data_type());
+}
+
+bool OutputLayer::SignedDataType(platforms::darwinn::DataType type) {
+    switch (type) {
         case platforms::darwinn::DataType_SIGNED_FIXED_POINT8:
         case platforms::darwinn::DataType_SIGNED_FIXED_POINT16:
             return true;
@@ -250,26 +268,15 @@ void OutputLayer::Relayout(uint8_t *dest) const {
         }
 
 #undef RELAYOUT_WITH_Z_BYTES_SPECIALIZATION
-
     }
 }
 
-void OutputLayer::TransformSignedDataType(uint8_t *buffer, int buffer_size) const {
-    if(!SignedDataType()) {
-        return;
-    }
-
-    const auto data_type_size = DataTypeSize();
-    if (buffer_size < ActualSizeBytes()) {
-        printf("Provided buffer size is less than actual size_bytes.");
-        return;
-    }
-
+void OutputLayer::TransformSignedDataType(uint8_t *buffer, int buffer_size, int data_type_size, int x_dim, int y_dim, int z_dim) {
     int buffer_index = 0;
 
-    for (int y = 0; y < y_dim(); ++y) {
-        for (int x = 0; x < x_dim(); ++x) {
-            for (int z = 0; z < z_dim(); ++z) {
+    for (int y = 0; y < y_dim; ++y) {
+        for (int x = 0; x < x_dim; ++x) {
+            for (int z = 0; z < z_dim; ++z) {
                 // XORing with 128 on the last byte of each entry will flip the MSB of
                 // each entry. Please note that bytes are stored little endian.
                 int msb_index = buffer_index + data_type_size - 1;
@@ -278,6 +285,19 @@ void OutputLayer::TransformSignedDataType(uint8_t *buffer, int buffer_size) cons
             }
         }
     }
+}
+
+void OutputLayer::TransformSignedDataType(uint8_t *buffer, int buffer_size) const {
+    if(!SignedDataType()) {
+        return;
+    }
+
+    if (buffer_size < ActualSizeBytes()) {
+        printf("Provided buffer size is less than actual size_bytes.");
+        return;
+    }
+
+    TransformSignedDataType(buffer, buffer_size, DataTypeSize(), x_dim(), y_dim(), z_dim());
 }
 
 // Used in GetBufferIndex(int y, int x, int z)
