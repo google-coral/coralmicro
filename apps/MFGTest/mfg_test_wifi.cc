@@ -3,7 +3,6 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/led.h"
-#include "libs/base/main_freertos_m7.h"
 #include "libs/base/mutex.h"
 #include "libs/base/strings.h"
 #include "libs/base/utils.h"
@@ -205,7 +204,7 @@ extern "C" void app_main(void* param) {
     }
 
     if (coral::micro::TurnOnWiFi()) {
-        if (coral::micro::ConnectToWiFi()) {
+        if (coral::micro::ConnectWiFi()) {
             coral::micro::led::Set(coral::micro::led::LED::kUser, true);
         }
     } else {

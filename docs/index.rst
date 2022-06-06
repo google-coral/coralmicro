@@ -5,3 +5,4 @@ coralmicro API
    edgetpu.rst
    inference.rst
    pins.rst
+   wifi.rst

@@ -317,7 +317,7 @@ void Main() {
     coral::micro::InitializeEthernet(false);
 #elif defined(OOBE_DEMO_WIFI)
     coral::micro::TurnOnWiFi();
-    if (!coral::micro::ConnectToWiFi()) {
+    if (!coral::micro::ConnectWiFi()) {
         // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
         coral::micro::led::Set(coral::micro::led::LED::kPower, true);
         coral::micro::led::Set(coral::micro::led::LED::kUser, true);

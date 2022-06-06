@@ -30,7 +30,9 @@ MacAddress GetMacAddress();
 bool GetUSBIPAddress(ip4_addr_t* usb_ip_out);
 bool GetUSBIPAddress(std::string* usb_ip_out);
 bool GetWifiSSID(std::string* wifi_ssid_out);
+bool SetWifiSSID(std::string* wifi_ssid);
 bool GetWifiPSK(std::string* wifi_psk_out);
+bool SetWifiPSK(std::string* wifi_psk);
 int GetEthernetSpeed();
 }  // namespace utils
 }  // namespace coral::micro

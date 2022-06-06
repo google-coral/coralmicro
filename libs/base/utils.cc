@@ -7,8 +7,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/ip_addr.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/wwd_constants.h"
 
-namespace coral::micro {
-namespace utils {
+namespace coral::micro::utils {
 
 uint64_t GetUniqueID() {
     uint32_t fuse_val_hi, fuse_val_lo;
@@ -22,7 +21,7 @@ std::string GetSerialNumber() {
     char serial[17];  // 16 hex characters + \0
     snprintf(serial, sizeof(serial), "%08lx%08lx",
              static_cast<uint32_t>(id >> 32), static_cast<uint32_t>(id));
-    return std::string(serial);
+    return serial;
 }
 
 MacAddress GetMacAddress() {
@@ -51,8 +50,20 @@ bool GetUSBIPAddress(std::string* usb_ip_out) {
     return coral::micro::filesystem::ReadFile("/usb_ip_address", usb_ip_out);
 }
 
+bool SetWifiSSID(std::string* wifi_ssid) {
+    return coral::micro::filesystem::WriteFile(
+        "/wifi_ssid", reinterpret_cast<const uint8_t*>(wifi_ssid->c_str()),
+        wifi_ssid->size());
+}
+
 bool GetWifiSSID(std::string* wifi_ssid_out) {
     return coral::micro::filesystem::ReadFile("/wifi_ssid", wifi_ssid_out);
+}
+
+bool SetWifiPSK(std::string* wifi_psk) {
+    return coral::micro::filesystem::WriteFile(
+        "/wifi_psk", reinterpret_cast<const uint8_t*>(wifi_psk->c_str()),
+        wifi_psk->size());
 }
 
 bool GetWifiPSK(std::string* wifi_psk_out) {
@@ -92,5 +103,4 @@ extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
         wifi_country_code_out[0], wifi_country_code_out[1], wifi_revision));
 }
 
-}  // namespace utils
-}  // namespace coral::micro
+}  // namespace coral::micro::utils
