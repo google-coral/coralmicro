@@ -736,6 +736,9 @@ def main():
     app_elf_group.add_argument(
         '--list', dest='list', action='store_true',
         help='Prints all detected Coral Dev Board Micro devices.')
+    app_elf_group.add_argument(
+        '--ums', dest='ums', action='store_true',
+        help='Puts the device in a state where it acts as an LFS mountable USB drive.')
 
     basic_group.add_argument(
         '--subapp', type=str, required=False,
@@ -907,6 +910,10 @@ def main():
         elif args.example:
             elf_name = args.example
             app_dir = os.path.join(build_dir, 'examples', args.example)
+        elif args.ums:
+            args.ram = True
+            elf_name = 'usb_drive'
+            app_dir = os.path.join(build_dir, 'apps', 'usb_drive')
         elf_path = os.path.join(app_dir, (
             args.subapp if args.subapp else elf_name) + '.stripped') if elf_path is None else elf_path
         unstripped_elf_path = os.path.join(app_dir, (
@@ -955,6 +962,7 @@ def main():
         'flashloader_path': flashloader_path,
         'ram': args.ram,
         'reset': not args.noreset,
+        'ums': args.ums,
         'elfloader_path': elfloader_path,
         'elfloader_elf_path': elfloader_elf_path,
         'elf_path': elf_path,
