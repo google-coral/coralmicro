@@ -124,7 +124,7 @@ bool setup() {
     interpreter = std::make_unique<tflite::MicroInterpreter>(
         model, *resolver, tensor_arena, kTensorArenaSize, error_reporter.get());
 #else
-    // Three operations are required, EdgeTPU is added when the Interpeter
+    // Three operations are required, EdgeTPU is added when the Interpreter
     // is created.
     resolver =
         std::make_unique<tflite::MicroMutableOpResolver<kNumTensorOps>>();
@@ -208,7 +208,6 @@ std::optional<const std::vector<tensorflow::Class>> loop(bool print) {
     for (int i = 0; i < kFeatureElementCount; ++i) {
         input[i] = (input[i] - offset) * scalar;
     }
-
     uint32_t invoke_start = coral::micro::timer::millis();
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
@@ -218,6 +217,7 @@ std::optional<const std::vector<tensorflow::Class>> loop(bool print) {
     const std::vector<tensorflow::Class> output =
         tensorflow::GetClassificationResults(interpreter.get(), kThreshold,
                                              kTopK);
+    FrontendReset(frontend_state.get());
     uint32_t process_end = coral::micro::timer::millis();
     if (print) {
         printf("Ran YAMNet + Frontend in %ld ms\r\n",

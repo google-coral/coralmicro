@@ -85,6 +85,10 @@ extern "C" [[noreturn]] void app_main(void* param) {
                 }
             });
         coral::micro::yamnet::loop();
+#ifndef YAMNET_CPU
+        // Delay 975 ms to rate limit the TPU version.
+        vTaskDelay(pdMS_TO_TICKS(coral::micro::yamnet::kDurationMs));
+#endif
     }
     vTaskSuspend(nullptr);
 }

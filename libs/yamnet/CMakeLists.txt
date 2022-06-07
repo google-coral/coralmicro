@@ -1,4 +1,4 @@
-set(YAMNET_CPU true) # If CPU YAMNet is desired, uncomment.
+# set(YAMNET_CPU true) # If CPU YAMNet is desired, uncomment.
 if(YAMNET_CPU)
     add_definitions(-DYAMNET_CPU)
     set(model_name yamnet.tflite)
