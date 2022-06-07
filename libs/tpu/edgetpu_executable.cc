@@ -37,6 +37,12 @@ EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe) 
     }
 }
 
+EdgeTpuExecutable::~EdgeTpuExecutable() {
+    for (auto entry : output_layers_) {
+        delete entry.second;
+    }
+}
+
 #define RETURN_IF_ERROR(expr) \
     do { \
         bool ret = expr; \

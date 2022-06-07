@@ -64,6 +64,7 @@ class OutputLayer {
 class EdgeTpuExecutable {
   public:
     explicit EdgeTpuExecutable(const platforms::darwinn::Executable *exe);
+    ~EdgeTpuExecutable();
     EdgeTpuExecutable(const EdgeTpuExecutable&) = delete;
     EdgeTpuExecutable& operator=(const EdgeTpuExecutable&) = delete;
 
