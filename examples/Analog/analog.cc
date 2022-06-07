@@ -4,6 +4,9 @@
 
 #include <cstdio>
 
+// Reads analog input from ADC1 channel B (pin 4 on the left-side header)
+// and writes it to the DAC (pin 9 on the right-side header)
+
 extern "C" void app_main(void *param) {
     coral::micro::analog::Init(coral::micro::analog::Device::ADC1);
     coral::micro::analog::Init(coral::micro::analog::Device::DAC1);

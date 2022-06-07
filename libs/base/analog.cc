@@ -92,10 +92,10 @@ uint16_t ReadADC(const ADCConfig& config) {
 
 void EnableDAC(bool enable) { DAC12_Enable(DAC, enable); }
 
-void WriteDAC(uint16_t counts) {
+void WriteDAC(uint16_t value) {
     // 12-bit DAC, values range from 0 - 4095.
-    assert(counts <= 4095);
-    DAC12_SetData(DAC, counts);
+    assert(value <= 4095);
+    DAC12_SetData(DAC, value);
 }
 
 }  // namespace analog

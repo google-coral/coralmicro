@@ -27,6 +27,7 @@ enum class Side {
 };
 
 // Represents the configuration of an ADC.
+// Each ADC has a 12-bit resolution with 1.8V reference voltage.
 struct ADCConfig {
     // Pointer to the base register of the ADC.
     ADC_Type* device;
@@ -44,14 +45,17 @@ void Init(Device device);
 // @param config Configuration struct to populate.
 // @param device Desired device to configure.
 // @param channel The ADC channel to use (must be less than the max number of channels).
-//                See `kLPADC1ChannelCount` and `kLPADC2ChannelCount` for the amount of channels.
-// @param primary_side Primary side of the ADC, if using differential mode. In single ended mode, the desired side.
+//   See `kLPADC1ChannelCount` and `kLPADC2ChannelCount` for the amount of channels.
+// @param primary_side Primary side of the ADC, if using differential mode.
+//   In single ended mode, the desired side.
 // @param differential Whether or not to run the ADC in differential mode.
 void CreateConfig(ADCConfig& config, Device device, int channel,
                   Side primary_side, bool differential);
 
-// Reads a configured ADC.
-// @param config Configuration to use.
+// Reads voltage values from an ADC.
+//
+// For example code, see `examples/analog/`.
+// @param config ADC configuration to use.
 // @returns Digitized value of the voltage that the ADC is sensing.
 //          The ADC has 12 bits of precision, so the maximum value returned is 4095.
 uint16_t ReadADC(const ADCConfig& config);
@@ -60,11 +64,13 @@ uint16_t ReadADC(const ADCConfig& config);
 // @param enable True enables the DAC; false disables it.
 void EnableDAC(bool enable);
 
-// Sets the voltage that the DAC should output when enabled.
-// @param counts The voltage to have the DAC output.
-//               The DAC has 12-bit resolution, so the maximum allowed value is 4095.
-//               The maximum output voltage of the DAC is 1.8V.
-void WriteDAC(uint16_t counts);
+// Writes voltage values to the DAC. You must first call `EnableDAC()`.
+//
+// For example code, see `examples/analog/`.
+// @param value The voltage value to output.
+//   The DAC has 12-bit resolution, so the allowed values are 0 to 4095.
+//   The maximum output voltage of the DAC is 1.8V.
+void WriteDAC(uint16_t value);
 
 }  // namespace analog
 }  // namespace coral::micro
