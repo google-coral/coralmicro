@@ -20,7 +20,8 @@ limitations under the License.
 // C data array, so it can be easily compiled into a binary for devices that
 // don't have a file system.
 
-// See train/README.md for a full description of the creation process.
+// For a full description of the creation process, see
+// https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/hello_world/train
 
 #include "examples/HelloTensorflowFreeRTOS/hello_world_model.h"
 

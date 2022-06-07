@@ -14,6 +14,31 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+// Runs a local server with an endpoint called 'detect_from_camera', which
+// will capture an image from the board's camera, run the image through an
+// object detection model and return the results in a JSON response.
+//
+// The response includes only the top result with a JSON file like this:
+//
+// {
+// 'id': int,
+// 'result':
+//     {
+//     'width': int,
+//     'height': int,
+//     'base64_data': image_bytes,
+//     'detection':
+//         {
+//         'id': int,
+//         'score': float,
+//         'xmin': float,
+//         'xmax': float,
+//         'ymin': float,
+//         'ymax': float
+//         }
+//     }
+// }
+
 namespace {
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";

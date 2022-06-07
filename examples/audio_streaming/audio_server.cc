@@ -11,6 +11,10 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
+// Captures audio from the Dev Board Micro on-board microphone
+// and makes the audio stream available from a local server.
+// To receive the audio stream, run audio_client.py on your connected computer.
+
 namespace coral::micro {
 namespace {
 AudioDriverBuffers</*NumDmaBuffers*/ 16, /*CombinedDmaBufferSize=*/28 * 1024>

@@ -7,6 +7,21 @@ import sys
 import threading
 import wave
 
+"""
+Saves audio data fetched from the audio_server that's running
+on the connected Dev Board Micro.
+
+First load audio_server onto the Dev Board Micro:
+
+    python3 scripts/flashtool.py -b build -e audio_streaming
+
+Then start this client on your computer:
+
+    python3 examples/audio_streaming/audio_client.py
+
+It will start recording and continue until you quit this script, and
+then it saves to output.wav by default.
+"""
 
 try:
     import pyaudio  # sudo apt-get install python3-pyaudio
@@ -271,7 +286,7 @@ def main():
                         help='audio player type')
     parser.add_argument('--format', '-f', default='wav', choices=FORMATS.keys(),
                         help='audio file format')
-    parser.add_argument('--output', '-o', type=str, default=None,
+    parser.add_argument('--output', '-o', type=str, default='output.wav',
                         metavar='FILENAME',
                         help='record audio to file')
     parser.add_argument('--ffplay', action='store_true',
@@ -304,6 +319,8 @@ def main():
                sample_rate_hz=args.sample_rate_hz,
                frames_per_callback_ms=max(args.dma_buffer_size_ms, 50)) as play:
 
+        print(f'Recording audio to {args.output}...')
+        print('Press CTRL+C to quit.')
         while True:
             samples = sock.recv(4096)
             if not samples:
