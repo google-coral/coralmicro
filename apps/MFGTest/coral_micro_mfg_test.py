@@ -77,7 +77,7 @@ class CoralMicroMFGTest(object):
             {'id': 1, 'result': {}}
         """
         return self.send_rpc('set_pmic_rail_state', {
-            'set_pmic_rail_state': rail.value,
+            'rail': rail.value,
             'enable': enable,
         })
 
