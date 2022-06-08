@@ -16,5 +16,6 @@ add_library(libs_arduino STATIC
     CMakeLists.txt)
 target_link_libraries(libs_arduino
     libs_base-m7_freertos
+    libs_yamnet
 )
 bundle_static_library(libs_arduino libs_arduino_bundled)
