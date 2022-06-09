@@ -31,8 +31,6 @@ sudo apt-get -y install \
 python3 -m pip install pip --upgrade
 python3 -m pip install -r scripts/requirements.txt
 
-sudo cp scripts/50-cmsis-dap.rules \
-  scripts/99-coral-micro.rules \
-  scripts/99-secure-provisioning.rules /etc/udev/rules.d
+sudo cp scripts/99-coral-micro.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules
 sudo udevadm trigger
