@@ -3,6 +3,9 @@
 #include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// This runs on the M4 core and receives IPC messages from the M7
+// and toggles the user LED based on the messages received.
+
 extern "C" void app_main(void* param) {
     // Create and register message handler.
     auto message_handler =
@@ -11,6 +14,7 @@ extern "C" void app_main(void* param) {
             const auto* msg =
                 reinterpret_cast<const mp_example::ExampleAppMessage*>(data);
             if (msg->type == mp_example::ExampleMessageType::LED_STATUS) {
+                printf("[M4] LED_STATUS received\r\n");
                 switch (msg->led_status) {
                     case mp_example::LEDStatus::ON: {
                         coral::micro::led::Set(coral::micro::led::LED::kUser,

@@ -2,6 +2,9 @@
 #include "libs/base/ipc_m7.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// This runs on the M7 core and sends IPC messages to the M4 with
+// instructions to toggle the user LED.
+
 extern "C" [[noreturn]] void app_main(void* param) {
     // Create and register message handler for the M7.
     auto message_handler =
