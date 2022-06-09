@@ -2,31 +2,19 @@
 
 #include <cstdio>
 
-#include "libs/base/check.h"
-#include "libs/base/mutex.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
 namespace coral::micro {
+using namespace pmic;
 namespace {
 constexpr uint8_t kPmicAddress = 0x58;
-
-struct PmicRegisters {
-    enum : uint16_t {
-        PAGE_CON = 0x000,
-        LDO2_CONT = 0x027,
-        LDO3_CONT = 0x028,
-        LDO4_CONT = 0x029,
-        DEVICE_ID = 0x181,
-        UNKNOWN = 0xFFF,
-    };
-};
 }  // namespace
 
-void PmicTask::Read(uint16_t reg, uint8_t* val) {
-    uint8_t offset = reg & 0xFF;
+void PmicTask::Read(PmicRegisters reg, uint8_t* val) {
+    uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
 
-    SetPage(reg);
+    SetPage(static_cast<uint16_t>(reg));
     lpi2c_master_transfer_t transfer;
     transfer.flags = kLPI2C_TransferDefaultFlag;
     transfer.slaveAddress = kPmicAddress;
@@ -35,13 +23,13 @@ void PmicTask::Read(uint16_t reg, uint8_t* val) {
     transfer.subaddressSize = sizeof(uint8_t);
     transfer.data = val;
     transfer.dataSize = sizeof(*val);
-    CHECK(LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success);
+    /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
 }
 
-void PmicTask::Write(uint16_t reg, uint8_t val) {
-    uint8_t offset = reg & 0xFF;
+void PmicTask::Write(PmicRegisters reg, uint8_t val) {
+    uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
 
-    SetPage(reg);
+    SetPage(static_cast<uint16_t>(reg));
     lpi2c_master_transfer_t transfer;
     transfer.flags = kLPI2C_TransferDefaultFlag;
     transfer.slaveAddress = kPmicAddress;
@@ -50,7 +38,7 @@ void PmicTask::Write(uint16_t reg, uint8_t val) {
     transfer.subaddressSize = sizeof(uint8_t);
     transfer.data = &val;
     transfer.dataSize = sizeof(val);
-    CHECK(LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success);
+    /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
 }
 
 void PmicTask::SetPage(uint16_t reg) {
@@ -67,33 +55,30 @@ void PmicTask::SetPage(uint16_t reg) {
     transfer.subaddressSize = sizeof(uint8_t);
     transfer.data = &page_con_reg;
     transfer.dataSize = sizeof(page_con_reg);
-    CHECK(LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success);
+    /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
 }
 
-PmicTask::PmicTask(): mutex_(xSemaphoreCreateMutex()) {
-    CHECK(mutex_);
+void PmicTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
+    QueueTask::Init();
+    i2c_handle_ = i2c_handle;
 }
 
-PmicTask::~PmicTask() { vSemaphoreDelete(mutex_); }
-
-void PmicTask::SetRailState(PmicRail rail, bool enable) {
-    MutexLock lock(mutex_);
-
-    uint16_t reg = PmicRegisters::UNKNOWN;
+void PmicTask::HandleRailRequest(const RailRequest& rail) {
+    PmicRegisters reg = PmicRegisters::UNKNOWN;
     uint8_t val;
-    switch (rail) {
-        case PmicRail::kCam2V8:
+    switch (rail.rail) {
+        case Rail::CAM_2V8:
             reg = PmicRegisters::LDO2_CONT;
             break;
-        case PmicRail::kCam1V8:
+        case Rail::CAM_1V8:
             reg = PmicRegisters::LDO3_CONT;
             break;
-        case PmicRail::kMic1V8:
+        case Rail::MIC_1V8:
             reg = PmicRegisters::LDO4_CONT;
             break;
     }
     Read(reg, &val);
-    if (enable) {
+    if (rail.enable) {
         val |= 1;
     } else {
         val &= ~1;
@@ -101,12 +86,44 @@ void PmicTask::SetRailState(PmicRail rail, bool enable) {
     Write(reg, val);
 }
 
-uint8_t PmicTask::GetChipId() {
-    MutexLock lock(mutex_);
+void PmicTask::HandleGpioRequest(const GpioRequest& gpio) {}
 
+uint8_t PmicTask::HandleChipIdRequest() {
     uint8_t device_id = 0xff;
     Read(PmicRegisters::DEVICE_ID, &device_id);
     return device_id;
+}
+
+void PmicTask::RequestHandler(Request* req) {
+    Response resp;
+    resp.type = req->type;
+    switch (req->type) {
+        case RequestType::Rail:
+            HandleRailRequest(req->request.rail);
+            break;
+        case RequestType::Gpio:
+            HandleGpioRequest(req->request.gpio);
+            break;
+        case RequestType::ChipId:
+            resp.response.chip_id = HandleChipIdRequest();
+            break;
+    }
+    if (req->callback) req->callback(resp);
+}
+
+void PmicTask::SetRailState(Rail rail, bool enable) {
+    Request req;
+    req.type = RequestType::Rail;
+    req.request.rail.rail = rail;
+    req.request.rail.enable = enable;
+    SendRequest(req);
+}
+
+uint8_t PmicTask::GetChipId() {
+    Request req;
+    req.type = RequestType::ChipId;
+    Response resp = SendRequest(req);
+    return resp.response.chip_id;
 }
 
 }  // namespace coral::micro
