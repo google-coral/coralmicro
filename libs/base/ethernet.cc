@@ -75,7 +75,7 @@ void InitializeEthernet(bool default_iface) {
     phy_config_t phyConfig = {
         .phyAddr = 1,
         .duplex = kPHY_FullDuplex,
-        .autoNeg = false,
+        .autoNeg = true,
         .enableEEE = true,
     };
 
