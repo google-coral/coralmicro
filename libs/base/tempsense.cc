@@ -4,8 +4,7 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_tempsensor.h"
 
-namespace coral::micro {
-namespace tempsense {
+namespace coral::micro::tempsense {
 
 void Init() {
     // Configure CPU for just single measurement mode.
@@ -18,11 +17,12 @@ void Init() {
 
 float GetTemperature(TempSensor sensor) {
     switch (sensor) {
-        case TempSensor::kCPU:
+        case TempSensor::kCPU: {
             // Toggle CTRL1_START to get new single-shot read.
             TMPSNS_StopMeasure(TMPSNS);
             TMPSNS_StartMeasure(TMPSNS);
             return TMPSNS_GetCurrentTemperature(TMPSNS);
+        }
         case TempSensor::kTPU: {
             auto context = EdgeTpuManager::GetSingleton()->OpenDevice();
             return EdgeTpuManager::GetSingleton()->GetTemperature().value();
@@ -33,5 +33,4 @@ float GetTemperature(TempSensor sensor) {
     }
 }
 
-}  // namespace tempsense
-}  // namespace coral::micro
+}  // namespace coral::micro::tempsense

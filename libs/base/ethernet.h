@@ -5,9 +5,30 @@
 
 namespace coral::micro {
 
+// Gets the ethernet interface, which contains info like
+// ip and hw addresses, interface names, etc.
+//
+// @return A pointer to the netif ethernet interface, or nullptr if `InitializeEthernet()` has
+// not been called or the POE add-on board failed to initialize. See:
+// https://os.mbed.com/docs/mbed-os/v6.15/mbed-os-api-doxy/structnetif.html
 struct netif* GetEthernetInterface();
+
+// Initializes the ethernet module.
+//
+// This function requires that the POE add-on board is connected and it must be called
+// before `GetEthernetInterface()`.
+// @param default_iface True sets ethernet as the default network interface, false disables it.
 void InitializeEthernet(bool default_iface);
-status_t EthernetPHYWrite(uint32_t phyReg, uint32_t data);
+
+// @cond Internal only, do not generate docs.
+// Writes data over the SMI to the specified PHY register.
+//
+// @param phy_reg The PHY register to write to.
+// @param data The data to write into that register.
+// @return A status code, see:
+// https://mcuxpresso.nxp.com/api_doc/dev/2349/a00344.html#ga7ff0b98bb1341c07acefb1473b6eda29
+status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data);
+// @endcond
 
 }  // namespace coral::micro
 

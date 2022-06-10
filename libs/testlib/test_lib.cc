@@ -489,6 +489,7 @@ void GetTemperature(struct jsonrpc_request* request) {
     int sensor_num;
     if (!JsonRpcGetIntegerParam(request, "sensor", &sensor_num)) return;
 
+    coral::micro::tempsense::Init();
     auto sensor = static_cast<coral::micro::tempsense::TempSensor>(sensor_num);
     if (sensor >= coral::micro::tempsense::TempSensor::kSensorCount) {
         jsonrpc_return_error(request, -1, "Invalid temperature sensor",

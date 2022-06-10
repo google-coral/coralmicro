@@ -65,8 +65,8 @@ struct netif* GetEthernetInterface() {
     return eth_netif;
 }
 
-status_t EthernetPHYWrite(uint32_t phyReg, uint32_t data) {
-    return PHY_Write(&phyHandle, phyReg, data);
+status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data) {
+    return PHY_Write(&phyHandle, phy_reg, data);
 }
 
 void InitializeEthernet(bool default_iface) {
