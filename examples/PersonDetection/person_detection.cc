@@ -10,6 +10,13 @@
 #include <cstring>
 #include <memory>
 
+// Runs a 250 kB TFLM model that recognizes people with the camera on the
+// Dev Board Micro, printing scores for "person" and "no person" in the serial
+// console. The model runs on the M7 core alone; it does NOT use the Edge TPU.
+//
+// For more information about this model, see:
+// https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/person_detection
+
 void RespondToDetection(tflite::ErrorReporter* error_reporter,
                         int8_t person_score, int8_t no_person_score){
     TF_LITE_REPORT_ERROR(error_reporter,

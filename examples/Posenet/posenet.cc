@@ -4,6 +4,9 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
+// Runs pose estimation using PoseNet, running on the Edge TPU.
+// Scores and keypoint data is printed to the serial console.
+
 extern "C" [[noreturn]] void app_main(void* param) {
     coral::micro::posenet::Output output{};
     coral::micro::CameraTask::GetSingleton()->SetPower(false);

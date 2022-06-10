@@ -11,6 +11,13 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
 
+// Runs a 20 kB TFLM model that can recognize 2 keywords, "yes" and "no",
+// using the mic on the Dev Board Micro and printing results to the serial
+// console. The model runs on the M7 core alone; it does NOT use the Edge TPU.
+//
+// For more information about this model, see:
+// https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech
+
 namespace {
 constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
 

@@ -5,6 +5,10 @@
 
 #include <cstdio>
 
+// Runs simple PWM cycles with pins PWM_A (pin 10 on the left-side header)
+// and PWM_B (pin 9 on the left-side header).
+// Note: These pins output a max of 1.8V
+
 extern "C" void app_main(void *param) {
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_00_FLEXPWM1_PWM0_A, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_FLEXPWM1_PWM0_B, 0U);

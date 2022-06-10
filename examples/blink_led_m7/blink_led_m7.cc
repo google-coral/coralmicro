@@ -4,6 +4,9 @@
 #include "libs/base/tasks.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 
+// Blinks the user LED (green), power LED (orange), and Edge TPU LED (white)
+// from the M7.
+
 extern "C" [[noreturn]] void app_main(void* param) {
     printf("Blinking LED from M7.\r\n");
     coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);

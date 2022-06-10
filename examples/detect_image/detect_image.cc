@@ -11,6 +11,10 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+// Performs object detection with SSD MobileNet, running on the Edge TPU,
+// using a local bitmap image as input.
+// Results (up to 3 detected objects) are printed to serial console.
+
 namespace coral::micro {
 namespace {
 constexpr char kModelPath[] =

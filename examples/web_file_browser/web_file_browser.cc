@@ -11,6 +11,10 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Hosts an HTTP server on the Dev Board Micro, allowing connected clients
+// to browse files with a web browser, and push/pull files to the board with
+// curl commands.
+
 using coral::micro::filesystem::Lfs;
 
 namespace coral::micro {

@@ -10,6 +10,12 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
+// Runs a tiny TFLM model on the M7 core, NOT on the Edge TPU, which simply
+// outputs sine wave values over time in the serial console.
+//
+// For more information about this model, see:
+// https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples
+
 extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask,
                                               char* pcTaskName) {
     printf("Stack overflow in %s\r\n", pcTaskName);

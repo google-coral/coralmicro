@@ -11,6 +11,22 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
 
+// Runs a local server with two RPC endpoints: 'serial_number', which
+// returns the board's SN, and 'take_picture', which captures an image with
+// the board's camera and return it via JSON.
+//
+// The 'take_picture' response looks like this:
+//
+// {
+// 'id': int,
+// 'result':
+//     {
+//     'width': int,
+//     'height': int,
+//     'base64_data': image_bytes
+//     }
+// }
+
 static void serial_number_rpc(struct jsonrpc_request* r) {
     std::string serial = coral::micro::utils::GetSerialNumber();
     jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", serial.size(),
@@ -40,7 +56,7 @@ static void take_picture_rpc(struct jsonrpc_request* r) {
     if (ret) {
         jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V}", "width",
                                coral::micro::CameraTask::kWidth, "height",
-                               coral::micro::CameraTask::kHeight, "pixels",
+                               coral::micro::CameraTask::kHeight, "base64_data",
                                image_buffer.size(), image_buffer.data());
     } else {
         jsonrpc_return_error(r, -1, "failure", nullptr);

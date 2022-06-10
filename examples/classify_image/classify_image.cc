@@ -11,6 +11,10 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+// Performs image classification with MobileNet, running on the Edge TPU,
+// using a local bitmap image as input.
+// The top 3 class predictions are printed to the serial console.
+
 namespace coral::micro {
 namespace {
 constexpr char kModelPath[] =
