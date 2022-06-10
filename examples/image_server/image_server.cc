@@ -89,12 +89,12 @@ extern "C" void app_main(void* param) {
     if (!coral::micro::TurnOnWiFi()) {
         printf("Unable to bring up wifi...\r\n");
     }
-    jsonrpc_export(coral::micro::testlib::kMethodWifiConnect,
-                   coral::micro::testlib::WifiConnect);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiGetIp,
-                   coral::micro::testlib::WifiGetIp);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiGetStatus,
-                   coral::micro::testlib::WifiGetStatus);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiConnect,
+                   coral::micro::testlib::WiFiConnect);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiGetIp,
+                   coral::micro::testlib::WiFiGetIp);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiGetStatus,
+                   coral::micro::testlib::WiFiGetStatus);
 
 #else
     printf("Starting Image RPC Server...\r\n");

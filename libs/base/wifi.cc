@@ -12,9 +12,9 @@ bool TurnOnWiFi() { return WIFI_On() == eWiFiSuccess; }
 
 bool TurnOffWiFi() { return WIFI_Off() == eWiFiSuccess; }
 
-bool WifiIsConnected() { return WIFI_IsConnected(); }
+bool WiFiIsConnected() { return WIFI_IsConnected(); }
 
-bool ConnectWifi(const WIFINetworkParams_t* network_params, int retry_count) {
+bool ConnectWiFi(const WIFINetworkParams_t* network_params, int retry_count) {
     while (retry_count != 0) {
         if (WIFI_ConnectAP(network_params) == eWiFiSuccess) return true;
         --retry_count;
@@ -40,23 +40,23 @@ bool ConnectWiFi(const char* ssid, const char* psk, int retry_count) {
         params.ucPasswordLength = 0;
         params.xSecurity = eWiFiSecurityOpen;
     }
-    return ConnectWifi(&params, retry_count);
+    return ConnectWiFi(&params, retry_count);
 }
 
 bool ConnectWiFi(int retry_count) {
     std::string wifi_ssid;
-    if (!coral::micro::utils::GetWifiSSID(&wifi_ssid)) {
+    if (!coral::micro::utils::GetWiFiSSID(&wifi_ssid)) {
         printf("No Wi-Fi SSID provided\r\n");
         return false;
     }
 
     std::string wifi_psk;
-    bool have_psk = coral::micro::utils::GetWifiPSK(&wifi_psk);
+    bool have_psk = coral::micro::utils::GetWiFiPSK(&wifi_psk);
     return ConnectWiFi(wifi_ssid.c_str(), have_psk ? wifi_psk.c_str() : nullptr,
                        retry_count);
 }
 
-bool DisconnectWifi(int retry_count) {
+bool DisconnectWiFi(int retry_count) {
     if (WIFI_IsConnected()) {
         while (retry_count != 0) {
             if (WIFI_Disconnect() == eWiFiSuccess) return true;
@@ -67,7 +67,7 @@ bool DisconnectWifi(int retry_count) {
     return true;
 }
 
-std::vector<WIFIScanResult_t> ScanWifi(uint8_t max_results) {
+std::vector<WIFIScanResult_t> ScanWiFi(uint8_t max_results) {
     std::vector<WIFIScanResult_t> results{max_results};
     if (WIFI_Scan(results.data(), results.size()) != eWiFiSuccess) {
         return {};
@@ -75,8 +75,8 @@ std::vector<WIFIScanResult_t> ScanWifi(uint8_t max_results) {
     return results;
 }
 
-std::optional<std::string> GetWifiIp() {
-    if (!WifiIsConnected()) {
+std::optional<std::string> GetWiFiIp() {
+    if (!WiFiIsConnected()) {
         return std::nullopt;
     }
     uint8_t ip[4];
@@ -87,12 +87,12 @@ std::optional<std::string> GetWifiIp() {
            std::to_string(ip[2]) + '.' + std::to_string(ip[3]);
 }
 
-bool SetWifiAntenna(WifiAntenna antenna) {
+bool SetWiFiAntenna(WiFiAntenna antenna) {
     switch (antenna) {
-        case WifiAntenna::kInternal:
+        case WiFiAntenna::kInternal:
             gpio::SetGpio(gpio::Gpio::kAntennaSelect, false);
             return true;
-        case WifiAntenna::kExternal:
+        case WiFiAntenna::kExternal:
             gpio::SetGpio(gpio::Gpio::kAntennaSelect, true);
             return true;
         default:

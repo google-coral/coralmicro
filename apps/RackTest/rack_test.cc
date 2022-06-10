@@ -235,18 +235,18 @@ extern "C" void app_main(void* param) {
         printf("Wi-Fi failed to come up (is the Wi-Fi board attached?)\r\n");
         vTaskSuspend(nullptr);
     }
-    jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
-                   coral::micro::testlib::WifiSetAntenna);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiScan,
-                   coral::micro::testlib::WifiScan);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiConnect,
-                   coral::micro::testlib::WifiConnect);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiDisconnect,
-                   coral::micro::testlib::WifiDisconnect);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiGetIp,
-                   coral::micro::testlib::WifiGetIp);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiGetStatus,
-                   coral::micro::testlib::WifiGetStatus);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiSetAntenna,
+                   coral::micro::testlib::WiFiSetAntenna);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiScan,
+                   coral::micro::testlib::WiFiScan);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiConnect,
+                   coral::micro::testlib::WiFiConnect);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiDisconnect,
+                   coral::micro::testlib::WiFiDisconnect);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiGetIp,
+                   coral::micro::testlib::WiFiGetIp);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiGetStatus,
+                   coral::micro::testlib::WiFiGetStatus);
 #endif
     jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
                    coral::micro::testlib::GetSerialNumber);

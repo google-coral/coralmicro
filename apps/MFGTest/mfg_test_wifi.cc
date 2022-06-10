@@ -24,7 +24,7 @@ extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
 namespace {
 using coral::micro::testlib::JsonRpcGetStringParam;
 
-void WifiGetAP(struct jsonrpc_request* request) {
+void WiFiGetAP(struct jsonrpc_request* request) {
     std::string name;
     if (!JsonRpcGetStringParam(request, "name", &name)) return;
 
@@ -217,11 +217,11 @@ extern "C" void app_main(void* param) {
                         wiced_bt_cfg_buf_pools);
 
     jsonrpc_init(nullptr, nullptr);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiScan,
-                   coral::micro::testlib::WifiScan);
-    jsonrpc_export("wifi_get_ap", WifiGetAP);
-    jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
-                   coral::micro::testlib::WifiSetAntenna);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiScan,
+                   coral::micro::testlib::WiFiScan);
+    jsonrpc_export("wifi_get_ap", WiFiGetAP);
+    jsonrpc_export(coral::micro::testlib::kMethodWiFiSetAntenna,
+                   coral::micro::testlib::WiFiSetAntenna);
     jsonrpc_export("ble_scan", BLEScan);
     jsonrpc_export("ble_find", BLEFind);
     IperfInit();

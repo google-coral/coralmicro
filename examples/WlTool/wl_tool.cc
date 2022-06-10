@@ -94,8 +94,8 @@ extern "C" int rwl_read_serial_port(void *hndle, char *read_buf,
 
 extern "C" void app_main(void *param) {
   jsonrpc_init(nullptr, nullptr);
-  jsonrpc_export(coral::micro::testlib::kMethodWifiSetAntenna,
-                 coral::micro::testlib::WifiSetAntenna);
+  jsonrpc_export(coral::micro::testlib::kMethodWiFiSetAntenna,
+                 coral::micro::testlib::WiFiSetAntenna);
   coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
 
   wwd_result_t err;

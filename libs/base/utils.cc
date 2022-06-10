@@ -50,23 +50,23 @@ bool GetUSBIPAddress(std::string* usb_ip_out) {
     return coral::micro::filesystem::ReadFile("/usb_ip_address", usb_ip_out);
 }
 
-bool SetWifiSSID(std::string* wifi_ssid) {
+bool SetWiFiSSID(std::string* wifi_ssid) {
     return coral::micro::filesystem::WriteFile(
         "/wifi_ssid", reinterpret_cast<const uint8_t*>(wifi_ssid->c_str()),
         wifi_ssid->size());
 }
 
-bool GetWifiSSID(std::string* wifi_ssid_out) {
+bool GetWiFiSSID(std::string* wifi_ssid_out) {
     return coral::micro::filesystem::ReadFile("/wifi_ssid", wifi_ssid_out);
 }
 
-bool SetWifiPSK(std::string* wifi_psk) {
+bool SetWiFiPSK(std::string* wifi_psk) {
     return coral::micro::filesystem::WriteFile(
         "/wifi_psk", reinterpret_cast<const uint8_t*>(wifi_psk->c_str()),
         wifi_psk->size());
 }
 
-bool GetWifiPSK(std::string* wifi_psk_out) {
+bool GetWiFiPSK(std::string* wifi_psk_out) {
     return coral::micro::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
 }
 

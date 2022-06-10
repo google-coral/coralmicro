@@ -23,12 +23,12 @@ inline constexpr char kMethodStartM4[] = "start_m4";
 inline constexpr char kMethodCaptureTestPattern[] = "capture_test_pattern";
 inline constexpr char kMethodGetTemperature[] = "get_temperature";
 inline constexpr char kMethodCaptureAudio[] = "capture_audio";
-inline constexpr char kMethodWifiSetAntenna[] = "wifi_set_antenna";
-inline constexpr char kMethodWifiScan[] = "wifi_scan";
-inline constexpr char kMethodWifiConnect[] = "wifi_connect";
-inline constexpr char kMethodWifiDisconnect[] = "wifi_disconnect";
-inline constexpr char kMethodWifiGetIp[] = "wifi_get_ip";
-inline constexpr char kMethodWifiGetStatus[] = "wifi_get_status";
+inline constexpr char kMethodWiFiSetAntenna[] = "wifi_set_antenna";
+inline constexpr char kMethodWiFiScan[] = "wifi_scan";
+inline constexpr char kMethodWiFiConnect[] = "wifi_connect";
+inline constexpr char kMethodWiFiDisconnect[] = "wifi_disconnect";
+inline constexpr char kMethodWiFiGetIp[] = "wifi_get_ip";
+inline constexpr char kMethodWiFiGetStatus[] = "wifi_get_status";
 
 bool JsonRpcGetIntegerParam(struct jsonrpc_request* request,
                             const char* param_name, int* out);
@@ -52,12 +52,12 @@ void StartM4(struct jsonrpc_request* request);
 void GetTemperature(struct jsonrpc_request* request);
 void CaptureTestPattern(struct jsonrpc_request* request);
 void CaptureAudio(struct jsonrpc_request* request);
-void WifiSetAntenna(struct jsonrpc_request* request);
-void WifiScan(struct jsonrpc_request* request);
-void WifiConnect(struct jsonrpc_request* request);
-void WifiDisconnect(struct jsonrpc_request* request);
-void WifiGetIp(struct jsonrpc_request* request);
-void WifiGetStatus(struct jsonrpc_request* request);
+void WiFiSetAntenna(struct jsonrpc_request* request);
+void WiFiScan(struct jsonrpc_request* request);
+void WiFiConnect(struct jsonrpc_request* request);
+void WiFiDisconnect(struct jsonrpc_request* request);
+void WiFiGetIp(struct jsonrpc_request* request);
+void WiFiGetStatus(struct jsonrpc_request* request);
 
 }  // namespace coral::micro::testlib
 
