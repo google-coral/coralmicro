@@ -201,7 +201,7 @@ def GetLibs(build_dir, libs_path, scanned, cached_files):
 
 def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino):
     if is_arduino:
-        return list()
+        return dict()
     libs_path = os.path.splitext(elf_path)[0] + '.libs'
     m4_exe_path = os.path.splitext(elf_path)[0] + '.m4_executable'
     libs = GetLibs(build_dir, libs_path, set(), cached_files)
