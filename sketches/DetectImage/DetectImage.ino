@@ -11,7 +11,7 @@ constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
 
 std::vector<uint8_t> image_data;
-constexpr char kImagePath[] = "/apps/DetectImage/cat_300x300.rgb";
+constexpr char kImagePath[] = "/examples/detect_image/cat_300x300.rgb";
 
 std::shared_ptr<coral::micro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;

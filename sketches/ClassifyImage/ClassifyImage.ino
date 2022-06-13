@@ -38,7 +38,7 @@ void setup() {
         Serial.print("Error loading model");
     }
 
-    const char* image_name = "/apps/ClassifyImage/cat_224x224.rgb";
+    const char* image_name = "/examples/classify_image/cat_224x224.rgb";
     Serial.println("Loading Input Image");
     if (!SD.exists(image_name)) {
         Serial.println("Image file not found");
