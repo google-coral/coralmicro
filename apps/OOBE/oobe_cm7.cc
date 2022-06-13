@@ -1,4 +1,5 @@
 #include "apps/OOBE/jpeg.h"
+#include "libs/base/filesystem.h"
 #include "libs/base/http_server_handlers.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/led.h"
@@ -7,9 +8,9 @@
 #include "libs/base/reset.h"
 #include "libs/base/strings.h"
 #include "libs/base/watchdog.h"
-#include "libs/posenet/posenet.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/tensorflow/posenet.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -46,16 +47,28 @@ constexpr int kMessageTypeImageData = 1;
 constexpr int kMessageTypePoseData = 2;
 constexpr int kLowPowerChange = 3;
 
+// Defines known attributes for the model that's used in this app.
+constexpr int kModelArenaSize = 1 * 1024 * 1024;
+constexpr int kExtraArenaSize = 1 * 1024 * 1024;
+constexpr int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
+constexpr char kModelPath[] =
+    "/models/"
+    "posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
+constexpr int kModelWidth = 324;
+constexpr int kModelHeight = 324;
+constexpr int kModelSize = kModelWidth * kModelHeight * /*depth*/ 3;
+
 template <typename T>
 constexpr uint8_t byte(T value, int i) {
     return static_cast<uint8_t>(value >> 8 * i);
 }
 
 void WriteMessageImageInfo(int fd) {
-    constexpr auto w = posenet::kPosenetWidth;
-    constexpr auto h = posenet::kPosenetHeight;
-    constexpr uint8_t msg[] = {byte(w, 0), byte(w, 1), byte(w, 2), byte(w, 3),
-                               byte(h, 0), byte(h, 1), byte(h, 2), byte(h, 3)};
+    constexpr uint8_t msg[] = {byte(kModelWidth, 0),  byte(kModelWidth, 1),
+                               byte(kModelWidth, 2),  byte(kModelWidth, 3),
+                               byte(kModelHeight, 0), byte(kModelHeight, 1),
+                               byte(kModelHeight, 2), byte(kModelHeight, 3)};
     WriteMessage(fd, kMessageTypeSetup, msg, sizeof(msg));
 }
 
@@ -65,30 +78,25 @@ struct TaskMessage {
     void* data;
 };
 
-int CountPoses(const posenet::Output& output, float threshold) {
-    int count = 0;
-    for (int i = 0; i < output.num_poses; ++i)
-        if (output.poses[i].score >= threshold) ++count;
-    return count;
-}
-
-void CreatePoseJson(const posenet::Output& output, float threshold,
+void CreatePoseJson(const std::vector<tensorflow::Pose>& poses, float threshold,
                     std::vector<uint8_t>* json) {
     CHECK(json);
     json->clear();
     int num_appended_poses = 0;
     StrAppend(json, "[");
-    for (int i = 0; i < output.num_poses; ++i) {
-        if (output.poses[i].score < threshold) continue;
+    for (const auto& pose : poses) {
+        if (pose.score < threshold) continue;
 
         StrAppend(json, num_appended_poses != 0 ? ",\n" : "");
         StrAppend(json, "{\n");
-        StrAppend(json, "  \"score\": %g,\n", output.poses[i].score);
+        StrAppend(json, "  \"score\": %g,\n", pose.score);
         StrAppend(json, "  \"keypoints\": [\n");
-        for (int j = 0; j < posenet::kKeypoints; ++j) {
-            const auto& kp = output.poses[i].keypoints[j];
+        for (int j = 0; j < coral::micro::tensorflow::kKeypoints; ++j) {
+            const auto& kp = pose.keypoints[j];
             StrAppend(json, "    [%g, %g, %g]", kp.score, kp.x, kp.y);
-            StrAppend(json, j != posenet::kKeypoints - 1 ? ",\n" : "\n");
+            StrAppend(json, j != coral::micro::tensorflow::kKeypoints - 1
+                                ? ",\n"
+                                : "\n");
         }
         StrAppend(json, "  ]\n");
         StrAppend(json, "}");
@@ -138,7 +146,7 @@ class NetworkTask : private Task<NetworkTask> {
             ResetClientSocket();
     }
 
-    bool PosenetInactiveForMs(int ms) const {
+    [[nodiscard]] bool PosenetInactiveForMs(int ms) const {
         MutexLock lock(mutex_);
         return xTaskGetTickCount() - last_pose_data_ > pdMS_TO_TICKS(ms);
     }
@@ -148,7 +156,7 @@ class NetworkTask : private Task<NetworkTask> {
         last_pose_data_ = xTaskGetTickCount();
     }
 
-    void Run() {
+    [[noreturn]] void Run() {
         int server_socket = SocketServer(kNetworkPort, /*backlog=*/5);
         while (true) {
             printf("INFO: Waiting for clients on %d...\r\n", kNetworkPort);
@@ -180,38 +188,40 @@ class NetworkTask : private Task<NetworkTask> {
 
 class PosenetTask : private Task<PosenetTask> {
    public:
-    PosenetTask(NetworkTask* network_task_)
+    explicit PosenetTask(NetworkTask* network_task_,
+                         std::shared_ptr<tflite::MicroInterpreter> interpreter)
         : Task("oobe_posenet_task", APP_TASK_PRIORITY),
           network_task_(network_task_),
-          queue_(xQueueCreate(1, sizeof(char))) {
+          queue_(xQueueCreate(1, sizeof(char))),
+          interpreter_(std::move(interpreter)) {
         CHECK(queue_);
+        printf("Posenet task started\r\n");
     }
 
     void Put(const std::vector<uint8_t>& frame) {
         if (uxQueueMessagesWaiting(queue_) == 0) {
-            assert(frame.size() == posenet::kPosenetSize);
-            std::memcpy(tflite::GetTensorData<uint8_t>(posenet::input()),
-                        frame.data(), posenet::kPosenetSize);
+            CHECK(frame.size() == kModelSize);
+            std::memcpy(tflite::GetTensorData<uint8_t>(interpreter_->input(0)),
+                        frame.data(), kModelSize);
             char cmd = 0;
             CHECK(xQueueSendToBack(queue_, &cmd, portMAX_DELAY) == pdTRUE);
         }
     }
 
-    void Run() const {
-        posenet::Output output;
+    [[noreturn]] void Run() const {
         std::vector<uint8_t> json;
         json.reserve(2048);  // Assume JSON size around 2K.
         while (true) {
             char cmd;
             CHECK(xQueuePeek(queue_, &cmd, portMAX_DELAY) == pdTRUE);
-            posenet::loop(&output, false);
-
-            if (CountPoses(output, kThreshold) > 0) {
-                CreatePoseJson(output, kThreshold, &json);
+            CHECK(interpreter_->Invoke() == kTfLiteOk);
+            auto poses = coral::micro::tensorflow::GetPosenetOutput(
+                interpreter_.get(), kThreshold);
+            if (!poses.empty()) {
+                CreatePoseJson(poses, kThreshold, &json);
                 network_task_->Send(kMessageTypePoseData, json.data(),
                                     json.size());
             }
-
             CHECK(xQueueReceive(queue_, &cmd, portMAX_DELAY) == pdTRUE);
         }
     }
@@ -219,6 +229,7 @@ class PosenetTask : private Task<PosenetTask> {
    private:
     NetworkTask* network_task_;
     QueueHandle_t queue_;
+    std::shared_ptr<tflite::MicroInterpreter> interpreter_;
 };
 
 class CameraTask : private Task<CameraTask> {
@@ -238,7 +249,7 @@ class CameraTask : private Task<CameraTask> {
     void Run() const {
         bool started = false;
 
-        std::vector<uint8_t> input(posenet::kPosenetSize);
+        std::vector<uint8_t> input(kModelSize);
         std::vector<unsigned char> jpeg(1024 * 70);
 
         TaskMessage message;
@@ -266,8 +277,8 @@ class CameraTask : private Task<CameraTask> {
                     }
 
                     coral::micro::camera::FrameFormat fmt;
-                    fmt.width = posenet::kPosenetWidth;
-                    fmt.height = posenet::kPosenetHeight;
+                    fmt.width = kModelWidth;
+                    fmt.height = kModelHeight;
                     fmt.fmt = camera::Format::RGB;
                     fmt.filter = camera::FilterMethod::BILINEAR;
                     fmt.preserve_ratio = false;
@@ -340,8 +351,35 @@ void Main() {
     };
     watchdog::StartWatchdog(wdt_config);
 
+    auto tpu_context =
+        EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
+    if (!tpu_context) {
+        printf("Failed to get tpu context.\r\n");
+        return;
+    }
+    std::vector<uint8_t> posenet_tflite;
+    if (!coral::micro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+        printf("ERROR: Failed to read model: %s\r\n", kModelPath);
+        return;
+    }
+
+    // Starts the posenet engine.
+    tflite::MicroErrorReporter error_reporter;
+    tflite::MicroMutableOpResolver<2> resolver;
+    resolver.AddCustom(coral::micro::kCustomOp,
+                       coral::micro::RegisterCustomOp());
+    resolver.AddCustom(coral::kPosenetDecoderOp,
+                       coral::RegisterPosenetDecoderOp());
+    auto interpreter = std::make_shared<tflite::MicroInterpreter>(
+        tflite::GetModel(posenet_tflite.data()), resolver, tensor_arena,
+        kTensorArenaSize, &error_reporter);
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+        printf("Failed to allocate tensor\r\n");
+        return;
+    }
+    // Starts all tasks.
     NetworkTask network_task;
-    PosenetTask posenet_task(&network_task);
+    PosenetTask posenet_task(&network_task, interpreter);
     CameraTask camera_task(&network_task, &posenet_task);
 
 // For the OOBE Demo, bring up WiFi and Ethernet. For now these are active
@@ -367,12 +405,7 @@ void Main() {
 
     IPCM7::GetSingleton()->RegisterAppMessageHandler(
         HandleAppMessage, xTaskGetCurrentTaskHandle());
-    auto tpu_context =
-        EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
-    if (!posenet::setup()) {
-        printf("setup() failed\r\n");
-        vTaskSuspend(nullptr);
-    }
+
     IPCM7::GetSingleton()->StartM4();
 
 #if defined(OOBE_DEMO)
@@ -418,7 +451,7 @@ void Main() {
         ipc::Message msg;
         msg.type = ipc::MessageType::APP;
         IPCM7::GetSingleton()->SendMessage(msg);
-        vTaskSuspend(nullptr);
+        return;
     }
 }
 }  // namespace

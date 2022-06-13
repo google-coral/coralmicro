@@ -6,8 +6,7 @@
 
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-namespace coral::micro {
-namespace tensorflow {
+namespace coral::micro::tensorflow {
 
 // Represents a classification result.
 struct Class {
@@ -58,7 +57,6 @@ bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor);
 // @returns True upon success; false if the tensor type is the wrong format.
 bool ClassificationPreprocess(TfLiteTensor* input_tensor);
 
-}  // namespace tensorflow
 }  // namespace coral::micro
 
 #endif  // LIBS_TENSORFLOW_CLASSIFICATION_H_

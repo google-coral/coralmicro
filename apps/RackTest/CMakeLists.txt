@@ -2,7 +2,6 @@ set(RACK_TEST_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_coremark-m7
     libs_mjson
-    libs_posenet
     libs_rpc_http_server
     libs_tasks_EdgeTpuTask_freertos
     libs_tasks_EdgeTpuDfuTask_freertos

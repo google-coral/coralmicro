@@ -15,6 +15,7 @@
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tensorflow/classification.h"
 #include "libs/tensorflow/detection.h"
+#include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/testconv1/testconv1.h"
 #include "libs/tpu/edgetpu_manager.h"
@@ -561,6 +562,79 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
     jsonrpc_return_success(request, "{%Q:%d, %Q:%V}", "latency",
                            invoke_latency + preprocess_latency, "output_mask",
                            size, output_mask);
+}
+
+void PosenetStressRun(struct jsonrpc_request* request) {
+    int iterations;
+    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "iterations",
+                                                       &iterations))
+        return;
+
+    // Turn on the TPU and get it's context.
+    auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
+        coral::micro::PerformanceMode::kMax);
+    if (!tpu_context) {
+        printf("ERROR: Failed to get EdgeTpu context\r\n");
+        jsonrpc_return_error(request, -1, "Failed to get tpu context", nullptr);
+        return;
+    }
+
+    constexpr char kModelPath[] =
+        "/models/"
+        "posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
+    // Reads the model and checks version.
+    std::vector<uint8_t> posenet_tflite;
+    if (!coral::micro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+        printf("ERROR: Failed to get EdgeTpu context\r\n");
+        jsonrpc_return_error(request, -1, "Failed to get posenet model",
+                             nullptr);
+        return;
+    }
+    auto* model = tflite::GetModel(posenet_tflite.data());
+
+    // Creates a micro interpreter.
+    tflite::MicroMutableOpResolver<2> resolver;
+    resolver.AddCustom(coral::micro::kCustomOp,
+                       coral::micro::RegisterCustomOp());
+    resolver.AddCustom(coral::kPosenetDecoderOp,
+                       coral::RegisterPosenetDecoderOp());
+    tflite::MicroErrorReporter error_reporter;
+    auto interpreter = tflite::MicroInterpreter{
+        model, resolver, tensor_arena, kTensorArenaSize, &error_reporter};
+    if (interpreter.AllocateTensors() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "Failed to allocates tensor",
+                             nullptr);
+        return;
+    }
+    auto* posenet_input = interpreter.input(0);
+    auto model_height = posenet_input->dims->data[1];
+    auto model_width = posenet_input->dims->data[2];
+
+    coral::micro::CameraTask::GetSingleton()->SetPower(true);
+    coral::micro::CameraTask::GetSingleton()->Enable(
+        coral::micro::camera::Mode::STREAMING);
+    for (int i = 0; i < iterations; ++i) {
+        coral::micro::camera::FrameFormat fmt{
+            /*fmt=*/coral::micro::camera::Format::RGB,
+            /*filter=*/coral::micro::camera::FilterMethod::BILINEAR,
+            /*rotation=*/coral::micro::camera::Rotation::k0,
+            /*width=*/model_width,
+            /*height=*/model_height,
+            /*preserve_ratio=*/false,
+            /*buffer=*/tflite::GetTensorData<uint8_t>(posenet_input)};
+        if (!coral::micro::CameraTask::GetFrame({fmt})) {
+            jsonrpc_return_error(request, -1, "Failed to get frame from camera",
+                                 nullptr);
+            break;
+        }
+        if (interpreter.Invoke() != kTfLiteOk) {
+            jsonrpc_return_error(request, -1, "Failed to Invoke", nullptr);
+            break;
+        }
+    }
+
+    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+    jsonrpc_return_success(request, "{}");
 }
 
 void StartM4(struct jsonrpc_request* request) {

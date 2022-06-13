@@ -149,6 +149,9 @@ set(libs_tensorflow_SOURCES
 add_library_m7(libs_tensorflow-m7 STATIC
     classification.cc
     detection.cc
+    posenet.cc
+    posenet_decoder.cc
+    posenet_decoder_op.cc
     utils.cc
     ${libs_tensorflow_SOURCES}
 )

@@ -47,6 +47,7 @@ void BeginUploadResource(struct jsonrpc_request* request);
 void UploadResourceChunk(struct jsonrpc_request* request);
 void DeleteResource(struct jsonrpc_request* request);
 void FetchResource(struct jsonrpc_request* request);
+void PosenetStressRun(struct jsonrpc_request* request);
 void RunClassificationModel(struct jsonrpc_request* request);
 void RunSegmentationModel(struct jsonrpc_request* request);
 void RunDetectionModel(struct jsonrpc_request* request);

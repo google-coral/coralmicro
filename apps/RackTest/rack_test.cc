@@ -1,19 +1,14 @@
 #include <array>
-#include <memory>
 
 #include "apps/RackTest/rack_test_ipc.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/utils.h"
 #include "libs/coremark/core_portme.h"
-#include "libs/posenet/posenet.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tasks/CameraTask/camera_task.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/testlib/test_lib.h"
-#include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 #if defined TEST_WIFI
 #include "libs/base/wifi.h"
@@ -45,56 +40,6 @@ void HandleAppMessage(
         default:
             printf("Unknown message type\r\n");
     }
-}
-
-void PosenetStressRun(struct jsonrpc_request* request) {
-    coral::micro::posenet::Output output{};
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
-    vTaskDelay(pdMS_TO_TICKS(500));
-    coral::micro::CameraTask::GetSingleton()->SetPower(true);
-    coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::STREAMING);
-    auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
-        coral::micro::PerformanceMode::kMax);
-    bool loopSuccess;
-    int iterations;
-
-    if (!coral::micro::posenet::setup()) {
-        printf("setup() failed\r\n");
-        coral::micro::CameraTask::GetSingleton()->SetPower(false);
-        jsonrpc_return_error(request, -1, "Posenet setup() failed", nullptr);
-        return;
-    }
-    coral::micro::posenet::loop(&output);
-    printf("Posenet static datatest finished.\r\n");
-
-    coral::micro::CameraTask::GetSingleton()->DiscardFrames(100);
-    if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "iterations",
-                                                       &iterations)) {
-        coral::micro::CameraTask::GetSingleton()->SetPower(false);
-        return;
-    }
-
-    for (int i = 0; i < iterations; i++) {
-        TfLiteTensor* input = coral::micro::posenet::input();
-        coral::micro::camera::FrameFormat fmt{};
-        fmt.filter = coral::micro::camera::FilterMethod::BILINEAR;
-        fmt.width = input->dims->data[2];
-        fmt.height = input->dims->data[1];
-        fmt.fmt = coral::micro::camera::Format::RGB;
-        fmt.preserve_ratio = false;
-        fmt.buffer = tflite::GetTensorData<uint8_t>(input);
-        coral::micro::CameraTask::GetFrame({fmt});
-        loopSuccess = coral::micro::posenet::loop(&output);
-        if (!loopSuccess) {
-            coral::micro::CameraTask::GetSingleton()->SetPower(false);
-            jsonrpc_return_error(request, -1, "Posenet loop() returned failure",
-                                 nullptr);
-            return;
-        }
-    }
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
-    jsonrpc_return_success(request, "{}");
 }
 
 void M4XOR(struct jsonrpc_request* request) {
@@ -255,7 +200,7 @@ extern "C" void app_main(void* param) {
     jsonrpc_export(coral::micro::testlib::kMethodSetTPUPowerState,
                    coral::micro::testlib::SetTPUPowerState);
     jsonrpc_export(coral::micro::testlib::kMethodPosenetStressRun,
-                   PosenetStressRun);
+                   coral::micro::testlib::PosenetStressRun);
     jsonrpc_export(coral::micro::testlib::kMethodBeginUploadResource,
                    coral::micro::testlib::BeginUploadResource);
     jsonrpc_export(coral::micro::testlib::kMethodUploadResourceChunk,

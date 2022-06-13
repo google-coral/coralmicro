@@ -3,12 +3,9 @@
 
 #include "libs/base/gpio.h"
 #include "libs/base/http_server.h"
-#include "libs/posenet/posenet.h"
 #include "libs/tasks/CameraTask/camera_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
 namespace coral::micro {
 namespace {
@@ -24,7 +21,7 @@ uint8_t camera_rgb_180[coral::micro::CameraTask::kWidth * coral::micro::CameraTa
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 uint8_t camera_rgb_270[coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
-uint8_t camera_rgb_posenet[posenet::kPosenetWidth * posenet::kPosenetHeight * 3]
+uint8_t camera_rgb_posenet[324 * 324 * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 uint8_t camera_raw[CameraTask::kWidth * CameraTask::kHeight]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
@@ -98,8 +95,8 @@ void GetFrame() {
 
     fmt_rgb_posenet.fmt = camera::Format::RGB;
     fmt_rgb_posenet.filter = camera::FilterMethod::BILINEAR;
-    fmt_rgb_posenet.width = posenet::kPosenetWidth;
-    fmt_rgb_posenet.height = posenet::kPosenetHeight;
+    fmt_rgb_posenet.width = 324;
+    fmt_rgb_posenet.height = 324;
     fmt_rgb_posenet.preserve_ratio = false;
     fmt_rgb_posenet.buffer = camera_rgb_posenet;
 

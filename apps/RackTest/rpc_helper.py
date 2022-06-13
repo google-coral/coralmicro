@@ -54,7 +54,7 @@ class CoralMicroRPCHelper(object):
                                                                      is not None):
             if self.print_payloads:
                 print(json)
-            return requests.post(self.url, json=json, timeout=20).json()
+            return requests.post(self.url, json=json, timeout=60).json()
         raise ValueError('Missing key in RPC')
 
     def call_rpc_method(self, method):
@@ -107,7 +107,6 @@ class CoralMicroRPCHelper(object):
         payload = self.get_new_payload()
         payload['method'] = 'posenet_stress_run'
         payload['params'].append({'iterations': iterations})
-        print(f'Running: {payload}')
         return self.send_rpc(payload)
 
     def resource_max_chunk_size(self):

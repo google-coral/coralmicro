@@ -8,6 +8,8 @@ prototyping, the real test are on google3.
   python3 apps/RackTest/test_client.py --model models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite --test_image test_data/cat.bmp --test detection
 - wifi_tests:
   python3 apps/RackTest/test_client.py --test wifi_tests
+- stress_test:
+  python3 apps/RackTest/test_client.py --test stress_test
 """
 import argparse
 import os
@@ -21,7 +23,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--host', type=str, default='10.10.10.1', help='Ip address of the Dev Board Micro')
 parser.add_argument('--port', type=int, default=80, help='Port of the Dev Board Micro')
 parser.add_argument('--test', type=str, default='detection',
-                    help='Test to run, currently support ["detection", "classification", "segmentation","wifi_tests]')
+                    help='Test to run, currently support ["detection", "classification", "segmentation", "wifi_tests", "stress_test"]')
 parser.add_argument('--test_image', type=str, default='test_data/cat.bmp')
 parser.add_argument('--model', type=str, default='models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite')
 args = parser.parse_args()
@@ -82,6 +84,12 @@ def run_wifi_test(url):
         print('Checking wifi status')
         print(rpc_helper.wifi_get_status())
 
+def run_stress_test(url):
+    rpc_helper = CoralMicroRPCHelper(url, print_payloads=True)
+    result = rpc_helper.call_tpu_stress_test(500)
+    print(result)
+
+
 def main():
     url = f"http://{args.host}:{args.port}/jsonrpc"
     print(f"Dev Board Micro url: {url}")
@@ -89,6 +97,8 @@ def main():
         run_model(url, args.test)
     elif args.test == "wifi_tests":
         run_wifi_test(url)
+    elif args.test == "stress_test":
+        run_stress_test(url)
     else:
         print('Test not supported')
         parser.print_help()

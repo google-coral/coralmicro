@@ -7,7 +7,6 @@ set(OOBE_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_base-m7_network
     libs_libjpeg
-    libs_posenet
     libs_rpc_http_server
 )
 
@@ -27,6 +26,7 @@ set(OOBE_M4_SOURCES
     main_functions.cc
     DATA
     ${PROJECT_SOURCE_DIR}/models/person_detect_model.tflite
+    ${PROJECT_SOURCE_DIR}/models/posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite
 )
 
 set(OOBE_M4_LINK_LIBRARIES
