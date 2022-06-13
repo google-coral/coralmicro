@@ -44,6 +44,7 @@ constexpr int kNetworkPort = 27000;
 constexpr int kMessageTypeSetup = 0;
 constexpr int kMessageTypeImageData = 1;
 constexpr int kMessageTypePoseData = 2;
+constexpr int kLowPowerChange = 3;
 
 template <typename T>
 constexpr uint8_t byte(T value, int i) {
@@ -140,6 +141,11 @@ class NetworkTask : private Task<NetworkTask> {
     bool PosenetInactiveForMs(int ms) const {
         MutexLock lock(mutex_);
         return xTaskGetTickCount() - last_pose_data_ > pdMS_TO_TICKS(ms);
+    }
+
+    void ResetPosenetTimer() {
+        MutexLock lock(mutex_);
+        last_pose_data_ = xTaskGetTickCount();
     }
 
     void Run() {
@@ -373,9 +379,13 @@ void Main() {
     int count = 0;
 #endif  // defined (OOBE_DEMO)
 
+    bool low_power = true;
     vTaskSuspend(nullptr);
     while (true) {
         printf("CM7 awoken\r\n");
+        low_power = false;
+        network_task.Send(kLowPowerChange, &low_power, 1);
+        network_task.ResetPosenetTimer();
 
         // Start camera_task processing, which will start posenet_task.
         camera_task.Start();
@@ -399,6 +409,8 @@ void Main() {
         }
 
         printf("Transition back to M4\r\n");
+        low_power = true;
+        network_task.Send(kLowPowerChange, &low_power, 1);
 
         // Stop camera_task processing. This will also stop posenet_task.
         camera_task.Stop();

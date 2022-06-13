@@ -18,11 +18,13 @@ from PIL import ImageTk, Image
 MSG_TYPE_SETUP = 0
 MSG_TYPE_IMAGE_DATA = 1
 MSG_TYPE_POSE_DATA = 2
+MSG_TYPE_LOW_POWER_MODE = 3
 
 
 Keypoint = collections.namedtuple('Keypoint', ('point', 'score'))
 Point = collections.namedtuple('Point', ('x', 'y'))
 Pose = collections.namedtuple('Pose', ('keypoints', 'score'))
+
 
 class KeypointType(enum.IntEnum):
     NOSE = 0
@@ -42,6 +44,7 @@ class KeypointType(enum.IntEnum):
     RIGHT_KNEE = 14
     LEFT_ANKLE = 15
     RIGHT_ANKLE = 16
+
 
 EDGES = (
     (KeypointType.NOSE, KeypointType.LEFT_EYE),
@@ -65,12 +68,15 @@ EDGES = (
     (KeypointType.RIGHT_KNEE, KeypointType.RIGHT_ANKLE),
 )
 
+
 def parse_keypoints(keypoints):
-    return {KeypointType(i) : Keypoint(Point(x, y), score)
+    return {KeypointType(i): Keypoint(Point(x, y), score)
             for i, (score, x, y) in enumerate(keypoints)}
+
 
 def parse_poses(poses):
     return [Pose(parse_keypoints(pose['keypoints']), pose['score']) for pose in poses]
+
 
 def recvall(sock, size):
     data = bytearray()
@@ -82,7 +88,9 @@ def recvall(sock, size):
         size -= len(chunk)
     return bytes(data)
 
+
 Message = collections.namedtuple('Message', ('type', 'body'))
+
 
 def recv_msg(sock):
     header = recvall(sock, size=5)
@@ -104,13 +112,14 @@ class Fps:
         self._prev = time.monotonic()
 
     def update(self):
-        curr  = time.monotonic()
+        curr = time.monotonic()
         self._acc.append(curr - self._prev)
         if len(self._acc) > self._avg_size:
             self._acc.pop(0)
         fps = len(self._acc) / sum(self._acc)
         self._prev = curr
         return fps
+
 
 @contextlib.contextmanager
 def Fetcher(read_msg, write_data):
@@ -128,6 +137,9 @@ def Fetcher(read_msg, write_data):
                 elif msg.type == MSG_TYPE_POSE_DATA:
                     last_pose_report = time.monotonic()
                     if not write_data(parse_poses(json.loads(msg.body))):
+                        break
+                elif msg.type == MSG_TYPE_LOW_POWER_MODE:
+                    if not write_data(msg.body):
                         break
 
                 if time.monotonic() - last_pose_report > 0.5:
@@ -175,16 +187,17 @@ class PoseCanvas(tk.Frame):
         self._canvas_width = event.width
         self._canvas_height = event.height
         self._canvas.scale('all', 0, 0, sx, sy)
-
+        self._canvas.itemconfigure(
+            self._text_id, font=f"Helvetica {int(self._canvas_height/20)} bold")
         self._update_image(event.width, event.height)
 
     def __init__(self, parent, width, height):
-        super().__init__(parent)
+        super().__init__(parent, bg='black')
 
         self.flip_x = False
         self.flip_y = False
 
-        self._image = Image.new('RGB', (width, height), color = 'black')
+        self._image = Image.new('RGB', (width, height), color='black')
         self._tk_image = ImageTk.PhotoImage(image=self._image)
 
         self._width = width
@@ -192,9 +205,11 @@ class PoseCanvas(tk.Frame):
         self._canvas_width = width
         self._canvas_height = height
 
-        self._canvas = tk.Canvas(self)  # bd=1, relief='ridge'
+        self._canvas = tk.Canvas(self, bd=0, highlightthickness=0, bg='black')
         self._image_id = self._canvas.create_image(0, 0, anchor='nw',
                                                    image=self._tk_image)
+        self._text_id = self._canvas.create_text(
+            width/2, height / 2, font=f"Helvetica {int(height/20)} bold", fill='white', text="Waiting for Person Detection", state=tk.HIDDEN)
         self._canvas.place(x=0, y=0, width=width, height=height)
         self._canvas.bind('<Configure>', self._canvas_configure)
         self.bind('<Configure>', self._configure)
@@ -203,17 +218,36 @@ class PoseCanvas(tk.Frame):
         self._image = image
         self._update_image(self._canvas_width, self._canvas_height)
 
+    def _toggle_low_power_message(self, low_power):
+        if low_power:
+            self._canvas.itemconfigure(self._text_id, state=tk.NORMAL)
+            self._canvas.itemconfigure(self._image_id, state=tk.HIDDEN)
+        else:
+            self._canvas.itemconfigure(self._text_id, state=tk.HIDDEN)
+            self._canvas.itemconfigure(self._image_id, state=tk.NORMAL)
+
+    def set_low_power(self, low_power):
+        print(f'Low Power toggle: {low_power}')
+        if low_power:
+            # Delay 2 seconds before toggling message to prevent quick back and forth.
+            self._low_power_timer = threading.Timer(
+                2, self._toggle_low_power_message, [True])
+            self._low_power_timer.start()
+        else:
+            if self._low_power_timer:
+                self._low_power_timer.cancel()
+            self._toggle_low_power_message(False)
 
     def update_poses(self, poses, r=5, threshold=0.2):
         if self.flip_x:
-            fx = lambda x: self._canvas_width * (1.0 - x / self._width)
+            def fx(x): return self._canvas_width * (1.0 - x / self._width)
         else:
-            fx = lambda x: self._canvas_width * (x / self._width)
+            def fx(x): return self._canvas_width * (x / self._width)
 
         if self.flip_y:
-            fy = lambda y: self._canvas_height * (1.0 - y / self._height)
+            def fy(y): return self._canvas_height * (1.0 - y / self._height)
         else:
-            fy = lambda y: self._canvas_height * (y / self._height)
+            def fy(y): return self._canvas_height * (y / self._height)
 
         self._canvas.delete('pose')
         for pose in poses:
@@ -236,8 +270,7 @@ class PoseCanvas(tk.Frame):
                                          tags=('pose',))
 
 
-
-def create_tk(width, height, fullscreen=False, do_stop = lambda: None):
+def create_tk(width, height, fullscreen=False, do_stop=lambda: None):
     root = tk.Tk()
     root.attributes('-fullscreen', fullscreen)
     root.title("Dev Board Micro OOBE")
@@ -274,6 +307,8 @@ def create_tk(width, height, fullscreen=False, do_stop = lambda: None):
         if isinstance(data, Image.Image):
             c.update_image(data)
             print('FPS: %.2f' % fps.update())
+        elif type(data) == bytes:
+            c.set_low_power(True if data == b'\x01' else False)
         else:
             c.update_poses(data)
     root.bind('<<NewData>>', on_new_data)
@@ -325,7 +360,8 @@ def SocketClient(host, port):
 def main():
     parser = argparse.ArgumentParser(description='OOBE UI',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--host', '--device_ip_address', type=str, default='10.10.10.1')
+    parser.add_argument('--host', '--device_ip_address',
+                        type=str, default='10.10.10.1')
     parser.add_argument('--port', type=int, default=27000)
     parser.add_argument('--flip_x', '--mirror', action='store_true')
     parser.add_argument('--flip_y', action='store_true')
@@ -342,6 +378,7 @@ def main():
         root, update = create_tk(width, height, args.fullscreen)
         with Fetcher(lambda: recv_msg(sock), update):
             root.mainloop()
+
 
 if __name__ == '__main__':
     main()
