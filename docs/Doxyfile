@@ -8,6 +8,9 @@ EXTRACT_ALL            = YES
 INPUT_FILTER           = ./doxygenate.sh
 INPUT                  = ../libs/tpu/ \
                          ../libs/tensorflow/ \
+                         ../libs/cdc_acm/ \
+                         ../libs/cdc_eem/ \
+                         ../libs/rpc/ \
                          ../libs/base/
 
 EXCLUDE                = ../libs/tpu/tpu_driver.h

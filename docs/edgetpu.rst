@@ -1,5 +1,5 @@
-Edge TPU runtime APIs for microcontrollers
-==========================================
+Edge TPU Runtime APIs
+=====================
 
 `[edgetpu_manager.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tpu/edgetpu_manager.h>`_
 
