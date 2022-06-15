@@ -21,7 +21,7 @@
 namespace coralmicro {
 namespace arduino {
 
-int CameraClass::begin(uint32_t resolution) {
+int CameraClass::begin(CameraResolution resolution) {
     switch (resolution) {
         case CAMERA_R160x120:
             return begin(160, 120);

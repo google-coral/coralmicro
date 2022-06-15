@@ -28,30 +28,114 @@
 namespace coralmicro {
 namespace arduino {
 
+// Allows for communication on the I2C bus.  
+// Example code can be found in `sketches/I2CM-Reader`, `sketches/I2CM-Writer`,
+// `sketches/I2CS-Reader`, and `sketches/I2CS-Writer`, showing the 
+// different configurations for the communication.
+// You should not initialize this object yourself; instead include `Wire.h` and then use the global `Wire` instance.
+// Then, the desired configuration will determine how the communication works.
 class HardwareI2C : public ::arduino::HardwareI2C {
   public:
+    // @cond Internal only, do not generate docs.
+    // Externally, use `begin()` and `end()`
     HardwareI2C(LPI2C_Type*);
+    // @endcond
+
+    // Joins the I2C bus as a controller.
+    //
     void begin();
+
+    // Joins the I2C bus as a peripheral.
+    // @param address The peripheral address, 
+    //
     void begin(uint8_t address);
+
+    // Leaves the I2C bus.
+    //
     void end();
 
+    // Sets the clock frequency for communication between devices.
+    // @param freq The clock frequency.
+    // 
     void setClock(uint32_t freq);
   
+    // Begins a transmission to the device at the given address.
+    // @param address The address of the receiving device.
+    //
     void beginTransmission(uint8_t address);
+
+    // Sends the bytes queued with `write()`.
+    // @param stopBit If stopBit is true, ends the transmission.
+    // Otherwise, the transmission continues.
+    //
+    // @returns `kSuccess` if the transmission succeeds, 
+    // `kAddressNACK` if the peripheral device sends a NACK, 
+    // and `kOther` if there is a different error.
     uint8_t endTransmission(bool stopBit);
+
+    // Ends the transmission, sending the bytes queued with `write()`.
+    // 
+    // @returns `kSuccess` if the transmission succeeds, 
+    // `kAddressNACK` if the peripheral device sends a NACK, 
+    // and `kOther` if there is a different error.
     uint8_t endTransmission(void);
 
+    // Allows the controller device to request data from the peripheral device.
+    // @param address The address of the peripheral device
+    // @param len The amount of data requested.
+    // @param stopBit Stops the connection between the devices if true.
+    // @returns The amount of data returned from the peripheral device.
+    //
     size_t requestFrom(uint8_t address, size_t len, bool stopBit) ;
+
+    // Allows the controller device to request data from the peripheral device.
+    // @param address The address of the peripheral device
+    // @param len The amount of data requested.
+    // @returns The amount of data returned from the peripheral device.
+    //
     size_t requestFrom(uint8_t address, size_t len);
 
+    // Registers a callback called when the peripheral device receives 
+    // data from the controller device
+    // @param cb The callback.
+    //
     void onReceive(void(*)(int));
+
+    // Registers a callback called when the controller devices requests
+    // data from the peripheral device
+    // @param cb The callback.
+    //
     void onRequest(void(*)(void));
 
+    // Writes data into the transmission.
+    // @param c The data for the transmission.
+    //
     size_t write(uint8_t c);
+
+    // Writes data into the transmission.
+    // @param str The data for the transmission.
+    //
     size_t write(const char *str);
+
+    // Writes data into the transmission.
+    // @param buffer The data for the transmission.
+    // @param size The size of the data in bytes.
+    //
     size_t write(const uint8_t *buffer, size_t size);
+
+    // The amount of data available when calling `read()`.
+    // @returns The number of bytes available for reading.
+    //
     int available();
+
+    // Reads one byte from the transmission.
+    // @returns The next byte in the transmission buffer.
+    //
     int read();
+    
+    // Looks at the next byte in the transmission.
+    // @returns The next byte in the transmission buffer, 
+    // without advancing.
     int peek();
 
     enum EndTransmissionStatus : uint8_t {
@@ -87,6 +171,8 @@ class HardwareI2C : public ::arduino::HardwareI2C {
 }  // namespace arduino
 }  // namespace coralmicro
 
+// This is the global `HardwareI2C` instance you should use instead of 
+// creating your own instance of `HardwareI2C`.
 extern coralmicro::arduino::HardwareI2C Wire;
 
 #endif  // Wire_h

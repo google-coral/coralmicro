@@ -58,7 +58,7 @@ uint32_t HardwareSPI::GetConfigFlags() {
          kLPSPI_MasterPcsContinuous | kLPSPI_MasterByteSwap;
 }
 
-void HardwareSPI::beginTransaction(::arduino::SPISettings settings) {
+void HardwareSPI::updateSettings(::arduino::SPISettings settings) {
   config_.direction = (settings.getBitOrder() == BitOrder::LSBFIRST)
                           ? kLPSPI_LsbFirst
                           : kLPSPI_MsbFirst;
@@ -72,6 +72,10 @@ void HardwareSPI::beginTransaction(::arduino::SPISettings settings) {
 
   // Applies the new config values
   LPSPI_MasterInit(base_, &config_, settings.getClockFreq());
+}
+
+void HardwareSPI::beginTransaction(::arduino::SPISettings settings) {
+
 }
 
 void HardwareSPI::endTransaction(void) {

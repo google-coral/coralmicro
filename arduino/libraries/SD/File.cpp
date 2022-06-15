@@ -146,7 +146,7 @@ File File::openNextFile(uint8_t mode) {
         buf[0] = '/';
         strcpy(buf + 1, info.name);
       }
-      return SD.open(buf);
+      return SD.open(buf, mode);
     }
   }
   return File();
