@@ -8,4 +8,5 @@ coralmicro API
    system.rst
    network.rst
    utils.rst
+   arduino.rst
 =======

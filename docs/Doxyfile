@@ -11,7 +11,8 @@ INPUT                  = ../libs/tpu/ \
                          ../libs/cdc_acm/ \
                          ../libs/cdc_eem/ \
                          ../libs/rpc/ \
-                         ../libs/base/
+                         ../libs/base/ \
+                         ../arduino/libraries/
 
 EXCLUDE                = ../libs/tpu/tpu_driver.h
 FILE_PATTERNS          = *.h
