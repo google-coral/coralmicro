@@ -469,6 +469,100 @@ void RunClassificationModel(struct jsonrpc_request* request) {
                            latency + preprocess_latency);
 }
 
+void RunSegmentationModel(struct jsonrpc_request* request) {
+    std::string model_resource_name, image_resource_name;
+    int image_width, image_height, image_depth;
+
+    if (!JsonRpcGetStringParam(request, "model_resource_name",
+                               &model_resource_name))
+        return;
+
+    if (!JsonRpcGetStringParam(request, "image_resource_name",
+                               &image_resource_name))
+        return;
+
+    if (!JsonRpcGetIntegerParam(request, "image_width", &image_width)) return;
+
+    if (!JsonRpcGetIntegerParam(request, "image_height", &image_height)) return;
+
+    if (!JsonRpcGetIntegerParam(request, "image_depth", &image_depth)) return;
+
+    const auto* model_resource = GetResource(model_resource_name);
+    if (!model_resource) {
+        jsonrpc_return_error(request, -1, "missing model resource", nullptr);
+        return;
+    }
+    const auto* image_resource = GetResource(image_resource_name);
+    if (!image_resource) {
+        jsonrpc_return_error(request, -1, "missing image resource", nullptr);
+        return;
+    }
+
+    const tflite::Model* model = tflite::GetModel(model_resource->data());
+    if (model->version() != TFLITE_SCHEMA_VERSION) {
+        jsonrpc_return_error(request, -1, "model schema version unsupported",
+                             nullptr);
+        return;
+    }
+
+    tflite::MicroErrorReporter error_reporter;
+    std::shared_ptr<EdgeTpuContext> context =
+        EdgeTpuManager::GetSingleton()->OpenDevice();
+    if (!context) {
+        jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
+        return;
+    }
+
+    tflite::MicroMutableOpResolver<1> resolver;
+    resolver.AddCustom(kCustomOp, RegisterCustomOp());
+    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
+                                         kTensorArenaSize, &error_reporter);
+    if (interpreter.AllocateTensors() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to allocate tensors",
+                             nullptr);
+        return;
+    }
+
+    auto* input_tensor = interpreter.input_tensor(0);
+    auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
+    tensorflow::ImageDims tensor_dims = {input_tensor->dims->data[1],
+                                         input_tensor->dims->data[2],
+                                         input_tensor->dims->data[3]};
+    auto preprocess_start = coral::micro::timer::micros();
+    if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
+                                 image_resource->data(), tensor_dims,
+                                 input_tensor_data)) {
+        jsonrpc_return_error(request, -1, "Failed to resize input image",
+                             nullptr);
+        return;
+    }
+    auto preprocess_latency = coral::micro::timer::micros() - preprocess_start;
+
+    // The first Invoke is slow due to model transfer. Run an Invoke
+    // but ignore the results.
+    if (interpreter.Invoke() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter",
+                             nullptr);
+        return;
+    }
+
+    auto invoke_start = coral::micro::timer::micros();
+    if (interpreter.Invoke() != kTfLiteOk) {
+        jsonrpc_return_error(request, -1, "failed to invoke interpreter",
+                             nullptr);
+        return;
+    }
+    auto invoke_latency = coral::micro::timer::micros() - invoke_start;
+    // Return results to post process on host side
+    auto* output_tensor = interpreter.output_tensor(0);
+    auto* output_mask = tflite::GetTensorData<uint8_t>(output_tensor);
+    auto size = coral::micro::tensorflow::TensorSize(output_tensor);
+
+    jsonrpc_return_success(request, "{%Q:%d, %Q:%V}", "latency",
+                           invoke_latency + preprocess_latency, "output_mask",
+                           size, output_mask);
+}
+
 void StartM4(struct jsonrpc_request* request) {
     auto* ipc = IPCM7::GetSingleton();
     if (!ipc->HasM4Application()) {

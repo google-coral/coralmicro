@@ -19,6 +19,7 @@ inline constexpr char kMethodFetchResource[] = "fetch_resource";
 inline constexpr char kMethodRunClassificationModel[] =
     "run_classification_model";
 inline constexpr char kMethodRunDetectionModel[] = "run_detection_model";
+inline constexpr char kMethodRunSegmentationModel[] = "run_segmentation_model";
 inline constexpr char kMethodStartM4[] = "start_m4";
 inline constexpr char kMethodCaptureTestPattern[] = "capture_test_pattern";
 inline constexpr char kMethodGetTemperature[] = "get_temperature";
@@ -47,6 +48,7 @@ void UploadResourceChunk(struct jsonrpc_request* request);
 void DeleteResource(struct jsonrpc_request* request);
 void FetchResource(struct jsonrpc_request* request);
 void RunClassificationModel(struct jsonrpc_request* request);
+void RunSegmentationModel(struct jsonrpc_request* request);
 void RunDetectionModel(struct jsonrpc_request* request);
 void StartM4(struct jsonrpc_request* request);
 void GetTemperature(struct jsonrpc_request* request);

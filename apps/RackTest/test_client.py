@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--host', type=str, default='10.10.10.1', help='Ip address of the Dev Board Micro')
 parser.add_argument('--port', type=int, default=80, help='Port of the Dev Board Micro')
 parser.add_argument('--test', type=str, default='detection',
-                    help='Test to run, currently support ["detection", "classification", "wifi_tests]')
+                    help='Test to run, currently support ["detection", "classification", "segmentation","wifi_tests]')
 parser.add_argument('--test_image', type=str, default='test_data/cat.bmp')
 parser.add_argument('--model', type=str, default='models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite')
 args = parser.parse_args()
@@ -50,6 +50,9 @@ def run_model(url, test):
                                         rpc_helper.image_width, rpc_helper.image_height, 3)
     elif test == 'classification':
         response = rpc_helper.run_model('run_classification_model', model_name, rpc_helper.image_resource_name,
+                                        rpc_helper.image_width, rpc_helper.image_height, 3)
+    elif test == 'segmentation':
+        response = rpc_helper.run_model('run_segmentation_model', model_name, rpc_helper.image_resource_name,
                                         rpc_helper.image_width, rpc_helper.image_height, 3)
     else:
         raise ValueError(f'{test} not supported')
@@ -82,7 +85,7 @@ def run_wifi_test(url):
 def main():
     url = f"http://{args.host}:{args.port}/jsonrpc"
     print(f"Dev Board Micro url: {url}")
-    if args.test in ["classification", "detection"]:
+    if args.test in ["classification", "detection", "segmentation"]:
         run_model(url, args.test)
     elif args.test == "wifi_tests":
         run_wifi_test(url)

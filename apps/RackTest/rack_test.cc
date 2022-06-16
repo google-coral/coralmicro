@@ -268,6 +268,8 @@ extern "C" void app_main(void* param) {
                    coral::micro::testlib::RunClassificationModel);
     jsonrpc_export(coral::micro::testlib::kMethodRunDetectionModel,
                    coral::micro::testlib::RunDetectionModel);
+    jsonrpc_export(coral::micro::testlib::kMethodRunSegmentationModel,
+                   coral::micro::testlib::RunSegmentationModel);
     jsonrpc_export(coral::micro::testlib::kMethodStartM4,
                    coral::micro::testlib::StartM4);
     jsonrpc_export(coral::micro::testlib::kMethodGetTemperature,
