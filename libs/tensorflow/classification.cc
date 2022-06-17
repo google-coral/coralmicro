@@ -32,6 +32,19 @@ struct ClassComparator {
 };
 }  // namespace
 
+std::string FormatClassificationOutput(
+    const std::vector<tensorflow::Class>& classes) {
+    if (classes.empty()) {
+        return "No results\r\n";
+    }
+    std::string out;
+    out += "Results:\r\n";
+    for (const auto& c : classes) {
+        out += std::to_string(c.id) + ": " + std::to_string(c.score) + "\r\n";
+    }
+    return out;
+}
+
 std::vector<Class> GetClassificationResults(const float* scores,
                                             ssize_t scores_count,
                                             float threshold, size_t top_k) {
@@ -106,4 +119,4 @@ bool ClassificationPreprocess(TfLiteTensor* input_tensor) {
     return true;
 }
 
-}  // namespace coralmicro
+}  // namespace coralmicro::tensorflow

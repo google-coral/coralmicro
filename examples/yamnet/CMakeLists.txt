@@ -12,14 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# set(YAMNET_CPU true) # If CPU YAMNet is desired, uncomment.
+if(YAMNET_CPU)
+    add_compile_definitions(YAMNET_CPU)
+    set(model_name yamnet.tflite)
+else()
+    set(model_name yamnet_edgetpu.tflite)
+endif()
+
 add_executable_m7(yamnet
     yamnet.cc
     DATA
     ${CMAKE_SOURCE_DIR}/models/yamnet_test_audio.bin
+    ${CMAKE_SOURCE_DIR}/models/${model_name}
 )
 
 target_link_libraries(yamnet
     libs_base-m7_freertos
     libs_audio_freertos
-    libs_yamnet
 )

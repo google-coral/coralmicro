@@ -32,6 +32,15 @@ struct Class {
     float score;
 };
 
+// Format the Classification outputs into a string.
+//
+// @param classes All the classification class predictions, as returned by
+// `GetClassificationResults()`.
+// @return a string with all predictions in a line-delimited list with ids and
+// scores for each classification.
+std::string FormatClassificationOutput(
+    const std::vector<tensorflow::Class>& classes);
+
 // Converts a classification output tensor into a list of ordered classes.
 //
 // @param scores The dequantized output tensor.
@@ -73,6 +82,6 @@ bool ClassificationInputNeedsPreprocessing(const TfLiteTensor& input_tensor);
 // @returns True upon success; false if the tensor type is the wrong format.
 bool ClassificationPreprocess(TfLiteTensor* input_tensor);
 
-}  // namespace coralmicro
+}  // namespace coralmicro::tensorflow
 
 #endif  // LIBS_TENSORFLOW_CLASSIFICATION_H_

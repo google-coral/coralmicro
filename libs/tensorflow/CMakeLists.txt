@@ -167,6 +167,7 @@ add_library_m7(libs_tensorflow-m7 STATIC
     posenet_decoder.cc
     posenet_decoder_op.cc
     utils.cc
+    yamnet.cc
     ${libs_tensorflow_SOURCES}
 )
 
