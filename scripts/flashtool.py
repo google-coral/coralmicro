@@ -292,8 +292,12 @@ section (0) {
 def StateDone():
     pass
 
+def FlashtoolError(error_msg='Unknown error'):
+    print(f'Encountered an error during flashing: {error_msg}')
+    return StateFlashtoolError
+
 def StateFlashtoolError():
-    return StateDone
+    pass
 
 def StateCheckForAny(serial_number=None):
     for i in range(10):
@@ -306,7 +310,7 @@ def StateCheckForAny(serial_number=None):
         if is_flashloader_connected():
             return StateCheckForFlashloader
         time.sleep(1)
-    return StateFlashtoolError
+    return FlashtoolError('Unable to find device in any recognized mode.')
 
 def StateCheckForCoralMicro(serial_number=None):
     for i in range(10):
@@ -324,7 +328,7 @@ def StateCheckForElfloader(serial_number=None):
         if is_elfloader_connected(serial_number):
             return StateResetElfloader
         time.sleep(1)
-    return StateFlashtoolError
+    return FlashtoolError('Unable to find device in ELFLoader mode.')
 
 def FindSerialPortForDevice(serial_number=None):
     for port in serial.tools.list_ports.comports():
@@ -338,8 +342,7 @@ def FindSerialPortForDevice(serial_number=None):
 def StateResetToSdp(serial_number=None):
     port = FindSerialPortForDevice(serial_number)
     if port is None:
-        print('serial port not found')
-        return StateFlashtoolError
+        return FlashtoolError('Device serial port not found.')
 
     # Port could be enumerated at this point but udev rules are still to get applied.
     # Typically this results in exceptions like "[Errno 13] Permission denied: '/dev/ttyACM0'"
@@ -358,15 +361,14 @@ def StateResetToSdp(serial_number=None):
             except:
                 pass
         time.sleep(1)
-    print('Unable to open %s' % port)
-    return StateFlashtoolError
+    return FlashtoolError(f'Unable to open serial port at {port}')
 
 def StateCheckForSdp():
     for i in range(10):
         if is_sdp_connected():
             return StateLoadFlashloader
         time.sleep(1)
-    return StateFlashtoolError
+    return FlashtoolError('Unable to find device in SDP mode.')
 
 def StateLoadFlashloader(blhost_path, flashloader_path):
     subprocess.check_call([blhost_path, '-u', sdp_vidpid(), '--', 'load-image', flashloader_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -400,7 +402,7 @@ def StateCheckForFlashloader(ram, target_elfloader=False):
             else:
                 return StateProgram
         time.sleep(1)
-    return StateFlashtoolError
+    return FlashtoolError(f'Unable to find device in flashloader mode.')
 
 @contextlib.contextmanager
 def OpenHidDevice(vid, pid, serial_number):
@@ -524,11 +526,9 @@ def StateStartGdb(jlink_path, toolchain_path, unstripped_elf_path):
     jlink_gdbserver = os.path.join(jlink_path, 'JLinkGDBServerCLExe')
     gdb_exe = os.path.join(toolchain_path, 'arm-none-eabi-gdb')
     if not os.path.exists(jlink_gdbserver):
-        print(jlink_gdbserver + ' does not exist!')
-        return StateFlashtoolError
+        return FlashtoolError(f'Failed to start debug session: {jlink_gdbserver} does not exist.')
     if not os.path.exists(gdb_exe):
-        print(gdb_exe + ' does not exist!')
-        return StateFlashtoolError
+        return FlashtoolError(f'Failed to start debug session: {gdb_exe} does not exist.')
 
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     with subprocess.Popen(
@@ -550,13 +550,15 @@ def state_name(state):
     return ''.join('_' + c if c.isupper() else c for c in state.__name__)[1:].upper()
 
 def RunFlashtool(state, **kwargs):
+    prev_state = None
     while True:
-        print(state_name(state))
-        if state is StateDone:
+        if state is not StateFlashtoolError:
+          print(state_name(state))
+        if state is StateDone or state is StateFlashtoolError:
             break
         params = inspect.signature(state).parameters.values()
         state_kwargs =  {param.name : kwargs.get(param.name, param.default) for param in params}
-        state = state(**state_kwargs)
+        (prev_state, state) = (state, state(**state_kwargs))
 
 def main():
     # Check if we're running from inside a pyinstaller binary.
