@@ -8,8 +8,8 @@ unsigned long JpegCompressRgb(unsigned char* rgb, int width, int height,
                               unsigned long size);
 
 struct JpegBuffer {
-    unsigned char* data;
-    unsigned long size;
+  unsigned char* data;
+  unsigned long size;
 };
 JpegBuffer JpegCompressRgb(unsigned char* rgb, int width, int height,
                            int quality);

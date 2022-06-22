@@ -1,42 +1,43 @@
 #ifndef APPS_ELFLOADER_ELF_LOADER_H_
 #define APPS_ELFLOADER_ELF_LOADER_H_
 
-#include "libs/usb/descriptors.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_hid.h"
 #include <cstddef>
 #include <cstdint>
 
+#include "libs/usb/descriptors.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_hid.h"
+
 enum class ElfloaderCommand : uint8_t {
-    SetSize = 0,
-    Bytes = 1,
-    Done = 2,
-    ResetToBootloader = 3,
-    Target = 4,
-    ResetToFlash = 5,
+  SetSize = 0,
+  Bytes = 1,
+  Done = 2,
+  ResetToBootloader = 3,
+  Target = 4,
+  ResetToFlash = 5,
 };
 
 enum class ElfloaderTarget : uint8_t {
-    Ram = 0,
-    Path = 1,
-    Filesystem = 2,
+  Ram = 0,
+  Path = 1,
+  Filesystem = 2,
 };
 
 enum BootModes {
-    kFuse = 0,
-    kSerialDownloader = 1,
-    kInternal = 2,
+  kFuse = 0,
+  kSerialDownloader = 1,
+  kInternal = 2,
 };
 
 struct ElfloaderSetSize {
-    size_t size;
+  size_t size;
 } __attribute__((packed));
 
 struct ElfloaderBytes {
-    size_t size;
-    size_t offset;
+  size_t size;
+  size_t offset;
 } __attribute__((packed));
 
 constexpr int kTxEndpoint = 0;
