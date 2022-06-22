@@ -38,19 +38,19 @@ bool WiFiIsConnected();
 
 // Connects to a Wi-Fi network.
 //
-// @params network_params A pointer to a `WIFINetworkParams_t` that contains
+// @param network_params A pointer to a `WIFINetworkParams_t` that contains
 // information of the ssid such as name, password, and security type. See:
 // https://aws.github.io/amazon-freertos/202107.00/html1/struct_w_i_f_i_network_params__t.html
-// @params retry_count The max number of connection attempts. Default is 5.
+// @param retry_count The max number of connection attempts. Default is 5.
 // @return True if successfully connected to Wi-Fi; false otherwise.
 bool ConnectWiFi(const WIFINetworkParams_t* network_params,
                  int retry_count = kDefaultRetryCount);
 
 // Connects to a Wi-Fi network with the given network name and password.
 //
-// @params ssid The network name.
-// @params psk The password for the ssid.
-// @params retry_count The max number of connection attempts. Default is 5.
+// @param ssid The network name.
+// @param psk The password for the ssid.
+// @param retry_count The max number of connection attempts. Default is 5.
 // @return True if successfully connected to Wi-Fi; false otherwise.
 bool ConnectWiFi(const char* ssid, const char* psk,
                  int retry_count = kDefaultRetryCount);
@@ -62,19 +62,19 @@ bool ConnectWiFi(const char* ssid, const char* psk,
 // either during flash with the `--wifi_ssid` and `--wifi_psk` flags or with a
 // direct call to `utils::SetWiFiSSID()` and `utils::SetWiFiPSK()`.
 //
-// @params retry_count The max number of connection attempts. Default is 5.
+// @param retry_count The max number of connection attempts. Default is 5.
 // @return True if successfully connected to Wi-Fi; false otherwise.
 bool ConnectWiFi(int retry_count = kDefaultRetryCount);
 
 // Disconnects from the Wi-Fi network.
 //
-// @params retry_count The max number of disconnect attempts. Default is 5.
+// @param retry_count The max number of disconnect attempts. Default is 5.
 // @return True if Wi-Fi is successfully disconnected; false otherwise.
 bool DisconnectWiFi(int retry_count = kDefaultRetryCount);
 
 // Scans for Wi-Fi networks.
 //
-// @params max_results The max number of networks to look for.
+// @param max_results The max number of networks to look for.
 // This function may return fewer than this number but never more.
 // Default is 255 which is the maximum for uint8_t.
 // @return A vector of `WIFIScanResult_t` which contains info like name,
@@ -91,7 +91,7 @@ std::optional<std::string> GetWiFiIp();
 
 // Sets which Wi-Fi antenna type to use (internal or external).
 //
-// @params antenna The type of antenna to use.
+// @param antenna The type of antenna to use.
 // @return True if the Wi-Fi antenna was enabled successfully; false otherwise.
 bool SetWiFiAntenna(WiFiAntenna antenna);
 
