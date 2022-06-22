@@ -289,6 +289,11 @@ section (0) {
     subprocess.check_call(args)
     return sbfile_path
 
+def FlashtoolDone(success_msg=None):
+    if success_msg:
+        print(success_msg)
+    return StateDone
+
 def StateDone():
     pass
 
@@ -389,6 +394,7 @@ def StateLoadElfloader(toolchain_path, elfloader_path, elfloader_elf_path, blhos
     subprocess.check_output('{} -u {} write-memory {} {{{{ffffffff}}}}'.format(blhost_path, flashloader_vidpid(), hex(disable_usb_timeout_address)), shell=True, text=True)
     subprocess.call([blhost_path, '-u', flashloader_vidpid(), 'call', hex(start_address), '0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if target_elfloader:
+        # We omit a success message here, since this branch is only used internally for putting devices in a known good state.
         return StateDone
     if ram:
         return StateProgramElfloader
@@ -474,7 +480,7 @@ def StateProgramElfloader(elf_path, debug=False, serial_number=None):
         ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM,
                               bar=Bar(elf_path, max=len(data)))
         if not debug:
-            return StateDone
+            return FlashtoolDone('Flashing to RAM is complete, your application should be executing.')
         return StateStartGdb
 
 def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None):
@@ -514,13 +520,14 @@ def StateResetToBootloader(serial_number=None, reset=False):
     if reset:
         with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
             h.write(elfloader_msg_reset_to_bootloader())
-    return StateDone
+    return FlashtoolDone('Resetting device to SDP mode complete.')
 
 def StateResetToFlash(serial_number=None, reset=False):
     if reset:
         with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
             h.write(elfloader_msg_reset_to_flash())
-    return StateDone
+            return FlashtoolDone('Flashing to flash storage complete, the device is restarting to execute your application.')
+    return FlashtoolDone('Flashing to flash storage complete, restart the device to execute your application.')
 
 def StateStartGdb(jlink_path, toolchain_path, unstripped_elf_path):
     jlink_gdbserver = os.path.join(jlink_path, 'JLinkGDBServerCLExe')
@@ -544,7 +551,7 @@ def StateStartGdb(jlink_path, toolchain_path, unstripped_elf_path):
             with subprocess.Popen([gdb_exe, '-x', gdb_commands.name]) as gdb:
                 gdb.communicate()
         gdbserver.terminate()
-    return StateDone
+    return FlashtoolDone('Debug session complete.')
 
 def state_name(state):
     return ''.join('_' + c if c.isupper() else c for c in state.__name__)[1:].upper()
@@ -552,7 +559,7 @@ def state_name(state):
 def RunFlashtool(state, **kwargs):
     prev_state = None
     while True:
-        if state is not StateFlashtoolError:
+        if state is not StateFlashtoolError and state is not StateDone:
           print(state_name(state))
         if state is StateDone or state is StateFlashtoolError:
             break
