@@ -14,11 +14,11 @@ limitations under the License.
 ==============================================================================*/
 
 #include "tensorflow/lite/micro/examples/person_detection/main_functions.h"
-#include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/task.h"
 
 #include "libs/base/filesystem.h"
 #include "libs/tensorflow/utils.h"
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/detection_responder.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"
@@ -61,7 +61,7 @@ void setup() {
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   if (!coral::micro::filesystem::ReadFile("/models/person_detect_model.tflite",
-                                     &g_person_detect_model_data_fs)) {
+                                          &g_person_detect_model_data_fs)) {
     TF_LITE_REPORT_ERROR(error_reporter, "Cannot load model");
     return;
   }

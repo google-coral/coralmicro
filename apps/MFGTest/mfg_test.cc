@@ -44,8 +44,8 @@ std::map<int, std::pair<GPIO_Type*, int>> j5_j6_gpio_pins;
 constexpr int kDacPin = 95;
 
 void InitializeLoopbackMappings() {
-    j5_j6_loopback_mapping = {
-        // clang-format off
+  j5_j6_loopback_mapping = {
+      // clang-format off
         {1, 3},
         {3, 1},
         {5, 6},
@@ -126,93 +126,93 @@ void InitializeLoopbackMappings() {
         {175, 173},
         {176, 172},
         {178, 10},
-        // clang-format on
-    };
-    j5_j6_iomuxc = {
-        {1, {IOMUXC_GPIO_AD_26_GPIO9_IO25}},
-        {3, {IOMUXC_GPIO_AD_27_GPIO9_IO26}},
-        {5, {IOMUXC_GPIO_AD_03_GPIO9_IO02}},
-        {6, {IOMUXC_GPIO_AD_11_GPIO9_IO10}},
-        {7, {IOMUXC_GPIO_AD_01_GPIO9_IO00}},
-        {9, {IOMUXC_GPIO_AD_00_GPIO8_IO31}},
-        {10, {IOMUXC_GPIO_AD_06_GPIO9_IO05}},
-        {14, {IOMUXC_GPIO_AD_07_GPIO9_IO06}},
-        {15, {IOMUXC_GPIO_LPSR_04_GPIO12_IO04}},
-        {17, {IOMUXC_GPIO_LPSR_05_GPIO12_IO05}},
-        {33, {IOMUXC_GPIO_SNVS_05_DIG_GPIO13_IO08}},
-        {34, {IOMUXC_GPIO_SNVS_07_DIG_GPIO13_IO10}},
-        {35, {IOMUXC_GPIO_LPSR_07_GPIO12_IO07}},
-        {40, {IOMUXC_GPIO_EMC_B2_10_GPIO8_IO20}},
-        {41, {IOMUXC_GPIO_LPSR_14_GPIO12_IO14}},
-        {42, {IOMUXC_GPIO_EMC_B2_06_GPIO8_IO16}},
-        {43, {IOMUXC_GPIO_LPSR_13_GPIO12_IO13}},
-        {44, {IOMUXC_GPIO_LPSR_12_GPIO12_IO12}},
-        {45, {IOMUXC_GPIO_LPSR_01_GPIO12_IO01}},
-        {46, {IOMUXC_GPIO_LPSR_11_GPIO12_IO11}},
-        {48, {IOMUXC_GPIO_LPSR_10_GPIO12_IO10}},
-        {50, {IOMUXC_GPIO_LPSR_09_GPIO12_IO09}},
-        {51, {IOMUXC_GPIO_AD_32_GPIO9_IO31}},
-        {52, {IOMUXC_GPIO_AD_33_GPIO10_IO00}},
-        {53, {IOMUXC_GPIO_EMC_B2_08_GPIO8_IO18}},
-        {56, {IOMUXC_GPIO_SNVS_08_DIG_GPIO13_IO11}},
-        {58, {IOMUXC_GPIO_SNVS_04_DIG_GPIO13_IO07}},
-        {62, {IOMUXC_GPIO_EMC_B2_05_GPIO8_IO15}},
-        {64, {IOMUXC_GPIO_EMC_B2_09_GPIO8_IO19}},
-        {66, {IOMUXC_GPIO_EMC_B2_04_GPIO8_IO14}},
-        {68, {IOMUXC_GPIO_EMC_B2_07_GPIO8_IO17}},
-        {71, {IOMUXC_GPIO_SD_B2_00_GPIO10_IO09}},
-        {72, {IOMUXC_GPIO_LPSR_06_GPIO12_IO06}},
-        {73, {IOMUXC_GPIO_SD_B2_02_GPIO10_IO11}},
-        {75, {IOMUXC_GPIO_SD_B2_01_GPIO10_IO10}},
-        {77, {IOMUXC_GPIO_SD_B2_03_GPIO10_IO12}},
-        {78, {IOMUXC_GPIO_SNVS_06_DIG_GPIO13_IO09}},
-        {79, {IOMUXC_GPIO_SD_B2_04_GPIO10_IO13}},
-        {81, {IOMUXC_GPIO_SD_B2_05_GPIO10_IO14}},
-        {82, {IOMUXC_GPIO_DISP_B2_09_GPIO11_IO10}},
-        {85, {IOMUXC_GPIO_SD_B1_04_GPIO10_IO07}},
-        {86, {IOMUXC_GPIO_DISP_B2_07_GPIO11_IO08}},
-        {87, {IOMUXC_GPIO_AD_35_GPIO10_IO02}},
-        {88, {IOMUXC_GPIO_DISP_B2_06_GPIO11_IO07}},
-        {89, {IOMUXC_GPIO_AD_24_GPIO9_IO23}},
-        {91, {IOMUXC_GPIO_AD_25_GPIO9_IO24}},
-        {92, {IOMUXC_GPIO_SD_B1_01_GPIO10_IO04}},
-        {93, {IOMUXC_GPIO_AD_34_GPIO10_IO01}},
-        {94, {IOMUXC_GPIO_SD_B1_03_GPIO10_IO06}},
-        {95, {}},
-        {96, {IOMUXC_GPIO_SD_B1_02_GPIO10_IO05}},
-        {98, {IOMUXC_GPIO_SD_B1_05_GPIO10_IO08}},
-        {100, {IOMUXC_GPIO_SD_B1_00_GPIO10_IO03}},
-        {140, {IOMUXC_GPIO_EMC_B2_02_GPIO8_IO12}},
-        {142, {IOMUXC_GPIO_EMC_B2_03_GPIO8_IO13}},
-        {144, {IOMUXC_GPIO_EMC_B2_19_GPIO8_IO29}},
-        {146, {IOMUXC_GPIO_EMC_B2_20_GPIO8_IO30}},
-        {150, {IOMUXC_GPIO_DISP_B2_15_GPIO11_IO16}},
-        {152, {IOMUXC_GPIO_DISP_B2_08_GPIO11_IO09}},
-        {154, {IOMUXC_GPIO_DISP_B2_13_GPIO11_IO14}},
-        {155, {IOMUXC_GPIO_DISP_B1_06_GPIO10_IO27}},
-        {156, {IOMUXC_GPIO_DISP_B2_12_GPIO11_IO13}},
-        {157, {IOMUXC_GPIO_DISP_B1_07_GPIO10_IO28}},
-        {158, {IOMUXC_GPIO_DISP_B2_10_GPIO11_IO11}},
-        {159, {IOMUXC_GPIO_DISP_B1_08_GPIO10_IO29}},
-        {160, {IOMUXC_GPIO_DISP_B2_11_GPIO11_IO12}},
-        {161, {IOMUXC_GPIO_DISP_B1_09_GPIO10_IO30}},
-        {162, {IOMUXC_GPIO_DISP_B2_14_GPIO11_IO15}},
-        {163, {IOMUXC_GPIO_DISP_B1_10_GPIO10_IO31}},
-        {165, {IOMUXC_GPIO_DISP_B1_11_GPIO11_IO00}},
-        {166, {IOMUXC_GPIO_DISP_B1_04_GPIO10_IO25}},
-        {168, {IOMUXC_GPIO_DISP_B1_03_GPIO10_IO24}},
-        {169, {IOMUXC_GPIO_AD_28_GPIO9_IO27}},
-        {170, {IOMUXC_GPIO_DISP_B1_02_GPIO10_IO23}},
-        {171, {IOMUXC_GPIO_AD_29_GPIO9_IO28}},
-        {172, {IOMUXC_GPIO_DISP_B1_05_GPIO10_IO26}},
-        {173, {IOMUXC_GPIO_AD_30_GPIO9_IO29}},
-        {175, {IOMUXC_GPIO_AD_31_GPIO9_IO30}},
-        {176, {IOMUXC_GPIO_DISP_B1_00_GPIO10_IO21}},
-        {178, {IOMUXC_GPIO_DISP_B1_01_GPIO10_IO22}},
-    };
+      // clang-format on
+  };
+  j5_j6_iomuxc = {
+      {1, {IOMUXC_GPIO_AD_26_GPIO9_IO25}},
+      {3, {IOMUXC_GPIO_AD_27_GPIO9_IO26}},
+      {5, {IOMUXC_GPIO_AD_03_GPIO9_IO02}},
+      {6, {IOMUXC_GPIO_AD_11_GPIO9_IO10}},
+      {7, {IOMUXC_GPIO_AD_01_GPIO9_IO00}},
+      {9, {IOMUXC_GPIO_AD_00_GPIO8_IO31}},
+      {10, {IOMUXC_GPIO_AD_06_GPIO9_IO05}},
+      {14, {IOMUXC_GPIO_AD_07_GPIO9_IO06}},
+      {15, {IOMUXC_GPIO_LPSR_04_GPIO12_IO04}},
+      {17, {IOMUXC_GPIO_LPSR_05_GPIO12_IO05}},
+      {33, {IOMUXC_GPIO_SNVS_05_DIG_GPIO13_IO08}},
+      {34, {IOMUXC_GPIO_SNVS_07_DIG_GPIO13_IO10}},
+      {35, {IOMUXC_GPIO_LPSR_07_GPIO12_IO07}},
+      {40, {IOMUXC_GPIO_EMC_B2_10_GPIO8_IO20}},
+      {41, {IOMUXC_GPIO_LPSR_14_GPIO12_IO14}},
+      {42, {IOMUXC_GPIO_EMC_B2_06_GPIO8_IO16}},
+      {43, {IOMUXC_GPIO_LPSR_13_GPIO12_IO13}},
+      {44, {IOMUXC_GPIO_LPSR_12_GPIO12_IO12}},
+      {45, {IOMUXC_GPIO_LPSR_01_GPIO12_IO01}},
+      {46, {IOMUXC_GPIO_LPSR_11_GPIO12_IO11}},
+      {48, {IOMUXC_GPIO_LPSR_10_GPIO12_IO10}},
+      {50, {IOMUXC_GPIO_LPSR_09_GPIO12_IO09}},
+      {51, {IOMUXC_GPIO_AD_32_GPIO9_IO31}},
+      {52, {IOMUXC_GPIO_AD_33_GPIO10_IO00}},
+      {53, {IOMUXC_GPIO_EMC_B2_08_GPIO8_IO18}},
+      {56, {IOMUXC_GPIO_SNVS_08_DIG_GPIO13_IO11}},
+      {58, {IOMUXC_GPIO_SNVS_04_DIG_GPIO13_IO07}},
+      {62, {IOMUXC_GPIO_EMC_B2_05_GPIO8_IO15}},
+      {64, {IOMUXC_GPIO_EMC_B2_09_GPIO8_IO19}},
+      {66, {IOMUXC_GPIO_EMC_B2_04_GPIO8_IO14}},
+      {68, {IOMUXC_GPIO_EMC_B2_07_GPIO8_IO17}},
+      {71, {IOMUXC_GPIO_SD_B2_00_GPIO10_IO09}},
+      {72, {IOMUXC_GPIO_LPSR_06_GPIO12_IO06}},
+      {73, {IOMUXC_GPIO_SD_B2_02_GPIO10_IO11}},
+      {75, {IOMUXC_GPIO_SD_B2_01_GPIO10_IO10}},
+      {77, {IOMUXC_GPIO_SD_B2_03_GPIO10_IO12}},
+      {78, {IOMUXC_GPIO_SNVS_06_DIG_GPIO13_IO09}},
+      {79, {IOMUXC_GPIO_SD_B2_04_GPIO10_IO13}},
+      {81, {IOMUXC_GPIO_SD_B2_05_GPIO10_IO14}},
+      {82, {IOMUXC_GPIO_DISP_B2_09_GPIO11_IO10}},
+      {85, {IOMUXC_GPIO_SD_B1_04_GPIO10_IO07}},
+      {86, {IOMUXC_GPIO_DISP_B2_07_GPIO11_IO08}},
+      {87, {IOMUXC_GPIO_AD_35_GPIO10_IO02}},
+      {88, {IOMUXC_GPIO_DISP_B2_06_GPIO11_IO07}},
+      {89, {IOMUXC_GPIO_AD_24_GPIO9_IO23}},
+      {91, {IOMUXC_GPIO_AD_25_GPIO9_IO24}},
+      {92, {IOMUXC_GPIO_SD_B1_01_GPIO10_IO04}},
+      {93, {IOMUXC_GPIO_AD_34_GPIO10_IO01}},
+      {94, {IOMUXC_GPIO_SD_B1_03_GPIO10_IO06}},
+      {95, {}},
+      {96, {IOMUXC_GPIO_SD_B1_02_GPIO10_IO05}},
+      {98, {IOMUXC_GPIO_SD_B1_05_GPIO10_IO08}},
+      {100, {IOMUXC_GPIO_SD_B1_00_GPIO10_IO03}},
+      {140, {IOMUXC_GPIO_EMC_B2_02_GPIO8_IO12}},
+      {142, {IOMUXC_GPIO_EMC_B2_03_GPIO8_IO13}},
+      {144, {IOMUXC_GPIO_EMC_B2_19_GPIO8_IO29}},
+      {146, {IOMUXC_GPIO_EMC_B2_20_GPIO8_IO30}},
+      {150, {IOMUXC_GPIO_DISP_B2_15_GPIO11_IO16}},
+      {152, {IOMUXC_GPIO_DISP_B2_08_GPIO11_IO09}},
+      {154, {IOMUXC_GPIO_DISP_B2_13_GPIO11_IO14}},
+      {155, {IOMUXC_GPIO_DISP_B1_06_GPIO10_IO27}},
+      {156, {IOMUXC_GPIO_DISP_B2_12_GPIO11_IO13}},
+      {157, {IOMUXC_GPIO_DISP_B1_07_GPIO10_IO28}},
+      {158, {IOMUXC_GPIO_DISP_B2_10_GPIO11_IO11}},
+      {159, {IOMUXC_GPIO_DISP_B1_08_GPIO10_IO29}},
+      {160, {IOMUXC_GPIO_DISP_B2_11_GPIO11_IO12}},
+      {161, {IOMUXC_GPIO_DISP_B1_09_GPIO10_IO30}},
+      {162, {IOMUXC_GPIO_DISP_B2_14_GPIO11_IO15}},
+      {163, {IOMUXC_GPIO_DISP_B1_10_GPIO10_IO31}},
+      {165, {IOMUXC_GPIO_DISP_B1_11_GPIO11_IO00}},
+      {166, {IOMUXC_GPIO_DISP_B1_04_GPIO10_IO25}},
+      {168, {IOMUXC_GPIO_DISP_B1_03_GPIO10_IO24}},
+      {169, {IOMUXC_GPIO_AD_28_GPIO9_IO27}},
+      {170, {IOMUXC_GPIO_DISP_B1_02_GPIO10_IO23}},
+      {171, {IOMUXC_GPIO_AD_29_GPIO9_IO28}},
+      {172, {IOMUXC_GPIO_DISP_B1_05_GPIO10_IO26}},
+      {173, {IOMUXC_GPIO_AD_30_GPIO9_IO29}},
+      {175, {IOMUXC_GPIO_AD_31_GPIO9_IO30}},
+      {176, {IOMUXC_GPIO_DISP_B1_00_GPIO10_IO21}},
+      {178, {IOMUXC_GPIO_DISP_B1_01_GPIO10_IO22}},
+  };
 
-    j5_j6_gpio_pins = {
-        // clang-format off
+  j5_j6_gpio_pins = {
+      // clang-format off
         {1, {GPIO9, 25}},
         {3, {GPIO9, 26}},
         {5, {GPIO9, 2}},
@@ -293,8 +293,8 @@ void InitializeLoopbackMappings() {
         {175, {GPIO9, 30}},
         {176, {GPIO10, 21}},
         {178, {GPIO10, 22}},
-        // clang-format on
-    };
+      // clang-format on
+  };
 }
 // Implementation of "set_pmic_rail_state" RPC.
 // Takes two parameters:
@@ -302,15 +302,15 @@ void InitializeLoopbackMappings() {
 //    "enable" is a boolean state to set the rail to.
 // Returns success or failure to set the requested state.
 void SetPmicRailState(struct jsonrpc_request* request) {
-    int rail;
-    if (!JsonRpcGetIntegerParam(request, "rail", &rail)) return;
+  int rail;
+  if (!JsonRpcGetIntegerParam(request, "rail", &rail)) return;
 
-    bool enable;
-    if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
+  bool enable;
+  if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
-    coral::micro::PmicTask::GetSingleton()->SetRailState(
-        static_cast<coral::micro::pmic::Rail>(rail), enable);
-    jsonrpc_return_success(request, "{}");
+  coral::micro::PmicTask::GetSingleton()->SetRailState(
+      static_cast<coral::micro::pmic::Rail>(rail), enable);
+  jsonrpc_return_success(request, "{}");
 }
 
 // Implementation of "set_led_state" RPC.
@@ -320,37 +320,36 @@ void SetPmicRailState(struct jsonrpc_request* request) {
 // Returns success or failure to set the requested state.
 // NOTE: The TPU LED requires that the TPU power is enabled.
 void SetLedState(struct jsonrpc_request* request) {
-    int led;
-    if (!JsonRpcGetIntegerParam(request, "led", &led)) return;
+  int led;
+  if (!JsonRpcGetIntegerParam(request, "led", &led)) return;
 
-    bool enable;
-    if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
+  bool enable;
+  if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
-    enum LEDs {
-        kPower = 0,
-        kUser = 1,
-        kTpu = 2,
-    };
-    switch (led) {
-        case kPower:
-            coral::micro::led::Set(coral::micro::led::LED::kPower, enable);
-            break;
-        case kUser:
-            coral::micro::led::Set(coral::micro::led::LED::kUser, enable);
-            break;
-        case kTpu:
-            if (!coral::micro::EdgeTpuTask::GetSingleton()->GetPower()) {
-                jsonrpc_return_error(request, -1, "TPU power is not enabled",
-                                     nullptr);
-                return;
-            }
-            coral::micro::led::Set(coral::micro::led::LED::kTpu, enable);
-            break;
-        default:
-            jsonrpc_return_error(request, -1, "invalid led", nullptr);
-            return;
-    }
-    jsonrpc_return_success(request, "{}");
+  enum LEDs {
+    kPower = 0,
+    kUser = 1,
+    kTpu = 2,
+  };
+  switch (led) {
+    case kPower:
+      coral::micro::led::Set(coral::micro::led::LED::kPower, enable);
+      break;
+    case kUser:
+      coral::micro::led::Set(coral::micro::led::LED::kUser, enable);
+      break;
+    case kTpu:
+      if (!coral::micro::EdgeTpuTask::GetSingleton()->GetPower()) {
+        jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
+        return;
+      }
+      coral::micro::led::Set(coral::micro::led::LED::kTpu, enable);
+      break;
+    default:
+      jsonrpc_return_error(request, -1, "invalid led", nullptr);
+      return;
+  }
+  jsonrpc_return_success(request, "{}");
 }
 
 // Implements "set_pin_pair_to_gpio" request.
@@ -359,90 +358,89 @@ void SetLedState(struct jsonrpc_request* request) {
 //    "output_pin" is the pin which will be set to output mode
 // Returns success or failure to set the pin states.
 void SetPinPairToGpio(struct jsonrpc_request* request) {
-    int output_pin, input_pin;
+  int output_pin, input_pin;
 
-    if (!JsonRpcGetIntegerParam(request, "output_pin", &output_pin)) return;
-    if (!JsonRpcGetIntegerParam(request, "input_pin", &input_pin)) return;
+  if (!JsonRpcGetIntegerParam(request, "output_pin", &output_pin)) return;
+  if (!JsonRpcGetIntegerParam(request, "input_pin", &input_pin)) return;
 
-    auto pin_pair_a = j5_j6_loopback_mapping.find(output_pin);
-    auto pin_pair_b = j5_j6_loopback_mapping.find(input_pin);
-    if (pin_pair_a == j5_j6_loopback_mapping.end()) {
-        jsonrpc_return_error(request, -1, "invalid 'output_pin'", nullptr);
-        return;
-    }
-    if (pin_pair_b == j5_j6_loopback_mapping.end()) {
-        jsonrpc_return_error(request, -1, "invalid 'input_pin'", nullptr);
-        return;
-    }
-    if (pin_pair_a->first != pin_pair_b->second ||
-        pin_pair_b->first != pin_pair_a->second) {
-        jsonrpc_return_error(
-            request, -1, "'output_pin and input_pin are not a pair'",
-            "{%Q:%d, %Q:%d}", "output_pin", output_pin, "input_pin", input_pin);
-        return;
-    }
+  auto pin_pair_a = j5_j6_loopback_mapping.find(output_pin);
+  auto pin_pair_b = j5_j6_loopback_mapping.find(input_pin);
+  if (pin_pair_a == j5_j6_loopback_mapping.end()) {
+    jsonrpc_return_error(request, -1, "invalid 'output_pin'", nullptr);
+    return;
+  }
+  if (pin_pair_b == j5_j6_loopback_mapping.end()) {
+    jsonrpc_return_error(request, -1, "invalid 'input_pin'", nullptr);
+    return;
+  }
+  if (pin_pair_a->first != pin_pair_b->second ||
+      pin_pair_b->first != pin_pair_a->second) {
+    jsonrpc_return_error(
+        request, -1, "'output_pin and input_pin are not a pair'",
+        "{%Q:%d, %Q:%d}", "output_pin", output_pin, "input_pin", input_pin);
+    return;
+  }
 
-    auto output_pin_mux = j5_j6_iomuxc.find(output_pin);
-    auto input_pin_mux = j5_j6_iomuxc.find(input_pin);
-    if (output_pin_mux == j5_j6_iomuxc.end()) {
-        jsonrpc_return_error(request, -1, "'output_pin' mux settings not found",
-                             nullptr);
-        return;
-    }
-    if (input_pin_mux == j5_j6_iomuxc.end()) {
-        jsonrpc_return_error(request, -1, "'input_pin' mux settings not found",
-                             nullptr);
-        return;
-    }
-    auto output_pin_gpio_values = j5_j6_gpio_pins.find(output_pin);
-    if (output_pin_gpio_values == j5_j6_gpio_pins.end()) {
-        jsonrpc_return_error(request, -1,
-                             "'output_pin' gpio settings not found", nullptr);
-        return;
-    }
-    auto input_pin_gpio_values = j5_j6_gpio_pins.find(input_pin);
-    if (input_pin_gpio_values == j5_j6_gpio_pins.end()) {
-        jsonrpc_return_error(request, -1, "'input_pin' gpio settings not found",
-                             nullptr);
-        return;
-    }
+  auto output_pin_mux = j5_j6_iomuxc.find(output_pin);
+  auto input_pin_mux = j5_j6_iomuxc.find(input_pin);
+  if (output_pin_mux == j5_j6_iomuxc.end()) {
+    jsonrpc_return_error(request, -1, "'output_pin' mux settings not found",
+                         nullptr);
+    return;
+  }
+  if (input_pin_mux == j5_j6_iomuxc.end()) {
+    jsonrpc_return_error(request, -1, "'input_pin' mux settings not found",
+                         nullptr);
+    return;
+  }
+  auto output_pin_gpio_values = j5_j6_gpio_pins.find(output_pin);
+  if (output_pin_gpio_values == j5_j6_gpio_pins.end()) {
+    jsonrpc_return_error(request, -1, "'output_pin' gpio settings not found",
+                         nullptr);
+    return;
+  }
+  auto input_pin_gpio_values = j5_j6_gpio_pins.find(input_pin);
+  if (input_pin_gpio_values == j5_j6_gpio_pins.end()) {
+    jsonrpc_return_error(request, -1, "'input_pin' gpio settings not found",
+                         nullptr);
+    return;
+  }
 
-    gpio_pin_config_t pin_config_output = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    };
-    gpio_pin_config_t pin_config_input = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    };
-    const uint32_t kInputBufferOn = 1U;
-    const uint32_t kDisablePulls = 0U;
-    if (output_pin != kDacPin) {
-        GPIO_PinInit(output_pin_gpio_values->second.first,
-                     output_pin_gpio_values->second.second, &pin_config_output);
-        IOMUXC_SetPinMux(output_pin_mux->second[0], output_pin_mux->second[1],
-                         output_pin_mux->second[2], output_pin_mux->second[3],
-                         output_pin_mux->second[4], kInputBufferOn);
-        IOMUXC_SetPinConfig(
-            output_pin_mux->second[0], output_pin_mux->second[1],
-            output_pin_mux->second[2], output_pin_mux->second[3],
-            output_pin_mux->second[4], kDisablePulls);
-    }
+  gpio_pin_config_t pin_config_output = {
+      .direction = kGPIO_DigitalOutput,
+      .outputLogic = 0,
+      .interruptMode = kGPIO_NoIntmode,
+  };
+  gpio_pin_config_t pin_config_input = {
+      .direction = kGPIO_DigitalInput,
+      .outputLogic = 0,
+      .interruptMode = kGPIO_NoIntmode,
+  };
+  const uint32_t kInputBufferOn = 1U;
+  const uint32_t kDisablePulls = 0U;
+  if (output_pin != kDacPin) {
+    GPIO_PinInit(output_pin_gpio_values->second.first,
+                 output_pin_gpio_values->second.second, &pin_config_output);
+    IOMUXC_SetPinMux(output_pin_mux->second[0], output_pin_mux->second[1],
+                     output_pin_mux->second[2], output_pin_mux->second[3],
+                     output_pin_mux->second[4], kInputBufferOn);
+    IOMUXC_SetPinConfig(output_pin_mux->second[0], output_pin_mux->second[1],
+                        output_pin_mux->second[2], output_pin_mux->second[3],
+                        output_pin_mux->second[4], kDisablePulls);
+  }
 
-    if (input_pin != kDacPin) {
-        GPIO_PinInit(input_pin_gpio_values->second.first,
-                     input_pin_gpio_values->second.second, &pin_config_input);
-        IOMUXC_SetPinMux(input_pin_mux->second[0], input_pin_mux->second[1],
-                         input_pin_mux->second[2], input_pin_mux->second[3],
-                         input_pin_mux->second[4], kInputBufferOn);
-        IOMUXC_SetPinConfig(input_pin_mux->second[0], input_pin_mux->second[1],
-                            input_pin_mux->second[2], input_pin_mux->second[3],
-                            input_pin_mux->second[4], kDisablePulls);
-    }
+  if (input_pin != kDacPin) {
+    GPIO_PinInit(input_pin_gpio_values->second.first,
+                 input_pin_gpio_values->second.second, &pin_config_input);
+    IOMUXC_SetPinMux(input_pin_mux->second[0], input_pin_mux->second[1],
+                     input_pin_mux->second[2], input_pin_mux->second[3],
+                     input_pin_mux->second[4], kInputBufferOn);
+    IOMUXC_SetPinConfig(input_pin_mux->second[0], input_pin_mux->second[1],
+                        input_pin_mux->second[2], input_pin_mux->second[3],
+                        input_pin_mux->second[4], kDisablePulls);
+  }
 
-    jsonrpc_return_success(request, "{}");
+  jsonrpc_return_success(request, "{}");
 }
 
 // Implements the "set_gpio" RPC.
@@ -451,26 +449,26 @@ void SetPinPairToGpio(struct jsonrpc_request* request) {
 //    "enable" is whether to drive the pin high or low.
 // Returns success or failure.
 void SetGpio(struct jsonrpc_request* request) {
-    int pin;
-    if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
+  int pin;
+  if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
 
-    bool enable;
-    if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
+  bool enable;
+  if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
-    auto pin_gpio_values = j5_j6_gpio_pins.find(pin);
-    if (pin_gpio_values == j5_j6_gpio_pins.end()) {
-        jsonrpc_return_error(request, -1, "invalid pin", nullptr);
-        return;
-    }
+  auto pin_gpio_values = j5_j6_gpio_pins.find(pin);
+  if (pin_gpio_values == j5_j6_gpio_pins.end()) {
+    jsonrpc_return_error(request, -1, "invalid pin", nullptr);
+    return;
+  }
 
-    if (pin != kDacPin) {
-        GPIO_PinWrite(pin_gpio_values->second.first,
-                      pin_gpio_values->second.second, enable);
-    } else {
-        coral::micro::analog::WriteDAC(enable ? 4095 : 1);
-        coral::micro::analog::EnableDAC(true);
-    }
-    jsonrpc_return_success(request, "{}", nullptr);
+  if (pin != kDacPin) {
+    GPIO_PinWrite(pin_gpio_values->second.first, pin_gpio_values->second.second,
+                  enable);
+  } else {
+    coral::micro::analog::WriteDAC(enable ? 4095 : 1);
+    coral::micro::analog::EnableDAC(true);
+  }
+  jsonrpc_return_success(request, "{}", nullptr);
 }
 
 // Implements the "get_gpio" RPC.
@@ -478,74 +476,73 @@ void SetGpio(struct jsonrpc_request* request) {
 //    "pin" is the numerical value of the pin to get the state of.
 // Returns success or failure.
 void GetGpio(struct jsonrpc_request* request) {
-    int pin;
-    if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
+  int pin;
+  if (!JsonRpcGetIntegerParam(request, "pin", &pin)) return;
 
-    auto pin_gpio_values = j5_j6_gpio_pins.find(pin);
-    if (pin_gpio_values == j5_j6_gpio_pins.end()) {
-        jsonrpc_return_error(request, -1, "invalid pin", nullptr);
-        return;
-    }
+  auto pin_gpio_values = j5_j6_gpio_pins.find(pin);
+  if (pin_gpio_values == j5_j6_gpio_pins.end()) {
+    jsonrpc_return_error(request, -1, "invalid pin", nullptr);
+    return;
+  }
 
-    int pin_value = GPIO_PinRead(pin_gpio_values->second.first,
-                                 pin_gpio_values->second.second);
-    jsonrpc_return_success(request, "{%Q:%d}", "value", pin_value);
+  int pin_value = GPIO_PinRead(pin_gpio_values->second.first,
+                               pin_gpio_values->second.second);
+  jsonrpc_return_success(request, "{%Q:%d}", "value", pin_value);
 }
 
 void GetTPUChipIds(struct jsonrpc_request* request) {
-    jsonrpc_return_error(request, -1, "get_tpu_chip_ids not implemented",
-                         nullptr);
+  jsonrpc_return_error(request, -1, "get_tpu_chip_ids not implemented",
+                       nullptr);
 }
 
 void CheckTPUAlarm(struct jsonrpc_request* request) {
-    jsonrpc_return_error(request, -1, "check_tpu_alarm not implemented",
-                         nullptr);
+  jsonrpc_return_error(request, -1, "check_tpu_alarm not implemented", nullptr);
 }
 
 // Implements the "set_dac_value" RPC.
 // Takes one parameter, "counts". This represents the number of DAC counts to
 // set, from 0-4095. Returns success or failure.
 void SetDACValue(struct jsonrpc_request* request) {
-    int counts;
-    if (!JsonRpcGetIntegerParam(request, "counts", &counts)) return;
+  int counts;
+  if (!JsonRpcGetIntegerParam(request, "counts", &counts)) return;
 
-    if (counts > 4095 || counts < 0) {
-        jsonrpc_return_error(request, -1, "'counts' out of range (0-4095)",
-                             nullptr);
-        return;
-    }
+  if (counts > 4095 || counts < 0) {
+    jsonrpc_return_error(request, -1, "'counts' out of range (0-4095)",
+                         nullptr);
+    return;
+  }
 
-    coral::micro::analog::WriteDAC(counts);
-    coral::micro::analog::EnableDAC(!!counts);
-    jsonrpc_return_success(request, "{}");
+  coral::micro::analog::WriteDAC(counts);
+  coral::micro::analog::EnableDAC(!!counts);
+  jsonrpc_return_success(request, "{}");
 }
 
 // Implements "test_sdram_pattern" RPC.
 // Allocates memory from SDRAM, writes and verifies a test pattern.
 // Returns success or failure.
 void TestSDRamPattern(struct jsonrpc_request* request) {
-    size_t sdram_area_size = 1024 * 1024;  // 1 MB
-    auto sdram_area = std::make_unique<uint8_t[]>(sdram_area_size);
-    if (sdram_area.get() < reinterpret_cast<void*>(0x80000000U)) {
-        jsonrpc_return_error(request, -1,
-                             "test_sdram_pattern memory not in sdram", nullptr);
-        return;
-    }
+  size_t sdram_area_size = 1024 * 1024;  // 1 MB
+  auto sdram_area = std::make_unique<uint8_t[]>(sdram_area_size);
+  if (sdram_area.get() < reinterpret_cast<void*>(0x80000000U)) {
+    jsonrpc_return_error(request, -1, "test_sdram_pattern memory not in sdram",
+                         nullptr);
+    return;
+  }
 
-    for (size_t i = 0; i < sdram_area_size; ++i) {
-        sdram_area[i] = i % UCHAR_MAX;
-    }
+  for (size_t i = 0; i < sdram_area_size; ++i) {
+    sdram_area[i] = i % UCHAR_MAX;
+  }
 
-    for (size_t i = 0; i < sdram_area_size; ++i) {
-        uint8_t val = sdram_area[i];
-        if (val != i % UCHAR_MAX) {
-            jsonrpc_return_error(request, -1, "test_sdram_pattern failed",
-                                 "{%Q:%x}", "location", &sdram_area[i]);
-            return;
-        }
+  for (size_t i = 0; i < sdram_area_size; ++i) {
+    uint8_t val = sdram_area[i];
+    if (val != i % UCHAR_MAX) {
+      jsonrpc_return_error(request, -1, "test_sdram_pattern failed", "{%Q:%x}",
+                           "location", &sdram_area[i]);
+      return;
     }
+  }
 
-    jsonrpc_return_success(request, "{}");
+  jsonrpc_return_success(request, "{}");
 }
 
 // Implements the "write_file" RPC.
@@ -554,150 +551,148 @@ void TestSDRamPattern(struct jsonrpc_request* request) {
 //    "data": base64-encoded data to decode and write into the file.
 // Returns success or failure.
 void WriteFile(struct jsonrpc_request* request) {
-    std::string filename;
-    if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
+  std::string filename;
+  if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
-    std::vector<uint8_t> data;
-    if (!JsonRpcGetBase64Param(request, "data", &data)) return;
+  std::vector<uint8_t> data;
+  if (!JsonRpcGetBase64Param(request, "data", &data)) return;
 
-    if (!coral::micro::filesystem::WriteFile(filename.c_str(), data.data(),
-                                             data.size())) {
-        jsonrpc_return_error(request, -1, "failed to write file", nullptr);
-        return;
-    }
+  if (!coral::micro::filesystem::WriteFile(filename.c_str(), data.data(),
+                                           data.size())) {
+    jsonrpc_return_error(request, -1, "failed to write file", nullptr);
+    return;
+  }
 
-    jsonrpc_return_success(request, "{}");
+  jsonrpc_return_success(request, "{}");
 }
 
 // Implements the "read_file" RPC.
 // Takes one parameter, "filename".
 // Base64-encodes and returns the data in the file, if it exists.
 void ReadFile(struct jsonrpc_request* request) {
-    std::string filename;
-    if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
+  std::string filename;
+  if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
-    std::vector<uint8_t> data;
-    if (!coral::micro::filesystem::ReadFile(filename.c_str(), &data)) {
-        jsonrpc_return_error(request, -1, "failed to read file", nullptr);
-    }
+  std::vector<uint8_t> data;
+  if (!coral::micro::filesystem::ReadFile(filename.c_str(), &data)) {
+    jsonrpc_return_error(request, -1, "failed to read file", nullptr);
+  }
 
-    jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(),
-                           data.data());
+  jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(), data.data());
 }
 
 void CheckA71CH(struct jsonrpc_request* request) {
-    static bool a71ch_inited = false;
-    if (!a71ch_inited) {
-        bool success = coral::micro::a71ch::Init();
-        if (!success) {
-            jsonrpc_return_error(request, -1, "failed to init a71ch", nullptr);
-            return;
-        }
-        a71ch_inited = true;
+  static bool a71ch_inited = false;
+  if (!a71ch_inited) {
+    bool success = coral::micro::a71ch::Init();
+    if (!success) {
+      jsonrpc_return_error(request, -1, "failed to init a71ch", nullptr);
+      return;
     }
+    a71ch_inited = true;
+  }
 
-    uint8_t uid[A71CH_MODULE_UNIQUE_ID_LEN];
-    uint16_t uidLen = A71CH_MODULE_UNIQUE_ID_LEN;
-    uint16_t ret = A71_GetUniqueID(uid, &uidLen);
+  uint8_t uid[A71CH_MODULE_UNIQUE_ID_LEN];
+  uint16_t uidLen = A71CH_MODULE_UNIQUE_ID_LEN;
+  uint16_t ret = A71_GetUniqueID(uid, &uidLen);
 
-    if (ret == SMCOM_OK) {
-        jsonrpc_return_success(request, "{}");
-    } else {
-        jsonrpc_return_error(request, -1, "failed to retrieve a71ch id",
-                             nullptr);
-    }
+  if (ret == SMCOM_OK) {
+    jsonrpc_return_success(request, "{}");
+  } else {
+    jsonrpc_return_error(request, -1, "failed to retrieve a71ch id", nullptr);
+  }
 }
 
 void FuseMACAddress(struct jsonrpc_request* request) {
-    std::string address;
-    if (!JsonRpcGetStringParam(request, "address", &address)) return;
+  std::string address;
+  if (!JsonRpcGetStringParam(request, "address", &address)) return;
 
-    unsigned int a, b, c, d, e, f;
-    int tokens = sscanf(address.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X", &a,
-                        &b, &c, &d, &e, &f);
-    if (tokens != 6) {
-        jsonrpc_return_error(
-            request, -1, "could not get six octets from 'address'", nullptr);
-        return;
-    }
+  unsigned int a, b, c, d, e, f;
+  int tokens = sscanf(address.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X", &a, &b,
+                      &c, &d, &e, &f);
+  if (tokens != 6) {
+    jsonrpc_return_error(request, -1, "could not get six octets from 'address'",
+                         nullptr);
+    return;
+  }
 
-    OCOTP_Init(OCOTP, 0);
+  OCOTP_Init(OCOTP, 0);
 
-    uint32_t mac_address_hi, mac_address_lo;
-    status_t status = OCOTP_ReadFuseShadowRegisterExt(
-        OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), &mac_address_hi, 1);
-    if (status != kStatus_Success) {
-        jsonrpc_return_error(
-            request, -1, "failed to read MAC address fuse register", nullptr);
-        return;
-    }
+  uint32_t mac_address_hi, mac_address_lo;
+  status_t status = OCOTP_ReadFuseShadowRegisterExt(
+      OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), &mac_address_hi, 1);
+  if (status != kStatus_Success) {
+    jsonrpc_return_error(request, -1,
+                         "failed to read MAC address fuse register", nullptr);
+    return;
+  }
 
-    // Preserve the reserved bits at the top of the high register.
-    mac_address_hi &= 0xFFFF0000;
-    mac_address_hi |= (a << 8) | (b);
-    mac_address_lo = (c << 24) | (d << 16) | (e << 8) | f;
+  // Preserve the reserved bits at the top of the high register.
+  mac_address_hi &= 0xFFFF0000;
+  mac_address_hi |= (a << 8) | (b);
+  mac_address_lo = (c << 24) | (d << 16) | (e << 8) | f;
 
-    status = OCOTP_WriteFuseShadowRegister(
-        OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), mac_address_hi);
-    if (status != kStatus_Success) {
-        jsonrpc_return_error(
-            request, -1, "failed to write MAC address fuse register", nullptr);
-        return;
-    }
-    status = OCOTP_WriteFuseShadowRegister(
-        OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO), mac_address_lo);
-    if (status != kStatus_Success) {
-        jsonrpc_return_error(
-            request, -1, "failed to write MAC address fuse register", nullptr);
-        return;
-    }
+  status = OCOTP_WriteFuseShadowRegister(
+      OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI), mac_address_hi);
+  if (status != kStatus_Success) {
+    jsonrpc_return_error(request, -1,
+                         "failed to write MAC address fuse register", nullptr);
+    return;
+  }
+  status = OCOTP_WriteFuseShadowRegister(
+      OCOTP, FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO), mac_address_lo);
+  if (status != kStatus_Success) {
+    jsonrpc_return_error(request, -1,
+                         "failed to write MAC address fuse register", nullptr);
+    return;
+  }
 
-    jsonrpc_return_success(request, "{}");
+  jsonrpc_return_success(request, "{}");
 }
 
 void ReadMACAddress(struct jsonrpc_request* request) {
-    coral::micro::MacAddress address = coral::micro::utils::GetMacAddress();
-    char address_str[255];
-    memset(address_str, 0, sizeof(address_str));
-    snprintf(address_str, sizeof(address_str), "%02X:%02X:%02X:%02X:%02X:%02X",
-             address.a, address.b, address.c, address.d, address.e, address.f);
-    jsonrpc_return_success(request, "{%Q:%Q}", "address", address_str);
+  coral::micro::MacAddress address = coral::micro::utils::GetMacAddress();
+  char address_str[255];
+  memset(address_str, 0, sizeof(address_str));
+  snprintf(address_str, sizeof(address_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+           address.a, address.b, address.c, address.d, address.e, address.f);
+  jsonrpc_return_success(request, "{%Q:%Q}", "address", address_str);
 }
 }  // namespace
 
 extern "C" void app_main(void* param) {
-    InitializeLoopbackMappings();
-    coral::micro::analog::Init(coral::micro::analog::Device::DAC1);
+  InitializeLoopbackMappings();
+  coral::micro::analog::Init(coral::micro::analog::Device::DAC1);
 
-    jsonrpc_init(nullptr, nullptr);
-    jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
-                   coral::micro::testlib::GetSerialNumber);
-    jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
-                   coral::micro::testlib::GetSerialNumber);
-    jsonrpc_export("set_pmic_rail_state", SetPmicRailState);
-    jsonrpc_export("set_led_state", SetLedState);
-    // TODO(atv): Special handling for the pair with DAC_OUT
-    jsonrpc_export("set_pin_pair_to_gpio", SetPinPairToGpio);
-    jsonrpc_export("set_gpio", SetGpio);
-    jsonrpc_export("get_gpio", GetGpio);
-    jsonrpc_export(coral::micro::testlib::kMethodCaptureTestPattern,
-                   coral::micro::testlib::CaptureTestPattern);
-    jsonrpc_export(coral::micro::testlib::kMethodCaptureAudio,
-                   coral::micro::testlib::CaptureAudio);
-    jsonrpc_export(coral::micro::testlib::kMethodSetTPUPowerState,
-                   coral::micro::testlib::SetTPUPowerState);
-    jsonrpc_export(coral::micro::testlib::kMethodRunTestConv1,
-                   coral::micro::testlib::RunTestConv1);
-    jsonrpc_export("get_tpu_chip_ids", GetTPUChipIds);
-    jsonrpc_export("check_tpu_alarm", CheckTPUAlarm);
-    jsonrpc_export("set_dac_value", SetDACValue);
-    jsonrpc_export("test_sdram_pattern", TestSDRamPattern);
-    jsonrpc_export("write_file", WriteFile);
-    jsonrpc_export("read_file", ReadFile);
-    jsonrpc_export("check_a71ch", CheckA71CH);
-    jsonrpc_export("fuse_mac_address", FuseMACAddress);
-    jsonrpc_export("read_mac_address", ReadMACAddress);
-    IperfInit();
-    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
-    vTaskSuspend(nullptr);
+  jsonrpc_init(nullptr, nullptr);
+  jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
+                 coral::micro::testlib::GetSerialNumber);
+  jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
+                 coral::micro::testlib::GetSerialNumber);
+  jsonrpc_export("set_pmic_rail_state", SetPmicRailState);
+  jsonrpc_export("set_led_state", SetLedState);
+  // TODO(atv): Special handling for the pair with DAC_OUT
+  jsonrpc_export("set_pin_pair_to_gpio", SetPinPairToGpio);
+  jsonrpc_export("set_gpio", SetGpio);
+  jsonrpc_export("get_gpio", GetGpio);
+  jsonrpc_export(coral::micro::testlib::kMethodCaptureTestPattern,
+                 coral::micro::testlib::CaptureTestPattern);
+  jsonrpc_export(coral::micro::testlib::kMethodCaptureAudio,
+                 coral::micro::testlib::CaptureAudio);
+  jsonrpc_export(coral::micro::testlib::kMethodSetTPUPowerState,
+                 coral::micro::testlib::SetTPUPowerState);
+  jsonrpc_export(coral::micro::testlib::kMethodRunTestConv1,
+                 coral::micro::testlib::RunTestConv1);
+  jsonrpc_export("get_tpu_chip_ids", GetTPUChipIds);
+  jsonrpc_export("check_tpu_alarm", CheckTPUAlarm);
+  jsonrpc_export("set_dac_value", SetDACValue);
+  jsonrpc_export("test_sdram_pattern", TestSDRamPattern);
+  jsonrpc_export("write_file", WriteFile);
+  jsonrpc_export("read_file", ReadFile);
+  jsonrpc_export("check_a71ch", CheckA71CH);
+  jsonrpc_export("fuse_mac_address", FuseMACAddress);
+  jsonrpc_export("read_mac_address", ReadMACAddress);
+  IperfInit();
+  coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
+  vTaskSuspend(nullptr);
 }

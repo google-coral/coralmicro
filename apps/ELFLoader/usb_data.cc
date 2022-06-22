@@ -24,12 +24,8 @@ uint8_t elfloader_hid_report[] = {
 uint16_t elfloader_hid_report_size = sizeof(elfloader_hid_report);
 
 coral::micro::HidClassDescriptor elfloader_descriptor_data = {
-    {
-        sizeof(coral::micro::InterfaceDescriptor),
-        0x4,
-        0,
-        0, 2, 3, 0, 0, 0
-    }, // InterfaceDescriptor
+    {sizeof(coral::micro::InterfaceDescriptor), 0x4, 0, 0, 2, 3, 0, 0,
+     0},  // InterfaceDescriptor
     {
         sizeof(coral::micro::HidDescriptor),
         33,
@@ -38,50 +34,71 @@ coral::micro::HidClassDescriptor elfloader_descriptor_data = {
         1,
         34,
         elfloader_hid_report_size,
-    }, // HidDescriptor
+    },  // HidDescriptor
     {
         sizeof(coral::micro::EndpointDescriptor),
-        5, 0 /* set by code */, 0x03, 512, 3,
-    }, // EndpointDescriptor
+        5,
+        0 /* set by code */,
+        0x03,
+        512,
+        3,
+    },  // EndpointDescriptor
     {
         sizeof(coral::micro::EndpointDescriptor),
-        5, 0 /* set by code */, 0x03, 512, 3,
-    }, // EndpointDescriptor
+        5,
+        0 /* set by code */,
+        0x03,
+        512,
+        3,
+    },  // EndpointDescriptor
 };
 
 usb_device_endpoint_struct_t elfloader_hid_endpoints[2] = {
     {
-        0, // in
+        0,  // in
         USB_ENDPOINT_INTERRUPT,
         128,
     },
     {
-        0, // out
+        0,  // out
         USB_ENDPOINT_INTERRUPT,
         128,
-    }
-};
+    }};
 
 usb_device_interface_struct_t elfloader_hid_interface[1] = {
     {
-        0, { ARRAY_SIZE(elfloader_hid_endpoints), elfloader_hid_endpoints, },
+        0,
+        {
+            ARRAY_SIZE(elfloader_hid_endpoints),
+            elfloader_hid_endpoints,
+        },
     },
 };
 
 usb_device_interfaces_struct_t elfloader_interfaces[1] = {
     {
-        0x03, 0x00, 0x00, 0, elfloader_hid_interface, ARRAY_SIZE(elfloader_hid_interface),
+        0x03,
+        0x00,
+        0x00,
+        0,
+        elfloader_hid_interface,
+        ARRAY_SIZE(elfloader_hid_interface),
     },
 };
 
 usb_device_interface_list_t elfloader_interface_list[1] = {
-    ARRAY_SIZE(elfloader_interfaces), elfloader_interfaces,
+    ARRAY_SIZE(elfloader_interfaces),
+    elfloader_interfaces,
 };
 
 usb_device_class_struct_t elfloader_class_struct = {
-    elfloader_interface_list, kUSB_DeviceClassTypeHid, ARRAY_SIZE(elfloader_interface_list),
+    elfloader_interface_list,
+    kUSB_DeviceClassTypeHid,
+    ARRAY_SIZE(elfloader_interface_list),
 };
 
 usb_device_class_config_struct_t elfloader_config_data = {
-    nullptr, nullptr, &elfloader_class_struct,
+    nullptr,
+    nullptr,
+    &elfloader_class_struct,
 };
