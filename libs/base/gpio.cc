@@ -5,6 +5,10 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
 
+#if (__CORTEX_M == 4)
+#define GPIO6_Combined_0_15_IRQn NotAvail_IRQn
+#endif
+
 namespace coral::micro {
 namespace gpio {
 namespace {
@@ -12,12 +16,6 @@ StaticSemaphore_t g_mutex_storage;
 SemaphoreHandle_t g_mutex;
 
 GPIO_Type* PinNameToModule[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = GPIO6,
-    [Gpio::kArduinoD1] = GPIO2,
-    [Gpio::kArduinoD2] = GPIO2,
-    [Gpio::kArduinoD3] = GPIO6,
-#endif
     [Gpio::kPowerLED] = GPIO13,
     [Gpio::kUserLED] = GPIO13,
     [Gpio::kEdgeTpuPgood] = GPIO8,
@@ -30,18 +28,25 @@ GPIO_Type* PinNameToModule[Gpio::kCount] = {
     [Gpio::kBtHostWake] = GPIO11,
     [Gpio::kBtDevWake] = GPIO11,
     [Gpio::kEthPhyRst] = GPIO8,
-    [Gpio::kBufferEnable] = GPIO9,
     [Gpio::kCameraPrivacyOverride] = GPIO8,
     [Gpio::kCryptoRst] = GPIO12,
+    [Gpio::kSpiCs] = GPIO6,
+    [Gpio::kSpiSck] = GPIO6,
+    [Gpio::kSpiSdo] = GPIO6,
+    [Gpio::kSpiSdi] = GPIO6,
+    [Gpio::kSda6] = GPIO6,
+    [Gpio::kScl1] = GPIO3,
+    [Gpio::kSda1] = GPIO4,
+    [Gpio::kAA] = GPIO3,
+    [Gpio::kAB] = GPIO3,
+    [Gpio::kUartCts] = GPIO2,
+    [Gpio::kUartRts] = GPIO2,
+    [Gpio::kPwm1] = GPIO3,
+    [Gpio::kPwm0] = GPIO2,
+    [Gpio::kScl6] = GPIO6,
 };
 
 constexpr uint32_t PinNameToPin[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 7,
-    [Gpio::kArduinoD1] = 11,
-    [Gpio::kArduinoD2] = 10,
-    [Gpio::kArduinoD3] = 6,
-#endif
     [Gpio::kPowerLED] = 5,
     [Gpio::kUserLED] = 6,
     [Gpio::kEdgeTpuPgood] = 26,
@@ -54,34 +59,25 @@ constexpr uint32_t PinNameToPin[Gpio::kCount] = {
     [Gpio::kBtHostWake] = 16,
     [Gpio::kBtDevWake] = 15,
     [Gpio::kEthPhyRst] = 13,
-    [Gpio::kBufferEnable] = 4,
     [Gpio::kCameraPrivacyOverride] = 22,
     [Gpio::kCryptoRst] = 8,
+    [Gpio::kSpiCs] = 9,
+    [Gpio::kSpiSck] = 10,
+    [Gpio::kSpiSdo] = 11,
+    [Gpio::kSpiSdi] = 12,
+    [Gpio::kSda6] = 6,
+    [Gpio::kScl1] = 31,
+    [Gpio::kSda1] = 0,
+    [Gpio::kAA] = 5,
+    [Gpio::kAB] = 6,
+    [Gpio::kUartCts] = 10,
+    [Gpio::kUartRts] = 11,
+    [Gpio::kPwm1] = 0,
+    [Gpio::kPwm0] = 31,
+    [Gpio::kScl6] = 7,
 };
 
 gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_IntFallingEdge,
-    },
-    [Gpio::kArduinoD1] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_IntFallingEdge,
-    },
-    [Gpio::kArduinoD2] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_IntFallingEdge,
-    },
-    [Gpio::kArduinoD3] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_IntFallingEdge,
-    },
-#endif
     [Gpio::kPowerLED] = {
         .direction = kGPIO_DigitalOutput,
         .outputLogic = 0,
@@ -142,11 +138,6 @@ gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
     },
-    [Gpio::kBufferEnable] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 1,
-        .interruptMode = kGPIO_NoIntmode,
-    },
     [Gpio::kCameraPrivacyOverride] = {
         .direction = kGPIO_DigitalOutput,
         .outputLogic = 1,
@@ -157,15 +148,79 @@ gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
         .outputLogic = 1,
         .interruptMode = kGPIO_NoIntmode,
     },
+    [Gpio::kSpiCs] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kSpiSck] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kSpiSdo] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kSpiSdi] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kSda6] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kScl1] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kSda1] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kAA] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kAB] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kUartCts] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kUartRts] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kPwm1] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kPwm0] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
+    [Gpio::kScl6] = {
+        .direction = kGPIO_DigitalInput,
+        .outputLogic = 0,
+        .interruptMode = kGPIO_NoIntmode,
+    },
 };
 
 constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = GPIO6_Combined_0_15_IRQn,
-    [Gpio::kArduinoD1] = GPIO2_Combined_0_15_IRQn,
-    [Gpio::kArduinoD2] = GPIO2_Combined_0_15_IRQn,
-    [Gpio::kArduinoD3] = GPIO6_Combined_0_15_IRQn,
-#endif
     [Gpio::kPowerLED] = HardFault_IRQn,
     [Gpio::kUserLED] = HardFault_IRQn,
     [Gpio::kEdgeTpuPgood] = HardFault_IRQn,
@@ -178,18 +233,25 @@ constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
     [Gpio::kBtHostWake] = HardFault_IRQn,
     [Gpio::kBtDevWake] = HardFault_IRQn,
     [Gpio::kEthPhyRst] = HardFault_IRQn,
-    [Gpio::kBufferEnable] = HardFault_IRQn,
     [Gpio::kCameraPrivacyOverride] = HardFault_IRQn,
     [Gpio::kCryptoRst] = HardFault_IRQn,
+    [Gpio::kSpiCs] = GPIO6_Combined_0_15_IRQn,
+    [Gpio::kSpiSck] = GPIO6_Combined_0_15_IRQn,
+    [Gpio::kSpiSdo] = GPIO6_Combined_0_15_IRQn,
+    [Gpio::kSpiSdi] = GPIO6_Combined_0_15_IRQn,
+    [Gpio::kSda6] = GPIO6_Combined_0_15_IRQn,
+    [Gpio::kScl1] = GPIO3_Combined_16_31_IRQn,
+    [Gpio::kSda1] = GPIO4_Combined_0_15_IRQn,
+    [Gpio::kAA] = GPIO3_Combined_0_15_IRQn,
+    [Gpio::kAB] = GPIO3_Combined_0_15_IRQn,
+    [Gpio::kUartCts] = GPIO2_Combined_0_15_IRQn,
+    [Gpio::kUartRts] = GPIO2_Combined_0_15_IRQn,
+    [Gpio::kPwm1] = GPIO3_Combined_0_15_IRQn,
+    [Gpio::kPwm0] = GPIO2_Combined_16_31_IRQn,
+    [Gpio::kScl6] = GPIO6_Combined_0_15_IRQn,
 };
 
 constexpr uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = {IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07},
-    [Gpio::kArduinoD1] = {IOMUXC_GPIO_EMC_B2_01_GPIO_MUX2_IO11},
-    [Gpio::kArduinoD2] = {IOMUXC_GPIO_EMC_B2_00_GPIO_MUX2_IO10},
-    [Gpio::kArduinoD3] = {IOMUXC_GPIO_LPSR_06_GPIO_MUX6_IO06},
-#endif
     [Gpio::kPowerLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
     [Gpio::kUserLED] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
     [Gpio::kEdgeTpuPgood] = {IOMUXC_GPIO_EMC_B2_16_GPIO8_IO26},
@@ -202,18 +264,25 @@ constexpr uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
     [Gpio::kBtHostWake] = {IOMUXC_GPIO_DISP_B2_15_GPIO11_IO16},
     [Gpio::kBtDevWake] = {IOMUXC_GPIO_DISP_B2_14_GPIO11_IO15},
     [Gpio::kEthPhyRst] = {IOMUXC_GPIO_EMC_B2_03_GPIO8_IO13},
-    [Gpio::kBufferEnable] = {IOMUXC_GPIO_AD_05_GPIO9_IO04},
     [Gpio::kCameraPrivacyOverride] = {IOMUXC_GPIO_EMC_B2_12_GPIO8_IO22},
     [Gpio::kCryptoRst] = {IOMUXC_GPIO_LPSR_08_GPIO12_IO08},
+    [Gpio::kSpiCs] = {IOMUXC_GPIO_LPSR_09_GPIO_MUX6_IO09},
+    [Gpio::kSpiSck] = {IOMUXC_GPIO_LPSR_10_GPIO_MUX6_IO10},
+    [Gpio::kSpiSdo] = {IOMUXC_GPIO_LPSR_11_GPIO_MUX6_IO11},
+    [Gpio::kSpiSdi] = {IOMUXC_GPIO_LPSR_12_GPIO_MUX6_IO12},
+    [Gpio::kSda6] = {IOMUXC_GPIO_LPSR_06_GPIO_MUX6_IO06},
+    [Gpio::kScl1] = {IOMUXC_GPIO_AD_32_GPIO_MUX3_IO31},
+    [Gpio::kSda1] = {IOMUXC_GPIO_AD_33_GPIO_MUX4_IO00},
+    [Gpio::kAA] = {IOMUXC_GPIO_AD_06_GPIO_MUX3_IO05},
+    [Gpio::kAB] = {IOMUXC_GPIO_AD_07_GPIO_MUX3_IO06},
+    [Gpio::kUartCts] = {IOMUXC_GPIO_EMC_B2_00_GPIO_MUX2_IO10},
+    [Gpio::kUartRts] = {IOMUXC_GPIO_EMC_B2_01_GPIO_MUX2_IO11},
+    [Gpio::kPwm1] = {IOMUXC_GPIO_AD_01_GPIO_MUX3_IO00},
+    [Gpio::kPwm0] = {IOMUXC_GPIO_AD_00_GPIO_MUX2_IO31},
+    [Gpio::kScl6] = {IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07},
 };
 
 constexpr uint32_t PinNameToPullMask[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x0000000C,
-    [Gpio::kArduinoD1] = 0x0000000C,
-    [Gpio::kArduinoD2] = 0x0000000C,
-    [Gpio::kArduinoD3] = 0x0000000C,
-#endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
@@ -223,15 +292,28 @@ constexpr uint32_t PinNameToPullMask[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x0000000C,
     [Gpio::kCameraTrigger] = 0x0000000C,
     [Gpio::kAntennaSelect] = 0x0000000C,
+    [Gpio::kBtHostWake] = 0x0000000C,
+    [Gpio::kBtDevWake] = 0x0000000C,
+    [Gpio::kEthPhyRst] = 0x0000000C,
+    [Gpio::kCameraPrivacyOverride] = 0x0000000C,
+    [Gpio::kCryptoRst] = 0x0000000C,
+    [Gpio::kSpiCs] = 0x0000000C,
+    [Gpio::kSpiSck] = 0x0000000C,
+    [Gpio::kSpiSdo] = 0x0000000C,
+    [Gpio::kSpiSdi] = 0x0000000C,
+    [Gpio::kSda6] = 0x0000000C,
+    [Gpio::kScl1] = 0x0000000C,
+    [Gpio::kSda1] = 0x0000000C,
+    [Gpio::kAA] = 0x0000000C,
+    [Gpio::kAB] = 0x0000000C,
+    [Gpio::kUartCts] = 0x0000000C,
+    [Gpio::kUartRts] = 0x0000000C,
+    [Gpio::kPwm1] = 0x0000000C,
+    [Gpio::kPwm0] = 0x0000000C,
+    [Gpio::kScl6] = 0x0000000C,
 };
 
 constexpr uint32_t PinNameToNoPull[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x00000000,
-    [Gpio::kArduinoD1] = 0x0000000C,
-    [Gpio::kArduinoD2] = 0x0000000C,
-    [Gpio::kArduinoD3] = 0x00000000,
-#endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
@@ -241,15 +323,28 @@ constexpr uint32_t PinNameToNoPull[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x00000000,
     [Gpio::kCameraTrigger] = 0x0000000C,
     [Gpio::kAntennaSelect] = 0x00000000,
+    [Gpio::kBtHostWake] = 0x00000000,
+    [Gpio::kBtDevWake] = 0x00000000,
+    [Gpio::kEthPhyRst] = 0x0000000C,
+    [Gpio::kCameraPrivacyOverride] = 0x0000000C,
+    [Gpio::kCryptoRst] = 0x00000000,
+    [Gpio::kSpiCs] = 0x00000000,
+    [Gpio::kSpiSck] = 0x00000000,
+    [Gpio::kSpiSdo] = 0x00000000,
+    [Gpio::kSpiSdi] = 0x00000000,
+    [Gpio::kSda6] = 0x00000000,
+    [Gpio::kScl1] = 0x00000000,
+    [Gpio::kSda1] = 0x00000000,
+    [Gpio::kAA] = 0x00000000,
+    [Gpio::kAB] = 0x00000000,
+    [Gpio::kUartCts] = 0x0000000C,
+    [Gpio::kUartRts] = 0x0000000C,
+    [Gpio::kPwm1] = 0x00000000,
+    [Gpio::kPwm0] = 0x00000000,
+    [Gpio::kScl6] = 0x00000000,
 };
 
 constexpr uint32_t PinNameToPullUp[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x0000000C,
-    [Gpio::kArduinoD1] = 0x00000004,
-    [Gpio::kArduinoD2] = 0x00000004,
-    [Gpio::kArduinoD3] = 0x0000000C,
-#endif
     [Gpio::kPowerLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x00000004,
@@ -259,15 +354,28 @@ constexpr uint32_t PinNameToPullUp[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x0000000C,
     [Gpio::kCameraTrigger] = 0x00000004,
     [Gpio::kAntennaSelect] = 0x0000000C,
+    [Gpio::kBtHostWake] = 0x0000000C,
+    [Gpio::kBtDevWake] = 0x0000000C,
+    [Gpio::kEthPhyRst] = 0x00000004,
+    [Gpio::kCameraPrivacyOverride] = 0x00000004,
+    [Gpio::kCryptoRst] = 0x0000000C,
+    [Gpio::kSpiCs] = 0x00000000,
+    [Gpio::kSpiSck] = 0x00000000,
+    [Gpio::kSpiSdo] = 0x00000000,
+    [Gpio::kSpiSdi] = 0x00000000,
+    [Gpio::kSda6] = 0x0000000C,
+    [Gpio::kScl1] = 0x0000000C,
+    [Gpio::kSda1] = 0x0000000C,
+    [Gpio::kAA] = 0x0000000C,
+    [Gpio::kAB] = 0x0000000C,
+    [Gpio::kUartCts] = 0x00000004,
+    [Gpio::kUartRts] = 0x00000004,
+    [Gpio::kPwm1] = 0x0000000C,
+    [Gpio::kPwm0] = 0x0000000C,
+    [Gpio::kScl6] = 0x0000000C,
 };
 
 constexpr uint32_t PinNameToPullDown[Gpio::kCount] = {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    [Gpio::kArduinoD0] = 0x00000004,
-    [Gpio::kArduinoD1] = 0x00000008,
-    [Gpio::kArduinoD2] = 0x00000008,
-    [Gpio::kArduinoD3] = 0x00000004,
-#endif
     [Gpio::kPowerLED] = 0x00000004,
     [Gpio::kUserLED] = 0x00000004,
     [Gpio::kEdgeTpuPgood] = 0x00000008,
@@ -277,6 +385,25 @@ constexpr uint32_t PinNameToPullDown[Gpio::kCount] = {
     [Gpio::kUserButton] = 0x00000004,
     [Gpio::kCameraTrigger] = 0x00000008,
     [Gpio::kAntennaSelect] = 0x00000004,
+    [Gpio::kBtHostWake] = 0x00000008,
+    [Gpio::kBtDevWake] = 0x00000008,
+    [Gpio::kEthPhyRst] = 0x00000008,
+    [Gpio::kCameraPrivacyOverride] = 0x00000008,
+    [Gpio::kCryptoRst] = 0x00000004,
+    [Gpio::kSpiCs] = 0x00000004,
+    [Gpio::kSpiSck] = 0x00000004,
+    [Gpio::kSpiSdo] = 0x00000004,
+    [Gpio::kSpiSdi] = 0x00000004,
+    [Gpio::kSda6] = 0x00000004,
+    [Gpio::kScl1] = 0x00000004,
+    [Gpio::kSda1] = 0x00000004,
+    [Gpio::kAA] = 0x00000004,
+    [Gpio::kAB] = 0x00000004,
+    [Gpio::kUartCts] = 0x00000008,
+    [Gpio::kUartRts] = 0x00000008,
+    [Gpio::kPwm1] = 0x00000004,
+    [Gpio::kPwm0] = 0x00000004,
+    [Gpio::kScl6] = 0x00000004,
 };
 
 constexpr gpio_interrupt_mode_t InterruptModeToGpioIntMode[InterruptMode::kIntModeCount] = {
@@ -392,46 +519,30 @@ void SetPinConfig(Gpio gpio, gpio_pin_config_t config) {
 }  // namespace gpio
 }  // namespace coral::micro
 
-extern "C" void GPIO13_Combined_0_31_IRQHandler() {
-    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO13);
-    GPIO_PortClearInterruptFlags(GPIO13, pins);
+namespace {
+void GPIO_Common_IRQHandler(GPIO_Type *base) {
+    uint32_t pins = GPIO_PortGetInterruptFlags(base);
+    GPIO_PortClearInterruptFlags(base, pins);
     int i = 0;
     while (pins) {
         if (pins & 1) {
-            coral::micro::gpio::IRQHandler(GPIO13, i);
+            coral::micro::gpio::IRQHandler(base, i);
         }
         ++i;
         pins = pins >> 1;
     }
-    SDK_ISR_EXIT_BARRIER;
 }
+}  // namespace
 
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-extern "C" void GPIO6_Combined_0_15_IRQHandler() {
-    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO6);
-    GPIO_PortClearInterruptFlags(GPIO6, pins);
-    int i = 0;
-    while (pins) {
-        if (pins & 1) {
-            coral::micro::gpio::IRQHandler(GPIO6, i);
-        }
-        ++i;
-        pins = pins >> 1;
+#define GPIO_IRQHandler(base, irq) \
+    extern "C" void irq() { \
+        GPIO_Common_IRQHandler(base); \
+        SDK_ISR_EXIT_BARRIER; \
     }
-    SDK_ISR_EXIT_BARRIER;
-}
 
-extern "C" void GPIO2_Combined_0_15_IRQHandler() {
-    uint32_t pins = GPIO_PortGetInterruptFlags(GPIO2);
-    GPIO_PortClearInterruptFlags(GPIO2, pins);
-    int i = 0;
-    while (pins) {
-        if (pins & 1) {
-            coral::micro::gpio::IRQHandler(GPIO2, i);
-        }
-        ++i;
-        pins = pins >> 1;
-    }
-    SDK_ISR_EXIT_BARRIER;
-}
-#endif
+GPIO_IRQHandler(GPIO2, GPIO2_Combined_0_15_IRQHandler);
+GPIO_IRQHandler(GPIO2, GPIO2_Combined_16_31_IRQHandler);
+GPIO_IRQHandler(GPIO3, GPIO3_Combined_16_31_IRQHandler);
+GPIO_IRQHandler(GPIO4, GPIO4_Combined_0_15_IRQHandler);
+GPIO_IRQHandler(GPIO6, GPIO6_Combined_0_15_IRQHandler);
+GPIO_IRQHandler(GPIO13, GPIO13_Combined_0_31_IRQHandler);

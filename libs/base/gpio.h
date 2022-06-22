@@ -8,12 +8,6 @@ namespace gpio {
 
 // Enumeration of the pre-configured GPIO pins.
 enum Gpio {
-#if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
-    kArduinoD0,
-    kArduinoD1,
-    kArduinoD2,
-    kArduinoD3,
-#endif
     kPowerLED,
     kUserLED,
     kEdgeTpuPgood,
@@ -26,10 +20,28 @@ enum Gpio {
     kBtHostWake,
     kBtDevWake,
     kEthPhyRst,
-    kBufferEnable,
     kCameraPrivacyOverride,
     kCryptoRst,
-    kCount
+    kSpiCs,
+    kSpiSck,
+    kSpiSdo,
+    kSpiSdi,
+    kSda6,
+    kScl1,
+    kSda1,
+    kAA,
+    kAB,
+    kUartCts,
+    kUartRts,
+    kPwm1,
+    kPwm0,
+    kScl6,
+    kCount,
+
+    kArduinoD0 = kScl6,
+    kArduinoD1 = kUartRts,
+    kArduinoD2 = kUartCts,
+    kArduinoD3 = kSda6,
 };
 
 // Enumeration of available interrupt modes for GPIOs.

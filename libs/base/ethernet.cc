@@ -115,7 +115,6 @@ void InitializeEthernet(bool default_iface) {
     IOMUXC_GPR->GPR5 &= ~IOMUXC_GPR_GPR5_ENET1G_TX_CLK_SEL_MASK;
     // Enable clock output for RGMII TX
     IOMUXC_GPR->GPR5 |= IOMUXC_GPR_GPR5_ENET1G_RGMII_EN_MASK;
-    gpio::SetGpio(gpio::Gpio::kBufferEnable, true);
     // Hold PHY in reset
     gpio::SetGpio(gpio::Gpio::kEthPhyRst, false);
     // Enable 3.3V power for the PHY
