@@ -30,13 +30,12 @@ def remove_title(soup):
 
 
 def relocate_h2id(soup):
-  """Moves the anchor ID to the H2 tag, from the wrapper DIV."""
+  """Moves the anchor ID to the H2 tag, from the wrapper SECTION."""
   for h2 in soup.find_all('h2'):
-    div = h2.find_parent('div')
-    if div.has_attr('id') and not h2.has_attr('id'):
-      # print('Move ID: ' + div['id'])
-      h2['id'] = div['id']
-      del div['id']
+    section = h2.find_parent('section')
+    if section and section.has_attr('id') and not h2.has_attr('id'):
+      h2['id'] = section['id']
+      del section['id']
     # Also delete embedded <a> tag
     if h2.find('a'):
       h2.find('a').extract()
