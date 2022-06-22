@@ -37,3 +37,17 @@ microcontroller with an Edge TPU.
 .. doxygenfile:: tensorflow/detection.h
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
 
+
+Pose estimation
+----------------
+
+The following APIs assist when running pose estimation with PoseNet.
+
+`[posenet_decoder_op.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/posenet_decoder_op.h>`_
+
+.. doxygenfile:: tensorflow/posenet_decoder_op.h
+
+`[posenet.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/posenet.h>`_
+
+.. doxygenfile:: tensorflow/posenet.h
+
