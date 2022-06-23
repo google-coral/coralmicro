@@ -23,10 +23,16 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_sema4.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/fsl_device_registers.h"
 
+
 namespace coralmicro {
+// Defines a mutex lock over a given semaphore.
+// Any code in the code block following the mutex lock will only be processed after the semaphore is acquired.
+// Thus, code-blocks that use a mutex lock to acquire the same semaphore will result in thread-safe variables between said code-blocks.
+// After leaving the code-block the mutex lock releases the semaphore and the mutex-lock is deleted.
 
 class MutexLock {
    public:
+    // @param sema SemaphoreHandle to be acquired.
     explicit MutexLock(SemaphoreHandle_t sema) : sema_(sema) {
         CHECK(xSemaphoreTake(sema_, portMAX_DELAY) == pdTRUE);
     }
@@ -40,8 +46,15 @@ class MutexLock {
     SemaphoreHandle_t sema_;
 };
 
+// Defines a core specific mutex lock over a given semaphore gate.
+// Because each core has its own copy of semaphore gates,
+// two mutex locks operating on separate cores can acquire the same gate simultaneously.
+// This results in being able to use a multicore mutex lock to represent hardware resources specific to each core.
+// Thus, you can use multicore locks to partition hardware resources to concurrently run processes on different cores.
 class MulticoreMutexLock {
-   public:
+  public:
+   // @param gate Unsigned int representing the semaphore gate.
+   // Must be within range of the maximum number of gates available on the  hardware (16).
     explicit MulticoreMutexLock(uint8_t gate) : gate_(gate) {
         assert(gate < SEMA4_GATE_COUNT);
 #if (__CORTEX_M == 7)
