@@ -2,8 +2,8 @@
 #include <vector>
 
 #include "libs/base/filesystem.h"
+#include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
-#include "libs/tasks/CameraTask/camera_task.h"
 #include "libs/tensorflow/detection.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"

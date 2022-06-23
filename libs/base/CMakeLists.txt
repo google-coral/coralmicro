@@ -35,7 +35,7 @@ add_library_m7(libs_base-m7_freertos STATIC
 if (CORAL_MICRO_BOARD_REVISION STREQUAL P0 OR CORAL_MICRO_BOARD_REVISION STREQUAL P1)
     set(libs_base-m7_freertos_LINK_LIBRARIES_REVISION
         libs_audio_freertos
-        libs_tasks_CameraTask_freertos
+        libs_camera_freertos
         libs_tasks_PmicTask_freertos
         libs_littlefs
         libs_nxp_rt1176-sdk_lwip
@@ -98,7 +98,7 @@ add_library_m4(libs_base-m4_freertos STATIC
 
 target_link_libraries(libs_base-m4_freertos
     libs_nxp_rt1176-sdk_freertos-m4
-    libs_tasks_CameraTask_freertos-m4
+    libs_camera_freertos-m4
     libs_tasks_PmicTask_freertos-m4
     libs_littlefs-m4
 )

@@ -1,5 +1,5 @@
-#ifndef _LIBS_TASKS_CAMERA_TASK_H_
-#define _LIBS_TASKS_CAMERA_TASK_H_
+#ifndef LIBS_CAMERA_CAMERA_H_
+#define LIBS_CAMERA_CAMERA_H_
 
 #include <cstdint>
 #include <functional>
@@ -183,4 +183,4 @@ class CameraTask
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TASKS_CAMERA_TASK_H_
+#endif  // LIBS_CAMERA_CAMERA_H_

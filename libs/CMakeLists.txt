@@ -1,5 +1,6 @@
 add_subdirectory(audio)
 add_subdirectory(CMSIS)
+add_subdirectory(camera)
 add_subdirectory(cdc_acm)
 add_subdirectory(cdc_eem)
 add_subdirectory(coremark)

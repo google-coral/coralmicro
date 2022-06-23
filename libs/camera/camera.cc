@@ -1,4 +1,4 @@
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 
 #include "libs/base/check.h"
 #include "libs/base/gpio.h"

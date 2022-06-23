@@ -3,7 +3,7 @@
 
 #include "libs/base/gpio.h"
 #include "libs/base/http_server.h"
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 

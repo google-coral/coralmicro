@@ -1,7 +1,7 @@
 #include "libs/tensorflow/posenet.h"
 
 #include "libs/base/filesystem.h"
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"

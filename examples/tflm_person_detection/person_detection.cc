@@ -1,6 +1,6 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/led.h"
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/detection_responder.h"

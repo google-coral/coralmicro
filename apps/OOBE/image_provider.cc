@@ -3,7 +3,7 @@
 #include <cstring>
 #include <memory>
 
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"

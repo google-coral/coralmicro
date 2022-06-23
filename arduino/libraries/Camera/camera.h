@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 
 namespace coral::micro {
 namespace arduino {

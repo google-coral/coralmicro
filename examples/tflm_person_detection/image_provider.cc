@@ -1,5 +1,5 @@
 #include "examples/tflm_person_detection/test_helpers.h"
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"

@@ -3,7 +3,7 @@
 #include "libs/base/ipc_m4.h"
 #include "libs/base/led.h"
 #include "libs/base/main_freertos_m4.h"
-#include "libs/tasks/CameraTask/camera_task.h"
+#include "libs/camera/camera.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/freertos_kernel/include/timers.h"

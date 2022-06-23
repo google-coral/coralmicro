@@ -1,1 +1,0 @@
-../../../../../../../libs/tasks/CameraTask/camera_task.cc
