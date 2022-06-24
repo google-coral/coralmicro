@@ -1,10 +1,14 @@
 #include "libs/base/reset.h"
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_romapi.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_soc_src.h"
 
 namespace coral::micro {
-
 namespace {
+constexpr src_general_purpose_register_index_t kRebootedByWatchdogCount =
+    kSRC_GeneralPurposeRegister13;
+constexpr src_general_purpose_register_index_t kRebootedByLockupCount =
+    kSRC_GeneralPurposeRegister14;
 ResetStats reset_stats;
 }  // namespace
 
@@ -14,9 +18,7 @@ void ResetToBootloader() {
     ROM_RunBootloader(&boot_arg);
 }
 
-void ResetToFlash() {
-    SNVS->LPCR |= SNVS_LPCR_TOP_MASK;
-}
+void ResetToFlash() { SNVS->LPCR |= SNVS_LPCR_TOP_MASK; }
 
 void StoreResetReason() {
     uint32_t watchdog_trip_count, lockup_count;
@@ -40,6 +42,5 @@ void StoreResetReason() {
     }
 }
 
-const ResetStats GetResetStats() { return reset_stats; }
-
+ResetStats GetResetStats() { return reset_stats; }
 }  // namespace coral::micro

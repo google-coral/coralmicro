@@ -56,7 +56,7 @@ void M4XOR(struct jsonrpc_request* request) {
   auto value =
       reinterpret_cast<uint32_t>(strtoul(value_string.c_str(), nullptr, 10));
   coral::micro::ipc::Message msg{};
-  msg.type = coral::micro::ipc::MessageType::APP;
+  msg.type = coral::micro::ipc::MessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
   app_message->message_type = RackTestAppMessageType::XOR;
   app_message->message.xor_value = value;
@@ -82,7 +82,7 @@ void M4CoreMark(struct jsonrpc_request* request) {
 
   char coremark_buffer[MAX_COREMARK_BUFFER];
   coral::micro::ipc::Message msg{};
-  msg.type = coral::micro::ipc::MessageType::APP;
+  msg.type = coral::micro::ipc::MessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
   app_message->message_type = RackTestAppMessageType::COREMARK;
   app_message->message.buffer_ptr = coremark_buffer;

@@ -24,7 +24,7 @@ std::string GetSerialNumber() {
     return serial;
 }
 
-MacAddress GetMacAddress() {
+std::array<uint8_t, 6> GetMacAddress() {
     uint32_t fuse_val_hi, fuse_val_lo;
     fuse_val_lo = OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO)].FUSE;
     fuse_val_hi =
@@ -35,8 +35,7 @@ MacAddress GetMacAddress() {
     uint8_t d = (fuse_val_lo >> 16) & 0xFF;
     uint8_t e = (fuse_val_lo >> 8) & 0xFF;
     uint8_t f = (fuse_val_lo)&0xFF;
-    MacAddress m(a, b, c, d, e, f);
-    return m;
+    return std::array<uint8_t, 6>{a, b, c, d, e, f};
 }
 
 bool GetUSBIPAddress(ip4_addr_t* usb_ip_out) {

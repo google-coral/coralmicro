@@ -12,8 +12,8 @@
 
 namespace coral::micro {
 
-constexpr int kEdgeTpuVid = 0x18d1;
-constexpr int kEdgeTpuPid = 0x9302;
+inline constexpr int kEdgeTpuVid = 0x18d1;
+inline constexpr int kEdgeTpuPid = 0x9302;
 
 namespace edgetpu {
 

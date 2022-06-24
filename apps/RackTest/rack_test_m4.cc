@@ -13,7 +13,7 @@ void HandleAppMessage(
   switch (app_message->message_type) {
     case RackTestAppMessageType::XOR: {
       coral::micro::ipc::Message reply;
-      reply.type = coral::micro::ipc::MessageType::APP;
+      reply.type = coral::micro::ipc::MessageType::kApp;
       RackTestAppMessage* app_reply =
           reinterpret_cast<RackTestAppMessage*>(&reply.message.data);
       app_reply->message_type = RackTestAppMessageType::XOR;
@@ -24,7 +24,7 @@ void HandleAppMessage(
     }
     case RackTestAppMessageType::COREMARK: {
       coral::micro::ipc::Message reply;
-      reply.type = coral::micro::ipc::MessageType::APP;
+      reply.type = coral::micro::ipc::MessageType::kApp;
       RackTestAppMessage* app_reply =
           reinterpret_cast<RackTestAppMessage*>(&reply.message.data);
       app_reply->message_type = RackTestAppMessageType::COREMARK;

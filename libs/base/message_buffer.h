@@ -21,8 +21,8 @@ struct SystemMessage {
 } __attribute__((packed));
 
 enum class MessageType : uint8_t {
-    SYSTEM,
-    APP,
+    kSystem,
+    kApp,
 };
 
 constexpr size_t kMessageBufferDataSize = 127;

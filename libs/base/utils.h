@@ -1,6 +1,7 @@
 #ifndef LIBS_BASE_UTILS_H_
 #define LIBS_BASE_UTILS_H_
 
+#include <array>
 #include <cstdint>
 #include <string>
 
@@ -11,19 +12,6 @@
 #define MAC1_ADDR_HI (0xA90)
 
 namespace coral::micro {
-
-// Represents the six bytes of MAC address.
-struct MacAddress {
-    MacAddress(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e, uint8_t f)
-        : a(a), b(b), c(c), d(d), e(e), f(f) {}
-    uint8_t a;
-    uint8_t b;
-    uint8_t c;
-    uint8_t d;
-    uint8_t e;
-    uint8_t f;
-};
-
 namespace utils {
 
 // Gets the 64-bit unique identifiers of the RT1176.
@@ -36,7 +24,7 @@ std::string GetSerialNumber();
 
 // Gets the assigned MAC address from the device fuses.
 // @returns The MAC address assigned to the device.
-MacAddress GetMacAddress();
+std::array<uint8_t, 6> GetMacAddress();
 
 // Gets the USB IP address that is stored in flash memory.
 // @param usb_ip_out The `ip4_addr_t` structure in which to store the IP.

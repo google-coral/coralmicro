@@ -92,7 +92,7 @@ int ConsoleM7::Read(char* buffer, int size) {
 
 void ConsoleM7::M4ConsoleTaskFn(void* param) {
     ipc::Message m4_console_buffer_msg;
-    m4_console_buffer_msg.type = ipc::MessageType::SYSTEM;
+    m4_console_buffer_msg.type = ipc::MessageType::kSystem;
     m4_console_buffer_msg.message.system.type =
         ipc::SystemMessageType::CONSOLE_BUFFER_PTR;
     m4_console_buffer_msg.message.system.message.console_buffer_ptr =

@@ -80,7 +80,7 @@ extern "C" void app_main(void* param) {
     printf("Person detected, let M7 take over.\r\n");
     coral::micro::CameraTask::GetSingleton()->Disable();
     coral::micro::ipc::Message msg;
-    msg.type = coral::micro::ipc::MessageType::APP;
+    msg.type = coral::micro::ipc::MessageType::kApp;
     coral::micro::IPCM4::GetSingleton()->SendMessage(msg);
     vTaskSuspend(nullptr);
   }

@@ -1,8 +1,6 @@
 #ifndef LIBS_BASE_WATCHDOG_H_
 #define LIBS_BASE_WATCHDOG_H_
 
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_wdog.h"
-
 namespace coral::micro {
 namespace watchdog {
 

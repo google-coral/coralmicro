@@ -9,9 +9,9 @@ namespace coral::micro {
 namespace analog {
 
 // Available channels on ADC1.
-constexpr int kLPADC1ChannelCount = 6;
+inline constexpr int kLPADC1ChannelCount = 6;
 // Available channels on ADC2.
-constexpr int kLPADC2ChannelCount = 7;
+inline constexpr int kLPADC2ChannelCount = 7;
 
 // Enumeration of the ADCs and DACs that exist in the system.
 enum class Device {

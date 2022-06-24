@@ -651,12 +651,11 @@ void FuseMACAddress(struct jsonrpc_request* request) {
 }
 
 void ReadMACAddress(struct jsonrpc_request* request) {
-  coral::micro::MacAddress address = coral::micro::utils::GetMacAddress();
-  char address_str[255];
-  memset(address_str, 0, sizeof(address_str));
-  snprintf(address_str, sizeof(address_str), "%02X:%02X:%02X:%02X:%02X:%02X",
-           address.a, address.b, address.c, address.d, address.e, address.f);
-  jsonrpc_return_success(request, "{%Q:%Q}", "address", address_str);
+  auto mac = coral::micro::utils::GetMacAddress();
+  char mac_str[255];
+  snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  jsonrpc_return_success(request, "{%Q:%Q}", "address", mac_str);
 }
 }  // namespace
 

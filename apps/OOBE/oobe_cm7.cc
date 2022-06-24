@@ -445,7 +445,7 @@ void Main() {
     camera_task.Stop();
 
     ipc::Message msg;
-    msg.type = ipc::MessageType::APP;
+    msg.type = ipc::MessageType::kApp;
     IPCM7::GetSingleton()->SendMessage(msg);
     return;
   }

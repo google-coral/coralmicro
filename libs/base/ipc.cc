@@ -60,10 +60,10 @@ void IPC::RxTaskFn() {
         if (rx_bytes == 0) continue;
 
         switch (rx_message.type) {
-            case ipc::MessageType::SYSTEM:
+            case ipc::MessageType::kSystem:
                 HandleSystemMessage(rx_message.message.system);
                 break;
-            case ipc::MessageType::APP:
+            case ipc::MessageType::kApp:
                 HandleAppMessage(rx_message.message.data);
                 break;
             default:

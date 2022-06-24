@@ -31,7 +31,7 @@ extern "C" void app_main(void* param) {
                     }
                 }
                 coral::micro::ipc::Message reply{};
-                reply.type = coral::micro::ipc::MessageType::APP;
+                reply.type = coral::micro::ipc::MessageType::kApp;
                 auto* ack = reinterpret_cast<mp_example::ExampleAppMessage*>(
                     &reply.message.data);
                 ack->type = mp_example::ExampleMessageType::ACKNOWLEDGED;

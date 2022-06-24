@@ -28,7 +28,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
                led_status ? "ON" : "OFF");
         vTaskDelay(pdMS_TO_TICKS(1000));
         coral::micro::ipc::Message msg{};
-        msg.type = coral::micro::ipc::MessageType::APP;
+        msg.type = coral::micro::ipc::MessageType::kApp;
         auto* app_message =
             reinterpret_cast<mp_example::ExampleAppMessage*>(&msg.message.data);
         app_message->type = mp_example::ExampleMessageType::LED_STATUS;
