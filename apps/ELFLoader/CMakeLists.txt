@@ -19,7 +19,7 @@ add_executable_m7(ELFLoader
     ${PROJECT_SOURCE_DIR}/libs/base/filesystem.cc
     ${PROJECT_SOURCE_DIR}/libs/base/reset.cc
     ${PROJECT_SOURCE_DIR}/libs/base/utils.cc
-    ${PROJECT_SOURCE_DIR}/libs/tasks/UsbDeviceTask/usb_device_task.cc
+    ${PROJECT_SOURCE_DIR}/libs/usb/usb_device_task.cc
 )
 
 target_compile_definitions(ELFLoader PUBLIC

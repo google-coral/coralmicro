@@ -1,7 +1,0 @@
-add_library_m7(libs_tasks_UsbDeviceTask_freertos STATIC
-    usb_device_task.cc
-)
-
-target_link_libraries(libs_tasks_UsbDeviceTask_freertos
-    libs_base-m7_freertos
-)

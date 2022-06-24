@@ -1,6 +1,6 @@
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
 #include "libs/tasks/EdgeTpuDfuTask/edgetpu_dfu_task.h"
-#include "libs/tasks/UsbHostTask/usb_host_task.h"
+#include "libs/usb/usb_host_task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_devices.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_ehci.h"

@@ -1,5 +1,5 @@
-#ifndef _LIBS_TASKS_USBHOSTTASK_USBHOSTTASK_H_
-#define _LIBS_TASKS_USBHOSTTASK_USBHOSTTASK_H_
+#ifndef LIBS_USB_USB_HOST_TASK_H_
+#define LIBS_USB_USB_HOST_TASK_H_
 
 #include <functional>
 #include <map>
@@ -46,4 +46,4 @@ class UsbHostTask {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TASKS_USBHOSTTASK_USBHOSTTASK_H_
+#endif  // LIBS_USB_USB_HOST_TASK_H_

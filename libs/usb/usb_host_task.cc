@@ -5,7 +5,7 @@
 #include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/clock_config.h"
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
-#include "libs/tasks/UsbHostTask/usb_host_task.h"
+#include "libs/usb/usb_host_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"

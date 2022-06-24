@@ -1,5 +1,3 @@
 add_subdirectory(EdgeTpuDfuTask)
 add_subdirectory(EdgeTpuTask)
 add_subdirectory(PmicTask)
-add_subdirectory(UsbDeviceTask)
-add_subdirectory(UsbHostTask)

@@ -51,8 +51,8 @@ target_link_libraries(libs_base-m7_freertos
     libs_cdc_eem_freertos
     libs_tasks_EdgeTpuTask_freertos
     libs_tasks_EdgeTpuDfuTask_freertos
-    libs_tasks_UsbDeviceTask_freertos
-    libs_tasks_UsbHostTask_freertos
+    libs_usb_device_task_freertos
+    libs_usb_host_task_freertos
     ${libs_base-m7_freertos_LINK_LIBRARIES_REVISION}
 )
 

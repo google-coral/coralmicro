@@ -10,7 +10,7 @@
 #include "libs/base/message_buffer.h"
 #include "libs/base/mutex.h"
 #include "libs/base/tasks.h"
-#include "libs/tasks/UsbDeviceTask/usb_device_task.h"
+#include "libs/usb/usb_device_task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 
 using namespace std::placeholders;

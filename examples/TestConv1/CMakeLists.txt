@@ -20,7 +20,7 @@ target_link_libraries(TestConv1
     libs_base-m7_freertos
     libs_tasks_EdgeTpuTask_freertos
     libs_tasks_EdgeTpuDfuTask_freertos
-    libs_tasks_UsbHostTask_freertos
+    libs_usb_host_task_freertos
     libs_testconv1
     libs_tpu_freertos
 )

@@ -1,4 +1,4 @@
-#include "libs/tasks/UsbDeviceTask/usb_device_task.h"
+#include "libs/usb/usb_device_task.h"
 
 #include <cstdio>
 

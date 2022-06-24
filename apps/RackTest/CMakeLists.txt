@@ -19,7 +19,7 @@ set(RACK_TEST_LINK_LIBRARIES
     libs_rpc_http_server
     libs_tasks_EdgeTpuTask_freertos
     libs_tasks_EdgeTpuDfuTask_freertos
-    libs_tasks_UsbHostTask_freertos
+    libs_usb_host_task_freertos
     libs_tensorflow-m7
     libs_testlib
     libs_tpu_freertos

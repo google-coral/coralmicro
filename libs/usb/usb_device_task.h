@@ -1,5 +1,5 @@
-#ifndef _LIBS_TASKS_USBDEVICETASK_USBDEVICETASK_H_
-#define _LIBS_TASKS_USBDEVICETASK_USBDEVICETASK_H_
+#ifndef LIBS_USB_USB_DEVICE_TASK_H_
+#define LIBS_USB_USB_DEVICE_TASK_H_
 
 #include <array>
 #include <functional>
@@ -94,4 +94,4 @@ class UsbDeviceTask {
 
 }  // namespace coral::micro
 
-#endif  // _LIBS_TASKS_USBDEVICETASK_USBDEVICETASK_H_
+#endif  // LIBS_USB_USB_DEVICE_TASK_H_
