@@ -10,7 +10,7 @@ namespace coral::micro {
 namespace ipc {
 
 enum class SystemMessageType : uint8_t {
-    CONSOLE_BUFFER_PTR,
+    kConsoleBufferPtr,
 };
 
 struct SystemMessage {
@@ -25,7 +25,7 @@ enum class MessageType : uint8_t {
     kApp,
 };
 
-constexpr size_t kMessageBufferDataSize = 127;
+inline constexpr size_t kMessageBufferDataSize = 127;
 struct Message {
     MessageType type;
     union {

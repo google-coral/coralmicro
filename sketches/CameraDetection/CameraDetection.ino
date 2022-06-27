@@ -85,8 +85,8 @@ void setup() {
     Serial.print("; height=");
     Serial.println(model_height);
     image.resize(model_width * model_height * model_channels);
-    if (Camera.begin(model_width, model_height, coral::micro::camera::Format::RGB,
-                     coral::micro::camera::FilterMethod::BILINEAR,
+    if (Camera.begin(model_width, model_height, coral::micro::camera::Format::kRgb,
+                     coral::micro::camera::FilterMethod::kBilinear,
                      coral::micro::camera::Rotation::k0,
                      true) != CameraStatus::SUCCESS) {
         Serial.println("Failed to start camera");

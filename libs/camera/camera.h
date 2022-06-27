@@ -15,18 +15,18 @@ namespace coral::micro {
 namespace camera {
 
 enum class Mode : uint8_t {
-    STANDBY = 0,
-    STREAMING = 1,
-    TRIGGER = 5,
+    kStandBy = 0,
+    kStreaming = 1,
+    kTrigger = 5,
 };
 
 enum class RequestType : uint8_t {
-    Enable,
-    Disable,
-    Frame,
-    Power,
-    TestPattern,
-    Discard,
+    kEnable,
+    kDisable,
+    kFrame,
+    kPower,
+    kTestPattern,
+    kDiscard,
 };
 
 struct FrameRequest {
@@ -54,9 +54,9 @@ struct PowerResponse {
 };
 
 enum class TestPattern : uint8_t {
-    NONE = 0x00,
-    COLOR_BAR = 0x01,
-    WALKING_ONES = 0x11,
+    kNone = 0x00,
+    kColorBar = 0x01,
+    kWalkingOnes = 0x11,
 };
 
 struct TestPatternRequest {
@@ -85,15 +85,15 @@ struct Request {
 };
 
 enum class Format {
-    RGBA,
-    RGB,
-    Y8,
-    RAW,
+    kRgba,
+    kRgb,
+    kY8,
+    kRaw,
 };
 
 enum class FilterMethod {
-    BILINEAR = 0,
-    NEAREST_NEIGHBOR,
+    kBilinear = 0,
+    kNearestNeighbor,
 };
 
 // Clockwise rotations
@@ -106,7 +106,7 @@ enum class Rotation {
 
 struct FrameFormat {
     Format fmt;
-    FilterMethod filter = FilterMethod::BILINEAR;
+    FilterMethod filter = FilterMethod::kBilinear;
     Rotation rotation = Rotation::k0;
     int width;
     int height;

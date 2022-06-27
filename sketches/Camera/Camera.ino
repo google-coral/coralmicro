@@ -21,7 +21,7 @@ void setup() {
 }
 
 void loop() {
-    Camera.testPattern(coral::micro::camera::TestPattern::WALKING_ONES);
+    Camera.testPattern(coral::micro::camera::TestPattern::kWalkingOnes);
     Serial.println("Discarding 100 frames...");
     Camera.discardFrames(100);
     delay(5000);

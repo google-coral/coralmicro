@@ -31,9 +31,9 @@ class CameraClass {
         : camera_{coral::micro::CameraTask::GetSingleton()},
           width_{0},
           height_{0},
-          format_{camera::Format::RGB},
-          filter_{camera::FilterMethod::BILINEAR},
-          test_pattern_{camera::TestPattern::NONE},
+          format_{camera::Format::kRgb},
+          filter_{camera::FilterMethod::kBilinear},
+          test_pattern_{camera::TestPattern::kNone},
           preserve_ratio_{false},
           initialized_{false} {}
 
@@ -46,8 +46,8 @@ class CameraClass {
     // modifications.
     int begin(uint32_t resolution = CAMERA_R320x320);
     int begin(int32_t width = 320, int32_t height = 320,
-              camera::Format fmt = camera::Format::RGB,
-              camera::FilterMethod filter = camera::FilterMethod::BILINEAR,
+              camera::Format fmt = camera::Format::kRgb,
+              camera::FilterMethod filter = camera::FilterMethod::kBilinear,
               camera::Rotation rotation = camera::Rotation::k0,
               bool preserve_ratio = false);
     int end();

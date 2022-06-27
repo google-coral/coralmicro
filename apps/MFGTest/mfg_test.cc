@@ -675,7 +675,7 @@ void ReadMACAddress(struct jsonrpc_request* request) {
 
 extern "C" void app_main(void* param) {
   InitializeLoopbackMappings();
-  coral::micro::analog::Init(coral::micro::analog::Device::DAC1);
+  coral::micro::analog::Init(coral::micro::analog::Device::kDac1);
 
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,

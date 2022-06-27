@@ -42,7 +42,7 @@ uint8_t *elfloader_recv_image = nullptr;
 char *elfloader_recv_path = nullptr;
 uint8_t elfloader_data[64];
 class_handle_t elfloader_class_handle;
-ElfloaderTarget elfloader_target = ElfloaderTarget::Ram;
+ElfloaderTarget elfloader_target = ElfloaderTarget::kRam;
 lfs_file_t file_handle;
 bool filesystem_formatted = false;
 
@@ -56,45 +56,45 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
       reinterpret_cast<const ElfloaderTarget *>(&buffer[1]);
   xTimerStop(usb_timer, 0);
   switch (cmd) {
-    case ElfloaderCommand::SetSize:
+    case ElfloaderCommand::kSetSize:
       assert(length >= sizeof(ElfloaderSetSize) + 1);
       switch (elfloader_target) {
-        case ElfloaderTarget::Filesystem:
+        case ElfloaderTarget::kFilesystem:
           break;
-        case ElfloaderTarget::Ram:
+        case ElfloaderTarget::kRam:
           elfloader_recv_image = new uint8_t[set_size->size];
           break;
-        case ElfloaderTarget::Path:
+        case ElfloaderTarget::kPath:
           elfloader_recv_path = static_cast<char *>(malloc(set_size->size + 1));
           memset(elfloader_recv_path, 0, set_size->size + 1);
           break;
       }
       break;
-    case ElfloaderCommand::Bytes:
+    case ElfloaderCommand::kBytes:
       assert(length >= sizeof(ElfloaderBytes) + 1);
       switch (elfloader_target) {
-        case ElfloaderTarget::Ram:
+        case ElfloaderTarget::kRam:
           memcpy(elfloader_recv_image + bytes->offset,
                  &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
           break;
-        case ElfloaderTarget::Path:
+        case ElfloaderTarget::kPath:
           memcpy(elfloader_recv_path + bytes->offset,
                  &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
           break;
-        case ElfloaderTarget::Filesystem:
+        case ElfloaderTarget::kFilesystem:
           coral::micro::filesystem::Write(
               &file_handle, &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
           break;
       }
       break;
-    case ElfloaderCommand::Done:
+    case ElfloaderCommand::kDone:
       switch (elfloader_target) {
-        case ElfloaderTarget::Ram:
+        case ElfloaderTarget::kRam:
           xTaskCreate(elfloader_main, "elfloader_main",
                       configMINIMAL_STACK_SIZE * 10, elfloader_recv_image,
                       APP_TASK_PRIORITY, nullptr);
           break;
-        case ElfloaderTarget::Path: {
+        case ElfloaderTarget::kPath: {
           // TODO(atv): This stuff can fail. We should propagate errors back to
           // the Python side if possible.
           auto dir = coral::micro::filesystem::Dirname(elfloader_recv_path);
@@ -104,23 +104,23 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
           free(elfloader_recv_path);
           elfloader_recv_path = nullptr;
         } break;
-        case ElfloaderTarget::Filesystem:
+        case ElfloaderTarget::kFilesystem:
           coral::micro::filesystem::Close(&file_handle);
           break;
       }
       break;
-    case ElfloaderCommand::ResetToBootloader:
+    case ElfloaderCommand::kResetToBootloader:
       coral::micro::ResetToBootloader();
       break;
-    case ElfloaderCommand::ResetToFlash:
+    case ElfloaderCommand::kResetToFlash:
       coral::micro::ResetToFlash();
       break;
-    case ElfloaderCommand::Target:
+    case ElfloaderCommand::kTarget:
       elfloader_target = *target;
 
       // Format filesystem before writing new files.
-      if (elfloader_target == ElfloaderTarget::Filesystem ||
-          elfloader_target == ElfloaderTarget::Path) {
+      if (elfloader_target == ElfloaderTarget::kFilesystem ||
+          elfloader_target == ElfloaderTarget::kPath) {
         if (!filesystem_formatted) {
           coral::micro::filesystem::Init(/*force_format=*/true);
           filesystem_formatted = true;

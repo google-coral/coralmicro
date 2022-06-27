@@ -8,7 +8,10 @@
 namespace coral::micro {
 class IPCM4 : public IPC {
    public:
-    static IPCM4* GetSingleton();
+    static IPCM4* GetSingleton() {
+        static IPCM4 ipc;
+        return &ipc;
+    }
 
     void Init() override;
 

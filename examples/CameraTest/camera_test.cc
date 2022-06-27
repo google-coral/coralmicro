@@ -75,60 +75,60 @@ void GetFrame() {
     camera::FrameFormat fmt_rgb, fmt_rgb_90, fmt_rgb_180, fmt_rgb_270,
         fmt_rgb_posenet, fmt_grayscale,
         fmt_grayscale_small, fmt_raw;
-    fmt_rgb.fmt = camera::Format::RGB;
-    fmt_rgb.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb.fmt = camera::Format::kRgb;
+    fmt_rgb.filter = camera::FilterMethod::kBilinear;
     fmt_rgb.rotation = camera::Rotation::k0;
     fmt_rgb.width = CameraTask::kWidth;
     fmt_rgb.height = CameraTask::kHeight;
     fmt_rgb.preserve_ratio = false;
     fmt_rgb.buffer = camera_rgb;
 
-    fmt_rgb_90.fmt = camera::Format::RGB;
-    fmt_rgb_90.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb_90.fmt = camera::Format::kRgb;
+    fmt_rgb_90.filter = camera::FilterMethod::kBilinear;
     fmt_rgb_90.rotation = camera::Rotation::k90;
     fmt_rgb_90.width = CameraTask::kWidth;
     fmt_rgb_90.height = CameraTask::kHeight;
     fmt_rgb_90.preserve_ratio = false;
     fmt_rgb_90.buffer = camera_rgb_90;
 
-    fmt_rgb_180.fmt = camera::Format::RGB;
-    fmt_rgb_180.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb_180.fmt = camera::Format::kRgb;
+    fmt_rgb_180.filter = camera::FilterMethod::kBilinear;
     fmt_rgb_180.rotation = camera::Rotation::k180;
     fmt_rgb_180.width = CameraTask::kWidth;
     fmt_rgb_180.height = CameraTask::kHeight;
     fmt_rgb_180.preserve_ratio = false;
     fmt_rgb_180.buffer = camera_rgb_180;
 
-    fmt_rgb_270.fmt = camera::Format::RGB;
-    fmt_rgb_270.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb_270.fmt = camera::Format::kRgb;
+    fmt_rgb_270.filter = camera::FilterMethod::kBilinear;
     fmt_rgb_270.rotation = camera::Rotation::k270;
     fmt_rgb_270.width = CameraTask::kWidth;
     fmt_rgb_270.height = CameraTask::kHeight;
     fmt_rgb_270.preserve_ratio = false;
     fmt_rgb_270.buffer = camera_rgb_270;
 
-    fmt_rgb_posenet.fmt = camera::Format::RGB;
-    fmt_rgb_posenet.filter = camera::FilterMethod::BILINEAR;
+    fmt_rgb_posenet.fmt = camera::Format::kRgb;
+    fmt_rgb_posenet.filter = camera::FilterMethod::kBilinear;
     fmt_rgb_posenet.width = 324;
     fmt_rgb_posenet.height = 324;
     fmt_rgb_posenet.preserve_ratio = false;
     fmt_rgb_posenet.buffer = camera_rgb_posenet;
 
-    fmt_grayscale.fmt = camera::Format::Y8;
-    fmt_grayscale.filter = camera::FilterMethod::BILINEAR;
+    fmt_grayscale.fmt = camera::Format::kY8;
+    fmt_grayscale.filter = camera::FilterMethod::kBilinear;
     fmt_grayscale.width = CameraTask::kWidth;
     fmt_grayscale.height = CameraTask::kHeight;
     fmt_grayscale.preserve_ratio = false;
     fmt_grayscale.buffer = camera_grayscale;
 
-    fmt_grayscale_small.fmt = camera::Format::Y8;
-    fmt_grayscale_small.filter = camera::FilterMethod::BILINEAR;
+    fmt_grayscale_small.fmt = camera::Format::kY8;
+    fmt_grayscale_small.filter = camera::FilterMethod::kBilinear;
     fmt_grayscale_small.width = 96;
     fmt_grayscale_small.height = 96;
     fmt_grayscale_small.preserve_ratio = false;
     fmt_grayscale_small.buffer = camera_grayscale_small;
 
-    fmt_raw.fmt = camera::Format::RAW;
+    fmt_raw.fmt = camera::Format::kRaw;
     fmt_raw.width = CameraTask::kWidth;
     fmt_raw.height = CameraTask::kHeight;
     fmt_raw.preserve_ratio = true;
@@ -148,9 +148,9 @@ void Main() {
 
     // Enable Power, Streaming, and enable test pattern.
     CameraTask::GetSingleton()->SetPower(true);
-    CameraTask::GetSingleton()->Enable(camera::Mode::STREAMING);
+    CameraTask::GetSingleton()->Enable(camera::Mode::kStreaming);
     CameraTask::GetSingleton()->SetTestPattern(
-        camera::TestPattern::WALKING_ONES);
+        camera::TestPattern::kWalkingOnes);
 
     // Get and discard some frames to let the sensor stabilize.
     CameraTask::GetSingleton()->DiscardFrames(100);
@@ -180,14 +180,14 @@ void Main() {
     }
     CameraTask::GetSingleton()->ReturnFrame(index);
 
-    CameraTask::GetSingleton()->SetTestPattern(camera::TestPattern::NONE);
+    CameraTask::GetSingleton()->SetTestPattern(camera::TestPattern::kNone);
     CameraTask::GetSingleton()->DiscardFrames(100);
     GetFrame();
 
     // Switch to triggered mode, the button press will capture and convert a new
     // frame.
     CameraTask::GetSingleton()->Disable();
-    CameraTask::GetSingleton()->Enable(camera::Mode::TRIGGER);
+    CameraTask::GetSingleton()->Enable(camera::Mode::kTrigger);
 
     TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
     gpio::RegisterIRQHandler(gpio::Gpio::kUserButton, [current_task]() {

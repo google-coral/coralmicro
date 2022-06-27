@@ -23,13 +23,13 @@
 // Note: The DAC outputs a max of 1.8V
 
 extern "C" void app_main(void *param) {
-    coral::micro::analog::Init(coral::micro::analog::Device::ADC1);
-    coral::micro::analog::Init(coral::micro::analog::Device::DAC1);
+    coral::micro::analog::Init(coral::micro::analog::Device::kAdc1);
+    coral::micro::analog::Init(coral::micro::analog::Device::kDac1);
     coral::micro::analog::ADCConfig config;
     coral::micro::analog::CreateConfig(
         config,
-        coral::micro::analog::Device::ADC1, 0,
-        coral::micro::analog::Side::B,
+        coral::micro::analog::Device::kAdc1, 0,
+        coral::micro::analog::Side::kB,
         false
     );
     coral::micro::analog::EnableDAC(true);

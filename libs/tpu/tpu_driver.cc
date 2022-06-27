@@ -281,7 +281,7 @@ ssize_t TpuDriver::BulkOutTransferInternal(uint8_t endpoint, const uint8_t *data
                uint8_t *data,
                uint32_t data_length,
                usb_status_t status) {
-                UsbTransferMetadata* meta = reinterpret_cast<UsbTransferMetadata*>(param);
+                UsbTransferMetadata* meta = static_cast<UsbTransferMetadata*>(param);
                 meta->bytes_transferred = data_length;
                 meta->status = status;
                 xSemaphoreGive(meta->sema);
@@ -337,7 +337,7 @@ ssize_t TpuDriver::BulkInTransferInternal(uint8_t endpoint, uint8_t *data, uint3
                uint8_t *data,
                uint32_t data_length,
                usb_status_t status) {
-                UsbTransferMetadata* meta = reinterpret_cast<UsbTransferMetadata*>(param);
+                UsbTransferMetadata* meta = static_cast<UsbTransferMetadata*>(param);
                 meta->bytes_transferred = data_length;
                 meta->status = status;
                 xSemaphoreGive(meta->sema);

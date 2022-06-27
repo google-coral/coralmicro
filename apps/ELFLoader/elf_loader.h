@@ -25,18 +25,18 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_hid.h"
 
 enum class ElfloaderCommand : uint8_t {
-  SetSize = 0,
-  Bytes = 1,
-  Done = 2,
-  ResetToBootloader = 3,
-  Target = 4,
-  ResetToFlash = 5,
+  kSetSize = 0,
+  kBytes = 1,
+  kDone = 2,
+  kResetToBootloader = 3,
+  kTarget = 4,
+  kResetToFlash = 5,
 };
 
 enum class ElfloaderTarget : uint8_t {
-  Ram = 0,
-  Path = 1,
-  Filesystem = 2,
+  kRam = 0,
+  kPath = 1,
+  kFilesystem = 2,
 };
 
 enum BootModes {

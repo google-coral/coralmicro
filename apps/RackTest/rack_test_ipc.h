@@ -18,8 +18,8 @@
 #include "libs/base/message_buffer.h"
 
 enum class RackTestAppMessageType : uint8_t {
-  XOR = 0,
-  COREMARK,
+  kXor = 0,
+  kCoreMark,
 };
 
 struct RackTestAppMessage {

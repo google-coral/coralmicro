@@ -16,8 +16,8 @@ TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
     coral::micro::camera::FrameFormat fmt;
     fmt.width = image_width;
     fmt.height = image_height;
-    fmt.fmt = coral::micro::camera::Format::Y8;
-    fmt.filter = coral::micro::camera::FilterMethod::BILINEAR;
+    fmt.fmt = coral::micro::camera::Format::kY8;
+    fmt.filter = coral::micro::camera::FilterMethod::kBilinear;
     fmt.preserve_ratio = false;
     fmt.buffer = unsigned_image_data.get();
     bool ret = coral::micro::CameraTask::GetFrame({fmt});

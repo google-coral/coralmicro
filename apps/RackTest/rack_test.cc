@@ -42,12 +42,12 @@ void HandleAppMessage(
   auto rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
   const auto* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
   switch (app_message->message_type) {
-    case RackTestAppMessageType::XOR: {
+    case RackTestAppMessageType::kXor: {
       xTaskNotify(rpc_task_handle, app_message->message.xor_value,
                   eSetValueWithOverwrite);
       break;
     }
-    case RackTestAppMessageType::COREMARK: {
+    case RackTestAppMessageType::kCoreMark: {
       xTaskNotify(rpc_task_handle, 0, eSetValueWithOverwrite);
       break;
     }
@@ -72,7 +72,7 @@ void M4XOR(struct jsonrpc_request* request) {
   coral::micro::ipc::Message msg{};
   msg.type = coral::micro::ipc::MessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
-  app_message->message_type = RackTestAppMessageType::XOR;
+  app_message->message_type = RackTestAppMessageType::kXor;
   app_message->message.xor_value = value;
   coral::micro::IPCM7::GetSingleton()->SendMessage(msg);
 
@@ -98,7 +98,7 @@ void M4CoreMark(struct jsonrpc_request* request) {
   coral::micro::ipc::Message msg{};
   msg.type = coral::micro::ipc::MessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
-  app_message->message_type = RackTestAppMessageType::COREMARK;
+  app_message->message_type = RackTestAppMessageType::kCoreMark;
   app_message->message.buffer_ptr = coremark_buffer;
   coral::micro::IPCM7::GetSingleton()->SendMessage(msg);
 
@@ -132,18 +132,18 @@ void GetFrame(struct jsonrpc_request* request) {
   int width = rpc_width_valid ? rpc_width : coral::micro::CameraTask::kWidth;
   int height =
       rpc_height_valid ? rpc_height : coral::micro::CameraTask::kHeight;
-  coral::micro::camera::Format format = coral::micro::camera::Format::RGB;
+  coral::micro::camera::Format format = coral::micro::camera::Format::kRgb;
 
   if (rpc_format_valid) {
     constexpr char kFormatRGB[] = "RGB";
     constexpr char kFormatGrayscale[] = "L";
     if (memcmp(rpc_format.c_str(), kFormatRGB,
                std::min(rpc_format.length(), strlen(kFormatRGB))) == 0) {
-      format = coral::micro::camera::Format::RGB;
+      format = coral::micro::camera::Format::kRgb;
     }
     if (memcmp(rpc_format.c_str(), kFormatGrayscale,
                std::min(rpc_format.length(), strlen(kFormatGrayscale))) == 0) {
-      format = coral::micro::camera::Format::Y8;
+      format = coral::micro::camera::Format::kY8;
     }
   }
 
@@ -152,14 +152,14 @@ void GetFrame(struct jsonrpc_request* request) {
 
   coral::micro::CameraTask::GetSingleton()->SetPower(true);
   coral::micro::camera::TestPattern pattern =
-      coral::micro::camera::TestPattern::COLOR_BAR;
+      coral::micro::camera::TestPattern::kColorBar;
   coral::micro::CameraTask::GetSingleton()->SetTestPattern(pattern);
   coral::micro::CameraTask::GetSingleton()->Enable(
-      coral::micro::camera::Mode::STREAMING);
+      coral::micro::camera::Mode::kStreaming);
   coral::micro::camera::FrameFormat fmt_rgb{};
 
   fmt_rgb.fmt = format;
-  fmt_rgb.filter = coral::micro::camera::FilterMethod::BILINEAR;
+  fmt_rgb.filter = coral::micro::camera::FilterMethod::kBilinear;
   fmt_rgb.width = width;
   fmt_rgb.height = height;
   fmt_rgb.preserve_ratio = false;

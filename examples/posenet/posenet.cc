@@ -101,15 +101,15 @@ extern "C" void app_main(void* param) {
     // Starts the camera for live poses.
     coral::micro::CameraTask::GetSingleton()->SetPower(true);
     coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::STREAMING);
+        coral::micro::camera::Mode::kStreaming);
 
     printf("Starting live posenet\r\n");
     auto model_height = posenet_input->dims->data[1];
     auto model_width = posenet_input->dims->data[2];
     for (;;) {
         coral::micro::camera::FrameFormat fmt{
-            /*fmt=*/coral::micro::camera::Format::RGB,
-            /*filter=*/coral::micro::camera::FilterMethod::BILINEAR,
+            /*fmt=*/coral::micro::camera::Format::kRgb,
+            /*filter=*/coral::micro::camera::FilterMethod::kBilinear,
             /*rotation=*/coral::micro::camera::Rotation::k0,
             /*width=*/model_width,
             /*height=*/model_height,

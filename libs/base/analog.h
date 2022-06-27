@@ -15,15 +15,15 @@ inline constexpr int kLPADC2ChannelCount = 7;
 
 // Enumeration of the ADCs and DACs that exist in the system.
 enum class Device {
-    ADC1,
-    ADC2,
-    DAC1,
+    kAdc1,
+    kAdc2,
+    kDac1,
 };
 
 // Enumeration of the choices for the primary side of an ADC.
 enum class Side {
-    A,
-    B,
+    kA,
+    kB,
 };
 
 // Represents the configuration of an ADC.

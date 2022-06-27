@@ -25,11 +25,6 @@ uint8_t IPCM7::rx_queue_storage_[IPCM7::kMessageBufferSize +
                                  sizeof(ipc::MessageBuffer)]
     __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
-IPCM7* IPCM7::GetSingleton() {
-    static IPCM7 ipc;
-    return &ipc;
-}
-
 void IPCM7::StaticRemoteAppEventHandler(uint16_t eventData, void* context) {
     GetSingleton()->RemoteAppEventHandler(eventData, context);
 }

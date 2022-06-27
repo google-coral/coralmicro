@@ -15,8 +15,8 @@ extern unsigned int apex_latest_single_ep_bin_len;
 
 namespace coral::micro {
 
-constexpr int kDfuVid = 0x1A6E;
-constexpr int kDfuPid = 0x089A;
+inline constexpr int kDfuVid = 0x1A6E;
+inline constexpr int kDfuPid = 0x089A;
 
 namespace edgetpu_dfu {
 

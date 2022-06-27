@@ -29,17 +29,17 @@ void wiringAnalogInit() {
     pwm_config.module = kPWM_Module_0;
     pwm_config.A.enabled = false;
     pwm_config.B.enabled = false;
-    coral::micro::analog::Init(Device::ADC1);
-    coral::micro::analog::Init(Device::DAC1);
+    coral::micro::analog::Init(Device::kAdc1);
+    coral::micro::analog::Init(Device::kDac1);
     coral::micro::analog::CreateConfig(
         Config_A0,
-        Device::ADC1, 0,
-        Side::B, false
+        Device::kAdc1, 0,
+        Side::kB, false
     );
     coral::micro::analog::CreateConfig(
         Config_A1,
-        Device::ADC1, 0,
-        Side::A, false
+        Device::kAdc1, 0,
+        Side::kA, false
     );
 }
 

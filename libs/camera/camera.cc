@@ -101,61 +101,61 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat>& fmts) {
     if (!raw) {
         return false;
     }
-    if (GetSingleton()->mode_ == Mode::TRIGGER) {
+    if (GetSingleton()->mode_ == Mode::kTrigger) {
         gpio::SetGpio(gpio::Gpio::kCameraTrigger, false);
     }
 
     for (const camera::FrameFormat& fmt : fmts) {
         switch (fmt.fmt) {
-            case Format::RGB: {
+            case Format::kRgb: {
                 if (fmt.width == kWidth && fmt.height == kHeight) {
                     BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height,
                                fmt.filter, fmt.rotation);
                     if (fmt.white_balance &&
-                        GetSingleton()->test_pattern_ == TestPattern::NONE) {
+                        GetSingleton()->test_pattern_ == TestPattern::kNone) {
                         AutoWhiteBalance(fmt.buffer, fmt.width, fmt.height);
                     }
                 } else {
                     auto buffer_rgb = std::make_unique<uint8_t[]>(
-                        FormatToBPP(Format::RGB) * kWidth * kHeight);
+                        FormatToBPP(Format::kRgb) * kWidth * kHeight);
                     BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight,
                                fmt.filter, fmt.rotation);
                     if (fmt.white_balance &&
-                        GetSingleton()->test_pattern_ == TestPattern::NONE) {
+                        GetSingleton()->test_pattern_ == TestPattern::kNone) {
                         AutoWhiteBalance(buffer_rgb.get(), kWidth, kHeight);
                     }
                     ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight,
                                           fmt.buffer, fmt.width, fmt.height,
-                                          FormatToBPP(Format::RGB),
+                                          FormatToBPP(Format::kRgb),
                                           fmt.preserve_ratio);
                 }
                 break;
-                case Format::Y8: {
+                case Format::kY8: {
                     if (fmt.width == kWidth && fmt.height == kHeight) {
                         BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight,
                                          fmt.filter, fmt.rotation);
                     } else {
                         auto buffer_rgb = std::make_unique<uint8_t[]>(
-                            FormatToBPP(Format::RGB) * kWidth * kHeight);
+                            FormatToBPP(Format::kRgb) * kWidth * kHeight);
                         auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(
-                            FormatToBPP(Format::RGB) * fmt.width * fmt.height);
+                            FormatToBPP(Format::kRgb) * fmt.width * fmt.height);
                         BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight,
                                    fmt.filter, fmt.rotation);
                         ResizeNearestNeighbor(
                             buffer_rgb.get(), kWidth, kHeight,
                             buffer_rgb_scaled.get(), fmt.width, fmt.height,
-                            FormatToBPP(Format::RGB), fmt.preserve_ratio);
+                            FormatToBPP(Format::kRgb), fmt.preserve_ratio);
                         RGBToGrayscale(buffer_rgb_scaled.get(), fmt.buffer,
                                        fmt.width, fmt.height);
                     }
                 } break;
-                case Format::RAW:
+                case Format::kRaw:
                     if (fmt.width != kWidth || fmt.height != kHeight) {
                         ret = false;
                         break;
                     }
                     memcpy(fmt.buffer, raw,
-                           kWidth * kHeight * FormatToBPP(Format::RAW));
+                           kWidth * kHeight * FormatToBPP(Format::kRaw));
                     ret = true;
                     break;
                 default:
@@ -208,7 +208,7 @@ namespace {
 template <typename Callback>
 void BayerInternal(const uint8_t* camera_raw, int width, int height,
                    FilterMethod filter, Callback callback) {
-    if (filter == FilterMethod::NEAREST_NEIGHBOR) {
+    if (filter == FilterMethod::kNearestNeighbor) {
         bool blue = true, green = false;
         for (int y = 2; y < height - 2; y++) {
             int start = green ? 3 : 2;
@@ -244,7 +244,7 @@ void BayerInternal(const uint8_t* camera_raw, int width, int height,
             blue = !blue;
             green = !green;
         }
-    } else if (filter == FilterMethod::BILINEAR) {
+    } else if (filter == FilterMethod::kBilinear) {
         int bayer_stride = width;
 
         size_t bayer_offset = 0;
@@ -508,7 +508,6 @@ void CameraTask::AutoWhiteBalance(uint8_t* camera_rgb, int width, int height) {
     float r_gain_f = r_sum_f < epsilon ? 0.0f : max_channel / r_sum_f;
     float g_gain_f = g_sum_f < epsilon ? 0.0f : max_channel / g_sum_f;
     float b_gain_f = b_sum_f < epsilon ? 0.0f : max_channel / b_sum_f;
-    float max_gain = std::max(r_gain_f, std::max(g_gain_f, b_gain_f));
     uint16_t r_gain_i = static_cast<uint16_t>(r_gain_f * (1 << 8));
     uint16_t g_gain_i = static_cast<uint16_t>(g_gain_f * (1 << 8));
     uint16_t b_gain_i = static_cast<uint16_t>(b_gain_f * (1 << 8));
@@ -527,12 +526,12 @@ void CameraTask::AutoWhiteBalance(uint8_t* camera_rgb, int width, int height) {
 
 int CameraTask::FormatToBPP(Format fmt) {
     switch (fmt) {
-        case Format::RGBA:
+        case Format::kRgba:
             return 4;
-        case Format::RGB:
+        case Format::kRgb:
             return 3;
-        case Format::RAW:
-        case Format::Y8:
+        case Format::kRaw:
+        case Format::kY8:
             return 1;
     }
     return 0;
@@ -573,12 +572,12 @@ bool CameraTask::Write(uint16_t reg, uint8_t val) {
 void CameraTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
     QueueTask::Init();
     i2c_handle_ = i2c_handle;
-    mode_ = Mode::STANDBY;
+    mode_ = Mode::kStandBy;
 }
 
 int CameraTask::GetFrame(uint8_t** buffer, bool block) {
     Request req;
-    req.type = RequestType::Frame;
+    req.type = RequestType::kFrame;
     req.request.frame.index = -1;
     Response resp;
     do {
@@ -590,27 +589,27 @@ int CameraTask::GetFrame(uint8_t** buffer, bool block) {
 
 void CameraTask::ReturnFrame(int index) {
     Request req;
-    req.type = RequestType::Frame;
+    req.type = RequestType::kFrame;
     req.request.frame.index = index;
     SendRequest(req);
 }
 
 void CameraTask::Enable(Mode mode) {
     Request req;
-    req.type = RequestType::Enable;
+    req.type = RequestType::kEnable;
     req.request.mode = mode;
     SendRequest(req);
 }
 
 void CameraTask::Disable() {
     Request req;
-    req.type = RequestType::Disable;
+    req.type = RequestType::kDisable;
     SendRequest(req);
 }
 
 bool CameraTask::SetPower(bool enable) {
     Request req;
-    req.type = RequestType::Power;
+    req.type = RequestType::kPower;
     req.request.power.enable = enable;
     Response resp = SendRequest(req);
     return resp.response.power.success;
@@ -618,7 +617,7 @@ bool CameraTask::SetPower(bool enable) {
 
 void CameraTask::SetTestPattern(TestPattern pattern) {
     Request req;
-    req.type = RequestType::TestPattern;
+    req.type = RequestType::kTestPattern;
     req.request.test_pattern.pattern = pattern;
     SendRequest(req);
 }
@@ -627,7 +626,7 @@ void CameraTask::Trigger() { gpio::SetGpio(gpio::Gpio::kCameraTrigger, true); }
 
 void CameraTask::DiscardFrames(int count) {
     Request req;
-    req.type = RequestType::Discard;
+    req.type = RequestType::kDiscard;
     req.request.discard.count = count;
     SendRequest(req);
 }
@@ -725,7 +724,7 @@ EnableResponse CameraTask::HandleEnableRequest(const Mode& mode) {
     status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
 
     int framebuffer_count = kFramebufferCount;
-    if (mode == Mode::TRIGGER) {
+    if (mode == Mode::kTrigger) {
         framebuffer_count = 2;
     }
     for (int i = 0; i < framebuffer_count; i++) {
@@ -741,7 +740,7 @@ EnableResponse CameraTask::HandleEnableRequest(const Mode& mode) {
 }
 
 void CameraTask::HandleDisableRequest() {
-    SetMode(Mode::STANDBY);
+    SetMode(Mode::kStandBy);
     CSI_TransferStop(CSI, &csi_handle_);
 }
 
@@ -796,7 +795,7 @@ FrameResponse CameraTask::HandleFrameRequest(const FrameRequest& frame) {
 
 void CameraTask::HandleTestPatternRequest(
     const TestPatternRequest& test_pattern) {
-    if (test_pattern.pattern == TestPattern::NONE) {
+    if (test_pattern.pattern == TestPattern::kNone) {
         SetDefaultRegisters();
     } else {
         Write(CameraRegisters::AE_CTRL, 0x00);
@@ -835,22 +834,22 @@ void CameraTask::RequestHandler(Request* req) {
     Response resp;
     resp.type = req->type;
     switch (req->type) {
-        case RequestType::Enable:
+        case RequestType::kEnable:
             resp.response.enable = HandleEnableRequest(req->request.mode);
             break;
-        case RequestType::Disable:
+        case RequestType::kDisable:
             HandleDisableRequest();
             break;
-        case RequestType::Power:
+        case RequestType::kPower:
             resp.response.power = HandlePowerRequest(req->request.power);
             break;
-        case RequestType::Frame:
+        case RequestType::kFrame:
             resp.response.frame = HandleFrameRequest(req->request.frame);
             break;
-        case RequestType::TestPattern:
+        case RequestType::kTestPattern:
             HandleTestPatternRequest(req->request.test_pattern);
             break;
-        case RequestType::Discard:
+        case RequestType::kDiscard:
             HandleDiscardRequest(req->request.discard);
             break;
     }

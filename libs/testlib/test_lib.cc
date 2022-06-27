@@ -612,11 +612,11 @@ void PosenetStressRun(struct jsonrpc_request* request) {
 
     coral::micro::CameraTask::GetSingleton()->SetPower(true);
     coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::STREAMING);
+        coral::micro::camera::Mode::kStreaming);
     for (int i = 0; i < iterations; ++i) {
         coral::micro::camera::FrameFormat fmt{
-            /*fmt=*/coral::micro::camera::Format::RGB,
-            /*filter=*/coral::micro::camera::FilterMethod::BILINEAR,
+            /*fmt=*/coral::micro::camera::Format::kRgb,
+            /*filter=*/coral::micro::camera::FilterMethod::kBilinear,
             /*rotation=*/coral::micro::camera::Rotation::k0,
             /*width=*/model_width,
             /*height=*/model_height,
@@ -679,9 +679,9 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
         return;
     }
     coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::TRIGGER);
+        coral::micro::camera::Mode::kTrigger);
     coral::micro::CameraTask::GetSingleton()->SetTestPattern(
-        coral::micro::camera::TestPattern::WALKING_ONES);
+        coral::micro::camera::TestPattern::kWalkingOnes);
 
     bool success = true;
     // Getting this test pattern doesn't seem to always work on the first try,

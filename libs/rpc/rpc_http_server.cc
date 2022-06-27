@@ -13,7 +13,7 @@
 namespace coral::micro {
 namespace {
 int Append(const char* buf, int len, void* userdata) {
-    auto* v = reinterpret_cast<std::vector<char>*>(userdata);
+    auto* v = static_cast<std::vector<char>*>(userdata);
     v->insert(v->end(), buf, buf + len);
     return len;
 }

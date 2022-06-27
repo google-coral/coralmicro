@@ -29,7 +29,7 @@ int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
     rotation_ = rotation;
     preserve_ratio_ = preserve_ratio;
     camera_->SetPower(true);
-    camera_->Enable(coral::micro::camera::Mode::STREAMING);
+    camera_->Enable(coral::micro::camera::Mode::kStreaming);
     return CameraStatus::SUCCESS;
 }
 
@@ -45,8 +45,8 @@ int CameraClass::grab(uint8_t* buffer) {
         return CameraStatus::NOT_INITIALIZED;
     }
     std::list<coral::micro::camera::FrameFormat> fmts;
-    if (test_pattern_ != camera::TestPattern::NONE) {
-        fmts.push_back({camera::Format::RAW, camera::FilterMethod::BILINEAR,
+    if (test_pattern_ != camera::TestPattern::kNone) {
+        fmts.push_back({camera::Format::kRaw, camera::FilterMethod::kBilinear,
                         camera::Rotation::k0,
                         CameraTask::kWidth, CameraTask::kHeight,
                         preserve_ratio_, buffer});
@@ -64,8 +64,8 @@ int CameraClass::grab(uint8_t* buffer) {
 }
 
 int CameraClass::testPattern(bool walking) {
-    auto test_pattern = walking ? coral::micro::camera::TestPattern::WALKING_ONES
-                                : coral::micro::camera::TestPattern::NONE;
+    auto test_pattern = walking ? coral::micro::camera::TestPattern::kWalkingOnes
+                                : coral::micro::camera::TestPattern::kNone;
     test_pattern_ = test_pattern;
     camera_->SetTestPattern(test_pattern_);
     return CameraStatus::SUCCESS;
@@ -79,9 +79,9 @@ int CameraClass::testPattern(coral::micro::camera::TestPattern pattern) {
 
 int CameraClass::standby(bool enable) {
     if (enable) {
-        camera_->Enable(coral::micro::camera::Mode::STREAMING);
+        camera_->Enable(coral::micro::camera::Mode::kStreaming);
     } else {
-        camera_->Enable(coral::micro::camera::Mode::STANDBY);
+        camera_->Enable(coral::micro::camera::Mode::kStandBy);
     }
     return CameraStatus::SUCCESS;
 }

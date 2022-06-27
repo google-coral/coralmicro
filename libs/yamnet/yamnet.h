@@ -8,16 +8,16 @@
 
 namespace coral::micro {
 namespace yamnet {
-constexpr int kSampleRate = 16000;
-constexpr int kSampleRateMs = kSampleRate / 1000;
-constexpr int kDurationMs = 975;
-constexpr int kAudioSize = kSampleRate * kDurationMs / 1000;
-constexpr int kFeatureSliceSize = 64;
-constexpr int kFeatureSliceCount = 96;
-constexpr int kFeatureElementCount = (kFeatureSliceSize * kFeatureSliceCount);
-constexpr int kFeatureSliceStrideMs = 10;
-constexpr int kFeatureSliceDurationMs = 25;
-constexpr int kFeatureSliceSamples = kFeatureSliceDurationMs * kSampleRateMs;
+inline constexpr int kSampleRate = 16000;
+inline constexpr int kSampleRateMs = kSampleRate / 1000;
+inline constexpr int kDurationMs = 975;
+inline constexpr int kAudioSize = kSampleRate * kDurationMs / 1000;
+inline constexpr int kFeatureSliceSize = 64;
+inline constexpr int kFeatureSliceCount = 96;
+inline constexpr int kFeatureElementCount = kFeatureSliceSize * kFeatureSliceCount;
+inline constexpr int kFeatureSliceStrideMs = 10;
+inline constexpr int kFeatureSliceDurationMs = 25;
+inline constexpr int kFeatureSliceSamples = kFeatureSliceDurationMs * kSampleRateMs;
 
 bool setup();
 std::optional<const std::vector<tensorflow::Class>> loop(bool print = true);

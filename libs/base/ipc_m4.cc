@@ -11,15 +11,10 @@
 
 namespace coral::micro {
 
-IPCM4* IPCM4::GetSingleton() {
-    static IPCM4 ipc;
-    return &ipc;
-}
-
 void IPCM4::HandleSystemMessage(const ipc::SystemMessage& message) {
     switch (message.type) {
-        case ipc::SystemMessageType::CONSOLE_BUFFER_PTR:
-            SetM4ConsoleBufferPtr(reinterpret_cast<ipc::StreamBuffer*>(
+        case ipc::SystemMessageType::kConsoleBufferPtr:
+            SetM4ConsoleBufferPtr(static_cast<ipc::StreamBuffer*>(
                 message.message.console_buffer_ptr));
             break;
         default:

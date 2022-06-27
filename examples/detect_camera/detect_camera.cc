@@ -73,10 +73,10 @@ void DetectFromCamera(struct jsonrpc_request* r) {
 
     coral::micro::CameraTask::GetSingleton()->SetPower(true);
     coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::STREAMING);
+        coral::micro::camera::Mode::kStreaming);
 
     std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
-    coral::micro::camera::FrameFormat fmt{coral::micro::camera::Format::RGB, coral::micro::camera::FilterMethod::BILINEAR,
+    coral::micro::camera::FrameFormat fmt{coral::micro::camera::Format::kRgb, coral::micro::camera::FilterMethod::kBilinear,
                                      coral::micro::camera::Rotation::k0, model_width,
                                      model_height, false, image.data()};
 

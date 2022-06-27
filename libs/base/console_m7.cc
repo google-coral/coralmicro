@@ -94,7 +94,7 @@ void ConsoleM7::M4ConsoleTaskFn(void* param) {
     ipc::Message m4_console_buffer_msg;
     m4_console_buffer_msg.type = ipc::MessageType::kSystem;
     m4_console_buffer_msg.message.system.type =
-        ipc::SystemMessageType::CONSOLE_BUFFER_PTR;
+        ipc::SystemMessageType::kConsoleBufferPtr;
     m4_console_buffer_msg.message.system.message.console_buffer_ptr =
         GetM4ConsoleBufferPtr();
     IPCM7::GetSingleton()->SendMessage(m4_console_buffer_msg);

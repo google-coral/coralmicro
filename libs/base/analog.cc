@@ -10,9 +10,9 @@ namespace {
 
 ADC_Type* DeviceToADC(Device d) {
     switch (d) {
-        case Device::ADC1:
+        case Device::kAdc1:
             return LPADC1;
-        case Device::ADC2:
+        case Device::kAdc2:
             return LPADC2;
         default:
             return nullptr;
@@ -27,13 +27,13 @@ void GetDefaultConfig(ADCConfig& config) {
 } // namespace
 
 void Init(Device device) {
-    if (device == Device::ADC1 || device == Device::ADC2) {
+    if (device == Device::kAdc1 || device == Device::kAdc2) {
         lpadc_config_t adc_config;
         LPADC_GetDefaultConfig(&adc_config);
         LPADC_Init(DeviceToADC(device), &adc_config);
     }
 
-    if (device == Device::DAC1) {
+    if (device == Device::kDac1) {
         dac12_config_t dac_config;
         DAC12_GetDefaultConfig(&dac_config);
         dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
@@ -48,28 +48,28 @@ void CreateConfig(ADCConfig& config, Device device, int channel,
 
     if (differential) {
         switch (primary_side) {
-            case Side::A:
+            case Side::kA:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelDiffBothSideAB;
-            case Side::B:
+            case Side::kB:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelDiffBothSideBA;
         }
     } else {
         switch (primary_side) {
-            case Side::A:
+            case Side::kA:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelSingleEndSideA;
-            case Side::B:
+            case Side::kB:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelSingleEndSideB;
         }
     }
 
-    if (device == Device::ADC1) {
+    if (device == Device::kAdc1) {
         assert(channel < kLPADC1ChannelCount);
     }
-    if (device == Device::ADC2) {
+    if (device == Device::kAdc2) {
         assert(channel < kLPADC2ChannelCount);
     }
 
