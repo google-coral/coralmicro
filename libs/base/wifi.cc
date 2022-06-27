@@ -16,8 +16,10 @@
 
 #include "libs/base/wifi.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <limits>
 #include <string>
 
 #include "libs/base/gpio.h"
@@ -83,11 +85,15 @@ bool DisconnectWiFi(int retry_count) {
     return true;
 }
 
-std::vector<WIFIScanResult_t> ScanWiFi(uint8_t max_results) {
-    std::vector<WIFIScanResult_t> results{max_results};
-    if (WIFI_Scan(results.data(), results.size()) != eWiFiSuccess) {
-        return {};
-    }
+std::vector<WIFIScanResult_t> ScanWiFi() {
+    std::vector<WIFIScanResult_t> results(std::numeric_limits<uint8_t>::max());
+    if (WIFI_Scan(results.data(), results.size()) != eWiFiSuccess) return {};
+
+    results.erase(std::remove_if(std::begin(results), std::end(results),
+                                 [](const WIFIScanResult_t& result) {
+                                     return result.cSSID[0] == '\0';
+                                 }),
+                  std::end(results));
     return results;
 }
 

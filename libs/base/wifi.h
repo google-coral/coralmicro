@@ -90,14 +90,10 @@ bool DisconnectWiFi(int retry_count = kDefaultRetryCount);
 
 // Scans for Wi-Fi networks.
 //
-// @param max_results The max number of networks to look for.
-// This function may return fewer than this number but never more.
-// Default is 255 which is the maximum for uint8_t.
 // @return A vector of `WIFIScanResult_t` which contains info like name,
 // security type, etc. See:
 // https://aws.github.io/amazon-freertos/202107.00/html1/struct_w_i_f_i_scan_result__t.html
-std::vector<WIFIScanResult_t> ScanWiFi(
-    uint8_t max_results = std::numeric_limits<uint8_t>::max());
+std::vector<WIFIScanResult_t> ScanWiFi();
 
 // Gets the device's Wi-Fi IP address.
 //

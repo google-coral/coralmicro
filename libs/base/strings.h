@@ -66,8 +66,10 @@ bool StrEndsWith(const std::string& s, const char (&suffix)[N]) {
 // @param format_str The string with format specifier to append to v.
 // @param args The arguments to the format specifier.
 // @tparam T The variadic class template that allows args to be any type.
-template <typename... T>
-void StrAppend(std::vector<uint8_t>* v, const char* format_str, T... args) {
+template <typename C, typename... T>
+void StrAppend(C* v, const char* format_str, T... args) {
+    static_assert(sizeof((*v)[0]) == 1);
+
     const int size = std::snprintf(nullptr, 0, format_str, args...) + 1;
     v->resize(v->size() + size);
     auto* s = reinterpret_cast<char*>(v->data() + v->size() - size);

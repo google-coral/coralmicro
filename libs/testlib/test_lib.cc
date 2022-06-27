@@ -818,30 +818,19 @@ void CaptureAudio(struct jsonrpc_request* request) {
 }
 
 void WiFiScan(struct jsonrpc_request* request) {
-    auto x_scan_results = coral::micro::ScanWiFi();
-
-    if (x_scan_results.empty()) {
+    auto results = coral::micro::ScanWiFi();
+    if (results.empty()) {
         jsonrpc_return_error(request, -1, "wifi scan failed", nullptr);
         return;
     }
 
-    std::vector<uint8_t> json;
-    json.reserve(2048);
+    std::string s;
+    s.reserve(1024);
+    for (auto& result : results)
+       coral::micro::StrAppend(&s, "\"%s\",", result.cSSID);
+    if (!results.empty()) s.pop_back();
 
-    coral::micro::StrAppend(&json, "[");
-    int count{0};
-    for (const auto& x_scan_result : x_scan_results) {
-        if (x_scan_result.cSSID[0] != '\0') {
-            coral::micro::StrAppend(&json, "\"%s\",", x_scan_result.cSSID);
-            count++;
-        }
-    }
-    if (count > 0) {
-        json.pop_back();  // Remove the last comma.
-    }
-    coral::micro::StrAppend(&json, "]");
-    jsonrpc_return_success(request, "{%Q:%s}", "SSIDs",
-                           reinterpret_cast<const char*>(json.data()));
+    jsonrpc_return_success(request, "{%Q: [%s]}", "SSIDs", s.c_str());
 }
 
 void WiFiConnect(struct jsonrpc_request* request) {
