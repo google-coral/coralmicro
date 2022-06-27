@@ -67,133 +67,166 @@ class CdcAcm {
 
     usb_device_endpoint_struct_t cdc_acm_comm_endpoints_[1] = {
         {
-            0, // set in constructor
-            USB_ENDPOINT_INTERRUPT,
-            8, // max packet size
+            .endpointAddress = 0,  // set in constructor
+            .transferType = USB_ENDPOINT_INTERRUPT,
+            .maxPacketSize = 8,
+            .interval = 0,
         },
     };
     usb_device_endpoint_struct_t cdc_acm_data_endpoints_[2] = {
         {
-            0, // set in constructor
-            USB_ENDPOINT_BULK,
-            512,
+            .endpointAddress = 0,  // set in constructor
+            .transferType = USB_ENDPOINT_BULK,
+            .maxPacketSize = 512,
+            .interval = 0,
         },
         {
-            0, // set in constructor
-            USB_ENDPOINT_BULK,
-            512,
+            .endpointAddress = 0,  // set in constructor
+            .transferType = USB_ENDPOINT_BULK,
+            .maxPacketSize = 512,
+            .interval = 0,
         },
     };
     usb_device_interface_struct_t cdc_acm_comm_interface_[1] = {
         {
-            0,
-            {
+            .alternateSetting = 0,
+            .endpointList = {
                 ARRAY_SIZE(cdc_acm_comm_endpoints_),
                 cdc_acm_comm_endpoints_,
             },
+            .classSpecific = nullptr,
         },
     };
     usb_device_interface_struct_t cdc_acm_data_interface_[1] = {
         {
-            0,
-            {
+            .alternateSetting = 0,
+            .endpointList = {
                 ARRAY_SIZE(cdc_acm_data_endpoints_),
                 cdc_acm_data_endpoints_,
-            }
+            },
+            .classSpecific = nullptr,
         },
     };
     usb_device_interfaces_struct_t cdc_acm_interfaces_[2] = {
-        // comm
+        // Comm
         {
-            0x02, // InterfaceClass
-            0x02, // InterfaceSubClass
-            0x00, // InterfaceProtocol
-            0,    // Interface index  set in constructor
-            cdc_acm_comm_interface_,
-            ARRAY_SIZE(cdc_acm_comm_interface_),
+            .classCode = 0x02,
+            .subclassCode = 0x02,
+            .protocolCode = 0x00,
+            .interfaceNumber = 0,  // set in constructor
+            .interface = cdc_acm_comm_interface_,
+            .count = ARRAY_SIZE(cdc_acm_comm_interface_),
         },
         // Data
         {
-            0x0A, // InterfaceClass
-            0x00, // InterfaceSubClass
-            0x00, // InterfaceProtocol
-            0,    // interface index set in constructor
-            cdc_acm_data_interface_,
-            ARRAY_SIZE(cdc_acm_data_interface_),
+            .classCode = 0x0A,
+            .subclassCode = 0x00,
+            .protocolCode = 0x00,
+            .interfaceNumber = 0,  // set in constructor
+            .interface = cdc_acm_data_interface_,
+            .count = ARRAY_SIZE(cdc_acm_data_interface_),
         },
     };
     usb_device_interface_list_t cdc_acm_interface_list_[1] = {
         {
-            ARRAY_SIZE(cdc_acm_interfaces_), cdc_acm_interfaces_,
+            .count = ARRAY_SIZE(cdc_acm_interfaces_),
+            .interfaces = cdc_acm_interfaces_,
         },
     };
     usb_device_class_struct_t class_struct_ {
-        cdc_acm_interface_list_,
-        kUSB_DeviceClassTypeCdc,
-        ARRAY_SIZE(cdc_acm_interface_list_),
+        .interfaceList = cdc_acm_interface_list_,
+        .type = kUSB_DeviceClassTypeCdc,
+        .configurations = ARRAY_SIZE(cdc_acm_interface_list_),
     };
     usb_device_class_config_struct_t config_ {
-        StaticHandler,
-        nullptr,
-        &class_struct_,
+        .classCallback = StaticHandler,
+        .classHandle = nullptr,
+        .classInfomation = &class_struct_,
     };
     static constexpr CdcAcmClassDescriptor descriptor_ = {
-        {
-            sizeof(InterfaceAssociationDescriptor),
-            0x0B,
-            0, // first iface num
-            2, // total num ifaces
-            0x02, 0x02, 0x01, 0,
-        }, // InterfaceAssociationDescriptor
-        {
-            sizeof(InterfaceDescriptor),
-            0x04,
-            0, // iface num
-            0, 1, 0x02, 0x02, 0x01, 0,
-        }, // InterfaceDescriptor
-        {
-            sizeof(CdcHeaderFunctionalDescriptor),
-            0x24,
-            0x00, 0x0110,
-        }, // CdcHeaderFunctionalDescriptor
-        {
-            sizeof(CdcCallManagementFunctionalDescriptor),
-            0x24,
-            0x01, 0, 1,
-        }, // CdcCallManagementFunctionalDescriptor
-        {
-            sizeof(CdcAcmFunctionalDescriptor),
-            0x24,
-            0x02, 2,
-        }, // CdcAcmFunctionalDescriptor
-        {
-            sizeof(CdcUnionFunctionalDescriptor),
-            0x24,
-            0x06, 0, 1
-        }, // CdcUnionFunctionalDescriptor
-        {
-            sizeof(EndpointDescriptor),
-            0x05,
-            1 | 0x80, 0x03, 10, 9,
-        }, // EndpointDescriptor
-
-        {
-            sizeof(InterfaceDescriptor),
-            0x04,
-            1,
-            0, 2, 0x0A, 0x00, 0x00, 0,
-        }, // InterfaceDescriptor
-        {
-            sizeof(EndpointDescriptor),
-            0x05,
-            2 | 0x80, 0x02, 512, 0,
-        }, // EndpointDescriptor
-        {
-            sizeof(EndpointDescriptor),
-            0x05,
-            3 & 0x7F, 0x02, 512, 0,
-        }, // EndpointDescriptor
-    }; // CdcAcmClassDescriptor
+        .iad0 = {
+            .length = sizeof(InterfaceAssociationDescriptor),
+            .descriptor_type = 0x0B,
+            .first_interface = 0,
+            .interface_count = 2,
+            .function_class = 0x02,
+            .function_subclass = 0x02,
+            .function_protocol = 0x01,
+            .interface = 0,
+        },
+        .cmd_iface = {
+            .length = sizeof(InterfaceDescriptor),
+            .descriptor_type = 0x04,
+            .interface_number = 0,
+            .alternate_setting = 0,
+            .num_endpoints = 1,
+            .interface_class = 0x02,
+            .interface_subclass = 0x02,
+            .interface_protocol = 0x01,
+            .interface = 0,
+        },
+        .cmd_hdr_fd = {
+            .length = sizeof(CdcHeaderFunctionalDescriptor),
+            .descriptor_type = 0x24,
+            .descriptor_subtype = 0x00,
+            .cdc = 0x0110,
+        },
+        .cmd_mgmt_fd = {
+            .function_length = sizeof(CdcCallManagementFunctionalDescriptor),
+            .descriptor_type = 0x24,
+            .descriptor_subtype = 0x01,
+            .capabilities = 0,
+            .data_interface = 1,
+        },
+        .cmd_acm_fd = {
+            .function_length = sizeof(CdcAcmFunctionalDescriptor),
+            .descriptor_type = 0x24,
+            .descriptor_subtype = 0x02,
+            .capabilities = 2,
+        },
+        .cmd_union_fd = {
+            .function_length = sizeof(CdcUnionFunctionalDescriptor),
+            .descriptor_type = 0x24,
+            .descriptor_subtype = 0x06,
+            .controller_iface = 0,
+            .peripheral_iface0 = 1,
+        },
+        .cmd_ep = {
+            .length = sizeof(EndpointDescriptor),
+            .descriptor_type = 0x05,
+            .endpoint_address = 1 | 0x80,
+            .attributes = 0x03,
+            .max_packet_size = 10,
+            .interval = 9,
+        },
+        .data_iface = {
+            .length = sizeof(InterfaceDescriptor),
+            .descriptor_type = 0x04,
+            .interface_number = 1,
+            .alternate_setting = 0,
+            .num_endpoints = 2,
+            .interface_class = 0x0A,
+            .interface_subclass = 0x00,
+            .interface_protocol = 0x00,
+            .interface = 0,
+        },
+        .in_ep = {
+            .length = sizeof(EndpointDescriptor),
+            .descriptor_type = 0x05,
+            .endpoint_address = 2 | 0x80,
+            .attributes = 0x02,
+            .max_packet_size = 512,
+            .interval = 0,
+        },
+        .out_ep = {
+            .length = sizeof(EndpointDescriptor),
+            .descriptor_type = 0x05,
+            .endpoint_address = 3 & 0x7F,
+            .attributes = 0x02,
+            .max_packet_size = 512,
+            .interval = 0,
+        },
+    };
 
     uint8_t tx_buffer_[512];
     uint8_t rx_buffer_[512];
