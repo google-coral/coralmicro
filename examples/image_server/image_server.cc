@@ -33,19 +33,6 @@
 namespace {
 using coral::micro::testlib::JsonRpcGetIntegerParam;
 
-#if defined(IMAGE_SERVER_ETHERNET)
-char* get_ethernet_ip(struct netif* ethernet) {
-    while (true) {
-        auto* dhcp = netif_dhcp_data(ethernet);
-        if (dhcp->state == DHCP_STATE_BOUND) {
-            break;
-        }
-        taskYIELD();
-    }
-    return ip4addr_ntoa(netif_ip4_addr(ethernet));
-}
-#endif  // defined(IMAGE_SERVER_ETHERNET)
-
 void get_image_from_camera(struct jsonrpc_request* request) {
     int width, height;
     if (!JsonRpcGetIntegerParam(request, "width", &width)) {
@@ -91,13 +78,17 @@ extern "C" void app_main(void* param) {
         printf("Unable to bring up ethernet...\r\n");
         vTaskSuspend(nullptr);
     }
-    auto* ethernet_ip = get_ethernet_ip(ethernet);
-    printf("Starting Image RPC Server on: %s\r\n", ethernet_ip);
-    jsonrpc_init(nullptr, ethernet_ip);
+    auto ethernet_ip = coral::micro::GetEthernetIp();
+    if (!ethernet_ip.has_value()) {
+        printf("Unable to get Ethernet IP\r\n");
+        vTaskSuspend(nullptr);
+    }
+    printf("Starting Image RPC Server on: %s\r\n", ethernet_ip.value().c_str());
+    jsonrpc_init(nullptr, &ethernet_ip.value());
     jsonrpc_export("get_ethernet_ip", [](struct jsonrpc_request* request) {
         jsonrpc_return_success(
             request, "{%Q: %Q}", "ethernet_ip",
-            reinterpret_cast<char*>(request->ctx->response_cb_data));
+            reinterpret_cast<std::string*>(request->ctx->response_cb_data)->c_str());
     });
 #elif defined(IMAGE_SERVER_WIFI)
     if (!coral::micro::TurnOnWiFi()) {

@@ -22,6 +22,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
 
 namespace coral::micro {
 namespace {
@@ -160,6 +161,21 @@ void InitializeEthernet(bool default_iface) {
     netifapi_netif_set_up(&netif);
     netifapi_dhcp_start(&netif);
     eth_netif = &netif;
+}
+
+std::optional<std::string> GetEthernetIp() {
+    if (!eth_netif) {
+        return std::nullopt;
+    }
+    while (true) {
+        auto* dhcp = netif_dhcp_data(eth_netif);
+        if (dhcp->state == DHCP_STATE_BOUND) {
+            break;
+        }
+        taskYIELD();
+    }
+
+    return ip4addr_ntoa(netif_ip4_addr(eth_netif));
 }
 
 }  // namespace coral::micro

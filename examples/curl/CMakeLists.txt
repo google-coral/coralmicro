@@ -12,12 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(ethernet_curl
-    ethernet_curl.cc
+set(CURL_SRC curl.cc)
+set(CURL_LINK_LIBRARIES
+    libs_base-m7_freertos
+    libs_curl
 )
 
-target_link_libraries(ethernet_curl
-    libs_base-m7_freertos
+add_executable_m7(curl_ethernet
+    ${CURL_SRC}
+)
+
+target_link_libraries(curl_ethernet
+    ${CURL_LINK_LIBRARIES}
     libs_base-m7_ethernet
-    libs_curl
+)
+
+target_compile_definitions(curl_ethernet PRIVATE
+    CURL_ETHERNET
+)
+
+add_executable_m7(curl_wifi
+    ${CURL_SRC}
+)
+
+target_link_libraries(curl_wifi
+    ${CURL_LINK_LIBRARIES}
+    libs_base-m7_wifi
+)
+
+target_compile_definitions(curl_wifi PRIVATE
+    CURL_WIFI
 )

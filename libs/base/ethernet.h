@@ -15,6 +15,7 @@
 #ifndef LIBS_BASE_ETHERNET_H_
 #define LIBS_BASE_ETHERNET_H_
 
+#include <optional>
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 
 namespace coral::micro {
@@ -43,6 +44,12 @@ void InitializeEthernet(bool default_iface);
 // https://mcuxpresso.nxp.com/api_doc/dev/2349/a00344.html#ga7ff0b98bb1341c07acefb1473b6eda29
 status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data);
 // @endcond
+
+// Gets the device's Ethernet IP address.
+//
+// @return A string representing the IPv4 IP address or `std::nullopt` on
+// failure.
+std::optional<std::string> GetEthernetIp();
 
 }  // namespace coral::micro
 
