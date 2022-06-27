@@ -355,12 +355,12 @@ void HandleAppMessage(const uint8_t data[ipc::kMessageBufferDataSize],
 }
 
 void Main() {
-  constexpr watchdog::WatchdogConfig wdt_config = {
+  constexpr Watchdog::Config wdt_config = {
       .timeout_s = 8,
       .pet_rate_s = 3,
       .enable_irq = false,
   };
-  watchdog::StartWatchdog(wdt_config);
+  Watchdog::Start(wdt_config);
 
   auto tpu_context =
       EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
