@@ -20,16 +20,35 @@
 namespace coral::micro {
 namespace led {
 
+// Available board LEDs
 enum class LED {
+    // Orange power LED.
     kPower,
+    // Green user-programmable LED.
     kUser,
+    // White Edge TPU LED. The Edge TPU must be powered to use this.
     kTpu,
 };
 
+// Fully-on brightness for `Set(led, enable, brightness)`
 inline constexpr unsigned int kFullyOn = 100;
+
+// Fully-off brightness for `Set(led, enable, brightness)`
 inline constexpr unsigned int kFullyOff = 0;
 
+// Turns an LED on or off.
+//
+// @param led The LED to enable/disable.
+// @param enable True turns the LED on, false turns it off.
+// @returns True upon success, false otherwise.
 bool Set(LED led, bool enable);
+
+// Turns an LED on or off with brightness setting.
+//
+// @param led The LED to enable/disable.
+// @param enable True turns the LED on, false turns it off.
+// @param brightness The LED brightness, from 0 to 100.
+// @returns True upon success, false otherwise.
 bool Set(LED led, bool enable, unsigned int brightness);
 
 }  // namespace led

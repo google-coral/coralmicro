@@ -20,6 +20,12 @@ Image classification
 The following APIs assist when running image classification models on a
 microcontroller with an Edge TPU.
 
+**Example** (from `examples/classify_image/`):
+
+.. literalinclude:: ../examples/classify_image/classify_image.cc
+   :start-after: [start-sphinx-snippet:classify-image]
+   :end-before: [end-sphinx-snippet:classify-image]
+
 `[classification.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/classification.h>`_
 
 .. doxygenfile:: tensorflow/classification.h
@@ -31,6 +37,12 @@ Object detection
 
 The following APIs assist when running object detection models on a
 microcontroller with an Edge TPU.
+
+**Example** (from `examples/detect_image/`):
+
+.. literalinclude:: ../examples/detect_image/detect_image.cc
+   :start-after: [start-sphinx-snippet:detect_image]
+   :end-before: [end-sphinx-snippet:detect_image]
 
 `[detection.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/detection.h>`_
 

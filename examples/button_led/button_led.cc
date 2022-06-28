@@ -21,6 +21,7 @@
 
 // Toggles the User LED in response to button presses
 
+//! [gpio-callback] Doxygen snippet for gpio.h
 bool user_led_on = false;
 
 // Callback for user button
@@ -36,3 +37,4 @@ extern "C" void app_main(void* param) {
     coral::micro::gpio::RegisterIRQHandler(coral::micro::gpio::Gpio::kUserButton, OnButtonPressed);
     vTaskSuspend(nullptr);
 }
+//! [gpio-callback] End snippet

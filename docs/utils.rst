@@ -6,14 +6,6 @@ Utility APIs
 .. doxygenfile:: base/utils.h
 
 
-LEDs
--------------------------
-
-`[led.h source] <https://github.com/google-coral/micro/blob/master/libs/base/led.h>`_
-
-.. doxygenfile:: base/led.h
-
-
 Strings
 -------------------------
 

@@ -42,33 +42,15 @@ namespace coral::micro {
 // an interpreter. (This is different because libcoral is based on TensorFlow
 // Lite and coralmicro is based on TensorFlow Lite for Microcontrollers.)
 //
-// For example:
-//
-// ```
-// auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
-// if (!tpu_context) {
-//     printf("ERROR: Failed to get EdgeTpu context\r\n");
-//     return;
-// }
-//
-// tflite::MicroErrorReporter error_reporter;
-// tflite::MicroMutableOpResolver<1> resolver;
-// resolver.AddCustom(kCustomOp, RegisterCustomOp());
-//
-// auto tensor_arena = std::make_unique<TensorArena>();
-// tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
-//                                      resolver, tensor_arena->data,
-//                                      kTensorArenaSize, &error_reporter);
-// ```
-//
-// To see the rest of this code example, see
-// `examples/classify_image/classify_image.cc`.
-//
 // The lifetime of the Edge TPU context must be longer than all associated
 // `tflite::MicroInterpreter` instances.
 //
 // The life of this object is directly tied to the Edge TPU power. So when this
 // object is destroyed, the Edge TPU powers down.
+//
+// **Example** (from `examples/classify_image/`):
+//
+// \snippet classify_image/classify_image.cc edgetpu-context
 class EdgeTpuContext {
    public:
     EdgeTpuContext();

@@ -71,6 +71,7 @@ enum InterruptMode {
     kIntModeCount
 };
 
+// The function type required by `RegisterIRQHandler()`.
 using GpioCallback = std::function<void()>;
 
 // @cond Internal only, do not generate docs
@@ -102,6 +103,11 @@ void SetMode(Gpio gpio, bool input, bool pull, bool pull_direction);
 void SetIntMode(Gpio gpio, InterruptMode mode);
 
 // Register an interrupt handler for a GPIO.
+//
+// **Example** (from `examples/button_led/`):
+//
+// \snippet button_led/button_led.cc gpio-callback
+//
 // @param Pin for which to register the handler.
 // @param cb Callback function that will be invoked when the interrupt is raised.
 //           This is called from interrupt context, so it should not do much work.

@@ -29,6 +29,7 @@
 // using a local bitmap image as input.
 // The top 3 class predictions are printed to the serial console.
 
+// [start-sphinx-snippet:classify-image]
 namespace coral::micro {
 namespace {
 constexpr char kModelPath[] =
@@ -52,6 +53,7 @@ void Main() {
         return;
     }
 
+    //! [edgetpu-context] Doxygen snippet for edgetpu_manager.h
     auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!tpu_context) {
         printf("ERROR: Failed to get EdgeTpu context\r\n");
@@ -67,6 +69,7 @@ void Main() {
     tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
                                          resolver, tensor_arena->data,
                                          kTensorArenaSize, &error_reporter);
+    //! [edgetpu-context] End snippet
     if (interpreter.AllocateTensors() != kTfLiteOk) {
         printf("ERROR: AllocateTensors() failed\r\n");
         return;
@@ -104,3 +107,4 @@ extern "C" void app_main(void* param) {
     coral::micro::Main();
     vTaskSuspend(nullptr);
 }
+// [end-sphinx-snippet:classify-image]

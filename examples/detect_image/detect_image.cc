@@ -29,6 +29,7 @@
 // using a local bitmap image as input.
 // Results (up to 3 detected objects) are printed to serial console.
 
+// [start-sphinx-snippet:detect-image]
 namespace coral::micro {
 namespace {
 constexpr char kModelPath[] =
@@ -109,3 +110,4 @@ extern "C" void app_main(void* param) {
     coral::micro::Main();
     vTaskSuspend(nullptr);
 }
+// [end-sphinx-snippet:detect-image]

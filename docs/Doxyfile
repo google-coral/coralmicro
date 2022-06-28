@@ -17,3 +17,4 @@ INPUT                  = ../libs/tpu/ \
 EXCLUDE                = ../libs/tpu/tpu_driver.h
 FILE_PATTERNS          = *.h
 RECURSIVE              = YES
+EXAMPLE_PATH           = ../examples/
