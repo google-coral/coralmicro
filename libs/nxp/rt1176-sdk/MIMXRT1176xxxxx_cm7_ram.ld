@@ -130,6 +130,12 @@ SECTIONS
      *liblibs_nxp_rt1176-sdk_lwip.a:*(.text .text*)
      *liblibs_nxp_rt1176-sdk_lwip.a:*(.data .data*)
      *liblibs_nxp_rt1176-sdk_lwip.a:*(.rodata .rodata*)
+     *liblibs_nxp_rt1176-sdk_lwip_httpd.a:*(.text .text*)
+     *liblibs_nxp_rt1176-sdk_lwip_httpd.a:*(.data .data*)
+     *liblibs_nxp_rt1176-sdk_lwip_httpd.a:*(.rodata .rodata*)
+     *liblibs_nxp_rt1176-sdk_lwip_mdns.a:*(.text .text*)
+     *liblibs_nxp_rt1176-sdk_lwip_mdns.a:*(.data .data*)
+     *liblibs_nxp_rt1176-sdk_lwip_mdns.a:*(.rodata .rodata*)
      __lwip_end = .;
      . = ALIGN(4);
   } > m_ocram
@@ -141,9 +147,6 @@ SECTIONS
      *liblibs_nxp_rt1176-sdk_wiced.a:*(.text .text*)
      *liblibs_nxp_rt1176-sdk_wiced.a:*(.data .data*)
      *liblibs_nxp_rt1176-sdk_wiced.a:*(.rodata .rodata*)
-     *libwicedble.a:*(.text .text*)
-     *libwicedble.a:*(.data .data*)
-     *libwicedble.a:*(.rodata .rodata*)
      __wiced_end = .;
      . = ALIGN(4);
   } > m_ocram
@@ -155,6 +158,9 @@ SECTIONS
      *liblibs_tensorflow-m7.a:*(.text .text*)
      *liblibs_tensorflow-m7.a:*(.data .data*)
      *liblibs_tensorflow-m7.a:*(.rodata .rodata*)
+     *liblibs_kissfft-m7.a*:*(.text .text*)
+     *liblibs_kissfft-m7.a*:*(.data .data*)
+     *liblibs_kissfft-m7.a*:*(.rodata .rodata*)
      __tensorflow_end = .;
      . = ALIGN(4);
   } > m_ocram

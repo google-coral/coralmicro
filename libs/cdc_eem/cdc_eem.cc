@@ -24,9 +24,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/netif/ethernet.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
 
-extern "C" {
-#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/app/dhcp_server.h"
-}
+extern "C" void start_dhcp_server(uint32_t local_addr);
 
 #include <cstring>
 #include <memory>

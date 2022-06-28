@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-#include "libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth.h"
-
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/mutex.h"
-#include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/platform/bt_ble_settings.h"
-#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/wwd_wiced.h"
-#include "third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/bluetooth/export/include/BT_hci_api.h"
+
+/* clang-format off */
+#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/include/wiced_management.h"
+#include "libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/controller.h"
+#include "third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/bluetooth/export/include/BT_hci_api.h"
+#include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/platform/bt_ble_settings.h"
+/* clang-format on */
 
 namespace {
 constexpr char kDeviceName[] = "Coral Dev Board Micro";
@@ -55,7 +57,6 @@ std::vector<std::string> g_scan_results;  // Protected by g_ble_scan_mtx.
 
 extern unsigned char brcm_patchram_buf[];
 extern unsigned int brcm_patch_ram_length;
-extern "C" wiced_result_t wiced_wlan_connectivity_init(void);
 void ble_pwr_on(void);
 
 extern "C" lfs_t* lfs_pl_init() { return coralmicro::Lfs(); }
@@ -134,7 +135,7 @@ void InitEdgefastBluetooth(bt_ready_cb_t cb) {
     printf("Reading patchram failed\r\n");
     assert(false);
   }
-  wiced_wlan_connectivity_init();
+  wiced_init();
   coralmicro::GpioSet(coralmicro::Gpio::kBtDevWake, false);
   ble_pwr_on();
   g_init_cb = cb;

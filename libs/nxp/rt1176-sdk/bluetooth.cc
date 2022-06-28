@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "libs/base/gpio.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.h"
@@ -32,15 +33,13 @@ static uint8_t lpuart2_ring_buffer[kLpuart2RingBufferSize];
 
 void ble_pwr_on(void) {
   vTaskDelay(pdMS_TO_TICKS(500));
-  GPIO_PinWrite(BOARD_INITPINS_BT_REG_ON_GPIO, BOARD_INITPINS_BT_REG_ON_PIN,
-                1U);
+  coralmicro::GpioSet(coralmicro::Gpio::kBtRegOn, true);
   vTaskDelay(pdMS_TO_TICKS(500));
 }
 
 void ble_pwr_off(void) {
   vTaskDelay(pdMS_TO_TICKS(500));
-  GPIO_PinWrite(BOARD_INITPINS_BT_REG_ON_GPIO, BOARD_INITPINS_BT_REG_ON_PIN,
-                0U);
+  coralmicro::GpioSet(coralmicro::Gpio::kBtRegOn, false);
   vTaskDelay(pdMS_TO_TICKS(500));
 }
 

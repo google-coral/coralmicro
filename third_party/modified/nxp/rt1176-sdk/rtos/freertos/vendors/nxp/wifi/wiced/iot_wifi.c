@@ -35,8 +35,11 @@
 #include "FreeRTOS.h"
 
 #include "iot_wifi.h"
-#include "wwd.h"
-#include "wwd_wiced.h"
+// #include "wwd.h"
+// #include "wwd_wiced.h"
+#include "wwd_debug.h"
+#include "wwd_structures.h"
+#include "wiced_result.h"
 #include "wwd_network.h"
 #include "wwd_constants.h"
 #include "lwip/netifapi.h"
@@ -170,13 +173,13 @@ void wiced_scan_results_handler( wiced_scan_result_t** result_ptr, void* user_da
         /* finished */
         scan_buf->pxBuffer[scan_buf->result_buff_num].cChannel = 0xff;// TODO: check
         xSemaphoreGive(g_api_sema);
-        WPRINT_WWD_INFO(("scan completed\r\n"));
+        WPRINT_WICED_INFO(("scan completed\r\n"));
         return;
     }
 
     if ( scan_buf->result_buff_num >= scan_buf->uxNumNetworks )
     {
-        WPRINT_WWD_INFO(("scan result overflow %d vs %d \r\n", scan_buf->result_buff_num, scan_buf->uxNumNetworks));
+        WPRINT_WICED_INFO(("scan result overflow %d vs %d \r\n", scan_buf->result_buff_num, scan_buf->uxNumNetworks));
         return;
     }
 
@@ -260,7 +263,7 @@ WIFIReturnCode_t WIFI_On(bool default_iface)
         if (0 == g_lwip_is_ready)
         {
             /* Initialize WICED */
-            result = (wwd_result_t) wiced_wlan_connectivity_init();
+            result = (wwd_result_t)wiced_init();
             if (result != WWD_SUCCESS)
                 break;
 

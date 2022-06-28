@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/internal/chips/43455/resources.h"
+#include "libs/nxp/rt1176-sdk/WICED/platform/resources.h"
 
 const resource_hnd_t wifi_firmware_image = {
     .location = RESOURCE_IN_EXTERNAL_STORAGE,

@@ -22,6 +22,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/ip_addr.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/wwd_constants.h"
+#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/include/wiced_defaults.h"
 
 namespace coralmicro {
 
@@ -58,12 +59,12 @@ extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
   std::string wifi_country_code_out, wifi_revision_out;
   unsigned short wifi_revision = 0;
   if (!coralmicro::LfsReadFile("/wifi_country", &wifi_country_code_out)) {
-    DbgConsole_Printf("failed to read back country, returning WW\r\n");
-    return WICED_COUNTRY_WORLD_WIDE_XX;
+    DbgConsole_Printf("failed to read back country, returning default\r\n");
+    return WICED_DEFAULT_COUNTRY_CODE;
   }
   if (wifi_country_code_out.length() != 2) {
-    DbgConsole_Printf("wifi_country must be 2 bytes, returning WW\r\n");
-    return WICED_COUNTRY_WORLD_WIDE_XX;
+    DbgConsole_Printf("wifi_country must be 2 bytes, returning default\r\n");
+    return WICED_DEFAULT_COUNTRY_CODE;
   }
   if (coralmicro::LfsReadFile("/wifi_revision", &wifi_revision_out)) {
     wifi_revision = *reinterpret_cast<uint16_t*>(wifi_revision_out.data());

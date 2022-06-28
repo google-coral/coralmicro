@@ -29,7 +29,6 @@ target_link_libraries(mfg_test
 add_executable_m7(mfg_test_wifi
     mfg_test_wifi.cc
     mfg_test_iperf.cc
-    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/wiced_bt_cfg.c
 )
 
 target_link_libraries(mfg_test_wifi
@@ -38,9 +37,8 @@ target_link_libraries(mfg_test_wifi
     libs_rpc_utils
     libs_mjson
     libs_testlib
-    # put me before wiced include
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/libwicedble.a
     libs_base-m7_wifi
+    edgefast_bluetooth
 )
 
 add_executable_m7(mfg_test_poe

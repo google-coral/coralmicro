@@ -33,5 +33,5 @@ if __name__ == '__main__':
   print(mfg_test.wifi_get_ap('GoogleGuest'))
   print(mfg_test.ble_scan())
   print(mfg_test.wifi_set_antenna(Antenna.INTERNAL))
-  print(mfg_test.ble_scan())
-  print(mfg_test.ble_find('e8:84:a5:04:eb:1e'))
+  find_addr = mfg_test.ble_scan()['result']['address']
+  print(mfg_test.ble_find(find_addr))
