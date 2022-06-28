@@ -18,7 +18,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/gpio.h"
-#include "libs/tasks/PmicTask/pmic_task.h"
+#include "libs/pmic/pmic.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_csi.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"

@@ -17,8 +17,8 @@
 #include "libs/base/console_m7.h"
 #include "libs/base/led.h"
 #include "libs/base/tasks.h"
+#include "libs/pmic/pmic.h"
 #include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/tasks/PmicTask/pmic_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 

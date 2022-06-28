@@ -24,7 +24,7 @@
 #include "libs/base/tasks.h"
 #include "libs/camera/camera.h"
 #include "libs/nxp/rt1176-sdk/board_hardware.h"
-#include "libs/tasks/PmicTask/pmic_task.h"
+#include "libs/pmic/pmic.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"

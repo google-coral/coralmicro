@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_library_m7(libs_audio_freertos STATIC
-    audio_driver.cc
-    audio_service.cc
+add_library_m7(libs_pmic_freertos STATIC
+    pmic.cc
 )
-target_link_libraries(libs_audio_freertos
+target_link_libraries(libs_pmic_freertos
     libs_nxp_rt1176-sdk_freertos
     libs_FreeRTOS
-    libs_pmic_freertos
+)
+
+add_library_m4(libs_pmic_freertos-m4 STATIC
+    pmic.cc
+)
+target_link_libraries(libs_pmic_freertos-m4
+    libs_nxp_rt1176-sdk_freertos-m4
+    libs_FreeRTOS-m4
 )
