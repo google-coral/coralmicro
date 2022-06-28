@@ -33,23 +33,23 @@ inline constexpr int kEdgeTpuPid = 0x9302;
 
 namespace edgetpu {
 
-enum edgetpu_state {
-    EDGETPU_STATE_UNATTACHED = 0,
-    EDGETPU_STATE_ATTACHED,
-    EDGETPU_STATE_SET_INTERFACE,
-    EDGETPU_STATE_GET_STATUS,
-    EDGETPU_STATE_CONNECTED,
-    EDGETPU_STATE_ERROR,
+enum class EdgeTpuState : uint8_t {
+    kUnattached,
+    kAttached,
+    kSetInterface,
+    kGetStatus,
+    kConnected,
+    kError,
 };
 
 enum class RequestType : uint8_t {
-    NEXT_STATE,
-    SET_POWER,
-    GET_POWER,
+    kNextState,
+    kSetPower,
+    kGetPower,
 };
 
 struct NextStateRequest {
-    edgetpu_state state;
+    EdgeTpuState state;
 };
 
 struct SetPowerRequest {
@@ -118,7 +118,7 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response,
     void HandleNextState(edgetpu::NextStateRequest& req);
     bool HandleGetPowerRequest();
     void HandleSetPowerRequest(edgetpu::SetPowerRequest& req);
-    void SetNextState(enum edgetpu::edgetpu_state next_state);
+    void SetNextState(edgetpu::EdgeTpuState next_state);
     static void SetInterfaceCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status);
     static void GetStatusCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status);
     usb_status_t USBHostEvent(

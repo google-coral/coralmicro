@@ -28,9 +28,9 @@ using namespace std::placeholders;
 namespace coral::micro {
 using namespace edgetpu;
 
-void EdgeTpuTask::SetNextState(enum edgetpu_state next_state) {
+void EdgeTpuTask::SetNextState(EdgeTpuState next_state) {
     Request req;
-    req.type = RequestType::NEXT_STATE;
+    req.type = RequestType::kNextState;
     req.request.next_state.state = next_state;
     SendRequestAsync(req);
 }
@@ -61,13 +61,13 @@ usb_status_t EdgeTpuTask::USBHostEvent(
             }
             return (this->device_handle() != nullptr) ? kStatus_USB_Success : kStatus_USB_NotSupported;
         case kUSB_HostEventEnumerationDone:
-            SetNextState(EDGETPU_STATE_ATTACHED);
+            SetNextState(EdgeTpuState::kAttached);
             return kStatus_USB_Success;
         case kUSB_HostEventDetach:
 #if 0
             printf("EdgeTPU went away...\r\n");
 #endif
-            SetNextState(EDGETPU_STATE_UNATTACHED);
+            SetNextState(EdgeTpuState::kUnattached);
             USB_HostEdgeTpuDeinit(this->device_handle(), this->class_handle());
             return USB_HostRemoveDevice(host_handle, this->device_handle());
         default:
@@ -79,20 +79,20 @@ void EdgeTpuTask::SetInterfaceCallback(void *param, uint8_t *data, uint32_t data
     auto *task = static_cast<EdgeTpuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in EdgeTpuSetInterface\r\n");
-        task->SetNextState(EDGETPU_STATE_ERROR);
+        task->SetNextState(EdgeTpuState::kError);
         return;
     }
-    task->SetNextState(EDGETPU_STATE_GET_STATUS);
+    task->SetNextState(EdgeTpuState::kGetStatus);
 }
 
 void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data, uint32_t data_length, usb_status_t status) {
     auto *task = static_cast<EdgeTpuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in EdgeTpuGetStatus\r\n");
-        task->SetNextState(EDGETPU_STATE_ERROR);
+        task->SetNextState(EdgeTpuState::kError);
         return;
     }
-    task->SetNextState(EDGETPU_STATE_CONNECTED);
+    task->SetNextState(EdgeTpuState::kConnected);
 }
 
 void EdgeTpuTask::TaskInit() {
@@ -137,47 +137,47 @@ void EdgeTpuTask::HandleSetPowerRequest(SetPowerRequest& req) {
 
 void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
     usb_status_t ret;
-    enum edgetpu_state next_state = req.state;
+    EdgeTpuState next_state = req.state;
 
     switch (next_state) {
-        case EDGETPU_STATE_UNATTACHED:
+        case EdgeTpuState::kUnattached:
             EdgeTpuManager::GetSingleton()->NotifyConnected(nullptr);
             break;
-        case EDGETPU_STATE_ATTACHED:
+        case EdgeTpuState::kAttached:
             ret = USB_HostEdgeTpuInit(device_handle(), &class_handle_);
             if (ret != kStatus_USB_Success) {
-                SetNextState(EDGETPU_STATE_ERROR);
+                SetNextState(EdgeTpuState::kError);
             } else {
-                SetNextState(EDGETPU_STATE_SET_INTERFACE);
+                SetNextState(EdgeTpuState::kSetInterface);
             }
             break;
-        case EDGETPU_STATE_SET_INTERFACE:
+        case EdgeTpuState::kSetInterface:
             ret = USB_HostEdgeTpuSetInterface(
                     class_handle(), interface_handle(),
                     0, SetInterfaceCallback, this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(EDGETPU_STATE_ERROR);
+                SetNextState(EdgeTpuState::kError);
             }
             // Thunderchild notifies EdgeTpuManager that it's connected. Should this be in callback?
             EdgeTpuManager::GetSingleton()->NotifyConnected(reinterpret_cast<usb_host_edgetpu_instance_t*>(class_handle()));
             break;
-        case EDGETPU_STATE_GET_STATUS:
+        case EdgeTpuState::kGetStatus:
             ret = USB_HostEdgeTpuGetStatus(class_handle(), &status_, GetStatusCallback, this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(EDGETPU_STATE_ERROR);
+                SetNextState(EdgeTpuState::kError);
             }
             break;
-        // case EDGETPU_STATE_CONNECTED:
+        // case EdgeTpuState::kConnected:
         //     EdgeTpuManager::GetSingleton()->NotifyConnected(reinterpret_cast<usb_host_edgetpu_instance_t*>(class_handle()));
         //     break;
-        case EDGETPU_STATE_ERROR:
+        case EdgeTpuState::kError:
             printf("EdgeTPU error\r\n");
             while (true) {
                 taskYIELD();
             }
             break;
         default:
-            printf("Unhandled EdgeTPU state: %d\r\n", next_state);
+            printf("Unhandled EdgeTPU state: %d\r\n", static_cast<int>(next_state));
             while (true) {
                 taskYIELD();
             }
@@ -187,14 +187,14 @@ void EdgeTpuTask::HandleNextState(NextStateRequest& req) {
 
 bool EdgeTpuTask::GetPower() {
     Request req;
-    req.type = RequestType::GET_POWER;
+    req.type = RequestType::kGetPower;
     Response resp = SendRequest(req);
     return resp.response.get_power.enabled;
 }
 
 void EdgeTpuTask::SetPower(bool enable) {
     Request req;
-    req.type = RequestType::SET_POWER;
+    req.type = RequestType::kSetPower;
     req.request.set_power.enable = enable;
     SendRequest(req);
 }
@@ -203,13 +203,13 @@ void EdgeTpuTask::RequestHandler(Request *req) {
     Response resp;
     resp.type = req->type;
     switch (req->type) {
-        case RequestType::NEXT_STATE:
+        case RequestType::kNextState:
             HandleNextState(req->request.next_state);
             break;
-        case RequestType::SET_POWER:
+        case RequestType::kSetPower:
             HandleSetPowerRequest(req->request.set_power);
             break;
-        case RequestType::GET_POWER:
+        case RequestType::kGetPower:
             resp.response.get_power.enabled = HandleGetPowerRequest();
             break;
     }

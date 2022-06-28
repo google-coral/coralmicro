@@ -31,9 +31,9 @@ namespace coral::micro {
 
 using namespace edgetpu_dfu;
 
-void EdgeTpuDfuTask::SetNextState(enum dfu_state next_state) {
+void EdgeTpuDfuTask::SetNextState(DfuState next_state) {
     Request req;
-    req.type = RequestType::NEXT_STATE;
+    req.type = RequestType::kNextState;
     req.request.next_state.state = next_state;
     SendRequestAsync(req);
 }
@@ -64,10 +64,10 @@ usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(usb_host_handle host_handle,
             return (this->device_handle() != nullptr) ? kStatus_USB_Success : kStatus_USB_NotSupported;
         case kUSB_HostEventEnumerationDone:
             // TODO: check if we're already dfuing, if handles are valid.
-            SetNextState(DFU_STATE_ATTACHED);
+            SetNextState(DfuState::kAttached);
             return kStatus_USB_Success;
         case kUSB_HostEventDetach:
-            SetNextState(DFU_STATE_UNATTACHED);
+            SetNextState(DfuState::kUnattached);
             return kStatus_USB_Success;
         default:
             return kStatus_USB_Success;
@@ -81,10 +81,10 @@ void EdgeTpuDfuTask::SetInterfaceCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUSetInterface\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
-    task->SetNextState(DFU_STATE_GET_STATUS);
+    task->SetNextState(DfuState::kGetStatus);
 }
 
 void EdgeTpuDfuTask::GetStatusCallback(void *param,
@@ -94,14 +94,14 @@ void EdgeTpuDfuTask::GetStatusCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUGetStatus\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
 
     if (task->bytes_transferred() < task->bytes_to_transfer()) {
-        task->SetNextState(DFU_STATE_TRANSFER);
+        task->SetNextState(DfuState::kTransfer);
     } else {
-        task->SetNextState(DFU_STATE_ZERO_LENGTH_TRANSFER);
+        task->SetNextState(DfuState::kZeroLengthTransfer);
     }
 }
 
@@ -112,7 +112,7 @@ void EdgeTpuDfuTask::TransferCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUTransfer\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
 
@@ -123,7 +123,7 @@ void EdgeTpuDfuTask::TransferCallback(void *param,
         printf("Transferred %d bytes\r\n", task->bytes_transferred());
     }
 #endif
-    task->SetNextState(DFU_STATE_GET_STATUS);
+    task->SetNextState(DfuState::kGetStatus);
 }
 
 void EdgeTpuDfuTask::ZeroLengthTransferCallback(void *param,
@@ -133,13 +133,13 @@ void EdgeTpuDfuTask::ZeroLengthTransferCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUZeroLengthTransfer\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
 
     task->SetCurrentBlockNumber(0);
     task->SetBytesTransferred(0);
-    task->SetNextState(DFU_STATE_READ_BACK);
+    task->SetNextState(DfuState::kReadBack);
 }
 
 void EdgeTpuDfuTask::ReadBackCallback(void *param,
@@ -149,7 +149,7 @@ void EdgeTpuDfuTask::ReadBackCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUReadBack\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
 
@@ -160,7 +160,7 @@ void EdgeTpuDfuTask::ReadBackCallback(void *param,
         printf("Read back %d bytes\r\n", task->bytes_transferred());
     }
 #endif
-    task->SetNextState(DFU_STATE_GET_STATUS_READ);
+    task->SetNextState(DfuState::kGetStatusRead);
 }
 
 void EdgeTpuDfuTask::GetStatusReadCallback(void *param,
@@ -170,18 +170,18 @@ void EdgeTpuDfuTask::GetStatusReadCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUGetStatusRead\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
 
     if (task->bytes_transferred() < task->bytes_to_transfer()) {
-        task->SetNextState(DFU_STATE_READ_BACK);
+        task->SetNextState(DfuState::kReadBack);
     } else {
         if (memcmp(apex_latest_single_ep_bin, task->read_back_data(), apex_latest_single_ep_bin_len) != 0) {
             printf("Read back firmware does not match!\r\n");
-            task->SetNextState(DFU_STATE_ERROR);
+            task->SetNextState(DfuState::kError);
         } else {
-            task->SetNextState(DFU_STATE_DETACH);
+            task->SetNextState(DfuState::kDetach);
         }
         free(task->read_back_data());
         task->SetReadBackData(nullptr);
@@ -197,11 +197,11 @@ void EdgeTpuDfuTask::DetachCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUDetach\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
-    // task->SetNextState(DFU_STATE_CHECK_STATUS);
-    task->SetNextState(DFU_STATE_COMPLETE);
+    // task->SetNextState(DfuState::kCheckStatus);
+    task->SetNextState(DfuState::kComplete);
 }
 
 void EdgeTpuDfuTask::CheckStatusCallback(void *param,
@@ -211,10 +211,10 @@ void EdgeTpuDfuTask::CheckStatusCallback(void *param,
     auto *task = static_cast<EdgeTpuDfuTask*>(param);
     if (status != kStatus_USB_Success) {
         printf("Error in DFUCheckStatus\r\n");
-        task->SetNextState(DFU_STATE_ERROR);
+        task->SetNextState(DfuState::kError);
         return;
     }
-    task->SetNextState(DFU_STATE_COMPLETE);
+    task->SetNextState(DfuState::kComplete);
 }
 
 void EdgeTpuDfuTask::TaskInit() {
@@ -225,38 +225,38 @@ void EdgeTpuDfuTask::TaskInit() {
 void EdgeTpuDfuTask::HandleNextState(NextStateRequest& req) {
     usb_status_t ret;
     uint32_t transfer_length;
-    enum dfu_state next_state = req.state;
+    DfuState next_state = req.state;
     switch (next_state) {
-        case DFU_STATE_UNATTACHED:
+        case DfuState::kUnattached:
             break;
-        case DFU_STATE_ATTACHED:
+        case DfuState::kAttached:
             ret = USB_HostDfuInit(device_handle(), &class_handle_);
             if (ret == kStatus_USB_Success) {
-                SetNextState(DFU_STATE_SET_INTERFACE);
+                SetNextState(DfuState::kSetInterface);
             } else {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_SET_INTERFACE:
+        case DfuState::kSetInterface:
             ret = USB_HostDfuSetInterface(class_handle(),
                                           interface_handle(),
                                           0,
                                           EdgeTpuDfuTask::SetInterfaceCallback,
                                           this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_GET_STATUS:
+        case DfuState::kGetStatus:
             ret = USB_HostDfuGetStatus(class_handle(),
                                        reinterpret_cast<uint8_t*>(&status_),
                                        EdgeTpuDfuTask::GetStatusCallback,
                                        this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_TRANSFER:
+        case DfuState::kTransfer:
             transfer_length = std::min(256U /* get from descriptor */,
                                        apex_latest_single_ep_bin_len - bytes_transferred());
             ret = USB_HostDfuDnload(class_handle(),
@@ -266,17 +266,17 @@ void EdgeTpuDfuTask::HandleNextState(NextStateRequest& req) {
                                     EdgeTpuDfuTask::TransferCallback,
                                     this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_ZERO_LENGTH_TRANSFER:
+        case DfuState::kZeroLengthTransfer:
             ret = USB_HostDfuDnload(class_handle(), current_block_number(), nullptr, 0,
                                     EdgeTpuDfuTask::ZeroLengthTransferCallback, this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_READ_BACK:
+        case DfuState::kReadBack:
             if (!read_back_data()) {
                 SetReadBackData(static_cast<uint8_t*>(malloc(apex_latest_single_ep_bin_len)));
             }
@@ -285,38 +285,38 @@ void EdgeTpuDfuTask::HandleNextState(NextStateRequest& req) {
             ret = USB_HostDfuUpload(class_handle(), current_block_number(), read_back_data() + bytes_transferred(),
                                     transfer_length, EdgeTpuDfuTask::ReadBackCallback, this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_GET_STATUS_READ:
+        case DfuState::kGetStatusRead:
             ret = USB_HostDfuGetStatus(class_handle(), reinterpret_cast<uint8_t*>(&status_), EdgeTpuDfuTask::GetStatusReadCallback, this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_DETACH:
+        case DfuState::kDetach:
             ret = USB_HostDfuDetach(class_handle(), 1000 /* ms */, EdgeTpuDfuTask::DetachCallback, this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_CHECK_STATUS:
+        case DfuState::kCheckStatus:
             ret = USB_HostDfuGetStatus(class_handle(), reinterpret_cast<uint8_t*>(&status_), EdgeTpuDfuTask::CheckStatusCallback, this);
             if (ret != kStatus_USB_Success) {
-                SetNextState(DFU_STATE_ERROR);
+                SetNextState(DfuState::kError);
             }
             break;
-        case DFU_STATE_COMPLETE:
+        case DfuState::kComplete:
             USB_HostEhciResetBus(static_cast<usb_host_ehci_instance_t*>(host_instance()->controllerHandle));
             ret = USB_HostDfuDeinit(device_handle(), class_handle());
             SetClassHandle(nullptr);
             USB_HostTriggerReEnumeration(device_handle());
             break;
-        case DFU_STATE_ERROR:
+        case DfuState::kError:
             printf("DFU error\r\n");
             break;
         default:
-            printf("Unhandled DFU state %d\r\n", next_state);
+            printf("Unhandled DFU state %d\r\n", static_cast<int>(next_state));
             break;
     }
 }
@@ -325,7 +325,7 @@ void EdgeTpuDfuTask::RequestHandler(Request *req) {
     Response resp;
     resp.type = req->type;
     switch (req->type) {
-        case RequestType::NEXT_STATE:
+        case RequestType::kNextState:
             HandleNextState(req->request.next_state);
             break;
     }

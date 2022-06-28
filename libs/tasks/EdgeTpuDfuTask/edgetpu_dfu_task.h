@@ -36,27 +36,27 @@ inline constexpr int kDfuPid = 0x089A;
 
 namespace edgetpu_dfu {
 
-enum dfu_state {
-    DFU_STATE_UNATTACHED = 0,
-    DFU_STATE_ATTACHED,
-    DFU_STATE_SET_INTERFACE,
-    DFU_STATE_GET_STATUS,
-    DFU_STATE_TRANSFER,
-    DFU_STATE_ZERO_LENGTH_TRANSFER,
-    DFU_STATE_READ_BACK,
-    DFU_STATE_GET_STATUS_READ,
-    DFU_STATE_DETACH,
-    DFU_STATE_CHECK_STATUS,
-    DFU_STATE_COMPLETE,
-    DFU_STATE_ERROR,
+enum class DfuState : uint8_t {
+    kUnattached,
+    kAttached,
+    kSetInterface,
+    kGetStatus,
+    kTransfer,
+    kZeroLengthTransfer,
+    kReadBack,
+    kGetStatusRead,
+    kDetach,
+    kCheckStatus,
+    kComplete,
+    kError,
 };
 
 enum class RequestType : uint8_t {
-    NEXT_STATE,
+    kNextState,
 };
 
 struct NextStateRequest {
-    dfu_state state;
+    DfuState state;
 };
 
 struct Response {
@@ -188,7 +188,7 @@ class EdgeTpuDfuTask : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Respo
     void TaskInit() override;
     void RequestHandler(edgetpu_dfu::Request *req) override;
     void HandleNextState(edgetpu_dfu::NextStateRequest& req);
-    void SetNextState(enum edgetpu_dfu::dfu_state next_state);
+    void SetNextState(edgetpu_dfu::DfuState next_state);
 
     usb_host_instance_t* host_instance_;
     usb_device_handle device_handle_;
