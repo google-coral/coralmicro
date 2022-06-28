@@ -66,13 +66,12 @@ usb_status_t UsbHostTask::HostEvent(usb_device_handle device_handle,
     if (host_event_callbacks_.find(vidpid) == host_event_callbacks_.end()) {
         return kStatus_USB_Error;
     }
-    usb_host_event_callback callback_fn = host_event_callbacks_[vidpid];
-
+    auto callback_fn = host_event_callbacks_[vidpid];
     return callback_fn(host_handle(), device_handle, config_handle, event_code);
 }
 
-void UsbHostTask::RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid,
-                                               usb_host_event_callback fn) {
+void UsbHostTask::RegisterUsbHostEventCallback(uint32_t vid, uint32_t pid,
+                                               UsbHostEventCallback fn) {
     const uint32_t vidpid = vidpid_to_key(vid, pid);
     host_event_callbacks_[vidpid] = fn;
 
@@ -91,7 +90,7 @@ void UsbHostTask::TaskMain() {
 void UsbHostTask::Init() {
     CHECK(xTaskCreate(UsbHostTask::StaticTaskMain, "UsbHostTask",
                       configMINIMAL_STACK_SIZE * 10, this,
-                      USB_HOST_TASK_PRIORITY, NULL) == pdPASS);
+                      USB_HOST_TASK_PRIORITY, nullptr) == pdPASS);
 }
 
 UsbHostTask::UsbHostTask() {

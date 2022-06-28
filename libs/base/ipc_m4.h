@@ -17,8 +17,6 @@
 #ifndef LIBS_BASE_IPC_M4_H_
 #define LIBS_BASE_IPC_M4_H_
 
-#include <functional>
-
 #include "libs/base/ipc.h"
 
 namespace coral::micro {

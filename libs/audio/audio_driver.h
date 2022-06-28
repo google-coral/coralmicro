@@ -70,7 +70,7 @@ class AudioDriver {
                               size_t dma_buffer_size);
 
     template <size_t NumDmaBuffers, size_t CombinedDmaBufferSize>
-    AudioDriver(
+    explicit AudioDriver(
         AudioDriverBuffers<NumDmaBuffers, CombinedDmaBufferSize>& buffers)
         : dma_buffer_(buffers.dma_buffer),
           combined_dma_buffer_size_(CombinedDmaBufferSize),

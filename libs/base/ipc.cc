@@ -22,10 +22,6 @@
 
 namespace coral::micro {
 
-void IPC::StaticFreeRtosMessageEventHandler(uint16_t eventData, void* context) {
-    static_cast<IPC*>(context)->FreeRtosMessageEventHandler(eventData);
-}
-
 void IPC::FreeRtosMessageEventHandler(uint16_t eventData) {
     BaseType_t higher_priority_woken = pdFALSE;
     // TODO(atv): Get the base address of the shmem from a linker sym
@@ -50,9 +46,10 @@ void IPC::SendMessage(const ipc::Message& message) {
     if (!tx_task_ || !tx_semaphore_) {
         return;
     }
-    xTaskNotifyIndexed(tx_task_, kSendMessageNotification, (uint32_t)&message,
+    xTaskNotifyIndexed(tx_task_, kSendMessageNotification,
+                       reinterpret_cast<uint32_t>(&message),
                        eSetValueWithOverwrite);
-    xSemaphoreTake(tx_semaphore_, portMAX_DELAY);
+    CHECK(xSemaphoreTake(tx_semaphore_, portMAX_DELAY) == pdTRUE);
 }
 
 void IPC::TxTaskFn() {
@@ -63,16 +60,16 @@ void IPC::TxTaskFn() {
                                portMAX_DELAY);
         xMessageBufferSend(tx_queue_->message_buffer, message, sizeof(*message),
                            portMAX_DELAY);
-        xSemaphoreGive(tx_semaphore_);
+        CHECK(xSemaphoreGive(tx_semaphore_) == pdTRUE);
     }
 }
 
 void IPC::RxTaskFn() {
-    size_t rx_bytes;
     while (true) {
         ipc::Message rx_message;
-        rx_bytes = xMessageBufferReceive(rx_queue_->message_buffer, &rx_message,
-                                         sizeof(rx_message), portMAX_DELAY);
+        size_t rx_bytes =
+            xMessageBufferReceive(rx_queue_->message_buffer, &rx_message,
+                                  sizeof(rx_message), portMAX_DELAY);
         if (rx_bytes == 0) continue;
 
         switch (rx_message.type) {

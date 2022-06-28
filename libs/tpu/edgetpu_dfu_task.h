@@ -124,56 +124,56 @@ class EdgeTpuDfuTask : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Respo
     void SetHostInstance(usb_host_instance_t* instance) {
       host_instance_ = instance;
     }
-    usb_host_instance_t* host_instance() {
+    const usb_host_instance_t* host_instance() const {
       return host_instance_;
     }
 
     void SetDeviceHandle(usb_device_handle handle) {
       device_handle_ = handle;
     }
-    usb_device_handle device_handle() {
+    usb_device_handle device_handle() const {
       return device_handle_;
     }
 
     void SetInterfaceHandle(usb_host_interface_handle handle) {
       interface_handle_ = handle;
     }
-    usb_host_interface_handle interface_handle() {
+    usb_host_interface_handle interface_handle() const {
       return interface_handle_;
     }
 
     void SetClassHandle(usb_host_class_handle handle) {
       class_handle_ = handle;
     }
-    usb_host_class_handle class_handle() {
+    usb_host_class_handle class_handle() const {
       return class_handle_;
     }
 
     void SetStatus(usb_host_dfu_status_t status) {
       status_ = status;
     }
-    usb_host_dfu_status_t status() {
+    usb_host_dfu_status_t status() const {
       return status_;
     }
 
     void SetBytesTransferred(size_t bytes) {
       bytes_transferred_ = bytes;
     }
-    size_t bytes_transferred() {
+    size_t bytes_transferred() const {
       return bytes_transferred_;
     }
 
     void SetBytesToTransfer(size_t bytes) {
       bytes_to_transfer_ = bytes;
     }
-    size_t bytes_to_transfer() {
+    size_t bytes_to_transfer() const {
       return bytes_to_transfer_;
     }
 
     void SetCurrentBlockNumber(size_t block) {
       current_block_number_ = block;
     }
-    size_t current_block_number() {
+    size_t current_block_number() const {
       return current_block_number_;
     }
 

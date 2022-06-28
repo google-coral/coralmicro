@@ -18,7 +18,6 @@
 #define LIBS_BASE_IPC_M7_H_
 
 #include <cstdint>
-#include <functional>
 
 #include "libs/base/ipc.h"
 
@@ -39,11 +38,13 @@ class IPCM7 : public IPC {
     void TxTaskFn() override;
 
    private:
-    static void StaticRemoteAppEventHandler(uint16_t eventData, void* context);
+    static void StaticRemoteAppEventHandler(uint16_t eventData, void* context) {
+        GetSingleton()->RemoteAppEventHandler(eventData, context);
+    }
     void RemoteAppEventHandler(uint16_t eventData, void* context);
     void HandleSystemMessage(const ipc::SystemMessage& message) override;
 
-    static constexpr size_t kMessageBufferSize = (8 * sizeof(ipc::Message));
+    static constexpr size_t kMessageBufferSize = 8 * sizeof(ipc::Message);
     static uint8_t
         tx_queue_storage_[kMessageBufferSize + sizeof(ipc::MessageBuffer)]
         __attribute__((section(".noinit.$rpmsg_sh_mem")));

@@ -41,10 +41,6 @@ uint8_t IPCM7::rx_queue_storage_[IPCM7::kMessageBufferSize +
                                  sizeof(ipc::MessageBuffer)]
     __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
-void IPCM7::StaticRemoteAppEventHandler(uint16_t eventData, void* context) {
-    GetSingleton()->RemoteAppEventHandler(eventData, context);
-}
-
 void IPCM7::RemoteAppEventHandler(uint16_t eventData, void* context) {
     BaseType_t reschedule =
         xTaskResumeFromISR(tx_task_) | xTaskResumeFromISR(rx_task_);
@@ -113,13 +109,14 @@ void IPCM7::Init() {
     }
 
     // Load the remote core's memory space with the program binary.
-    uint32_t m4_start = (uint32_t)&m4_binary_start;
-    uint32_t m4_size = (uint32_t)&m4_binary_size;
-    memcpy((void*)CORE1_BOOT_ADDRESS, (void*)m4_start, m4_size);
+    auto m4_start = reinterpret_cast<uint32_t>(&m4_binary_start);
+    auto m4_size = reinterpret_cast<uint32_t>(&m4_binary_size);
+    memcpy(reinterpret_cast<void*>(CORE1_BOOT_ADDRESS),
+           reinterpret_cast<void*>(m4_start), m4_size);
 
     // Register callbacks for communication with the other core.
     MCMGR_RegisterEvent(kMCMGR_RemoteApplicationEvent,
-                        IPCM7::StaticRemoteAppEventHandler, NULL);
+                        IPCM7::StaticRemoteAppEventHandler, nullptr);
 
     IPC::Init();
 }
@@ -132,7 +129,7 @@ void IPCM7::StartM4() {
     // Start up the remote core.
     // Provide the address of the P->S message queue so that the remote core can
     // receive messages from this core.
-    MCMGR_StartCore(kMCMGR_Core1, (void*)CORE1_BOOT_ADDRESS,
+    MCMGR_StartCore(kMCMGR_Core1, reinterpret_cast<void*>(CORE1_BOOT_ADDRESS),
                     reinterpret_cast<uint32_t>(tx_queue_),
                     kMCMGR_Start_Asynchronous);
 }

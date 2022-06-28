@@ -37,16 +37,16 @@ class UsbHostTask {
     }
     void Init();
 
-    using usb_host_event_callback =
+    using UsbHostEventCallback =
         std::function<usb_status_t(usb_host_handle, usb_device_handle,
                                    usb_host_configuration_handle, uint32_t)>;
-    void RegisterUSBHostEventCallback(uint32_t vid, uint32_t pid,
-                                      usb_host_event_callback fn);
+    void RegisterUsbHostEventCallback(uint32_t vid, uint32_t pid,
+                                      UsbHostEventCallback fn);
     usb_status_t HostEvent(usb_device_handle device_handle,
                            usb_host_configuration_handle config_handle,
                            uint32_t event_code);
 
-    usb_host_handle host_handle() { return host_handle_; }
+    usb_host_handle host_handle() const { return host_handle_; }
 
    private:
     static void StaticTaskMain(void* param) {
@@ -57,7 +57,7 @@ class UsbHostTask {
 
     // Map from VID/PID to callback
     // Key is VID in the top 16 bits, PID in the bottom 16 bits.
-    std::map<uint32_t, usb_host_event_callback> host_event_callbacks_;
+    std::map<uint32_t, UsbHostEventCallback> host_event_callbacks_;
 };
 
 }  // namespace coral::micro

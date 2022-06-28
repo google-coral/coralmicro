@@ -32,7 +32,7 @@ void Random::RequestHandler(Request* req) {
     handle.jobRing = kCAAM_JobRing0;
     status_t status =
         CAAM_RNG_GetRandomData(CAAM, &handle, kCAAM_RngStateHandle0, req->out,
-                               req->len, kCAAM_RngDataAny, NULL);
+                               req->len, kCAAM_RngDataAny, nullptr);
     DCACHE_InvalidateByRange(reinterpret_cast<uint32_t>(req->out), req->len);
     resp.success = (status == kStatus_Success);
     req->callback(resp);

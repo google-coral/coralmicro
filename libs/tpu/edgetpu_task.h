@@ -95,21 +95,21 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response,
     void SetDeviceHandle(usb_device_handle handle) {
       device_handle_ = handle;
     }
-    usb_device_handle device_handle() {
+    usb_device_handle device_handle() const {
       return device_handle_;
     }
 
     void SetInterfaceHandle(usb_host_interface_handle handle) {
       interface_handle_ = handle;
     }
-    usb_host_interface_handle interface_handle() {
+    usb_host_interface_handle interface_handle() const {
       return interface_handle_;
     }
 
     void SetClassHandle(usb_host_class_handle handle) {
       class_handle_ = handle;
     }
-    usb_host_class_handle class_handle() {
+    usb_host_class_handle class_handle() const {
       return class_handle_;
     }
   private:

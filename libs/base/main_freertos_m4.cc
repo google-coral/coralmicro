@@ -65,7 +65,7 @@ extern "C" int main(int argc, char** argv) {
     constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;
     static StaticTask_t xTaskBuffer;
     static StackType_t xStack[stack_size];
-    CHECK(xTaskCreateStatic(pre_app_main, "app_main", stack_size, NULL,
+    CHECK(xTaskCreateStatic(pre_app_main, "app_main", stack_size, nullptr,
                             APP_TASK_PRIORITY, xStack, &xTaskBuffer));
 
     vTaskStartScheduler();

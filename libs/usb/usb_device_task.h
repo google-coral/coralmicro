@@ -32,16 +32,16 @@ namespace coral::micro {
 
 class UsbDeviceTask {
    public:
-    using usb_set_handle_callback = std::function<void(class_handle_t)>;
-    using usb_handle_event_callback = std::function<bool(uint32_t, void*)>;
+    using UsbSetHandleCallback = std::function<void(class_handle_t)>;
+    using UsbHandleEventCallback = std::function<bool(uint32_t, void*)>;
 
     UsbDeviceTask();
     UsbDeviceTask(const UsbDeviceTask&) = delete;
     UsbDeviceTask& operator=(const UsbDeviceTask&) = delete;
 
     void AddDevice(const usb_device_class_config_struct_t& config,
-                   usb_set_handle_callback sh_cb,
-                   usb_handle_event_callback he_cb, const void* descriptor_data,
+                   UsbSetHandleCallback sh_cb,
+                   UsbHandleEventCallback he_cb, const void* descriptor_data,
                    size_t descriptor_data_size);
     bool Init();
     static UsbDeviceTask* GetSingleton() {
@@ -95,7 +95,10 @@ class UsbDeviceTask {
 
 
     static usb_status_t StaticHandler(usb_device_handle device_handle,
-                                      uint32_t event, void* param);
+                                      uint32_t event, void* param) {
+        return GetSingleton()->Handler(device_handle, event, param);
+    }
+
     usb_status_t Handler(usb_device_handle device_handle, uint32_t event,
                          void* param);
 
@@ -103,8 +106,8 @@ class UsbDeviceTask {
     usb_device_class_config_list_struct_t config_list_;
     usb_device_handle device_handle_;
 
-    std::vector<usb_set_handle_callback> set_handle_callbacks_;
-    std::vector<usb_handle_event_callback> handle_event_callbacks_;
+    std::vector<UsbSetHandleCallback> set_handle_callbacks_;
+    std::vector<UsbHandleEventCallback> handle_event_callbacks_;
     std::string serial_number_;
 };
 

@@ -63,7 +63,7 @@ void ConsoleM7::Write(char* buffer, int size) {
     }
     ConsoleMessage msg = {
         size,
-        (uint8_t*)malloc(size),
+        new uint8_t[size],
     };
 #ifdef BLOCKING_PRINTF
     msg.semaphore = xSemaphoreCreateBinaryStatic(&msg.semaphore_storage);
@@ -150,9 +150,9 @@ void ConsoleM7::M7ConsoleTaskTxFn(void* param) {
     while (true) {
         ConsoleMessage msg;
         if (xQueueReceive(console_queue_, &msg, portMAX_DELAY) == pdTRUE) {
-            DbgConsole_SendDataReliable((uint8_t*)msg.str, msg.len);
-            cdc_acm_.Transmit((uint8_t*)msg.str, msg.len);
-            free(msg.str);
+            DbgConsole_SendDataReliable(msg.str, msg.len);
+            cdc_acm_.Transmit(msg.str, msg.len);
+            delete [] msg.str;
 #ifdef BLOCKING_PRINTF
             DbgConsole_Flush();
             xSemaphoreGive(msg.semaphore);

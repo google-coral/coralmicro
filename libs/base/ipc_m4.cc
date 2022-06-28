@@ -40,11 +40,11 @@ void IPCM4::HandleSystemMessage(const ipc::SystemMessage& message) {
 }
 
 void IPCM4::RxTaskFn() {
-    size_t rx_bytes;
-    rx_bytes = xMessageBufferReceive(rx_queue_->message_buffer, &tx_queue_,
-                                     sizeof(tx_queue_), portMAX_DELAY);
+    size_t rx_bytes =
+        xMessageBufferReceive(rx_queue_->message_buffer, &tx_queue_,
+                              sizeof(tx_queue_), portMAX_DELAY);
     if (!rx_bytes) {
-        vTaskSuspend(NULL);
+        vTaskSuspend(nullptr);
     }
     vTaskResume(tx_task_);
 

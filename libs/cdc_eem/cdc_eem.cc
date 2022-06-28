@@ -135,7 +135,7 @@ err_t CdcEem::TransmitFrame(void* buffer, uint32_t length) {
 
 err_t CdcEem::ReceiveFrame(uint8_t *buffer, uint32_t length) {
     struct netif *tmp_netif;
-    for (tmp_netif = netif_list; (tmp_netif != NULL) && (tmp_netif->state != this); tmp_netif = tmp_netif->next) {}
+    for (tmp_netif = netif_list; (tmp_netif != nullptr) && (tmp_netif->state != this); tmp_netif = tmp_netif->next) {}
     if (!tmp_netif) {
         printf("Couldn't find EEM interface\r\n");
         return ERR_IF;

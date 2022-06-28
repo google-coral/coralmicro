@@ -36,8 +36,11 @@ class IPC {
 
    private:
     static void StaticFreeRtosMessageEventHandler(uint16_t eventData,
-                                                  void* context);
+                                                  void* context) {
+        static_cast<IPC*>(context)->FreeRtosMessageEventHandler(eventData);
+    }
     void FreeRtosMessageEventHandler(uint16_t eventData);
+
     static void StaticTxTaskFn(void* param) {
         static_cast<IPC*>(param)->TxTaskFn();
     }

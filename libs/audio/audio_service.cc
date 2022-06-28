@@ -142,7 +142,7 @@ bool AudioService::RemoveCallback(int id) {
 }
 
 void AudioService::StaticRun(void* param) {
-    reinterpret_cast<const AudioService*>(param)->Run();
+    static_cast<const AudioService*>(param)->Run();
     vTaskSuspend(nullptr);
 }
 

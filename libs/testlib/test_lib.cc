@@ -86,11 +86,11 @@ auto WiFiSafeDisconnect = [](void* = nullptr, uint32_t = 0) {
 
 auto WiFiSafeConnect = [](void* wifi_network_params, uint32_t retries) {
   WiFiSafeDisconnect();
-  auto params = reinterpret_cast<WIFINetworkParams_t*>(wifi_network_params);
+  auto* params = static_cast<WIFINetworkParams_t*>(wifi_network_params);
   coral::micro::ConnectWiFi(params, static_cast<int>(retries));
-  free((void*)params->pcSSID);
-  free((void*)params->pcPassword);
-  free(wifi_network_params);
+  free(const_cast<char*>(params->pcSSID));
+  free(const_cast<char*>(params->pcPassword));
+  delete params;
 };
 }  // namespace pended_functions
 }  // namespace
@@ -811,29 +811,33 @@ void WiFiScan(struct jsonrpc_request* request) {
 }
 
 void WiFiConnect(struct jsonrpc_request* request) {
-  std::string ssid, psk;
+  std::string ssid;
   if (!JsonRpcGetStringParam(request, "ssid", &ssid)) {
     JsonRpcReturnBadParam(request, "ssid must be specified", "ssid");
     return;
   }
-  JsonRpcGetStringParam(request, "password",
 
-                        &psk);  // Password is not required.;
-  int retries{5};               // Default to 5.
+  std::string psk;  // Password is not required.
+  JsonRpcGetStringParam(request, "password", &psk);
+
+  int retries = 5;
   JsonRpcGetIntegerParam(request, "retries", &retries);
 
-  auto* network_params = new WIFINetworkParams_t();
-  network_params->pcSSID = (const char*)malloc(ssid.size() + 1);
-  std::strcpy(const_cast<char*>(network_params->pcSSID), ssid.c_str());
-  network_params->ucSSIDLength = ssid.size();
-  network_params->pcPassword = (const char*)malloc(psk.size() + 1);
-  std::strcpy(const_cast<char*>(network_params->pcPassword), psk.c_str());
-  network_params->ucPasswordLength = psk.size();
-  network_params->xSecurity =
+  auto* params = new WIFINetworkParams_t();
+
+  params->pcSSID = static_cast<const char*>(malloc(ssid.size() + 1));
+  std::strcpy(const_cast<char*>(params->pcSSID), ssid.c_str());
+  params->ucSSIDLength = ssid.size();
+
+  params->pcPassword = static_cast<const char*>(malloc(psk.size() + 1));
+  std::strcpy(const_cast<char*>(params->pcPassword), psk.c_str());
+  params->ucPasswordLength = psk.size();
+
+  params->xSecurity =
       psk.empty() ? eWiFiSecurityOpen : eWiFiSecurityWPA2;
 
   jsonrpc_return_success(request, "{}");
-  xTimerPendFunctionCall(pended_functions::WiFiSafeConnect, network_params,
+  xTimerPendFunctionCall(pended_functions::WiFiSafeConnect, params,
                          static_cast<uint32_t>(retries), pdMS_TO_TICKS(10));
 }
 

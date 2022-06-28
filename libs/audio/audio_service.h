@@ -212,7 +212,7 @@ class AudioService {
 //
 class LatestSamples {
    public:
-    LatestSamples(size_t num_samples);
+    explicit LatestSamples(size_t num_samples);
     LatestSamples(const LatestSamples&) = delete;
     LatestSamples& operator=(const LatestSamples&) = delete;
     ~LatestSamples();

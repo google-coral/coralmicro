@@ -218,7 +218,7 @@ void EdgeTpuDfuTask::CheckStatusCallback(void *param,
 }
 
 void EdgeTpuDfuTask::TaskInit() {
-    coral::micro::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(kDfuVid, kDfuPid,
+    coral::micro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(kDfuVid, kDfuPid,
             std::bind(&EdgeTpuDfuTask::USB_DFUHostEvent, this, _1, _2, _3, _4));
 }
 

@@ -53,12 +53,6 @@ void ToUsbStringDescriptor(const char* s,
 }
 }  // namespace
 
-usb_status_t UsbDeviceTask::StaticHandler(usb_device_handle device_handle,
-                                          uint32_t event, void* param) {
-    return coral::micro::UsbDeviceTask::GetSingleton()->Handler(device_handle,
-                                                                event, param);
-}
-
 usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle,
                                     uint32_t event, void* param) {
     static uint8_t string_buffer[64];
@@ -150,8 +144,8 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle,
 }
 
 void UsbDeviceTask::AddDevice(const usb_device_class_config_struct_t& config,
-                              usb_set_handle_callback sh_cb,
-                              usb_handle_event_callback he_cb,
+                              UsbSetHandleCallback sh_cb,
+                              UsbHandleEventCallback he_cb,
                               const void* descriptor_data,
                               size_t descriptor_data_size) {
     configs_.push_back(config);

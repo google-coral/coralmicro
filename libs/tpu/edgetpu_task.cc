@@ -96,7 +96,7 @@ void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data, uint32_t data_le
 }
 
 void EdgeTpuTask::TaskInit() {
-    coral::micro::UsbHostTask::GetSingleton()->RegisterUSBHostEventCallback(
+    coral::micro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(
             kEdgeTpuVid, kEdgeTpuPid, std::bind(&EdgeTpuTask::USBHostEvent, this, _1, _2, _3, _4));
 }
 

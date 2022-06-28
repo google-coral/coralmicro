@@ -195,7 +195,7 @@ std::optional<const std::vector<tensorflow::Class>> loop(bool print) {
                                    num_samples_remaining, &num_samples_read);
         audio += num_samples_read;
         num_samples_remaining -= num_samples_read;
-        if (output.values != NULL) {
+        if (output.values != nullptr) {
             for (size_t i = 0; i < output.size; ++i) {
                 feature_buffer[count++] = output.values[i];
             }
