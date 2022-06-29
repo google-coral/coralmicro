@@ -21,6 +21,7 @@ add_library_m7(libs_testlib STATIC
 
 target_link_libraries(libs_testlib PUBLIC
     libs_base-m7_freertos
+    libs_a71ch
     libs_mjson
     libs_audio_freertos
     libs_tensorflow-m7

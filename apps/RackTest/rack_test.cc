@@ -238,6 +238,11 @@ extern "C" void app_main(void* param) {
   jsonrpc_export(kMethodGetFrame, GetFrame);
   jsonrpc_export(coral::micro::testlib::kMethodCaptureAudio,
                  coral::micro::testlib::CaptureAudio);
+  jsonrpc_export(coral::micro::testlib::kMethodInitCrypto,
+                 coral::micro::testlib::CryptoInit);
+  jsonrpc_export(coral::micro::testlib::kMethodGetCryptoUId,
+                 coral::micro::testlib::CryptoGetUID);
+
   coral::micro::JsonRpcHttpServer server;
   server.AddUriHandler(UriHandler);
   coral::micro::UseHttpServer(&server);

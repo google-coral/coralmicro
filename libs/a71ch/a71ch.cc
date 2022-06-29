@@ -15,24 +15,48 @@
  */
 
 #include "libs/a71ch/a71ch.h"
+
 #include "libs/base/gpio.h"
+#include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
 #include "third_party/a71ch/sss/ex/inc/ex_sss_boot.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace coral::micro {
-namespace a71ch {
+namespace coral::micro::a71ch {
+namespace {
+// Helper function to convert an array of unsigned char to a string in hex
+// value.
+auto to_hex = [](const uint8_t* src, uint16_t src_len) -> std::string {
+  std::string output;
+  output.reserve(src_len * 2);
+  for (int dest_idx = 0, src_idx = 0; src_idx < src_len;
+       dest_idx += 2, src_idx += 1) {
+    sprintf(&output[dest_idx], "%02x", src[src_idx]);
+  }
+  return output;
+};
+}  // namespace
+
 bool Init() {
   coral::micro::gpio::SetGpio(coral::micro::gpio::kCryptoRst, false);
   vTaskDelay(pdMS_TO_TICKS(1));
   coral::micro::gpio::SetGpio(coral::micro::gpio::kCryptoRst, true);
 
   SE_Connect_Ctx_t sessionCtxt = {0};
-  sss_status_t status = sss_session_open(nullptr, kType_SSS_SE_A71CH, 0, kSSS_ConnectionType_Plain, &sessionCtxt);
+  sss_status_t status = sss_session_open(
+      nullptr, kType_SSS_SE_A71CH, 0, kSSS_ConnectionType_Plain, &sessionCtxt);
   if (kStatus_SSS_Success != status) {
     return false;
   }
   return true;
 }
-}  // namespace a71ch
-}  // namespace coral::micro
+
+std::optional<std::string> GetUID() {
+  uint16_t uid_len = A71CH_MODULE_UNIQUE_ID_LEN;
+  uint8_t uid[uid_len];
+  if (A71_GetUniqueID(uid, &uid_len) != SMCOM_OK) {
+    return std::nullopt;
+  }
+  return to_hex(uid, uid_len);
+}
+}  // namespace coral::micro::a71ch

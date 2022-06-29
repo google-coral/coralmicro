@@ -86,6 +86,17 @@ SECTIONS
     . = ALIGN(4);
   } > m_interrupts
 
+  .a71ch :
+  {
+     . = ALIGN(4);
+     __a71ch_start = .;
+     *liblibs_a71ch.a:*(.text .text*)
+     *liblibs_a71ch.a:*(.data .data*)
+     *liblibs_a71ch.a:*(.rodata .rodata*)
+     __a71ch_end = .;
+     . = ALIGN(4);
+  } > m_ocram
+
   .curl :
   {
      . = ALIGN(4);

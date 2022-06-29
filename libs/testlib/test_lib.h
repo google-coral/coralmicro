@@ -46,6 +46,8 @@ inline constexpr char kMethodWiFiConnect[] = "wifi_connect";
 inline constexpr char kMethodWiFiDisconnect[] = "wifi_disconnect";
 inline constexpr char kMethodWiFiGetIp[] = "wifi_get_ip";
 inline constexpr char kMethodWiFiGetStatus[] = "wifi_get_status";
+inline constexpr char kMethodInitCrypto[] = "a71ch_init";
+inline constexpr char kMethodGetCryptoUId[] = "a71ch_get_uid";
 
 bool JsonRpcGetIntegerParam(struct jsonrpc_request* request,
                             const char* param_name, int* out);
@@ -77,6 +79,8 @@ void WiFiConnect(struct jsonrpc_request* request);
 void WiFiDisconnect(struct jsonrpc_request* request);
 void WiFiGetIp(struct jsonrpc_request* request);
 void WiFiGetStatus(struct jsonrpc_request* request);
+void CryptoInit(struct jsonrpc_request* request);
+void CryptoGetUID(struct jsonrpc_request* request);
 
 }  // namespace coral::micro::testlib
 

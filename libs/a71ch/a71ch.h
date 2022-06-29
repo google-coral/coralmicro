@@ -17,10 +17,22 @@
 #ifndef LIBS_A71CH_A71CH_H_
 #define LIBS_A71CH_A71CH_H_
 
-namespace coral::micro {
-namespace a71ch {
+#include <optional>
+#include <string>
+
+namespace coral::micro::a71ch {
+
+// Initializes the a71ch module.
+//
+// This function must be called before using any of our a71ch wrapper functions
+// or the direct a71ch api. The reference manual for the a71ch chip can be found
+// here: https://www.nxp.com/a71ch
 bool Init();
-}
-}  // namespace coral::micro
+
+// Convenience helper to get the uid of the a71ch module.
+//
+// @return the unique id of this a71ch module or std::nullopt.
+std::optional<std::string> GetUID();
+}  // namespace coral::micro::a71ch
 
 #endif  // LIBS_A71CH_A71CH_H_

@@ -102,6 +102,12 @@ def run_stress_test(url):
     result = rpc_helper.call_tpu_stress_test(500)
     print(result)
 
+def run_crypto_test(url):
+    rpc_helper = CoralMicroRPCHelper(url, print_payloads=True)
+    print('Init Crypto')
+    print(rpc_helper.call_rpc_method('a71ch_init'))
+    print('Getting Crypto UID')
+    print(rpc_helper.call_rpc_method('a71ch_get_uid'))
 
 def main():
     url = f"http://{args.host}:{args.port}/jsonrpc"
@@ -112,6 +118,8 @@ def main():
         run_wifi_test(url)
     elif args.test == "stress_test":
         run_stress_test(url)
+    elif args.test == "crypto_test":
+        run_crypto_test(url)
     else:
         print('Test not supported')
         parser.print_help()
