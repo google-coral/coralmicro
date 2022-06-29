@@ -41,8 +41,8 @@ microcontroller with an Edge TPU.
 **Example** (from `examples/detect_image/`):
 
 .. literalinclude:: ../examples/detect_image/detect_image.cc
-   :start-after: [start-sphinx-snippet:detect_image]
-   :end-before: [end-sphinx-snippet:detect_image]
+   :start-after: [start-sphinx-snippet:detect-image]
+   :end-before: [end-sphinx-snippet:detect-image]
 
 `[detection.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/detection.h>`_
 
