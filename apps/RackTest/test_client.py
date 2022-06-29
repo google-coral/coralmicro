@@ -23,6 +23,8 @@ prototyping, the real test are on google3.
   python3 apps/RackTest/test_client.py --test wifi_tests
 - stress_test:
   python3 apps/RackTest/test_client.py --test stress_test
+- ble_tests:
+  python3 apps/RackTest/test_client.py --test ble_tests
 """
 import argparse
 import os
@@ -36,7 +38,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--host', type=str, default='10.10.10.1', help='Ip address of the Dev Board Micro')
 parser.add_argument('--port', type=int, default=80, help='Port of the Dev Board Micro')
 parser.add_argument('--test', type=str, default='detection',
-                    help='Test to run, currently support ["detection", "classification", "segmentation", "wifi_tests", "stress_test", "crypto_tests"]')
+                    help='Test to run, currently support ["detection", "classification", "segmentation", "wifi_tests", "stress_test", "crypto_tests", "ble_tests"]')
 parser.add_argument('--test_image', type=str, default='test_data/cat.bmp')
 parser.add_argument('--model', type=str, default='models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite')
 args = parser.parse_args()
@@ -129,6 +131,11 @@ def run_crypto_test(url):
                                           stored_signature_name=stored_signature_name,
                                           idx=key_index))
 
+def run_ble_test(url):
+    rpc_helper = CoralMicroRPCHelper(url)
+    print('Ble Scan')
+    print(json.dumps(rpc_helper.ble_scan(), indent=2))
+
 def main():
     url = f"http://{args.host}:{args.port}/jsonrpc"
     print(f"Dev Board Micro url: {url}")
@@ -140,6 +147,8 @@ def main():
         run_stress_test(url)
     elif args.test == "crypto_tests":
         run_crypto_test(url)
+    elif args.test == "ble_tests":
+        run_ble_test(url)
     else:
         print('Test not supported')
         parser.print_help()

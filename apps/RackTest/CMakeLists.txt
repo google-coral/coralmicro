@@ -52,9 +52,21 @@ add_executable_m7(RackTestWifi
     RackTestM4
 )
 
+# For bluetooth tests.
+add_executable_m7(RackTestBle
+     rack_test.cc
+     M4_EXECUTABLE
+     RackTestM4
+)
+
 target_compile_definitions(RackTestWifi PUBLIC TEST_WIFI)
+target_compile_definitions(RackTestBle PUBLIC TEST_BLE)
 
 target_link_libraries(RackTestWifi
     ${RACK_TEST_LINK_LIBRARIES}
     libs_base-m7_wifi
+)
+
+target_link_libraries(RackTestBle
+    ${RACK_TEST_LINK_LIBRARIES}
 )

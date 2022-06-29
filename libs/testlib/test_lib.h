@@ -54,6 +54,7 @@ inline constexpr char kMethodCryptoGetPubEccKey[] = "a71ch_get_public_ecc_key";
 inline constexpr char kMethodCryptoGetEccSignature[] =
     "a71ch_get_ecc_signature";
 inline constexpr char kMethodCryptoEccVerify[] = "a71ch_ecc_verify";
+inline constexpr char kMethodBleScan[] = "ble_scan";
 
 bool JsonRpcGetIntegerParam(struct jsonrpc_request* request,
                             const char* param_name, int* out);
@@ -92,6 +93,7 @@ void CryptoGetSha256(struct jsonrpc_request* request);
 void CryptoGetPublicEccKey(struct jsonrpc_request* request);
 void CryptoGetEccSignature(struct jsonrpc_request* request);
 void CryptoEccVerify(struct jsonrpc_request* request);
+void BleScan(struct jsonrpc_request* request);
 }  // namespace coralmicro::testlib
 
 #endif  // LIBS_TESTLIB_TEST_LIB_H_

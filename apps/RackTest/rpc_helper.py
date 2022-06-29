@@ -108,6 +108,11 @@ class CoralMicroRPCHelper(object):
         payload['method'] = 'wifi_get_ip'
         return self.send_rpc(payload)
 
+    def ble_scan(self):
+        payload = self.get_new_payload()
+        payload['method'] = 'ble_scan'
+        return self.send_rpc(payload)
+
     def set_tpu_power_state(self, enable):
         """Calls set_tpu_power_state to either turn on or off tpu power."""
         payload = self.get_new_payload()

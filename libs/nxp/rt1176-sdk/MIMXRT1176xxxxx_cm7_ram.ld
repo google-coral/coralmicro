@@ -188,6 +188,48 @@ SECTIONS
      . = ALIGN(4);
   } > m_ocram
 
+  .edgefast_bluetooth_text :
+  {
+    . = ALIGN(4);
+    __edgefast_bluetooth_text_start__ = .;
+    *libedgefast_bluetooth_internal.a:*(.text .text*)
+    *lib_crypto_m7.a:*(.text .text*)
+    *libethermind_ble_protocol.a:*(.text .text*)
+    *libethermind_ble_gatt.a:*(.text .text*)
+    *libethermind_ble_core.a:*(.text .text*)
+    *libethermind_ble_util.a:*(.text .text*)
+    __edgefast_bluetooth_text_end__ = .;
+    . = ALIGN(4);
+  } > m_sdram
+
+  .edgefast_bluetooth_data :
+  {
+    . = ALIGN(4);
+    __edgefast_bluetooth_data_start__ = .;
+    *libedgefast_bluetooth_internal.a:*(.data .data*)
+    *lib_crypto_m7.a:*(.data .data*)
+    *libethermind_ble_protocol.a:*(.data .data*)
+    *libethermind_ble_gatt.a:*(.data .data*)
+    *libethermind_ble_core.a:*(.data .data*)
+    *libethermind_ble_util.a:*(.data .data*)
+    __edgefast_bluetooth_data_end__ = .;
+    . = ALIGN(4);
+  } > m_sdram
+
+  .edgefast_bluetooth_rodata :
+  {
+    . = ALIGN(4);
+    __edgefast_bluetooth_rodata_start__ = .;
+    *libedgefast_bluetooth_internal.a:*(.rodata .rodata*)
+    *lib_crypto_m7.a:*(.rodata .rodata*)
+    *libethermind_ble_protocol.a:*(.rodata .rodata*)
+    *libethermind_ble_gatt.a:*(.rodata .rodata*)
+    *libethermind_ble_core.a:*(.rodata .rodata*)
+    *libethermind_ble_util.a:*(.rodata .rodata*)
+    __edgefast_bluetooth_rodata_end__ = .;
+    . = ALIGN(4);
+  } > m_sdram
+
   /* The program code and other data goes into internal RAM */
   .text :
   {
@@ -372,6 +414,13 @@ SECTIONS
     . = ALIGN(4);
     __sdram_bss_start__ = .;
     *(.sdram_bss*)
+    /* edgefast_bluetooth_bss */
+    *lib_crypto_m7.a:*(.bss .bss*)
+    *libedgefast_bluetooth_internal.a:*(.bss .bss*)
+    *libethermind_ble_protocol.a:*(.bss .bss*)
+    *libethermind_ble_gatt.a:*(.bss .bss*)
+    *libethermind_ble_core.a:*(.bss .bss*)
+    *libethermind_ble_util.a:*(.bss .bss*)
     . = ALIGN(4);
     __sdram_bss_end__ = .;
   } > m_sdram

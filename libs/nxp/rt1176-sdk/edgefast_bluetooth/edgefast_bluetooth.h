@@ -17,6 +17,9 @@
 #ifndef LIBS_NXP_RT1176_SDK_EDGEFAST_BLUETOOTH_EDGEFAST_BLUETOOTH_H_
 #define LIBS_NXP_RT1176_SDK_EDGEFAST_BLUETOOTH_EDGEFAST_BLUETOOTH_H_
 
+#include <memory>
+#include <string>
+#include <vector>
 /* clang-format off */
 #include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include/toolchain.h"
 #include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include/bluetooth/bluetooth.h"
@@ -32,5 +35,7 @@
 // @param cb  Callback to notify when Bluetooth is enabled or fails to enable.
 //
 void InitEdgefastBluetooth(bt_ready_cb_t cb);
+void BluetoothScan(std::vector<std::string>* scan_results,
+                   int max_num_of_results, unsigned int scan_period_ms);
 
 #endif  // LIBS_NXP_RT1176_SDK_EDGEFAST_BLUETOOTH_EDGEFAST_BLUETOOTH_H_

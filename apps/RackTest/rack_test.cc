@@ -27,6 +27,9 @@
 #if defined TEST_WIFI
 #include "libs/base/wifi.h"
 #endif
+#if defined TEST_BLE
+#include "libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth.h"
+#endif
 
 namespace {
 constexpr char kMethodM4XOR[] = "m4_xor";
@@ -250,6 +253,11 @@ extern "C" void app_main(void* param) {
                  coralmicro::testlib::CryptoGetSha256);
   jsonrpc_export(coralmicro::testlib::kMethodCryptoEccVerify,
                  coralmicro::testlib::CryptoEccVerify);
+#if defined TEST_BLE
+  InitEdgefastBluetooth(nullptr);
+  jsonrpc_export(coralmicro::testlib::kMethodBleScan,
+                 coralmicro::testlib::BleScan);
+#endif
 
   coralmicro::JsonRpcHttpServer server;
   server.AddUriHandler(UriHandler);

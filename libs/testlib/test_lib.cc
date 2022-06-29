@@ -44,6 +44,7 @@
 extern "C" {
 #include "third_party/modified/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
+#include "libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth.h"
 
 namespace coralmicro::testlib {
 namespace {
@@ -1071,5 +1072,32 @@ void CryptoEccVerify(struct jsonrpc_request* request) {
     return;
   }
   jsonrpc_return_success(request, "{}");
+}
+
+void BleScan(struct jsonrpc_request* request) {
+  constexpr int kMaxNumResults = 10;
+  constexpr unsigned int kScanPeriodMs = 10000;
+  std::vector<std::string> x_scan_results;
+  BluetoothScan(&x_scan_results, kMaxNumResults, kScanPeriodMs);
+
+  std::vector<uint8_t> json;
+  json.reserve(2048);
+
+  coralmicro::StrAppend(&json, "[");
+  int count{0};
+  for (const auto& x_scan_result : x_scan_results) {
+    if (!x_scan_result.empty()) {
+      coralmicro::StrAppend(
+          &json, "\"%s\",",
+          reinterpret_cast<const char*>(x_scan_result.data()));
+      count++;
+    }
+  }
+  if (count > 0) {
+    json.pop_back();  // Remove the last comma.
+  }
+  coralmicro::StrAppend(&json, "]");
+  jsonrpc_return_success(request, "{%Q:%s}", "UUIDs",
+                         reinterpret_cast<const char*>(json.data()));
 }
 }  // namespace coralmicro::testlib

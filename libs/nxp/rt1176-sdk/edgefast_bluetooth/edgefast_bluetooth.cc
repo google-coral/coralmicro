@@ -18,6 +18,7 @@
 
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/mutex.h"
 #include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/platform/bt_ble_settings.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/wwd_wiced.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/bluetooth/export/include/BT_hci_api.h"
@@ -45,6 +46,10 @@ extern "C" int controller_hci_uart_get_configuration(
 }
 
 static bt_ready_cb_t g_cb = nullptr;
+static bool bt_initialized = false;
+static int kMaxNumResults;
+static SemaphoreHandle_t ble_scan_mtx;
+std::vector<std::string>* p_scan_results;
 static void bt_ready_internal(int err_param) {
   if (err_param) {
     printf("Bluetooth initialization failed: %d\r\n", err_param);
@@ -91,9 +96,14 @@ static void bt_ready_internal(int err_param) {
   if (g_cb) {
     g_cb(err);
   }
+
+  coralmicro::MutexLock lock(ble_scan_mtx);
+  bt_initialized = true;
 }
 
 void InitEdgefastBluetooth(bt_ready_cb_t cb) {
+  ble_scan_mtx = xSemaphoreCreateMutex();
+  CHECK(ble_scan_mtx);
   if (coralmicro::LfsReadFile(
           "/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
           brcm_patchram_buf, brcm_patch_ram_length) != brcm_patch_ram_length) {
@@ -106,6 +116,43 @@ void InitEdgefastBluetooth(bt_ready_cb_t cb) {
   g_cb = cb;
   int err = bt_enable(bt_ready_internal);
   if (err) {
-    printf("bt_enable failed\r\n");
+    printf("bt_enable failed(%d)\r\n", err);
   }
+}
+
+void scan_cb(const bt_addr_le_t* addr, int8_t rssi, uint8_t adv_type,
+             struct net_buf_simple* buf) {
+  char addr_s[BT_ADDR_LE_STR_LEN];
+  bt_addr_le_to_str(addr, addr_s, sizeof(addr_s));
+
+  coralmicro::MutexLock lock(ble_scan_mtx);
+  if (p_scan_results && p_scan_results->size() < kMaxNumResults) {
+    p_scan_results->emplace_back(std::move(addr_s));
+  }
+}
+
+void BluetoothScan(std::vector<std::string>* scan_results,
+                   int max_num_of_results, unsigned int scan_period_ms) {
+  {
+    coralmicro::MutexLock lock(ble_scan_mtx);
+    if (!bt_initialized) {
+      printf("Bluetooth is being initialized.\r\n");
+      return;
+    }
+    p_scan_results = scan_results;
+    kMaxNumResults = max_num_of_results;
+  }
+  const struct bt_le_scan_param scan_param = {
+      .type = BT_HCI_LE_SCAN_ACTIVE,
+      .options = BT_LE_SCAN_OPT_NONE,
+      .interval = 0x0100,
+      .window = 0x0010,
+  };
+  int err = bt_le_scan_start(&scan_param, scan_cb);
+  if (err) {
+    printf("Starting scanning failed (err %d)\r\n", err);
+    return;
+  }
+  vTaskDelay(pdMS_TO_TICKS(scan_period_ms));
+  bt_le_scan_stop();
 }
