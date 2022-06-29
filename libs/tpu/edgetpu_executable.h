@@ -17,8 +17,8 @@
 #ifndef LIBS_TPU_EDGETPU_EXECUTABLE_H_
 #define LIBS_TPU_EDGETPU_EXECUTABLE_H_
 
+#include "libs/tpu/edgetpu_driver.h"
 #include "libs/tpu/executable_generated.h"
-#include "libs/tpu/tpu_driver.h"
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
 #include <cstdlib>

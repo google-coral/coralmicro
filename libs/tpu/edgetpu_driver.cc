@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "libs/tpu/tpu_driver.h"
+#include "libs/tpu/edgetpu_driver.h"
 
 #include "libs/base/check.h"
 #include "third_party/darwinn/driver/config/beagle/beagle_chip_config.h"

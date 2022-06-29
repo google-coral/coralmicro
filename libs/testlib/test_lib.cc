@@ -28,7 +28,7 @@
 #include "libs/base/utils.h"
 #include "libs/base/wifi.h"
 #include "libs/camera/camera.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
+#include "libs/tpu/edgetpu_task.h"
 #include "libs/tensorflow/classification.h"
 #include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/posenet_decoder_op.h"

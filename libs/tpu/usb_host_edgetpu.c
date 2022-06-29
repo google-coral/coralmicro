@@ -15,7 +15,7 @@
  */
 
 #include "libs/nxp/rt1176-sdk/usb_host_config.h"
-#include "libs/usb_host_edgetpu/usb_host_edgetpu.h"
+#include "libs/tpu/usb_host_edgetpu.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 
 static usb_status_t USB_HostEdgeTpuOpenInterface(usb_host_edgetpu_instance_t *tpuInstance);

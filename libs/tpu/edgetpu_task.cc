@@ -15,10 +15,10 @@
  */
 
 #include "libs/base/gpio.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
-#include "libs/usb/usb_host_task.h"
 #include "libs/tpu/edgetpu_manager.h"
-#include "libs/usb_host_edgetpu/usb_host_edgetpu.h"
+#include "libs/tpu/edgetpu_task.h"
+#include "libs/tpu/usb_host_edgetpu.h"
+#include "libs/usb/usb_host_task.h"
 
 #include <cstdio>
 #include <functional>

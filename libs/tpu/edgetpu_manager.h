@@ -24,8 +24,8 @@
 
 #include "libs/tpu/edgetpu_executable.h"
 #include "libs/tpu/executable_generated.h"
-#include "libs/tpu/tpu_driver.h"
-#include "libs/usb_host_edgetpu/usb_host_edgetpu.h"
+#include "libs/tpu/edgetpu_driver.h"
+#include "libs/tpu/usb_host_edgetpu.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"

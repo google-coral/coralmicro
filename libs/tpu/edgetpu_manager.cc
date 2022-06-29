@@ -20,7 +20,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/mutex.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
+#include "libs/tpu/edgetpu_task.h"
 #include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "third_party/flatbuffers/include/flatbuffers/flexbuffers.h"
 #include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"

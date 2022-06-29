@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef _USB_HOST_EDGETPU_H_
-#define _USB_HOST_EDGETPU_H_
+#ifndef LIBS_TPU_USB_HOST_EDGETPU_H_
+#define LIBS_TPU_USB_HOST_EDGETPU_H_
+
 #include "usb.h"
 #include "usb_host_config.h"
 #include "usb_host.h"
@@ -113,4 +114,4 @@ usb_status_t USB_HostEdgeTpuControl(usb_host_edgetpu_instance_t *tpuInstance,
 }
 #endif
 
-#endif /* _USB_HOST_EDGETPU_H_ */
+#endif  // LIBS_TPU_USB_HOST_EDGETPU_H_

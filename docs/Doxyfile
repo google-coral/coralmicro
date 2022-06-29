@@ -14,7 +14,7 @@ INPUT                  = ../libs/tpu/ \
                          ../libs/base/ \
                          ../arduino/libraries/
 
-EXCLUDE                = ../libs/tpu/tpu_driver.h
+EXCLUDE                = ../libs/tpu/edgetpu_driver.h
 FILE_PATTERNS          = *.h
 RECURSIVE              = YES
 EXAMPLE_PATH           = ../examples/

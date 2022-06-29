@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
-#define _LIBS_TASKS_EDGETPUDFUTASK_EDGETPUDFUTASK_H_
+#ifndef LIBS_TPU_EDGETPU_DFU_TASK_H_
+#define LIBS_TPU_EDGETPU_DFU_TASK_H_
 
 #include "libs/base/queue_task.h"
 #include "libs/base/tasks.h"
@@ -203,4 +203,4 @@ class EdgeTpuDfuTask : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Respo
 
 }  // namespace coral::micro
 
-#endif  // _APPS_LSUSB_DFU_H_
+#endif  // LIBS_TPU_EDGETPU_DFU_TASK_H_

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef LIBS_TPU_TPU_DRIVER_H_
-#define LIBS_TPU_TPU_DRIVER_H_
+#ifndef LIBS_TPU_EDGETPU_DRIVER_H_
+#define LIBS_TPU_EDGETPU_DRIVER_H_
 
 #include <cstdint>
 #include <vector>
 
-#include "libs/usb_host_edgetpu/usb_host_edgetpu.h"
+#include "libs/tpu/usb_host_edgetpu.h"
 #include "third_party/darwinn/driver/config/beagle/beagle_chip_config.h"
 #include "third_party/darwinn/driver/hardware_structures.h"
 
@@ -92,4 +92,4 @@ class TpuDriver {
 
 }  // namespace coral::micro
 
-#endif  // LIBS_TPU_TPU_DRIVER_H_
+#endif  // LIBS_TPU_EDGETPU_DRIVER_H_

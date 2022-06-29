@@ -16,7 +16,7 @@
 
 #include "libs/base/ipc_m7.h"
 #include "libs/base/mutex.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
+#include "libs/tpu/edgetpu_task.h"
 
 // Does nothing except start the M4, which runs blink_led_m4
 

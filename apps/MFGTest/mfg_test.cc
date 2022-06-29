@@ -25,7 +25,7 @@
 #include "libs/base/utils.h"
 #include "libs/pmic/pmic.h"
 #include "libs/rpc/rpc_http_server.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
+#include "libs/tpu/edgetpu_task.h"
 #include "libs/testconv1/testconv1.h"
 #include "libs/testlib/test_lib.h"
 #include "libs/tpu/edgetpu_manager.h"

@@ -17,7 +17,7 @@
 #include "libs/base/gpio.h"
 #include "libs/base/led.h"
 #include "libs/base/tasks.h"
-#include "libs/tasks/EdgeTpuTask/edgetpu_task.h"
+#include "libs/tpu/edgetpu_task.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/freertos_kernel/include/projdefs.h"
 
