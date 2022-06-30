@@ -17,6 +17,7 @@
 #ifndef LIBS_BASE_MUTEX_H_
 #define LIBS_BASE_MUTEX_H_
 
+#include "libs/base/check.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_sema4.h"
@@ -27,28 +28,13 @@ namespace coral::micro {
 class MutexLock {
    public:
     explicit MutexLock(SemaphoreHandle_t sema) : sema_(sema) {
-        if (__get_IPSR() != 0) {
-            BaseType_t reschedule;
-            xSemaphoreTakeFromISR(sema_, &reschedule);
-            portYIELD_FROM_ISR(reschedule);
-        } else {
-            xSemaphoreTake(sema_, portMAX_DELAY);
-        }
+        CHECK(xSemaphoreTake(sema_, portMAX_DELAY) == pdTRUE);
     }
 
-    ~MutexLock() {
-        if (__get_IPSR() != 0) {
-            BaseType_t reschedule;
-            xSemaphoreGiveFromISR(sema_, &reschedule);
-            portYIELD_FROM_ISR(reschedule);
-        } else {
-            xSemaphoreGive(sema_);
-        }
-    }
+    ~MutexLock() { CHECK(xSemaphoreGive(sema_) == pdTRUE); }
+
     MutexLock(const MutexLock&) = delete;
-    MutexLock(MutexLock&&) = delete;
     MutexLock& operator=(const MutexLock&) = delete;
-    MutexLock& operator=(MutexLock&&) = delete;
 
    private:
     SemaphoreHandle_t sema_;
@@ -68,10 +54,9 @@ class MulticoreMutexLock {
         SEMA4_Lock(SEMA4, gate_, core_);
     }
     ~MulticoreMutexLock() { SEMA4_Unlock(SEMA4, gate_); }
+
     MulticoreMutexLock(const MutexLock&) = delete;
-    MulticoreMutexLock(MutexLock&&) = delete;
     MulticoreMutexLock& operator=(const MutexLock&) = delete;
-    MulticoreMutexLock& operator=(MutexLock&&) = delete;
 
    private:
     uint8_t gate_;
