@@ -19,6 +19,7 @@
 namespace coralmicro {
 namespace arduino {
 namespace SDLib {
+using coralmicro::filesystem::Lfs;
 
 File::File(std::shared_ptr<lfs_file_t> handle, const char *name, bool writable)
     : file_handle_(handle), open_(true), is_writable_(writable) {
@@ -113,7 +114,7 @@ void File::close() {
   name_[0] = 0;
   if (is_dir_) {
     if (dir_handle_) {
-      coralmicro::filesystem::CloseDir(dir_handle_.get());
+      lfs_dir_close(Lfs(), dir_handle_.get());
       dir_handle_ = nullptr;
       is_dir_ = false;
     }
@@ -131,7 +132,7 @@ File File::openNextFile(uint8_t mode) {
   if (is_dir_ && dir_handle_) {
     char buf[255];
     lfs_info info;
-    while (coralmicro::filesystem::ReadDir(dir_handle_.get(), &info)) {
+    while (lfs_dir_read(Lfs(), dir_handle_.get(), &info) > 0) {
       if (info.name[0] == '.') {
         continue;
       }
@@ -152,7 +153,7 @@ File File::openNextFile(uint8_t mode) {
 
 void File::rewindDirectory() {
   if (dir_handle_) {
-    coralmicro::filesystem::RewindDir(dir_handle_.get());
+    lfs_dir_rewind(Lfs(), dir_handle_.get());
   }
 }
 

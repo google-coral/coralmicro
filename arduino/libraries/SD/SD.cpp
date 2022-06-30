@@ -19,6 +19,8 @@
 namespace coralmicro {
 namespace arduino {
 namespace SDLib {
+using coralmicro::filesystem::Lfs;
+
 bool SDClass::begin(uint8_t csPin) {
   // We ignore csPin, since we don't have a real SD card
   return coralmicro::filesystem::Init();
@@ -28,7 +30,7 @@ File SDClass::open(const char *filename, uint8_t mode) {
   std::shared_ptr<lfs_file_t> file_handle = std::make_shared<lfs_file_t>();
   std::shared_ptr<lfs_dir_t> dir_handle = std::make_shared<lfs_dir_t>();
 
-  if (coralmicro::filesystem::OpenDir(dir_handle.get(), filename)) {
+  if (lfs_dir_open(Lfs(), dir_handle.get(), filename) >= 0) {
     return File(dir_handle, filename);
   } else if (coralmicro::filesystem::Open(file_handle.get(), filename,
                                        mode == FILE_WRITE, true)) {
@@ -43,8 +45,8 @@ bool SDClass::exists(const char *filepath) {
   lfs_file_t file_handle;
   bool retval = false;
 
-  if (coralmicro::filesystem::OpenDir(&dir_handle, filepath)) {
-    coralmicro::filesystem::CloseDir(&dir_handle);
+  if (lfs_dir_open(Lfs(), &dir_handle, filepath) >= 0) {
+    lfs_dir_close(Lfs(), &dir_handle);
     retval = true;
   } else if (coralmicro::filesystem::Open(&file_handle, filepath, false)) {
     coralmicro::filesystem::Close(&file_handle);

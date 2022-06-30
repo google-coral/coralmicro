@@ -227,30 +227,6 @@ bool MakeDirs(const char* path) {
     return true;
 }
 
-bool OpenDir(lfs_dir_t* dir, const char* path) {
-    int ret = lfs_dir_open(&g_lfs, dir, path);
-    if (ret < 0) return false;
-    return true;
-}
-
-bool ReadDir(lfs_dir_t* dir, lfs_info* info) {
-    int ret = lfs_dir_read(&g_lfs, dir, info);
-    if (ret <= 0) return false;
-    return true;
-}
-
-bool CloseDir(lfs_dir_t* dir) {
-    int ret = lfs_dir_close(&g_lfs, dir);
-    if (ret < 0) return false;
-    return true;
-}
-
-bool RewindDir(lfs_dir_t* dir) {
-    int ret = lfs_dir_rewind(&g_lfs, dir);
-    if (ret < 0) return false;
-    return true;
-}
-
 int Read(lfs_file_t* handle, void* buffer, size_t size) {
     return lfs_file_read(&g_lfs, handle, buffer, size);
 }
@@ -284,28 +260,6 @@ lfs_soff_t Size(lfs_file_t* handle) { return lfs_file_size(&g_lfs, handle); }
 
 bool Remove(const char* path) {
     int ret = lfs_remove(&g_lfs, path);
-    if (ret < 0) return false;
-    return true;
-}
-
-bool Stat(const char* path, struct lfs_info* info) {
-    int ret = lfs_stat(&g_lfs, path, info);
-    if (ret < 0) return false;
-    return true;
-}
-
-bool DirOpen(lfs_dir_t* dir, const char* path) {
-    int ret = lfs_dir_open(&g_lfs, dir, path);
-    if (ret < 0) return false;
-    return true;
-}
-
-int DirRead(lfs_dir_t* dir, struct lfs_info* info) {
-    return lfs_dir_read(&g_lfs, dir, info);
-}
-
-bool DirClose(lfs_dir_t* dir) {
-    int ret = lfs_dir_close(&g_lfs, dir);
     if (ret < 0) return false;
     return true;
 }
