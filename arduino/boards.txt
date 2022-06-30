@@ -1,4 +1,4 @@
-coral_micro.name=coral_micro
+coral_micro.name=Dev Board Micro
 coral_micro.build.core=arduino
 coral_micro.build.crossprefix=arm-none-eabi-
 coral_micro.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/

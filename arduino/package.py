@@ -232,7 +232,7 @@ def manifest_main(args, **kwargs):
             print('Provided core checksum does not match downloaded!')
             return
         core_json = {
-            'name': 'Coral Dev Board Micro',
+            'name': 'Coral',
             'architecture': 'coral_micro',
             'version': manifest_revision,
             'url': core_url,
@@ -241,7 +241,7 @@ def manifest_main(args, **kwargs):
             'size': str(size),
             'boards': [
                 {
-                    'name': 'Coral Dev Board Micro',
+                    'name': 'Dev Board Micro',
                 }
             ],
             'toolsDependencies': [
