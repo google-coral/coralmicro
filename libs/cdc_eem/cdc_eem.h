@@ -74,68 +74,83 @@ class CdcEem {
 
     usb_device_endpoint_struct_t cdc_eem_data_endpoints_[2] = {
         {
-            0, // set in constructor
-            USB_ENDPOINT_BULK,
-            512,
+            .endpointAddress = 0,  // set in constructor
+            .transferType = USB_ENDPOINT_BULK,
+            .maxPacketSize = 512,
+            .interval = 0,
         },
         {
-            0, // set in constructor
-            USB_ENDPOINT_BULK,
-            512,
+            .endpointAddress = 0,  // set in constructor
+            .transferType = USB_ENDPOINT_BULK,
+            .maxPacketSize = 512,
+            .interval = 0,
         },
     };
     usb_device_interface_struct_t cdc_eem_data_interface_[1] = {
         {
-            0,
-            {
-                ARRAY_SIZE(cdc_eem_data_endpoints_),
-                cdc_eem_data_endpoints_,
-            }
+            .alternateSetting = 0,
+            .endpointList = {
+                .count = ARRAY_SIZE(cdc_eem_data_endpoints_),
+                .endpoint = cdc_eem_data_endpoints_,
+            },
+            .classSpecific = nullptr,
         },
     };
     usb_device_interfaces_struct_t cdc_eem_interfaces_[1] = {
         {
-            0x02, // InterfaceClass
-            0x0C, // InterfaceSubClass
-            0x07, // InterfaceProtocol
-            0,    // set in constructor
-            cdc_eem_data_interface_,
-            ARRAY_SIZE(cdc_eem_data_interface_),
+            .classCode = 0x02,
+            .subclassCode = 0x0C,
+            .protocolCode = 0x07,
+            .interfaceNumber = 0,  // set in constructor
+            .interface = cdc_eem_data_interface_,
+            .count = ARRAY_SIZE(cdc_eem_data_interface_),
         },
     };
     usb_device_interface_list_t cdc_eem_interface_list_[1] = {
         {
-            ARRAY_SIZE(cdc_eem_interfaces_), cdc_eem_interfaces_,
+            .count = ARRAY_SIZE(cdc_eem_interfaces_),
+            .interfaces = cdc_eem_interfaces_,
         },
     };
     usb_device_class_struct_t class_struct_ {
-        cdc_eem_interface_list_,
-        kUSB_DeviceClassTypeEem,
-        ARRAY_SIZE(cdc_eem_interface_list_),
+        .interfaceList = cdc_eem_interface_list_,
+        .type = kUSB_DeviceClassTypeEem,
+        .configurations = ARRAY_SIZE(cdc_eem_interface_list_),
     };
     usb_device_class_config_struct_t config_ {
-        StaticHandler,
-        nullptr,
-        &class_struct_,
+        .classCallback = StaticHandler,
+        .classHandle = nullptr,
+        .classInfomation = &class_struct_,
     };
     static constexpr CdcEemClassDescriptor descriptor_ = {
-        {
-            sizeof(InterfaceDescriptor),
-            0x4,
-            2,
-            0, 2, 0x2, 0xC, 0x7, 0,
-        }, // InterfaceDescriptor
-        {
-            sizeof(EndpointDescriptor),
-            0x05,
-            4 | 0x80, 0x02, 512, 0
-        }, // EndpointDescriptor
-        {
-            sizeof(EndpointDescriptor),
-            0x05,
-            5 & 0x7F, 0x02, 512, 0
-        }, // EndpointDescriptor
-    }; // CdcEemClassDescriptor
+        .iface = {
+            .length = sizeof(InterfaceDescriptor),
+            .descriptor_type = 0x4,
+            .interface_number = 2,
+            .alternate_setting = 0,
+            .num_endpoints = 2,
+            .interface_class = 0x2,
+            .interface_subclass = 0xC,
+            .interface_protocol = 0x7,
+            .interface = 0,
+        },
+        .in_ep = {
+            .length = sizeof(EndpointDescriptor),
+            .descriptor_type = 0x05,
+            .endpoint_address = 4 | 0x80,
+            .attributes = 0x02,
+            .max_packet_size = 512,
+            .interval = 0
+        },
+        .out_ep = {
+            .length = sizeof(EndpointDescriptor),
+            .descriptor_type = 0x05,
+            .endpoint_address = 5 & 0x7F,
+            .attributes = 0x02,
+            .max_packet_size = 512,
+            .interval = 0
+        },
+    };
 
     uint8_t serial_state_buffer_[10];
     uint8_t tx_buffer_[512];
