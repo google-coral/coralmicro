@@ -23,19 +23,6 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro::a71ch {
-namespace {
-// Helper function to convert an array of unsigned char to a string in hex
-// value.
-auto to_hex = [](const uint8_t* src, uint16_t src_len) -> std::string {
-  std::string output;
-  output.reserve(src_len * 2);
-  for (int dest_idx = 0, src_idx = 0; src_idx < src_len;
-       dest_idx += 2, src_idx += 1) {
-    sprintf(&output[dest_idx], "%02x", src[src_idx]);
-  }
-  return output;
-};
-}  // namespace
 
 bool Init() {
   coralmicro::gpio::SetGpio(coralmicro::gpio::kCryptoRst, false);
@@ -43,20 +30,89 @@ bool Init() {
   coralmicro::gpio::SetGpio(coralmicro::gpio::kCryptoRst, true);
 
   SE_Connect_Ctx_t sessionCtxt = {0};
-  sss_status_t status = sss_session_open(
-      nullptr, kType_SSS_SE_A71CH, 0, kSSS_ConnectionType_Plain, &sessionCtxt);
-  if (kStatus_SSS_Success != status) {
+  if (auto status = sss_session_open(nullptr, kType_SSS_SE_A71CH, 0,
+                                     kSSS_ConnectionType_Plain, &sessionCtxt);
+      kStatus_SSS_Success != status) {
     return false;
   }
   return true;
 }
 
-std::optional<std::string> GetUID() {
+std::optional<std::string> GetUId() {
   uint16_t uid_len = A71CH_MODULE_UNIQUE_ID_LEN;
-  uint8_t uid[uid_len];
-  if (A71_GetUniqueID(uid, &uid_len) != SMCOM_OK) {
+  std::string uid;
+  uid.resize(uid_len);
+  if (A71_GetUniqueID(reinterpret_cast<U8*>(uid.data()), &uid_len) !=
+          SMCOM_OK ||
+      uid_len != A71CH_MODULE_UNIQUE_ID_LEN) {
     return std::nullopt;
   }
-  return to_hex(uid, uid_len);
+  return uid;
 }
+
+std::optional<std::string> GetRandomBytes(uint8_t num_bytes) {
+  std::string random;
+  random.resize(num_bytes);
+  if (A71_GetRandom(reinterpret_cast<U8*>(random.data()), num_bytes) !=
+      SMCOM_OK) {
+    return std::nullopt;
+  }
+  return random;
+}
+
+std::optional<std::string> GetEccPublicKey(uint8_t idx) {
+  // Anything less than 65 will fail, anything more than 65 will just fill the
+  // returning key with trailing 0s.
+  uint16_t key_len = 65;
+  std::string public_ecc_key;
+  public_ecc_key.resize(key_len);
+  if (A71_GetPublicKeyEccKeyPair(idx,
+                                 reinterpret_cast<U8*>(public_ecc_key.data()),
+                                 &key_len) != SMCOM_OK) {
+    return std::nullopt;
+  }
+  return public_ecc_key;
+}
+
+std::optional<std::string> GetSha256(uint8_t* data, uint16_t data_len) {
+  // Anything less than 32 will fail, anything more than 32 will just fill the
+  // returning key with trailing 0s.
+  uint16_t sha_len = 32;
+  std::string sha_256;
+  sha_256.resize(sha_len);
+  if (A71_GetSha256(data, data_len, reinterpret_cast<U8*>(sha_256.data()),
+                    &sha_len) != SMCOM_OK) {
+    return std::nullopt;
+  }
+  return sha_256;
+}
+
+std::optional<std::string> GetSha256(const std::vector<uint8_t>& data) {
+  return GetSha256(const_cast<uint8_t*>(data.data()), data.size());
+}
+
+std::optional<std::string> GetEccSignature(uint8_t idx, const uint8_t* sha,
+                                           uint16_t sha_len) {
+  uint16_t signature_len = 256;
+  std::string signature;
+  signature.resize(signature_len);
+  if (A71_EccSign(idx, sha, sha_len, reinterpret_cast<U8*>(signature.data()),
+                  &signature_len) != SMCOM_OK) {
+    return std::nullopt;
+  }
+  signature.resize(signature_len);  // Resize to the returned size.
+  return signature;
+}
+
+std::optional<std::string> GetEccSignature(uint8_t idx,
+                                           const std::vector<uint8_t>& data) {
+  return GetEccSignature(idx, data.data(), data.size());
+}
+
+std::optional<std::string> GetEccSignature(uint8_t idx,
+                                           const std::string& sha) {
+  return GetEccSignature(idx, reinterpret_cast<const uint8_t*>(sha.data()),
+                         sha.size());
+}
+
 }  // namespace coralmicro::a71ch

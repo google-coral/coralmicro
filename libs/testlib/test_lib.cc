@@ -29,13 +29,13 @@
 #include "libs/base/utils.h"
 #include "libs/base/wifi.h"
 #include "libs/camera/camera.h"
-#include "libs/tpu/edgetpu_task.h"
 #include "libs/tensorflow/classification.h"
 #include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/testconv1/testconv1.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "libs/tpu/edgetpu_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
@@ -569,7 +569,7 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
 void PosenetStressRun(struct jsonrpc_request* request) {
   int iterations;
   if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "iterations",
-                                                     &iterations))
+                                                   &iterations))
     return;
 
   // Turn on the TPU and get it's context.
@@ -689,12 +689,11 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
   for (int i = 0; i < kRetries; ++i) {
     coralmicro::CameraTask::GetSingleton()->Trigger();
     uint8_t* buffer = nullptr;
-    int index =
-        coralmicro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+    int index = coralmicro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
     uint8_t expected = 0;
     success = true;
-    for (unsigned int i = 0; i < coralmicro::CameraTask::kWidth *
-                                     coralmicro::CameraTask::kHeight;
+    for (unsigned int i = 0;
+         i < coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight;
          ++i) {
       if (buffer[i] != expected) {
         success = false;
@@ -833,8 +832,7 @@ void WiFiConnect(struct jsonrpc_request* request) {
   std::strcpy(const_cast<char*>(params->pcPassword), psk.c_str());
   params->ucPasswordLength = psk.size();
 
-  params->xSecurity =
-      psk.empty() ? eWiFiSecurityOpen : eWiFiSecurityWPA2;
+  params->xSecurity = psk.empty() ? eWiFiSecurityOpen : eWiFiSecurityWPA2;
 
   jsonrpc_return_success(request, "{}");
   xTimerPendFunctionCall(pended_functions::WiFiSafeConnect, params,
@@ -882,13 +880,14 @@ void CryptoInit(struct jsonrpc_request* request) {
 }
 
 void CryptoGetUID(struct jsonrpc_request* request) {
-  auto maybe_uid = coralmicro::a71ch::GetUID();
+  auto maybe_uid = coralmicro::a71ch::GetUId();
   if (!maybe_uid.has_value()) {
     jsonrpc_return_error(request, -1, "Unable to obtain a71ch uid", nullptr);
     return;
   }
   const auto& uid = maybe_uid.value();
-  jsonrpc_return_success(request, "{%Q:\"%s\"}", "uid", uid.c_str());
+  jsonrpc_return_success(request, "{%Q:\"%s\"}", "uid",
+                         coralmicro::StrToHex(uid).c_str());
 }
 
 }  // namespace coralmicro::testlib

@@ -17,85 +17,80 @@
 #include "libs/a71ch/a71ch.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/strings.h"
 #include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 extern "C" void app_main(void* param) {
   vTaskDelay(pdMS_TO_TICKS(1000));
+  // Initializes the A71 chip.
   if (!coralmicro::a71ch::Init()) {
-      printf("Failed to initializes the a71ch chip\r\n");
-      vTaskSuspend(nullptr);
+    printf("Failed to initializes the a71ch chip\r\n");
+    vTaskSuspend(nullptr);
   }
 
-  if (auto a71ch_uid = coralmicro::a71ch::GetUID(); a71ch_uid.has_value()) {
-    printf("A71 Unique ID: %s\r\n", a71ch_uid.value().c_str());
+  // Get the A71's unique id.
+  if (auto a71ch_uid = coralmicro::a71ch::GetUId(); a71ch_uid.has_value()) {
+    printf("A71 Unique ID: %s\r\n",
+           coralmicro::StrToHex(a71ch_uid.value()).c_str());
   } else {
     printf("Failed to retrieve A71's unique ID\r\n");
     vTaskSuspend(nullptr);
   }
 
-  constexpr uint8_t randomLen = 16;
-  uint8_t random[randomLen];
-  auto ret = A71_GetRandom(random, randomLen);
-  if (ret == SMCOM_OK) {
-    printf("A71 Random bytes: ");
-    for (int i = 0; i < randomLen; ++i) {
-      printf("%02x", random[i]);
+  // Get random bytes from the A71.
+  for (uint8_t random_len = 8; random_len <= 64; random_len <<= 1) {
+    if (auto random_bytes = coralmicro::a71ch::GetRandomBytes(random_len);
+        random_bytes.has_value()) {
+      printf("A71 Random %d Bytes: %s\r\n", random_len,
+             coralmicro::StrToHex(random_bytes.value()).c_str());
+    } else {
+      printf("Failed to get random bytes from A71\r\n");
+      vTaskSuspend(nullptr);
     }
-    printf("\r\n");
+  }
+
+  printf("\r\nSee examples/security/README.md for instruction to verify.\r\n");
+  // The storage index of the key pair we're using.
+  constexpr SST_Index_t key_idx = 0;
+
+  // Get the public ECC key at index 0 from the A71 chip.
+  if (auto ecc_pub_key = coralmicro::a71ch::GetEccPublicKey(key_idx);
+      ecc_pub_key.has_value()) {
+    printf("A71 ECC public key 0: %s\r\n",
+           coralmicro::StrToHex(ecc_pub_key.value()).c_str());
   } else {
-    printf("Failed to get random data from A71\r\n");
+    printf("Failed to get A71 ECC public key 0\r\n");
     vTaskSuspend(nullptr);
   }
 
-  uint16_t publicKeyLen = 65;
-  uint8_t publicKey[publicKeyLen];
-  ret = A71_GetPublicKeyEccKeyPair(0, publicKey, &publicKeyLen);
-  if (ret == SMCOM_OK) {
-    printf("A71 public key 0: ");
-    for (int i = 0; i < publicKeyLen; ++i) {
-      printf("%02x", publicKey[i]);
-    }
-    printf("\r\n");
-  } else {
-    printf("couldn't get keypair\r\n");
-    vTaskSuspend(nullptr);
-  }
-
+  // Get the sha256 and ecc signature for this model file.
   std::vector<uint8_t> model;
   constexpr char kModelPath[] = "/models/testconv1-edgetpu.tflite";
   if (!coralmicro::filesystem::ReadFile(kModelPath, &model)) {
     printf("%s missing\r\n", kModelPath);
     vTaskSuspend(nullptr);
   }
-
-  uint16_t shaLen = 32;
-  uint8_t sha[shaLen];
-  ret = A71_GetSha256(model.data(), model.size(), sha, &shaLen);
-  if (ret == SMCOM_OK) {
-    printf("SHA256: ");
-    for (int i = 0; i < shaLen; ++i) {
-      printf("%02x", sha[i]);
-    }
-    printf("\r\n");
+  auto maybe_sha = coralmicro::a71ch::GetSha256(model);
+  if (maybe_sha.has_value()) {
+    printf("testconv1-edgetpu.tflite sha: %s\r\n",
+           coralmicro::StrToHex(maybe_sha.value()).c_str());
   } else {
-    printf("Failed to sha256sum\r\n");
+    printf("failed to generate sha256 for testconv1-edgetpu.tflite\r\n");
     vTaskSuspend(nullptr);
   }
 
-  uint16_t signature_len = 256;
-  uint8_t signature[signature_len];
-  ret = A71_EccSign(0, sha, shaLen, signature, &signature_len);
-  if (ret == SMCOM_OK) {
-    printf("Signature: ");
-    for (int i = 0; i < signature_len; ++i) {
-      printf("%02x", signature[i]);
-    }
-    printf("\r\n");
+  // Get signature for this model with the key public key in index 0.
+  const auto& sha = maybe_sha.value();
+  auto maybe_signature = coralmicro::a71ch::GetEccSignature(key_idx, sha);
+  if (maybe_signature.has_value()) {
+    printf("Signature: %s\r\n",
+           coralmicro::StrToHex(maybe_signature.value()).c_str());
   } else {
-    printf("Failed to sign\r\n");
+    printf("failed to get ecc signature\r\n");
     vTaskSuspend(nullptr);
   }
+
   vTaskSuspend(nullptr);
 }

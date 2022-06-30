@@ -77,6 +77,19 @@ void StrAppend(C* v, const char* format_str, T... args) {
     v->pop_back();  // remove null terminator
 }
 
+// Gets a string's hexadecimal representation.
+//
+// @param src The source array of raw characters.
+// @param src_len The size of the source array.
+// @return The hexadecimal representation of the src string.
+std::string StrToHex(const char* src, size_t src_len);
+
+// Gets a string's hexadecimal representation.
+//
+// @param src The source array of raw characters.
+// @return The hexadecimal representation of the src string.
+std::string StrToHex(const std::string& src);
+
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_STRINGS_H_

@@ -37,8 +37,7 @@ constexpr char kMethodGetFrame[] = "get_frame";
 std::vector<uint8_t> camera_rgb;
 
 void HandleAppMessage(
-    const uint8_t data[coralmicro::ipc::kMessageBufferDataSize],
-    void* param) {
+    const uint8_t data[coralmicro::ipc::kMessageBufferDataSize], void* param) {
   auto rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
   const auto* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
   switch (app_message->message_type) {
@@ -59,7 +58,7 @@ void HandleAppMessage(
 void M4XOR(struct jsonrpc_request* request) {
   std::string value_string;
   if (!coralmicro::testlib::JsonRpcGetStringParam(request, "value",
-                                                    &value_string))
+                                                  &value_string))
     return;
 
   if (!coralmicro::IPCM7::GetSingleton()->M4IsAlive(1000 /*ms*/)) {
@@ -122,16 +121,15 @@ void M7CoreMark(struct jsonrpc_request* request) {
 void GetFrame(struct jsonrpc_request* request) {
   int rpc_width, rpc_height;
   std::string rpc_format;
-  bool rpc_width_valid = coralmicro::testlib::JsonRpcGetIntegerParam(
-      request, "width", &rpc_width);
+  bool rpc_width_valid =
+      coralmicro::testlib::JsonRpcGetIntegerParam(request, "width", &rpc_width);
   bool rpc_height_valid = coralmicro::testlib::JsonRpcGetIntegerParam(
       request, "height", &rpc_height);
   bool rpc_format_valid = coralmicro::testlib::JsonRpcGetStringParam(
       request, "format", &rpc_format);
 
   int width = rpc_width_valid ? rpc_width : coralmicro::CameraTask::kWidth;
-  int height =
-      rpc_height_valid ? rpc_height : coralmicro::CameraTask::kHeight;
+  int height = rpc_height_valid ? rpc_height : coralmicro::CameraTask::kHeight;
   coralmicro::camera::Format format = coralmicro::camera::Format::kRgb;
 
   if (rpc_format_valid) {

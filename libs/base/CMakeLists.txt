@@ -40,6 +40,7 @@ add_library_m7(libs_base-m7_freertos STATIC
     pwm.cc
     random.cc
     reset.cc
+    strings.cc
     tempsense.cc
     timer.cc
     utils.cc

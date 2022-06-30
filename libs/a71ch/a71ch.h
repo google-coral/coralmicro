@@ -19,20 +19,77 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace coralmicro::a71ch {
 
+// The following functions are convenience helpers for basic usage of the a71ch
+// chip with a more modern c++ style. For the full a71ch's API, please check out
+// the reference manual: https://www.nxp.com/a71ch
+//
+// Note: Both APIs can be used together, however `coral::micro::a71ch::Init()`
+// must always be called first.
+
 // Initializes the a71ch module.
 //
-// This function must be called before using any of our a71ch wrapper functions
-// or the direct a71ch api. The reference manual for the a71ch chip can be found
-// here: https://www.nxp.com/a71ch
+// This function must be called before using any of our a71ch helper functions
+// or the direct a71ch api.
 bool Init();
 
-// Convenience helper to get the uid of the a71ch module.
+// Gets the uid of the a71ch module.
 //
-// @return the unique id of this a71ch module or std::nullopt.
-std::optional<std::string> GetUID();
+// @return The unique id of this a71ch module or std::nullopt.
+std::optional<std::string> GetUId();
+
+// Gets the random bytes from the A71.
+//
+// @param num_bytes The number of random bytes.
+// @return The random bytes or std::nullopt on failure.
+std::optional<std::string> GetRandomBytes(uint8_t num_bytes);
+
+// Gets a public Elliptical Curve key from the A71.
+//
+// @param idx The key storage index to obtain.
+// @return The public ECC key in index idx or std::nullopt if failed to
+// retrieve.
+std::optional<std::string> GetEccPublicKey(uint8_t idx);
+
+// Gets the sha256 hash for a buffer of data.
+//
+// @param data The buffer to the raw data to generate the hash.
+// @param data_len The length of the data buffer.
+// @return The sha256 hash for data or std::nullopt on failure.
+std::optional<std::string> GetSha256(uint8_t* data, uint16_t data_len);
+
+// Gets the sha256 hash for a vector of data.
+//
+// @param data The raw data to generate the hash.
+// @return The sha256 hash for data or std::nullopt on failure.
+std::optional<std::string> GetSha256(const std::vector<uint8_t>& data);
+
+// Gets the Elliptical Curve signature for a hash.
+//
+// @param idx The index of the public key to sign this hash.
+// @param sha The buffer containing the sha256 hash of some data to sign.
+// @param sha_len The length of the sha.
+// @return The Ecc Signature or std::nullopt on failure.
+std::optional<std::string> GetEccSignature(uint8_t idx, const uint8_t* sha,
+                                           uint16_t sha_len);
+
+// Gets the Elliptical Curve signature for a hash.
+//
+// @param idx The index of the public key to sign this hash.
+// @param sha The sha256 hash for some data to sign.
+// @return The Ecc Signature or std::nullopt on failure.
+std::optional<std::string> GetEccSignature(uint8_t idx,
+                                           const std::vector<uint8_t>& data);
+
+// Gets the Elliptical Curve signature for a hash.
+//
+// @param idx The index of the public key to sign this hash.
+// @param sha The string of sha256 hash for some data to sign.
+// @return The Ecc Signature or std::nullopt on failure.
+std::optional<std::string> GetEccSignature(uint8_t idx, const std::string& sha);
 }  // namespace coralmicro::a71ch
 
 #endif  // LIBS_A71CH_A71CH_H_
