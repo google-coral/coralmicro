@@ -22,8 +22,8 @@ namespace led {
 
 // Available board LEDs
 enum class LED {
-    // Orange power LED.
-    kPower,
+    // Orange status LED.
+    kStatus,
     // Green user-programmable LED.
     kUser,
     // White Edge TPU LED. The Edge TPU must be powered to use this.

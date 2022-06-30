@@ -24,7 +24,7 @@ namespace gpio {
 
 // Enumeration of the pre-configured GPIO pins.
 enum Gpio {
-    kPowerLED,
+    kStatusLED,
     kUserLED,
     kEdgeTpuPgood,
     kEdgeTpuReset,

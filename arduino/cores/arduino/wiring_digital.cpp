@@ -26,8 +26,8 @@ static coral::micro::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
             return coral::micro::gpio::Gpio::kUserLED;
         case PIN_BTN:
             return coral::micro::gpio::Gpio::kUserButton;
-        case PIN_LED_POWER:
-            return coral::micro::gpio::Gpio::kPowerLED;
+        case PIN_LED_STATUS:
+            return coral::micro::gpio::Gpio::kStatusLED;
         case D0:
             return coral::micro::gpio::Gpio::kArduinoD0;
         case D1:

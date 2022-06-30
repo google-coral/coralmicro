@@ -27,7 +27,7 @@
 
 namespace {
 bool volatile g_person_detected = false;
-bool g_power_led_state = true;
+bool g_status_led_state = true;
 
 void HandleAppMessage(
     const uint8_t data[coral::micro::ipc::kMessageBufferDataSize],
@@ -58,15 +58,15 @@ extern "C" void app_main(void* param) {
   coral::micro::CameraTask::GetSingleton()->SetPower(true);
   setup();
 
-  coral::micro::led::Set(coral::micro::led::LED::kPower, g_power_led_state);
-  auto power_led_timer = xTimerCreate(
-      "power_led_timer", pdMS_TO_TICKS(1000), pdTRUE, nullptr,
+  coral::micro::led::Set(coral::micro::led::LED::kStatus, g_status_led_state);
+  auto status_led_timer = xTimerCreate(
+      "status_led_timer", pdMS_TO_TICKS(1000), pdTRUE, nullptr,
       +[](TimerHandle_t xTimer) {
-        g_power_led_state = !g_power_led_state;
-        coral::micro::led::Set(coral::micro::led::LED::kPower,
-                               g_power_led_state);
+        g_status_led_state = !g_status_led_state;
+        coral::micro::led::Set(coral::micro::led::LED::kStatus,
+                               g_status_led_state);
       });
-  xTimerStart(power_led_timer, 0);
+  xTimerStart(status_led_timer, 0);
 
 #if defined(OOBE_DEMO)
   TimerHandle_t m4_timer = xTimerCreate(

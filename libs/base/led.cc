@@ -29,8 +29,8 @@ bool Set(LED led, bool enable) {
 bool Set(LED led, bool enable, unsigned int brightness) {
     bool ret = true;
     switch (led) {
-        case LED::kPower:
-            gpio::SetGpio(gpio::Gpio::kPowerLED, enable);
+        case LED::kStatus:
+            gpio::SetGpio(gpio::Gpio::kStatusLED, enable);
             break;
         case LED::kUser:
             gpio::SetGpio(gpio::Gpio::kUserLED, enable);

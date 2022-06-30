@@ -341,13 +341,13 @@ void SetLedState(struct jsonrpc_request* request) {
   if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
   enum LEDs {
-    kPower = 0,
+    kStatus = 0,
     kUser = 1,
     kTpu = 2,
   };
   switch (led) {
-    case kPower:
-      coral::micro::led::Set(coral::micro::led::LED::kPower, enable);
+    case kStatus:
+      coral::micro::led::Set(coral::micro::led::LED::kStatus, enable);
       break;
     case kUser:
       coral::micro::led::Set(coral::micro::led::LED::kUser, enable);

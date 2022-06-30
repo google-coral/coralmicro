@@ -400,7 +400,7 @@ void Main() {
   TurnOnWiFi();
   if (!ConnectWiFi()) {
     // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
-    led::Set(led::LED::kPower, true);
+    led::Set(led::LED::kStatus, true);
     led::Set(led::LED::kUser, true);
     vTaskSuspend(nullptr);
   }

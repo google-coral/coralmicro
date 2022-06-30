@@ -17,7 +17,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include <cstdio>
 
-// Blinks the user LED (green) and power LED (orange) from the M4.
+// Blinks the user LED (green) and status LED (orange) from the M4.
 // This is started by main_app_m7.
 
 // [start-sphinx-snippet:blink-led]
@@ -26,7 +26,7 @@ extern "C" [[noreturn]] void app_main(void *param) {
     bool on = true;
     while (true) {
         on = !on;
-        coral::micro::led::Set(coral::micro::led::LED::kPower, on);
+        coral::micro::led::Set(coral::micro::led::LED::kStatus, on);
         coral::micro::led::Set(coral::micro::led::LED::kUser, on);
         vTaskDelay(pdMS_TO_TICKS(500));
     }

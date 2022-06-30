@@ -50,7 +50,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
     bool up = true;
     unsigned int brightness = 50;
     while (true) {
-        coral::micro::led::Set(coral::micro::led::LED::kPower, brightness > 50);
+        coral::micro::led::Set(coral::micro::led::LED::kStatus, brightness > 50);
         coral::micro::led::Set(coral::micro::led::LED::kUser, brightness > 50);
         coral::micro::led::Set(coral::micro::led::LED::kTpu, true, brightness);
 

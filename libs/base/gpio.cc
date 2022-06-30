@@ -32,7 +32,7 @@ StaticSemaphore_t g_mutex_storage;
 SemaphoreHandle_t g_mutex;
 
 GPIO_Type* PinNameToModule[Gpio::kCount] = {
-    [Gpio::kPowerLED] = GPIO13,
+    [Gpio::kStatusLED] = GPIO13,
     [Gpio::kUserLED] = GPIO13,
     [Gpio::kEdgeTpuPgood] = GPIO8,
     [Gpio::kEdgeTpuReset] = GPIO8,
@@ -63,7 +63,7 @@ GPIO_Type* PinNameToModule[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToPin[Gpio::kCount] = {
-    [Gpio::kPowerLED] = 5,
+    [Gpio::kStatusLED] = 5,
     [Gpio::kUserLED] = 6,
     [Gpio::kEdgeTpuPgood] = 26,
     [Gpio::kEdgeTpuReset] = 24,
@@ -94,7 +94,7 @@ constexpr uint32_t PinNameToPin[Gpio::kCount] = {
 };
 
 gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
-    [Gpio::kPowerLED] = {
+    [Gpio::kStatusLED] = {
         .direction = kGPIO_DigitalOutput,
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
@@ -237,7 +237,7 @@ gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
 };
 
 constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
-    [Gpio::kPowerLED] = HardFault_IRQn,
+    [Gpio::kStatusLED] = HardFault_IRQn,
     [Gpio::kUserLED] = HardFault_IRQn,
     [Gpio::kEdgeTpuPgood] = HardFault_IRQn,
     [Gpio::kEdgeTpuReset] = HardFault_IRQn,
@@ -268,7 +268,7 @@ constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
-    [Gpio::kPowerLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
+    [Gpio::kStatusLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
     [Gpio::kUserLED] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
     [Gpio::kEdgeTpuPgood] = {IOMUXC_GPIO_EMC_B2_16_GPIO8_IO26},
     [Gpio::kEdgeTpuReset] = {IOMUXC_GPIO_EMC_B2_14_GPIO8_IO24},
@@ -299,7 +299,7 @@ constexpr uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
 };
 
 constexpr uint32_t PinNameToPullMask[Gpio::kCount] = {
-    [Gpio::kPowerLED] = 0x0000000C,
+    [Gpio::kStatusLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
     [Gpio::kEdgeTpuReset] = 0x0000000C,
@@ -330,7 +330,7 @@ constexpr uint32_t PinNameToPullMask[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToNoPull[Gpio::kCount] = {
-    [Gpio::kPowerLED] = 0x0000000C,
+    [Gpio::kStatusLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
     [Gpio::kEdgeTpuReset] = 0x0000000C,
@@ -361,7 +361,7 @@ constexpr uint32_t PinNameToNoPull[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToPullUp[Gpio::kCount] = {
-    [Gpio::kPowerLED] = 0x0000000C,
+    [Gpio::kStatusLED] = 0x0000000C,
     [Gpio::kUserLED] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x00000004,
     [Gpio::kEdgeTpuReset] = 0x00000004,
@@ -392,7 +392,7 @@ constexpr uint32_t PinNameToPullUp[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToPullDown[Gpio::kCount] = {
-    [Gpio::kPowerLED] = 0x00000004,
+    [Gpio::kStatusLED] = 0x00000004,
     [Gpio::kUserLED] = 0x00000004,
     [Gpio::kEdgeTpuPgood] = 0x00000008,
     [Gpio::kEdgeTpuReset] = 0x00000008,

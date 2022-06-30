@@ -46,7 +46,7 @@ Pin (Arduino pin) | Silk label | Silk label | Pin (Arduino pin)
 #define LED_BUILTIN (PIN_LED_USER)
 #define LEDG (PIN_LED_USER)
 
-#define PIN_LED_POWER (19U)
+#define PIN_LED_STATUS (19U)
 #define PIN_LED_TPU (20U)
 
 #define D0 (0U)
