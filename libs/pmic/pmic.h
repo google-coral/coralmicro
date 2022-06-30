@@ -26,36 +26,18 @@ namespace coral::micro {
 namespace pmic {
 
 enum class RequestType : uint8_t {
-    Rail,
-    Gpio,
-    ChipId,
+    kRail,
+    kChipId,
 };
 
 enum class Rail : uint8_t {
-    CAM_2V8,
-    CAM_1V8,
-    MIC_1V8,
+    kCam2V8,
+    kCam1V8,
+    kMic1V8,
 };
 
 struct RailRequest {
     Rail rail;
-    bool enable;
-};
-
-enum class PmicGpio : uint8_t {
-    DA_GPIO2,
-    DA_GPIO3,
-    DA_GPIO4,
-};
-
-enum class Direction : bool {
-    In,
-    Out,
-};
-
-struct GpioRequest {
-    PmicGpio gpio;
-    Direction dir;
     bool enable;
 };
 
@@ -70,18 +52,17 @@ struct Request {
     RequestType type;
     union {
         RailRequest rail;
-        GpioRequest gpio;
     } request;
     std::function<void(Response)> callback;
 };
 
 enum class PmicRegisters : uint16_t {
-    PAGE_CON = 0x000,
-    LDO2_CONT = 0x027,
-    LDO3_CONT = 0x028,
-    LDO4_CONT = 0x029,
-    DEVICE_ID = 0x181,
-    UNKNOWN = 0xFFF,
+    kPageCon = 0x000,
+    kLdo2Cont = 0x027,
+    kLdo3Cont = 0x028,
+    kLdo4Cont = 0x029,
+    kDeviceId = 0x181,
+    kUnknown = 0xFFF,
 };
 
 }  // namespace pmic
@@ -103,7 +84,6 @@ class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName,
    private:
     void RequestHandler(pmic::Request* req) override;
     void HandleRailRequest(const pmic::RailRequest& rail);
-    void HandleGpioRequest(const pmic::GpioRequest& gpio);
     uint8_t HandleChipIdRequest();
     void SetPage(uint16_t reg);
     void Read(pmic::PmicRegisters reg, uint8_t* val);

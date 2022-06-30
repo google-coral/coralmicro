@@ -37,11 +37,11 @@ extern "C" [[noreturn]] void app_main(void* param) {
     printf("Hello world FreeRTOS.\r\n");
 
     coral::micro::PmicTask::GetSingleton()->SetRailState(
-        coral::micro::pmic::Rail::CAM_2V8, true);
+        coral::micro::pmic::Rail::kCam2V8, true);
     coral::micro::PmicTask::GetSingleton()->SetRailState(
-        coral::micro::pmic::Rail::CAM_1V8, true);
+        coral::micro::pmic::Rail::kCam1V8, true);
     coral::micro::PmicTask::GetSingleton()->SetRailState(
-        coral::micro::pmic::Rail::MIC_1V8, true);
+        coral::micro::pmic::Rail::kMic1V8, true);
     coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
 
     xTaskCreate(read_task, "read_task", configMINIMAL_STACK_SIZE, nullptr,

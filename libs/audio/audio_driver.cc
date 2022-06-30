@@ -88,7 +88,7 @@ bool AudioDriver::Enable(const AudioDriverConfig& config, void* callback_param,
     callback_param_ = callback_param;
     callback_ = callback;
 
-    PmicTask::GetSingleton()->SetRailState(pmic::Rail::MIC_1V8, true);
+    PmicTask::GetSingleton()->SetRailState(pmic::Rail::kMic1V8, true);
 
     // TODO(atv): Make a header with DMA MUX configs so we don't end up with
     // collisions down the line
@@ -158,7 +158,7 @@ void AudioDriver::Disable() {
     PDM_Deinit(PDM);
     DMAMUX_Deinit(DMAMUX0);
 
-    PmicTask::GetSingleton()->SetRailState(pmic::Rail::MIC_1V8, false);
+    PmicTask::GetSingleton()->SetRailState(pmic::Rail::kMic1V8, false);
 }
 
 }  // namespace coral::micro

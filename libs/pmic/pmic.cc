@@ -65,7 +65,7 @@ void PmicTask::SetPage(uint16_t reg) {
     transfer.flags = kLPI2C_TransferDefaultFlag;
     transfer.slaveAddress = kPmicAddress;
     transfer.direction = kLPI2C_Write;
-    transfer.subaddress = static_cast<uint32_t>(PmicRegisters::PAGE_CON);
+    transfer.subaddress = static_cast<uint32_t>(PmicRegisters::kPageCon);
     transfer.subaddressSize = sizeof(uint8_t);
     transfer.data = &page_con_reg;
     transfer.dataSize = sizeof(page_con_reg);
@@ -78,17 +78,17 @@ void PmicTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
 }
 
 void PmicTask::HandleRailRequest(const RailRequest& rail) {
-    PmicRegisters reg = PmicRegisters::UNKNOWN;
+    PmicRegisters reg = PmicRegisters::kUnknown;
     uint8_t val;
     switch (rail.rail) {
-        case Rail::CAM_2V8:
-            reg = PmicRegisters::LDO2_CONT;
+        case Rail::kCam2V8:
+            reg = PmicRegisters::kLdo2Cont;
             break;
-        case Rail::CAM_1V8:
-            reg = PmicRegisters::LDO3_CONT;
+        case Rail::kCam1V8:
+            reg = PmicRegisters::kLdo3Cont;
             break;
-        case Rail::MIC_1V8:
-            reg = PmicRegisters::LDO4_CONT;
+        case Rail::kMic1V8:
+            reg = PmicRegisters::kLdo4Cont;
             break;
     }
     Read(reg, &val);
@@ -100,11 +100,9 @@ void PmicTask::HandleRailRequest(const RailRequest& rail) {
     Write(reg, val);
 }
 
-void PmicTask::HandleGpioRequest(const GpioRequest& gpio) {}
-
 uint8_t PmicTask::HandleChipIdRequest() {
     uint8_t device_id = 0xff;
-    Read(PmicRegisters::DEVICE_ID, &device_id);
+    Read(PmicRegisters::kDeviceId, &device_id);
     return device_id;
 }
 
@@ -112,13 +110,10 @@ void PmicTask::RequestHandler(Request* req) {
     Response resp;
     resp.type = req->type;
     switch (req->type) {
-        case RequestType::Rail:
+        case RequestType::kRail:
             HandleRailRequest(req->request.rail);
             break;
-        case RequestType::Gpio:
-            HandleGpioRequest(req->request.gpio);
-            break;
-        case RequestType::ChipId:
+        case RequestType::kChipId:
             resp.response.chip_id = HandleChipIdRequest();
             break;
     }
@@ -127,7 +122,7 @@ void PmicTask::RequestHandler(Request* req) {
 
 void PmicTask::SetRailState(Rail rail, bool enable) {
     Request req;
-    req.type = RequestType::Rail;
+    req.type = RequestType::kRail;
     req.request.rail.rail = rail;
     req.request.rail.enable = enable;
     SendRequest(req);
@@ -135,7 +130,7 @@ void PmicTask::SetRailState(Rail rail, bool enable) {
 
 uint8_t PmicTask::GetChipId() {
     Request req;
-    req.type = RequestType::ChipId;
+    req.type = RequestType::kChipId;
     Response resp = SendRequest(req);
     return resp.response.chip_id;
 }
