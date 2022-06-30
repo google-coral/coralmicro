@@ -21,23 +21,23 @@
 Coral Dev Board Micro Arduino pin assignment diagram:
 Pin (Arduino pin) | Silk label | Silk label | Pin (Arduino pin)
 
--              VSYS         SCL1         16
-0 (D0)         SCL6         SDA1         15
-1 (A3)         PWM0         SDA6         14 (D3)
-2 (A4)         PWM1         DAC          13 (A2)
-3 (D1)         RTS          SDI          12
-4 (D2)         CTS          SDO          11
-5              RXD          SCK          10
-6              TXD          CS           9
-7 (A0)         A-B          VBAK         -
-8 (A1)         A-A          3V3          -
--              1V8          1V8          -
 -              GND          GND          -
+-              1V8          1V8          -
+8 (A1)         A-A          3V3          -
+7 (A0)         A-B          VBAK         -
+6              TXD          CS           9
+5              RXD          SCK          10
+4 (D2)         CTS          SDO          11
+3 (D1)         RTS          SDI          12
+2 (A4)         PWMB         DAC          13 (A2)
+1 (A3)         PWMA         SDA6         14 (D3)
+0 (D0)         SCL6         SDA1         15
+-              VSYS         SCL1         16
 
-17 - LED
+17 - User LED
 18 - User button (D4)
-19 - Power LED
-20 - Tpu LED
+19 - Status LED
+20 - Edge TPU LED
 */
 
 #define PIN_BTN (18U)
