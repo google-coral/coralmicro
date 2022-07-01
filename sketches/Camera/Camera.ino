@@ -1,4 +1,4 @@
-#include <camera.h>
+#include <coralmicro_camera.h>
 
 #include <cstdint>
 #include <memory>

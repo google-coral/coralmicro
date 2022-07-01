@@ -1,5 +1,5 @@
-#include <SD.h>
-#include <camera.h>
+#include <coralmicro_SD.h>
+#include <coralmicro_camera.h>
 
 #include <cstdint>
 #include <memory>

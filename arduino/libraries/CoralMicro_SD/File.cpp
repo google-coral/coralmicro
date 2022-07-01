@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "SD.h"
+#include "coralmicro_SD.h"
 
 namespace coralmicro {
 namespace arduino {

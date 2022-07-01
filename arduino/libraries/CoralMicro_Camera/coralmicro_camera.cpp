@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "camera.h"
+#include "coralmicro_camera.h"
 
 #include <cstdio>
 
