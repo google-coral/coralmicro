@@ -101,6 +101,7 @@ EOF
     fi
 
     if [[ ! -z ${build_arduino} ]]; then
+        python3 -m pip install -r ${ROOTDIR}/arduino/requirements.txt
         python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --core
         python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --flashtool
         cat <<EOF >${ROOTDIR}/arduino-cli.yaml
