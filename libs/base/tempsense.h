@@ -17,7 +17,7 @@
 #ifndef LIBS_BASE_TEMPSENSE_H_
 #define LIBS_BASE_TEMPSENSE_H_
 
-namespace coral::micro::tempsense {
+namespace coralmicro::tempsense {
 
 // Enumerates the various temperature sensors.
 enum class TempSensor : unsigned int {
@@ -42,6 +42,6 @@ void Init();
 // @return The actual temperature in Celcius or 0.0 on failure.
 float GetTemperature(TempSensor sensor);
 
-}  // namespace coral::micro::tempsense
+}  // namespace coralmicro::tempsense
 
 #endif  // LIBS_BASE_TEMPSENSE_H_

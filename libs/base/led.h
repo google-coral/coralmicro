@@ -17,7 +17,7 @@
 #ifndef LIBS_BASE_LED_H_
 #define LIBS_BASE_LED_H_
 
-namespace coral::micro {
+namespace coralmicro {
 namespace led {
 
 // Available board LEDs
@@ -52,6 +52,6 @@ bool Set(LED led, bool enable);
 bool Set(LED led, bool enable, unsigned int brightness);
 
 }  // namespace led
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_LED_H_

@@ -19,11 +19,11 @@
 
 #include "libs/base/message_buffer.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 void ConsoleInit();
 void SetM4ConsoleBufferPtr(ipc::StreamBuffer* buffer);
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_CONSOLE_M4_H_

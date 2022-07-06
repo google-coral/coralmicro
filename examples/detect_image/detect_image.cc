@@ -30,7 +30,7 @@
 // Results (up to 3 detected objects) are printed to serial console.
 
 // [start-sphinx-snippet:detect-image]
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
@@ -103,11 +103,11 @@ void Main() {
     }
 }
 }  // namespace
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
     (void)param;
-    coral::micro::Main();
+    coralmicro::Main();
     vTaskSuspend(nullptr);
 }
 // [end-sphinx-snippet:detect-image]

@@ -117,20 +117,20 @@ extern "C" int mbedtls_pk_load_file(const char *path, unsigned char **buf,
   MBEDTLS_INTERNAL_VALIDATE_RET(n != NULL, MBEDTLS_ERR_PK_BAD_INPUT_DATA);
 
   lfs_file_t handle;
-  if (!coral::micro::filesystem::Open(&handle, path)) {
+  if (!coralmicro::filesystem::Open(&handle, path)) {
     return MBEDTLS_ERR_PK_FILE_IO_ERROR;
   }
 
-  *n = coral::micro::filesystem::Size(&handle);
+  *n = coralmicro::filesystem::Size(&handle);
 
   if (*n + 1 == 0 || (*buf = reinterpret_cast<unsigned char *>(
                           mbedtls_calloc(1, *n + 1))) == NULL) {
-    coral::micro::filesystem::Close(&handle);
+    coralmicro::filesystem::Close(&handle);
     return MBEDTLS_ERR_PK_ALLOC_FAILED;
   }
 
-  if (static_cast<size_t>(coral::micro::filesystem::Read(&handle, *buf, *n)) != *n) {
-    coral::micro::filesystem::Close(&handle);
+  if (static_cast<size_t>(coralmicro::filesystem::Read(&handle, *buf, *n)) != *n) {
+    coralmicro::filesystem::Close(&handle);
 
     mbedtls_platform_zeroize(*buf, *n);
     mbedtls_free(*buf);
@@ -138,7 +138,7 @@ extern "C" int mbedtls_pk_load_file(const char *path, unsigned char **buf,
     return MBEDTLS_ERR_PK_FILE_IO_ERROR;
   }
 
-  coral::micro::filesystem::Close(&handle);
+  coralmicro::filesystem::Close(&handle);
 
   (*buf)[*n] = '\0';
 

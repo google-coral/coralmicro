@@ -27,14 +27,14 @@ TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
                       int image_height, int channels, int8_t* image_data) {
   auto unsigned_image_data =
       std::make_unique<uint8_t[]>(image_width * image_height);
-  coral::micro::camera::FrameFormat fmt;
+  coralmicro::camera::FrameFormat fmt;
   fmt.width = image_width;
   fmt.height = image_height;
-  fmt.fmt = coral::micro::camera::Format::kY8;
-  fmt.filter = coral::micro::camera::FilterMethod::kBilinear;
+  fmt.fmt = coralmicro::camera::Format::kY8;
+  fmt.filter = coralmicro::camera::FilterMethod::kBilinear;
   fmt.preserve_ratio = false;
   fmt.buffer = unsigned_image_data.get();
-  bool ret = coral::micro::CameraTask::GetFrame({fmt});
+  bool ret = coralmicro::CameraTask::GetFrame({fmt});
   for (int i = 0; i < image_width * image_height; ++i) {
     image_data[i] = unsigned_image_data[i] - 128;
   }

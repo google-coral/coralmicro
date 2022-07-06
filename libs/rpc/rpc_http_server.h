@@ -23,9 +23,9 @@
 #include "libs/base/http_server.h"
 #include "third_party/mjson/src/mjson.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
-class JsonRpcHttpServer : public coral::micro::HttpServer {
+class JsonRpcHttpServer : public coralmicro::HttpServer {
    public:
     JsonRpcHttpServer(struct jsonrpc_ctx* ctx = &jsonrpc_default_context)
         : ctx_(ctx) {}
@@ -48,6 +48,6 @@ class JsonRpcHttpServer : public coral::micro::HttpServer {
     std::map<void*, std::vector<char>> buffers_;  // connection-to-buffer map
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_RPC_RPC_HTTP_SERVER_H_

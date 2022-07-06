@@ -37,11 +37,11 @@ uint8_t elfloader_hid_report[] = {
 };
 uint16_t elfloader_hid_report_size = sizeof(elfloader_hid_report);
 
-coral::micro::HidClassDescriptor elfloader_descriptor_data = {
-    {sizeof(coral::micro::InterfaceDescriptor), 0x4, 0, 0, 2, 3, 0, 0,
+coralmicro::HidClassDescriptor elfloader_descriptor_data = {
+    {sizeof(coralmicro::InterfaceDescriptor), 0x4, 0, 0, 2, 3, 0, 0,
      0},  // InterfaceDescriptor
     {
-        sizeof(coral::micro::HidDescriptor),
+        sizeof(coralmicro::HidDescriptor),
         33,
         0x0100,
         0,
@@ -50,7 +50,7 @@ coral::micro::HidClassDescriptor elfloader_descriptor_data = {
         elfloader_hid_report_size,
     },  // HidDescriptor
     {
-        sizeof(coral::micro::EndpointDescriptor),
+        sizeof(coralmicro::EndpointDescriptor),
         5,
         0 /* set by code */,
         0x03,
@@ -58,7 +58,7 @@ coral::micro::HidClassDescriptor elfloader_descriptor_data = {
         3,
     },  // EndpointDescriptor
     {
-        sizeof(coral::micro::EndpointDescriptor),
+        sizeof(coralmicro::EndpointDescriptor),
         5,
         0 /* set by code */,
         0x03,

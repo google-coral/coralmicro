@@ -42,35 +42,35 @@
 // }
 
 static void serial_number_rpc(struct jsonrpc_request* r) {
-    std::string serial = coral::micro::utils::GetSerialNumber();
+    std::string serial = coralmicro::utils::GetSerialNumber();
     jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", serial.size(),
                            serial.c_str());
 }
 
 static void take_picture_rpc(struct jsonrpc_request* r) {
-    coral::micro::CameraTask::GetSingleton()->SetPower(true);
-    coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::kStreaming);
-    coral::micro::CameraTask::GetSingleton()->DiscardFrames(1);
+    coralmicro::CameraTask::GetSingleton()->SetPower(true);
+    coralmicro::CameraTask::GetSingleton()->Enable(
+        coralmicro::camera::Mode::kStreaming);
+    coralmicro::CameraTask::GetSingleton()->DiscardFrames(1);
 
-    std::vector<uint8_t> image_buffer(coral::micro::CameraTask::kWidth *
-                                      coral::micro::CameraTask::kHeight * 3);
-    coral::micro::camera::FrameFormat fmt;
-    fmt.fmt = coral::micro::camera::Format::kRgb;
-    fmt.filter = coral::micro::camera::FilterMethod::kBilinear;
-    fmt.width = coral::micro::CameraTask::kWidth;
-    fmt.height = coral::micro::CameraTask::kHeight;
+    std::vector<uint8_t> image_buffer(coralmicro::CameraTask::kWidth *
+                                      coralmicro::CameraTask::kHeight * 3);
+    coralmicro::camera::FrameFormat fmt;
+    fmt.fmt = coralmicro::camera::Format::kRgb;
+    fmt.filter = coralmicro::camera::FilterMethod::kBilinear;
+    fmt.width = coralmicro::CameraTask::kWidth;
+    fmt.height = coralmicro::CameraTask::kHeight;
     fmt.preserve_ratio = false;
     fmt.buffer = image_buffer.data();
 
-    bool ret = coral::micro::CameraTask::GetFrame({fmt});
+    bool ret = coralmicro::CameraTask::GetFrame({fmt});
 
-    coral::micro::CameraTask::GetSingleton()->Disable();
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+    coralmicro::CameraTask::GetSingleton()->Disable();
+    coralmicro::CameraTask::GetSingleton()->SetPower(false);
     if (ret) {
         jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V}", "width",
-                               coral::micro::CameraTask::kWidth, "height",
-                               coral::micro::CameraTask::kHeight, "base64_data",
+                               coralmicro::CameraTask::kWidth, "height",
+                               coralmicro::CameraTask::kHeight, "base64_data",
                                image_buffer.size(), image_buffer.data());
     } else {
         jsonrpc_return_error(r, -1, "failure", nullptr);
@@ -81,7 +81,7 @@ extern "C" void app_main(void* param) {
     jsonrpc_init(nullptr, nullptr);
     jsonrpc_export("serial_number", serial_number_rpc);
     jsonrpc_export("take_picture", take_picture_rpc);
-    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
+    coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
     printf("RPC server ready\r\n");
     vTaskSuspend(nullptr);
 }

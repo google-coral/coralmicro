@@ -19,7 +19,7 @@
 
 #include <functional>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace gpio {
 
 // Enumeration of the pre-configured GPIO pins.
@@ -114,6 +114,6 @@ void SetIntMode(Gpio gpio, InterruptMode mode);
 void RegisterIRQHandler(Gpio gpio, GpioCallback cb);
 
 }  // namespace gpio
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_GPIO_H_

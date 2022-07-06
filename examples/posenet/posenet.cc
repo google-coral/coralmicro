@@ -40,8 +40,8 @@ extern "C" void app_main(void* param) {
     TF_LITE_REPORT_ERROR(&error_reporter, "Posenet!");
 
     // Turn on the TPU and get it's context.
-    auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
-        coral::micro::PerformanceMode::kMax);
+    auto tpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice(
+        coralmicro::PerformanceMode::kMax);
     if (!tpu_context) {
         printf("ERROR: Failed to get EdgeTpu context\r\n");
         vTaskSuspend(nullptr);
@@ -49,7 +49,7 @@ extern "C" void app_main(void* param) {
 
     // Reads the model and checks version.
     std::vector<uint8_t> posenet_tflite;
-    if (!coral::micro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+    if (!coralmicro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
         TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load model!");
         vTaskSuspend(nullptr);
     }
@@ -63,8 +63,8 @@ extern "C" void app_main(void* param) {
 
     // Creates a micro interpreter.
     tflite::MicroMutableOpResolver<2> resolver;
-    resolver.AddCustom(coral::micro::kCustomOp,
-                       coral::micro::RegisterCustomOp());
+    resolver.AddCustom(coralmicro::kCustomOp,
+                       coralmicro::RegisterCustomOp());
     resolver.AddCustom(coral::kPosenetDecoderOp,
                        coral::RegisterPosenetDecoderOp());
     auto interpreter = tflite::MicroInterpreter{
@@ -78,7 +78,7 @@ extern "C" void app_main(void* param) {
     // Runs posenet on a test image.
     printf("Getting outputs for posenet test input\r\n");
     std::vector<uint8_t> posenet_test_input_bin;
-    if (!coral::micro::filesystem::ReadFile(kTestInputPath,
+    if (!coralmicro::filesystem::ReadFile(kTestInputPath,
                                             &posenet_test_input_bin)) {
         TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load test input!");
         vTaskSuspend(nullptr);
@@ -95,27 +95,27 @@ extern "C" void app_main(void* param) {
         TF_LITE_REPORT_ERROR(&error_reporter, "Invoke failed.");
         vTaskSuspend(nullptr);
     }
-    auto test_image_output = coral::micro::tensorflow::GetPosenetOutput(
+    auto test_image_output = coralmicro::tensorflow::GetPosenetOutput(
         &interpreter, /*threshold=*/0.5, /*print=*/true);
 
     // Starts the camera for live poses.
-    coral::micro::CameraTask::GetSingleton()->SetPower(true);
-    coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::kStreaming);
+    coralmicro::CameraTask::GetSingleton()->SetPower(true);
+    coralmicro::CameraTask::GetSingleton()->Enable(
+        coralmicro::camera::Mode::kStreaming);
 
     printf("Starting live posenet\r\n");
     auto model_height = posenet_input->dims->data[1];
     auto model_width = posenet_input->dims->data[2];
     for (;;) {
-        coral::micro::camera::FrameFormat fmt{
-            /*fmt=*/coral::micro::camera::Format::kRgb,
-            /*filter=*/coral::micro::camera::FilterMethod::kBilinear,
-            /*rotation=*/coral::micro::camera::Rotation::k0,
+        coralmicro::camera::FrameFormat fmt{
+            /*fmt=*/coralmicro::camera::Format::kRgb,
+            /*filter=*/coralmicro::camera::FilterMethod::kBilinear,
+            /*rotation=*/coralmicro::camera::Rotation::k0,
             /*width=*/model_width,
             /*height=*/model_height,
             /*preserve_ratio=*/false,
             /*buffer=*/tflite::GetTensorData<uint8_t>(posenet_input)};
-        if (!coral::micro::CameraTask::GetFrame({fmt})) {
+        if (!coralmicro::CameraTask::GetFrame({fmt})) {
             TF_LITE_REPORT_ERROR(&error_reporter,
                                  "Failed to get image from camera.");
             break;
@@ -124,10 +124,10 @@ extern "C" void app_main(void* param) {
             TF_LITE_REPORT_ERROR(&error_reporter, "Invoke failed.");
             break;
         }
-        auto output = coral::micro::tensorflow::GetPosenetOutput(
+        auto output = coralmicro::tensorflow::GetPosenetOutput(
             &interpreter, /*threshold=*/0.5, /*print=*/true);
         vTaskDelay(pdMS_TO_TICKS(100));
     }
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+    coralmicro::CameraTask::GetSingleton()->SetPower(false);
     vTaskSuspend(nullptr);
 }

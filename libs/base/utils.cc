@@ -23,7 +23,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/ip_addr.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/wwd_constants.h"
 
-namespace coral::micro::utils {
+namespace coralmicro::utils {
 
 uint64_t GetUniqueID() {
     uint32_t fuse_val_hi, fuse_val_lo;
@@ -33,7 +33,7 @@ uint64_t GetUniqueID() {
 }
 
 std::string GetSerialNumber() {
-    uint64_t id = coral::micro::utils::GetUniqueID();
+    uint64_t id = coralmicro::utils::GetUniqueID();
     char serial[17];  // 16 hex characters + \0
     snprintf(serial, sizeof(serial), "%08lx%08lx",
              static_cast<uint32_t>(id >> 32), static_cast<uint32_t>(id));
@@ -62,33 +62,33 @@ bool GetUSBIPAddress(ip4_addr_t* usb_ip_out) {
 }
 
 bool GetUSBIPAddress(std::string* usb_ip_out) {
-    return coral::micro::filesystem::ReadFile("/usb_ip_address", usb_ip_out);
+    return coralmicro::filesystem::ReadFile("/usb_ip_address", usb_ip_out);
 }
 
 bool SetWiFiSSID(std::string* wifi_ssid) {
-    return coral::micro::filesystem::WriteFile(
+    return coralmicro::filesystem::WriteFile(
         "/wifi_ssid", reinterpret_cast<const uint8_t*>(wifi_ssid->c_str()),
         wifi_ssid->size());
 }
 
 bool GetWiFiSSID(std::string* wifi_ssid_out) {
-    return coral::micro::filesystem::ReadFile("/wifi_ssid", wifi_ssid_out);
+    return coralmicro::filesystem::ReadFile("/wifi_ssid", wifi_ssid_out);
 }
 
 bool SetWiFiPSK(std::string* wifi_psk) {
-    return coral::micro::filesystem::WriteFile(
+    return coralmicro::filesystem::WriteFile(
         "/wifi_psk", reinterpret_cast<const uint8_t*>(wifi_psk->c_str()),
         wifi_psk->size());
 }
 
 bool GetWiFiPSK(std::string* wifi_psk_out) {
-    return coral::micro::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
+    return coralmicro::filesystem::ReadFile("/wifi_psk", wifi_psk_out);
 }
 
 int GetEthernetSpeed() {
     std::string ethernet_speed;
     uint16_t speed;
-    if (!coral::micro::filesystem::ReadFile("/ethernet_speed",
+    if (!coralmicro::filesystem::ReadFile("/ethernet_speed",
                                             &ethernet_speed)) {
         printf("Failed to read ethernet speed, assuming 100M.\r\n");
         speed = 100;
@@ -101,7 +101,7 @@ int GetEthernetSpeed() {
 extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
     std::string wifi_country_code_out, wifi_revision_out;
     unsigned short wifi_revision = 0;
-    if (!coral::micro::filesystem::ReadFile("/wifi_country",
+    if (!coralmicro::filesystem::ReadFile("/wifi_country",
                                             &wifi_country_code_out)) {
         DbgConsole_Printf("failed to read back country, returning WW\r\n");
         return WICED_COUNTRY_WORLD_WIDE_XX;
@@ -110,7 +110,7 @@ extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
         DbgConsole_Printf("wifi_country must be 2 bytes, returning WW\r\n");
         return WICED_COUNTRY_WORLD_WIDE_XX;
     }
-    if (coral::micro::filesystem::ReadFile("/wifi_revision",
+    if (coralmicro::filesystem::ReadFile("/wifi_revision",
                                            &wifi_revision_out)) {
         wifi_revision = *reinterpret_cast<uint16_t*>(wifi_revision_out.data());
     }
@@ -118,4 +118,4 @@ extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
         wifi_country_code_out[0], wifi_country_code_out[1], wifi_revision));
 }
 
-}  // namespace coral::micro::utils
+}  // namespace coralmicro::utils

@@ -21,7 +21,7 @@
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpadc.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace analog {
 
 // Available channels on ADC1.
@@ -89,6 +89,6 @@ void EnableDAC(bool enable);
 void WriteDAC(uint16_t value);
 
 }  // namespace analog
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_ANALOG_H_

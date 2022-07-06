@@ -25,7 +25,7 @@
 #include <cstring>
 #include <map>
 
-namespace coral::micro {
+namespace coralmicro {
 
 class OutputLayer {
   public:
@@ -100,6 +100,6 @@ class EdgeTpuExecutable {
     std::map<const char*, OutputLayer*, Less> output_layers_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TPU_EDGETPU_EXECUTABLE_H_

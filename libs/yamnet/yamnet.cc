@@ -29,7 +29,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace yamnet {
 
 namespace {
@@ -37,7 +37,7 @@ constexpr int kTensorArenaSize = 1 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 std::unique_ptr<tflite::MicroInterpreter> interpreter;
-std::shared_ptr<coral::micro::EdgeTpuContext> edgetpu_context;
+std::shared_ptr<coralmicro::EdgeTpuContext> edgetpu_context;
 std::shared_ptr<tflite::MicroErrorReporter> error_reporter;
 std::shared_ptr<TfLiteTensor> input_tensor;
 
@@ -110,7 +110,7 @@ bool setup() {
     error_reporter = std::make_shared<tflite::MicroErrorReporter>();
     TF_LITE_REPORT_ERROR(error_reporter.get(), "YAMNet!");
 
-    if (!coral::micro::filesystem::ReadFile(kModelName,
+    if (!coralmicro::filesystem::ReadFile(kModelName,
                                             &yamnet_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Failed to load model!");
         return false;
@@ -148,8 +148,8 @@ bool setup() {
     resolver->AddDequantize();
     resolver->AddCustom(kCustomOp, RegisterCustomOp());
 
-    edgetpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
-        coral::micro::PerformanceMode::kMax);
+    edgetpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice(
+        coralmicro::PerformanceMode::kMax);
     if (!edgetpu_context) {
         TF_LITE_REPORT_ERROR(error_reporter.get(), "Failed to get TPU context");
         return false;
@@ -184,7 +184,7 @@ bool setup() {
 std::optional<const std::vector<tensorflow::Class>> loop(bool print) {
     // TODO(michaelbrooks): Properly slice the data so that we don't need to
     // re-run the frontend on windows we've already processed.
-    uint32_t process_start = coral::micro::timer::millis();
+    uint32_t process_start = coralmicro::timer::millis();
     int num_samples_remaining = kAudioSize;
     int16_t* audio = audio_data.get();
     int count = 0;
@@ -224,7 +224,7 @@ std::optional<const std::vector<tensorflow::Class>> loop(bool print) {
     for (int i = 0; i < kFeatureElementCount; ++i) {
         input[i] = (input[i] - offset) * scalar;
     }
-    uint32_t invoke_start = coral::micro::timer::millis();
+    uint32_t invoke_start = coralmicro::timer::millis();
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
         return std::nullopt;
@@ -234,7 +234,7 @@ std::optional<const std::vector<tensorflow::Class>> loop(bool print) {
         tensorflow::GetClassificationResults(interpreter.get(), kThreshold,
                                              kTopK);
     FrontendReset(frontend_state.get());
-    uint32_t process_end = coral::micro::timer::millis();
+    uint32_t process_end = coralmicro::timer::millis();
     if (print) {
         printf("Ran YAMNet + Frontend in %ld ms\r\n",
                process_end - process_start);
@@ -245,4 +245,4 @@ std::optional<const std::vector<tensorflow::Class>> loop(bool print) {
 }
 
 }  // namespace yamnet
-}  // namespace coral::micro
+}  // namespace coralmicro

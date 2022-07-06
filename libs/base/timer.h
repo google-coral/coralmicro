@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace timer {
 
 void Init();
@@ -31,6 +31,6 @@ uint32_t millis();
 uint32_t micros();
 
 }  // namespace timer
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_TIMER_H_

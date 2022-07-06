@@ -27,7 +27,7 @@
 #define MAC1_ADDR_LO (0xA80)
 #define MAC1_ADDR_HI (0xA90)
 
-namespace coral::micro {
+namespace coralmicro {
 namespace utils {
 
 // Gets the 64-bit unique identifiers of the RT1176.
@@ -78,6 +78,6 @@ bool SetWiFiPSK(std::string* wifi_psk);
 int GetEthernetSpeed();
 
 }  // namespace utils
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_UTILS_H_

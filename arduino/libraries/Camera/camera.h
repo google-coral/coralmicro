@@ -22,7 +22,7 @@
 
 #include "libs/camera/camera.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 enum {
@@ -44,7 +44,7 @@ class CameraClass {
     // Note: based on Portenta's API, we do requires that user calls "begin" to
     // set the resolution.
     CameraClass()
-        : camera_{coral::micro::CameraTask::GetSingleton()},
+        : camera_{coralmicro::CameraTask::GetSingleton()},
           width_{0},
           height_{0},
           format_{camera::Format::kRgb},
@@ -70,12 +70,12 @@ class CameraClass {
     int grab(uint8_t* buffer);
     int standby(bool enable);
     int testPattern(bool walking);
-    int testPattern(coral::micro::camera::TestPattern pattern);
+    int testPattern(coralmicro::camera::TestPattern pattern);
 
     // Followings APIs are adds on to extends features that we have and Portenta
     // doesn't.
     int preserveRatio(bool preserve_ratio);
-    int format(coral::micro::camera::Format fmt);
+    int format(coralmicro::camera::Format fmt);
     int discardFrames(int num_frames);
 
     // Unimplemented APIs left over from Portenta.
@@ -89,16 +89,16 @@ class CameraClass {
     std::unique_ptr<CameraTask> camera_;
     int32_t width_;
     int32_t height_;
-    coral::micro::camera::Format format_;
-    coral::micro::camera::FilterMethod filter_;
-    coral::micro::camera::Rotation rotation_;
-    coral::micro::camera::TestPattern test_pattern_;
+    coralmicro::camera::Format format_;
+    coralmicro::camera::FilterMethod filter_;
+    coralmicro::camera::Rotation rotation_;
+    coralmicro::camera::TestPattern test_pattern_;
     bool preserve_ratio_;
     bool initialized_;
 };
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
-extern coral::micro::arduino::CameraClass Camera;
+extern coralmicro::arduino::CameraClass Camera;
 
 #endif  // CORAL_MICRO_CAMERACLASS_H

@@ -22,7 +22,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace coral::micro::a71ch {
+namespace coralmicro::a71ch {
 namespace {
 // Helper function to convert an array of unsigned char to a string in hex
 // value.
@@ -38,9 +38,9 @@ auto to_hex = [](const uint8_t* src, uint16_t src_len) -> std::string {
 }  // namespace
 
 bool Init() {
-  coral::micro::gpio::SetGpio(coral::micro::gpio::kCryptoRst, false);
+  coralmicro::gpio::SetGpio(coralmicro::gpio::kCryptoRst, false);
   vTaskDelay(pdMS_TO_TICKS(1));
-  coral::micro::gpio::SetGpio(coral::micro::gpio::kCryptoRst, true);
+  coralmicro::gpio::SetGpio(coralmicro::gpio::kCryptoRst, true);
 
   SE_Connect_Ctx_t sessionCtxt = {0};
   sss_status_t status = sss_session_open(
@@ -59,4 +59,4 @@ std::optional<std::string> GetUID() {
   }
   return to_hex(uid, uid_len);
 }
-}  // namespace coral::micro::a71ch
+}  // namespace coralmicro::a71ch

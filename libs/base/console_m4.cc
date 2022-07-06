@@ -23,7 +23,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h"
 
 namespace {
-coral::micro::ipc::StreamBuffer* console_buffer = nullptr;
+coralmicro::ipc::StreamBuffer* console_buffer = nullptr;
 }  // namespace
 
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
@@ -52,7 +52,7 @@ extern "C" int _read(int handle, char* buffer, int size) {
     return -1;
 }
 
-namespace coral::micro {
+namespace coralmicro {
 
 void ConsoleInit() {}
 
@@ -60,4 +60,4 @@ void SetM4ConsoleBufferPtr(ipc::StreamBuffer* buffer) {
     console_buffer = buffer;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

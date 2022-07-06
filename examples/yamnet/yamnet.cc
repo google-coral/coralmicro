@@ -21,67 +21,67 @@ namespace {
 constexpr int kNumDmaBuffers = 2;
 constexpr int kDmaBufferSizeMs = 50;
 constexpr int kDmaBufferSize =
-    kNumDmaBuffers * coral::micro::yamnet::kSampleRateMs * kDmaBufferSizeMs;
+    kNumDmaBuffers * coralmicro::yamnet::kSampleRateMs * kDmaBufferSizeMs;
 constexpr int kAudioServicePriority = 4;
 constexpr int kDropFirstSamplesMs = 150;
 
 std::vector<uint8_t> yamnet_test_input_bin;
-std::unique_ptr<coral::micro::LatestSamples> audio_latest = nullptr;
+std::unique_ptr<coralmicro::LatestSamples> audio_latest = nullptr;
 
-coral::micro::AudioDriverBuffers<kNumDmaBuffers, kDmaBufferSize> audio_buffers;
-coral::micro::AudioDriver audio_driver(audio_buffers);
+coralmicro::AudioDriverBuffers<kNumDmaBuffers, kDmaBufferSize> audio_buffers;
+coralmicro::AudioDriver audio_driver(audio_buffers);
 
-constexpr int kAudioBufferSizeMs = coral::micro::yamnet::kDurationMs;
+constexpr int kAudioBufferSizeMs = coralmicro::yamnet::kDurationMs;
 constexpr int kAudioBufferSize =
-    kAudioBufferSizeMs * coral::micro::yamnet::kSampleRateMs;
+    kAudioBufferSizeMs * coralmicro::yamnet::kSampleRateMs;
 
 }  // namespace
 
 extern "C" [[noreturn]] void app_main(void* param) {
-    if (!coral::micro::yamnet::setup()) {
+    if (!coralmicro::yamnet::setup()) {
         printf("setup() failed\r\n");
         vTaskSuspend(nullptr);
     }
 
-    if (!coral::micro::filesystem::ReadFile("/models/yamnet_test_audio.bin",
+    if (!coralmicro::filesystem::ReadFile("/models/yamnet_test_audio.bin",
                                             &yamnet_test_input_bin)) {
         printf("Failed to load test input!\r\n");
         vTaskSuspend(nullptr);
     }
 
     if (yamnet_test_input_bin.size() !=
-        coral::micro::yamnet::kAudioSize * sizeof(int16_t)) {
+        coralmicro::yamnet::kAudioSize * sizeof(int16_t)) {
         printf("Input audio size doesn't match expected\r\n");
         vTaskSuspend(nullptr);
     }
 
-    std::shared_ptr<int16_t[]> audio_data = coral::micro::yamnet::audio_input();
+    std::shared_ptr<int16_t[]> audio_data = coralmicro::yamnet::audio_input();
     std::memcpy(audio_data.get(), yamnet_test_input_bin.data(),
                 yamnet_test_input_bin.size());
-    coral::micro::yamnet::loop();
+    coralmicro::yamnet::loop();
     printf("YAMNet Setup Complete\r\n\n");
 
     // Setup audio
-    coral::micro::AudioDriverConfig audio_config{
-        coral::micro::AudioSampleRate::k16000_Hz, kNumDmaBuffers,
+    coralmicro::AudioDriverConfig audio_config{
+        coralmicro::AudioSampleRate::k16000_Hz, kNumDmaBuffers,
         kDmaBufferSizeMs};
-    coral::micro::AudioService audio_service(&audio_driver, audio_config,
+    coralmicro::AudioService audio_service(&audio_driver, audio_config,
                                              kAudioServicePriority,
                                              kDropFirstSamplesMs);
 
-    audio_latest = std::make_unique<coral::micro::LatestSamples>(
-        coral::micro::MsToSamples(coral::micro::AudioSampleRate::k16000_Hz,
-                                  coral::micro::yamnet::kDurationMs));
+    audio_latest = std::make_unique<coralmicro::LatestSamples>(
+        coralmicro::MsToSamples(coralmicro::AudioSampleRate::k16000_Hz,
+                                  coralmicro::yamnet::kDurationMs));
     audio_service.AddCallback(
         audio_latest.get(),
         +[](void* ctx, const int32_t* samples, size_t num_samples) {
-            static_cast<coral::micro::LatestSamples*>(ctx)->Append(samples,
+            static_cast<coralmicro::LatestSamples*>(ctx)->Append(samples,
                                                                    num_samples);
             return true;
         });
 
     // Delay for the first buffers to fill.
-    vTaskDelay(pdMS_TO_TICKS(coral::micro::yamnet::kDurationMs));
+    vTaskDelay(pdMS_TO_TICKS(coralmicro::yamnet::kDurationMs));
 
     while (true) {
         audio_latest->AccessLatestSamples(
@@ -98,10 +98,10 @@ extern "C" [[noreturn]] void app_main(void* param) {
                     audio_data[i + j] = samples[j] >> 16;
                 }
             });
-        coral::micro::yamnet::loop();
+        coralmicro::yamnet::loop();
 #ifndef YAMNET_CPU
         // Delay 975 ms to rate limit the TPU version.
-        vTaskDelay(pdMS_TO_TICKS(coral::micro::yamnet::kDurationMs));
+        vTaskDelay(pdMS_TO_TICKS(coralmicro::yamnet::kDurationMs));
 #endif
     }
     vTaskSuspend(nullptr);

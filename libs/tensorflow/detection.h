@@ -22,7 +22,7 @@
 
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-namespace coral::micro::tensorflow {
+namespace coralmicro::tensorflow {
 
 // Represents the bounding box of a detected object.
 template <typename T>
@@ -79,6 +79,6 @@ std::vector<Object> GetDetectionResults(
     float threshold = -std::numeric_limits<float>::infinity(),
     size_t top_k = std::numeric_limits<size_t>::max());
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TENSORFLOW_DETECTION_H_

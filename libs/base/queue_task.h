@@ -23,7 +23,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 inline constexpr size_t kDefaultTaskStackDepth = configMINIMAL_STACK_SIZE;
 template <typename Request, typename Response, const char* Name,
@@ -95,6 +95,6 @@ class QueueTask {
     virtual void RequestHandler(Request* msg) = 0;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_QUEUE_TASK_H_

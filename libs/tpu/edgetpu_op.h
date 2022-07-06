@@ -19,7 +19,7 @@
 
 #include "tensorflow/lite/c/common.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 // Edge TPU custom op. Pass this to
 // `tflite::MicroMutableOpResolver::AddCustom()`.
@@ -30,6 +30,6 @@ inline constexpr char kCustomOp[] = "edgetpu-custom-op";
 // `tflite::MicroMutableOpResolver::AddCustom()`.
 TfLiteRegistration* RegisterCustomOp();
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TPU_EDGETPU_OP_H_

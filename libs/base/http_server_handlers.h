@@ -19,7 +19,7 @@
 
 #include "libs/base/http_server.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 struct FileSystemUriHandler {
     const char* prefix = "/fs/";
@@ -31,6 +31,6 @@ struct TaskStatsUriHandler {
     HttpServer::Content operator()(const char* uri);
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_HTTP_SERVER_HANDLERS_H_

@@ -33,7 +33,7 @@
     static uint8_t name[size] __attribute__((aligned(16))) \
     __attribute__((section(".ocram_bss,\"aw\",%nobits @")))
 
-namespace coral::micro {
+namespace coralmicro {
 namespace tensorflow {
 
 // Represents the dimensions of an image.
@@ -105,6 +105,6 @@ std::vector<T> DequantizeTensor(TfLiteTensor* tensor) {
     return result;
 }
 }  // namespace tensorflow
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TENSORFLOW_UTILS_H_

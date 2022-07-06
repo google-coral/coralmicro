@@ -20,7 +20,7 @@
 #include <optional>
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 // Gets the ethernet interface, which contains info like
 // ip and hw addresses, interface names, etc.
@@ -53,6 +53,6 @@ status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data);
 // failure.
 std::optional<std::string> GetEthernetIp();
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_ETHERNET_H_

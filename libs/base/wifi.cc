@@ -24,7 +24,7 @@
 
 #include "libs/base/gpio.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 bool TurnOnWiFi() { return WIFI_On() == eWiFiSuccess; }
 
@@ -63,13 +63,13 @@ bool ConnectWiFi(const char* ssid, const char* psk, int retry_count) {
 
 bool ConnectWiFi(int retry_count) {
     std::string wifi_ssid;
-    if (!coral::micro::utils::GetWiFiSSID(&wifi_ssid)) {
+    if (!coralmicro::utils::GetWiFiSSID(&wifi_ssid)) {
         printf("No Wi-Fi SSID provided\r\n");
         return false;
     }
 
     std::string wifi_psk;
-    bool have_psk = coral::micro::utils::GetWiFiPSK(&wifi_psk);
+    bool have_psk = coralmicro::utils::GetWiFiPSK(&wifi_psk);
     return ConnectWiFi(wifi_ssid.c_str(), have_psk ? wifi_psk.c_str() : nullptr,
                        retry_count);
 }
@@ -122,4 +122,4 @@ bool SetWiFiAntenna(WiFiAntenna antenna) {
     }
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

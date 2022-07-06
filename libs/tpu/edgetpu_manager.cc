@@ -25,7 +25,7 @@
 #include "third_party/flatbuffers/include/flatbuffers/flexbuffers.h"
 #include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr char kKeyVersion[] = "1";
 constexpr char kKeyChipName[] = "2";
@@ -185,4 +185,4 @@ std::optional<float> EdgeTpuManager::GetTemperature() {
     return std::nullopt;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

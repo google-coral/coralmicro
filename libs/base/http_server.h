@@ -26,7 +26,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/fs.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 // Defines an HTTP server on the device.
 //
@@ -169,6 +169,6 @@ class HttpServer {
 // @param The server to start.
 void UseHttpServer(HttpServer* server);
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_HTTP_SERVER_H_

@@ -21,7 +21,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 uint8_t camera_grayscale[CameraTask::kWidth * CameraTask::kHeight]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
@@ -29,11 +29,11 @@ uint8_t camera_grayscale_small[96 * 96]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 uint8_t camera_rgb[CameraTask::kWidth * CameraTask::kHeight * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
-uint8_t camera_rgb_90[coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight * 3]
+uint8_t camera_rgb_90[coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
-uint8_t camera_rgb_180[coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight * 3]
+uint8_t camera_rgb_180[coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
-uint8_t camera_rgb_270[coral::micro::CameraTask::kWidth * coral::micro::CameraTask::kHeight * 3]
+uint8_t camera_rgb_270[coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
 uint8_t camera_rgb_posenet[324 * 324 * 3]
     __attribute__((section(".sdram_bss,\"aw\",%nobits @")));
@@ -210,10 +210,10 @@ void Main() {
     CameraTask::GetSingleton()->SetPower(false);
 }
 }  // namespace
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
     (void)param;
-    coral::micro::Main();
+    coralmicro::Main();
     vTaskSuspend(nullptr);
 }

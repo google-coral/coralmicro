@@ -22,7 +22,7 @@
 #include "libs/tensorflow/classification.h"
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace yamnet {
 inline constexpr int kSampleRate = 16000;
 inline constexpr int kSampleRateMs = kSampleRate / 1000;
@@ -39,6 +39,6 @@ bool setup();
 std::optional<const std::vector<tensorflow::Class>> loop(bool print = true);
 std::shared_ptr<int16_t[]> audio_input();
 }  // namespace yamnet
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_YAMNET_YAMNET_H_

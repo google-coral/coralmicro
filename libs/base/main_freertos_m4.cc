@@ -36,7 +36,7 @@ namespace {
 lpi2c_rtos_handle_t i2c5_handle;
 
 void pre_app_main(void* param) {
-    coral::micro::IPCM4::GetSingleton()->Init();
+    coralmicro::IPCM4::GetSingleton()->Init();
     app_main(param);
 }
 }  // namespace
@@ -47,9 +47,9 @@ extern "C" int main(int argc, char** argv) __attribute__((weak));
 extern "C" int main(int argc, char** argv) {
     BOARD_InitHardware(true);
 
-    coral::micro::ConsoleInit();
-    CHECK(coral::micro::filesystem::Init());
-    coral::micro::gpio::Init();
+    coralmicro::ConsoleInit();
+    CHECK(coralmicro::filesystem::Init());
+    coralmicro::gpio::Init();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     // Initialize I2C5 state
@@ -59,7 +59,7 @@ extern "C" int main(int argc, char** argv) {
     LPI2C_RTOS_Init(&i2c5_handle, (LPI2C_Type*)LPI2C5_BASE, &config,
                     CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
-    coral::micro::PmicTask::GetSingleton()->Init(&i2c5_handle);
+    coralmicro::PmicTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
     constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;

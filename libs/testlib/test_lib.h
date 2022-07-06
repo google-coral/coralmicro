@@ -22,7 +22,7 @@
 
 #include "third_party/mjson/src/mjson.h"
 
-namespace coral::micro::testlib {
+namespace coralmicro::testlib {
 
 inline constexpr char kMethodGetSerialNumber[] = "get_serial_number";
 inline constexpr char kMethodRunTestConv1[] = "run_testconv1";
@@ -82,6 +82,6 @@ void WiFiGetStatus(struct jsonrpc_request* request);
 void CryptoInit(struct jsonrpc_request* request);
 void CryptoGetUID(struct jsonrpc_request* request);
 
-}  // namespace coral::micro::testlib
+}  // namespace coralmicro::testlib
 
 #endif  // LIBS_TESTLIB_TEST_LIB_H_

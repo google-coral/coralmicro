@@ -28,7 +28,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 class UsbDeviceTask {
    public:
@@ -111,6 +111,6 @@ class UsbDeviceTask {
     std::string serial_number_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_USB_USB_DEVICE_TASK_H_

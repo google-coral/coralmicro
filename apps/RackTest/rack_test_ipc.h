@@ -30,6 +30,6 @@ struct RackTestAppMessage {
   } message;
 };
 static_assert(sizeof(RackTestAppMessage) <=
-              coral::micro::ipc::kMessageBufferDataSize);
+              coralmicro::ipc::kMessageBufferDataSize);
 
 #endif  // APPS_RACKTEST_RACK_TEST_IPC_H_

@@ -24,7 +24,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 class IPC {
    public:
@@ -63,6 +63,6 @@ class IPC {
     ipc::MessageBuffer *tx_queue_, *rx_queue_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_IPC_H_

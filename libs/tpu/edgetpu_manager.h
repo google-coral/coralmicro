@@ -30,7 +30,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 // This class is essentially a representation of the Edge TPU, so there is one
 // shared `EdgeTpuContext` used by all model interpreters. Instances of this
@@ -133,6 +133,6 @@ class EdgeTpuManager {
     SemaphoreHandle_t mutex_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TPU_EDGETPU_MANAGER_H_

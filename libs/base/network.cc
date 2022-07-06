@@ -23,7 +23,7 @@
 
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 IOStatus ReadBytes(int fd, void* bytes, size_t size) {
     assert(fd >= 0);
@@ -103,4 +103,4 @@ int SocketAccept(int sockfd) { return lwip_accept(sockfd, nullptr, nullptr); }
 
 void SocketClose(int sockfd) { lwip_close(sockfd); }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

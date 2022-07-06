@@ -30,7 +30,7 @@
 // The top 3 class predictions are printed to the serial console.
 
 // [start-sphinx-snippet:classify-image]
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr char kModelPath[] =
     "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
@@ -100,11 +100,11 @@ void Main() {
         printf("Label ID: %d Score: %f\r\n", result.id, result.score);
 }
 }  // namespace
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
     (void)param;
-    coral::micro::Main();
+    coralmicro::Main();
     vTaskSuspend(nullptr);
 }
 // [end-sphinx-snippet:classify-image]

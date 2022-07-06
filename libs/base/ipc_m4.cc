@@ -25,7 +25,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 void IPCM4::HandleSystemMessage(const ipc::SystemMessage& message) {
     switch (message.type) {
@@ -66,4 +66,4 @@ void IPCM4::Init() {
     MCMGR_TriggerEvent(kMCMGR_RemoteApplicationEvent, 1);
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

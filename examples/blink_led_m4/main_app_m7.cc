@@ -22,6 +22,6 @@
 
 extern "C" [[noreturn]] void app_main(void* param) {
     printf("Starting M4 from M7...\r\n");
-    coral::micro::IPCM7::GetSingleton()->StartM4();
+    coralmicro::IPCM7::GetSingleton()->StartM4();
     vTaskSuspend(nullptr);
 }

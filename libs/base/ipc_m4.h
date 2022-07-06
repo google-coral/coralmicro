@@ -19,7 +19,7 @@
 
 #include "libs/base/ipc.h"
 
-namespace coral::micro {
+namespace coralmicro {
 class IPCM4 : public IPC {
    public:
     static IPCM4* GetSingleton() {
@@ -35,6 +35,6 @@ class IPCM4 : public IPC {
    private:
     void HandleSystemMessage(const ipc::SystemMessage& message) override;
 };
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_IPC_M4_H_

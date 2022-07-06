@@ -21,7 +21,7 @@
 #include "libs/base/tasks.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 namespace pmic {
 
@@ -92,6 +92,6 @@ class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName,
     lpi2c_rtos_handle_t* i2c_handle_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_PMIC_PMIC_H_

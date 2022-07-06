@@ -20,7 +20,7 @@
 
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace analog {
 namespace {
 
@@ -115,4 +115,4 @@ void WriteDAC(uint16_t value) {
 }
 
 }  // namespace analog
-}  // namespace coral::micro
+}  // namespace coralmicro

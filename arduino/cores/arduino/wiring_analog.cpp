@@ -24,11 +24,11 @@
 #include <algorithm>
 #include <cassert>
 
-using coral::micro::analog::ADCConfig;
-using coral::micro::analog::Device;
-using coral::micro::analog::Side;
-using coral::micro::pwm::PwmModuleConfig;
-using coral::micro::pwm::PwmPinConfig;
+using coralmicro::analog::ADCConfig;
+using coralmicro::analog::Device;
+using coralmicro::analog::Side;
+using coralmicro::pwm::PwmModuleConfig;
+using coralmicro::pwm::PwmPinConfig;
 
 static constexpr int kAdcFullResolutionBits = 12;
 // 12-bits for the real DAC (A2).
@@ -45,14 +45,14 @@ void wiringAnalogInit() {
     pwm_config.module = kPWM_Module_0;
     pwm_config.A.enabled = false;
     pwm_config.B.enabled = false;
-    coral::micro::analog::Init(Device::kAdc1);
-    coral::micro::analog::Init(Device::kDac1);
-    coral::micro::analog::CreateConfig(
+    coralmicro::analog::Init(Device::kAdc1);
+    coralmicro::analog::Init(Device::kDac1);
+    coralmicro::analog::CreateConfig(
         Config_A0,
         Device::kAdc1, 0,
         Side::kB, false
     );
-    coral::micro::analog::CreateConfig(
+    coralmicro::analog::CreateConfig(
         Config_A1,
         Device::kAdc1, 0,
         Side::kA, false
@@ -74,17 +74,17 @@ static void analogWriteDAC(pin_size_t pinNumber, int value) {
     int dac_shift = kDacFullResolutionBits - dac_resolution_bits;
     int shift_value = dac_resolution_bits;
     if (value) {
-        coral::micro::analog::EnableDAC(true);
-        coral::micro::analog::WriteDAC(value << dac_shift);
+        coralmicro::analog::EnableDAC(true);
+        coralmicro::analog::WriteDAC(value << dac_shift);
     } else {
-        coral::micro::analog::EnableDAC(false);
+        coralmicro::analog::EnableDAC(false);
     }
 }
 
 int analogRead(pin_size_t pinNumber) {
     int adc_shift = kAdcFullResolutionBits - adc_resolution_bits;
     const ADCConfig& config = pinToADCConfig(pinNumber);
-    return (coral::micro::analog::ReadADC(config) >> adc_shift);
+    return (coralmicro::analog::ReadADC(config) >> adc_shift);
 }
 
 void analogReference(uint8_t mode) {}
@@ -100,10 +100,10 @@ void analogWrite(pin_size_t pinNumber, int value) {
         analogWriteDAC(pinNumber, value);
         return;
     } else if (pinNumber == PIN_LED_TPU) {
-        coral::micro::led::Set(coral::micro::led::LED::kTpu, true,
+        coralmicro::led::Set(coralmicro::led::LED::kTpu, true,
                                map(value,
                                    0, 255,
-                                   coral::micro::led::kFullyOff, coral::micro::led::kFullyOn)
+                                   coralmicro::led::kFullyOff, coralmicro::led::kFullyOn)
                               );
         return;
     } else {
@@ -111,8 +111,8 @@ void analogWrite(pin_size_t pinNumber, int value) {
     }
     pin_config->enabled = true;
     pin_config->duty_cycle = map(value, 0, 255, 0, 100);
-    coral::micro::pwm::Init(pwm_config);
-    coral::micro::pwm::Enable(pwm_config, true);
+    coralmicro::pwm::Init(pwm_config);
+    coralmicro::pwm::Enable(pwm_config, true);
 }
 
 void analogReadResolution(int bits) {

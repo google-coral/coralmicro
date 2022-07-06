@@ -27,7 +27,7 @@
 
 using namespace std::placeholders;
 
-namespace coral::micro {
+namespace coralmicro {
 
 using namespace edgetpu_dfu;
 
@@ -218,7 +218,7 @@ void EdgeTpuDfuTask::CheckStatusCallback(void *param,
 }
 
 void EdgeTpuDfuTask::TaskInit() {
-    coral::micro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(kDfuVid, kDfuPid,
+    coralmicro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(kDfuVid, kDfuPid,
             std::bind(&EdgeTpuDfuTask::USB_DFUHostEvent, this, _1, _2, _3, _4));
 }
 
@@ -335,4 +335,4 @@ void EdgeTpuDfuTask::RequestHandler(Request *req) {
     }
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

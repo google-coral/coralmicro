@@ -82,7 +82,7 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
                  &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
           break;
         case ElfloaderTarget::kFilesystem:
-          coral::micro::filesystem::Write(
+          coralmicro::filesystem::Write(
               &file_handle, &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
           break;
       }
@@ -97,23 +97,23 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
         case ElfloaderTarget::kPath: {
           // TODO(atv): This stuff can fail. We should propagate errors back to
           // the Python side if possible.
-          auto dir = coral::micro::filesystem::Dirname(elfloader_recv_path);
-          coral::micro::filesystem::MakeDirs(dir.c_str());
-          coral::micro::filesystem::Open(&file_handle, elfloader_recv_path,
+          auto dir = coralmicro::filesystem::Dirname(elfloader_recv_path);
+          coralmicro::filesystem::MakeDirs(dir.c_str());
+          coralmicro::filesystem::Open(&file_handle, elfloader_recv_path,
                                          true);
           free(elfloader_recv_path);
           elfloader_recv_path = nullptr;
         } break;
         case ElfloaderTarget::kFilesystem:
-          coral::micro::filesystem::Close(&file_handle);
+          coralmicro::filesystem::Close(&file_handle);
           break;
       }
       break;
     case ElfloaderCommand::kResetToBootloader:
-      coral::micro::ResetToBootloader();
+      coralmicro::ResetToBootloader();
       break;
     case ElfloaderCommand::kResetToFlash:
-      coral::micro::ResetToFlash();
+      coralmicro::ResetToFlash();
       break;
     case ElfloaderCommand::kTarget:
       elfloader_target = *target;
@@ -122,7 +122,7 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
       if (elfloader_target == ElfloaderTarget::kFilesystem ||
           elfloader_target == ElfloaderTarget::kPath) {
         if (!filesystem_formatted) {
-          coral::micro::filesystem::Init(/*force_format=*/true);
+          coralmicro::filesystem::Init(/*force_format=*/true);
           filesystem_formatted = true;
         }
       }
@@ -199,10 +199,10 @@ void elfloader_main(void *param) {
   ssize_t elf_size = -1;
   std::unique_ptr<uint8_t[]> application_elf;
   if (!param) {
-    elf_size = coral::micro::filesystem::Size("/default.elf");
+    elf_size = coralmicro::filesystem::Size("/default.elf");
     if (elf_size != -1) {
       application_elf = std::make_unique<uint8_t[]>(elf_size);
-      if (coral::micro::filesystem::ReadFile(
+      if (coralmicro::filesystem::ReadFile(
               "/default.elf", application_elf.get(), elf_size) != elf_size) {
         application_elf.reset();
       }
@@ -248,7 +248,7 @@ void elfloader_main(void *param) {
 
 void usb_device_task(void *param) {
   while (true) {
-    coral::micro::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
+    coralmicro::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
     taskYIELD();
   }
 }
@@ -261,7 +261,7 @@ void usb_timer_callback(TimerHandle_t timer) {
 
 extern "C" int main(int argc, char **argv) {
   BOARD_InitHardware(false);
-  coral::micro::filesystem::Init();
+  coralmicro::filesystem::Init();
 
   TaskHandle_t usb_task;
   xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10,
@@ -277,22 +277,22 @@ extern "C" int main(int argc, char **argv) {
   }
 
   elfloader_hid_endpoints[0].endpointAddress =
-      coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value() |
+      coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value() |
       (USB_IN << 7);
   elfloader_hid_endpoints[1].endpointAddress =
-      coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value() |
+      coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value() |
       (USB_OUT << 7);
   elfloader_descriptor_data.in_ep.endpoint_address =
       elfloader_hid_endpoints[0].endpointAddress;
   elfloader_descriptor_data.out_ep.endpoint_address =
       elfloader_hid_endpoints[1].endpointAddress;
   elfloader_interfaces[0].interfaceNumber =
-      coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value();
-  coral::micro::UsbDeviceTask::GetSingleton()->AddDevice(
+      coralmicro::UsbDeviceTask::GetSingleton()->next_interface_value();
+  coralmicro::UsbDeviceTask::GetSingleton()->AddDevice(
       elfloader_config_data_, elfloader_SetClassHandle, elfloader_HandleEvent,
       &elfloader_descriptor_data, sizeof(elfloader_descriptor_data));
 
-  coral::micro::UsbDeviceTask::GetSingleton()->Init();
+  coralmicro::UsbDeviceTask::GetSingleton()->Init();
 
   vTaskStartScheduler();
   return 0;

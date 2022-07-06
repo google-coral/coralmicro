@@ -30,7 +30,7 @@ bool volatile g_person_detected = false;
 bool g_status_led_state = true;
 
 void HandleAppMessage(
-    const uint8_t data[coral::micro::ipc::kMessageBufferDataSize],
+    const uint8_t data[coralmicro::ipc::kMessageBufferDataSize],
     void* param) {
   (void)data;
   vTaskResume(reinterpret_cast<TaskHandle_t>(param));
@@ -50,20 +50,20 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
 
 extern "C" void app_main(void* param) {
   (void)param;
-  coral::micro::IPCM4::GetSingleton()->RegisterAppMessageHandler(
+  coralmicro::IPCM4::GetSingleton()->RegisterAppMessageHandler(
       HandleAppMessage, xTaskGetCurrentTaskHandle());
-  coral::micro::CameraTask::GetSingleton()->Init(I2C5Handle());
-  coral::micro::CameraTask::GetSingleton()->SetPower(false);
+  coralmicro::CameraTask::GetSingleton()->Init(I2C5Handle());
+  coralmicro::CameraTask::GetSingleton()->SetPower(false);
   vTaskDelay(pdMS_TO_TICKS(100));
-  coral::micro::CameraTask::GetSingleton()->SetPower(true);
+  coralmicro::CameraTask::GetSingleton()->SetPower(true);
   setup();
 
-  coral::micro::led::Set(coral::micro::led::LED::kStatus, g_status_led_state);
+  coralmicro::led::Set(coralmicro::led::LED::kStatus, g_status_led_state);
   auto status_led_timer = xTimerCreate(
       "status_led_timer", pdMS_TO_TICKS(1000), pdTRUE, nullptr,
       +[](TimerHandle_t xTimer) {
         g_status_led_state = !g_status_led_state;
-        coral::micro::led::Set(coral::micro::led::LED::kStatus,
+        coralmicro::led::Set(coralmicro::led::LED::kStatus,
                                g_status_led_state);
       });
   xTimerStart(status_led_timer, 0);
@@ -77,13 +77,13 @@ extern "C" void app_main(void* param) {
 
   while (true) {
     printf("M4 main loop\r\n");
-    coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::kStreaming);
+    coralmicro::CameraTask::GetSingleton()->Enable(
+        coralmicro::camera::Mode::kStreaming);
     g_person_detected = false;
 
     while (true) {
       loop();
-      coral::micro::led::Set(coral::micro::led::LED::kUser, g_person_detected);
+      coralmicro::led::Set(coralmicro::led::LED::kUser, g_person_detected);
 
 #if !defined(OOBE_SIMPLE)
       if (g_person_detected) {
@@ -92,10 +92,10 @@ extern "C" void app_main(void* param) {
 #endif
     }
     printf("Person detected, let M7 take over.\r\n");
-    coral::micro::CameraTask::GetSingleton()->Disable();
-    coral::micro::ipc::Message msg;
-    msg.type = coral::micro::ipc::MessageType::kApp;
-    coral::micro::IPCM4::GetSingleton()->SendMessage(msg);
+    coralmicro::CameraTask::GetSingleton()->Disable();
+    coralmicro::ipc::Message msg;
+    msg.type = coralmicro::ipc::MessageType::kApp;
+    coralmicro::IPCM4::GetSingleton()->SendMessage(msg);
     vTaskSuspend(nullptr);
   }
 }

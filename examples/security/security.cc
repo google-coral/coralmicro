@@ -23,12 +23,12 @@
 
 extern "C" void app_main(void* param) {
   vTaskDelay(pdMS_TO_TICKS(1000));
-  if (!coral::micro::a71ch::Init()) {
+  if (!coralmicro::a71ch::Init()) {
       printf("Failed to initializes the a71ch chip\r\n");
       vTaskSuspend(nullptr);
   }
 
-  if (auto a71ch_uid = coral::micro::a71ch::GetUID(); a71ch_uid.has_value()) {
+  if (auto a71ch_uid = coralmicro::a71ch::GetUID(); a71ch_uid.has_value()) {
     printf("A71 Unique ID: %s\r\n", a71ch_uid.value().c_str());
   } else {
     printf("Failed to retrieve A71's unique ID\r\n");
@@ -65,7 +65,7 @@ extern "C" void app_main(void* param) {
 
   std::vector<uint8_t> model;
   constexpr char kModelPath[] = "/models/testconv1-edgetpu.tflite";
-  if (!coral::micro::filesystem::ReadFile(kModelPath, &model)) {
+  if (!coralmicro::filesystem::ReadFile(kModelPath, &model)) {
     printf("%s missing\r\n", kModelPath);
     vTaskSuspend(nullptr);
   }

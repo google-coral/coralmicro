@@ -32,7 +32,7 @@ unsigned int m4_binary_start __attribute__((weak)) = 0xdeadbeef;
 unsigned int m4_binary_end __attribute__((weak)) = 0xdeadbeef;
 unsigned int m4_binary_size __attribute__((weak)) = 0xdeadbeef;
 
-namespace coral::micro {
+namespace coralmicro {
 
 uint8_t IPCM7::tx_queue_storage_[IPCM7::kMessageBufferSize +
                                  sizeof(ipc::MessageBuffer)]
@@ -134,4 +134,4 @@ void IPCM7::StartM4() {
                     kMCMGR_Start_Asynchronous);
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

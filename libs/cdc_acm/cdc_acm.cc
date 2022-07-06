@@ -26,7 +26,7 @@
 #define DATA_OUT (1)
 #define DATA_IN  (0)
 
-namespace coral::micro {
+namespace coralmicro {
 std::map<class_handle_t, CdcAcm*> CdcAcm::handle_map_;
 
 void CdcAcm::Init(uint8_t interrupt_in_ep, uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t comm_iface, uint8_t data_iface,
@@ -197,4 +197,4 @@ usb_status_t CdcAcm::Handler(uint32_t event, void *param) {
     return ret;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

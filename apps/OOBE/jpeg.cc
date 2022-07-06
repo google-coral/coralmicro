@@ -18,7 +18,7 @@
 
 #include "third_party/nxp/rt1176-sdk/middleware/libjpeg/inc/jpeglib.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 struct buf_destination_mgr {
   struct jpeg_destination_mgr pub;
@@ -119,4 +119,4 @@ JpegBuffer JpegCompressRgb(unsigned char* rgb, int width, int height,
   return res;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

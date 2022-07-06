@@ -27,7 +27,7 @@
 
 #include <cassert>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr uint8_t kSingleBulkOutEndpoint = 1;
 constexpr uint8_t kEventInEndpoint = 2;
@@ -574,4 +574,4 @@ float TpuDriver::GetTemperature() {
     return temperature / 1000;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

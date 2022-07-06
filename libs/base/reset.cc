@@ -19,7 +19,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_romapi.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_soc_src.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr src_general_purpose_register_index_t kRebootedByWatchdogCount =
     kSRC_GeneralPurposeRegister13;
@@ -59,4 +59,4 @@ void StoreResetReason() {
 }
 
 ResetStats GetResetStats() { return reset_stats; }
-}  // namespace coral::micro
+}  // namespace coralmicro

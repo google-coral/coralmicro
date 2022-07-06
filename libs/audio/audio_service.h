@@ -27,7 +27,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 template <typename T>
 class FreeRTOSStreamBuffer {
@@ -245,6 +245,6 @@ class LatestSamples {
     std::vector<int32_t> samples_;  // protected by mutex_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_AUDIO_AUDIO_SERVICE_H_

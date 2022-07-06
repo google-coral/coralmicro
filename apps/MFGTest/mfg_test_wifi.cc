@@ -36,7 +36,7 @@ extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;
 extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
 
 namespace {
-using coral::micro::testlib::JsonRpcGetStringParam;
+using coralmicro::testlib::JsonRpcGetStringParam;
 
 void WiFiGetAP(struct jsonrpc_request* request) {
   std::string name;
@@ -79,7 +79,7 @@ bool ble_ready = false;
 SemaphoreHandle_t ble_scan_sema;
 void BLEFind(struct jsonrpc_request* request) {
   {
-    coral::micro::MutexLock lock(ble_ready_mtx);
+    coralmicro::MutexLock lock(ble_ready_mtx);
     if (!ble_ready) {
       jsonrpc_return_error(request, -1, "bt not ready yet", nullptr);
       return;
@@ -137,7 +137,7 @@ void BLEFind(struct jsonrpc_request* request) {
 
 void BLEScan(struct jsonrpc_request* request) {
   {
-    coral::micro::MutexLock lock(ble_ready_mtx);
+    coralmicro::MutexLock lock(ble_ready_mtx);
     if (!ble_ready) {
       jsonrpc_return_error(request, -1, "bt not ready yet", nullptr);
       return;
@@ -182,7 +182,7 @@ wiced_result_t ble_management_callback(
     wiced_bt_management_evt_data_t* p_event_data) {
   switch (event) {
     case BTM_ENABLED_EVT: {
-      coral::micro::MutexLock lock(ble_ready_mtx);
+      coralmicro::MutexLock lock(ble_ready_mtx);
       if (((wiced_bt_dev_enabled_t*)(p_event_data))->status == WICED_SUCCESS) {
         ble_ready = true;
       } else {
@@ -206,35 +206,35 @@ extern "C" void app_main(void* param) {
   CHECK(ble_scan_sema);
   ble_ready_mtx = xSemaphoreCreateMutex();
   CHECK(ble_ready_mtx);
-  if (coral::micro::filesystem::ReadFile(
+  if (coralmicro::filesystem::ReadFile(
           "/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
           brcm_patchram_buf, brcm_patch_ram_length) != brcm_patch_ram_length) {
     printf("Reading patchram failed\r\n");
     vTaskSuspend(nullptr);
   }
 
-  if (coral::micro::TurnOnWiFi()) {
-    if (coral::micro::ConnectWiFi()) {
-      coral::micro::led::Set(coral::micro::led::LED::kUser, true);
+  if (coralmicro::TurnOnWiFi()) {
+    if (coralmicro::ConnectWiFi()) {
+      coralmicro::led::Set(coralmicro::led::LED::kUser, true);
     }
   } else {
     printf("Wi-Fi failed to come up (is the Wi-Fi board attached?\r\n");
-    coral::micro::led::Set(coral::micro::led::LED::kStatus, true);
+    coralmicro::led::Set(coralmicro::led::LED::kStatus, true);
     vTaskSuspend(nullptr);
   }
-  coral::micro::gpio::SetGpio(coral::micro::gpio::kBtDevWake, false);
+  coralmicro::gpio::SetGpio(coralmicro::gpio::kBtDevWake, false);
   wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings,
                       wiced_bt_cfg_buf_pools);
 
   jsonrpc_init(nullptr, nullptr);
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiScan,
-                 coral::micro::testlib::WiFiScan);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiScan,
+                 coralmicro::testlib::WiFiScan);
   jsonrpc_export("wifi_get_ap", WiFiGetAP);
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiSetAntenna,
-                 coral::micro::testlib::WiFiSetAntenna);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiSetAntenna,
+                 coralmicro::testlib::WiFiSetAntenna);
   jsonrpc_export("ble_scan", BLEScan);
   jsonrpc_export("ble_find", BLEFind);
   IperfInit();
-  coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
+  coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
   vTaskSuspend(nullptr);
 }

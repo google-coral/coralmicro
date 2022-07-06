@@ -19,7 +19,7 @@
 #include <cmath>
 #include <queue>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace tensorflow {
 
 namespace {
@@ -86,4 +86,4 @@ std::vector<Object> GetDetectionResults(tflite::MicroInterpreter* interpreter,
 }
 
 }  // namespace tensorflow
-}  // namespace coral::micro
+}  // namespace coralmicro

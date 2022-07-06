@@ -28,7 +28,7 @@ extern "C" void app_main(void *param) {
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_00_FLEXPWM1_PWM0_A, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_FLEXPWM1_PWM0_B, 0U);
     printf("i'm so pwm\r\n");
-    coral::micro::pwm::PwmModuleConfig config;
+    coralmicro::pwm::PwmModuleConfig config;
     memset(&config, 0, sizeof(config));
     config.base = PWM1;
     config.module = kPWM_Module_0;
@@ -36,11 +36,11 @@ extern "C" void app_main(void *param) {
     config.A.duty_cycle = 20;
     config.B.enabled = true;
     config.B.duty_cycle = 80;
-    coral::micro::pwm::Init(config);
+    coralmicro::pwm::Init(config);
     while (true) {
-        coral::micro::pwm::Enable(config, true);
+        coralmicro::pwm::Enable(config, true);
         vTaskDelay(pdMS_TO_TICKS(1000));
-        coral::micro::pwm::Enable(config, false);
+        coralmicro::pwm::Enable(config, false);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

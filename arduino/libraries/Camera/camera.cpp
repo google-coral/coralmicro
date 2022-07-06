@@ -18,7 +18,7 @@
 
 #include <cstdio>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 int CameraClass::begin(uint32_t resolution) {
@@ -45,7 +45,7 @@ int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
     rotation_ = rotation;
     preserve_ratio_ = preserve_ratio;
     camera_->SetPower(true);
-    camera_->Enable(coral::micro::camera::Mode::kStreaming);
+    camera_->Enable(coralmicro::camera::Mode::kStreaming);
     return CameraStatus::SUCCESS;
 }
 
@@ -60,7 +60,7 @@ int CameraClass::grab(uint8_t* buffer) {
         printf("%s Camera is not initialized...\n", __func__);
         return CameraStatus::NOT_INITIALIZED;
     }
-    std::list<coral::micro::camera::FrameFormat> fmts;
+    std::list<coralmicro::camera::FrameFormat> fmts;
     if (test_pattern_ != camera::TestPattern::kNone) {
         fmts.push_back({camera::Format::kRaw, camera::FilterMethod::kBilinear,
                         camera::Rotation::k0,
@@ -71,7 +71,7 @@ int CameraClass::grab(uint8_t* buffer) {
             {format_, filter_, rotation_, width_, height_, preserve_ratio_, buffer});
     }
 
-    auto success = coral::micro::CameraTask::GetFrame(fmts);
+    auto success = coralmicro::CameraTask::GetFrame(fmts);
     if (!success) {
         printf("Failed to get frame from camera\r\n");
         return CameraStatus::FAILURE;
@@ -80,14 +80,14 @@ int CameraClass::grab(uint8_t* buffer) {
 }
 
 int CameraClass::testPattern(bool walking) {
-    auto test_pattern = walking ? coral::micro::camera::TestPattern::kWalkingOnes
-                                : coral::micro::camera::TestPattern::kNone;
+    auto test_pattern = walking ? coralmicro::camera::TestPattern::kWalkingOnes
+                                : coralmicro::camera::TestPattern::kNone;
     test_pattern_ = test_pattern;
     camera_->SetTestPattern(test_pattern_);
     return CameraStatus::SUCCESS;
 }
 
-int CameraClass::testPattern(coral::micro::camera::TestPattern pattern) {
+int CameraClass::testPattern(coralmicro::camera::TestPattern pattern) {
     test_pattern_ = pattern;
     camera_->SetTestPattern(test_pattern_);
     return CameraStatus::SUCCESS;
@@ -95,9 +95,9 @@ int CameraClass::testPattern(coral::micro::camera::TestPattern pattern) {
 
 int CameraClass::standby(bool enable) {
     if (enable) {
-        camera_->Enable(coral::micro::camera::Mode::kStreaming);
+        camera_->Enable(coralmicro::camera::Mode::kStreaming);
     } else {
-        camera_->Enable(coral::micro::camera::Mode::kStandBy);
+        camera_->Enable(coralmicro::camera::Mode::kStandBy);
     }
     return CameraStatus::SUCCESS;
 }
@@ -107,7 +107,7 @@ int CameraClass::preserveRatio(bool preserve_ratio) {
     return CameraStatus::SUCCESS;
 }
 
-int CameraClass::format(coral::micro::camera::Format fmt) {
+int CameraClass::format(coralmicro::camera::Format fmt) {
     format_ = fmt;
     return CameraStatus::SUCCESS;
 }
@@ -144,6 +144,6 @@ int CameraClass::framerate(uint32_t framerate) {
 }
 
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
-coral::micro::arduino::CameraClass Camera = coral::micro::arduino::CameraClass();
+coralmicro::arduino::CameraClass Camera = coralmicro::arduino::CameraClass();

@@ -22,7 +22,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_xbara.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace pwm {
 namespace {
 pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
@@ -98,4 +98,4 @@ void Enable(const PwmModuleConfig& config, bool enable) {
     }
 }
 }  // namespace pwm
-}  // namespace coral::micro
+}  // namespace coralmicro

@@ -45,18 +45,18 @@
 
 namespace {
 lpi2c_rtos_handle_t i2c5_handle;
-coral::micro::CdcEem cdc_eem;
+coralmicro::CdcEem cdc_eem;
 
 void InitializeCDCEEM() {
     using namespace std::placeholders;
     cdc_eem.Init(
-        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-        coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value());
-    coral::micro::UsbDeviceTask::GetSingleton()->AddDevice(
+        coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coralmicro::UsbDeviceTask::GetSingleton()->next_interface_value());
+    coralmicro::UsbDeviceTask::GetSingleton()->AddDevice(
         cdc_eem.config_data(),
-        std::bind(&coral::micro::CdcEem::SetClassHandle, &cdc_eem, _1),
-        std::bind(&coral::micro::CdcEem::HandleEvent, &cdc_eem, _1, _2),
+        std::bind(&coralmicro::CdcEem::SetClassHandle, &cdc_eem, _1),
+        std::bind(&coralmicro::CdcEem::HandleEvent, &cdc_eem, _1, _2),
         cdc_eem.descriptor_data(), cdc_eem.descriptor_data_size());
 }
 }  // namespace
@@ -74,22 +74,22 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
                          bool init_console_rx) {
     BOARD_InitHardware(true);
     SEMA4_Init(SEMA4);
-    coral::micro::StoreResetReason();
-    coral::micro::timer::Init();
-    coral::micro::gpio::Init();
-    coral::micro::IPCM7::GetSingleton()->Init();
-    coral::micro::Random::GetSingleton()->Init();
-    coral::micro::ConsoleM7::GetSingleton()->Init(init_console_tx,
+    coralmicro::StoreResetReason();
+    coralmicro::timer::Init();
+    coralmicro::gpio::Init();
+    coralmicro::IPCM7::GetSingleton()->Init();
+    coralmicro::Random::GetSingleton()->Init();
+    coralmicro::ConsoleM7::GetSingleton()->Init(init_console_tx,
                                                   init_console_rx);
-    CHECK(coral::micro::filesystem::Init());
+    CHECK(coralmicro::filesystem::Init());
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(nullptr, nullptr);
     InitializeCDCEEM();
-    coral::micro::UsbDeviceTask::GetSingleton()->Init();
-    coral::micro::UsbHostTask::GetSingleton()->Init();
-    coral::micro::EdgeTpuDfuTask::GetSingleton()->Init();
-    coral::micro::EdgeTpuTask::GetSingleton()->Init();
-    coral::micro::tempsense::Init();
+    coralmicro::UsbDeviceTask::GetSingleton()->Init();
+    coralmicro::UsbHostTask::GetSingleton()->Init();
+    coralmicro::EdgeTpuDfuTask::GetSingleton()->Init();
+    coralmicro::EdgeTpuTask::GetSingleton()->Init();
+    coralmicro::tempsense::Init();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     // Initialize I2C5 state
@@ -99,8 +99,8 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
     LPI2C_RTOS_Init(&i2c5_handle, (LPI2C_Type*)LPI2C5_BASE, &config,
                     CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
-    coral::micro::PmicTask::GetSingleton()->Init(&i2c5_handle);
-    coral::micro::CameraTask::GetSingleton()->Init(&i2c5_handle);
+    coralmicro::PmicTask::GetSingleton()->Init(&i2c5_handle);
+    coralmicro::CameraTask::GetSingleton()->Init(&i2c5_handle);
 #endif
 
     CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30,

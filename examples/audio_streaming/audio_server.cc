@@ -29,7 +29,7 @@
 // and makes the audio stream available from a local server.
 // To receive the audio stream, run audio_client.py on your connected computer.
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 AudioDriverBuffers</*NumDmaBuffers*/ 16, /*CombinedDmaBufferSize=*/28 * 1024>
     g_audio_buffers;
@@ -155,10 +155,10 @@ void RunServer() {
     }
 }
 }  // namespace
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
     (void)param;
-    coral::micro::RunServer();
+    coralmicro::RunServer();
     vTaskSuspend(nullptr);
 }

@@ -19,7 +19,7 @@
 
 #include <api/HardwareSerial.h>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 class HardwareSerial : public ::arduino::HardwareSerial {
@@ -40,6 +40,6 @@ class HardwareSerial : public ::arduino::HardwareSerial {
 };
 
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // HardwareSerial_h

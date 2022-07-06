@@ -16,21 +16,21 @@
 
 #include "SD.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 namespace SDLib {
 bool SDClass::begin(uint8_t csPin) {
   // We ignore csPin, since we don't have a real SD card
-  return coral::micro::filesystem::Init();
+  return coralmicro::filesystem::Init();
 }
 
 File SDClass::open(const char *filename, uint8_t mode) {
   std::shared_ptr<lfs_file_t> file_handle = std::make_shared<lfs_file_t>();
   std::shared_ptr<lfs_dir_t> dir_handle = std::make_shared<lfs_dir_t>();
 
-  if (coral::micro::filesystem::OpenDir(dir_handle.get(), filename)) {
+  if (coralmicro::filesystem::OpenDir(dir_handle.get(), filename)) {
     return File(dir_handle, filename);
-  } else if (coral::micro::filesystem::Open(file_handle.get(), filename,
+  } else if (coralmicro::filesystem::Open(file_handle.get(), filename,
                                        mode == FILE_WRITE, true)) {
     return SDLib::File(file_handle, filename, mode == FILE_WRITE);
   } else {
@@ -43,30 +43,30 @@ bool SDClass::exists(const char *filepath) {
   lfs_file_t file_handle;
   bool retval = false;
 
-  if (coral::micro::filesystem::OpenDir(&dir_handle, filepath)) {
-    coral::micro::filesystem::CloseDir(&dir_handle);
+  if (coralmicro::filesystem::OpenDir(&dir_handle, filepath)) {
+    coralmicro::filesystem::CloseDir(&dir_handle);
     retval = true;
-  } else if (coral::micro::filesystem::Open(&file_handle, filepath, false)) {
-    coral::micro::filesystem::Close(&file_handle);
+  } else if (coralmicro::filesystem::Open(&file_handle, filepath, false)) {
+    coralmicro::filesystem::Close(&file_handle);
     retval = true;
   }
   return retval;
 }
 
 bool SDClass::mkdir(const char *filepath) {
-  return coral::micro::filesystem::MakeDirs(filepath);
+  return coralmicro::filesystem::MakeDirs(filepath);
 }
 
 bool SDClass::remove(const char *filepath) {
-  return coral::micro::filesystem::Remove(filepath);
+  return coralmicro::filesystem::Remove(filepath);
 }
 
 bool SDClass::rmdir(const char *filepath) {
-  return coral::micro::filesystem::Remove(filepath);
+  return coralmicro::filesystem::Remove(filepath);
 }
 
 }  // namespace SDLib
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
-coral::micro::arduino::SDLib::SDClass SD;
+coralmicro::arduino::SDLib::SDClass SD;

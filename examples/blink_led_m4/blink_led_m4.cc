@@ -26,8 +26,8 @@ extern "C" [[noreturn]] void app_main(void *param) {
     bool on = true;
     while (true) {
         on = !on;
-        coral::micro::led::Set(coral::micro::led::LED::kStatus, on);
-        coral::micro::led::Set(coral::micro::led::LED::kUser, on);
+        coralmicro::led::Set(coralmicro::led::LED::kStatus, on);
+        coralmicro::led::Set(coralmicro::led::LED::kUser, on);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

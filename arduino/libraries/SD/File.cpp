@@ -16,7 +16,7 @@
 
 #include "SD.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 namespace SDLib {
 
@@ -38,7 +38,7 @@ size_t File::write(uint8_t val) { return write(&val, 1); }
 
 size_t File::write(const uint8_t *buf, size_t sz) {
   if (file_handle_) {
-    return coral::micro::filesystem::Write(file_handle_.get(), buf, sz);
+    return coralmicro::filesystem::Write(file_handle_.get(), buf, sz);
   }
   return 0;
 }
@@ -48,7 +48,7 @@ int File::peek() {
     int retval;
     retval = read();
     if (retval != -1) {
-      coral::micro::filesystem::Seek(file_handle_.get(), -1, LFS_SEEK_CUR);
+      coralmicro::filesystem::Seek(file_handle_.get(), -1, LFS_SEEK_CUR);
     }
     return retval;
   }
@@ -63,7 +63,7 @@ int File::read() {
 
 int File::read(void *buf, size_t nbyte) {
   if (file_handle_) {
-    return coral::micro::filesystem::Read(file_handle_.get(), buf, nbyte);
+    return coralmicro::filesystem::Read(file_handle_.get(), buf, nbyte);
   }
   return -1;
 }
@@ -77,13 +77,13 @@ int File::available() {
 
 void File::flush() {
   if (file_handle_) {
-    coral::micro::filesystem::Seek(file_handle_.get(), 0, LFS_SEEK_CUR);
+    coralmicro::filesystem::Seek(file_handle_.get(), 0, LFS_SEEK_CUR);
   }
 }
 
 bool File::seek(size_t pos) {
   if (file_handle_ && pos >= 0 && pos <= size()) {
-    return coral::micro::filesystem::Seek(file_handle_.get(), pos, LFS_SEEK_SET);
+    return coralmicro::filesystem::Seek(file_handle_.get(), pos, LFS_SEEK_SET);
   }
   return false;
 }
@@ -96,14 +96,14 @@ size_t File::position() {
       uint8_t junk;
       write(&junk, 0);
     }
-    return coral::micro::filesystem::Position(file_handle_.get());
+    return coralmicro::filesystem::Position(file_handle_.get());
   }
   return -1;
 }
 
 size_t File::size() {
   if (file_handle_) {
-    return coral::micro::filesystem::Size(file_handle_.get());
+    return coralmicro::filesystem::Size(file_handle_.get());
   }
   return -1;
 }
@@ -113,13 +113,13 @@ void File::close() {
   name_[0] = 0;
   if (is_dir_) {
     if (dir_handle_) {
-      coral::micro::filesystem::CloseDir(dir_handle_.get());
+      coralmicro::filesystem::CloseDir(dir_handle_.get());
       dir_handle_ = nullptr;
       is_dir_ = false;
     }
   } else {
     if (file_handle_) {
-      coral::micro::filesystem::Close(file_handle_.get());
+      coralmicro::filesystem::Close(file_handle_.get());
       file_handle_ = nullptr;
     }
   }
@@ -131,7 +131,7 @@ File File::openNextFile(uint8_t mode) {
   if (is_dir_ && dir_handle_) {
     char buf[255];
     lfs_info info;
-    while (coral::micro::filesystem::ReadDir(dir_handle_.get(), &info)) {
+    while (coralmicro::filesystem::ReadDir(dir_handle_.get(), &info)) {
       if (info.name[0] == '.') {
         continue;
       }
@@ -152,10 +152,10 @@ File File::openNextFile(uint8_t mode) {
 
 void File::rewindDirectory() {
   if (dir_handle_) {
-    coral::micro::filesystem::RewindDir(dir_handle_.get());
+    coralmicro::filesystem::RewindDir(dir_handle_.get());
   }
 }
 
 }  // namespace SDLib
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro

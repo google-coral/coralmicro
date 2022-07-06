@@ -38,21 +38,21 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
             person_score, no_person_score);
 
     bool person_detected = person_score > no_person_score;
-    coral::micro::led::Set(coral::micro::led::LED::kUser, person_detected);
-    coral::micro::led::Set(coral::micro::led::LED::kStatus, person_detected);
+    coralmicro::led::Set(coralmicro::led::LED::kUser, person_detected);
+    coralmicro::led::Set(coralmicro::led::LED::kStatus, person_detected);
 }
 
 extern "C" void app_main(void *param) {
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+    coralmicro::CameraTask::GetSingleton()->SetPower(false);
     vTaskDelay(pdMS_TO_TICKS(100));
-    coral::micro::CameraTask::GetSingleton()->SetPower(true);
-    coral::micro::CameraTask::GetSingleton()->Enable(coral::micro::camera::Mode::kStreaming);
+    coralmicro::CameraTask::GetSingleton()->SetPower(true);
+    coralmicro::CameraTask::GetSingleton()->Enable(coralmicro::camera::Mode::kStreaming);
 
     setup();
     while (true) {
         loop();
     }
-    coral::micro::CameraTask::GetSingleton()->Disable();
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+    coralmicro::CameraTask::GetSingleton()->Disable();
+    coralmicro::CameraTask::GetSingleton()->SetPower(false);
     vTaskSuspend(nullptr);
 }

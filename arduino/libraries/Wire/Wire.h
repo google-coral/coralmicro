@@ -25,7 +25,7 @@
 
 #include <functional>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 class HardwareI2C : public ::arduino::HardwareI2C {
@@ -85,8 +85,8 @@ class HardwareI2C : public ::arduino::HardwareI2C {
 };
 
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
-extern coral::micro::arduino::HardwareI2C Wire;
+extern coralmicro::arduino::HardwareI2C Wire;
 
 #endif  // Wire_h

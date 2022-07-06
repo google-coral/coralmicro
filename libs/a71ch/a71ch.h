@@ -20,7 +20,7 @@
 #include <optional>
 #include <string>
 
-namespace coral::micro::a71ch {
+namespace coralmicro::a71ch {
 
 // Initializes the a71ch module.
 //
@@ -33,6 +33,6 @@ bool Init();
 //
 // @return the unique id of this a71ch module or std::nullopt.
 std::optional<std::string> GetUID();
-}  // namespace coral::micro::a71ch
+}  // namespace coralmicro::a71ch
 
 #endif  // LIBS_A71CH_A71CH_H_

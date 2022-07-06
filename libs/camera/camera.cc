@@ -31,7 +31,7 @@
 
 #include <memory>
 
-namespace coral::micro {
+namespace coralmicro {
 using namespace camera;
 
 namespace {
@@ -872,4 +872,4 @@ void CameraTask::RequestHandler(Request* req) {
     if (req->callback) req->callback(resp);
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

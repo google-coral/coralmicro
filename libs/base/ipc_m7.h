@@ -21,7 +21,7 @@
 
 #include "libs/base/ipc.h"
 
-namespace coral::micro {
+namespace coralmicro {
 class IPCM7 : public IPC {
    public:
     static IPCM7* GetSingleton() {
@@ -52,6 +52,6 @@ class IPCM7 : public IPC {
         rx_queue_storage_[kMessageBufferSize + sizeof(ipc::MessageBuffer)]
         __attribute__((section(".noinit.$rpmsg_sh_mem")));
 };
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_IPC_M7_H_

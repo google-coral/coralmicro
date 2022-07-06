@@ -24,19 +24,19 @@
 
 // [start-sphinx-snippet:dac-adc]
 extern "C" void app_main(void *param) {
-    coral::micro::analog::Init(coral::micro::analog::Device::kAdc1);
-    coral::micro::analog::Init(coral::micro::analog::Device::kDac1);
-    coral::micro::analog::ADCConfig config;
-    coral::micro::analog::CreateConfig(
+    coralmicro::analog::Init(coralmicro::analog::Device::kAdc1);
+    coralmicro::analog::Init(coralmicro::analog::Device::kDac1);
+    coralmicro::analog::ADCConfig config;
+    coralmicro::analog::CreateConfig(
         config,
-        coral::micro::analog::Device::kAdc1, 0,
-        coral::micro::analog::Side::kB,
+        coralmicro::analog::Device::kAdc1, 0,
+        coralmicro::analog::Side::kB,
         false
     );
-    coral::micro::analog::EnableDAC(true);
+    coralmicro::analog::EnableDAC(true);
     while (true) {
-        uint16_t val = coral::micro::analog::ReadADC(config);
-        coral::micro::analog::WriteDAC(val);
+        uint16_t val = coralmicro::analog::ReadADC(config);
+        coralmicro::analog::WriteDAC(val);
         printf("ADC val: %u\r\n", val);
     }
 }

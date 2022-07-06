@@ -17,13 +17,13 @@
 #ifndef LIBS_TESTCONV1_TESTCONV1_H_
 #define LIBS_TESTCONV1_TESTCONV1_H_
 
-namespace coral::micro {
+namespace coralmicro {
 namespace testconv1 {
 
 bool setup();
 bool loop();
 
 }  // namespace testconv1
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TESTCONV1_TESTCONV1_H_

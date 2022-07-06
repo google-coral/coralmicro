@@ -20,7 +20,7 @@
 #include "libs/base/tasks.h"
 #include "third_party/nxp/rt1176-sdk/middleware/multicore/mcmgr/src/mcmgr.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 void IPC::FreeRtosMessageEventHandler(uint16_t eventData) {
     BaseType_t higher_priority_woken = pdFALSE;
@@ -102,4 +102,4 @@ void IPC::Init() {
     vTaskSuspend(rx_task_);
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

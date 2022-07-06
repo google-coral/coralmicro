@@ -34,7 +34,7 @@ namespace mp_example {
         LEDStatus led_status;
     } __attribute__((packed));
 
-    static_assert(sizeof(ExampleAppMessage) <= coral::micro::ipc::kMessageBufferDataSize);
+    static_assert(sizeof(ExampleAppMessage) <= coralmicro::ipc::kMessageBufferDataSize);
 
 } // namespace mp_example
 

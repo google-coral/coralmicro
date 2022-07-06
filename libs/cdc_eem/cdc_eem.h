@@ -26,7 +26,7 @@
 
 #include <map>
 
-namespace coral::micro {
+namespace coralmicro {
 
 class CdcEem {
   public:
@@ -171,6 +171,6 @@ class CdcEem {
     void DetectEndianness(uint32_t packet_length);
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_CDC_EEM_CDC_EEM_H_

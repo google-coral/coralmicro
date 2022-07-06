@@ -10,7 +10,7 @@ const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
 std::vector<uint8_t> image_data;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
-std::shared_ptr<coral::micro::EdgeTpuContext> context = nullptr;
+std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 
 const int kTensorArenaSize = 1024 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
@@ -52,13 +52,13 @@ void setup() {
     }
 
     model = tflite::GetModel(model_data.data());
-    context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
+    context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         Serial.println("Failed to get EdgeTpuContext");
         return;
     }
 
-    resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
+    resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
     tflite::MicroErrorReporter error_reporter;
     interpreter = std::make_unique<tflite::MicroInterpreter>(
         model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
@@ -90,12 +90,12 @@ void loop() {
         return;
     }
 
-    if (coral::micro::tensorflow::ClassificationInputNeedsPreprocessing(
+    if (coralmicro::tensorflow::ClassificationInputNeedsPreprocessing(
             *input_tensor)) {
-        coral::micro::tensorflow::ClassificationPreprocess(input_tensor);
+        coralmicro::tensorflow::ClassificationPreprocess(input_tensor);
     }
 
-    coral::micro::tensorflow::TensorSize(input_tensor);
+    coralmicro::tensorflow::TensorSize(input_tensor);
     auto* input_tensor_data = tflite::GetTensorData<uint8_t>(input_tensor);
     memcpy(input_tensor_data, image_data.data(), input_tensor->bytes);
 
@@ -104,7 +104,7 @@ void loop() {
         return;
     }
 
-    auto results = coral::micro::tensorflow::GetClassificationResults(
+    auto results = coralmicro::tensorflow::GetClassificationResults(
         interpreter.get(), 0.0f, 3);
     for (auto result : results) {
         Serial.print("Label ID: ");

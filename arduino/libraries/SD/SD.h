@@ -24,7 +24,7 @@
 #define FILE_WRITE 1
 #define DONT_CARE 0
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 namespace SDLib {
@@ -94,10 +94,10 @@ class SDClass {
 
 }  // namespace SDLib
 }  // namespace arduino
-}  // namespace coral::micro
-// using namespace coral::micro::arduino::SDLib;
+}  // namespace coralmicro
+// using namespace coralmicro::arduino::SDLib;
 
-typedef coral::micro::arduino::SDLib::File SDFile;
-extern coral::micro::arduino::SDLib::SDClass SD;
+typedef coralmicro::arduino::SDLib::File SDFile;
+extern coralmicro::arduino::SDLib::SDClass SD;
 
 #endif  // SD_h

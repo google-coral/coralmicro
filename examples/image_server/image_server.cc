@@ -31,7 +31,7 @@
 #endif  // defined(IMAGE_SERVER_WIFI)
 
 namespace {
-using coral::micro::testlib::JsonRpcGetIntegerParam;
+using coralmicro::testlib::JsonRpcGetIntegerParam;
 
 void get_image_from_camera(struct jsonrpc_request* request) {
     int width, height;
@@ -42,21 +42,21 @@ void get_image_from_camera(struct jsonrpc_request* request) {
         return;
     }
 
-    coral::micro::CameraTask::GetSingleton()->SetPower(true);
-    coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::kStreaming);
+    coralmicro::CameraTask::GetSingleton()->SetPower(true);
+    coralmicro::CameraTask::GetSingleton()->Enable(
+        coralmicro::camera::Mode::kStreaming);
     std::vector<uint8_t> image(width * height * /*channels=*/3);
-    coral::micro::camera::FrameFormat fmt{
-        coral::micro::camera::Format::kRgb,
-        coral::micro::camera::FilterMethod::kBilinear,
-        coral::micro::camera::Rotation::k0,
+    coralmicro::camera::FrameFormat fmt{
+        coralmicro::camera::Format::kRgb,
+        coralmicro::camera::FilterMethod::kBilinear,
+        coralmicro::camera::Rotation::k0,
         width,
         height,
         false,
         image.data()};
-    auto ret = coral::micro::CameraTask::GetFrame({fmt});
-    coral::micro::CameraTask::GetSingleton()->Disable();
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+    auto ret = coralmicro::CameraTask::GetFrame({fmt});
+    coralmicro::CameraTask::GetSingleton()->Disable();
+    coralmicro::CameraTask::GetSingleton()->SetPower(false);
 
     if (!ret) {
         jsonrpc_return_error(request, -1, "Failed to get image from camera.",
@@ -72,13 +72,13 @@ void get_image_from_camera(struct jsonrpc_request* request) {
 
 extern "C" void app_main(void* param) {
 #if defined(IMAGE_SERVER_ETHERNET)
-    coral::micro::InitializeEthernet(true);
-    auto* ethernet = coral::micro::GetEthernetInterface();
+    coralmicro::InitializeEthernet(true);
+    auto* ethernet = coralmicro::GetEthernetInterface();
     if (!ethernet) {
         printf("Unable to bring up ethernet...\r\n");
         vTaskSuspend(nullptr);
     }
-    auto ethernet_ip = coral::micro::GetEthernetIp();
+    auto ethernet_ip = coralmicro::GetEthernetIp();
     if (!ethernet_ip.has_value()) {
         printf("Unable to get Ethernet IP\r\n");
         vTaskSuspend(nullptr);
@@ -91,22 +91,22 @@ extern "C" void app_main(void* param) {
             reinterpret_cast<std::string*>(request->ctx->response_cb_data)->c_str());
     });
 #elif defined(IMAGE_SERVER_WIFI)
-    if (!coral::micro::TurnOnWiFi()) {
+    if (!coralmicro::TurnOnWiFi()) {
         printf("Unable to bring up wifi...\r\n");
     }
-    jsonrpc_export(coral::micro::testlib::kMethodWiFiConnect,
-                   coral::micro::testlib::WiFiConnect);
-    jsonrpc_export(coral::micro::testlib::kMethodWiFiGetIp,
-                   coral::micro::testlib::WiFiGetIp);
-    jsonrpc_export(coral::micro::testlib::kMethodWiFiGetStatus,
-                   coral::micro::testlib::WiFiGetStatus);
+    jsonrpc_export(coralmicro::testlib::kMethodWiFiConnect,
+                   coralmicro::testlib::WiFiConnect);
+    jsonrpc_export(coralmicro::testlib::kMethodWiFiGetIp,
+                   coralmicro::testlib::WiFiGetIp);
+    jsonrpc_export(coralmicro::testlib::kMethodWiFiGetStatus,
+                   coralmicro::testlib::WiFiGetStatus);
 
 #else
     printf("Starting Image RPC Server...\r\n");
     jsonrpc_init(nullptr, nullptr);
 #endif  // defined(IMAGE_SERVER_ETHERNET)
     jsonrpc_export("get_image_from_camera", get_image_from_camera);
-    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
+    coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
     printf("Server started...\r\n");
     vTaskSuspend(nullptr);
 }

@@ -25,9 +25,9 @@
 [[noreturn]] void read_task(void* param) {
     char ch;
     do {
-        int bytes = coral::micro::ConsoleM7::GetSingleton()->Read(&ch, 1);
+        int bytes = coralmicro::ConsoleM7::GetSingleton()->Read(&ch, 1);
         if (bytes == 1) {
-            coral::micro::ConsoleM7::GetSingleton()->Write(&ch, 1);
+            coralmicro::ConsoleM7::GetSingleton()->Write(&ch, 1);
         }
         taskYIELD();
     } while (true);
@@ -36,13 +36,13 @@
 extern "C" [[noreturn]] void app_main(void* param) {
     printf("Hello world FreeRTOS.\r\n");
 
-    coral::micro::PmicTask::GetSingleton()->SetRailState(
-        coral::micro::pmic::Rail::kCam2V8, true);
-    coral::micro::PmicTask::GetSingleton()->SetRailState(
-        coral::micro::pmic::Rail::kCam1V8, true);
-    coral::micro::PmicTask::GetSingleton()->SetRailState(
-        coral::micro::pmic::Rail::kMic1V8, true);
-    coral::micro::EdgeTpuTask::GetSingleton()->SetPower(true);
+    coralmicro::PmicTask::GetSingleton()->SetRailState(
+        coralmicro::pmic::Rail::kCam2V8, true);
+    coralmicro::PmicTask::GetSingleton()->SetRailState(
+        coralmicro::pmic::Rail::kCam1V8, true);
+    coralmicro::PmicTask::GetSingleton()->SetRailState(
+        coralmicro::pmic::Rail::kMic1V8, true);
+    coralmicro::EdgeTpuTask::GetSingleton()->SetPower(true);
 
     xTaskCreate(read_task, "read_task", configMINIMAL_STACK_SIZE, nullptr,
                 APP_TASK_PRIORITY, nullptr);
@@ -50,9 +50,9 @@ extern "C" [[noreturn]] void app_main(void* param) {
     bool up = true;
     unsigned int brightness = 50;
     while (true) {
-        coral::micro::led::Set(coral::micro::led::LED::kStatus, brightness > 50);
-        coral::micro::led::Set(coral::micro::led::LED::kUser, brightness > 50);
-        coral::micro::led::Set(coral::micro::led::LED::kTpu, true, brightness);
+        coralmicro::led::Set(coralmicro::led::LED::kStatus, brightness > 50);
+        coralmicro::led::Set(coralmicro::led::LED::kUser, brightness > 50);
+        coralmicro::led::Set(coralmicro::led::LED::kTpu, true, brightness);
 
         if (up) {
             ++brightness;

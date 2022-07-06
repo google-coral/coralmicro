@@ -25,7 +25,7 @@
 #define GPIO6_Combined_0_15_IRQn NotAvail_IRQn
 #endif
 
-namespace coral::micro {
+namespace coralmicro {
 namespace gpio {
 namespace {
 StaticSemaphore_t g_mutex_storage;
@@ -533,7 +533,7 @@ void SetPinConfig(Gpio gpio, gpio_pin_config_t config) {
 }
 
 }  // namespace gpio
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 namespace {
 void GPIO_Common_IRQHandler(GPIO_Type *base) {
@@ -542,7 +542,7 @@ void GPIO_Common_IRQHandler(GPIO_Type *base) {
     int i = 0;
     while (pins) {
         if (pins & 1) {
-            coral::micro::gpio::IRQHandler(base, i);
+            coralmicro::gpio::IRQHandler(base, i);
         }
         ++i;
         pins = pins >> 1;

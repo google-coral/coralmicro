@@ -19,7 +19,7 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 void* CustomOpInit(TfLiteContext* context, const char* buffer, size_t length) {
     return EdgeTpuManager::GetSingleton()->RegisterPackage(buffer, length);
@@ -47,4 +47,4 @@ TfLiteRegistration* RegisterCustomOp() {
     };
     return &registration;
 }
-}  // namespace coral::micro
+}  // namespace coralmicro

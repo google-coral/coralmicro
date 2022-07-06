@@ -23,7 +23,7 @@
 #include "libs/cdc_acm/cdc_acm.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 class ConsoleM7 {
    public:
@@ -88,6 +88,6 @@ class ConsoleM7 {
     TaskHandle_t tx_task_, rx_task_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_CONSOLE_M7_H_

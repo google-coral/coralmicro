@@ -20,7 +20,7 @@
 #include "third_party/freertos_kernel/include/timers.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_wdog.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 TimerHandle_t wdog_timer;
 }  // namespace
@@ -61,4 +61,4 @@ void Watchdog::Stop() {
     WDOG_Deinit(WDOG1);
     xTimerDelete(wdog_timer, /*xTicksToWait=*/0);
 }
-}  // namespace coral::micro
+}  // namespace coralmicro

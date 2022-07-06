@@ -13,7 +13,7 @@ constexpr char kModelPath[] =
 std::vector<uint8_t> image_data;
 constexpr char kImagePath[] = "/examples/detect_image/cat_300x300.rgb";
 
-std::shared_ptr<coral::micro::EdgeTpuContext> context = nullptr;
+std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 tflite::MicroMutableOpResolver<3> resolver;
 
@@ -53,7 +53,7 @@ void setup() {
     }
     Serial.println("Input image complete");
     model = tflite::GetModel(model_data.data());
-    context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
+    context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         Serial.println("Failed to get EdgeTpuContext");
         return;
@@ -62,7 +62,7 @@ void setup() {
 
     resolver.AddDequantize();
     resolver.AddDetectionPostprocess();
-    resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
+    resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
     tflite::MicroErrorReporter error_reporter;
 
     interpreter = std::make_unique<tflite::MicroInterpreter>(
@@ -108,7 +108,7 @@ void loop() {
     }
 
     auto results =
-        coral::micro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
+        coralmicro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
     for (auto result : results) {
         Serial.print("id: ");
         Serial.print(result.id);

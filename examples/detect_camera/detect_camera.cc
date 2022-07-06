@@ -71,19 +71,19 @@ void DetectFromCamera(struct jsonrpc_request* r) {
 
     printf("width=%d; height=%d\n\r", model_width, model_height);
 
-    coral::micro::CameraTask::GetSingleton()->SetPower(true);
-    coral::micro::CameraTask::GetSingleton()->Enable(
-        coral::micro::camera::Mode::kStreaming);
+    coralmicro::CameraTask::GetSingleton()->SetPower(true);
+    coralmicro::CameraTask::GetSingleton()->Enable(
+        coralmicro::camera::Mode::kStreaming);
 
     std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
-    coral::micro::camera::FrameFormat fmt{coral::micro::camera::Format::kRgb, coral::micro::camera::FilterMethod::kBilinear,
-                                     coral::micro::camera::Rotation::k0, model_width,
+    coralmicro::camera::FrameFormat fmt{coralmicro::camera::Format::kRgb, coralmicro::camera::FilterMethod::kBilinear,
+                                     coralmicro::camera::Rotation::k0, model_width,
                                      model_height, false, image.data()};
 
-    bool ret = coral::micro::CameraTask::GetFrame({fmt});
+    bool ret = coralmicro::CameraTask::GetFrame({fmt});
 
-    coral::micro::CameraTask::GetSingleton()->Disable();
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+    coralmicro::CameraTask::GetSingleton()->Disable();
+    coralmicro::CameraTask::GetSingleton()->SetPower(false);
 
     if (!ret) {
         jsonrpc_return_error(r, -1, "Failed to get image from camera.",
@@ -100,7 +100,7 @@ void DetectFromCamera(struct jsonrpc_request* r) {
     }
 
     auto results =
-        coral::micro::tensorflow::GetDetectionResults(interpreter, 0.5, 1);
+        coralmicro::tensorflow::GetDetectionResults(interpreter, 0.5, 1);
     if (!results.empty()) {
         const auto& result = results[0];
         jsonrpc_return_success(
@@ -121,12 +121,12 @@ void DetectFromCamera(struct jsonrpc_request* r) {
 
 extern "C" void app_main(void* param) {
     std::vector<uint8_t> model;
-    if (!coral::micro::filesystem::ReadFile(kModelPath, &model)) {
+    if (!coralmicro::filesystem::ReadFile(kModelPath, &model)) {
         printf("ERROR: Failed to load %s\r\n", kModelPath);
         vTaskSuspend(nullptr);
     }
 
-    auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
+    auto tpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!tpu_context) {
         printf("ERROR: Failed to get EdgeTpu context\r\n");
         vTaskSuspend(nullptr);
@@ -136,7 +136,7 @@ extern "C" void app_main(void* param) {
     tflite::MicroMutableOpResolver<3> resolver;
     resolver.AddDequantize();
     resolver.AddDetectionPostprocess();
-    resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
+    resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
 
     tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
                                          resolver, tensor_arena,
@@ -154,7 +154,7 @@ extern "C" void app_main(void* param) {
     printf("Initializing detection server...%p\r\n", &interpreter);
     jsonrpc_init(nullptr, &interpreter);
     jsonrpc_export("detect_from_camera", DetectFromCamera);
-    coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
+    coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
     printf("Detection server ready!\r\n");
     vTaskSuspend(nullptr);
 }

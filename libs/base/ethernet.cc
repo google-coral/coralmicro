@@ -26,7 +26,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 struct netif netif;
 struct netif* eth_netif = nullptr;
@@ -96,7 +96,7 @@ void InitializeEthernet(bool default_iface) {
         .enableEEE = true,
     };
 
-    int speed = coral::micro::utils::GetEthernetSpeed();
+    int speed = coralmicro::utils::GetEthernetSpeed();
     switch (speed) {
         case 1000:
             phyConfig.speed = kPHY_Speed1000M;
@@ -123,7 +123,7 @@ void InitializeEthernet(bool default_iface) {
     // Populate the low bytes of the MAC address with our device's
     // unique ID.
     // In production units, addresses should be in fuses that we can read.
-    uint64_t unique_id = coral::micro::utils::GetUniqueID();
+    uint64_t unique_id = coralmicro::utils::GetUniqueID();
     enet_config.macAddress[3] = (unique_id >> 56) & 0xFF;
     enet_config.macAddress[4] = (unique_id >> 48) & 0xFF;
     enet_config.macAddress[5] = (unique_id >> 40) & 0xFF;
@@ -180,4 +180,4 @@ std::optional<std::string> GetEthernetIp() {
     return ip4addr_ntoa(netif_ip4_addr(eth_netif));
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

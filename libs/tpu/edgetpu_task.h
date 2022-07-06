@@ -26,7 +26,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include <functional>
 
-namespace coral::micro {
+namespace coralmicro {
 
 inline constexpr int kEdgeTpuVid = 0x18d1;
 inline constexpr int kEdgeTpuPid = 0x9302;
@@ -133,6 +133,6 @@ class EdgeTpuTask : public QueueTask<edgetpu::Request, edgetpu::Response,
     uint8_t status_;
     int enabled_count_ = 0;
 };
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TPU_EDGETPU_TASK_H_

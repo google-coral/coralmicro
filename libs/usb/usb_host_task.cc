@@ -30,10 +30,10 @@
 
 extern "C" void USB_OTG2_IRQHandler(void) {
     USB_HostEhciIsrFunction(
-        coral::micro::UsbHostTask::GetSingleton()->host_handle());
+        coralmicro::UsbHostTask::GetSingleton()->host_handle());
 }
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr int kUSBControllerId = kUSB_ControllerEhci1;
 
@@ -119,4 +119,4 @@ UsbHostTask::UsbHostTask() {
 #endif
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

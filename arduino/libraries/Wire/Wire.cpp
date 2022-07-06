@@ -20,7 +20,7 @@
 #include <cassert>
 extern "C" uint32_t LPI2C_GetInstance(LPI2C_Type*);
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 void HardwareI2C::StaticSlaveCallback(LPI2C_Type *base, lpi2c_slave_transfer_t *transfer, void *userData) {
@@ -222,6 +222,6 @@ int HardwareI2C::peek() {
 }
 
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
-coral::micro::arduino::HardwareI2C Wire(LPI2C1);
+coralmicro::arduino::HardwareI2C Wire(LPI2C1);

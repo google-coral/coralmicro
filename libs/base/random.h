@@ -23,7 +23,7 @@
 #include "libs/base/queue_task.h"
 #include "libs/base/tasks.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 namespace random {
 
@@ -55,6 +55,6 @@ class Random : public QueueTask<random::Request, random::Response,
     void RequestHandler(random::Request* req) override;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_RANDOM_H_

@@ -23,7 +23,7 @@
 // Run it and open a web browser on your computer to the URL
 // shown in the serial terminal, such as http://10.10.10.1/hello.html
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 
 HttpServer::Content UriHandler(const char* path) {
@@ -39,17 +39,17 @@ HttpServer::Content UriHandler(const char* path) {
 }
 
 }  // namespace
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
     (void)param;
     printf("Starting server...\r\n");
-    coral::micro::HttpServer http_server;
-    http_server.AddUriHandler(coral::micro::UriHandler);
-    coral::micro::UseHttpServer(&http_server);
+    coralmicro::HttpServer http_server;
+    http_server.AddUriHandler(coralmicro::UriHandler);
+    coralmicro::UseHttpServer(&http_server);
 
     std::string ip;
-    if (coral::micro::utils::GetUSBIPAddress(&ip)) {
+    if (coralmicro::utils::GetUSBIPAddress(&ip)) {
         printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "/hello.html");
     }
     vTaskSuspend(nullptr);

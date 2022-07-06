@@ -36,7 +36,7 @@ typedef struct _usb_host_cdc_line_coding_struct
     uint8_t bDataBits;   /*!< Data bits (5, 6, 7, 8 or 16).*/
 } __attribute__((packed)) usb_host_cdc_line_coding_struct_t;
 
-namespace coral::micro {
+namespace coralmicro {
 
 class CdcAcm {
   public:
@@ -240,6 +240,6 @@ class CdcAcm {
     usb_host_cdc_line_coding_struct_t line_coding_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_CDC_ACM_CDC_ACM_H_

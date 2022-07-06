@@ -21,7 +21,7 @@
 #include "third_party/freertos_kernel/include/message_buffer.h"
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 namespace ipc {
 
@@ -67,6 +67,6 @@ static_assert(sizeof(SystemMessage) <= kMessageBufferDataSize);
 #endif
 
 }  // namespace ipc
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_MESSAGE_BUFFER_H_

@@ -25,10 +25,10 @@
 
 extern "C" void USB_OTG1_IRQHandler(void) {
     USB_DeviceEhciIsrFunction(
-        coral::micro::UsbDeviceTask::GetSingleton()->device_handle());
+        coralmicro::UsbDeviceTask::GetSingleton()->device_handle());
 }
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr int kUSBControllerId = kUSB_ControllerEhci0;
 
@@ -181,7 +181,7 @@ bool UsbDeviceTask::Init() {
 }
 
 UsbDeviceTask::UsbDeviceTask() {
-    serial_number_ = coral::micro::utils::GetSerialNumber();
+    serial_number_ = coralmicro::utils::GetSerialNumber();
 
     constexpr uint32_t usb_clock_freq = 24000000;
     usb_phy_config_struct_t phy_config = {
@@ -219,4 +219,4 @@ void UsbDeviceTask::UsbDeviceTaskFn() {
     USB_DeviceEhciTaskFunction(device_handle_);
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

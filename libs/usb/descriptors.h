@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace coral::micro {
+namespace coralmicro {
 
 struct DeviceDescriptor {
     uint8_t length;
@@ -159,6 +159,6 @@ struct LangIdDescriptor {
     uint16_t lang_id;
 } __attribute__((packed));
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_USB_DESCRIPTORS_H_

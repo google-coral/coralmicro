@@ -19,7 +19,7 @@
 #include "libs/base/gpio.h"
 #include "libs/base/pwm.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace led {
 
 bool Set(LED led, bool enable) {
@@ -68,4 +68,4 @@ bool Set(LED led, bool enable, unsigned int brightness) {
 }
 
 }  // namespace led
-}  // namespace coral::micro
+}  // namespace coralmicro

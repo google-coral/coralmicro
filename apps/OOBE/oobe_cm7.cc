@@ -46,7 +46,7 @@
 #include <utility>
 #include <vector>
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr float kThreshold = 0.4;
 
@@ -105,11 +105,11 @@ void CreatePoseJson(const std::vector<tensorflow::Pose>& poses, float threshold,
     StrAppend(json, "{\n");
     StrAppend(json, "  \"score\": %g,\n", pose.score);
     StrAppend(json, "  \"keypoints\": [\n");
-    for (int j = 0; j < coral::micro::tensorflow::kKeypoints; ++j) {
+    for (int j = 0; j < coralmicro::tensorflow::kKeypoints; ++j) {
       const auto& kp = pose.keypoints[j];
       StrAppend(json, "    [%g, %g, %g]", kp.score, kp.x, kp.y);
       StrAppend(json,
-                j != coral::micro::tensorflow::kKeypoints - 1 ? ",\n" : "\n");
+                j != coralmicro::tensorflow::kKeypoints - 1 ? ",\n" : "\n");
     }
     StrAppend(json, "  ]\n");
     StrAppend(json, "}");
@@ -228,7 +228,7 @@ class PosenetTask : private Task<PosenetTask> {
       char cmd;
       CHECK(xQueuePeek(queue_, &cmd, portMAX_DELAY) == pdTRUE);
       CHECK(interpreter_->Invoke() == kTfLiteOk);
-      auto poses = coral::micro::tensorflow::GetPosenetOutput(
+      auto poses = coralmicro::tensorflow::GetPosenetOutput(
           interpreter_.get(), kThreshold);
       if (!poses.empty()) {
         CreatePoseJson(poses, kThreshold, &json);
@@ -272,14 +272,14 @@ class CameraTask : private Task<CameraTask> {
         case kCmdStart:
           configASSERT(!started);
           started = true;
-          coral::micro::CameraTask::GetSingleton()->Enable(
+          coralmicro::CameraTask::GetSingleton()->Enable(
               camera::Mode::kStreaming);
           printf("Camera: started\r\n");
           QueueProcess();
           break;
         case kCmdStop:
           configASSERT(started);
-          coral::micro::CameraTask::GetSingleton()->Disable();
+          coralmicro::CameraTask::GetSingleton()->Disable();
           started = false;
           printf("Camera: stopped\r\n");
           break;
@@ -288,14 +288,14 @@ class CameraTask : private Task<CameraTask> {
             continue;
           }
 
-          coral::micro::camera::FrameFormat fmt;
+          coralmicro::camera::FrameFormat fmt;
           fmt.width = kModelWidth;
           fmt.height = kModelHeight;
           fmt.fmt = camera::Format::kRgb;
           fmt.filter = camera::FilterMethod::kBilinear;
           fmt.preserve_ratio = false;
           fmt.buffer = input.data();
-          coral::micro::CameraTask::GetFrame({fmt});
+          coralmicro::CameraTask::GetFrame({fmt});
 
           auto jpeg_size =
               JpegCompressRgb(input.data(), fmt.width, fmt.height,
@@ -369,7 +369,7 @@ void Main() {
     return;
   }
   std::vector<uint8_t> posenet_tflite;
-  if (!coral::micro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+  if (!coralmicro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
     printf("ERROR: Failed to read model: %s\r\n", kModelPath);
     return;
   }
@@ -377,7 +377,7 @@ void Main() {
   // Starts the posenet engine.
   tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<2> resolver;
-  resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
+  resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
   resolver.AddCustom(coral::kPosenetDecoderOp,
                      coral::RegisterPosenetDecoderOp());
   auto interpreter = std::make_shared<tflite::MicroInterpreter>(
@@ -465,10 +465,10 @@ void Main() {
   }
 }
 }  // namespace
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
   (void)param;
-  coral::micro::Main();
+  coralmicro::Main();
   vTaskSuspend(nullptr);
 }

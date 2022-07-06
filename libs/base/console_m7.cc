@@ -37,7 +37,7 @@ extern "C" int _write(int handle, char* buffer, int size) {
         return -1;
     }
 
-    coral::micro::ConsoleM7::GetSingleton()->Write(buffer, size);
+    coralmicro::ConsoleM7::GetSingleton()->Write(buffer, size);
 
     return size;
 }
@@ -48,11 +48,11 @@ extern "C" int _read(int handle, char* buffer, int size) {
     }
 
     int bytes_read =
-        coral::micro::ConsoleM7::GetSingleton()->Read(buffer, size);
+        coralmicro::ConsoleM7::GetSingleton()->Read(buffer, size);
     return bytes_read > 0 ? bytes_read : -1;
 }
 
-namespace coral::micro {
+namespace coralmicro {
 
 uint8_t ConsoleM7::m4_console_buffer_storage_[kM4ConsoleBufferSize]
     __attribute__((section(".noinit.$rpmsg_sh_mem")));
@@ -163,7 +163,7 @@ void ConsoleM7::M7ConsoleTaskTxFn(void* param) {
 
 void usb_device_task(void* param) {
     while (true) {
-        coral::micro::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
+        coralmicro::UsbDeviceTask::GetSingleton()->UsbDeviceTaskFn();
         taskYIELD();
     }
 }
@@ -176,16 +176,16 @@ void ConsoleM7::Init(bool init_tx, bool init_rx) {
         &m4_console_buffer_->static_stream_buffer);
 
     cdc_acm_.Init(
-        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-        coral::micro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
-        coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
-        coral::micro::UsbDeviceTask::GetSingleton()->next_interface_value(),
+        coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
+        coralmicro::UsbDeviceTask::GetSingleton()->next_interface_value(),
+        coralmicro::UsbDeviceTask::GetSingleton()->next_interface_value(),
         nullptr /*ReceiveHandler*/);
-    coral::micro::UsbDeviceTask::GetSingleton()->AddDevice(
+    coralmicro::UsbDeviceTask::GetSingleton()->AddDevice(
         cdc_acm_.config_data(),
-        std::bind(&coral::micro::CdcAcm::SetClassHandle, &cdc_acm_, _1),
-        std::bind(&coral::micro::CdcAcm::HandleEvent, &cdc_acm_, _1, _2),
+        std::bind(&coralmicro::CdcAcm::SetClassHandle, &cdc_acm_, _1),
+        std::bind(&coralmicro::CdcAcm::HandleEvent, &cdc_acm_, _1, _2),
         cdc_acm_.descriptor_data(), cdc_acm_.descriptor_data_size());
 
     console_queue_ = xQueueCreate(16, sizeof(ConsoleMessage));
@@ -218,4 +218,4 @@ ipc::StreamBuffer* ConsoleM7::GetM4ConsoleBufferPtr() {
     return m4_console_buffer_;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

@@ -36,9 +36,9 @@ void delayMicroseconds(unsigned int us) {
 }
 
 unsigned long millis() {
-    return coral::micro::timer::millis();
+    return coralmicro::timer::millis();
 }
 
 unsigned long micros() {
-    return coral::micro::timer::micros();
+    return coralmicro::timer::micros();
 }

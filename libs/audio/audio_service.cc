@@ -20,7 +20,7 @@
 
 #include "libs/base/check.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 enum class MessageType : uint8_t {
     kAddCallback,
@@ -211,4 +211,4 @@ LatestSamples::LatestSamples(size_t num_samples)
 
 LatestSamples::~LatestSamples() { vSemaphoreDelete(mutex_); }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

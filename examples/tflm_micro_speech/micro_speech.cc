@@ -38,7 +38,7 @@ constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
 constexpr int kNumDmaBuffers = 10;
 constexpr int kDmaBufferSizeMs = 100;
 constexpr int kDmaBufferSize = kDmaBufferSizeMs * kSamplesPerMs;
-coral::micro::AudioDriverBuffers<kNumDmaBuffers, kNumDmaBuffers * kDmaBufferSize>
+coralmicro::AudioDriverBuffers<kNumDmaBuffers, kNumDmaBuffers * kDmaBufferSize>
     g_audio_buffers;
 
 constexpr int kAudioBufferSizeMs = 1000;
@@ -90,8 +90,8 @@ extern "C" void app_main(void* param) {
     printf("Micro speech\r\n");
 
     // Setup audio
-    coral::micro::AudioDriver driver(g_audio_buffers);
-    coral::micro::AudioDriverConfig config{coral::micro::AudioSampleRate::k16000_Hz,
+    coralmicro::AudioDriver driver(g_audio_buffers);
+    coralmicro::AudioDriverConfig config{coralmicro::AudioSampleRate::k16000_Hz,
                                       kNumDmaBuffers, kDmaBufferSizeMs};
     driver.Enable(
         config, nullptr,

@@ -18,7 +18,7 @@
 
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-namespace coral::micro::tensorflow {
+namespace coralmicro::tensorflow {
 
 std::string FormatPosenetOutput(const std::vector<Pose>& poses) {
     std::string out;
@@ -70,4 +70,4 @@ std::vector<Pose> GetPosenetOutput(tflite::MicroInterpreter* interpreter,
     return poses;
 }
 
-}  // namespace coral::micro::tensorflow
+}  // namespace coralmicro::tensorflow

@@ -23,7 +23,7 @@
 
 namespace {
 void EthGetIP(struct jsonrpc_request* request) {
-  struct netif* ethernet = coral::micro::GetEthernetInterface();
+  struct netif* ethernet = coralmicro::GetEthernetInterface();
   if (!ethernet) {
     jsonrpc_return_error(request, -1, "ethernet interface not found", nullptr);
     return;
@@ -46,14 +46,14 @@ void EthGetIP(struct jsonrpc_request* request) {
 
 void EthWritePHY(struct jsonrpc_request* request) {
   int reg;
-  if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg))
+  if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg))
     return;
 
   int val;
-  if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "val", &val))
+  if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "val", &val))
     return;
 
-  status_t status = coral::micro::EthernetPHYWrite(reg, val);
+  status_t status = coralmicro::EthernetPHYWrite(reg, val);
   if (status != kStatus_Success) {
     jsonrpc_return_error(request, -1, "EthernetPHYWrite failed", nullptr);
     return;
@@ -64,12 +64,12 @@ void EthWritePHY(struct jsonrpc_request* request) {
 }  // namespace
 
 extern "C" void app_main(void* param) {
-  coral::micro::InitializeEthernet(false);
+  coralmicro::InitializeEthernet(false);
 
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export("eth_get_ip", EthGetIP);
   jsonrpc_export("eth_write_phy", EthWritePHY);
   IperfInit();
-  coral::micro::UseHttpServer(new coral::micro::JsonRpcHttpServer);
+  coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
   vTaskSuspend(nullptr);
 }

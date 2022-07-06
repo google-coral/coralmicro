@@ -29,7 +29,7 @@
 extern unsigned char apex_latest_single_ep_bin[];
 extern unsigned int apex_latest_single_ep_bin_len;
 
-namespace coral::micro {
+namespace coralmicro {
 
 inline constexpr int kDfuVid = 0x1A6E;
 inline constexpr int kDfuPid = 0x089A;
@@ -201,6 +201,6 @@ class EdgeTpuDfuTask : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Respo
     uint8_t *read_back_data_ = nullptr;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TPU_EDGETPU_DFU_TASK_H_

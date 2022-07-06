@@ -45,7 +45,7 @@ extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
-namespace coral::micro::testlib {
+namespace coralmicro::testlib {
 namespace {
 AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024>
     g_audio_buffers;
@@ -79,7 +79,7 @@ namespace pended_functions {
 // https://www.freertos.org/xTimerPendFunctionCall.html
 
 auto WiFiSafeDisconnect = [](void* = nullptr, uint32_t = 0) {
-  if (!coral::micro::DisconnectWiFi()) {
+  if (!coralmicro::DisconnectWiFi()) {
     printf("Unable to disconnect from previous wifi connection\r\n");
   }
 };
@@ -87,7 +87,7 @@ auto WiFiSafeDisconnect = [](void* = nullptr, uint32_t = 0) {
 auto WiFiSafeConnect = [](void* wifi_network_params, uint32_t retries) {
   WiFiSafeDisconnect();
   auto* params = static_cast<WIFINetworkParams_t*>(wifi_network_params);
-  coral::micro::ConnectWiFi(params, static_cast<int>(retries));
+  coralmicro::ConnectWiFi(params, static_cast<int>(retries));
   free(const_cast<char*>(params->pcSSID));
   free(const_cast<char*>(params->pcPassword));
   delete params;
@@ -177,7 +177,7 @@ bool JsonRpcGetBase64Param(struct jsonrpc_request* request,
 // Returns JSON results with the key "serial_number" and the serial, as a
 // string.
 void GetSerialNumber(struct jsonrpc_request* request) {
-  std::string serial = coral::micro::utils::GetSerialNumber();
+  std::string serial = coralmicro::utils::GetSerialNumber();
   jsonrpc_return_success(request, "{%Q:%.*Q}", "serial_number", serial.size(),
                          serial.c_str());
 }
@@ -186,16 +186,16 @@ void GetSerialNumber(struct jsonrpc_request* request) {
 // Runs the simple "testconv1" model using the TPU.
 // NOTE: The TPU power must be enabled for this RPC to succeed.
 void RunTestConv1(struct jsonrpc_request* request) {
-  if (!coral::micro::EdgeTpuTask::GetSingleton()->GetPower()) {
+  if (!coralmicro::EdgeTpuTask::GetSingleton()->GetPower()) {
     jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
     return;
   }
-  coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
-  if (!coral::micro::testconv1::setup()) {
+  coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
+  if (!coralmicro::testconv1::setup()) {
     jsonrpc_return_error(request, -1, "testconv1 setup failed", nullptr);
     return;
   }
-  if (!coral::micro::testconv1::loop()) {
+  if (!coralmicro::testconv1::loop()) {
     jsonrpc_return_error(request, -1, "testconv1 loop failed", nullptr);
     return;
   }
@@ -209,7 +209,7 @@ void SetTPUPowerState(struct jsonrpc_request* request) {
   bool enable;
   if (!JsonRpcGetBooleanParam(request, "enable", &enable)) return;
 
-  coral::micro::EdgeTpuTask::GetSingleton()->SetPower(enable);
+  coralmicro::EdgeTpuTask::GetSingleton()->SetPower(enable);
   jsonrpc_return_success(request, "{}");
 }
 
@@ -335,14 +335,14 @@ void RunDetectionModel(struct jsonrpc_request* request) {
   tensorflow::ImageDims tensor_dims = {input_tensor->dims->data[1],
                                        input_tensor->dims->data[2],
                                        input_tensor->dims->data[3]};
-  auto preprocess_start = coral::micro::timer::micros();
+  auto preprocess_start = coralmicro::timer::micros();
   if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
                                image_resource->data(), tensor_dims,
                                input_tensor_data)) {
     jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
     return;
   }
-  auto preprocess_latency = coral::micro::timer::micros() - preprocess_start;
+  auto preprocess_latency = coralmicro::timer::micros() - preprocess_start;
 
   // The first Invoke is slow due to model transfer. Run an Invoke
   // but ignore the results.
@@ -351,12 +351,12 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     return;
   }
 
-  auto invoke_start = coral::micro::timer::micros();
+  auto invoke_start = coralmicro::timer::micros();
   if (interpreter.Invoke() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
     return;
   }
-  auto invoke_latency = coral::micro::timer::micros() - invoke_start;
+  auto invoke_latency = coralmicro::timer::micros() - invoke_start;
 
   // Return results and check on host side
   auto results = tensorflow::GetDetectionResults(&interpreter, 0.7, 3);
@@ -430,12 +430,12 @@ void RunClassificationModel(struct jsonrpc_request* request) {
       tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
   uint32_t preprocess_latency = 0;
   if (needs_preprocessing) {
-    uint32_t preprocess_start = coral::micro::timer::micros();
+    uint32_t preprocess_start = coralmicro::timer::micros();
     if (!tensorflow::ClassificationPreprocess(input_tensor)) {
       jsonrpc_return_error(request, -1, "input preprocessing failed", nullptr);
       return;
     }
-    uint32_t preprocess_end = coral::micro::timer::micros();
+    uint32_t preprocess_end = coralmicro::timer::micros();
     preprocess_latency = preprocess_end - preprocess_start;
   }
 
@@ -457,12 +457,12 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     return;
   }
 
-  uint32_t start = coral::micro::timer::micros();
+  uint32_t start = coralmicro::timer::micros();
   if (interpreter.Invoke() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
     return;
   }
-  uint32_t end = coral::micro::timer::micros();
+  uint32_t end = coralmicro::timer::micros();
   uint32_t latency = end - start;
 
   // Return results and check on host side
@@ -534,14 +534,14 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
   tensorflow::ImageDims tensor_dims = {input_tensor->dims->data[1],
                                        input_tensor->dims->data[2],
                                        input_tensor->dims->data[3]};
-  auto preprocess_start = coral::micro::timer::micros();
+  auto preprocess_start = coralmicro::timer::micros();
   if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
                                image_resource->data(), tensor_dims,
                                input_tensor_data)) {
     jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
     return;
   }
-  auto preprocess_latency = coral::micro::timer::micros() - preprocess_start;
+  auto preprocess_latency = coralmicro::timer::micros() - preprocess_start;
 
   // The first Invoke is slow due to model transfer. Run an Invoke
   // but ignore the results.
@@ -550,16 +550,16 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
     return;
   }
 
-  auto invoke_start = coral::micro::timer::micros();
+  auto invoke_start = coralmicro::timer::micros();
   if (interpreter.Invoke() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
     return;
   }
-  auto invoke_latency = coral::micro::timer::micros() - invoke_start;
+  auto invoke_latency = coralmicro::timer::micros() - invoke_start;
   // Return results to post process on host side
   auto* output_tensor = interpreter.output_tensor(0);
   auto* output_mask = tflite::GetTensorData<uint8_t>(output_tensor);
-  auto size = coral::micro::tensorflow::TensorSize(output_tensor);
+  auto size = coralmicro::tensorflow::TensorSize(output_tensor);
 
   jsonrpc_return_success(request, "{%Q:%d, %Q:%V}", "latency",
                          invoke_latency + preprocess_latency, "output_mask",
@@ -568,13 +568,13 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
 
 void PosenetStressRun(struct jsonrpc_request* request) {
   int iterations;
-  if (!coral::micro::testlib::JsonRpcGetIntegerParam(request, "iterations",
+  if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "iterations",
                                                      &iterations))
     return;
 
   // Turn on the TPU and get it's context.
-  auto tpu_context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice(
-      coral::micro::PerformanceMode::kMax);
+  auto tpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice(
+      coralmicro::PerformanceMode::kMax);
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
     jsonrpc_return_error(request, -1, "Failed to get tpu context", nullptr);
@@ -586,7 +586,7 @@ void PosenetStressRun(struct jsonrpc_request* request) {
       "posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
   // Reads the model and checks version.
   std::vector<uint8_t> posenet_tflite;
-  if (!coral::micro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+  if (!coralmicro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
     jsonrpc_return_error(request, -1, "Failed to get posenet model", nullptr);
     return;
@@ -595,7 +595,7 @@ void PosenetStressRun(struct jsonrpc_request* request) {
 
   // Creates a micro interpreter.
   tflite::MicroMutableOpResolver<2> resolver;
-  resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
+  resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
   resolver.AddCustom(coral::kPosenetDecoderOp,
                      coral::RegisterPosenetDecoderOp());
   tflite::MicroErrorReporter error_reporter;
@@ -609,19 +609,19 @@ void PosenetStressRun(struct jsonrpc_request* request) {
   auto model_height = posenet_input->dims->data[1];
   auto model_width = posenet_input->dims->data[2];
 
-  coral::micro::CameraTask::GetSingleton()->SetPower(true);
-  coral::micro::CameraTask::GetSingleton()->Enable(
-      coral::micro::camera::Mode::kStreaming);
+  coralmicro::CameraTask::GetSingleton()->SetPower(true);
+  coralmicro::CameraTask::GetSingleton()->Enable(
+      coralmicro::camera::Mode::kStreaming);
   for (int i = 0; i < iterations; ++i) {
-    coral::micro::camera::FrameFormat fmt{
-        /*fmt=*/coral::micro::camera::Format::kRgb,
-        /*filter=*/coral::micro::camera::FilterMethod::kBilinear,
-        /*rotation=*/coral::micro::camera::Rotation::k0,
+    coralmicro::camera::FrameFormat fmt{
+        /*fmt=*/coralmicro::camera::Format::kRgb,
+        /*filter=*/coralmicro::camera::FilterMethod::kBilinear,
+        /*rotation=*/coralmicro::camera::Rotation::k0,
         /*width=*/model_width,
         /*height=*/model_height,
         /*preserve_ratio=*/false,
         /*buffer=*/tflite::GetTensorData<uint8_t>(posenet_input)};
-    if (!coral::micro::CameraTask::GetFrame({fmt})) {
+    if (!coralmicro::CameraTask::GetFrame({fmt})) {
       jsonrpc_return_error(request, -1, "Failed to get frame from camera",
                            nullptr);
       break;
@@ -632,7 +632,7 @@ void PosenetStressRun(struct jsonrpc_request* request) {
     }
   }
 
-  coral::micro::CameraTask::GetSingleton()->SetPower(false);
+  coralmicro::CameraTask::GetSingleton()->SetPower(false);
   jsonrpc_return_success(request, "{}");
 }
 
@@ -656,14 +656,14 @@ void GetTemperature(struct jsonrpc_request* request) {
   int sensor_num;
   if (!JsonRpcGetIntegerParam(request, "sensor", &sensor_num)) return;
 
-  coral::micro::tempsense::Init();
-  auto sensor = static_cast<coral::micro::tempsense::TempSensor>(sensor_num);
-  if (sensor >= coral::micro::tempsense::TempSensor::kSensorCount) {
+  coralmicro::tempsense::Init();
+  auto sensor = static_cast<coralmicro::tempsense::TempSensor>(sensor_num);
+  if (sensor >= coralmicro::tempsense::TempSensor::kSensorCount) {
     jsonrpc_return_error(request, -1, "Invalid temperature sensor", nullptr);
     return;
   }
 
-  float temperature = coral::micro::tempsense::GetTemperature(sensor);
+  float temperature = coralmicro::tempsense::GetTemperature(sensor);
   jsonrpc_return_success(request, "{%Q:%g}", "temperature", temperature);
 }
 
@@ -671,15 +671,15 @@ void GetTemperature(struct jsonrpc_request* request) {
 // Configures the sensor to test pattern mode, and captures via trigger.
 // Returns success if the test pattern has the expected data, failure otherwise.
 void CaptureTestPattern(struct jsonrpc_request* request) {
-  if (!coral::micro::CameraTask::GetSingleton()->SetPower(true)) {
-    coral::micro::CameraTask::GetSingleton()->SetPower(false);
+  if (!coralmicro::CameraTask::GetSingleton()->SetPower(true)) {
+    coralmicro::CameraTask::GetSingleton()->SetPower(false);
     jsonrpc_return_error(request, -1, "unable to detect camera", nullptr);
     return;
   }
-  coral::micro::CameraTask::GetSingleton()->Enable(
-      coral::micro::camera::Mode::kTrigger);
-  coral::micro::CameraTask::GetSingleton()->SetTestPattern(
-      coral::micro::camera::TestPattern::kWalkingOnes);
+  coralmicro::CameraTask::GetSingleton()->Enable(
+      coralmicro::camera::Mode::kTrigger);
+  coralmicro::CameraTask::GetSingleton()->SetTestPattern(
+      coralmicro::camera::TestPattern::kWalkingOnes);
 
   bool success = true;
   // Getting this test pattern doesn't seem to always work on the first try,
@@ -687,14 +687,14 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
   // a small amount of retrying to smooth that over.
   constexpr int kRetries = 3;
   for (int i = 0; i < kRetries; ++i) {
-    coral::micro::CameraTask::GetSingleton()->Trigger();
+    coralmicro::CameraTask::GetSingleton()->Trigger();
     uint8_t* buffer = nullptr;
     int index =
-        coral::micro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+        coralmicro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
     uint8_t expected = 0;
     success = true;
-    for (unsigned int i = 0; i < coral::micro::CameraTask::kWidth *
-                                     coral::micro::CameraTask::kHeight;
+    for (unsigned int i = 0; i < coralmicro::CameraTask::kWidth *
+                                     coralmicro::CameraTask::kHeight;
          ++i) {
       if (buffer[i] != expected) {
         success = false;
@@ -706,7 +706,7 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
         expected = expected << 1;
       }
     }
-    coral::micro::CameraTask::GetSingleton()->ReturnFrame(index);
+    coralmicro::CameraTask::GetSingleton()->ReturnFrame(index);
     if (success) {
       break;
     }
@@ -716,7 +716,7 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
   } else {
     jsonrpc_return_error(request, -1, "camera test pattern mismatch", nullptr);
   }
-  coral::micro::CameraTask::GetSingleton()->SetPower(false);
+  coralmicro::CameraTask::GetSingleton()->SetPower(false);
 }
 
 // Implements the "capture_audio" RPC.
@@ -795,7 +795,7 @@ void CaptureAudio(struct jsonrpc_request* request) {
 }
 
 void WiFiScan(struct jsonrpc_request* request) {
-  auto results = coral::micro::ScanWiFi();
+  auto results = coralmicro::ScanWiFi();
   if (results.empty()) {
     jsonrpc_return_error(request, -1, "wifi scan failed", nullptr);
     return;
@@ -804,7 +804,7 @@ void WiFiScan(struct jsonrpc_request* request) {
   std::string s;
   s.reserve(1024);
   for (auto& result : results)
-    coral::micro::StrAppend(&s, "\"%s\",", result.cSSID);
+    coralmicro::StrAppend(&s, "\"%s\",", result.cSSID);
   if (!results.empty()) s.pop_back();
 
   jsonrpc_return_success(request, "{%Q: [%s]}", "SSIDs", s.c_str());
@@ -849,11 +849,11 @@ void WiFiDisconnect(struct jsonrpc_request* request) {
 
 void WiFiGetStatus(struct jsonrpc_request* request) {
   jsonrpc_return_success(request, "{%Q:%d}", "status",
-                         coral::micro::WiFiIsConnected());
+                         coralmicro::WiFiIsConnected());
 }
 
 void WiFiGetIp(struct jsonrpc_request* request) {
-  auto maybe_ip = coral::micro::GetWiFiIp();
+  auto maybe_ip = coralmicro::GetWiFiIp();
   if (!maybe_ip.has_value()) {
     jsonrpc_return_error(request, -1, "Unable to get wifi ip.", nullptr);
     return;
@@ -866,7 +866,7 @@ void WiFiSetAntenna(struct jsonrpc_request* request) {
   int antenna;
   if (!JsonRpcGetIntegerParam(request, "antenna", &antenna)) return;
 
-  if (!SetWiFiAntenna(static_cast<coral::micro::WiFiAntenna>(antenna))) {
+  if (!SetWiFiAntenna(static_cast<coralmicro::WiFiAntenna>(antenna))) {
     jsonrpc_return_error(request, -1, "invalid antenna selection", nullptr);
     return;
   }
@@ -874,7 +874,7 @@ void WiFiSetAntenna(struct jsonrpc_request* request) {
 }
 
 void CryptoInit(struct jsonrpc_request* request) {
-  if (!coral::micro::a71ch::Init()) {
+  if (!coralmicro::a71ch::Init()) {
     jsonrpc_return_error(request, -1, "Unable to initialize a71ch", nullptr);
     return;
   }
@@ -882,7 +882,7 @@ void CryptoInit(struct jsonrpc_request* request) {
 }
 
 void CryptoGetUID(struct jsonrpc_request* request) {
-  auto maybe_uid = coral::micro::a71ch::GetUID();
+  auto maybe_uid = coralmicro::a71ch::GetUID();
   if (!maybe_uid.has_value()) {
     jsonrpc_return_error(request, -1, "Unable to obtain a71ch uid", nullptr);
     return;
@@ -891,4 +891,4 @@ void CryptoGetUID(struct jsonrpc_request* request) {
   jsonrpc_return_success(request, "{%Q:\"%s\"}", "uid", uid.c_str());
 }
 
-}  // namespace coral::micro::testlib
+}  // namespace coralmicro::testlib

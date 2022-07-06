@@ -26,7 +26,7 @@
 
 #define FS_FILE_FLAGS_JSON_RPC (1 << 7)
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 int Append(const char* buf, int len, void* userdata) {
     auto* v = static_cast<std::vector<char>*>(userdata);
@@ -116,4 +116,4 @@ void JsonRpcHttpServer::FsCloseCustom(struct fs_file* file) {
     HttpServer::FsCloseCustom(file);
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro

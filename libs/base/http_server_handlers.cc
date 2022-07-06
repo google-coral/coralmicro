@@ -27,7 +27,7 @@
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 void GenerateStatsHtml(std::vector<uint8_t>* html) {
     std::vector<TaskStatus_t> infos(uxTaskGetNumberOfTasks());
@@ -55,7 +55,7 @@ void GenerateStatsHtml(std::vector<uint8_t>* html) {
         auto name = info.pcTaskName;
         auto runtime = info.ulRunTimeCounter;
         float percent = static_cast<float>(runtime) / (total_runtime / 100.0);
-        coral::micro::StrAppend(
+        coralmicro::StrAppend(
             html, "    <tr><td>%s</td><td>%lu</td><td>%.1f%%</td></tr>\r\n",
             name, runtime, percent);
     }
@@ -81,4 +81,4 @@ HttpServer::Content TaskStatsUriHandler::operator()(const char* uri) {
     return {};
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

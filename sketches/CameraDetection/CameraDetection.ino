@@ -8,13 +8,13 @@
 #include "coral_micro.h"
 #include "libs/tensorflow/detection.h"
 
-using namespace coral::micro::arduino;
+using namespace coralmicro::arduino;
 
 namespace {
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
-std::shared_ptr<coral::micro::EdgeTpuContext> context = nullptr;
+std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 TfLiteTensor* input_tensor = nullptr;
 
@@ -46,7 +46,7 @@ void setup() {
     }
 
     model = tflite::GetModel(model_data.data());
-    context = coral::micro::EdgeTpuManager::GetSingleton()->OpenDevice();
+    context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
     if (!context) {
         Serial.println("Failed to get EdgeTpuContext");
         return;
@@ -56,7 +56,7 @@ void setup() {
     tflite::MicroErrorReporter error_reporter;
     resolver.AddDequantize();
     resolver.AddDetectionPostprocess();
-    resolver.AddCustom(coral::micro::kCustomOp, coral::micro::RegisterCustomOp());
+    resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
 
     interpreter = std::make_unique<tflite::MicroInterpreter>(
         model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
@@ -85,9 +85,9 @@ void setup() {
     Serial.print("; height=");
     Serial.println(model_height);
     image.resize(model_width * model_height * model_channels);
-    if (Camera.begin(model_width, model_height, coral::micro::camera::Format::kRgb,
-                     coral::micro::camera::FilterMethod::kBilinear,
-                     coral::micro::camera::Rotation::k0,
+    if (Camera.begin(model_width, model_height, coralmicro::camera::Format::kRgb,
+                     coralmicro::camera::FilterMethod::kBilinear,
+                     coralmicro::camera::Rotation::k0,
                      true) != CameraStatus::SUCCESS) {
         Serial.println("Failed to start camera");
         return;
@@ -123,7 +123,7 @@ void loop() {
     }
 
     auto results =
-        coral::micro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
+        coralmicro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
     Serial.print("Results count: ");
     Serial.println(results.size());
     for (auto result : results) {

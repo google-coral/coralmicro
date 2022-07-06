@@ -20,7 +20,7 @@
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_tempsensor.h"
 
-namespace coral::micro::tempsense {
+namespace coralmicro::tempsense {
 
 void Init() {
     // Configure CPU for just single measurement mode.
@@ -49,4 +49,4 @@ float GetTemperature(TempSensor sensor) {
     }
 }
 
-}  // namespace coral::micro::tempsense
+}  // namespace coralmicro::tempsense

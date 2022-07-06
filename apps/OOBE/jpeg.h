@@ -15,7 +15,7 @@
 #ifndef APPS_OOBEE_JPEG_H_
 #define APPS_OOBEE_JPEG_H_
 
-namespace coral::micro {
+namespace coralmicro {
 
 unsigned long JpegCompressRgb(unsigned char* rgb, int width, int height,
                               int quality, unsigned char* buf,
@@ -28,6 +28,6 @@ struct JpegBuffer {
 JpegBuffer JpegCompressRgb(unsigned char* rgb, int width, int height,
                            int quality);
 
-};  // namespace coral::micro
+};  // namespace coralmicro
 
 #endif  // APPS_OOBEE_JPEG_H_

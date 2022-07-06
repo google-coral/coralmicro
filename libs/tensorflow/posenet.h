@@ -23,7 +23,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-namespace coral::micro::tensorflow {
+namespace coralmicro::tensorflow {
 
 // Number of keypoints in each pose.
 inline constexpr int kKeypoints = 17;
@@ -73,6 +73,6 @@ std::vector<Pose> GetPosenetOutput(
     float threshold = -std::numeric_limits<float>::infinity(),
     bool print = false);
 
-}  // namespace coral::micro::tensorflow
+}  // namespace coralmicro::tensorflow
 
 #endif  // LIBS_POSENET_POSENET_H_

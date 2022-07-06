@@ -18,6 +18,6 @@
 
 extern "C" void app_main(void* param) {
   (void)param;
-  coral::micro::IPCM7::GetSingleton()->StartM4();
+  coralmicro::IPCM7::GetSingleton()->StartM4();
   vTaskSuspend(nullptr);
 }

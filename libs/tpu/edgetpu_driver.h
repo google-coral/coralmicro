@@ -24,7 +24,7 @@
 #include "third_party/darwinn/driver/config/beagle/beagle_chip_config.h"
 #include "third_party/darwinn/driver/hardware_structures.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 enum class PerformanceMode {
     kLow,
@@ -90,6 +90,6 @@ class TpuDriver {
     usb_host_edgetpu_instance_t* usb_instance_ = nullptr;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_TPU_EDGETPU_DRIVER_H_

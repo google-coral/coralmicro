@@ -20,7 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace coral::micro {
+namespace coralmicro {
 
 enum class IOStatus { kOk, kEof, kError };
 
@@ -50,6 +50,6 @@ int SocketAccept(int sockfd);
 
 void SocketClose(int sockfd);
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_NETWORK_H_

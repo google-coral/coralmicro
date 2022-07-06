@@ -27,14 +27,14 @@ bool user_led_on = false;
 // Callback for user button
 void OnButtonPressed() {
     user_led_on = !user_led_on;
-    coral::micro::led::Set(coral::micro::led::LED::kUser, user_led_on);
+    coralmicro::led::Set(coralmicro::led::LED::kUser, user_led_on);
 }
 
 extern "C" void app_main(void* param) {
     printf("Press the user button.\r\n");
 
     // Register callback for the user button
-    coral::micro::gpio::RegisterIRQHandler(coral::micro::gpio::Gpio::kUserButton, OnButtonPressed);
+    coralmicro::gpio::RegisterIRQHandler(coralmicro::gpio::Gpio::kUserButton, OnButtonPressed);
     vTaskSuspend(nullptr);
 }
 //! [gpio-callback] End snippet

@@ -21,7 +21,7 @@
 
 #include "libs/tensorflow/utils.h"
 
-namespace coral::micro::tensorflow {
+namespace coralmicro::tensorflow {
 namespace {
 // Defines a comparator which allows us to rank Class based on their score and
 // id.
@@ -106,4 +106,4 @@ bool ClassificationPreprocess(TfLiteTensor* input_tensor) {
     return true;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

@@ -29,9 +29,9 @@
 // to browse files with a web browser, and push/pull files to the board with
 // curl commands.
 
-using coral::micro::filesystem::Lfs;
+using coralmicro::filesystem::Lfs;
 
-namespace coral::micro {
+namespace coralmicro {
 namespace {
 constexpr char kUrlPrefix[] = "/fs/";
 
@@ -185,18 +185,18 @@ class FileHttpServer : public HttpServer {
 };
 
 }  // namespace
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
-    using coral::micro::kUrlPrefix;
+    using coralmicro::kUrlPrefix;
     (void)param;
     printf("WebFileBrowser\r\n");
-    coral::micro::FileHttpServer http_server;
-    http_server.AddUriHandler(coral::micro::UriHandler);
-    coral::micro::UseHttpServer(&http_server);
+    coralmicro::FileHttpServer http_server;
+    http_server.AddUriHandler(coralmicro::UriHandler);
+    coralmicro::UseHttpServer(&http_server);
 
     std::string ip;
-    if (coral::micro::utils::GetUSBIPAddress(&ip)) {
+    if (coralmicro::utils::GetUSBIPAddress(&ip)) {
         printf("BROWSE:   http://%s%s\r\n", ip.c_str(), kUrlPrefix);
         printf("UPLOAD:   curl -X POST http://%s%sfile --data-binary @file\r\n",
                ip.c_str(), kUrlPrefix);

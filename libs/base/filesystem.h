@@ -24,7 +24,7 @@
 
 #include "third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace filesystem {
 
 lfs_t* Lfs();
@@ -58,6 +58,6 @@ size_t ReadFile(const char* path, uint8_t* buf, size_t size);
 bool WriteFile(const char* path, const uint8_t* buf, size_t size);
 
 }  // namespace filesystem
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_FILESYSTEM_H_

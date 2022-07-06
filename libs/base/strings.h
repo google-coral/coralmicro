@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace coral::micro {
+namespace coralmicro {
 
 // Gets the length of a const char.
 //
@@ -77,6 +77,6 @@ void StrAppend(C* v, const char* format_str, T... args) {
     v->pop_back();  // remove null terminator
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_STRINGS_H_

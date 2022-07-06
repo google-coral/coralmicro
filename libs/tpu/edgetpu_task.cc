@@ -25,7 +25,7 @@
 
 using namespace std::placeholders;
 
-namespace coral::micro {
+namespace coralmicro {
 using namespace edgetpu;
 
 void EdgeTpuTask::SetNextState(EdgeTpuState next_state) {
@@ -96,7 +96,7 @@ void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data, uint32_t data_le
 }
 
 void EdgeTpuTask::TaskInit() {
-    coral::micro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(
+    coralmicro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(
             kEdgeTpuVid, kEdgeTpuPid, std::bind(&EdgeTpuTask::USBHostEvent, this, _1, _2, _3, _4));
 }
 
@@ -219,4 +219,4 @@ void EdgeTpuTask::RequestHandler(Request *req) {
     }
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

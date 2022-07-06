@@ -25,7 +25,7 @@ extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
-namespace coral::micro {
+namespace coralmicro {
 
 inline constexpr int kDefaultRetryCount{5};
 
@@ -107,5 +107,5 @@ std::optional<std::string> GetWiFiIp();
 // @return True if the Wi-Fi antenna was enabled successfully; false otherwise.
 bool SetWiFiAntenna(WiFiAntenna antenna);
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 #endif  // LIBS_BASE_WIFI_H_

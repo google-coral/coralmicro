@@ -37,7 +37,7 @@ constexpr char kMethodGetFrame[] = "get_frame";
 std::vector<uint8_t> camera_rgb;
 
 void HandleAppMessage(
-    const uint8_t data[coral::micro::ipc::kMessageBufferDataSize],
+    const uint8_t data[coralmicro::ipc::kMessageBufferDataSize],
     void* param) {
   auto rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
   const auto* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
@@ -58,23 +58,23 @@ void HandleAppMessage(
 
 void M4XOR(struct jsonrpc_request* request) {
   std::string value_string;
-  if (!coral::micro::testlib::JsonRpcGetStringParam(request, "value",
+  if (!coralmicro::testlib::JsonRpcGetStringParam(request, "value",
                                                     &value_string))
     return;
 
-  if (!coral::micro::IPCM7::GetSingleton()->M4IsAlive(1000 /*ms*/)) {
+  if (!coralmicro::IPCM7::GetSingleton()->M4IsAlive(1000 /*ms*/)) {
     jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
     return;
   }
 
   auto value =
       reinterpret_cast<uint32_t>(strtoul(value_string.c_str(), nullptr, 10));
-  coral::micro::ipc::Message msg{};
-  msg.type = coral::micro::ipc::MessageType::kApp;
+  coralmicro::ipc::Message msg{};
+  msg.type = coralmicro::ipc::MessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
   app_message->message_type = RackTestAppMessageType::kXor;
   app_message->message.xor_value = value;
-  coral::micro::IPCM7::GetSingleton()->SendMessage(msg);
+  coralmicro::IPCM7::GetSingleton()->SendMessage(msg);
 
   // hang out here and wait for an event.
   uint32_t xor_value;
@@ -88,19 +88,19 @@ void M4XOR(struct jsonrpc_request* request) {
 }
 
 void M4CoreMark(struct jsonrpc_request* request) {
-  auto* ipc = coral::micro::IPCM7::GetSingleton();
+  auto* ipc = coralmicro::IPCM7::GetSingleton();
   if (!ipc->M4IsAlive(1000 /*ms*/)) {
     jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
     return;
   }
 
   char coremark_buffer[MAX_COREMARK_BUFFER];
-  coral::micro::ipc::Message msg{};
-  msg.type = coral::micro::ipc::MessageType::kApp;
+  coralmicro::ipc::Message msg{};
+  msg.type = coralmicro::ipc::MessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
   app_message->message_type = RackTestAppMessageType::kCoreMark;
   app_message->message.buffer_ptr = coremark_buffer;
-  coral::micro::IPCM7::GetSingleton()->SendMessage(msg);
+  coralmicro::IPCM7::GetSingleton()->SendMessage(msg);
 
   if (xTaskNotifyWait(0, 0, nullptr, pdMS_TO_TICKS(30000)) != pdTRUE) {
     jsonrpc_return_error(request, -1, "Timed out waiting for response from M4",
@@ -122,51 +122,51 @@ void M7CoreMark(struct jsonrpc_request* request) {
 void GetFrame(struct jsonrpc_request* request) {
   int rpc_width, rpc_height;
   std::string rpc_format;
-  bool rpc_width_valid = coral::micro::testlib::JsonRpcGetIntegerParam(
+  bool rpc_width_valid = coralmicro::testlib::JsonRpcGetIntegerParam(
       request, "width", &rpc_width);
-  bool rpc_height_valid = coral::micro::testlib::JsonRpcGetIntegerParam(
+  bool rpc_height_valid = coralmicro::testlib::JsonRpcGetIntegerParam(
       request, "height", &rpc_height);
-  bool rpc_format_valid = coral::micro::testlib::JsonRpcGetStringParam(
+  bool rpc_format_valid = coralmicro::testlib::JsonRpcGetStringParam(
       request, "format", &rpc_format);
 
-  int width = rpc_width_valid ? rpc_width : coral::micro::CameraTask::kWidth;
+  int width = rpc_width_valid ? rpc_width : coralmicro::CameraTask::kWidth;
   int height =
-      rpc_height_valid ? rpc_height : coral::micro::CameraTask::kHeight;
-  coral::micro::camera::Format format = coral::micro::camera::Format::kRgb;
+      rpc_height_valid ? rpc_height : coralmicro::CameraTask::kHeight;
+  coralmicro::camera::Format format = coralmicro::camera::Format::kRgb;
 
   if (rpc_format_valid) {
     constexpr char kFormatRGB[] = "RGB";
     constexpr char kFormatGrayscale[] = "L";
     if (memcmp(rpc_format.c_str(), kFormatRGB,
                std::min(rpc_format.length(), strlen(kFormatRGB))) == 0) {
-      format = coral::micro::camera::Format::kRgb;
+      format = coralmicro::camera::Format::kRgb;
     }
     if (memcmp(rpc_format.c_str(), kFormatGrayscale,
                std::min(rpc_format.length(), strlen(kFormatGrayscale))) == 0) {
-      format = coral::micro::camera::Format::kY8;
+      format = coralmicro::camera::Format::kY8;
     }
   }
 
   camera_rgb.resize(width * height *
-                    coral::micro::CameraTask::FormatToBPP(format));
+                    coralmicro::CameraTask::FormatToBPP(format));
 
-  coral::micro::CameraTask::GetSingleton()->SetPower(true);
-  coral::micro::camera::TestPattern pattern =
-      coral::micro::camera::TestPattern::kColorBar;
-  coral::micro::CameraTask::GetSingleton()->SetTestPattern(pattern);
-  coral::micro::CameraTask::GetSingleton()->Enable(
-      coral::micro::camera::Mode::kStreaming);
-  coral::micro::camera::FrameFormat fmt_rgb{};
+  coralmicro::CameraTask::GetSingleton()->SetPower(true);
+  coralmicro::camera::TestPattern pattern =
+      coralmicro::camera::TestPattern::kColorBar;
+  coralmicro::CameraTask::GetSingleton()->SetTestPattern(pattern);
+  coralmicro::CameraTask::GetSingleton()->Enable(
+      coralmicro::camera::Mode::kStreaming);
+  coralmicro::camera::FrameFormat fmt_rgb{};
 
   fmt_rgb.fmt = format;
-  fmt_rgb.filter = coral::micro::camera::FilterMethod::kBilinear;
+  fmt_rgb.filter = coralmicro::camera::FilterMethod::kBilinear;
   fmt_rgb.width = width;
   fmt_rgb.height = height;
   fmt_rgb.preserve_ratio = false;
   fmt_rgb.buffer = camera_rgb.data();
 
-  bool success = coral::micro::CameraTask::GetFrame({fmt_rgb});
-  coral::micro::CameraTask::GetSingleton()->SetPower(false);
+  bool success = coralmicro::CameraTask::GetFrame({fmt_rgb});
+  coralmicro::CameraTask::GetSingleton()->SetPower(false);
 
   if (success)
     jsonrpc_return_success(request, "{}");
@@ -175,76 +175,76 @@ void GetFrame(struct jsonrpc_request* request) {
                          nullptr);
 }
 
-coral::micro::HttpServer::Content UriHandler(const char* name) {
+coralmicro::HttpServer::Content UriHandler(const char* name) {
   if (std::strcmp("/camera.rgb", name) == 0)
-    return coral::micro::HttpServer::Content{std::move(camera_rgb)};
+    return coralmicro::HttpServer::Content{std::move(camera_rgb)};
   return {};
 }
 }  // namespace
 
 extern "C" void app_main(void* param) {
-  coral::micro::IPCM7::GetSingleton()->RegisterAppMessageHandler(
+  coralmicro::IPCM7::GetSingleton()->RegisterAppMessageHandler(
       HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
   jsonrpc_init(nullptr, nullptr);
 #if defined(TEST_WIFI)
-  if (!coral::micro::TurnOnWiFi()) {
+  if (!coralmicro::TurnOnWiFi()) {
     printf("Wi-Fi failed to come up (is the Wi-Fi board attached?)\r\n");
     vTaskSuspend(nullptr);
   }
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiSetAntenna,
-                 coral::micro::testlib::WiFiSetAntenna);
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiScan,
-                 coral::micro::testlib::WiFiScan);
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiConnect,
-                 coral::micro::testlib::WiFiConnect);
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiDisconnect,
-                 coral::micro::testlib::WiFiDisconnect);
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiGetIp,
-                 coral::micro::testlib::WiFiGetIp);
-  jsonrpc_export(coral::micro::testlib::kMethodWiFiGetStatus,
-                 coral::micro::testlib::WiFiGetStatus);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiSetAntenna,
+                 coralmicro::testlib::WiFiSetAntenna);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiScan,
+                 coralmicro::testlib::WiFiScan);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiConnect,
+                 coralmicro::testlib::WiFiConnect);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiDisconnect,
+                 coralmicro::testlib::WiFiDisconnect);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiGetIp,
+                 coralmicro::testlib::WiFiGetIp);
+  jsonrpc_export(coralmicro::testlib::kMethodWiFiGetStatus,
+                 coralmicro::testlib::WiFiGetStatus);
 #endif
-  jsonrpc_export(coral::micro::testlib::kMethodGetSerialNumber,
-                 coral::micro::testlib::GetSerialNumber);
-  jsonrpc_export(coral::micro::testlib::kMethodRunTestConv1,
-                 coral::micro::testlib::RunTestConv1);
-  jsonrpc_export(coral::micro::testlib::kMethodSetTPUPowerState,
-                 coral::micro::testlib::SetTPUPowerState);
-  jsonrpc_export(coral::micro::testlib::kMethodPosenetStressRun,
-                 coral::micro::testlib::PosenetStressRun);
-  jsonrpc_export(coral::micro::testlib::kMethodBeginUploadResource,
-                 coral::micro::testlib::BeginUploadResource);
-  jsonrpc_export(coral::micro::testlib::kMethodUploadResourceChunk,
-                 coral::micro::testlib::UploadResourceChunk);
-  jsonrpc_export(coral::micro::testlib::kMethodDeleteResource,
-                 coral::micro::testlib::DeleteResource);
-  jsonrpc_export(coral::micro::testlib::kMethodFetchResource,
-                 coral::micro::testlib::FetchResource);
-  jsonrpc_export(coral::micro::testlib::kMethodRunClassificationModel,
-                 coral::micro::testlib::RunClassificationModel);
-  jsonrpc_export(coral::micro::testlib::kMethodRunDetectionModel,
-                 coral::micro::testlib::RunDetectionModel);
-  jsonrpc_export(coral::micro::testlib::kMethodRunSegmentationModel,
-                 coral::micro::testlib::RunSegmentationModel);
-  jsonrpc_export(coral::micro::testlib::kMethodStartM4,
-                 coral::micro::testlib::StartM4);
-  jsonrpc_export(coral::micro::testlib::kMethodGetTemperature,
-                 coral::micro::testlib::GetTemperature);
+  jsonrpc_export(coralmicro::testlib::kMethodGetSerialNumber,
+                 coralmicro::testlib::GetSerialNumber);
+  jsonrpc_export(coralmicro::testlib::kMethodRunTestConv1,
+                 coralmicro::testlib::RunTestConv1);
+  jsonrpc_export(coralmicro::testlib::kMethodSetTPUPowerState,
+                 coralmicro::testlib::SetTPUPowerState);
+  jsonrpc_export(coralmicro::testlib::kMethodPosenetStressRun,
+                 coralmicro::testlib::PosenetStressRun);
+  jsonrpc_export(coralmicro::testlib::kMethodBeginUploadResource,
+                 coralmicro::testlib::BeginUploadResource);
+  jsonrpc_export(coralmicro::testlib::kMethodUploadResourceChunk,
+                 coralmicro::testlib::UploadResourceChunk);
+  jsonrpc_export(coralmicro::testlib::kMethodDeleteResource,
+                 coralmicro::testlib::DeleteResource);
+  jsonrpc_export(coralmicro::testlib::kMethodFetchResource,
+                 coralmicro::testlib::FetchResource);
+  jsonrpc_export(coralmicro::testlib::kMethodRunClassificationModel,
+                 coralmicro::testlib::RunClassificationModel);
+  jsonrpc_export(coralmicro::testlib::kMethodRunDetectionModel,
+                 coralmicro::testlib::RunDetectionModel);
+  jsonrpc_export(coralmicro::testlib::kMethodRunSegmentationModel,
+                 coralmicro::testlib::RunSegmentationModel);
+  jsonrpc_export(coralmicro::testlib::kMethodStartM4,
+                 coralmicro::testlib::StartM4);
+  jsonrpc_export(coralmicro::testlib::kMethodGetTemperature,
+                 coralmicro::testlib::GetTemperature);
   jsonrpc_export(kMethodM4XOR, M4XOR);
-  jsonrpc_export(coral::micro::testlib::kMethodCaptureTestPattern,
-                 coral::micro::testlib::CaptureTestPattern);
+  jsonrpc_export(coralmicro::testlib::kMethodCaptureTestPattern,
+                 coralmicro::testlib::CaptureTestPattern);
   jsonrpc_export(kMethodM4CoreMark, M4CoreMark);
   jsonrpc_export(kMethodM7CoreMark, M7CoreMark);
   jsonrpc_export(kMethodGetFrame, GetFrame);
-  jsonrpc_export(coral::micro::testlib::kMethodCaptureAudio,
-                 coral::micro::testlib::CaptureAudio);
-  jsonrpc_export(coral::micro::testlib::kMethodInitCrypto,
-                 coral::micro::testlib::CryptoInit);
-  jsonrpc_export(coral::micro::testlib::kMethodGetCryptoUId,
-                 coral::micro::testlib::CryptoGetUID);
+  jsonrpc_export(coralmicro::testlib::kMethodCaptureAudio,
+                 coralmicro::testlib::CaptureAudio);
+  jsonrpc_export(coralmicro::testlib::kMethodInitCrypto,
+                 coralmicro::testlib::CryptoInit);
+  jsonrpc_export(coralmicro::testlib::kMethodGetCryptoUId,
+                 coralmicro::testlib::CryptoGetUID);
 
-  coral::micro::JsonRpcHttpServer server;
+  coralmicro::JsonRpcHttpServer server;
   server.AddUriHandler(UriHandler);
-  coral::micro::UseHttpServer(&server);
+  coralmicro::UseHttpServer(&server);
   vTaskSuspend(nullptr);
 }

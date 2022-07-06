@@ -23,7 +23,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 class UsbHostTask {
    public:
@@ -60,6 +60,6 @@ class UsbHostTask {
     std::map<uint32_t, UsbHostEventCallback> host_event_callbacks_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_USB_USB_HOST_TASK_H_

@@ -16,7 +16,7 @@
 
 #include "PDM.h"
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 PDMClass::PDMClass()
@@ -79,6 +79,6 @@ void PDMClass::Append(const int32_t* samples, size_t num_samples) {
 }
 
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
-coral::micro::arduino::PDMClass Mic = coral::micro::arduino::PDMClass();
+coralmicro::arduino::PDMClass Mic = coralmicro::arduino::PDMClass();

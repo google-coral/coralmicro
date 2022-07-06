@@ -25,7 +25,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pdm_edma.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 enum class AudioSampleRate : int32_t {
     k16000_Hz = 16000,
@@ -110,6 +110,6 @@ class AudioDriver {
     Callback callback_;
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_AUDIO_AUDIO_DRIVER_H_

@@ -22,7 +22,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm7/fsl_cache.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_caam.h"
 
-namespace coral::micro {
+namespace coralmicro {
 
 using namespace random;
 
@@ -46,4 +46,4 @@ bool Random::GetRandomNumber(void* out, size_t len) {
     return resp.success;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

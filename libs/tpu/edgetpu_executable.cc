@@ -42,7 +42,7 @@ int TensorDataTypeSize(platforms::darwinn::DataType data_type) {
 }
 }  // namespace
 
-namespace coral::micro {
+namespace coralmicro {
 
 EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe) :
     executable_(exe) {
@@ -354,4 +354,4 @@ int OutputLayer::GetBufferIndex(const YBufferIndex& y_buffer_index, int x,
         z;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

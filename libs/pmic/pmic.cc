@@ -19,7 +19,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
-namespace coral::micro {
+namespace coralmicro {
 using namespace pmic;
 namespace {
 constexpr uint8_t kPmicAddress = 0x58;
@@ -135,4 +135,4 @@ uint8_t PmicTask::GetChipId() {
     return resp.response.chip_id;
 }
 
-}  // namespace coral::micro
+}  // namespace coralmicro

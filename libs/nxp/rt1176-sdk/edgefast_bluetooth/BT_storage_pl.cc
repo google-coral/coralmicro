@@ -24,14 +24,14 @@ static UCHAR ssign[STORAGE_NUM_TYPES][STORAGE_SKEY_SIZE] = {
 
 API_RESULT storage_open_pl(UCHAR type, UCHAR mode) {
   if (NULL != fp[type]) {
-    coral::micro::filesystem::Close(fp[type]);
+    coralmicro::filesystem::Close(fp[type]);
     fp[type] = NULL;
   }
   bool open;
   if (mode == STORAGE_OPEN_MODE_WRITE) {
-    open = coral::micro::filesystem::Open(&lfs_file[type], (char *)fn[type], true);
+    open = coralmicro::filesystem::Open(&lfs_file[type], (char *)fn[type], true);
   } else {
-    open = coral::micro::filesystem::Open(&lfs_file[type], (char *)fn[type]);
+    open = coralmicro::filesystem::Open(&lfs_file[type], (char *)fn[type]);
   }
   if (!open) {
     return API_FAILURE;
@@ -43,7 +43,7 @@ API_RESULT storage_open_pl(UCHAR type, UCHAR mode) {
 
 API_RESULT storage_close_pl(UCHAR type, UCHAR mode) {
   if (NULL != fp[type]) {
-    coral::micro::filesystem::Close(fp[type]);
+    coralmicro::filesystem::Close(fp[type]);
     fp[type] = NULL;
   }
 
@@ -55,7 +55,7 @@ INT16 storage_write_pl(UCHAR type, void *buffer, UINT16 size) {
   nbytes = 0;
 
   if (NULL != fp[type]) {
-    nbytes = (INT16)coral::micro::filesystem::Write(fp[type], buffer, size);
+    nbytes = (INT16)coralmicro::filesystem::Write(fp[type], buffer, size);
   }
   return nbytes;
 }
@@ -63,7 +63,7 @@ INT16 storage_write_pl(UCHAR type, void *buffer, UINT16 size) {
 INT16 storage_read_pl(UCHAR type, void *buffer, UINT16 size) {
   INT16 nbytes = 0;
   if (NULL != fp[type]) {
-    nbytes = (INT16)coral::micro::filesystem::Read(fp[type], buffer, size);
+    nbytes = (INT16)coralmicro::filesystem::Read(fp[type], buffer, size);
   }
   return nbytes;
 }
@@ -71,7 +71,7 @@ INT16 storage_read_pl(UCHAR type, void *buffer, UINT16 size) {
 INT16 storage_write_signature_pl(UCHAR type) {
   INT16 nbytes = 0;
   if (NULL != fp[type]) {
-    nbytes = (INT16)coral::micro::filesystem::Write(fp[type], ssign[type],
+    nbytes = (INT16)coralmicro::filesystem::Write(fp[type], ssign[type],
                                                STORAGE_SKEY_SIZE);
   }
   return nbytes;
@@ -81,7 +81,7 @@ INT16 storage_read_signature_pl(UCHAR type) {
   INT16 nbytes = 0;
   UCHAR sign[STORAGE_SKEY_SIZE];
   if (NULL != fp[type]) {
-    nbytes = coral::micro::filesystem::Read(fp[type], sign, STORAGE_SKEY_SIZE);
+    nbytes = coralmicro::filesystem::Read(fp[type], sign, STORAGE_SKEY_SIZE);
     if (BT_mem_cmp(ssign[type], sign, STORAGE_SKEY_SIZE)) {
       return -1;
     }

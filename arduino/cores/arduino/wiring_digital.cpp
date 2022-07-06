@@ -20,86 +20,86 @@
 #include "libs/base/gpio.h"
 #include "pins_arduino.h"
 
-static coral::micro::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
+static coralmicro::gpio::Gpio PinNumberToGpio(pin_size_t pinNumber) {
     switch (pinNumber) {
         case PIN_LED_USER:
-            return coral::micro::gpio::Gpio::kUserLED;
+            return coralmicro::gpio::Gpio::kUserLED;
         case PIN_BTN:
-            return coral::micro::gpio::Gpio::kUserButton;
+            return coralmicro::gpio::Gpio::kUserButton;
         case PIN_LED_STATUS:
-            return coral::micro::gpio::Gpio::kStatusLED;
+            return coralmicro::gpio::Gpio::kStatusLED;
         case D0:
-            return coral::micro::gpio::Gpio::kArduinoD0;
+            return coralmicro::gpio::Gpio::kArduinoD0;
         case D1:
-            return coral::micro::gpio::Gpio::kArduinoD1;
+            return coralmicro::gpio::Gpio::kArduinoD1;
         case D2:
-            return coral::micro::gpio::Gpio::kArduinoD2;
+            return coralmicro::gpio::Gpio::kArduinoD2;
         case D3:
-            return coral::micro::gpio::Gpio::kArduinoD3;
+            return coralmicro::gpio::Gpio::kArduinoD3;
         default:
             assert(false);
-            return coral::micro::gpio::Gpio::kCount;
+            return coralmicro::gpio::Gpio::kCount;
     }
 }
 
-static coral::micro::gpio::InterruptMode PinStatusToInterruptMode(PinStatus mode) {
+static coralmicro::gpio::InterruptMode PinStatusToInterruptMode(PinStatus mode) {
     switch (mode) {
         case HIGH:
-            return coral::micro::gpio::kIntModeHigh;
+            return coralmicro::gpio::kIntModeHigh;
         case LOW:
-            return coral::micro::gpio::kIntModeLow;
+            return coralmicro::gpio::kIntModeLow;
         case CHANGE:
-            return coral::micro::gpio::kIntModeChanging;
+            return coralmicro::gpio::kIntModeChanging;
         case RISING:
-            return coral::micro::gpio::kIntModeRising;
+            return coralmicro::gpio::kIntModeRising;
         case FALLING:
-            return coral::micro::gpio::kIntModeFalling;
+            return coralmicro::gpio::kIntModeFalling;
         default:
             assert(false);
-            return coral::micro::gpio::kIntModeCount;
+            return coralmicro::gpio::kIntModeCount;
     }
 }
 
 void pinMode(pin_size_t pinNumber, PinMode pinMode) {
-    coral::micro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
+    coralmicro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
     switch (pinMode) {
         case INPUT:
-            coral::micro::gpio::SetMode(gpio, true, false, false);
+            coralmicro::gpio::SetMode(gpio, true, false, false);
             break;
         case OUTPUT:
-            coral::micro::gpio::SetMode(gpio, false, false, false);
+            coralmicro::gpio::SetMode(gpio, false, false, false);
             break;
         case INPUT_PULLUP:
-            coral::micro::gpio::SetMode(gpio, true, true, true);
+            coralmicro::gpio::SetMode(gpio, true, true, true);
             break;
         case INPUT_PULLDOWN:
-            coral::micro::gpio::SetMode(gpio, true, true, false);
+            coralmicro::gpio::SetMode(gpio, true, true, false);
             break;
     }
 }
 
 void digitalWrite(pin_size_t pinNumber, PinStatus status) {
     assert(status == LOW || status == HIGH);
-    coral::micro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
-    coral::micro::gpio::SetGpio(gpio, status == LOW ? false : true);
+    coralmicro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
+    coralmicro::gpio::SetGpio(gpio, status == LOW ? false : true);
 }
 
 PinStatus digitalRead(pin_size_t pinNumber) {
-    coral::micro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
-    bool status = coral::micro::gpio::GetGpio(gpio);
+    coralmicro::gpio::Gpio gpio = PinNumberToGpio(pinNumber);
+    bool status = coralmicro::gpio::GetGpio(gpio);
     return status ? HIGH : LOW;
 }
 
 void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback,
                      PinStatus mode) {
-    coral::micro::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
+    coralmicro::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
     auto interrupt_mode = PinStatusToInterruptMode(mode);
-    coral::micro::gpio::SetIntMode(gpio, interrupt_mode);
-    coral::micro::gpio::RegisterIRQHandler(gpio, callback);
+    coralmicro::gpio::SetIntMode(gpio, interrupt_mode);
+    coralmicro::gpio::RegisterIRQHandler(gpio, callback);
 }
 
 void detachInterrupt(pin_size_t interruptNumber) {
-    coral::micro::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
-    coral::micro::gpio::RegisterIRQHandler(gpio, nullptr);
-    coral::micro::gpio::SetIntMode(gpio, coral::micro::gpio::kIntModeNone);
+    coralmicro::gpio::Gpio gpio = PinNumberToGpio(interruptNumber);
+    coralmicro::gpio::RegisterIRQHandler(gpio, nullptr);
+    coralmicro::gpio::SetIntMode(gpio, coralmicro::gpio::kIntModeNone);
 }

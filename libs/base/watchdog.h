@@ -17,7 +17,7 @@
 #ifndef LIBS_BASE_WATCHDOG_H_
 #define LIBS_BASE_WATCHDOG_H_
 
-namespace coral::micro {
+namespace coralmicro {
 
 struct Watchdog {
     struct Config {
@@ -33,6 +33,6 @@ struct Watchdog {
     static void Stop();
 };
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_WATCHDOG_H_

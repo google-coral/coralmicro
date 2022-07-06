@@ -14,16 +14,16 @@ int settings_init(void) { return 0; }
 
 int settings_load_one(const char *name, void *value, size_t val_len) {
   lfs_file_t readFile;
-  bool success = coral::micro::filesystem::Open(&readFile, name);
+  bool success = coralmicro::filesystem::Open(&readFile, name);
   if (!success) {
     return -1;
   }
 
-  int len = coral::micro::filesystem::Size(&readFile);
+  int len = coralmicro::filesystem::Size(&readFile);
   if (value != NULL) {
-    len = coral::micro::filesystem::Read(&readFile, value, val_len);
+    len = coralmicro::filesystem::Read(&readFile, value, val_len);
   }
-  coral::micro::filesystem::Close(&readFile);
+  coralmicro::filesystem::Close(&readFile);
   return len;
 }
 
@@ -44,19 +44,19 @@ int settings_load_subtree_direct(const char *subtree,
     }
 
     memset((void *)&dir, 0, sizeof(dir));
-    bool success = coral::micro::filesystem::Stat(subtree, &info);
+    bool success = coralmicro::filesystem::Stat(subtree, &info);
     if (!success) {
         return -1;
     }
     if (info.type == LFS_TYPE_DIR)
     {
-        success = coral::micro::filesystem::DirOpen(&dir, subtree);
+        success = coralmicro::filesystem::DirOpen(&dir, subtree);
         if (!success) {
             return -1;
         }
 
         /* iterate until end of directory */
-        while ((err = coral::micro::filesystem::DirRead(&dir, &info)) != 0)
+        while ((err = coralmicro::filesystem::DirRead(&dir, &info)) != 0)
         {
             if ((!strcmp(info.name, ".")) || (!strcmp(info.name, "..")))
             {
@@ -69,7 +69,7 @@ int settings_load_subtree_direct(const char *subtree,
             err = cb(info.name, settings_load_one(name, NULL, 0), settings_read_data, name, param);
         }
 
-        coral::micro::filesystem::DirClose(&dir);
+        coralmicro::filesystem::DirClose(&dir);
     }
     else
     {
@@ -89,7 +89,7 @@ static int settings_load_subtree_scan(struct settings_handler_static *set,
   bool ret;
 
   memset((void *)&dir, 0, sizeof(dir));
-  ret = coral::micro::filesystem::Stat(key, &info);
+  ret = coralmicro::filesystem::Stat(key, &info);
   if (!ret) {
     return -EIO;
   }
@@ -98,11 +98,11 @@ static int settings_load_subtree_scan(struct settings_handler_static *set,
       return err;
     }
 
-    ret = coral::micro::filesystem::DirOpen(&dir, key);
+    ret = coralmicro::filesystem::DirOpen(&dir, key);
     if (!ret) {
       return -EIO;
     }
-    while ((err = coral::micro::filesystem::DirRead(&dir, &info)) != 0) {
+    while ((err = coralmicro::filesystem::DirRead(&dir, &info)) != 0) {
       if ((!strcmp(info.name, ".")) || (!strcmp(info.name, ".."))) {
         continue;
       }
@@ -113,7 +113,7 @@ static int settings_load_subtree_scan(struct settings_handler_static *set,
       name[sizeof(name) - 1] = '\0';
       err = settings_load_subtree_scan(set, name, level + 1);
     }
-    ret = coral::micro::filesystem::DirClose(&dir);
+    ret = coralmicro::filesystem::DirClose(&dir);
     if (!ret) {
       return -EIO;
     }
@@ -164,7 +164,7 @@ static int settings_check_create_path(const char *name) {
   while (index > 0) {
     memcpy(dname, name, index);
     dname[index] = 0;
-    bool success = coral::micro::filesystem::MakeDirs(dname);
+    bool success = coralmicro::filesystem::MakeDirs(dname);
     if (!success) {
       return -1;
     }
@@ -183,13 +183,13 @@ int settings_save_one(const char *name, const void *value, size_t val_len) {
     return err;
   }
 
-  bool success = coral::micro::filesystem::Open(&writeFile, name, true);
+  bool success = coralmicro::filesystem::Open(&writeFile, name, true);
   if (!success) {
     return -1;
   }
 
-  int len = coral::micro::filesystem::Write(&writeFile, value, val_len);
-  success = coral::micro::filesystem::Close(&writeFile);
+  int len = coralmicro::filesystem::Write(&writeFile, value, val_len);
+  success = coralmicro::filesystem::Close(&writeFile);
   if (!success) {
     return -1;
   }
@@ -266,7 +266,7 @@ int settings_name_next(const char *name, const char **next) {
 
 int settings_delete(const char *name) {
   if (name) {
-      if (coral::micro::filesystem::Remove(name)) {
+      if (coralmicro::filesystem::Remove(name)) {
           return 0;
       }
   }

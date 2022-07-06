@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace coral::micro {
+namespace coralmicro {
 
 struct ResetStats {
     uint32_t reset_reason;
@@ -32,6 +32,6 @@ void ResetToFlash();
 void StoreResetReason();
 ResetStats GetResetStats();
 
-}  // namespace coral::micro
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_RESET_H_

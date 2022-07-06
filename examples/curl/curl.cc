@@ -31,7 +31,7 @@
 #include "libs/curl/curl.h"
 /* clang-format on */
 
-namespace coral::micro {
+namespace coralmicro {
 
 namespace {
 struct DnsCallbackArg {
@@ -98,23 +98,23 @@ bool PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
 void Main() {
     std::optional<std::string> our_ip_addr = std::nullopt;
 #if defined(CURL_ETHERNET)
-    coral::micro::InitializeEthernet(true);
-    our_ip_addr = coral::micro::GetEthernetIp();
+    coralmicro::InitializeEthernet(true);
+    our_ip_addr = coralmicro::GetEthernetIp();
 #elif defined(CURL_WIFI)
     // Uncomment me to use the external antenna.
-    // coral::micro::SetWiFiAntenna(coral::micro::WiFiAntenna::kExternal);
+    // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);
     bool success = false;
-    success = coral::micro::TurnOnWiFi();
+    success = coralmicro::TurnOnWiFi();
     if (!success) {
         printf("Failed to turn on Wifi\r\n");
         return;
     }
-    success = coral::micro::ConnectWiFi();
+    success = coralmicro::ConnectWiFi();
     if (!success) {
         printf("falied to connect wifi\r\n");
         return;
     }
-    our_ip_addr = coral::micro::GetWiFiIp();
+    our_ip_addr = coralmicro::GetWiFiIp();
 #endif
 
     if (our_ip_addr.has_value()) {
@@ -140,9 +140,9 @@ void Main() {
 
     vTaskSuspend(nullptr);
 }
-}  // namespace coral::micro
+}  // namespace coralmicro
 extern "C" void app_main(void* param) {
     (void)param;
-    coral::micro::Main();
+    coralmicro::Main();
     vTaskSuspend(nullptr);
 }

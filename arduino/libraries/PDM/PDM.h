@@ -35,7 +35,7 @@ constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
 constexpr int kNumDmaBuffers = 10;
 constexpr int kDmaBufferSizeMs = 100;
 constexpr int kDmaBufferSize = kDmaBufferSizeMs * kSamplesPerMs;
-coral::micro::AudioDriverBuffers<kNumDmaBuffers,
+coralmicro::AudioDriverBuffers<kNumDmaBuffers,
                                  kNumDmaBuffers * kDmaBufferSize>
     g_audio_buffers;
 
@@ -46,7 +46,7 @@ int16_t g_audio_buffer[kAudioBufferSize] __attribute__((aligned(16)));
 constexpr int kDropFirstSamplesMs = 150;
 }  // namespace
 
-namespace coral::micro {
+namespace coralmicro {
 namespace arduino {
 
 class PDMClass {
@@ -81,8 +81,8 @@ class PDMClass {
 };
 
 }  // namespace arduino
-}  // namespace coral::micro
+}  // namespace coralmicro
 
-extern coral::micro::arduino::PDMClass Mic;
+extern coralmicro::arduino::PDMClass Mic;
 
 #endif  // PDM_H_
