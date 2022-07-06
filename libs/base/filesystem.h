@@ -43,6 +43,7 @@ bool Remove(const char* path);
 lfs_soff_t Size(lfs_file_t* handle);
 ssize_t Size(const char* path);
 
+bool DirExists(const char* path);
 bool FileExists(const char* path);
 bool ReadFile(const char* path, std::vector<uint8_t>* buf);
 bool ReadFile(const char* path, std::string* str);

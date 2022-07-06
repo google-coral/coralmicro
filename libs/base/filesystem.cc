@@ -264,6 +264,13 @@ bool Remove(const char* path) {
     return true;
 }
 
+bool DirExists(const char* path) {
+    lfs_dir_t dir;
+    if (lfs_dir_open(&g_lfs, &dir, path) < 0) return false;
+    lfs_dir_close(&g_lfs, &dir);
+    return true;
+}
+
 bool FileExists(const char* path) {
     lfs_file_t file;
     if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return false;
