@@ -47,7 +47,7 @@ namespace {
 struct DnsCallbackArg {
     SemaphoreHandle_t sema;
     const char *hostname;
-    ip_addr_t ip_addr;
+    ip_addr_t* ip_addr;
 };
 
 size_t curl_writefunction(void* contents, size_t size, size_t nmemb,
@@ -83,17 +83,18 @@ void CURLRequest(const char* url) {
 
 bool PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
     DnsCallbackArg dns_arg;
+    dns_arg.ip_addr = addr;
     dns_arg.sema = xSemaphoreCreateBinary();
     dns_arg.hostname = hostname;
     tcpip_callback([](void* ctx) {
         DnsCallbackArg* dns_arg = static_cast<DnsCallbackArg*>(ctx);
         dns_gethostbyname(
-            dns_arg->hostname, &dns_arg->ip_addr,
+            dns_arg->hostname, dns_arg->ip_addr,
             [](const char* name, const ip_addr_t* ipaddr, void* callback_arg) {
                 DnsCallbackArg* dns_arg =
                     reinterpret_cast<DnsCallbackArg*>(callback_arg);
                 if (ipaddr) {
-                    memcpy(&dns_arg->ip_addr, ipaddr, sizeof(ipaddr));
+                    memcpy(dns_arg->ip_addr, ipaddr, sizeof(*ipaddr));
                 }
                 xSemaphoreGive(dns_arg->sema);
             },
