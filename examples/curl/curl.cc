@@ -21,6 +21,7 @@
 #include "libs/base/wifi.h"
 #endif
 
+#include "libs/base/check.h"
 #include "libs/base/gpio.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -111,7 +112,7 @@ void Main() {
   std::optional<std::string> our_ip_addr = std::nullopt;
 #if defined(CURL_ETHERNET)
   printf("Attempting to use ethernet...\r\n");
-  coralmicro::EthernetInit(/*default_iface=*/true);
+  CHECK(coralmicro::EthernetInit(/*default_iface=*/true));
   our_ip_addr = coralmicro::EthernetGetIp();
 #elif defined(CURL_WIFI)
   printf("Attempting to use Wi-Fi...\r\n");

@@ -84,7 +84,7 @@ status_t EthernetPhyWrite(uint32_t phy_reg, uint32_t data) {
   return PHY_Write(&g_phy_handle, phy_reg, data);
 }
 
-void EthernetInit(bool default_iface) {
+bool EthernetInit(bool default_iface) {
   ip4_addr_t netif_ipaddr, netif_netmask, netif_gw;
 
   phy_config_t phy_config = {
@@ -156,8 +156,11 @@ void EthernetInit(bool default_iface) {
     printf("Failed enabling PHY SSC, proceeding.\r\n");
   }
 
-  netifapi_netif_add(&g_netif, &netif_ipaddr, &netif_netmask, &netif_gw,
-                     &enet_config, ethernetif1_init, tcpip_input);
+  err_t err = netifapi_netif_add(&g_netif, &netif_ipaddr, &netif_netmask, &netif_gw,
+                                 &enet_config, ethernetif1_init, tcpip_input);
+  if (err != ERR_OK) {
+    return false;
+  }
   if (default_iface) {
     netifapi_netif_set_default(&g_netif);
   }
@@ -165,6 +168,7 @@ void EthernetInit(bool default_iface) {
   netifapi_netif_set_up(&g_netif);
   netifapi_dhcp_start(&g_netif);
   g_eth_netif = &g_netif;
+  return true;
 }
 
 std::optional<std::string> EthernetGetIp() {

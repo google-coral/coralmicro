@@ -389,7 +389,12 @@ void Main() {
 // For the OOBE Demo, bring up WiFi and Ethernet. For now these are active
 // but unused.
 #if defined(OOBE_DEMO_ETHERNET)
-  EthernetInit(/*default_iface=*/false);
+  if (!EthernetInit(/*default_iface=*/false)) {
+    // If initializing Ethernet fails, turn our LEDs on solid, and halt.
+    LedSet(Led::kStatus, true);
+    LedSet(Led::kUser, true);
+    vTaskSuspend(nullptr);
+  }
 #elif defined(OOBE_DEMO_WIFI)
   WiFiTurnOn();
   if (!WiFiConnect()) {

@@ -14,6 +14,7 @@
 
 #include <cstdio>
 
+#include "libs/base/check.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/testlib/test_lib.h"
@@ -156,7 +157,7 @@ void get_image_from_camera(struct jsonrpc_request* request) {
 
 extern "C" void app_main(void* param) {
 #if defined(IMAGE_SERVER_ETHERNET)
-  coralmicro::EthernetInit(/*default_iface=*/true);
+  CHECK(coralmicro::EthernetInit(/*default_iface=*/true));
   auto* ethernet = coralmicro::EthernetGetInterface();
   if (!ethernet) {
     printf("Unable to bring up ethernet...\r\n");

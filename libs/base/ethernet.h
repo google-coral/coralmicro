@@ -38,7 +38,8 @@ struct netif* EthernetGetInterface();
 // called before `EthernetGetInterface()`.
 // @param default_iface True sets ethernet as the default network interface,
 // false disables it.
-void EthernetInit(bool default_iface);
+// @return True if ethernet successfully initialized; false otherwise.
+bool EthernetInit(bool default_iface);
 
 // @cond Do not generate docs.
 // Writes data over the SMI to the specified PHY register.
