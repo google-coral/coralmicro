@@ -19,7 +19,6 @@
 set -ex
 
 brew install \
-  protobuf \
   cmake \
   libusb \
   lsusb

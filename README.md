@@ -30,10 +30,8 @@ sudo apt-get install -y \
          libudev-dev \
          libhidapi-hidraw0 \
          ninja-build \
-         protobuf-compiler \
          python3-dev \
          python3-pip \
-         python3-protobuf \
          vim
 ```
 
