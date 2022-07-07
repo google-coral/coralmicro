@@ -253,7 +253,6 @@ WIFIReturnCode_t WIFI_On( void )
         {
             /* Initialize WICED */
             result = (wwd_result_t) wiced_wlan_connectivity_init();
-            assert(!(result != WWD_SUCCESS));
             if (result != WWD_SUCCESS)
                 break;
 
