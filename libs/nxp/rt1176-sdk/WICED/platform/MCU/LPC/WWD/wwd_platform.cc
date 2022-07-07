@@ -13,15 +13,17 @@ static lfs_file_t firmware;
 static lfs_file_t clm_blob;
 
 extern "C" resource_result_t platform_read_external_resource(const resource_hnd_t* resource, uint32_t offset, uint32_t maxsize, uint32_t* size, void* buffer) {
+    using coralmicro::filesystem::Lfs;
+
     bool ret;
     int bytes_read;
 
     if (!resources_initialized) {
-        ret = coralmicro::filesystem::Open(&firmware, wifi_firmware_image.val.fs.filename);
+        ret = lfs_file_open(Lfs(), &firmware, wifi_firmware_image.val.fs.filename, LFS_O_RDONLY) >= 0;
         if (!ret) {
             return RESOURCE_FILE_OPEN_FAIL;
         }
-        ret = coralmicro::filesystem::Open(&clm_blob, wifi_firmware_clm_blob.val.fs.filename);
+        ret = lfs_file_open(Lfs(), &clm_blob, wifi_firmware_clm_blob.val.fs.filename, LFS_O_RDONLY) >= 0;
         if (!ret) {
             return RESOURCE_FILE_OPEN_FAIL;
         }
@@ -38,12 +40,12 @@ extern "C" resource_result_t platform_read_external_resource(const resource_hnd_
     } else {
         return RESOURCE_FILE_OPEN_FAIL;
     }
-    ret = coralmicro::filesystem::Seek(f, offset, LFS_SEEK_SET);
+    ret = lfs_file_seek(Lfs(), f, offset, LFS_SEEK_SET) >= 0;
     if (!ret) {
         result = RESOURCE_FILE_SEEK_FAIL;
         goto exit_close;
     }
-    bytes_read = coralmicro::filesystem::Read(f, buffer, maxsize);
+    bytes_read = lfs_file_read(Lfs(), f, buffer, maxsize);
     if (bytes_read < 0) {
         result = RESOURCE_FILE_READ_FAIL;
         goto exit_close;
