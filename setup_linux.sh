@@ -23,7 +23,7 @@ sudo apt-get -y install \
   protobuf-compiler \
   cmake \
   libhidapi-hidraw0 \
-  libusb-dev \
+  libusb-1.0-0-dev \
   libudev-dev \
   python3-dev \
   python3-pip
