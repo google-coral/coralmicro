@@ -156,22 +156,6 @@ bool Init(bool force_format) {
     return true;
 }
 
-bool Open(lfs_file_t* handle, const char* path) {
-    return Open(handle, path, false);
-}
-
-bool Open(lfs_file_t* handle, const char* path, bool writable, bool append) {
-    int ret = lfs_file_open(&g_lfs, handle, path,
-                            writable ? ((append ? LFS_O_APPEND : LFS_O_TRUNC) |
-                                        LFS_O_CREAT | LFS_O_RDWR)
-                                     : LFS_O_RDONLY);
-    return (ret == LFS_ERR_OK);
-}
-
-int Write(lfs_file_t* handle, const void* buffer, size_t size) {
-    return lfs_file_write(&g_lfs, handle, buffer, size);
-}
-
 // Matches the specification of
 // https://docs.python.org/3/library/os.path.html#os.path.dirname
 // except it assumes only a single '/' in a row.
@@ -227,41 +211,11 @@ bool MakeDirs(const char* path) {
     return true;
 }
 
-int Read(lfs_file_t* handle, void* buffer, size_t size) {
-    return lfs_file_read(&g_lfs, handle, buffer, size);
-}
-
-bool Seek(lfs_file_t* handle, size_t off, int whence) {
-    int ret = lfs_file_seek(&g_lfs, handle, off, whence);
-    return (ret >= 0) ? true : false;
-}
-
-size_t Position(lfs_file_t* handle) {
-    return lfs_file_seek(&g_lfs, handle, 0, LFS_SEEK_CUR);
-}
-
-bool Close(lfs_file_t* handle) {
-    int ret = lfs_file_close(&g_lfs, handle);
-    return (ret == LFS_ERR_OK) ? true : false;
-}
-
 ssize_t Size(const char* path) {
-    lfs_file_t handle;
-    if (!Open(&handle, path)) {
-        return -1;
-    }
-
-    ssize_t ret = Size(&handle);
-    Close(&handle);
-    return ret;
-}
-
-lfs_soff_t Size(lfs_file_t* handle) { return lfs_file_size(&g_lfs, handle); }
-
-bool Remove(const char* path) {
-    int ret = lfs_remove(&g_lfs, path);
-    if (ret < 0) return false;
-    return true;
+    lfs_file_t file;
+    if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return -1;
+    AutoClose close{&file};
+    return lfs_file_size(&g_lfs, &file);
 }
 
 bool DirExists(const char* path) {

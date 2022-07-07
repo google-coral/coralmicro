@@ -29,18 +29,9 @@ namespace filesystem {
 
 lfs_t* Lfs();
 bool Init(bool force_format = false);
-bool Open(lfs_file_t* handle, const char* path);
-bool Open(lfs_file_t* handle, const char* path, bool writable,
-          bool append = false);
-int Read(lfs_file_t* handle, void* buffer, size_t size);
-int Write(lfs_file_t* handle, const void* buffer, size_t size);
+
 bool MakeDirs(const char* path);
 std::string Dirname(const char* path);
-bool Seek(lfs_file_t* handle, size_t off, int whence);
-size_t Position(lfs_file_t* handle);
-bool Close(lfs_file_t* handle);
-bool Remove(const char* path);
-lfs_soff_t Size(lfs_file_t* handle);
 ssize_t Size(const char* path);
 
 bool DirExists(const char* path);

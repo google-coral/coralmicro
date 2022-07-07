@@ -35,6 +35,7 @@ uint32_t disable_usb_timeout __attribute__((section(".noinit_rpmsg_sh_mem")));
 extern "C" uint32_t vPortGetRunTimeCounterValue(void) { return 0; }
 
 namespace {
+using coralmicro::filesystem::Lfs;
 void elfloader_main(void *param);
 
 TimerHandle_t usb_timer;
@@ -82,8 +83,8 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
                  &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
           break;
         case ElfloaderTarget::kFilesystem:
-          coralmicro::filesystem::Write(
-              &file_handle, &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
+          lfs_file_write(Lfs(), &file_handle,
+                         &buffer[1] + sizeof(ElfloaderBytes), bytes->size);
           break;
       }
       break;
@@ -99,13 +100,12 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
           // the Python side if possible.
           auto dir = coralmicro::filesystem::Dirname(elfloader_recv_path);
           coralmicro::filesystem::MakeDirs(dir.c_str());
-          coralmicro::filesystem::Open(&file_handle, elfloader_recv_path,
-                                         true);
+          lfs_file_open(Lfs(), &file_handle, elfloader_recv_path, LFS_O_TRUNC | LFS_O_CREAT | LFS_O_RDWR);
           free(elfloader_recv_path);
           elfloader_recv_path = nullptr;
         } break;
         case ElfloaderTarget::kFilesystem:
-          coralmicro::filesystem::Close(&file_handle);
+          lfs_file_close(Lfs(), &file_handle);
           break;
       }
       break;
