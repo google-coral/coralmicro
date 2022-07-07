@@ -39,7 +39,7 @@ size_t File::write(uint8_t val) { return write(&val, 1); }
 
 size_t File::write(const uint8_t *buf, size_t sz) {
   if (file_handle_) {
-    return coralmicro::filesystem::Write(file_handle_.get(), buf, sz);
+    return lfs_file_write(Lfs(), file_handle_.get(), buf, sz);
   }
   return 0;
 }
@@ -49,7 +49,7 @@ int File::peek() {
     int retval;
     retval = read();
     if (retval != -1) {
-      coralmicro::filesystem::Seek(file_handle_.get(), -1, LFS_SEEK_CUR);
+      lfs_file_seek(Lfs(), file_handle_.get(), -1, LFS_SEEK_CUR);
     }
     return retval;
   }
@@ -64,7 +64,7 @@ int File::read() {
 
 int File::read(void *buf, size_t nbyte) {
   if (file_handle_) {
-    return coralmicro::filesystem::Read(file_handle_.get(), buf, nbyte);
+    return lfs_file_read(Lfs(), file_handle_.get(), buf, nbyte);
   }
   return -1;
 }
@@ -78,13 +78,13 @@ int File::available() {
 
 void File::flush() {
   if (file_handle_) {
-    coralmicro::filesystem::Seek(file_handle_.get(), 0, LFS_SEEK_CUR);
+    lfs_file_seek(Lfs(), file_handle_.get(), 0, LFS_SEEK_CUR);
   }
 }
 
 bool File::seek(size_t pos) {
   if (file_handle_ && pos >= 0 && pos <= size()) {
-    return coralmicro::filesystem::Seek(file_handle_.get(), pos, LFS_SEEK_SET);
+    return lfs_file_seek(Lfs(), file_handle_.get(), pos, LFS_SEEK_SET) >= 0;
   }
   return false;
 }
@@ -97,14 +97,15 @@ size_t File::position() {
       uint8_t junk;
       write(&junk, 0);
     }
-    return coralmicro::filesystem::Position(file_handle_.get());
+
+    return lfs_file_seek(Lfs(), file_handle_.get(), 0, LFS_SEEK_CUR);
   }
   return -1;
 }
 
 size_t File::size() {
   if (file_handle_) {
-    return coralmicro::filesystem::Size(file_handle_.get());
+    return lfs_file_size(Lfs(), file_handle_.get());
   }
   return -1;
 }
@@ -120,7 +121,7 @@ void File::close() {
     }
   } else {
     if (file_handle_) {
-      coralmicro::filesystem::Close(file_handle_.get());
+      lfs_file_close(Lfs(), file_handle_.get());
       file_handle_ = nullptr;
     }
   }
