@@ -51,17 +51,16 @@ extern "C" void app_main(void* param) {
     }
   }
 
-  printf("\r\nSee examples/security/README.md for instruction to verify.\r\n");
-  // The storage index of the key pair we're using.
-  constexpr SST_Index_t key_idx = 0;
+  // The storage index of the ecc key pair to sign and verify.
+  constexpr uint8_t kKeyIdx = 0;
 
   // Get the public ECC key at index 0 from the A71 chip.
-  if (auto ecc_pub_key = coralmicro::a71ch::GetEccPublicKey(key_idx);
-      ecc_pub_key.has_value()) {
-    printf("A71 ECC public key 0: %s\r\n",
-           coralmicro::StrToHex(ecc_pub_key.value()).c_str());
+  auto maybe_ecc_pub_key = coralmicro::a71ch::GetEccPublicKey(kKeyIdx);
+  if (maybe_ecc_pub_key.has_value()) {
+    printf("A71 ECC public key %d: %s\r\n", kKeyIdx,
+           coralmicro::StrToHex(maybe_ecc_pub_key.value()).c_str());
   } else {
-    printf("Failed to get A71 ECC public key 0\r\n");
+    printf("Failed to get A71 ECC public key %d\r\n", kKeyIdx);
     vTaskSuspend(nullptr);
   }
 
@@ -83,7 +82,7 @@ extern "C" void app_main(void* param) {
 
   // Get signature for this model with the key public key in index 0.
   const auto& sha = maybe_sha.value();
-  auto maybe_signature = coralmicro::a71ch::GetEccSignature(key_idx, sha);
+  auto maybe_signature = coralmicro::a71ch::GetEccSignature(kKeyIdx, sha);
   if (maybe_signature.has_value()) {
     printf("Signature: %s\r\n",
            coralmicro::StrToHex(maybe_signature.value()).c_str());
@@ -92,5 +91,21 @@ extern "C" void app_main(void* param) {
     vTaskSuspend(nullptr);
   }
 
+  // Verifying the signature using the key storage index.
+  const auto& signature = maybe_signature.value();
+  printf("EccVerify: %s\r\n",
+         coralmicro::a71ch::EccVerify(kKeyIdx, sha, signature) ? "success"
+                                                               : "fail");
+
+  // Verifying the signature using the key.
+  const auto& ecc_pub_key = maybe_ecc_pub_key.value();
+  printf("EccVerifyWithKey: %s\r\n",
+         coralmicro::a71ch::EccVerifyWithKey(ecc_pub_key, sha, signature)
+             ? "success"
+             : "fail");
+
+  printf(
+      "\r\nSee examples/security/README.md for instructions to verify "
+      "manually.\r\n");
   vTaskSuspend(nullptr);
 }

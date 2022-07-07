@@ -13,11 +13,13 @@ A71 Random 8 Bytes: b4a3054723f73320
 A71 Random 16 Bytes: 6ff97a2cf5e70fd71a867875515b6d57
 A71 Random 32 Bytes: 28fda7f43956937043e56cdfda84321c61749e817f5b1982d5cb4ec574251c31
 A71 Random 64 Bytes: 4d01a3d3c6fc1837efbd3f51644a5b280301fc510fb778ca3dde0c667e4490f292e82ea1d3b4006dcff68d7431e6cbd775bd90d15de99fcf324a874a4f3a32d7
-
-See examples/security/README.md for instruction to verify.
 A71 ECC public key 0: 04a35e5482132be6a6af3fd76885e062545801f331bb6f0c0e7cbb7b920e94719b62812925b11f7335e1c35b2d187f093dd38381287dfaea914ae248e4d21fe8ed
 testconv1-edgetpu.tflite sha: 20735a163b0a4835e42157e88b60440b566db21a4accfac49bd002998e9e069f
 Signature: 3046022100b1a1b761f642998228ad04972bc811fb25be47a1e08fa5db6bea1e6b25b995100221008c23b40e17ad57cbdc3fc4d9a2c3f8ac36f8d7e77b8a30b341c0d4b5ac7979fd
+Ecc Verify: success
+EccVerifyWithKey: success
+
+See examples/security/README.md for instruction to verify.
 ```
 
 ## Getting a public key file for desktop use (replace key string with the string from your device)

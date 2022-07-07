@@ -60,13 +60,13 @@ std::optional<std::string> GetRandomBytes(uint8_t num_bytes) {
   return random;
 }
 
-std::optional<std::string> GetEccPublicKey(uint8_t idx) {
+std::optional<std::string> GetEccPublicKey(uint8_t key_idx) {
   // Anything less than 65 will fail, anything more than 65 will just fill the
   // returning key with trailing 0s.
   uint16_t key_len = 65;
   std::string public_ecc_key;
   public_ecc_key.resize(key_len);
-  if (A71_GetPublicKeyEccKeyPair(idx,
+  if (A71_GetPublicKeyEccKeyPair(key_idx,
                                  reinterpret_cast<U8*>(public_ecc_key.data()),
                                  &key_len) != SMCOM_OK) {
     return std::nullopt;
@@ -91,12 +91,13 @@ std::optional<std::string> GetSha256(const std::vector<uint8_t>& data) {
   return GetSha256(const_cast<uint8_t*>(data.data()), data.size());
 }
 
-std::optional<std::string> GetEccSignature(uint8_t idx, const uint8_t* sha,
+std::optional<std::string> GetEccSignature(uint8_t key_idx, const uint8_t* sha,
                                            uint16_t sha_len) {
   uint16_t signature_len = 256;
   std::string signature;
   signature.resize(signature_len);
-  if (A71_EccSign(idx, sha, sha_len, reinterpret_cast<U8*>(signature.data()),
+  if (A71_EccSign(key_idx, sha, sha_len,
+                  reinterpret_cast<U8*>(signature.data()),
                   &signature_len) != SMCOM_OK) {
     return std::nullopt;
   }
@@ -104,15 +105,51 @@ std::optional<std::string> GetEccSignature(uint8_t idx, const uint8_t* sha,
   return signature;
 }
 
-std::optional<std::string> GetEccSignature(uint8_t idx,
+std::optional<std::string> GetEccSignature(uint8_t key_idx,
                                            const std::vector<uint8_t>& data) {
-  return GetEccSignature(idx, data.data(), data.size());
+  return GetEccSignature(key_idx, data.data(), data.size());
 }
 
-std::optional<std::string> GetEccSignature(uint8_t idx,
+std::optional<std::string> GetEccSignature(uint8_t key_idx,
                                            const std::string& sha) {
-  return GetEccSignature(idx, reinterpret_cast<const uint8_t*>(sha.data()),
+  return GetEccSignature(key_idx, reinterpret_cast<const uint8_t*>(sha.data()),
                          sha.size());
 }
 
+bool EccVerify(uint8_t key_idx, const uint8_t* sha, uint16_t sha_len,
+               const uint8_t* signature, uint16_t signature_len) {
+  if (auto maybe_key = GetEccPublicKey(key_idx); maybe_key.has_value()) {
+    const auto& ecc_key = maybe_key.value();
+    return EccVerifyWithKey(reinterpret_cast<const uint8_t*>(ecc_key.data()),
+                            ecc_key.size(), sha, sha_len, signature,
+                            signature_len);
+  }
+  return false;
+}
+
+bool EccVerify(uint8_t key_idx, const std::string& sha,
+               const std::string& signature) {
+  return EccVerify(
+      key_idx, reinterpret_cast<const uint8_t*>(sha.data()), sha.size(),
+      reinterpret_cast<const uint8_t*>(signature.data()), signature.size());
+}
+
+bool EccVerifyWithKey(const uint8_t* ecc_pub_key, uint16_t key_len,
+                      const uint8_t* sha, uint16_t sha_len,
+                      const uint8_t* signature, uint16_t signature_len) {
+  uint8_t result;
+  if (A71_EccVerifyWithKey(ecc_pub_key, key_len, sha, sha_len, signature,
+                           signature_len, &result) != SMCOM_OK) {
+    return false;
+  }
+  return result;
+}
+
+bool EccVerifyWithKey(const std::string& ecc_key, const std::string& sha,
+                      const std::string& signature) {
+  return EccVerifyWithKey(
+      reinterpret_cast<const uint8_t*>(ecc_key.data()), ecc_key.size(),
+      reinterpret_cast<const uint8_t*>(sha.data()), sha.size(),
+      reinterpret_cast<const uint8_t*>(signature.data()), signature.size());
+}
 }  // namespace coralmicro::a71ch
