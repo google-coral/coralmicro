@@ -112,25 +112,27 @@ extern "C" int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len) {
 // implementation to use our filesystem API.
 extern "C" int mbedtls_pk_load_file(const char *path, unsigned char **buf,
                                     size_t *n) {
+  using coralmicro::filesystem::Lfs;
+
   MBEDTLS_INTERNAL_VALIDATE_RET(path != NULL, MBEDTLS_ERR_PK_BAD_INPUT_DATA);
   MBEDTLS_INTERNAL_VALIDATE_RET(buf != NULL, MBEDTLS_ERR_PK_BAD_INPUT_DATA);
   MBEDTLS_INTERNAL_VALIDATE_RET(n != NULL, MBEDTLS_ERR_PK_BAD_INPUT_DATA);
 
   lfs_file_t handle;
-  if (!coralmicro::filesystem::Open(&handle, path)) {
+  if (lfs_file_open(Lfs(), &handle, path, LFS_O_RDONLY) < 0) {
     return MBEDTLS_ERR_PK_FILE_IO_ERROR;
   }
 
-  *n = coralmicro::filesystem::Size(&handle);
+  *n = lfs_file_size(Lfs(), &handle);
 
   if (*n + 1 == 0 || (*buf = reinterpret_cast<unsigned char *>(
                           mbedtls_calloc(1, *n + 1))) == NULL) {
-    coralmicro::filesystem::Close(&handle);
+    lfs_file_close(Lfs(), &handle);
     return MBEDTLS_ERR_PK_ALLOC_FAILED;
   }
 
-  if (static_cast<size_t>(coralmicro::filesystem::Read(&handle, *buf, *n)) != *n) {
-    coralmicro::filesystem::Close(&handle);
+  if (static_cast<size_t>(lfs_file_read(Lfs(), &handle, *buf, *n)) != *n) {
+    lfs_file_close(Lfs(), &handle);
 
     mbedtls_platform_zeroize(*buf, *n);
     mbedtls_free(*buf);
@@ -138,7 +140,7 @@ extern "C" int mbedtls_pk_load_file(const char *path, unsigned char **buf,
     return MBEDTLS_ERR_PK_FILE_IO_ERROR;
   }
 
-  coralmicro::filesystem::Close(&handle);
+  lfs_file_close(Lfs(), &handle);
 
   (*buf)[*n] = '\0';
 
