@@ -236,10 +236,20 @@ extern "C" void app_main(void* param) {
   jsonrpc_export(kMethodGetFrame, GetFrame);
   jsonrpc_export(coralmicro::testlib::kMethodCaptureAudio,
                  coralmicro::testlib::CaptureAudio);
-  jsonrpc_export(coralmicro::testlib::kMethodInitCrypto,
+  jsonrpc_export(coralmicro::testlib::kMethodCryptoInit,
                  coralmicro::testlib::CryptoInit);
-  jsonrpc_export(coralmicro::testlib::kMethodGetCryptoUId,
+  jsonrpc_export(coralmicro::testlib::kMethodCryptoGetUId,
                  coralmicro::testlib::CryptoGetUID);
+  jsonrpc_export(coralmicro::testlib::kMethodCryptoGetRandomBytes,
+                 coralmicro::testlib::CryptoGetRandomBytes);
+  jsonrpc_export(coralmicro::testlib::kMethodCryptoGetEccSignature,
+                 coralmicro::testlib::CryptoGetEccSignature);
+  jsonrpc_export(coralmicro::testlib::kMethodCryptoGetPubEccKey,
+                 coralmicro::testlib::CryptoGetPublicEccKey);
+  jsonrpc_export(coralmicro::testlib::kMethodCryptoGetSha256,
+                 coralmicro::testlib::CryptoGetSha256);
+  jsonrpc_export(coralmicro::testlib::kMethodCryptoEccVerify,
+                 coralmicro::testlib::CryptoEccVerify);
 
   coralmicro::JsonRpcHttpServer server;
   server.AddUriHandler(UriHandler);

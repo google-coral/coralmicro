@@ -41,6 +41,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
+
 extern "C" {
 #include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
@@ -56,7 +57,7 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 // Map for containing uploaded resources.
 // Key is the output of StrHash with the resource name as the parameter.
-std::map<std::string, std::vector<uint8_t>> g_uploaded_resources;
+std::map<std::string, std::vector<uint8_t>> g_stored_resources;
 
 std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char* param_name) {
   const char* param_format = "$[0].%s";
@@ -68,8 +69,8 @@ std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char* param_name) {
 }
 
 std::vector<uint8_t>* GetResource(const std::string& resource_name) {
-  auto it = g_uploaded_resources.find(resource_name);
-  if (it == g_uploaded_resources.end()) return nullptr;
+  auto it = g_stored_resources.find(resource_name);
+  if (it == g_stored_resources.end()) return nullptr;
   return &it->second;
 }
 
@@ -220,7 +221,7 @@ void BeginUploadResource(struct jsonrpc_request* request) {
   int resource_size;
   if (!JsonRpcGetIntegerParam(request, "size", &resource_size)) return;
 
-  g_uploaded_resources[resource_name].resize(resource_size);
+  g_stored_resources[resource_name].resize(resource_size);
   jsonrpc_return_success(request, "{}");
 }
 
@@ -248,13 +249,13 @@ void DeleteResource(struct jsonrpc_request* request) {
   std::string resource_name;
   if (!JsonRpcGetStringParam(request, "name", &resource_name)) return;
 
-  auto it = g_uploaded_resources.find(resource_name);
-  if (it == g_uploaded_resources.end()) {
+  auto it = g_stored_resources.find(resource_name);
+  if (it == g_stored_resources.end()) {
     jsonrpc_return_error(request, -1, "unknown resource", nullptr);
     return;
   }
 
-  g_uploaded_resources.erase(it);
+  g_stored_resources.erase(it);
   jsonrpc_return_success(request, "{}");
 }
 
@@ -880,14 +881,121 @@ void CryptoInit(struct jsonrpc_request* request) {
 }
 
 void CryptoGetUID(struct jsonrpc_request* request) {
-  auto maybe_uid = coralmicro::a71ch::GetUId();
-  if (!maybe_uid.has_value()) {
-    jsonrpc_return_error(request, -1, "Unable to obtain a71ch uid", nullptr);
+  if (auto maybe_uid = coralmicro::a71ch::GetUId(); maybe_uid.has_value()) {
+    const auto& uid = maybe_uid.value();
+    jsonrpc_return_success(request, "{%Q:%V}", "uid", uid.size(), uid.data());
     return;
   }
-  const auto& uid = maybe_uid.value();
-  jsonrpc_return_success(request, "{%Q:\"%s\"}", "uid",
-                         coralmicro::StrToHex(uid).c_str());
+  jsonrpc_return_error(request, -1, "Unable to obtain a71ch uid", nullptr);
 }
 
+void CryptoGetRandomBytes(struct jsonrpc_request* request) {
+  int num_bytes;
+  if (!JsonRpcGetIntegerParam(request, "num_bytes", &num_bytes)) return;
+  if (auto maybe_bytes = coralmicro::a71ch::GetRandomBytes(num_bytes);
+      maybe_bytes.has_value()) {
+    const auto& bytes = maybe_bytes.value();
+    jsonrpc_return_success(request, "{%Q:%V}", "bytes", bytes.size(),
+                           bytes.data());
+    return;
+  }
+  jsonrpc_return_error(request, -1, "Failed to get random bytes.", nullptr);
+}
+
+void CryptoGetSha256(struct jsonrpc_request* request) {
+  std::string file_name;
+  if (!JsonRpcGetStringParam(request, "file_name", &file_name)) return;
+  std::string stored_sha_name;
+  if (!JsonRpcGetStringParam(request, "stored_sha_name", &stored_sha_name))
+    return;
+  std::vector<uint8_t> file_content;
+  if (!coralmicro::filesystem::ReadFile(file_name.c_str(), &file_content)) {
+    jsonrpc_return_error(request, -1, "%s not found", file_name.c_str());
+    return;
+  }
+  auto maybe_sha = coralmicro::a71ch::GetSha256(file_content);
+  if (maybe_sha.has_value()) {
+    const auto& sha = maybe_sha.value();
+    g_stored_resources[stored_sha_name] = {sha.begin(), sha.end()};
+    jsonrpc_return_success(request, "{%Q:%V}", "sha_256", sha.size(),
+                           sha.data());
+    return;
+  }
+  jsonrpc_return_error(request, -1, "failed to generate sha256 for %s",
+                       file_name.c_str());
+}
+
+void CryptoGetPublicEccKey(struct jsonrpc_request* request) {
+  int index;
+  if (!JsonRpcGetIntegerParam(request, "key_index", &index)) return;
+  if (auto ecc_pub_key = coralmicro::a71ch::GetEccPublicKey(index);
+      ecc_pub_key.has_value()) {
+    const auto& key = ecc_pub_key.value();
+    jsonrpc_return_success(request, "{%Q:%V}", "ecc_pub_key", key.size(),
+                           key.data());
+    return;
+  }
+  jsonrpc_return_error(request, -1, "Failed to get A71 ECC public key",
+                       nullptr);
+}
+
+void CryptoGetEccSignature(struct jsonrpc_request* request) {
+  int index;
+  if (!JsonRpcGetIntegerParam(request, "key_index", &index)) return;
+  std::string stored_sha_name;
+  if (!JsonRpcGetStringParam(request, "stored_sha_name", &stored_sha_name))
+    return;
+  std::string stored_signature_name;
+  if (!JsonRpcGetStringParam(request, "stored_signature_name",
+                             &stored_signature_name))
+    return;
+  auto* stored_sha = GetResource(stored_sha_name);
+  if (!stored_sha) {
+    jsonrpc_return_error(request, -1, "Failed to retrieve the stored sha",
+                         nullptr);
+    return;
+  }
+  if (auto maybe_signature =
+          coralmicro::a71ch::GetEccSignature(index, *stored_sha);
+      maybe_signature.has_value()) {
+    const auto& signature = maybe_signature.value();
+    g_stored_resources[stored_signature_name] = {signature.begin(),
+                                                 signature.end()};
+    jsonrpc_return_success(request, "{%Q:%V}", "ecc_signature",
+                           signature.size(), signature.data());
+    return;
+  }
+  jsonrpc_return_error(request, -1, "Failed to get ecc signature", nullptr);
+}
+
+void CryptoEccVerify(struct jsonrpc_request* request) {
+  int index;
+  if (!JsonRpcGetIntegerParam(request, "key_index", &index)) return;
+  std::string stored_sha_name;
+  if (!JsonRpcGetStringParam(request, "stored_sha_name", &stored_sha_name))
+    return;
+  auto* stored_sha = GetResource(stored_sha_name);
+  if (!stored_sha) {
+    jsonrpc_return_error(request, -1, "Failed to retrieve the stored sha",
+                         nullptr);
+    return;
+  }
+  std::string stored_signature_name;
+  if (!JsonRpcGetStringParam(request, "stored_signature_name",
+                             &stored_signature_name))
+    return;
+  auto* stored_signature = GetResource(stored_signature_name);
+  if (!stored_signature) {
+    jsonrpc_return_error(request, -1, "Failed to retrieve the stored signature",
+                         nullptr);
+    return;
+  }
+  if (!coralmicro::a71ch::EccVerify(
+          index, stored_sha->data(), stored_sha->size(),
+          stored_signature->data(), stored_signature->size())) {
+    jsonrpc_return_error(request, -1, "Failed to verify", nullptr);
+    return;
+  }
+  jsonrpc_return_success(request, "{}");
+}
 }  // namespace coralmicro::testlib

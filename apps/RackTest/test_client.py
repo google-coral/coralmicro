@@ -36,7 +36,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--host', type=str, default='10.10.10.1', help='Ip address of the Dev Board Micro')
 parser.add_argument('--port', type=int, default=80, help='Port of the Dev Board Micro')
 parser.add_argument('--test', type=str, default='detection',
-                    help='Test to run, currently support ["detection", "classification", "segmentation", "wifi_tests", "stress_test"]')
+                    help='Test to run, currently support ["detection", "classification", "segmentation", "wifi_tests", "stress_test", "crypto_tests"]')
 parser.add_argument('--test_image', type=str, default='test_data/cat.bmp')
 parser.add_argument('--model', type=str, default='models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite')
 args = parser.parse_args()
@@ -59,7 +59,6 @@ def run_model(url, test):
     model_data_len = len(model_data)
     model_name = model_path.split('/')[-1]
     rpc_helper.upload_resource(model_name, model_data, model_data_len)
-    response = {}
     if test == 'detection':
         response = rpc_helper.run_model('run_detection_model', model_name, rpc_helper.image_resource_name,
                                         rpc_helper.image_width, rpc_helper.image_height, 3)
@@ -103,11 +102,32 @@ def run_stress_test(url):
     print(result)
 
 def run_crypto_test(url):
-    rpc_helper = CoralMicroRPCHelper(url, print_payloads=True)
+    rpc_helper = CoralMicroRPCHelper(url)
     print('Init Crypto')
     print(rpc_helper.call_rpc_method('a71ch_init'))
     print('Getting Crypto UID')
     print(rpc_helper.call_rpc_method('a71ch_get_uid'))
+    for num_bytes in (2**p for p in range(1, 7)):
+        print(f'Getting {num_bytes} random bytes')
+        print(rpc_helper.a71ch_get_random(num_bytes))
+
+    file_name = '/models/testconv1-edgetpu.tflite'
+    stored_sha_name = 'testconv1-stored-sha'
+    print(f'Getting sha for {file_name}')
+    print(rpc_helper.a71ch_get_sha_256(file_name, stored_sha_name))
+    stored_signature_name = 'testconv1-stored-signature'
+    for key_index in range(4):
+        print(f'key_index: {key_index}')
+        print('Getting Crypto Ecc pubkey')
+        print(rpc_helper.a71ch_get_public_ecc_key(idx=key_index))
+        print('Getting Signature')
+        print(rpc_helper.a71ch_get_ecc_signature(stored_sha_name=stored_sha_name,
+                                                 stored_signature_name=stored_signature_name,
+                                                 idx=key_index))
+        print(f'Verifying signature...')
+        print(rpc_helper.a71ch_ecc_verify(stored_sha_name=stored_sha_name,
+                                          stored_signature_name=stored_signature_name,
+                                          idx=key_index))
 
 def main():
     url = f"http://{args.host}:{args.port}/jsonrpc"
@@ -118,7 +138,7 @@ def main():
         run_wifi_test(url)
     elif args.test == "stress_test":
         run_stress_test(url)
-    elif args.test == "crypto_test":
+    elif args.test == "crypto_tests":
         run_crypto_test(url)
     else:
         print('Test not supported')

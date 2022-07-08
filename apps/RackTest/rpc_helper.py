@@ -122,6 +122,46 @@ class CoralMicroRPCHelper(object):
         payload['params'].append({'iterations': iterations})
         return self.send_rpc(payload)
 
+    def a71ch_get_random(self, num_bytes):
+        """Gets random bytes from the a71ch module."""
+        payload = self.get_new_payload()
+        payload['method'] = 'a71ch_get_random'
+        payload['params'].append({'num_bytes': num_bytes})
+        return self.send_rpc(payload)
+
+    def a71ch_get_public_ecc_key(self, idx=0):
+        """Gets the public key from the a71ch module."""
+        payload = self.get_new_payload()
+        payload['method'] = 'a71ch_get_public_ecc_key'
+        payload['params'].append({'key_index': idx})
+        return self.send_rpc(payload)
+
+    def a71ch_get_sha_256(self, file_name, stored_sha_name):
+        """Gets the sha of a file from the a71ch module."""
+        payload = self.get_new_payload()
+        payload['method'] = 'a71ch_get_sha_256'
+        payload['params'].append({'file_name': file_name,
+                                  'stored_sha_name': stored_sha_name})
+        return self.send_rpc(payload)
+
+    def a71ch_get_ecc_signature(self, stored_sha_name, stored_signature_name, idx=0):
+        """Gets the signature of a sha and the key from a storage index from the a71ch module."""
+        payload = self.get_new_payload()
+        payload['method'] = 'a71ch_get_ecc_signature'
+        payload['params'].append({'key_index': idx,
+                                  'stored_sha_name': stored_sha_name,
+                                  'stored_signature_name': stored_signature_name})
+        return self.send_rpc(payload)
+
+    def a71ch_ecc_verify(self, stored_sha_name, stored_signature_name, idx=0):
+        """Verifies a sha with a signature using the key at a storage index with the a71ch module."""
+        payload = self.get_new_payload()
+        payload['method'] = 'a71ch_ecc_verify'
+        payload['params'].append({'key_index': idx,
+                                  'stored_sha_name': stored_sha_name,
+                                  'stored_signature_name': stored_signature_name})
+        return self.send_rpc(payload)
+
     def resource_max_chunk_size(self):
         return 2 ** 13
 

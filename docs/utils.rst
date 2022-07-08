@@ -37,3 +37,10 @@ Temperature sensors
 `[tempsense.h source] <https://github.com/google-coral/micro/blob/master/libs/base/tempsense.h>`_
 
 .. doxygenfile:: base/tempsense.h
+
+Security
+-------------------------
+
+`[a71ch.h source] <https://github.com/google-coral/micro/blob/master/libs/a71ch/a71ch.h>`_
+
+.. doxygenfile:: a71ch/a71ch.h

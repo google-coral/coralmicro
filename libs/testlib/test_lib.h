@@ -46,8 +46,14 @@ inline constexpr char kMethodWiFiConnect[] = "wifi_connect";
 inline constexpr char kMethodWiFiDisconnect[] = "wifi_disconnect";
 inline constexpr char kMethodWiFiGetIp[] = "wifi_get_ip";
 inline constexpr char kMethodWiFiGetStatus[] = "wifi_get_status";
-inline constexpr char kMethodInitCrypto[] = "a71ch_init";
-inline constexpr char kMethodGetCryptoUId[] = "a71ch_get_uid";
+inline constexpr char kMethodCryptoInit[] = "a71ch_init";
+inline constexpr char kMethodCryptoGetUId[] = "a71ch_get_uid";
+inline constexpr char kMethodCryptoGetRandomBytes[] = "a71ch_get_random";
+inline constexpr char kMethodCryptoGetSha256[] = "a71ch_get_sha_256";
+inline constexpr char kMethodCryptoGetPubEccKey[] = "a71ch_get_public_ecc_key";
+inline constexpr char kMethodCryptoGetEccSignature[] =
+    "a71ch_get_ecc_signature";
+inline constexpr char kMethodCryptoEccVerify[] = "a71ch_ecc_verify";
 
 bool JsonRpcGetIntegerParam(struct jsonrpc_request* request,
                             const char* param_name, int* out);
@@ -81,7 +87,11 @@ void WiFiGetIp(struct jsonrpc_request* request);
 void WiFiGetStatus(struct jsonrpc_request* request);
 void CryptoInit(struct jsonrpc_request* request);
 void CryptoGetUID(struct jsonrpc_request* request);
-
+void CryptoGetRandomBytes(struct jsonrpc_request* request);
+void CryptoGetSha256(struct jsonrpc_request* request);
+void CryptoGetPublicEccKey(struct jsonrpc_request* request);
+void CryptoGetEccSignature(struct jsonrpc_request* request);
+void CryptoEccVerify(struct jsonrpc_request* request);
 }  // namespace coralmicro::testlib
 
 #endif  // LIBS_TESTLIB_TEST_LIB_H_
