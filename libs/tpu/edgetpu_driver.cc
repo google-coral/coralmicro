@@ -17,9 +17,9 @@
 #include "libs/tpu/edgetpu_driver.h"
 
 #include "libs/base/check.h"
-#include "third_party/darwinn/driver/config/beagle/beagle_chip_config.h"
-#include "third_party/darwinn/driver/config/beagle_csr_helper.h"
-#include "third_party/darwinn/driver/config/common_csr_helper.h"
+#include "libs/tpu/darwinn/driver/config/beagle/beagle_chip_config.h"
+#include "libs/tpu/darwinn/driver/config/beagle_csr_helper.h"
+#include "libs/tpu/darwinn/driver/config/common_csr_helper.h"
 #include "third_party/nxp/rt1176-sdk/components/osa/fsl_os_abstraction.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb_spec.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"

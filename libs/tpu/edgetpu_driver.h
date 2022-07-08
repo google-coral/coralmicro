@@ -21,8 +21,8 @@
 #include <vector>
 
 #include "libs/tpu/usb_host_edgetpu.h"
-#include "third_party/darwinn/driver/config/beagle/beagle_chip_config.h"
-#include "third_party/darwinn/driver/hardware_structures.h"
+#include "libs/tpu/darwinn/driver/config/beagle/beagle_chip_config.h"
+#include "libs/tpu/darwinn/driver/hardware_structures.h"
 
 namespace coralmicro {
 
