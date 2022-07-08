@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(freertos_hello_world
-    freertos_hello_world.cc
+add_executable_m7(freertos_task
+    freertos_task.cc
 )
 
-target_link_libraries(freertos_hello_world
+target_link_libraries(freertos_task
     libs_base-m7_freertos
 )
