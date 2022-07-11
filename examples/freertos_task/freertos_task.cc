@@ -26,7 +26,7 @@
     bool on = true;
     while (true) {
         on = !on;
-        coralmicro::led::Set(coralmicro::led::LED::kUser, on);
+        coralmicro::LedSet(coralmicro::Led::kUser, on);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
@@ -37,7 +37,7 @@ extern "C" void app_main(void *param) {
     bool on = true;
     while (true) {
         on = !on;
-        coralmicro::led::Set(coralmicro::led::LED::kStatus, on);
+        coralmicro::LedSet(coralmicro::Led::kStatus, on);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

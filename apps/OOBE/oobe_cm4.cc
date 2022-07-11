@@ -58,13 +58,12 @@ extern "C" void app_main(void* param) {
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   setup();
 
-  coralmicro::led::Set(coralmicro::led::LED::kStatus, g_status_led_state);
+  coralmicro::LedSet(coralmicro::Led::kStatus, g_status_led_state);
   auto status_led_timer = xTimerCreate(
       "status_led_timer", pdMS_TO_TICKS(1000), pdTRUE, nullptr,
       +[](TimerHandle_t xTimer) {
         g_status_led_state = !g_status_led_state;
-        coralmicro::led::Set(coralmicro::led::LED::kStatus,
-                               g_status_led_state);
+        coralmicro::LedSet(coralmicro::Led::kStatus, g_status_led_state);
       });
   xTimerStart(status_led_timer, 0);
 
@@ -83,7 +82,7 @@ extern "C" void app_main(void* param) {
 
     while (true) {
       loop();
-      coralmicro::led::Set(coralmicro::led::LED::kUser, g_person_detected);
+      coralmicro::LedSet(coralmicro::Led::kUser, g_person_detected);
 
 #if !defined(OOBE_SIMPLE)
       if (g_person_detected) {

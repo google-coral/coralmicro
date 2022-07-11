@@ -20,30 +20,29 @@
 #include "libs/base/pwm.h"
 
 namespace coralmicro {
-namespace led {
 
-bool Set(LED led, bool enable) {
-    return Set(led, enable, enable ? kFullyOn : kFullyOff);
+bool LedSet(Led led, bool enable) {
+    return LedSet(led, enable, enable ? kLedFullyOn : kLedFullyOff);
 }
 
-bool Set(LED led, bool enable, unsigned int brightness) {
+bool LedSet(Led led, bool enable, unsigned int brightness) {
     bool ret = true;
     switch (led) {
-        case LED::kStatus:
+        case Led::kStatus:
             GpioSet(Gpio::kStatusLed, enable);
             break;
-        case LED::kUser:
+        case Led::kUser:
             GpioSet(Gpio::kUserLed, enable);
             break;
-        case LED::kTpu:
+        case Led::kTpu:
 #if __CORTEX_M == 7
             if (!GpioGet(Gpio::kEdgeTpuPmic)) {
                 printf("TPU LED requires TPU power to be enabled.\r\n");
                 ret = false;
                 break;
             }
-            if (brightness > kFullyOn) {
-                brightness = kFullyOff;
+            if (brightness > kLedFullyOn) {
+                brightness = kLedFullyOff;
             }
             PwmModuleConfig config;
             config.base = PWM1;
@@ -67,5 +66,4 @@ bool Set(LED led, bool enable, unsigned int brightness) {
     return ret;
 }
 
-}  // namespace led
 }  // namespace coralmicro

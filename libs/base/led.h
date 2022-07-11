@@ -18,10 +18,9 @@
 #define LIBS_BASE_LED_H_
 
 namespace coralmicro {
-namespace led {
 
 // Available board LEDs
-enum class LED {
+enum class Led {
     // Orange status LED.
     kStatus,
     // Green user-programmable LED.
@@ -31,17 +30,17 @@ enum class LED {
 };
 
 // Fully-on brightness for `Set(led, enable, brightness)`
-inline constexpr unsigned int kFullyOn = 100;
+inline constexpr unsigned int kLedFullyOn = 100;
 
 // Fully-off brightness for `Set(led, enable, brightness)`
-inline constexpr unsigned int kFullyOff = 0;
+inline constexpr unsigned int kLedFullyOff = 0;
 
 // Turns an LED on or off.
 //
 // @param led The LED to enable/disable.
 // @param enable True turns the LED on, false turns it off.
 // @returns True upon success, false otherwise.
-bool Set(LED led, bool enable);
+bool LedSet(Led led, bool enable);
 
 // Turns an LED on or off with brightness setting.
 //
@@ -49,9 +48,8 @@ bool Set(LED led, bool enable);
 // @param enable True turns the LED on, false turns it off.
 // @param brightness The LED brightness, from 0 to 100.
 // @returns True upon success, false otherwise.
-bool Set(LED led, bool enable, unsigned int brightness);
+bool LedSet(Led led, bool enable, unsigned int brightness);
 
-}  // namespace led
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_LED_H_

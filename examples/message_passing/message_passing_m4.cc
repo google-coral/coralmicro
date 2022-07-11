@@ -31,13 +31,11 @@ extern "C" void app_main(void* param) {
                 printf("[M4] LED_STATUS received\r\n");
                 switch (msg->led_status) {
                     case mp_example::LEDStatus::ON: {
-                        coralmicro::led::Set(coralmicro::led::LED::kUser,
-                                               true);
+                        coralmicro::LedSet(coralmicro::Led::kUser, true);
                         break;
                     }
                     case mp_example::LEDStatus::OFF: {
-                        coralmicro::led::Set(coralmicro::led::LED::kUser,
-                                               false);
+                        coralmicro::LedSet(coralmicro::Led::kUser, false);
                         break;
                     }
                     default: {

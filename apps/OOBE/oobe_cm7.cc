@@ -400,8 +400,8 @@ void Main() {
   TurnOnWiFi();
   if (!ConnectWiFi()) {
     // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
-    led::Set(led::LED::kStatus, true);
-    led::Set(led::LED::kUser, true);
+    LedSet(Led::kStatus, true);
+    LedSet(Led::kUser, true);
     vTaskSuspend(nullptr);
   }
 #endif  // defined(OOBE_DEMO_ETHERNET)

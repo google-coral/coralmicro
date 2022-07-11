@@ -100,11 +100,11 @@ void analogWrite(pin_size_t pinNumber, int value) {
         analogWriteDAC(pinNumber, value);
         return;
     } else if (pinNumber == PIN_LED_TPU) {
-        coralmicro::led::Set(coralmicro::led::LED::kTpu, true,
+        coralmicro::LedSet(coralmicro::Led::kTpu, true,
                                map(value,
                                    0, 255,
-                                   coralmicro::led::kFullyOff, coralmicro::led::kFullyOn)
-                              );
+                                   coralmicro::kLedFullyOff,
+                                   coralmicro::kLedFullyOn));
         return;
     } else {
         assert(false);

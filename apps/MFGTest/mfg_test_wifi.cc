@@ -215,11 +215,11 @@ extern "C" void app_main(void* param) {
 
   if (coralmicro::TurnOnWiFi()) {
     if (coralmicro::ConnectWiFi()) {
-      coralmicro::led::Set(coralmicro::led::LED::kUser, true);
+      coralmicro::LedSet(coralmicro::Led::kUser, true);
     }
   } else {
     printf("Wi-Fi failed to come up (is the Wi-Fi board attached?\r\n");
-    coralmicro::led::Set(coralmicro::led::LED::kStatus, true);
+    coralmicro::LedSet(coralmicro::Led::kStatus, true);
     vTaskSuspend(nullptr);
   }
   coralmicro::GpioSet(coralmicro::Gpio::kBtDevWake, false);

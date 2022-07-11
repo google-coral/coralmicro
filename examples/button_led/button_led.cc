@@ -27,7 +27,7 @@ bool user_led_on = false;
 // Callback for user button
 void OnButtonPressed() {
     user_led_on = !user_led_on;
-    coralmicro::led::Set(coralmicro::led::LED::kUser, user_led_on);
+    coralmicro::LedSet(coralmicro::Led::kUser, user_led_on);
 }
 
 extern "C" void app_main(void* param) {

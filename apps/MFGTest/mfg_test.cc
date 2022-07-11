@@ -347,17 +347,17 @@ void SetLedState(struct jsonrpc_request* request) {
   };
   switch (led) {
     case kStatus:
-      coralmicro::led::Set(coralmicro::led::LED::kStatus, enable);
+      coralmicro::LedSet(coralmicro::Led::kStatus, enable);
       break;
     case kUser:
-      coralmicro::led::Set(coralmicro::led::LED::kUser, enable);
+      coralmicro::LedSet(coralmicro::Led::kUser, enable);
       break;
     case kTpu:
       if (!coralmicro::EdgeTpuTask::GetSingleton()->GetPower()) {
         jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
         return;
       }
-      coralmicro::led::Set(coralmicro::led::LED::kTpu, enable);
+      coralmicro::LedSet(coralmicro::Led::kTpu, enable);
       break;
     default:
       jsonrpc_return_error(request, -1, "invalid led", nullptr);
