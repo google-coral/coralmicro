@@ -25,7 +25,7 @@ namespace {
 TimerHandle_t wdog_timer;
 }  // namespace
 
-void Watchdog::Start(const Config& config) {
+void WatchdogStart(const WatchdogConfig& config) {
     wdog_config_t wdog_config;
     // wdogConfig->enableWdog = true;
     // wdogConfig->workMode.enableWait = true;
@@ -56,7 +56,7 @@ void Watchdog::Start(const Config& config) {
     xTimerStart(wdog_timer, 0);
 }
 
-void Watchdog::Stop() {
+void WatchdogStop() {
     DisableIRQ(WDOG1_IRQn);
     WDOG_Deinit(WDOG1);
     xTimerDelete(wdog_timer, /*xTicksToWait=*/0);
