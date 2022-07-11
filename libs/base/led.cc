@@ -45,17 +45,17 @@ bool Set(LED led, bool enable, unsigned int brightness) {
             if (brightness > kFullyOn) {
                 brightness = kFullyOff;
             }
-            pwm::PwmModuleConfig config;
+            PwmModuleConfig config;
             config.base = PWM1;
             config.module = kPWM_Module_1;
             if (enable) {
                 config.A.enabled = true;
                 config.A.duty_cycle = brightness;
                 config.B.enabled = false;
-                pwm::Init(config);
-                pwm::Enable(config, true);
+                PwmInit(config);
+                PwmEnable(config, true);
             } else {
-                pwm::Enable(config, false);
+                PwmEnable(config, false);
             }
 #else
             ret = false;

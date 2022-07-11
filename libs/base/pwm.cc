@@ -23,7 +23,6 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_xbara.h"
 
 namespace coralmicro {
-namespace pwm {
 namespace {
 pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
     switch (module) {
@@ -41,7 +40,7 @@ pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
 }
 }  // namespace
 
-void Init(const PwmModuleConfig& config) {
+void PwmInit(const PwmModuleConfig& config) {
     static bool xbar_inited = false;
     if (!xbar_inited) {
         XBARA_Init(XBARA1);
@@ -90,12 +89,11 @@ void Init(const PwmModuleConfig& config) {
     PWM_SetPwmLdok(config.base, PwmModuleToControl(config.module), true);
 }
 
-void Enable(const PwmModuleConfig& config, bool enable) {
+void PwmEnable(const PwmModuleConfig& config, bool enable) {
     if (enable) {
         PWM_StartTimer(config.base, PwmModuleToControl(config.module));
     } else {
         PWM_StopTimer(config.base, PwmModuleToControl(config.module));
     }
 }
-}  // namespace pwm
 }  // namespace coralmicro

@@ -20,7 +20,6 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.h"
 
 namespace coralmicro {
-namespace pwm {
 
 // Represents the configuration for a single PWM pin.
 struct PwmPinConfig {
@@ -44,14 +43,13 @@ struct PwmModuleConfig {
 
 // Initializes a PWM module.
 // @param config The configuration structure for the module.
-void Init(const PwmModuleConfig& config);
+void PwmInit(const PwmModuleConfig& config);
 
 // Enables or disables a PWM module.
 // @param config The configuration structure for the module.
 // @param enable True to enable the module; false to disable it.
-void Enable(const PwmModuleConfig& config, bool enable);
+void PwmEnable(const PwmModuleConfig& config, bool enable);
 
-}  // namespace pwm
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_PWM_H_

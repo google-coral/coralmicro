@@ -27,8 +27,8 @@
 using coralmicro::analog::ADCConfig;
 using coralmicro::analog::Device;
 using coralmicro::analog::Side;
-using coralmicro::pwm::PwmModuleConfig;
-using coralmicro::pwm::PwmPinConfig;
+using coralmicro::PwmModuleConfig;
+using coralmicro::PwmPinConfig;
 
 static constexpr int kAdcFullResolutionBits = 12;
 // 12-bits for the real DAC (A2).
@@ -111,8 +111,8 @@ void analogWrite(pin_size_t pinNumber, int value) {
     }
     pin_config->enabled = true;
     pin_config->duty_cycle = map(value, 0, 255, 0, 100);
-    coralmicro::pwm::Init(pwm_config);
-    coralmicro::pwm::Enable(pwm_config, true);
+    coralmicro::PwmInit(pwm_config);
+    coralmicro::PwmEnable(pwm_config, true);
 }
 
 void analogReadResolution(int bits) {
