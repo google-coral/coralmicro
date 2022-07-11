@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_BREAKPOINT_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_BREAKPOINT_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,9 +28,9 @@ namespace config {
 // e.g. scalar core, TTU, etc.
 // Members are intentionally named to match the GCSR register names.
 struct BreakpointCsrOffsets {
-  uint64 RunControl;
-  uint64 RunStatus;
-  uint64 BreakPoint;
+  uint64_t RunControl;
+  uint64_t RunStatus;
+  uint64_t BreakPoint;
 };
 
 }  // namespace config

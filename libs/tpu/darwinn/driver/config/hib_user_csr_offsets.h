@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_HIB_USER_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_HIB_USER_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,28 +28,28 @@ namespace config {
 // intentionally named to match the GCSR register names.
 struct HibUserCsrOffsets {
   // Interrupt control and status for top level.
-  uint64 top_level_int_control;
-  uint64 top_level_int_status;
+  uint64_t top_level_int_control;
+  uint64_t top_level_int_status;
 
   // Interrupt count for scalar core.
-  uint64 sc_host_int_count;
+  uint64_t sc_host_int_count;
 
   // DMA pauses.
-  uint64 dma_pause;
-  uint64 dma_paused;
+  uint64_t dma_pause;
+  uint64_t dma_paused;
 
   // Enable/disable status block update.
-  uint64 status_block_update;
+  uint64_t status_block_update;
 
   // HIB errors.
-  uint64 hib_error_status;
-  uint64 hib_error_mask;
-  uint64 hib_first_error_status;
-  uint64 hib_first_error_timestamp;
-  uint64 hib_inject_error;
+  uint64_t hib_error_status;
+  uint64_t hib_error_mask;
+  uint64_t hib_first_error_status;
+  uint64_t hib_first_error_timestamp;
+  uint64_t hib_inject_error;
 
   // Limits AXI DMA burst.
-  uint64 dma_burst_limiter;
+  uint64_t dma_burst_limiter;
 };
 
 }  // namespace config

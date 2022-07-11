@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_SCU_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_SCU_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -30,14 +30,14 @@ namespace config {
 struct ScuCsrOffsets {
   // The SCU control registers have generic names but each contain many small
   // fields which are reflected in the spec (should use csr_helper to access)
-  uint64 scu_ctrl_0;
-  uint64 scu_ctrl_1;
-  uint64 scu_ctrl_2;
-  uint64 scu_ctrl_3;
-  uint64 scu_ctrl_4;
-  uint64 scu_ctrl_5;
-  uint64 scu_ctr_6;
-  uint64 scu_ctr_7;
+  uint64_t scu_ctrl_0;
+  uint64_t scu_ctrl_1;
+  uint64_t scu_ctrl_2;
+  uint64_t scu_ctrl_3;
+  uint64_t scu_ctrl_4;
+  uint64_t scu_ctrl_5;
+  uint64_t scu_ctr_6;
+  uint64_t scu_ctr_7;
 };
 
 }  // namespace config

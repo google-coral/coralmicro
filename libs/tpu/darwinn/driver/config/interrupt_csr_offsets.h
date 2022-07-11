@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_INTERRUPT_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_INTERRUPT_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -29,8 +29,8 @@ namespace config {
 // names.
 struct InterruptCsrOffsets {
   // Interrupt control and status CSRs.
-  uint64 control;
-  uint64 status;
+  uint64_t control;
+  uint64_t status;
 };
 
 }  // namespace config

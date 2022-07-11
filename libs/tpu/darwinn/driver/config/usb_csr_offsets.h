@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_USB_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_USB_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -27,10 +27,10 @@ namespace config {
 // This struct holds various CSR offsets for USB HIB.
 // Members are intentionally named to match the GCSR register names.
 struct UsbCsrOffsets {
-  uint64 outfeed_chunk_length;
-  uint64 descr_ep;
-  uint64 ep_status_credit;
-  uint64 multi_bo_ep;
+  uint64_t outfeed_chunk_length;
+  uint64_t descr_ep;
+  uint64_t ep_status_credit;
+  uint64_t multi_bo_ep;
 };
 
 }  // namespace config

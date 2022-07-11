@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_MISC_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_MISC_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -27,7 +27,7 @@ namespace config {
 // This struct holds various CSR offsets for custom block misc.
 // Members are intentionally named to match the GCSR register names.
 struct MiscCsrOffsets {
-  uint64 idleRegister;
+  uint64_t idleRegister;
 };
 
 }  // namespace config

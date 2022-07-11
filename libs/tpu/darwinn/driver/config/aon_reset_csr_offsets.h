@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_AON_RESET_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_AON_RESET_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,24 +28,24 @@ namespace config {
 // intentionally named to match the GCSR register names.
 struct AonResetCsrOffsets {
   // Resets CB.
-  uint64 resetReg;
+  uint64_t resetReg;
 
   // Clock enable register.
-  uint64 clockEnableReg;
+  uint64_t clockEnableReg;
 
   // Shutdown registers.
-  uint64 logicShutdownReg;
-  uint64 logicShutdownPreReg;
-  uint64 logicShutdownAllReg;
-  uint64 memoryShutdownReg;
-  uint64 memoryShutdownAckReg;
-  uint64 tileMemoryRetnReg;
+  uint64_t logicShutdownReg;
+  uint64_t logicShutdownPreReg;
+  uint64_t logicShutdownAllReg;
+  uint64_t memoryShutdownReg;
+  uint64_t memoryShutdownAckReg;
+  uint64_t tileMemoryRetnReg;
 
   // Clamp register.
-  uint64 clampEnableReg;
+  uint64_t clampEnableReg;
 
   // Quiesce register.
-  uint64 forceQuiesceReg;
+  uint64_t forceQuiesceReg;
 };
 
 }  // namespace config

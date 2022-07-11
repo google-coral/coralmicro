@@ -20,7 +20,7 @@
 #include <stddef.h>
 #include <algorithm>
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -38,46 +38,46 @@ namespace driver {
 // 1    | Reserved [0]    | Extended PT Index | Host Table Index | Page Offset
 
 // The MSB.
-static constexpr uint64 kExtendedVirtualAddressBit = (1ULL << 63);
+static constexpr uint64_t kExtendedVirtualAddressBit = (1ULL << 63);
 // Simple addressing: page table index.
-static constexpr uint64 kSimplePageTableIndexShiftBits = 12;
-static constexpr uint64 kSimplePageTableIndexWidthBits = 13;
+static constexpr uint64_t kSimplePageTableIndexShiftBits = 12;
+static constexpr uint64_t kSimplePageTableIndexWidthBits = 13;
 // Extended addressing: page table index.
-static constexpr uint64 kExtendedPageTableIndexShiftBits = 21;
-static constexpr uint64 kExtendedPageTableIndexWidthBits = 13;
+static constexpr uint64_t kExtendedPageTableIndexShiftBits = 21;
+static constexpr uint64_t kExtendedPageTableIndexWidthBits = 13;
 // Extended addressing: host page table index.
-static constexpr uint64 kExtendedHostPageTableIndexShiftBits = 12;
-static constexpr uint64 kExtendedHostPageTableIndexWidthBits = 9;
-static constexpr uint64 kExtendedHostPageTableSizePerPage =
+static constexpr uint64_t kExtendedHostPageTableIndexShiftBits = 12;
+static constexpr uint64_t kExtendedHostPageTableIndexWidthBits = 9;
+static constexpr uint64_t kExtendedHostPageTableSizePerPage =
     (1ULL << kExtendedHostPageTableIndexWidthBits);
 
 // Host page info. 4096 bytes.
-static constexpr uint64 kHostPageShiftBits = 12;
-static constexpr uint64 kHostPageSize = (1ULL << kHostPageShiftBits);
+static constexpr uint64_t kHostPageShiftBits = 12;
+static constexpr uint64_t kHostPageSize = (1ULL << kHostPageShiftBits);
 
 // Manage valid / Invalid page table entries.
-static constexpr uint64 kValidPageTableEntryMask = 1;
-static constexpr uint64 kInvalidPageTableEntryValue = 0;
+static constexpr uint64_t kValidPageTableEntryMask = 1;
+static constexpr uint64_t kInvalidPageTableEntryValue = 0;
 
 // Manage bar number and offsets.
-static constexpr uint64 kDarwinnBarNumber = 2;
-static constexpr uint64 kDarwinnBarSize = 1ULL * 1024ULL * 1024ULL;
+static constexpr uint64_t kDarwinnBarNumber = 2;
+static constexpr uint64_t kDarwinnBarSize = 1ULL * 1024ULL * 1024ULL;
 
 // Defines a descriptor to fetch instructions in the host queue.
 struct HostQueueDescriptor {
-  uint64 address;
-  uint32 size_in_bytes;
-  uint32 reserved;
+  uint64_t address;
+  uint32_t size_in_bytes;
+  uint32_t reserved;
 } __attribute__((packed));
 static_assert(sizeof(HostQueueDescriptor) == 16, "Must be 16 bytes.");
 
 // Defines the status block that hardware updates.
 struct HostQueueStatusBlock {
   // The value of completed_head pointer when the status block was updated.
-  uint32 completed_head_pointer;
+  uint32_t completed_head_pointer;
   // A bit to indicate that fatal error has occured for the host queue. Using
-  // uint32 to align it to 8B boundary.
-  uint32 fatal_error;
+  // uint32_t to align it to 8B boundary.
+  uint32_t fatal_error;
 } __attribute__((packed));
 static_assert(sizeof(HostQueueStatusBlock) == 8, "Must be 8 bytes.");
 
@@ -85,17 +85,17 @@ static_assert(sizeof(HostQueueStatusBlock) == 8, "Must be 8 bytes.");
 // rev 3.0 document.
 struct MsixTableEntry {
   // An address to perform PCIe write at for an interrupt.
-  uint64 message_address;
+  uint64_t message_address;
   // Data to send in PCIe write for an interrupt.
-  uint32 message_data;
+  uint32_t message_data;
   // LSB is used to mask an interrupt. Other bits are reserved.
-  uint32 vector_control;
+  uint32_t vector_control;
 } __attribute__((packed));
 static_assert(sizeof(MsixTableEntry) == 16, "Must be 16 bytes.");
 
 // Size in bytes addressable by a single extended page table entry.
 // When kHostPageSize is 4K, this is 2MB.
-static constexpr uint64 kExtendedPageTableEntryAddressableBytes =
+static constexpr uint64_t kExtendedPageTableEntryAddressableBytes =
     kExtendedHostPageTableSizePerPage * kHostPageSize;
 
 // Size in bytes of the configured DarwiNN extended address space range.
@@ -103,8 +103,8 @@ static constexpr uint64 kExtendedPageTableEntryAddressableBytes =
 // addressable extended address space range is 16 GB. However, this is
 // restricted to 4GB to avoid using 64 bit math in the scalar core.
 // See: go/g.d/1a9uNlUCrEu43L31v_gRENgCjKW4MMA-B-L64cR8z3I4
-static constexpr uint64 kExtendedAddressSpaceStart = 0x8000000000000000L;
-static constexpr uint64 kExtendedAddressSpaceSizeBytes =
+static constexpr uint64_t kExtendedAddressSpaceStart = 0x8000000000000000L;
+static constexpr uint64_t kExtendedAddressSpaceSizeBytes =
     (4096 * 1024 * 1024ULL);
 static constexpr int kExtendedAddressSpacePrefixWidthBits = 32;
 static_assert(
@@ -117,7 +117,7 @@ static_assert((kExtendedAddressSpaceSizeBytes %
               "Must be multiple of extended host page");
 
 // The upper 32 bits of the extended address space segment.
-static constexpr uint32 kExtendedAddressSpacePrefix =
+static constexpr uint32_t kExtendedAddressSpacePrefix =
     kExtendedAddressSpaceStart >> kExtendedAddressSpacePrefixWidthBits;
 
 // Simple / Extended page table entry split.

@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_SYNC_FLAG_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_SYNC_FLAG_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,7 +28,7 @@ namespace config {
 // core and tiles.
 struct SyncFlagCsrOffsets {
   // Intentionally named to match the GCSR register names.
-  uint64 SyncCounter;
+  uint64_t SyncCounter;
 };
 
 }  // namespace config

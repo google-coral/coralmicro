@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_HIB_KERNEL_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_HIB_KERNEL_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -27,17 +27,17 @@ namespace config {
 // This struct holds various CSR offsets for kernel space in HIB. Members are
 // intentionally named to match the GCSR register names.
 struct HibKernelCsrOffsets {
-  uint64 page_table_size;
-  uint64 extended_table;
-  uint64 dma_pause;
+  uint64_t page_table_size;
+  uint64_t extended_table;
+  uint64_t dma_pause;
 
   // Tracks whether initialization is done.
-  uint64 page_table_init;
-  uint64 msix_table_init;
+  uint64_t page_table_init;
+  uint64_t msix_table_init;
 
   // Points to the first entry in the page table. Subsequent entries can be
   // accessed with increasing offsets if they exist.
-  uint64 page_table;
+  uint64_t page_table;
 };
 
 }  // namespace config

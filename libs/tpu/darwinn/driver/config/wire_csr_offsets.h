@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_WIRE_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_WIRE_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,8 +28,8 @@ namespace config {
 // Members are intentionally named to match the GCSR register names.
 struct WireCsrOffsets {
   // Tells which interrupts should be serviced.
-  uint64 wire_int_pending_bit_array;
-  uint64 wire_int_mask_array;
+  uint64_t wire_int_pending_bit_array;
+  uint64_t wire_int_mask_array;
 };
 
 }  // namespace config

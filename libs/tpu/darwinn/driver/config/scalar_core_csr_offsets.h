@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_SCALAR_CORE_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_SCALAR_CORE_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,11 +28,11 @@ namespace config {
 // Members are intentionally named to match the GCSR register names.
 struct ScalarCoreCsrOffsets {
   // RunControls.
-  uint64 scalarCoreRunControl;
-  uint64 avDataPopRunControl;
-  uint64 parameterPopRunControl;
-  uint64 infeedRunControl;
-  uint64 outfeedRunControl;
+  uint64_t scalarCoreRunControl;
+  uint64_t avDataPopRunControl;
+  uint64_t parameterPopRunControl;
+  uint64_t infeedRunControl;
+  uint64_t outfeedRunControl;
 };
 
 }  // namespace config

@@ -19,7 +19,7 @@
 
 #include <stddef.h>
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -29,20 +29,20 @@ namespace config {
 // This struct holds the various CSR offsets for programming queue behaviors.
 // Members are intentionally named to match the GCSR register names.
 struct QueueCsrOffsets {
-  uint64 queue_control;
-  uint64 queue_status;
-  uint64 queue_descriptor_size;
-  uint64 queue_base;
-  uint64 queue_status_block_base;
-  uint64 queue_size;
-  uint64 queue_tail;
-  uint64 queue_fetched_head;
-  uint64 queue_completed_head;
-  uint64 queue_int_control;
-  uint64 queue_int_status;
-  uint64 queue_minimum_size;
-  uint64 queue_maximum_size;
-  uint64 queue_int_vector;
+  uint64_t queue_control;
+  uint64_t queue_status;
+  uint64_t queue_descriptor_size;
+  uint64_t queue_base;
+  uint64_t queue_status_block_base;
+  uint64_t queue_size;
+  uint64_t queue_tail;
+  uint64_t queue_fetched_head;
+  uint64_t queue_completed_head;
+  uint64_t queue_int_control;
+  uint64_t queue_int_status;
+  uint64_t queue_minimum_size;
+  uint64_t queue_maximum_size;
+  uint64_t queue_int_vector;
 };
 
 }  // namespace config

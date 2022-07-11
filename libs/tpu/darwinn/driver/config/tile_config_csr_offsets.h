@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_TILE_CONFIG_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_TILE_CONFIG_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,10 +28,10 @@ namespace config {
 // Members are intentionally named to match the GCSR register names.
 struct TileConfigCsrOffsets {
   // Used only by driver.
-  uint64 tileconfig0;
+  uint64_t tileconfig0;
 
   // Used by debugger, and other purposes.
-  uint64 tileconfig1;
+  uint64_t tileconfig1;
 };
 
 }  // namespace config

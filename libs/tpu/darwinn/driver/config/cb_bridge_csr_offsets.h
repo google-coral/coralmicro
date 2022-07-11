@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_CB_BRIDGE_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_CB_BRIDGE_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -27,11 +27,11 @@ namespace config {
 // This struct holds various CSR offsets for cb_bridge in Beagle.
 // Members are intentionally named to match the GCSR register names.
 struct CbBridgeCsrOffsets {
-  uint64 bo0_fifo_status;
-  uint64 bo1_fifo_status;
-  uint64 bo2_fifo_status;
-  uint64 bo3_fifo_status;
-  uint64 gcbb_credit0;
+  uint64_t bo0_fifo_status;
+  uint64_t bo1_fifo_status;
+  uint64_t bo2_fifo_status;
+  uint64_t bo3_fifo_status;
+  uint64_t gcbb_credit0;
 };
 
 }  // namespace config

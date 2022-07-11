@@ -24,7 +24,7 @@
 //   // Unused bitfield can be left out. Bitfields are uninitialized because
 //   // they are expected to be used within union.
 //   union {
-//     uint64 raw_value;
+//     uint64_t raw_value;
 //     Bitfield<0, 1> enable;
 //     Bitfield<1, 9> status;
 //   } reg;
@@ -48,7 +48,7 @@
 #include <cassert>
 #include <limits>
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -59,31 +59,31 @@ class Bitfield {
  public:
   // Sets the bitfield to |value|. |value| is right aligned, and should set bits
   // in the range of NUM_BITS.
-  Bitfield& operator=(uint64 value) {
+  Bitfield& operator=(uint64_t value) {
     if ((value & kMask) != value) {
       assert(false);
     }
 
     // Since Bitfield is expected to be used with unions, other bits from value
     // must be preserved.
-    uint64 preserved_bits = value_ & ~(kMask << LSB_POSITION);
+    uint64_t preserved_bits = value_ & ~(kMask << LSB_POSITION);
     value_ = preserved_bits | (value << LSB_POSITION);
     return *this;
   }
 
   // Returns the value in a right aligned form.
-  constexpr uint64 operator()() const {
+  constexpr uint64_t operator()() const {
     return (value_ >> LSB_POSITION) & kMask;
   }
 
   // Returns mask for Bitfield.
-  constexpr uint64 mask() const {
+  constexpr uint64_t mask() const {
     return kMask;
   }
 
  private:
   // Supported bits in the underlying value.
-  static constexpr size_t kMaxBits = sizeof(uint64) * CHAR_BIT;
+  static constexpr size_t kMaxBits = sizeof(uint64_t) * CHAR_BIT;
   static_assert(NUM_BITS > 0, "Bitfield must use at least 1 bit");
   static_assert(NUM_BITS <= kMaxBits,
                 "Bitfield cannot have more bits than 64 bits");
@@ -93,12 +93,12 @@ class Bitfield {
                 "Bitfield cannot have its MSB position past 64-bit");
 
   // Any attempt to write outside of kMask will cause an error.
-  static constexpr uint64 kMask =
-      (NUM_BITS == kMaxBits) ? (std::numeric_limits<uint64>::max())
+  static constexpr uint64_t kMask =
+      (NUM_BITS == kMaxBits) ? (std::numeric_limits<uint64_t>::max())
                              : (1ULL << NUM_BITS) - 1;
 
   // Underlying value for Bitfield.
-  uint64 value_;
+  uint64_t value_;
 };
 
 }  // namespace driver

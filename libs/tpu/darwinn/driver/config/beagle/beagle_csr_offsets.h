@@ -889,33 +889,33 @@ const TileConfigCsrOffsets kBeagleTileConfigCsrOffsets = {
 
 const TileCsrOffsets kBeagleTileCsrOffsets = {
     0x400c0,                  // NOLINT: opRunControl
-    static_cast<uint64>(-1),  // UNUSED, narrowToNarrowRunControl
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToNarrowRunControl
     0x40150,                  // NOLINT: narrowToWideRunControl
     0x40110,                  // NOLINT: wideToNarrowRunControl
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_0
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_0
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_0
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_1
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_1
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_1
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_2
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_2
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_2
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_3
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_3
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_3
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_4
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_4
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_4
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_5
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_5
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_5
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_6
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_6
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_6
-    static_cast<uint64>(-1),  // UNUSED, opRunControl_7
-    static_cast<uint64>(-1),  // UNUSED, narrowToWideRunControl_7
-    static_cast<uint64>(-1),  // UNUSED, wideToNarrowRunControl_7
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_0
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_0
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_0
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_1
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_1
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_1
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_2
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_2
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_2
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_3
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_3
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_3
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_4
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_4
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_4
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_5
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_5
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_5
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_6
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_6
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_6
+    static_cast<uint64_t>(-1),  // UNUSED, opRunControl_7
+    static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_7
+    static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_7
     0x40190,                  // NOLINT: ringBusConsumer0RunControl
     0x401d0,                  // NOLINT: ringBusConsumer1RunControl
     0x40210,                  // NOLINT: ringBusProducerRunControl

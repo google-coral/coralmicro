@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_MEMORY_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_MEMORY_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -28,8 +28,8 @@ namespace config {
 // scalar core and tiles.
 // Members are intentionally named to match the GCSR register names.
 struct MemoryCsrOffsets {
-  uint64 Access;
-  uint64 Data;
+  uint64_t Access;
+  uint64_t Data;
 };
 
 }  // namespace config

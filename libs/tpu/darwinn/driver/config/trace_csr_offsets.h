@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_TRACE_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_TRACE_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -27,9 +27,9 @@ namespace config {
 // This struct holds various CSR offsets for performance tracing.
 // Members are intentionally named to match the GCSR register names.
 struct TraceCsrOffsets {
-  uint64 OverwriteMode;
-  uint64 EnableTracing;
-  uint64 Trace;
+  uint64_t OverwriteMode;
+  uint64_t EnableTracing;
+  uint64_t Trace;
 };
 
 }  // namespace config

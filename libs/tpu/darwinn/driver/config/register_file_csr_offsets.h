@@ -17,7 +17,7 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_REGISTER_FILE_CSR_OFFSETS_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_REGISTER_FILE_CSR_OFFSETS_H_
 
-#include "libs/tpu/darwinn/port/integral_types.h"
+#include <cstdint>
 
 namespace platforms {
 namespace darwinn {
@@ -29,7 +29,7 @@ namespace config {
 struct RegisterFileCsrOffsets {
   // Points to first register in the register file. Subsequent registers can be
   // accessed with increasing offsets if they exist.
-  uint64 RegisterFile;
+  uint64_t RegisterFile;
 };
 
 }  // namespace config
