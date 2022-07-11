@@ -89,7 +89,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
     coralmicro::UsbHostTask::GetSingleton()->Init();
     coralmicro::EdgeTpuDfuTask::GetSingleton()->Init();
     coralmicro::EdgeTpuTask::GetSingleton()->Init();
-    coralmicro::tempsense::Init();
+    coralmicro::TempSensorInit();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     // Initialize I2C5 state
