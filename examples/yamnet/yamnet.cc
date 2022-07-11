@@ -57,16 +57,16 @@ constexpr bool kUseTpu = true;
 // populated with raw audio input.
 void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
     auto input_tensor = interpreter->input_tensor(0);
-    auto preprocess_start = coralmicro::timer::millis();
+    auto preprocess_start = coralmicro::TimerMillis();
     coralmicro::tensorflow::YamNetPreprocessInput(input_tensor, frontend_state);
     // Reset frontend state.
     FrontendReset(frontend_state);
-    auto preprocess_end = coralmicro::timer::millis();
+    auto preprocess_end = coralmicro::TimerMillis();
     if (interpreter->Invoke() != kTfLiteOk) {
         printf("Failed to invoke on test input\r\n");
         vTaskSuspend(nullptr);
     }
-    auto current_time = coralmicro::timer::millis();
+    auto current_time = coralmicro::TimerMillis();
     printf(
         "Yamnet preprocess time: %lums, invoke time: %lums, total: "
         "%lums\r\n",

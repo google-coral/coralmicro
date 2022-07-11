@@ -20,17 +20,15 @@
 #include <cstdint>
 
 namespace coralmicro {
-namespace timer {
 
-void Init();
+void TimerInit();
 
 // Milliseconds since boot
-uint32_t millis();
+uint32_t TimerMillis();
 
 // Microseconds since boot
-uint32_t micros();
+uint32_t TimerMicros();
 
-}  // namespace timer
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_TIMER_H_

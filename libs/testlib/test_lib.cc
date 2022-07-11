@@ -336,14 +336,14 @@ void RunDetectionModel(struct jsonrpc_request* request) {
   tensorflow::ImageDims tensor_dims = {input_tensor->dims->data[1],
                                        input_tensor->dims->data[2],
                                        input_tensor->dims->data[3]};
-  auto preprocess_start = coralmicro::timer::micros();
+  auto preprocess_start = coralmicro::TimerMicros();
   if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
                                image_resource->data(), tensor_dims,
                                input_tensor_data)) {
     jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
     return;
   }
-  auto preprocess_latency = coralmicro::timer::micros() - preprocess_start;
+  auto preprocess_latency = coralmicro::TimerMicros() - preprocess_start;
 
   // The first Invoke is slow due to model transfer. Run an Invoke
   // but ignore the results.
@@ -352,12 +352,12 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     return;
   }
 
-  auto invoke_start = coralmicro::timer::micros();
+  auto invoke_start = coralmicro::TimerMicros();
   if (interpreter.Invoke() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
     return;
   }
-  auto invoke_latency = coralmicro::timer::micros() - invoke_start;
+  auto invoke_latency = coralmicro::TimerMicros() - invoke_start;
 
   // Return results and check on host side
   auto results = tensorflow::GetDetectionResults(&interpreter, 0.7, 3);
@@ -431,12 +431,12 @@ void RunClassificationModel(struct jsonrpc_request* request) {
       tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
   uint32_t preprocess_latency = 0;
   if (needs_preprocessing) {
-    uint32_t preprocess_start = coralmicro::timer::micros();
+    uint32_t preprocess_start = coralmicro::TimerMicros();
     if (!tensorflow::ClassificationPreprocess(input_tensor)) {
       jsonrpc_return_error(request, -1, "input preprocessing failed", nullptr);
       return;
     }
-    uint32_t preprocess_end = coralmicro::timer::micros();
+    uint32_t preprocess_end = coralmicro::TimerMicros();
     preprocess_latency = preprocess_end - preprocess_start;
   }
 
@@ -458,12 +458,12 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     return;
   }
 
-  uint32_t start = coralmicro::timer::micros();
+  uint32_t start = coralmicro::TimerMicros();
   if (interpreter.Invoke() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
     return;
   }
-  uint32_t end = coralmicro::timer::micros();
+  uint32_t end = coralmicro::TimerMicros();
   uint32_t latency = end - start;
 
   // Return results and check on host side
@@ -535,14 +535,14 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
   tensorflow::ImageDims tensor_dims = {input_tensor->dims->data[1],
                                        input_tensor->dims->data[2],
                                        input_tensor->dims->data[3]};
-  auto preprocess_start = coralmicro::timer::micros();
+  auto preprocess_start = coralmicro::TimerMicros();
   if (!tensorflow::ResizeImage({image_height, image_width, image_depth},
                                image_resource->data(), tensor_dims,
                                input_tensor_data)) {
     jsonrpc_return_error(request, -1, "Failed to resize input image", nullptr);
     return;
   }
-  auto preprocess_latency = coralmicro::timer::micros() - preprocess_start;
+  auto preprocess_latency = coralmicro::TimerMicros() - preprocess_start;
 
   // The first Invoke is slow due to model transfer. Run an Invoke
   // but ignore the results.
@@ -551,12 +551,12 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
     return;
   }
 
-  auto invoke_start = coralmicro::timer::micros();
+  auto invoke_start = coralmicro::TimerMicros();
   if (interpreter.Invoke() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
     return;
   }
-  auto invoke_latency = coralmicro::timer::micros() - invoke_start;
+  auto invoke_latency = coralmicro::TimerMicros() - invoke_start;
   // Return results to post process on host side
   auto* output_tensor = interpreter.output_tensor(0);
   auto* output_mask = tflite::GetTensorData<uint8_t>(output_tensor);

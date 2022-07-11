@@ -21,13 +21,12 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.h"
 
 namespace coralmicro {
-namespace timer {
 namespace {
 // Number of times the microseconds counter has rolled over.
 uint32_t micros_rollover = 0;
 } // namespace
 
-void Init() {
+void TimerInit() {
     gpt_config_t gpt_config;
     GPT_GetDefaultConfig(&gpt_config);
     gpt_config.clockSource = kGPT_ClockSource_Periph;
@@ -44,23 +43,22 @@ void Init() {
     GPT_StartTimer(GPT1);
 }
 
-uint32_t millis() {
+uint32_t TimerMillis() {
     return (micros_rollover * (UINT_MAX / 1000)) +
            (GPT_GetCurrentTimerCount(GPT1) / 1000);
 }
 
-uint32_t micros() { return GPT_GetCurrentTimerCount(GPT1); }
+uint32_t TimerMicros() { return GPT_GetCurrentTimerCount(GPT1); }
 
-}  // namespace timer
 }  // namespace coralmicro
 
 extern "C" void GPT1_IRQHandler() {
     if (GPT_GetStatusFlags(GPT1, kGPT_RollOverFlag)) {
         GPT_ClearStatusFlags(GPT1, kGPT_RollOverFlag);
-        coralmicro::timer::micros_rollover++;
+        coralmicro::micros_rollover++;
     }
 }
 
 extern "C" uint32_t vPortGetRunTimeCounterValue() {
-    return coralmicro::timer::micros();
+    return coralmicro::TimerMicros();
 }
