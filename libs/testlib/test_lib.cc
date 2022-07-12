@@ -415,10 +415,11 @@ void RunDetectionModel(struct jsonrpc_request* request) {
   }
   const auto& top_result = results.at(0);
   jsonrpc_return_success(
-      request, "{%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q:%d}", "id",
+      request, "{%Q: %d, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q: %g, %Q:%lu}", "id",
       top_result.id, "score", top_result.score, "xmin", top_result.bbox.xmin,
       "xmax", top_result.bbox.xmax, "ymin", top_result.bbox.ymin, "ymax",
-      top_result.bbox.ymax, "latency", (preprocess_latency + invoke_latency));
+      top_result.bbox.ymax, "latency",
+      static_cast<uint32_t>(preprocess_latency + invoke_latency));
 }
 
 void RunClassificationModel(struct jsonrpc_request* request) {
@@ -477,14 +478,14 @@ void RunClassificationModel(struct jsonrpc_request* request) {
   auto* input_tensor = interpreter.input_tensor(0);
   bool needs_preprocessing =
       tensorflow::ClassificationInputNeedsPreprocessing(*input_tensor);
-  uint32_t preprocess_latency = 0;
+  uint64_t preprocess_latency = 0;
   if (needs_preprocessing) {
-    uint32_t preprocess_start = coralmicro::TimerMicros();
+    auto preprocess_start = coralmicro::TimerMicros();
     if (!tensorflow::ClassificationPreprocess(input_tensor)) {
       jsonrpc_return_error(request, -1, "input preprocessing failed", nullptr);
       return;
     }
-    uint32_t preprocess_end = coralmicro::TimerMicros();
+    auto preprocess_end = coralmicro::TimerMicros();
     preprocess_latency = preprocess_end - preprocess_start;
   }
 
@@ -506,13 +507,13 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     return;
   }
 
-  uint32_t start = coralmicro::TimerMicros();
+  auto start = coralmicro::TimerMicros();
   if (interpreter.Invoke() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
     return;
   }
-  uint32_t end = coralmicro::TimerMicros();
-  uint32_t latency = end - start;
+  auto end = coralmicro::TimerMicros();
+  uint64_t latency = end - start;
 
   // Return results and check on host side
   auto results = tensorflow::GetClassificationResults(&interpreter, 0.0f, 1);
@@ -520,9 +521,9 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     jsonrpc_return_error(request, -1, "no results above threshold", nullptr);
     return;
   }
-  jsonrpc_return_success(request, "{%Q:%d, %Q:%g, %Q:%d}", "id", results[0].id,
+  jsonrpc_return_success(request, "{%Q:%d, %Q:%g, %Q:%lu}", "id", results[0].id,
                          "score", results[0].score, "latency",
-                         latency + preprocess_latency);
+                         static_cast<uint32_t>(latency + preprocess_latency));
 }
 
 void RunSegmentationModel(struct jsonrpc_request* request) {
@@ -610,9 +611,9 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
   auto* output_mask = tflite::GetTensorData<uint8_t>(output_tensor);
   auto size = coralmicro::tensorflow::TensorSize(output_tensor);
 
-  jsonrpc_return_success(request, "{%Q:%d, %Q:%V}", "latency",
-                         invoke_latency + preprocess_latency, "output_mask",
-                         size, output_mask);
+  jsonrpc_return_success(request, "{%Q:%lu, %Q:%V}", "latency",
+                         static_cast<uint32_t>(invoke_latency + preprocess_latency),
+                         "output_mask", size, output_mask);
 }
 
 void PosenetStressRun(struct jsonrpc_request* request) {

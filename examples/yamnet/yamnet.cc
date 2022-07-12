@@ -70,8 +70,9 @@ void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
     printf(
         "Yamnet preprocess time: %lums, invoke time: %lums, total: "
         "%lums\r\n",
-        preprocess_end - preprocess_start, current_time - preprocess_end,
-        current_time - preprocess_start);
+        static_cast<uint32_t>(preprocess_end - preprocess_start),
+        static_cast<uint32_t>(current_time - preprocess_end),
+        static_cast<uint32_t>(current_time - preprocess_start));
     auto results = coralmicro::tensorflow::GetClassificationResults(
         interpreter, kThreshold, kTopK);
     printf("%s\r\n",

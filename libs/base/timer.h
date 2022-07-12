@@ -23,11 +23,11 @@ namespace coralmicro {
 
 void TimerInit();
 
-// Milliseconds since boot
-uint32_t TimerMillis();
+// Microseconds since boot.
+uint64_t TimerMicros();
 
-// Microseconds since boot
-uint32_t TimerMicros();
+// Milliseconds since boot.
+inline uint64_t TimerMillis() { return TimerMicros() / 1000; }
 
 }  // namespace coralmicro
 

@@ -23,7 +23,7 @@
 namespace coralmicro {
 namespace {
 // Number of times the microseconds counter has rolled over.
-uint32_t micros_rollover = 0;
+uint64_t g_micros_rollover = 0;
 } // namespace
 
 void TimerInit() {
@@ -31,7 +31,7 @@ void TimerInit() {
     GPT_GetDefaultConfig(&gpt_config);
     gpt_config.clockSource = kGPT_ClockSource_Periph;
 
-    uint32_t root_freq = CLOCK_GetRootClockFreq(kCLOCK_Root_Gpt1);
+    auto root_freq = CLOCK_GetRootClockFreq(kCLOCK_Root_Gpt1);
 
     GPT_Init(GPT1, &gpt_config);
     GPT_EnableInterrupts(GPT1, kGPT_RollOverFlagInterruptEnable);
@@ -39,26 +39,22 @@ void TimerInit() {
     // Set the divider to get us close to 1MHz.
     GPT_SetClockDivider(GPT1, root_freq / 1000000);
     EnableIRQ(GPT1_IRQn);
-
     GPT_StartTimer(GPT1);
 }
 
-uint32_t TimerMillis() {
-    return (micros_rollover * (UINT_MAX / 1000)) +
-           (GPT_GetCurrentTimerCount(GPT1) / 1000);
+uint64_t TimerMicros() {
+    return g_micros_rollover * (uint64_t{1} << 32) +
+        static_cast<uint64_t>(GPT_GetCurrentTimerCount(GPT1));
 }
-
-uint32_t TimerMicros() { return GPT_GetCurrentTimerCount(GPT1); }
-
 }  // namespace coralmicro
 
 extern "C" void GPT1_IRQHandler() {
     if (GPT_GetStatusFlags(GPT1, kGPT_RollOverFlag)) {
         GPT_ClearStatusFlags(GPT1, kGPT_RollOverFlag);
-        coralmicro::micros_rollover++;
+        ++coralmicro::g_micros_rollover;
     }
 }
 
 extern "C" uint32_t vPortGetRunTimeCounterValue() {
-    return coralmicro::TimerMicros();
+    return static_cast<uint32_t>(coralmicro::TimerMicros());
 }
