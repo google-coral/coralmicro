@@ -26,13 +26,13 @@
 
 namespace coralmicro {
 
-bool TurnOnWiFi() { return WIFI_On() == eWiFiSuccess; }
+bool WiFiTurnOn() { return WIFI_On() == eWiFiSuccess; }
 
-bool TurnOffWiFi() { return WIFI_Off() == eWiFiSuccess; }
+bool WiFiTurnOff() { return WIFI_Off() == eWiFiSuccess; }
 
 bool WiFiIsConnected() { return WIFI_IsConnected(); }
 
-bool ConnectWiFi(const WIFINetworkParams_t* network_params, int retry_count) {
+bool WiFiConnect(const WIFINetworkParams_t* network_params, int retry_count) {
     while (retry_count != 0) {
         if (WIFI_ConnectAP(network_params) == eWiFiSuccess) return true;
         --retry_count;
@@ -42,7 +42,7 @@ bool ConnectWiFi(const WIFINetworkParams_t* network_params, int retry_count) {
     return false;
 }
 
-bool ConnectWiFi(const char* ssid, const char* psk, int retry_count) {
+bool WiFiConnect(const char* ssid, const char* psk, int retry_count) {
     assert(ssid);
     assert(retry_count > 0);
 
@@ -58,10 +58,10 @@ bool ConnectWiFi(const char* ssid, const char* psk, int retry_count) {
         params.ucPasswordLength = 0;
         params.xSecurity = eWiFiSecurityOpen;
     }
-    return ConnectWiFi(&params, retry_count);
+    return WiFiConnect(&params, retry_count);
 }
 
-bool ConnectWiFi(int retry_count) {
+bool WiFiConnect(int retry_count) {
     std::string wifi_ssid;
     if (!coralmicro::utils::GetWiFiSSID(&wifi_ssid)) {
         printf("No Wi-Fi SSID provided\r\n");
@@ -70,11 +70,11 @@ bool ConnectWiFi(int retry_count) {
 
     std::string wifi_psk;
     bool have_psk = coralmicro::utils::GetWiFiPSK(&wifi_psk);
-    return ConnectWiFi(wifi_ssid.c_str(), have_psk ? wifi_psk.c_str() : nullptr,
+    return WiFiConnect(wifi_ssid.c_str(), have_psk ? wifi_psk.c_str() : nullptr,
                        retry_count);
 }
 
-bool DisconnectWiFi(int retry_count) {
+bool WiFiDisconnect(int retry_count) {
     if (WIFI_IsConnected()) {
         while (retry_count != 0) {
             if (WIFI_Disconnect() == eWiFiSuccess) return true;
@@ -85,7 +85,7 @@ bool DisconnectWiFi(int retry_count) {
     return true;
 }
 
-std::vector<WIFIScanResult_t> ScanWiFi() {
+std::vector<WIFIScanResult_t> WiFiScan() {
     std::vector<WIFIScanResult_t> results(std::numeric_limits<uint8_t>::max());
     if (WIFI_Scan(results.data(), results.size()) != eWiFiSuccess) return {};
 
@@ -97,7 +97,7 @@ std::vector<WIFIScanResult_t> ScanWiFi() {
     return results;
 }
 
-std::optional<std::string> GetWiFiIp() {
+std::optional<std::string> WiFiGetIp() {
     if (!WiFiIsConnected()) {
         return std::nullopt;
     }
@@ -109,7 +109,7 @@ std::optional<std::string> GetWiFiIp() {
            std::to_string(ip[2]) + '.' + std::to_string(ip[3]);
 }
 
-bool SetWiFiAntenna(WiFiAntenna antenna) {
+bool WiFiSetAntenna(WiFiAntenna antenna) {
     switch (antenna) {
         case WiFiAntenna::kInternal:
             GpioSet(Gpio::kAntennaSelect, false);

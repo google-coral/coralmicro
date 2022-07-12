@@ -104,17 +104,17 @@ void Main() {
     // Uncomment me to use the external antenna.
     // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);
     bool success = false;
-    success = coralmicro::TurnOnWiFi();
+    success = coralmicro::WiFiTurnOn();
     if (!success) {
         printf("Failed to turn on Wifi\r\n");
         return;
     }
-    success = coralmicro::ConnectWiFi();
+    success = coralmicro::WiFiConnect();
     if (!success) {
         printf("falied to connect wifi\r\n");
         return;
     }
-    our_ip_addr = coralmicro::GetWiFiIp();
+    our_ip_addr = coralmicro::WiFiGetIp();
 #endif
 
     if (our_ip_addr.has_value()) {

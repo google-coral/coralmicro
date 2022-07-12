@@ -40,12 +40,12 @@ enum class WiFiAntenna {
 // Turns on the Wi-Fi module.
 //
 // @return True if successfully turned on; false otherwise.
-bool TurnOnWiFi();
+bool WiFiTurnOn();
 
 // Turns off the Wi-Fi module.
 //
 // @return True if successfully turned off; false otherwise.
-bool TurnOffWiFi();
+bool WiFiTurnOff();
 
 // Checks if the board is connected to a Wi-Fi network.
 //
@@ -59,7 +59,7 @@ bool WiFiIsConnected();
 // https://aws.github.io/amazon-freertos/202107.00/html1/struct_w_i_f_i_network_params__t.html
 // @param retry_count The max number of connection attempts. Default is 5.
 // @return True if successfully connected to Wi-Fi; false otherwise.
-bool ConnectWiFi(const WIFINetworkParams_t* network_params,
+bool WiFiConnect(const WIFINetworkParams_t* network_params,
                  int retry_count = kDefaultRetryCount);
 
 // Connects to a Wi-Fi network with the given network name and password.
@@ -68,7 +68,7 @@ bool ConnectWiFi(const WIFINetworkParams_t* network_params,
 // @param psk The password for the ssid.
 // @param retry_count The max number of connection attempts. Default is 5.
 // @return True if successfully connected to Wi-Fi; false otherwise.
-bool ConnectWiFi(const char* ssid, const char* psk,
+bool WiFiConnect(const char* ssid, const char* psk,
                  int retry_count = kDefaultRetryCount);
 
 // Connects to the Wi-Fi network that's saved on the device.
@@ -80,32 +80,32 @@ bool ConnectWiFi(const char* ssid, const char* psk,
 //
 // @param retry_count The max number of connection attempts. Default is 5.
 // @return True if successfully connected to Wi-Fi; false otherwise.
-bool ConnectWiFi(int retry_count = kDefaultRetryCount);
+bool WiFiConnect(int retry_count = kDefaultRetryCount);
 
 // Disconnects from the Wi-Fi network.
 //
 // @param retry_count The max number of disconnect attempts. Default is 5.
 // @return True if Wi-Fi is successfully disconnected; false otherwise.
-bool DisconnectWiFi(int retry_count = kDefaultRetryCount);
+bool WiFiDisconnect(int retry_count = kDefaultRetryCount);
 
 // Scans for Wi-Fi networks.
 //
 // @return A vector of `WIFIScanResult_t` which contains info like name,
 // security type, etc. See:
 // https://aws.github.io/amazon-freertos/202107.00/html1/struct_w_i_f_i_scan_result__t.html
-std::vector<WIFIScanResult_t> ScanWiFi();
+std::vector<WIFIScanResult_t> WiFiScan();
 
 // Gets the device's Wi-Fi IP address.
 //
 // @return A string representing the IPv4 IP address or `std::nullopt` on
 // failure.
-std::optional<std::string> GetWiFiIp();
+std::optional<std::string> WiFiGetIp();
 
 // Sets which Wi-Fi antenna type to use (internal or external).
 //
 // @param antenna The type of antenna to use.
 // @return True if the Wi-Fi antenna was enabled successfully; false otherwise.
-bool SetWiFiAntenna(WiFiAntenna antenna);
+bool WiFiSetAntenna(WiFiAntenna antenna);
 
 }  // namespace coralmicro
 #endif  // LIBS_BASE_WIFI_H_

@@ -213,8 +213,8 @@ extern "C" void app_main(void* param) {
     vTaskSuspend(nullptr);
   }
 
-  if (coralmicro::TurnOnWiFi()) {
-    if (coralmicro::ConnectWiFi()) {
+  if (coralmicro::WiFiTurnOn()) {
+    if (coralmicro::WiFiConnect()) {
       coralmicro::LedSet(coralmicro::Led::kUser, true);
     }
   } else {

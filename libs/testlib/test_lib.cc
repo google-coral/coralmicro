@@ -80,7 +80,7 @@ namespace pended_functions {
 // https://www.freertos.org/xTimerPendFunctionCall.html
 
 auto WiFiSafeDisconnect = [](void* = nullptr, uint32_t = 0) {
-  if (!coralmicro::DisconnectWiFi()) {
+  if (!coralmicro::WiFiDisconnect()) {
     printf("Unable to disconnect from previous wifi connection\r\n");
   }
 };
@@ -88,7 +88,7 @@ auto WiFiSafeDisconnect = [](void* = nullptr, uint32_t = 0) {
 auto WiFiSafeConnect = [](void* wifi_network_params, uint32_t retries) {
   WiFiSafeDisconnect();
   auto* params = static_cast<WIFINetworkParams_t*>(wifi_network_params);
-  coralmicro::ConnectWiFi(params, static_cast<int>(retries));
+  coralmicro::WiFiConnect(params, static_cast<int>(retries));
   free(const_cast<char*>(params->pcSSID));
   free(const_cast<char*>(params->pcPassword));
   delete params;
@@ -795,7 +795,7 @@ void CaptureAudio(struct jsonrpc_request* request) {
 }
 
 void WiFiScan(struct jsonrpc_request* request) {
-  auto results = coralmicro::ScanWiFi();
+  auto results = coralmicro::WiFiScan();
   if (results.empty()) {
     jsonrpc_return_error(request, -1, "wifi scan failed", nullptr);
     return;
@@ -852,7 +852,7 @@ void WiFiGetStatus(struct jsonrpc_request* request) {
 }
 
 void WiFiGetIp(struct jsonrpc_request* request) {
-  auto maybe_ip = coralmicro::GetWiFiIp();
+  auto maybe_ip = coralmicro::WiFiGetIp();
   if (!maybe_ip.has_value()) {
     jsonrpc_return_error(request, -1, "Unable to get wifi ip.", nullptr);
     return;
@@ -865,7 +865,7 @@ void WiFiSetAntenna(struct jsonrpc_request* request) {
   int antenna;
   if (!JsonRpcGetIntegerParam(request, "antenna", &antenna)) return;
 
-  if (!SetWiFiAntenna(static_cast<coralmicro::WiFiAntenna>(antenna))) {
+  if (!WiFiSetAntenna(static_cast<coralmicro::WiFiAntenna>(antenna))) {
     jsonrpc_return_error(request, -1, "invalid antenna selection", nullptr);
     return;
   }

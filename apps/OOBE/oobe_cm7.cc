@@ -397,8 +397,8 @@ void Main() {
 #if defined(OOBE_DEMO_ETHERNET)
   InitializeEthernet(false);
 #elif defined(OOBE_DEMO_WIFI)
-  TurnOnWiFi();
-  if (!ConnectWiFi()) {
+  WiFiTurnOn();
+  if (!WiFiConnect()) {
     // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
     LedSet(Led::kStatus, true);
     LedSet(Led::kUser, true);

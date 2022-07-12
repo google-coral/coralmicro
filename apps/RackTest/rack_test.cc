@@ -185,7 +185,7 @@ extern "C" void app_main(void* param) {
       HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
   jsonrpc_init(nullptr, nullptr);
 #if defined(TEST_WIFI)
-  if (!coralmicro::TurnOnWiFi()) {
+  if (!coralmicro::WiFiTurnOn()) {
     printf("Wi-Fi failed to come up (is the Wi-Fi board attached?)\r\n");
     vTaskSuspend(nullptr);
   }

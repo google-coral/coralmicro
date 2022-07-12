@@ -175,7 +175,7 @@ extern "C" void app_main(void* param) {
             reinterpret_cast<std::string*>(request->ctx->response_cb_data)->c_str());
     });
 #elif defined(IMAGE_SERVER_WIFI)
-    if (!coralmicro::TurnOnWiFi()) {
+    if (!coralmicro::WiFiTurnOn()) {
         printf("Unable to bring up wifi...\r\n");
     }
     jsonrpc_export(coralmicro::testlib::kMethodWiFiConnect,
