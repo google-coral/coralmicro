@@ -611,41 +611,120 @@ def main():
 
     parser = argparse.ArgumentParser(description='Coral Dev Board Micro flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--build_dir', '-b', type=str, required=True)
-    parser.add_argument('--subapp', type=str, required=False)
-    parser.add_argument('--ram', dest='ram', action='store_true')
-    parser.add_argument('--noram', dest='ram', action='store_false')
-    parser.add_argument('--reset', dest='reset', action='store_true', default=True)
-    parser.add_argument('--noreset', dest='reset', action='store_false')
-    parser.add_argument('--elfloader_path', type=str, required=False)
-    parser.add_argument('--serial', type=str, required=False)
-    parser.add_argument('--list', dest='list', action='store_true')
-    parser.add_argument('--usb_ip_address', type=str, required=False, default='10.10.10.1')
-    parser.add_argument('--wifi_ssid', type=str, required=False, default=None)
-    parser.add_argument('--wifi_psk', type=str, required=False, default=None)
-    parser.add_argument('--wifi_country', type=str, required=False, default=None)
-    parser.add_argument('--wifi_revision', type=int, required=False, default=None)
-    parser.add_argument('--ethernet_speed', type=int, choices=[10, 100, 1000], required=False, default=None)
-    # --strip and --toolchain are provided for Arduino uses.
-    # CMake-built targets already generate a stripped binary.
-    parser.add_argument('--strip', dest='strip', action='store_true')
-    parser.add_argument('--toolchain', type=str, required=False)
-    parser.add_argument('--debug', dest='debug', action='store_true')
-    parser.add_argument('--jlink_path', type=str, default='/opt/SEGGER/JLink')
-    parser.add_argument('--cached', dest='cached', action='store_true')
-    parser.add_argument('--data_dir', type=str, required=False)
+    basic_group = parser.add_argument_group('Flashing options')
+    basic_group.add_argument(
+        '--build_dir', '-b', type=str, required=True,
+        help='Path to the coralmicro build output.')
+    basic_group.add_argument(
+        '--subapp', type=str, required=False,
+        help='The target name you want to flash. This is needed only when \
+        using --app or --example and the target name is different than the \
+        name given to those arguments.')
+    basic_group.add_argument(
+        '--ram', dest='ram', action='store_true',
+        help='Flashes the app to the RAM only, instead of to flash memory. \
+        This means the app will be overrwritten upon reset. Without this flag, \
+        it flashes to the flash memory and resets the board to load it.')
+    basic_group.add_argument(
+        '--noram', dest='ram', action='store_false',
+        help=argparse.SUPPRESS)
+    basic_group.add_argument(
+        '--noreset', dest='reset', action='store_false',
+        help='Prevents resetting the board after flashing the board.')
+    basic_group.add_argument(
+        '--reset', dest='reset', action='store_true',
+        help=argparse.SUPPRESS)
+    parser.add_argument(
+        '--elfloader_path', type=str, required=False,
+        help=argparse.SUPPRESS)
+    basic_group.add_argument(
+        '--serial', type=str, required=False,
+        help='The board serial number you want to flash. This is necessary \
+        only if you have multiple Coral Dev Board Micro devices connected.')
+    parser.add_argument(
+        '--list', dest='list', action='store_true',
+        help='Prints all detected Coral Dev Board Micro devices.')
 
-    parser.add_argument('--program', dest='program', action='store_true')
-    parser.add_argument('--noprogram', dest='program', action='store_false')
-    parser.add_argument('--data', dest='data', action='store_true')
-    parser.add_argument('--nodata', dest='data', action='store_false')
-    parser.add_argument('--arduino', dest='arduino', action='store_true')
+    network_group = parser.add_argument_group('Board network settings')
+    network_group.add_argument(
+        '--usb_ip_address', type=str, required=False, default='10.10.10.1',
+        help='The board IP address for Ethernet-over-USB connections.')
+    network_group.add_argument(
+        '--wifi_ssid', type=str, required=False, default=None,
+        help='The default Wi-Fi SSID for the board to use. \
+        Requires the Coral Wireless Add-on Board (or similar).')
+    network_group.add_argument(
+        '--wifi_psk', type=str, required=False, default=None,
+        help='The Wi-Fi password to use with --wifi_ssid.')
+    network_group.add_argument(
+        '--wifi_country', type=str, required=False, default=None,
+        help='The Wi-Fi country code to use with --wifi_ssid.')
+    network_group.add_argument(
+        '--wifi_revision', type=int, required=False, default=None,
+        help='The Wi-Fi revision to use with --wifi_ssid.')
+    network_group.add_argument(
+        '--ethernet_speed', type=int, choices=[10, 100, 1000],
+        required=False, default=None,
+        help='The maximum ethernet speed in Mbps. Must be one of: \
+        %(choices)s. Requires the Coral PoE Add-on Board (or similar).')
+
+    debug_group = parser.add_argument_group('Debugging options')
+    debug_group.add_argument(
+        '--strip', dest='strip', action='store_true',
+        help='If you specify an unstripped binary with --elf_path to use for \
+        debugging, this argument adds the stripped file to the default.elf \
+        package that gets flashed.')
+    parser.add_argument(
+        '--toolchain', type=str, required=False,
+        help=argparse.SUPPRESS)
+    debug_group.add_argument(
+        '--debug', dest='debug', action='store_true',
+        help='Loads the app into RAM, starts the JLink debug server, and \
+        attaches GDB.')
+    debug_group.add_argument(
+        '--jlink_path', type=str, default='/opt/SEGGER/JLink',
+        help='Path to JLink if --debug is enabled.')
+
+    advanced_group = parser.add_argument_group('Advanced options')
+    advanced_group.add_argument(
+        '--cached', dest='cached', action='store_true',
+        help='Flashes using cached target files, which can speed up the \
+        flashing process. You must first run scripts/cache_build.py.')
+    advanced_group.add_argument(
+        '--data_dir', type=str, required=False,
+        help=argparse.SUPPRESS)
+    parser.add_argument(
+        '--program', dest='program', action='store_true',
+        help=argparse.SUPPRESS)
+    advanced_group.add_argument(
+        '--noprogram', dest='program', action='store_false',
+        help='Prevents flashing the program code (only data is flashed, \
+        unless --nodata is also specified).')
+    parser.add_argument(
+        '--data', dest='data', action='store_true',
+        help=argparse.SUPPRESS)
+    advanced_group.add_argument(
+        '--nodata', dest='data', action='store_false',
+        help='Prevents flashing the app data (only program code is flashed, \
+        unless --noprogram is also specified).')
+    parser.add_argument(
+        '--arduino', dest='arduino', action='store_true',
+        help=argparse.SUPPRESS)
     parser.set_defaults(program=True, data=True, arduino=False)
 
-    app_elf_group = parser.add_mutually_exclusive_group(required=True)
-    app_elf_group.add_argument('--app', '-a', type=str)
-    app_elf_group.add_argument('--example', '-e', type=str)
-    app_elf_group.add_argument('--elf_path', type=str)
+    app_elf_group = basic_group.add_mutually_exclusive_group(required=True)
+    app_elf_group.add_argument(
+        '--app', '-a', type=str,
+        help='Name of the coralmicro "app" to flash. Must be used with \
+        --build_dir.')
+    app_elf_group.add_argument(
+        '--example', '-e', type=str,
+        help='Name of the coralmicro "example" to flash. Must be used with \
+        --build_dir.')
+    app_elf_group.add_argument(
+        '--elf_path', type=str,
+        help='Path to your project\'s .stripped binary (ELF file). This must \
+        be the full path and filename.')
 
     args = parser.parse_args()
 
