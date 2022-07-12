@@ -22,7 +22,6 @@ target_link_libraries(MFGTest
     libs_a71ch
     libs_rpc_http_server
     libs_mjson
-    libs_testconv1
     libs_testlib
     libs_tpu_freertos
 )

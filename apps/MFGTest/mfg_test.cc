@@ -19,16 +19,12 @@
 #include "libs/a71ch/a71ch.h"
 #include "libs/base/analog.h"
 #include "libs/base/filesystem.h"
-#include "libs/base/gpio.h"
 #include "libs/base/led.h"
-#include "libs/base/main_freertos_m7.h"
 #include "libs/base/utils.h"
 #include "libs/pmic/pmic.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tpu/edgetpu_task.h"
-#include "libs/testconv1/testconv1.h"
 #include "libs/testlib/test_lib.h"
-#include "libs/tpu/edgetpu_manager.h"
 #include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -589,6 +585,7 @@ void ReadFile(struct jsonrpc_request* request) {
   std::vector<uint8_t> data;
   if (!coralmicro::LfsReadFile(filename.c_str(), &data)) {
     jsonrpc_return_error(request, -1, "failed to read file", nullptr);
+    return;
   }
 
   jsonrpc_return_success(request, "{%Q: %V}", "data", data.size(), data.data());

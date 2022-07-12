@@ -33,7 +33,6 @@
 #include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tensorflow/utils.h"
-#include "libs/testconv1/testconv1.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -183,26 +182,6 @@ void GetSerialNumber(struct jsonrpc_request* request) {
                          serial.c_str());
 }
 
-// Implements the "run_testconv1" RPC.
-// Runs the simple "testconv1" model using the TPU.
-// NOTE: The TPU power must be enabled for this RPC to succeed.
-void RunTestConv1(struct jsonrpc_request* request) {
-  if (!coralmicro::EdgeTpuTask::GetSingleton()->GetPower()) {
-    jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
-    return;
-  }
-  coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
-  if (!coralmicro::testconv1::setup()) {
-    jsonrpc_return_error(request, -1, "testconv1 setup failed", nullptr);
-    return;
-  }
-  if (!coralmicro::testconv1::loop()) {
-    jsonrpc_return_error(request, -1, "testconv1 loop failed", nullptr);
-    return;
-  }
-  jsonrpc_return_success(request, "{}");
-}
-
 // Implements the "set_tpu_power_state" RPC.
 // Takes one parameter, "enable" -- a boolean indicating the state to set.
 // Returns success or failure.
@@ -273,6 +252,75 @@ void FetchResource(struct jsonrpc_request* request) {
   }
   jsonrpc_return_success(request, "{%Q:%V}", "data", resource->size(),
                          resource->data());
+}
+
+// Runs the simple "testconv1" model using the TPU.
+void RunTestConv1(struct jsonrpc_request* request) {
+  // This check needs to be here because MFG Test expects that the first call
+  // fails since we never explicitly turn on the tpu via a rpc call.
+  if (!coralmicro::EdgeTpuTask::GetSingleton()->GetPower()) {
+    jsonrpc_return_error(request, -1, "TPU power is not enabled", nullptr);
+    return;
+  }
+  constexpr char kConv1ModelFile[] = "/models/testconv1-edgetpu.tflite";
+  std::vector<uint8_t> testconv1_edgetpu_tflite;
+  if (!coralmicro::LfsReadFile(kConv1ModelFile, &testconv1_edgetpu_tflite)) {
+    jsonrpc_return_error(request, -1, "failed to open %s", kConv1ModelFile);
+    return;
+  }
+  constexpr char kConv1InputBin[] = "/models/testconv1-test-input.bin";
+  std::vector<uint8_t> testconv1_test_input_bin;
+  if (!coralmicro::LfsReadFile(kConv1InputBin, &testconv1_test_input_bin)) {
+    jsonrpc_return_error(request, -1, "failed to open %s", kConv1InputBin);
+    return;
+  }
+  constexpr char kExpectedConv1OutputBin[] =
+      "/models/testconv1-expected-output.bin";
+  std::vector<uint8_t> testconv1_expected_output_bin;
+  if (!coralmicro::LfsReadFile(kExpectedConv1OutputBin,
+                               &testconv1_expected_output_bin)) {
+    jsonrpc_return_error(request, -1, "failed to open %s",
+                         kExpectedConv1OutputBin);
+    return;
+  }
+
+  auto* model = tflite::GetModel(testconv1_edgetpu_tflite.data());
+  if (model->version() != TFLITE_SCHEMA_VERSION) {
+    jsonrpc_return_error(request, -1, "model schema version unsupported",
+                         nullptr);
+    return;
+  }
+  auto edgetpu_context =
+      coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
+  if (!edgetpu_context) {
+    jsonrpc_return_error(request, -1, "failed to open TPU", nullptr);
+    return;
+  }
+  tflite::MicroMutableOpResolver<1> resolver;
+  resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
+  tflite::MicroErrorReporter error_reporter;
+  tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
+                                       kTensorArenaSize, &error_reporter);
+  if (interpreter.AllocateTensors() != kTfLiteOk) {
+    jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
+    return;
+  }
+
+  auto* input = interpreter.input(0);
+  auto* output = interpreter.output(0);
+
+  memcpy(input->data.uint8, testconv1_test_input_bin.data(),
+         testconv1_test_input_bin.size());
+  if (interpreter.Invoke() != kTfLiteOk) {
+    jsonrpc_return_error(request, -1, "failed to invoke interpreter", nullptr);
+    return;
+  }
+  if (memcmp(output->data.uint8, testconv1_expected_output_bin.data(),
+             testconv1_expected_output_bin.size()) != 0) {
+    jsonrpc_return_error(request, -1, "Output did not match expected", nullptr);
+    return;
+  }
+  jsonrpc_return_success(request, "{}");
 }
 
 void RunDetectionModel(struct jsonrpc_request* request) {
