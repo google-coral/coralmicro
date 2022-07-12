@@ -28,7 +28,6 @@
 extern "C" nand_handle_t* BOARD_GetNANDHandle(void);
 
 namespace coralmicro {
-namespace filesystem {
 namespace {
 lfs_t g_lfs;
 lfs_config g_lfs_config;
@@ -110,7 +109,7 @@ int LfsUnlock(const struct lfs_config* c) {
 
 lfs_t* Lfs() { return &g_lfs; }
 
-bool Init(bool force_format) {
+bool LfsInit(bool force_format) {
     if (g_lfs_mutex) vSemaphoreDelete(g_lfs_mutex);
 
     g_lfs_mutex = xSemaphoreCreateMutex();
@@ -172,7 +171,7 @@ bool Init(bool force_format) {
 // assert(Dirname("dir1/dir2/")      == "dir1/dir2");
 // assert(Dirname("/dir1/dir2/file") == "/dir1/dir2");
 // assert(Dirname("dir1/dir2/file")  == "dir1/dir2");
-std::string Dirname(const char* path) {
+std::string LfsDirname(const char* path) {
     const std::string s(path);
     if (s.empty()) return "";
 
@@ -182,7 +181,7 @@ std::string Dirname(const char* path) {
     return s.substr(0, index);   // e.g. "/dir/", "/dir/file"
 }
 
-bool MakeDirs(const char* path) {
+bool LfsMakeDirs(const char* path) {
     int ret;
     size_t path_len = strlen(path);
     if (path_len > g_lfs.name_max) {
@@ -211,28 +210,28 @@ bool MakeDirs(const char* path) {
     return true;
 }
 
-ssize_t Size(const char* path) {
+ssize_t LfsSize(const char* path) {
     lfs_file_t file;
     if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return -1;
     AutoClose close{&file};
     return lfs_file_size(&g_lfs, &file);
 }
 
-bool DirExists(const char* path) {
+bool LfsDirExists(const char* path) {
     lfs_dir_t dir;
     if (lfs_dir_open(&g_lfs, &dir, path) < 0) return false;
     lfs_dir_close(&g_lfs, &dir);
     return true;
 }
 
-bool FileExists(const char* path) {
+bool LfsFileExists(const char* path) {
     lfs_file_t file;
     if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return false;
     lfs_file_close(&g_lfs, &file);
     return true;
 }
 
-bool ReadFile(const char* path, std::vector<uint8_t>* buf) {
+bool LfsReadFile(const char* path, std::vector<uint8_t>* buf) {
     lfs_file_t file;
     if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return false;
     AutoClose close{&file};
@@ -245,7 +244,7 @@ bool ReadFile(const char* path, std::vector<uint8_t>* buf) {
     return n >= 0 && static_cast<size_t>(n) == buf->size();
 }
 
-bool ReadFile(const char* path, std::string* str) {
+bool LfsReadFile(const char* path, std::string* str) {
     lfs_file_t file;
     if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return false;
     AutoClose close{&file};
@@ -258,7 +257,7 @@ bool ReadFile(const char* path, std::string* str) {
     return n >= 0 && static_cast<size_t>(n) == str->size();
 }
 
-size_t ReadFile(const char* path, uint8_t* buf, size_t size) {
+size_t LfsReadFile(const char* path, uint8_t* buf, size_t size) {
     lfs_file_t file;
     if (lfs_file_open(&g_lfs, &file, path, LFS_O_RDONLY) < 0) return 0;
     AutoClose close{&file};
@@ -273,7 +272,7 @@ size_t ReadFile(const char* path, uint8_t* buf, size_t size) {
     return 0;
 }
 
-bool WriteFile(const char* path, const uint8_t* buf, size_t size) {
+bool LfsWriteFile(const char* path, const uint8_t* buf, size_t size) {
     lfs_file_t file;
     if (lfs_file_open(&g_lfs, &file, path,
                       LFS_O_WRONLY | LFS_O_TRUNC | LFS_O_CREAT) < 0)
@@ -283,5 +282,4 @@ bool WriteFile(const char* path, const uint8_t* buf, size_t size) {
     auto n = lfs_file_write(&g_lfs, &file, buf, size);
     return n >= 0 && static_cast<size_t>(n) == size;
 }
-}  // namespace filesystem
 }  // namespace coralmicro

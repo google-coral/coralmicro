@@ -206,7 +206,7 @@ extern "C" void app_main(void* param) {
   CHECK(ble_scan_sema);
   ble_ready_mtx = xSemaphoreCreateMutex();
   CHECK(ble_ready_mtx);
-  if (coralmicro::filesystem::ReadFile(
+  if (coralmicro::LfsReadFile(
           "/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
           brcm_patchram_buf, brcm_patch_ram_length) != brcm_patch_ram_length) {
     printf("Reading patchram failed\r\n");

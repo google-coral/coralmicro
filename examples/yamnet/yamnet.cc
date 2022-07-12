@@ -83,7 +83,7 @@ void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
 extern "C" [[noreturn]] void app_main(void* param) {
     printf("YAMNet!!!\r\n");
     std::vector<uint8_t> yamnet_tflite;
-    if (!coralmicro::filesystem::ReadFile(kModelName, &yamnet_tflite)) {
+    if (!coralmicro::LfsReadFile(kModelName, &yamnet_tflite)) {
         printf("Failed to load model\r\n");
         vTaskSuspend(nullptr);
     }
@@ -123,8 +123,8 @@ extern "C" [[noreturn]] void app_main(void* param) {
 
     // Run tensorflow on test input file.
     std::vector<uint8_t> yamnet_test_input_bin;
-    if (!coralmicro::filesystem::ReadFile("/models/yamnet_test_audio.bin",
-                                          &yamnet_test_input_bin)) {
+    if (!coralmicro::LfsReadFile("/models/yamnet_test_audio.bin",
+                                 &yamnet_test_input_bin)) {
         printf("Failed to load test input!\r\n");
         vTaskSuspend(nullptr);
     }

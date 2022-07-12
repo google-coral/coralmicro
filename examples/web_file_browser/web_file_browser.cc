@@ -29,8 +29,6 @@
 // to browse files with a web browser, and push/pull files to the board with
 // curl commands.
 
-using coralmicro::filesystem::Lfs;
-
 namespace coralmicro {
 namespace {
 constexpr char kUrlPrefix[] = "/fs/";
@@ -103,7 +101,7 @@ HttpServer::Content UriHandler(const char* uri) {
     lfs_dir_t dir;
     int res = lfs_dir_open(Lfs(), &dir, path.c_str());
     if (res < 0) {
-        if (filesystem::FileExists(path.c_str())) return path;
+        if (LfsFileExists(path.c_str())) return path;
         return {};
     }
 
@@ -141,8 +139,8 @@ class FileHttpServer : public HttpServer {
 
         printf("POST %s (%d bytes) => %s\r\n", uri, content_len, path.c_str());
 
-        auto dirname = filesystem::Dirname(path.c_str());
-        if (!filesystem::MakeDirs(dirname.c_str())) return ERR_ARG;
+        auto dirname = LfsDirname(path.c_str());
+        if (!LfsMakeDirs(dirname.c_str())) return ERR_ARG;
 
         auto file = std::make_unique<lfs_file_t>();
         if (lfs_file_open(Lfs(), file.get(), path.c_str(),

@@ -571,8 +571,7 @@ void WriteFile(struct jsonrpc_request* request) {
   std::vector<uint8_t> data;
   if (!JsonRpcGetBase64Param(request, "data", &data)) return;
 
-  if (!coralmicro::filesystem::WriteFile(filename.c_str(), data.data(),
-                                           data.size())) {
+  if (!coralmicro::LfsWriteFile(filename.c_str(), data.data(), data.size())) {
     jsonrpc_return_error(request, -1, "failed to write file", nullptr);
     return;
   }
@@ -588,7 +587,7 @@ void ReadFile(struct jsonrpc_request* request) {
   if (!JsonRpcGetStringParam(request, "filename", &filename)) return;
 
   std::vector<uint8_t> data;
-  if (!coralmicro::filesystem::ReadFile(filename.c_str(), &data)) {
+  if (!coralmicro::LfsReadFile(filename.c_str(), &data)) {
     jsonrpc_return_error(request, -1, "failed to read file", nullptr);
   }
 

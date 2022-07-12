@@ -35,7 +35,7 @@ uint32_t disable_usb_timeout __attribute__((section(".noinit_rpmsg_sh_mem")));
 extern "C" uint32_t vPortGetRunTimeCounterValue(void) { return 0; }
 
 namespace {
-using coralmicro::filesystem::Lfs;
+using coralmicro::Lfs;
 void elfloader_main(void *param);
 
 TimerHandle_t usb_timer;
@@ -98,8 +98,8 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
         case ElfloaderTarget::kPath: {
           // TODO(atv): This stuff can fail. We should propagate errors back to
           // the Python side if possible.
-          auto dir = coralmicro::filesystem::Dirname(elfloader_recv_path);
-          coralmicro::filesystem::MakeDirs(dir.c_str());
+          auto dir = coralmicro::LfsDirname(elfloader_recv_path);
+          coralmicro::LfsMakeDirs(dir.c_str());
           lfs_file_open(Lfs(), &file_handle, elfloader_recv_path, LFS_O_TRUNC | LFS_O_CREAT | LFS_O_RDWR);
           free(elfloader_recv_path);
           elfloader_recv_path = nullptr;
@@ -122,7 +122,7 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
       if (elfloader_target == ElfloaderTarget::kFilesystem ||
           elfloader_target == ElfloaderTarget::kPath) {
         if (!filesystem_formatted) {
-          coralmicro::filesystem::Init(/*force_format=*/true);
+          coralmicro::LfsInit(/*force_format=*/true);
           filesystem_formatted = true;
         }
       }
@@ -199,10 +199,10 @@ void elfloader_main(void *param) {
   ssize_t elf_size = -1;
   std::unique_ptr<uint8_t[]> application_elf;
   if (!param) {
-    elf_size = coralmicro::filesystem::Size("/default.elf");
+    elf_size = coralmicro::LfsSize("/default.elf");
     if (elf_size != -1) {
       application_elf = std::make_unique<uint8_t[]>(elf_size);
-      if (coralmicro::filesystem::ReadFile(
+      if (coralmicro::LfsReadFile(
               "/default.elf", application_elf.get(), elf_size) != elf_size) {
         application_elf.reset();
       }
@@ -261,7 +261,7 @@ void usb_timer_callback(TimerHandle_t timer) {
 
 extern "C" int main(int argc, char **argv) {
   BOARD_InitHardware(false);
-  coralmicro::filesystem::Init();
+  coralmicro::LfsInit();
 
   TaskHandle_t usb_task;
   xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10,

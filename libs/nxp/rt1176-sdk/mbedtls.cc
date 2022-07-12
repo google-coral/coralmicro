@@ -112,7 +112,7 @@ extern "C" int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len) {
 // implementation to use our filesystem API.
 extern "C" int mbedtls_pk_load_file(const char *path, unsigned char **buf,
                                     size_t *n) {
-  using coralmicro::filesystem::Lfs;
+  using coralmicro::Lfs;
 
   MBEDTLS_INTERNAL_VALIDATE_RET(path != NULL, MBEDTLS_ERR_PK_BAD_INPUT_DATA);
   MBEDTLS_INTERNAL_VALIDATE_RET(buf != NULL, MBEDTLS_ERR_PK_BAD_INPUT_DATA);

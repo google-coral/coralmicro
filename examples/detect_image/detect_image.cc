@@ -42,13 +42,13 @@ struct TensorArena {
 
 void Main() {
     std::vector<uint8_t> model;
-    if (!filesystem::ReadFile(kModelPath, &model)) {
+    if (!LfsReadFile(kModelPath, &model)) {
         printf("ERROR: Failed to load %s\r\n", kModelPath);
         return;
     }
 
     std::vector<uint8_t> image;
-    if (!filesystem::ReadFile(kImagePath, &image)) {
+    if (!LfsReadFile(kImagePath, &image)) {
         printf("ERROR: Failed to load %s\r\n", kImagePath);
         return;
     }

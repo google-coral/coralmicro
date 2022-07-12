@@ -25,23 +25,22 @@
 #include "third_party/nxp/rt1176-sdk/middleware/littlefs/lfs.h"
 
 namespace coralmicro {
-namespace filesystem {
 
 lfs_t* Lfs();
-bool Init(bool force_format = false);
 
-bool MakeDirs(const char* path);
-std::string Dirname(const char* path);
-ssize_t Size(const char* path);
+bool LfsInit(bool force_format = false);
 
-bool DirExists(const char* path);
-bool FileExists(const char* path);
-bool ReadFile(const char* path, std::vector<uint8_t>* buf);
-bool ReadFile(const char* path, std::string* str);
-size_t ReadFile(const char* path, uint8_t* buf, size_t size);
-bool WriteFile(const char* path, const uint8_t* buf, size_t size);
+bool LfsMakeDirs(const char* path);
+std::string LfsDirname(const char* path);
+ssize_t LfsSize(const char* path);
 
-}  // namespace filesystem
+bool LfsDirExists(const char* path);
+bool LfsFileExists(const char* path);
+bool LfsReadFile(const char* path, std::vector<uint8_t>* buf);
+bool LfsReadFile(const char* path, std::string* str);
+size_t LfsReadFile(const char* path, uint8_t* buf, size_t size);
+bool LfsWriteFile(const char* path, const uint8_t* buf, size_t size);
+
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_FILESYSTEM_H_

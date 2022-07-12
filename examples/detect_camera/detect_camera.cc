@@ -121,7 +121,7 @@ void DetectFromCamera(struct jsonrpc_request* r) {
 
 extern "C" void app_main(void* param) {
     std::vector<uint8_t> model;
-    if (!coralmicro::filesystem::ReadFile(kModelPath, &model)) {
+    if (!coralmicro::LfsReadFile(kModelPath, &model)) {
         printf("ERROR: Failed to load %s\r\n", kModelPath);
         vTaskSuspend(nullptr);
     }

@@ -587,7 +587,7 @@ void PosenetStressRun(struct jsonrpc_request* request) {
       "posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
   // Reads the model and checks version.
   std::vector<uint8_t> posenet_tflite;
-  if (!coralmicro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+  if (!coralmicro::LfsReadFile(kModelPath, &posenet_tflite)) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
     jsonrpc_return_error(request, -1, "Failed to get posenet model", nullptr);
     return;
@@ -909,7 +909,7 @@ void CryptoGetSha256(struct jsonrpc_request* request) {
   if (!JsonRpcGetStringParam(request, "stored_sha_name", &stored_sha_name))
     return;
   std::vector<uint8_t> file_content;
-  if (!coralmicro::filesystem::ReadFile(file_name.c_str(), &file_content)) {
+  if (!coralmicro::LfsReadFile(file_name.c_str(), &file_content)) {
     jsonrpc_return_error(request, -1, "%s not found", file_name.c_str());
     return;
   }

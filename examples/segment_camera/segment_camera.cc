@@ -119,7 +119,7 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
 
 void Main() {
     std::vector<uint8_t> model;
-    if (!coralmicro::filesystem::ReadFile(kModelPath, &model)) {
+    if (!coralmicro::LfsReadFile(kModelPath, &model)) {
         printf("ERROR: Failed to load %s\r\n", kModelPath);
         vTaskSuspend(nullptr);
     }

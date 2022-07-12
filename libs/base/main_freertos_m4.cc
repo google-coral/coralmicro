@@ -48,7 +48,7 @@ extern "C" int main(int argc, char** argv) {
     BOARD_InitHardware(true);
 
     coralmicro::ConsoleInit();
-    CHECK(coralmicro::filesystem::Init());
+    CHECK(coralmicro::LfsInit());
     coralmicro::GpioInit();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)

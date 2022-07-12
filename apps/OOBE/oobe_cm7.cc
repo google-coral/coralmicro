@@ -369,7 +369,7 @@ void Main() {
     return;
   }
   std::vector<uint8_t> posenet_tflite;
-  if (!coralmicro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+  if (!coralmicro::LfsReadFile(kModelPath, &posenet_tflite)) {
     printf("ERROR: Failed to read model: %s\r\n", kModelPath);
     return;
   }

@@ -51,18 +51,18 @@ bool setup() {
         return true;
     }
 
-    if (!coralmicro::filesystem::ReadFile("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite)) {
+    if (!coralmicro::LfsReadFile("/models/testconv1-edgetpu.tflite", &testconv1_edgetpu_tflite)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load model!");
         return false;
 
     }
 
-    if (!coralmicro::filesystem::ReadFile("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin)) {
+    if (!coralmicro::LfsReadFile("/models/testconv1-expected-output.bin", &testconv1_expected_output_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load expected output!");
         return false;
     }
 
-    if (!coralmicro::filesystem::ReadFile("/models/testconv1-test-input.bin", &testconv1_test_input_bin)) {
+    if (!coralmicro::LfsReadFile("/models/testconv1-test-input.bin", &testconv1_test_input_bin)) {
         TF_LITE_REPORT_ERROR(error_reporter, "Failed to load test input!");
         return false;
     }

@@ -10,7 +10,7 @@
 
 #include "libs/base/filesystem.h"
 
-using coralmicro::filesystem::Lfs;
+using coralmicro::Lfs;
 
 extern "C" {
 

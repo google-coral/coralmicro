@@ -19,7 +19,7 @@
 namespace coralmicro {
 namespace arduino {
 namespace SDLib {
-using coralmicro::filesystem::Lfs;
+using coralmicro::Lfs;
 
 File::File(std::shared_ptr<lfs_file_t> handle, const char *name, bool writable)
     : file_handle_(handle), open_(true), is_writable_(writable) {

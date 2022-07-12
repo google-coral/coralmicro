@@ -73,9 +73,9 @@ static void bt_ready_internal(int err_param) {
 }
 
 void InitEdgefastBluetooth(bt_ready_cb_t cb) {
-    if (coralmicro::filesystem::ReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
-                                      brcm_patchram_buf,
-                                      brcm_patch_ram_length) != brcm_patch_ram_length) {
+    if (coralmicro::LfsReadFile("/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
+                                brcm_patchram_buf,
+                                brcm_patch_ram_length) != brcm_patch_ram_length) {
         printf("Reading patchram failed\r\n");
         assert(false);
     }

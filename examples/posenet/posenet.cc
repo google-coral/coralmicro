@@ -49,7 +49,7 @@ extern "C" void app_main(void* param) {
 
     // Reads the model and checks version.
     std::vector<uint8_t> posenet_tflite;
-    if (!coralmicro::filesystem::ReadFile(kModelPath, &posenet_tflite)) {
+    if (!coralmicro::LfsReadFile(kModelPath, &posenet_tflite)) {
         TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load model!");
         vTaskSuspend(nullptr);
     }
@@ -78,8 +78,7 @@ extern "C" void app_main(void* param) {
     // Runs posenet on a test image.
     printf("Getting outputs for posenet test input\r\n");
     std::vector<uint8_t> posenet_test_input_bin;
-    if (!coralmicro::filesystem::ReadFile(kTestInputPath,
-                                            &posenet_test_input_bin)) {
+    if (!coralmicro::LfsReadFile(kTestInputPath, &posenet_test_input_bin)) {
         TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load test input!");
         vTaskSuspend(nullptr);
     }

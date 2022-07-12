@@ -19,11 +19,11 @@
 namespace coralmicro {
 namespace arduino {
 namespace SDLib {
-using coralmicro::filesystem::Lfs;
+using coralmicro::Lfs;
 
 bool SDClass::begin(uint8_t csPin) {
   // We ignore csPin, since we don't have a real SD card
-  return coralmicro::filesystem::Init();
+  return coralmicro::LfsInit();
 }
 
 File SDClass::open(const char *filename, uint8_t mode) {
@@ -58,7 +58,7 @@ bool SDClass::exists(const char *filepath) {
 }
 
 bool SDClass::mkdir(const char *filepath) {
-  return coralmicro::filesystem::MakeDirs(filepath);
+  return coralmicro::LfsMakeDirs(filepath);
 }
 
 bool SDClass::remove(const char *filepath) {

@@ -13,7 +13,7 @@ static lfs_file_t firmware;
 static lfs_file_t clm_blob;
 
 extern "C" resource_result_t platform_read_external_resource(const resource_hnd_t* resource, uint32_t offset, uint32_t maxsize, uint32_t* size, void* buffer) {
-    using coralmicro::filesystem::Lfs;
+    using coralmicro::Lfs;
 
     bool ret;
     int bytes_read;

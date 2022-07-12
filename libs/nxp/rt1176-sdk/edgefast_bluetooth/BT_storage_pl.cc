@@ -8,7 +8,7 @@
  *  All rights reserved.
  */
 
-using coralmicro::filesystem::Lfs;
+using coralmicro::Lfs;
 
 extern "C" {
 

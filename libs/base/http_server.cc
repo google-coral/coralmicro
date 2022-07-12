@@ -22,7 +22,6 @@
 
 namespace coralmicro {
 namespace {
-using filesystem::Lfs;
 
 HttpServer* g_server = nullptr;
 

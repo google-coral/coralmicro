@@ -67,7 +67,7 @@ extern "C" void app_main(void* param) {
   // Get the sha256 and ecc signature for this model file.
   std::vector<uint8_t> model;
   constexpr char kModelPath[] = "/models/testconv1-edgetpu.tflite";
-  if (!coralmicro::filesystem::ReadFile(kModelPath, &model)) {
+  if (!coralmicro::LfsReadFile(kModelPath, &model)) {
     printf("%s missing\r\n", kModelPath);
     vTaskSuspend(nullptr);
   }

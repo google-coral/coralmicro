@@ -81,7 +81,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
     coralmicro::Random::GetSingleton()->Init();
     coralmicro::ConsoleM7::GetSingleton()->Init(init_console_tx,
                                                   init_console_rx);
-    CHECK(coralmicro::filesystem::Init());
+    CHECK(coralmicro::LfsInit());
     // Make sure this happens before EEM or WICED are initialized.
     tcpip_init(nullptr, nullptr);
     InitializeCDCEEM();
