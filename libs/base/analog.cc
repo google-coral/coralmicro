@@ -43,18 +43,9 @@ void GetDefaultConfig(ADCConfig& config) {
 } // namespace
 
 void Init(Device device) {
-    if (device == Device::kAdc1 || device == Device::kAdc2) {
-        lpadc_config_t adc_config;
-        LPADC_GetDefaultConfig(&adc_config);
-        LPADC_Init(DeviceToADC(device), &adc_config);
-    }
-
-    if (device == Device::kDac1) {
-        dac12_config_t dac_config;
-        DAC12_GetDefaultConfig(&dac_config);
-        dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
-        DAC12_Init(DAC, &dac_config);
-    }
+    lpadc_config_t adc_config;
+    LPADC_GetDefaultConfig(&adc_config);
+    LPADC_Init(DeviceToADC(device), &adc_config);
 }
 
 void CreateConfig(ADCConfig& config, Device device, int channel,
@@ -105,14 +96,21 @@ uint16_t ReadADC(const ADCConfig& config) {
 
     return (result.convValue >> 3) & 0xFFF;
 }
+}  // namespace analog
 
-void EnableDAC(bool enable) { DAC12_Enable(DAC, enable); }
+void DacInit() {
+    dac12_config_t dac_config;
+    DAC12_GetDefaultConfig(&dac_config);
+    dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
+    DAC12_Init(DAC, &dac_config);
+}
 
-void WriteDAC(uint16_t value) {
+void DacEnable(bool enable) { DAC12_Enable(DAC, enable); }
+
+void DacWrite(uint16_t value) {
     // 12-bit DAC, values range from 0 - 4095.
     assert(value <= 4095);
     DAC12_SetData(DAC, value);
 }
 
-}  // namespace analog
 }  // namespace coralmicro

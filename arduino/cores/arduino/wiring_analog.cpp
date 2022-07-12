@@ -46,7 +46,7 @@ void wiringAnalogInit() {
     pwm_config.A.enabled = false;
     pwm_config.B.enabled = false;
     coralmicro::analog::Init(Device::kAdc1);
-    coralmicro::analog::Init(Device::kDac1);
+    coralmicro::DacInit();
     coralmicro::analog::CreateConfig(
         Config_A0,
         Device::kAdc1, 0,
@@ -74,10 +74,10 @@ static void analogWriteDAC(pin_size_t pinNumber, int value) {
     int dac_shift = kDacFullResolutionBits - dac_resolution_bits;
     int shift_value = dac_resolution_bits;
     if (value) {
-        coralmicro::analog::EnableDAC(true);
-        coralmicro::analog::WriteDAC(value << dac_shift);
+        coralmicro::DacEnable(true);
+        coralmicro::DacWrite(value << dac_shift);
     } else {
-        coralmicro::analog::EnableDAC(false);
+        coralmicro::DacEnable(false);
     }
 }
 

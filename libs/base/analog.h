@@ -33,7 +33,6 @@ inline constexpr int kLPADC2ChannelCount = 7;
 enum class Device {
     kAdc1,
     kAdc2,
-    kDac1,
 };
 
 // Enumeration of the choices for the primary side of an ADC.
@@ -53,8 +52,8 @@ struct ADCConfig {
     lpadc_conv_trigger_config_t trigger_config;
 };
 
-// Initializes an analog device.
-// @param device ADC or DAC to initialize.
+// Initializes ADC device.
+// @param device ADC to initialize.
 void Init(Device device);
 
 // Populates an `ADCConfig` struct based on the given parameters.
@@ -75,10 +74,15 @@ void CreateConfig(ADCConfig& config, Device device, int channel,
 // @returns Digitized value of the voltage that the ADC is sensing.
 //          The ADC has 12 bits of precision, so the maximum value returned is 4095.
 uint16_t ReadADC(const ADCConfig& config);
+}  // namespace analog
+
+// Initializes DAC device.
+// @param device DAC to initialize.
+void DacInit();
 
 // Sets the state of the DAC.
 // @param enable True enables the DAC; false disables it.
-void EnableDAC(bool enable);
+void DacEnable(bool enable);
 
 // Writes voltage values to the DAC. You must first call `EnableDAC()`.
 //
@@ -86,9 +90,8 @@ void EnableDAC(bool enable);
 // @param value The voltage value to output.
 //   The DAC has 12-bit resolution, so the allowed values are 0 to 4095.
 //   The maximum output voltage of the DAC is 1.8V.
-void WriteDAC(uint16_t value);
+void DacWrite(uint16_t value);
 
-}  // namespace analog
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_ANALOG_H_

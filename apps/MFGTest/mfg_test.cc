@@ -479,8 +479,8 @@ void SetGpio(struct jsonrpc_request* request) {
     GPIO_PinWrite(pin_gpio_values->second.first, pin_gpio_values->second.second,
                   enable);
   } else {
-    coralmicro::analog::WriteDAC(enable ? 4095 : 1);
-    coralmicro::analog::EnableDAC(true);
+    coralmicro::DacWrite(enable ? 4095 : 1);
+    coralmicro::DacEnable(true);
   }
   jsonrpc_return_success(request, "{}", nullptr);
 }
@@ -526,8 +526,8 @@ void SetDACValue(struct jsonrpc_request* request) {
     return;
   }
 
-  coralmicro::analog::WriteDAC(counts);
-  coralmicro::analog::EnableDAC(!!counts);
+  coralmicro::DacWrite(counts);
+  coralmicro::DacEnable(!!counts);
   jsonrpc_return_success(request, "{}");
 }
 
@@ -675,7 +675,7 @@ void ReadMACAddress(struct jsonrpc_request* request) {
 
 extern "C" void app_main(void* param) {
   InitializeLoopbackMappings();
-  coralmicro::analog::Init(coralmicro::analog::Device::kDac1);
+  coralmicro::DacInit();
 
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export(coralmicro::testlib::kMethodGetSerialNumber,
