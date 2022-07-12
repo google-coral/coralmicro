@@ -26,14 +26,13 @@
 #endif
 
 namespace coralmicro {
-namespace gpio {
 namespace {
 StaticSemaphore_t g_mutex_storage;
 SemaphoreHandle_t g_mutex;
 
 GPIO_Type* PinNameToModule[Gpio::kCount] = {
-    [Gpio::kStatusLED] = GPIO13,
-    [Gpio::kUserLED] = GPIO13,
+    [Gpio::kStatusLed] = GPIO13,
+    [Gpio::kUserLed] = GPIO13,
     [Gpio::kEdgeTpuPgood] = GPIO8,
     [Gpio::kEdgeTpuReset] = GPIO8,
     [Gpio::kEdgeTpuPmic] = GPIO8,
@@ -63,8 +62,8 @@ GPIO_Type* PinNameToModule[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToPin[Gpio::kCount] = {
-    [Gpio::kStatusLED] = 5,
-    [Gpio::kUserLED] = 6,
+    [Gpio::kStatusLed] = 5,
+    [Gpio::kUserLed] = 6,
     [Gpio::kEdgeTpuPgood] = 26,
     [Gpio::kEdgeTpuReset] = 24,
     [Gpio::kEdgeTpuPmic] = 25,
@@ -94,12 +93,12 @@ constexpr uint32_t PinNameToPin[Gpio::kCount] = {
 };
 
 gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
-    [Gpio::kStatusLED] = {
+    [Gpio::kStatusLed] = {
         .direction = kGPIO_DigitalOutput,
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
     },
-    [Gpio::kUserLED] = {
+    [Gpio::kUserLed] = {
         .direction = kGPIO_DigitalOutput,
         .outputLogic = 0,
         .interruptMode = kGPIO_NoIntmode,
@@ -237,8 +236,8 @@ gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
 };
 
 constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
-    [Gpio::kStatusLED] = HardFault_IRQn,
-    [Gpio::kUserLED] = HardFault_IRQn,
+    [Gpio::kStatusLed] = HardFault_IRQn,
+    [Gpio::kUserLed] = HardFault_IRQn,
     [Gpio::kEdgeTpuPgood] = HardFault_IRQn,
     [Gpio::kEdgeTpuReset] = HardFault_IRQn,
     [Gpio::kEdgeTpuPmic] = HardFault_IRQn,
@@ -268,8 +267,8 @@ constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
-    [Gpio::kStatusLED] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
-    [Gpio::kUserLED] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
+    [Gpio::kStatusLed] = {IOMUXC_GPIO_SNVS_02_DIG_GPIO13_IO05},
+    [Gpio::kUserLed] = {IOMUXC_GPIO_SNVS_03_DIG_GPIO13_IO06},
     [Gpio::kEdgeTpuPgood] = {IOMUXC_GPIO_EMC_B2_16_GPIO8_IO26},
     [Gpio::kEdgeTpuReset] = {IOMUXC_GPIO_EMC_B2_14_GPIO8_IO24},
     [Gpio::kEdgeTpuPmic] = {IOMUXC_GPIO_EMC_B2_15_GPIO8_IO25},
@@ -299,8 +298,8 @@ constexpr uint32_t PinNameToIOMUXC[Gpio::kCount][5] = {
 };
 
 constexpr uint32_t PinNameToPullMask[Gpio::kCount] = {
-    [Gpio::kStatusLED] = 0x0000000C,
-    [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kStatusLed] = 0x0000000C,
+    [Gpio::kUserLed] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
     [Gpio::kEdgeTpuReset] = 0x0000000C,
     [Gpio::kEdgeTpuPmic] = 0x0000000C,
@@ -330,8 +329,8 @@ constexpr uint32_t PinNameToPullMask[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToNoPull[Gpio::kCount] = {
-    [Gpio::kStatusLED] = 0x0000000C,
-    [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kStatusLed] = 0x0000000C,
+    [Gpio::kUserLed] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x0000000C,
     [Gpio::kEdgeTpuReset] = 0x0000000C,
     [Gpio::kEdgeTpuPmic] = 0x0000000C,
@@ -361,8 +360,8 @@ constexpr uint32_t PinNameToNoPull[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToPullUp[Gpio::kCount] = {
-    [Gpio::kStatusLED] = 0x0000000C,
-    [Gpio::kUserLED] = 0x0000000C,
+    [Gpio::kStatusLed] = 0x0000000C,
+    [Gpio::kUserLed] = 0x0000000C,
     [Gpio::kEdgeTpuPgood] = 0x00000004,
     [Gpio::kEdgeTpuReset] = 0x00000004,
     [Gpio::kEdgeTpuPmic] = 0x00000004,
@@ -392,8 +391,8 @@ constexpr uint32_t PinNameToPullUp[Gpio::kCount] = {
 };
 
 constexpr uint32_t PinNameToPullDown[Gpio::kCount] = {
-    [Gpio::kStatusLED] = 0x00000004,
-    [Gpio::kUserLED] = 0x00000004,
+    [Gpio::kStatusLed] = 0x00000004,
+    [Gpio::kUserLed] = 0x00000004,
     [Gpio::kEdgeTpuPgood] = 0x00000008,
     [Gpio::kEdgeTpuReset] = 0x00000008,
     [Gpio::kEdgeTpuPmic] = 0x00000008,
@@ -422,21 +421,21 @@ constexpr uint32_t PinNameToPullDown[Gpio::kCount] = {
     [Gpio::kScl6] = 0x00000004,
 };
 
-constexpr gpio_interrupt_mode_t InterruptModeToGpioIntMode[InterruptMode::kIntModeCount] = {
-    [InterruptMode::kIntModeNone] = kGPIO_NoIntmode,
-    [InterruptMode::kIntModeLow] = kGPIO_IntLowLevel,
-    [InterruptMode::kIntModeHigh] = kGPIO_IntHighLevel,
-    [InterruptMode::kIntModeRising] = kGPIO_IntRisingEdge,
-    [InterruptMode::kIntModeFalling] = kGPIO_IntFallingEdge,
-    [InterruptMode::kIntModeChanging] = kGPIO_IntRisingOrFallingEdge,
+constexpr gpio_interrupt_mode_t InterruptModeToGpioIntMode[GpioInterruptMode::kIntModeCount] = {
+    [GpioInterruptMode::kIntModeNone] = kGPIO_NoIntmode,
+    [GpioInterruptMode::kIntModeLow] = kGPIO_IntLowLevel,
+    [GpioInterruptMode::kIntModeHigh] = kGPIO_IntHighLevel,
+    [GpioInterruptMode::kIntModeRising] = kGPIO_IntRisingEdge,
+    [GpioInterruptMode::kIntModeFalling] = kGPIO_IntFallingEdge,
+    [GpioInterruptMode::kIntModeChanging] = kGPIO_IntRisingOrFallingEdge,
 };
 
-GpioCallback IRQHandlers[Gpio::kCount];
+GpioCallback g_irq_handlers[Gpio::kCount];
 
 void IRQHandler(GPIO_Type* gpio, uint32_t pin) {
     for (int i = 0; i < Gpio::kCount; ++i) {
         if (PinNameToModule[i] == gpio && PinNameToPin[i] == pin) {
-            GpioCallback handler = IRQHandlers[i];
+            GpioCallback handler = g_irq_handlers[i];
             if (handler) {
                 handler();
             }
@@ -446,11 +445,11 @@ void IRQHandler(GPIO_Type* gpio, uint32_t pin) {
 }
 }  // namespace
 
-void Init() {
+void GpioInit() {
     g_mutex = xSemaphoreCreateMutexStatic(&g_mutex_storage);
 
     for (int i = 0; i < Gpio::kCount; ++i) {
-        IRQHandlers[i] = nullptr;
+        g_irq_handlers[i] = nullptr;
         switch (i) {
             case Gpio::kEdgeTpuPgood:
             case Gpio::kEdgeTpuReset:
@@ -475,17 +474,17 @@ void Init() {
     }
 }
 
-void SetGpio(Gpio gpio, bool enable) {
+void GpioSet(Gpio gpio, bool enable) {
     MutexLock lock(g_mutex);
     GPIO_PinWrite(PinNameToModule[gpio], PinNameToPin[gpio], enable);
 }
 
-bool GetGpio(Gpio gpio) {
+bool GpioGet(Gpio gpio) {
     MutexLock lock(g_mutex);
     return GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
 }
 
-void SetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
+void GpioSetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
     auto *config = &PinNameToConfig[gpio];
     config->direction = input ? kGPIO_DigitalInput : kGPIO_DigitalOutput;
     GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
@@ -504,7 +503,7 @@ void SetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
     IOMUXC_SetPinConfig(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4], pin_config);
 }
 
-void SetIntMode(Gpio gpio, InterruptMode mode) {
+void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode) {
     auto *config = &PinNameToConfig[gpio];
     config->direction = kGPIO_DigitalInput;
     config->interruptMode = InterruptModeToGpioIntMode[mode];
@@ -520,8 +519,8 @@ void SetIntMode(Gpio gpio, InterruptMode mode) {
     }
 }
 
-void RegisterIRQHandler(Gpio gpio, GpioCallback cb) {
-    IRQHandlers[gpio] = cb;
+void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb) {
+    g_irq_handlers[gpio] = cb;
 }
 
 gpio_pin_config_t GetPinConfig(Gpio gpio) {
@@ -532,7 +531,6 @@ void SetPinConfig(Gpio gpio, gpio_pin_config_t config) {
     GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], &config);
 }
 
-}  // namespace gpio
 }  // namespace coralmicro
 
 namespace {
@@ -542,7 +540,7 @@ void GPIO_Common_IRQHandler(GPIO_Type *base) {
     int i = 0;
     while (pins) {
         if (pins & 1) {
-            coralmicro::gpio::IRQHandler(base, i);
+            coralmicro::IRQHandler(base, i);
         }
         ++i;
         pins = pins >> 1;

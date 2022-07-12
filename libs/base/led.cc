@@ -30,14 +30,14 @@ bool Set(LED led, bool enable, unsigned int brightness) {
     bool ret = true;
     switch (led) {
         case LED::kStatus:
-            gpio::SetGpio(gpio::Gpio::kStatusLED, enable);
+            GpioSet(Gpio::kStatusLed, enable);
             break;
         case LED::kUser:
-            gpio::SetGpio(gpio::Gpio::kUserLED, enable);
+            GpioSet(Gpio::kUserLed, enable);
             break;
         case LED::kTpu:
 #if __CORTEX_M == 7
-            if (!gpio::GetGpio(gpio::Gpio::kEdgeTpuPmic)) {
+            if (!GpioGet(Gpio::kEdgeTpuPmic)) {
                 printf("TPU LED requires TPU power to be enabled.\r\n");
                 ret = false;
                 break;

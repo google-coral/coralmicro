@@ -133,12 +133,12 @@ void InitializeEthernet(bool default_iface) {
     // Enable clock output for RGMII TX
     IOMUXC_GPR->GPR5 |= IOMUXC_GPR_GPR5_ENET1G_RGMII_EN_MASK;
     // Hold PHY in reset
-    gpio::SetGpio(gpio::Gpio::kEthPhyRst, false);
+    GpioSet(Gpio::kEthPhyRst, false);
     // Enable 3.3V power for the PHY
-    gpio::SetGpio(gpio::Gpio::kBtHostWake, true);
+    GpioSet(Gpio::kBtHostWake, true);
     // Hold in reset for 10ms
     SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CpuClk));
-    gpio::SetGpio(gpio::Gpio::kEthPhyRst, true);
+    GpioSet(Gpio::kEthPhyRst, true);
     // Delay 72ms for internal circuits to settle
     SDK_DelayAtLeastUs(72000, CLOCK_GetFreq(kCLOCK_CpuClk));
 

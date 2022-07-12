@@ -49,7 +49,7 @@ extern "C" int main(int argc, char** argv) {
 
     coralmicro::ConsoleInit();
     CHECK(coralmicro::filesystem::Init());
-    coralmicro::gpio::Init();
+    coralmicro::GpioInit();
 
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     // Initialize I2C5 state

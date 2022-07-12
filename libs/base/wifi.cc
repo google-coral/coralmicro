@@ -112,10 +112,10 @@ std::optional<std::string> GetWiFiIp() {
 bool SetWiFiAntenna(WiFiAntenna antenna) {
     switch (antenna) {
         case WiFiAntenna::kInternal:
-            gpio::SetGpio(gpio::Gpio::kAntennaSelect, false);
+            GpioSet(Gpio::kAntennaSelect, false);
             return true;
         case WiFiAntenna::kExternal:
-            gpio::SetGpio(gpio::Gpio::kAntennaSelect, true);
+            GpioSet(Gpio::kAntennaSelect, true);
             return true;
         default:
             return false;

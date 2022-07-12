@@ -25,9 +25,9 @@
 namespace coralmicro::a71ch {
 
 bool Init() {
-  coralmicro::gpio::SetGpio(coralmicro::gpio::kCryptoRst, false);
+  coralmicro::GpioSet(coralmicro::Gpio::kCryptoRst, false);
   vTaskDelay(pdMS_TO_TICKS(1));
-  coralmicro::gpio::SetGpio(coralmicro::gpio::kCryptoRst, true);
+  coralmicro::GpioSet(coralmicro::Gpio::kCryptoRst, true);
 
   SE_Connect_Ctx_t sessionCtxt = {0};
   if (auto status = sss_session_open(nullptr, kType_SSS_SE_A71CH, 0,

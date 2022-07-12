@@ -80,7 +80,7 @@ void InitEdgefastBluetooth(bt_ready_cb_t cb) {
         assert(false);
     }
     wiced_wlan_connectivity_init();
-    coralmicro::gpio::SetGpio(coralmicro::gpio::kBtDevWake, false);
+    coralmicro::GpioSet(coralmicro::Gpio::kBtDevWake, false);
     ble_pwr_on();
     g_cb = cb;
     int err = bt_enable(bt_ready_internal);

@@ -118,7 +118,7 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat>& fmts) {
         return false;
     }
     if (GetSingleton()->mode_ == Mode::kTrigger) {
-        gpio::SetGpio(gpio::Gpio::kCameraTrigger, false);
+        GpioSet(Gpio::kCameraTrigger, false);
     }
 
     for (const camera::FrameFormat& fmt : fmts) {
@@ -638,7 +638,7 @@ void CameraTask::SetTestPattern(TestPattern pattern) {
     SendRequest(req);
 }
 
-void CameraTask::Trigger() { gpio::SetGpio(gpio::Gpio::kCameraTrigger, true); }
+void CameraTask::Trigger() { GpioSet(Gpio::kCameraTrigger, true); }
 
 void CameraTask::DiscardFrames(int count) {
     Request req;

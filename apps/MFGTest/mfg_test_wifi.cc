@@ -222,7 +222,7 @@ extern "C" void app_main(void* param) {
     coralmicro::led::Set(coralmicro::led::LED::kStatus, true);
     vTaskSuspend(nullptr);
   }
-  coralmicro::gpio::SetGpio(coralmicro::gpio::kBtDevWake, false);
+  coralmicro::GpioSet(coralmicro::Gpio::kBtDevWake, false);
   wiced_bt_stack_init(ble_management_callback, &wiced_bt_cfg_settings,
                       wiced_bt_cfg_buf_pools);
 

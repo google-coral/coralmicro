@@ -76,7 +76,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
     SEMA4_Init(SEMA4);
     coralmicro::StoreResetReason();
     coralmicro::TimerInit();
-    coralmicro::gpio::Init();
+    coralmicro::GpioInit();
     coralmicro::IPCM7::GetSingleton()->Init();
     coralmicro::Random::GetSingleton()->Init();
     coralmicro::ConsoleM7::GetSingleton()->Init(init_console_tx,

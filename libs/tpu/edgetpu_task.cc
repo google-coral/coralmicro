@@ -119,19 +119,19 @@ void EdgeTpuTask::HandleSetPowerRequest(SetPowerRequest& req) {
         }
     }
 #if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
-    gpio::SetGpio(gpio::Gpio::kEdgeTpuPmic, req.enable);
+    GpioSet(Gpio::kEdgeTpuPmic, req.enable);
 
     if (req.enable) {
         bool pgood;
         do {
-            pgood = gpio::GetGpio(gpio::Gpio::kEdgeTpuPgood);
+            pgood = GpioGet(Gpio::kEdgeTpuPgood);
             taskYIELD();
         } while (!pgood);
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
-    gpio::SetGpio(gpio::Gpio::kEdgeTpuReset, req.enable);
+    GpioSet(Gpio::kEdgeTpuReset, req.enable);
 #endif
 }
 
