@@ -30,7 +30,7 @@ bool volatile g_person_detected = false;
 bool g_status_led_state = true;
 
 void HandleAppMessage(
-    const uint8_t data[coralmicro::ipc::kMessageBufferDataSize],
+    const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
     void* param) {
   (void)data;
   vTaskResume(reinterpret_cast<TaskHandle_t>(param));
@@ -50,7 +50,7 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
 
 extern "C" void app_main(void* param) {
   (void)param;
-  coralmicro::IPCM4::GetSingleton()->RegisterAppMessageHandler(
+  coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(
       HandleAppMessage, xTaskGetCurrentTaskHandle());
   coralmicro::CameraTask::GetSingleton()->Init(I2C5Handle());
   coralmicro::CameraTask::GetSingleton()->SetPower(false);
@@ -92,9 +92,9 @@ extern "C" void app_main(void* param) {
     }
     printf("Person detected, let M7 take over.\r\n");
     coralmicro::CameraTask::GetSingleton()->Disable();
-    coralmicro::ipc::Message msg;
-    msg.type = coralmicro::ipc::MessageType::kApp;
-    coralmicro::IPCM4::GetSingleton()->SendMessage(msg);
+    coralmicro::IpcMessage msg;
+    msg.type = coralmicro::IpcMessageType::kApp;
+    coralmicro::IpcM4::GetSingleton()->SendMessage(msg);
     vTaskSuspend(nullptr);
   }
 }

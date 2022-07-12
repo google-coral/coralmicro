@@ -20,25 +20,25 @@
 
 namespace {
 void HandleAppMessage(
-    const uint8_t data[coralmicro::ipc::kMessageBufferDataSize],
+    const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
     void* param) {
   const RackTestAppMessage* app_message =
       reinterpret_cast<const RackTestAppMessage*>(data);
   switch (app_message->message_type) {
     case RackTestAppMessageType::kXor: {
-      coralmicro::ipc::Message reply;
-      reply.type = coralmicro::ipc::MessageType::kApp;
+      coralmicro::IpcMessage reply;
+      reply.type = coralmicro::IpcMessageType::kApp;
       RackTestAppMessage* app_reply =
           reinterpret_cast<RackTestAppMessage*>(&reply.message.data);
       app_reply->message_type = RackTestAppMessageType::kXor;
       app_reply->message.xor_value =
           (app_message->message.xor_value ^ 0xFEEDDEED);
-      coralmicro::IPCM4::GetSingleton()->SendMessage(reply);
+      coralmicro::IpcM4::GetSingleton()->SendMessage(reply);
       break;
     }
     case RackTestAppMessageType::kCoreMark: {
-      coralmicro::ipc::Message reply;
-      reply.type = coralmicro::ipc::MessageType::kApp;
+      coralmicro::IpcMessage reply;
+      reply.type = coralmicro::IpcMessageType::kApp;
       RackTestAppMessage* app_reply =
           reinterpret_cast<RackTestAppMessage*>(&reply.message.data);
       app_reply->message_type = RackTestAppMessageType::kCoreMark;
@@ -47,7 +47,7 @@ void HandleAppMessage(
       // const char* results = GetCoreMarkResults();
       RunCoreMark(app_message->message.buffer_ptr);
       // app_reply->message.coremark_results = results;
-      coralmicro::IPCM4::GetSingleton()->SendMessage(reply);
+      coralmicro::IpcM4::GetSingleton()->SendMessage(reply);
       break;
     }
 
@@ -58,7 +58,7 @@ void HandleAppMessage(
 }  // namespace
 
 extern "C" void app_main(void* param) {
-  coralmicro::IPCM4::GetSingleton()->RegisterAppMessageHandler(
+  coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(
       HandleAppMessage, nullptr);
   vTaskSuspend(nullptr);
 }

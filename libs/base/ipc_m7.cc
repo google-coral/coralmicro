@@ -34,20 +34,20 @@ unsigned int m4_binary_size __attribute__((weak)) = 0xdeadbeef;
 
 namespace coralmicro {
 
-uint8_t IPCM7::tx_queue_storage_[IPCM7::kMessageBufferSize +
-                                 sizeof(ipc::MessageBuffer)]
+uint8_t IpcM7::tx_queue_storage_[IpcM7::kMessageBufferSize +
+                                 sizeof(IpcMessageBuffer)]
     __attribute__((section(".noinit.$rpmsg_sh_mem")));
-uint8_t IPCM7::rx_queue_storage_[IPCM7::kMessageBufferSize +
-                                 sizeof(ipc::MessageBuffer)]
+uint8_t IpcM7::rx_queue_storage_[IpcM7::kMessageBufferSize +
+                                 sizeof(IpcMessageBuffer)]
     __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
-void IPCM7::RemoteAppEventHandler(uint16_t eventData, void* context) {
+void IpcM7::RemoteAppEventHandler(uint16_t eventData, void* context) {
     BaseType_t reschedule =
         xTaskResumeFromISR(tx_task_) | xTaskResumeFromISR(rx_task_);
     portYIELD_FROM_ISR(reschedule);
 }
 
-void IPCM7::HandleSystemMessage(const ipc::SystemMessage& message) {
+void IpcM7::HandleSystemMessage(const IpcSystemMessage& message) {
     switch (message.type) {
         default:
             printf("Unhandled system message type: %d\r\n",
@@ -55,7 +55,7 @@ void IPCM7::HandleSystemMessage(const ipc::SystemMessage& message) {
     }
 }
 
-void IPCM7::TxTaskFn() {
+void IpcM7::TxTaskFn() {
     // Send the rx_queue_ address to the M4.
     size_t tx_bytes;
     tx_bytes = xMessageBufferSend(tx_queue_->message_buffer, &rx_queue_,
@@ -64,10 +64,10 @@ void IPCM7::TxTaskFn() {
         printf("Failed to send s2p buffer address\r\n");
     }
 
-    IPC::TxTaskFn();
+    Ipc::TxTaskFn();
 }
 
-bool IPCM7::M4IsAlive(uint32_t millis) {
+bool IpcM7::M4IsAlive(uint32_t millis) {
     constexpr int kSleepMs = 100;
     uint32_t time_left = millis;
     do {
@@ -85,14 +85,14 @@ bool IPCM7::M4IsAlive(uint32_t millis) {
     return false;
 }
 
-bool IPCM7::HasM4Application() { return (m4_binary_start != 0xdeadbeef); }
+bool IpcM7::HasM4Application() { return (m4_binary_start != 0xdeadbeef); }
 
-void IPCM7::Init() {
+void IpcM7::Init() {
     if (!HasM4Application()) {
         return;
     }
 
-    tx_queue_ = reinterpret_cast<ipc::MessageBuffer*>(tx_queue_storage_);
+    tx_queue_ = reinterpret_cast<IpcMessageBuffer*>(tx_queue_storage_);
     tx_queue_->message_buffer = xMessageBufferCreateStatic(
         kMessageBufferSize, tx_queue_->message_buffer_storage,
         &tx_queue_->static_message_buffer);
@@ -100,7 +100,7 @@ void IPCM7::Init() {
         return;
     }
 
-    rx_queue_ = reinterpret_cast<ipc::MessageBuffer*>(rx_queue_storage_);
+    rx_queue_ = reinterpret_cast<IpcMessageBuffer*>(rx_queue_storage_);
     rx_queue_->message_buffer = xMessageBufferCreateStatic(
         kMessageBufferSize, rx_queue_->message_buffer_storage,
         &rx_queue_->static_message_buffer);
@@ -116,12 +116,12 @@ void IPCM7::Init() {
 
     // Register callbacks for communication with the other core.
     MCMGR_RegisterEvent(kMCMGR_RemoteApplicationEvent,
-                        IPCM7::StaticRemoteAppEventHandler, nullptr);
+                        IpcM7::StaticRemoteAppEventHandler, nullptr);
 
-    IPC::Init();
+    Ipc::Init();
 }
 
-void IPCM7::StartM4() {
+void IpcM7::StartM4() {
     if (!HasM4Application()) {
         return;
     }

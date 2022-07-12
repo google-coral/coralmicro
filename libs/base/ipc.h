@@ -26,27 +26,27 @@
 
 namespace coralmicro {
 
-class IPC {
+class Ipc {
    public:
     using AppMessageHandler = std::function<void(
-        const uint8_t data[ipc::kMessageBufferDataSize], void*)>;
+        const uint8_t data[kIpcMessageBufferDataSize], void*)>;
     virtual void Init();
-    void SendMessage(const ipc::Message& message);
+    void SendMessage(const IpcMessage& message);
     void RegisterAppMessageHandler(AppMessageHandler, void* param);
 
    private:
     static void StaticFreeRtosMessageEventHandler(uint16_t eventData,
                                                   void* context) {
-        static_cast<IPC*>(context)->FreeRtosMessageEventHandler(eventData);
+        static_cast<Ipc*>(context)->FreeRtosMessageEventHandler(eventData);
     }
     void FreeRtosMessageEventHandler(uint16_t eventData);
 
     static void StaticTxTaskFn(void* param) {
-        static_cast<IPC*>(param)->TxTaskFn();
+        static_cast<Ipc*>(param)->TxTaskFn();
     }
 
     static void StaticRxTaskFn(void* param) {
-        static_cast<IPC*>(param)->RxTaskFn();
+        static_cast<Ipc*>(param)->RxTaskFn();
     }
 
     AppMessageHandler app_handler_ = nullptr;
@@ -54,13 +54,13 @@ class IPC {
     void* app_handler_param_ = nullptr;
 
    protected:
-    void HandleAppMessage(const uint8_t data[ipc::kMessageBufferDataSize]);
-    virtual void HandleSystemMessage(const ipc::SystemMessage& message) = 0;
+    void HandleAppMessage(const uint8_t data[kIpcMessageBufferDataSize]);
+    virtual void HandleSystemMessage(const IpcSystemMessage& message) = 0;
     virtual void TxTaskFn();
     virtual void RxTaskFn();
     SemaphoreHandle_t tx_semaphore_;
     TaskHandle_t tx_task_, rx_task_;
-    ipc::MessageBuffer *tx_queue_, *rx_queue_;
+    IpcMessageBuffer *tx_queue_, *rx_queue_;
 };
 
 }  // namespace coralmicro

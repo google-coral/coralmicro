@@ -20,10 +20,10 @@
 #include "libs/base/ipc.h"
 
 namespace coralmicro {
-class IPCM4 : public IPC {
+class IpcM4 : public Ipc {
    public:
-    static IPCM4* GetSingleton() {
-        static IPCM4 ipc;
+    static IpcM4* GetSingleton() {
+        static IpcM4 ipc;
         return &ipc;
     }
 
@@ -33,7 +33,7 @@ class IPCM4 : public IPC {
     void RxTaskFn() override;
 
    private:
-    void HandleSystemMessage(const ipc::SystemMessage& message) override;
+    void HandleSystemMessage(const IpcSystemMessage& message) override;
 };
 }  // namespace coralmicro
 

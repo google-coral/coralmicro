@@ -348,7 +348,7 @@ void reset_count_rpc(struct jsonrpc_request* r) {
                          reset_stats.reset_reason);
 }
 
-void HandleAppMessage(const uint8_t data[ipc::kMessageBufferDataSize],
+void HandleAppMessage(const uint8_t data[kIpcMessageBufferDataSize],
                       void* param) {
   (void)data;
   vTaskResume(static_cast<TaskHandle_t>(param));
@@ -413,10 +413,10 @@ void Main() {
   http_server.AddUriHandler(FileSystemUriHandler{});
   UseHttpServer(&http_server);
 
-  IPCM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage,
+  IpcM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage,
                                                    xTaskGetCurrentTaskHandle());
 
-  IPCM7::GetSingleton()->StartM4();
+  IpcM7::GetSingleton()->StartM4();
 
 #if defined(OOBE_DEMO)
   int count = 0;
@@ -458,9 +458,9 @@ void Main() {
     // Stop camera_task processing. This will also stop posenet_task.
     camera_task.Stop();
 
-    ipc::Message msg;
-    msg.type = ipc::MessageType::kApp;
-    IPCM7::GetSingleton()->SendMessage(msg);
+    IpcMessage msg;
+    msg.type = IpcMessageType::kApp;
+    IpcM7::GetSingleton()->SendMessage(msg);
     return;
   }
 }

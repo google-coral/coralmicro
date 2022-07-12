@@ -37,7 +37,7 @@ constexpr char kMethodGetFrame[] = "get_frame";
 std::vector<uint8_t> camera_rgb;
 
 void HandleAppMessage(
-    const uint8_t data[coralmicro::ipc::kMessageBufferDataSize], void* param) {
+    const uint8_t data[coralmicro::kIpcMessageBufferDataSize], void* param) {
   auto rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
   const auto* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
   switch (app_message->message_type) {
@@ -61,19 +61,19 @@ void M4XOR(struct jsonrpc_request* request) {
                                                   &value_string))
     return;
 
-  if (!coralmicro::IPCM7::GetSingleton()->M4IsAlive(1000 /*ms*/)) {
+  if (!coralmicro::IpcM7::GetSingleton()->M4IsAlive(1000 /*ms*/)) {
     jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
     return;
   }
 
   auto value =
       reinterpret_cast<uint32_t>(strtoul(value_string.c_str(), nullptr, 10));
-  coralmicro::ipc::Message msg{};
-  msg.type = coralmicro::ipc::MessageType::kApp;
+  coralmicro::IpcMessage msg{};
+  msg.type = coralmicro::IpcMessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
   app_message->message_type = RackTestAppMessageType::kXor;
   app_message->message.xor_value = value;
-  coralmicro::IPCM7::GetSingleton()->SendMessage(msg);
+  coralmicro::IpcM7::GetSingleton()->SendMessage(msg);
 
   // hang out here and wait for an event.
   uint32_t xor_value;
@@ -87,19 +87,19 @@ void M4XOR(struct jsonrpc_request* request) {
 }
 
 void M4CoreMark(struct jsonrpc_request* request) {
-  auto* ipc = coralmicro::IPCM7::GetSingleton();
+  auto* ipc = coralmicro::IpcM7::GetSingleton();
   if (!ipc->M4IsAlive(1000 /*ms*/)) {
     jsonrpc_return_error(request, -1, "M4 has not been started", nullptr);
     return;
   }
 
   char coremark_buffer[MAX_COREMARK_BUFFER];
-  coralmicro::ipc::Message msg{};
-  msg.type = coralmicro::ipc::MessageType::kApp;
+  coralmicro::IpcMessage msg{};
+  msg.type = coralmicro::IpcMessageType::kApp;
   auto* app_message = reinterpret_cast<RackTestAppMessage*>(&msg.message.data);
   app_message->message_type = RackTestAppMessageType::kCoreMark;
   app_message->message.buffer_ptr = coremark_buffer;
-  coralmicro::IPCM7::GetSingleton()->SendMessage(msg);
+  coralmicro::IpcM7::GetSingleton()->SendMessage(msg);
 
   if (xTaskNotifyWait(0, 0, nullptr, pdMS_TO_TICKS(30000)) != pdTRUE) {
     jsonrpc_return_error(request, -1, "Timed out waiting for response from M4",
@@ -181,7 +181,7 @@ coralmicro::HttpServer::Content UriHandler(const char* name) {
 }  // namespace
 
 extern "C" void app_main(void* param) {
-  coralmicro::IPCM7::GetSingleton()->RegisterAppMessageHandler(
+  coralmicro::IpcM7::GetSingleton()->RegisterAppMessageHandler(
       HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
   jsonrpc_init(nullptr, nullptr);
 #if defined(TEST_WIFI)

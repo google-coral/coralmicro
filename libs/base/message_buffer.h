@@ -23,50 +23,45 @@
 
 namespace coralmicro {
 
-namespace ipc {
-
-enum class SystemMessageType : uint8_t {
+enum class IpcSystemMessageType : uint8_t {
     kConsoleBufferPtr,
 };
 
-struct SystemMessage {
-    SystemMessageType type;
+struct IpcSystemMessage {
+    IpcSystemMessageType type;
     union {
         void* console_buffer_ptr;
     } message;
 } __attribute__((packed));
 
-enum class MessageType : uint8_t {
+enum class IpcMessageType : uint8_t {
     kSystem,
     kApp,
 };
 
-inline constexpr size_t kMessageBufferDataSize = 127;
-struct Message {
-    MessageType type;
+inline constexpr size_t kIpcMessageBufferDataSize = 127;
+struct IpcMessage {
+    IpcMessageType type;
     union {
-        SystemMessage system;
-        uint8_t data[kMessageBufferDataSize];
+        IpcSystemMessage system;
+        uint8_t data[kIpcMessageBufferDataSize];
     } message;
 } __attribute__((packed));
 
-struct MessageBuffer {
+struct IpcMessageBuffer {
     MessageBufferHandle_t message_buffer;
     StaticMessageBuffer_t static_message_buffer;
     uint8_t message_buffer_storage[];
 };
 
-struct StreamBuffer {
+struct IpcStreamBuffer {
     StreamBufferHandle_t stream_buffer;
     StaticStreamBuffer_t static_stream_buffer;
     uint8_t stream_buffer_storage[];
 };
 
-#if defined(__cplusplus)
-static_assert(sizeof(SystemMessage) <= kMessageBufferDataSize);
-#endif
+static_assert(sizeof(IpcSystemMessage) <= kIpcMessageBufferDataSize);
 
-}  // namespace ipc
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_MESSAGE_BUFFER_H_

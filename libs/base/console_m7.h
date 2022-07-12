@@ -32,7 +32,7 @@ class ConsoleM7 {
         return &console;
     }
     void Init(bool init_tx, bool init_rx);
-    ipc::StreamBuffer* GetM4ConsoleBufferPtr();
+    IpcStreamBuffer* GetM4ConsoleBufferPtr();
     void Write(char* buffer, int size);
     // NOTE: This reads from the internal buffer, not directly from a serial
     // device.
@@ -74,10 +74,10 @@ class ConsoleM7 {
     QueueHandle_t console_queue_ = nullptr;
     CdcAcm cdc_acm_;
 
-    ipc::StreamBuffer* m4_console_buffer_ = nullptr;
+    IpcStreamBuffer* m4_console_buffer_ = nullptr;
     static constexpr size_t kM4ConsoleBufferBytes = 128;
     static constexpr size_t kM4ConsoleBufferSize =
-        kM4ConsoleBufferBytes + sizeof(ipc::StreamBuffer);
+        kM4ConsoleBufferBytes + sizeof(IpcStreamBuffer);
     static uint8_t m4_console_buffer_storage_[kM4ConsoleBufferSize];
 
     static constexpr size_t kRxBufferSize = 64;

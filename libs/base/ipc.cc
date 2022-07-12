@@ -22,7 +22,7 @@
 
 namespace coralmicro {
 
-void IPC::FreeRtosMessageEventHandler(uint16_t eventData) {
+void Ipc::FreeRtosMessageEventHandler(uint16_t eventData) {
     BaseType_t higher_priority_woken = pdFALSE;
     // TODO(atv): Get the base address of the shmem from a linker sym
     xStreamBufferSendCompletedFromISR(
@@ -31,18 +31,18 @@ void IPC::FreeRtosMessageEventHandler(uint16_t eventData) {
     portYIELD_FROM_ISR(higher_priority_woken);
 }
 
-void IPC::RegisterAppMessageHandler(AppMessageHandler handler, void* param) {
+void Ipc::RegisterAppMessageHandler(AppMessageHandler handler, void* param) {
     app_handler_ = handler;
     app_handler_param_ = param;
 }
 
-void IPC::HandleAppMessage(const uint8_t data[ipc::kMessageBufferDataSize]) {
+void Ipc::HandleAppMessage(const uint8_t data[kIpcMessageBufferDataSize]) {
     if (app_handler_) {
         app_handler_(data, app_handler_param_);
     }
 }
 
-void IPC::SendMessage(const ipc::Message& message) {
+void Ipc::SendMessage(const IpcMessage& message) {
     if (!tx_task_ || !tx_semaphore_) {
         return;
     }
@@ -52,9 +52,9 @@ void IPC::SendMessage(const ipc::Message& message) {
     CHECK(xSemaphoreTake(tx_semaphore_, portMAX_DELAY) == pdTRUE);
 }
 
-void IPC::TxTaskFn() {
+void Ipc::TxTaskFn() {
     while (true) {
-        ipc::Message* message;
+        IpcMessage* message;
         xTaskNotifyWaitIndexed(kSendMessageNotification, 0, 0,
                                reinterpret_cast<uint32_t*>(&message),
                                portMAX_DELAY);
@@ -64,19 +64,19 @@ void IPC::TxTaskFn() {
     }
 }
 
-void IPC::RxTaskFn() {
+void Ipc::RxTaskFn() {
     while (true) {
-        ipc::Message rx_message;
+        IpcMessage rx_message;
         size_t rx_bytes =
             xMessageBufferReceive(rx_queue_->message_buffer, &rx_message,
                                   sizeof(rx_message), portMAX_DELAY);
         if (rx_bytes == 0) continue;
 
         switch (rx_message.type) {
-            case ipc::MessageType::kSystem:
+            case IpcMessageType::kSystem:
                 HandleSystemMessage(rx_message.message.system);
                 break;
-            case ipc::MessageType::kApp:
+            case IpcMessageType::kApp:
                 HandleAppMessage(rx_message.message.data);
                 break;
             default:
@@ -87,15 +87,15 @@ void IPC::RxTaskFn() {
     }
 }
 
-void IPC::Init() {
+void Ipc::Init() {
     tx_semaphore_ = xSemaphoreCreateBinary();
     CHECK(tx_semaphore_);
     MCMGR_RegisterEvent(kMCMGR_FreeRtosMessageBuffersEvent,
                         StaticFreeRtosMessageEventHandler, this);
-    CHECK(xTaskCreate(IPC::StaticTxTaskFn, "ipc_tx_task",
+    CHECK(xTaskCreate(Ipc::StaticTxTaskFn, "ipc_tx_task",
                       configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY,
                       &tx_task_) == pdPASS);
-    CHECK(xTaskCreate(IPC::StaticRxTaskFn, "ipc_rx_task",
+    CHECK(xTaskCreate(Ipc::StaticRxTaskFn, "ipc_rx_task",
                       configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY,
                       &rx_task_) == pdPASS);
     vTaskSuspend(tx_task_);

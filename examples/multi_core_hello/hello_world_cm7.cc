@@ -20,7 +20,7 @@
 #include <cstring>
 
 extern "C" void app_main(void *param) {
-    coralmicro::IPCM7::GetSingleton()->StartM4();
+    coralmicro::IpcM7::GetSingleton()->StartM4();
     while (true) {
         coralmicro::MulticoreMutexLock lock(0);
         printf("[M7] Hello.\r\n");

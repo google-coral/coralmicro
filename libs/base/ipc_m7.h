@@ -22,10 +22,10 @@
 #include "libs/base/ipc.h"
 
 namespace coralmicro {
-class IPCM7 : public IPC {
+class IpcM7 : public Ipc {
    public:
-    static IPCM7* GetSingleton() {
-        static IPCM7 ipc;
+    static IpcM7* GetSingleton() {
+        static IpcM7 ipc;
         return &ipc;
     }
 
@@ -42,14 +42,14 @@ class IPCM7 : public IPC {
         GetSingleton()->RemoteAppEventHandler(eventData, context);
     }
     void RemoteAppEventHandler(uint16_t eventData, void* context);
-    void HandleSystemMessage(const ipc::SystemMessage& message) override;
+    void HandleSystemMessage(const IpcSystemMessage& message) override;
 
-    static constexpr size_t kMessageBufferSize = 8 * sizeof(ipc::Message);
+    static constexpr size_t kMessageBufferSize = 8 * sizeof(IpcMessage);
     static uint8_t
-        tx_queue_storage_[kMessageBufferSize + sizeof(ipc::MessageBuffer)]
+        tx_queue_storage_[kMessageBufferSize + sizeof(IpcMessageBuffer)]
         __attribute__((section(".noinit.$rpmsg_sh_mem")));
     static uint8_t
-        rx_queue_storage_[kMessageBufferSize + sizeof(ipc::MessageBuffer)]
+        rx_queue_storage_[kMessageBufferSize + sizeof(IpcMessageBuffer)]
         __attribute__((section(".noinit.$rpmsg_sh_mem")));
 };
 }  // namespace coralmicro

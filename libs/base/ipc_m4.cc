@@ -27,10 +27,10 @@
 
 namespace coralmicro {
 
-void IPCM4::HandleSystemMessage(const ipc::SystemMessage& message) {
+void IpcM4::HandleSystemMessage(const IpcSystemMessage& message) {
     switch (message.type) {
-        case ipc::SystemMessageType::kConsoleBufferPtr:
-            SetM4ConsoleBufferPtr(static_cast<ipc::StreamBuffer*>(
+        case IpcSystemMessageType::kConsoleBufferPtr:
+            SetM4ConsoleBufferPtr(static_cast<IpcStreamBuffer*>(
                 message.message.console_buffer_ptr));
             break;
         default:
@@ -39,7 +39,7 @@ void IPCM4::HandleSystemMessage(const ipc::SystemMessage& message) {
     }
 }
 
-void IPCM4::RxTaskFn() {
+void IpcM4::RxTaskFn() {
     size_t rx_bytes =
         xMessageBufferReceive(rx_queue_->message_buffer, &tx_queue_,
                               sizeof(tx_queue_), portMAX_DELAY);
@@ -48,18 +48,18 @@ void IPCM4::RxTaskFn() {
     }
     vTaskResume(tx_task_);
 
-    IPC::RxTaskFn();
+    Ipc::RxTaskFn();
 }
 
-void IPCM4::Init() {
+void IpcM4::Init() {
     uint32_t startup_data;
     mcmgr_status_t status;
     do {
         status = MCMGR_GetStartupData(&startup_data);
     } while (status != kStatus_MCMGR_Success);
-    rx_queue_ = reinterpret_cast<ipc::MessageBuffer*>(startup_data);
+    rx_queue_ = reinterpret_cast<IpcMessageBuffer*>(startup_data);
 
-    IPC::Init();
+    Ipc::Init();
     vTaskResume(rx_task_);
 
     // Let the primary core know we're alive.

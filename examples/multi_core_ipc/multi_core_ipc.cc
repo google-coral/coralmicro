@@ -22,7 +22,7 @@
 extern "C" [[noreturn]] void app_main(void* param) {
     // Create and register message handler for the M7.
     auto message_handler =
-        [](const uint8_t data[coralmicro::ipc::kMessageBufferDataSize],
+        [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
            void* param) {
             const auto* msg =
                 reinterpret_cast<const mp_example::ExampleAppMessage*>(data);
@@ -30,19 +30,19 @@ extern "C" [[noreturn]] void app_main(void* param) {
                 printf("[M7] ACK received from M4\r\n");
             }
         };
-    coralmicro::IPCM7::GetSingleton()->RegisterAppMessageHandler(
+    coralmicro::IpcM7::GetSingleton()->RegisterAppMessageHandler(
         message_handler, nullptr);
-    coralmicro::IPCM7::GetSingleton()->StartM4();
+    coralmicro::IpcM7::GetSingleton()->StartM4();
 
     bool led_status{false};
-    auto ipc = coralmicro::IPCM7::GetSingleton();
+    auto ipc = coralmicro::IpcM7::GetSingleton();
     while (true) {
         led_status = !led_status;
         printf("---\r\n[M7] Sending M4 LEDStatus::%s\r\n",
                led_status ? "ON" : "OFF");
         vTaskDelay(pdMS_TO_TICKS(1000));
-        coralmicro::ipc::Message msg{};
-        msg.type = coralmicro::ipc::MessageType::kApp;
+        coralmicro::IpcMessage msg{};
+        msg.type = coralmicro::IpcMessageType::kApp;
         auto* app_message =
             reinterpret_cast<mp_example::ExampleAppMessage*>(&msg.message.data);
         app_message->type = mp_example::ExampleMessageType::LED_STATUS;

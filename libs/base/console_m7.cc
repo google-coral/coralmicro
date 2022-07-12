@@ -107,13 +107,13 @@ int ConsoleM7::Read(char* buffer, int size) {
 }
 
 void ConsoleM7::M4ConsoleTaskFn(void* param) {
-    ipc::Message m4_console_buffer_msg;
-    m4_console_buffer_msg.type = ipc::MessageType::kSystem;
+    IpcMessage m4_console_buffer_msg;
+    m4_console_buffer_msg.type = IpcMessageType::kSystem;
     m4_console_buffer_msg.message.system.type =
-        ipc::SystemMessageType::kConsoleBufferPtr;
+        IpcSystemMessageType::kConsoleBufferPtr;
     m4_console_buffer_msg.message.system.message.console_buffer_ptr =
         GetM4ConsoleBufferPtr();
-    IPCM7::GetSingleton()->SendMessage(m4_console_buffer_msg);
+    IpcM7::GetSingleton()->SendMessage(m4_console_buffer_msg);
 
     size_t rx_bytes;
     char buf[16];
@@ -170,7 +170,7 @@ void usb_device_task(void* param) {
 
 void ConsoleM7::Init(bool init_tx, bool init_rx) {
     m4_console_buffer_ =
-        reinterpret_cast<ipc::StreamBuffer*>(m4_console_buffer_storage_);
+        reinterpret_cast<IpcStreamBuffer*>(m4_console_buffer_storage_);
     m4_console_buffer_->stream_buffer = xStreamBufferCreateStatic(
         kM4ConsoleBufferBytes, 1, m4_console_buffer_->stream_buffer_storage,
         &m4_console_buffer_->static_stream_buffer);
@@ -207,14 +207,14 @@ void ConsoleM7::Init(bool init_tx, bool init_rx) {
                           configMINIMAL_STACK_SIZE * 10, nullptr,
                           CONSOLE_TASK_PRIORITY, &rx_task_) == pdPASS);
     }
-    if (IPCM7::HasM4Application()) {
+    if (IpcM7::HasM4Application()) {
         CHECK(xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task",
                           configMINIMAL_STACK_SIZE * 10, nullptr,
                           CONSOLE_TASK_PRIORITY, nullptr) == pdPASS);
     }
 }
 
-ipc::StreamBuffer* ConsoleM7::GetM4ConsoleBufferPtr() {
+IpcStreamBuffer* ConsoleM7::GetM4ConsoleBufferPtr() {
     return m4_console_buffer_;
 }
 

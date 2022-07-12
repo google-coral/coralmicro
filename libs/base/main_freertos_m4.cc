@@ -36,7 +36,7 @@ namespace {
 lpi2c_rtos_handle_t i2c5_handle;
 
 void pre_app_main(void* param) {
-    coralmicro::IPCM4::GetSingleton()->Init();
+    coralmicro::IpcM4::GetSingleton()->Init();
     app_main(param);
 }
 }  // namespace
