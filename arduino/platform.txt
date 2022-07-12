@@ -36,3 +36,11 @@ recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" 
 
 tools.flashtool.cmd.path={runtime.tools.flashtool.path}/flashtool
 tools.flashtool.cmd.path.windows={runtime.tools.flashtool.path}/flashtool.exe
+
+recipe.hooks.sketch.prebuild.0.pattern=rm -rf {build.path}/data
+recipe.hooks.sketch.prebuild.1.pattern=mkdir -p {build.path}/data
+recipe.hooks.sketch.prebuild.2.pattern=bash -c "if [[ -d {build.source.path}/data ]]; then cp -RL {build.source.path}/data/* {build.path}/data/; fi"
+
+recipe.hooks.sketch.prebuild.0.pattern.windows=cmd.exe /c if exist {build.path}\data ( rd /s /q {build.path}\data )
+recipe.hooks.sketch.prebuild.1.pattern.windows=cmd.exe /c md {build.path}\data
+recipe.hooks.sketch.prebuild.2.pattern.windows=cmd.exe /c if exist {build.source.path}\data ( xcopy /Y /E {build.source.path}\data\* {build.path}\data\ )

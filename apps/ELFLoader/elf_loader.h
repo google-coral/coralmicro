@@ -31,6 +31,7 @@ enum class ElfloaderCommand : uint8_t {
   kResetToBootloader = 3,
   kTarget = 4,
   kResetToFlash = 5,
+  kFormat = 6,
 };
 
 enum class ElfloaderTarget : uint8_t {

@@ -117,15 +117,10 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
       break;
     case ElfloaderCommand::kTarget:
       elfloader_target = *target;
-
-      // Format filesystem before writing new files.
-      if (elfloader_target == ElfloaderTarget::kFilesystem ||
-          elfloader_target == ElfloaderTarget::kPath) {
-        if (!filesystem_formatted) {
-          coralmicro::LfsInit(/*force_format=*/true);
-          filesystem_formatted = true;
-        }
-      }
+      break;
+    case ElfloaderCommand::kFormat:
+      coralmicro::LfsInit(/*force_format=*/true);
+      filesystem_formatted = true;
       break;
   }
 }

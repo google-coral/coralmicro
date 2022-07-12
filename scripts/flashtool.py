@@ -84,6 +84,7 @@ ELFLOADER_DONE = 2
 ELFLOADER_RESET_TO_BOOTLOADER = 3
 ELFLOADER_TARGET = 4
 ELFLOADER_RESET_TO_FLASH = 5
+ELFLOADER_FORMAT = 6
 
 ELFLOADER_TARGET_RAM = 0
 ELFLOADER_TARGET_PATH = 1
@@ -109,6 +110,9 @@ def elfloader_msg_target(target):
 
 def elfloader_msg_reset_to_flash():
     return struct.pack('=BB', 0, ELFLOADER_RESET_TO_FLASH)
+
+def elfloader_msg_format():
+    return struct.pack('=BB', 0, ELFLOADER_FORMAT)
 
 def read_file(path):
     with open(path, 'rb') as f:
@@ -213,9 +217,19 @@ def GetLibs(build_dir, libs_path, scanned, cached_files):
         sublibs |= GetLibs(build_dir, lib, scanned | libs_found, cached_files)
     return libs_found | sublibs
 
-def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino):
-    if is_arduino:
+def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino, data_dir, data):
+    if not data:
         return dict()
+    if is_arduino:
+        if not data_dir:
+            return dict()
+        folder_resources = dict()
+        for root, dirs, files in os.walk(data_dir):
+            for file in files:
+                src_path = os.path.join(root, file)
+                tgt_path = src_path.replace(data_dir, '')
+                folder_resources[src_path] = tgt_path
+        return folder_resources
     libs_path = os.path.splitext(elf_path)[0] + '.libs'
     m4_exe_path = os.path.splitext(elf_path)[0] + '.m4_executable'
     libs = GetLibs(build_dir, libs_path, set(), cached_files)
@@ -254,7 +268,7 @@ def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_ar
 
     return data_files
 
-def CreateSbFile(workdir, elftosb_path, srec_path):
+def CreateSbFile(workdir, elftosb_path, srec_path, erase):
     spinand_bdfile_path = os.path.join(workdir, 'program_flexspinand_image.bd')
     itcm_bdfile_path = os.path.join(workdir, 'imx-itcm-unsigned.bd')
 
@@ -263,6 +277,7 @@ def CreateSbFile(workdir, elftosb_path, srec_path):
     itcm_startaddress = srec_obj.parts()[0][0] & 0xFFFF0000
 
     with open(spinand_bdfile_path, 'w') as spinand_bdfile:
+        erase_cmd = 'erase spinand 0xc..0x4c;'
         spinand_bdfile.write(
 '''sources {
   bootImageFile = extern (0);
@@ -276,7 +291,9 @@ section (0) {
   enable spinand 0x10000;
   erase spinand 0x4..0x8;
   erase spinand 0x8..0xc;
-  erase spinand 0xc..0x4c;
+''' +
+(erase_cmd if erase else '') +
+'''
   load spinand bootImageFile > 0x4;
   load spinand bootImageFile > 0x8;
 }
@@ -497,9 +514,12 @@ def StateProgramElfloader(elf_path, debug=False, serial_number=None):
             return FlashtoolDone('Flashing to RAM is complete, your application should be executing.')
         return StateStartGdb
 
-def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None):
+def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None, program=True, data=True):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
-        data_files[elf_path] = '/default.elf'
+        if program and data:
+            h.write(elfloader_msg_format())
+        if program:
+            data_files[elf_path] = '/default.elf'
         data_files[str(usb_ip_address).encode()] = USB_IP_ADDRESS_FILE
         if wifi_ssid is not None:
             data_files[wifi_ssid.encode()] = WIFI_SSID_FILE
@@ -512,10 +532,10 @@ def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, 
         if ethernet_speed is not None:
             data_files[struct.pack('<H', ethernet_speed)] = ETHERNET_SPEED_FILE
         for src_file, target_file in data_files.items():
+            # If we are running on something with the wrong directory separator, fix it.
+            target_file = target_file.replace('\\', '/')
             if target_file[0] != '/':
                 target_file = '/' + target_file
-            # If we are running on something with the wrong directory separator, fix it.
-            target_file.replace('\\', '/')
 
             if isinstance(src_file, str):
                 data = read_file(src_file)
@@ -589,8 +609,6 @@ def main():
     else:
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-    is_arduino = os.getenv('ARDUINO_USER_AGENT') is not None
-
     parser = argparse.ArgumentParser(description='Coral Dev Board Micro flashtool',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--build_dir', '-b', type=str, required=True)
@@ -615,6 +633,14 @@ def main():
     parser.add_argument('--debug', dest='debug', action='store_true')
     parser.add_argument('--jlink_path', type=str, default='/opt/SEGGER/JLink')
     parser.add_argument('--cached', dest='cached', action='store_true')
+    parser.add_argument('--data_dir', type=str, required=False)
+
+    parser.add_argument('--program', dest='program', action='store_true')
+    parser.add_argument('--noprogram', dest='program', action='store_false')
+    parser.add_argument('--data', dest='data', action='store_true')
+    parser.add_argument('--nodata', dest='data', action='store_false')
+    parser.add_argument('--arduino', dest='arduino', action='store_true')
+    parser.set_defaults(program=True, data=True, arduino=False)
 
     app_elf_group = parser.add_mutually_exclusive_group(required=True)
     app_elf_group.add_argument('--app', '-a', type=str)
@@ -634,6 +660,13 @@ def main():
                 cached_files = file_list.read().splitlines()
     else:
         cached_files = None
+
+    data_dir = None
+    if args.data_dir:
+      if not os.path.exists(args.data_dir):
+        print(f'Resource directory {args.data_dir} not found!')
+        return
+      data_dir = os.path.abspath(args.data_dir)
 
     elf_path = args.elf_path if args.elf_path else None
     unstripped_elf_path = args.elf_path if args.elf_path else None
@@ -712,6 +745,8 @@ def main():
         'debug': args.debug,
         'jlink_path': args.jlink_path,
         'toolchain_path': toolchain_path,
+        'program': args.program,
+        'data': args.data,
     }
 
     sdp_devices = len(EnumerateSDP())
@@ -755,11 +790,11 @@ def main():
         data_files = None
         if not args.ram:
             print('Creating Filesystem')
-            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino)
+            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, args.arduino, data_dir, args.data)
             if data_files is None:
                 print('Creating filesystem failed, exit')
                 return
-            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path)
+            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path, args.program and args.data)
             if not sbfile_path:
                 print('Creating sbfile failed, exit')
                 return

@@ -24,7 +24,7 @@ coral_micro.bootloader.file={runtime.platform.path}/bootloaders/coral_micro/imag
 
 coral_micro.upload.tool=flashtool
 coral_micro.upload.protocol=
-coral_micro.upload.pattern={cmd.path} --elfloader_path {bootloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path}
+coral_micro.upload.pattern={cmd.path} --elfloader_path {bootloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
 
 coral_micro.vid.0=0x18d1
 coral_micro.pid.0=0x9307
@@ -38,3 +38,12 @@ coral_micro.vid.4=0x18d1
 coral_micro.pid.4=0x93fe
 coral_micro.vid.5=0x18d1
 coral_micro.pid.5=0x93ff
+
+menu.upload=Upload sketch
+coral_micro.menu.upload.both=Sketch + Data
+coral_micro.menu.upload.program=Sketch only
+coral_micro.menu.upload.data=Data only
+
+coral_micro.menu.upload.both.upload.extra_flags=--program --data
+coral_micro.menu.upload.program.upload.extra_flags=--program --nodata
+coral_micro.menu.upload.data.upload.extra_flags=--data --noprogram
