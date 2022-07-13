@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-namespace coralmicro::a71ch {
+namespace coralmicro {
 
 // The following functions are convenience helpers for basic usage of the a71ch
 // chip with a more modern c++ style. For the full a71ch's API, please check out
@@ -34,18 +34,18 @@ namespace coralmicro::a71ch {
 //
 // This function must be called before using any of our a71ch helper functions
 // or the direct a71ch api.
-bool Init();
+bool A71ChInit();
 
 // Gets the uid of the a71ch module.
 //
 // @return The unique id of this a71ch module or std::nullopt.
-std::optional<std::string> GetUId();
+std::optional<std::string> A71ChGetUId();
 
 // Gets the random bytes from the A71.
 //
 // @param num_bytes The number of random bytes.
 // @return The random bytes or std::nullopt on failure.
-std::optional<std::string> GetRandomBytes(uint8_t num_bytes);
+std::optional<std::string> A71ChGetRandomBytes(uint8_t num_bytes);
 
 // Gets a public Elliptical Curve key from the A71.
 //
@@ -54,20 +54,20 @@ std::optional<std::string> GetRandomBytes(uint8_t num_bytes);
 // See the manual referenced above for more info.
 // @return The public ECC key in index key_idx or std::nullopt if failed to
 // retrieve.
-std::optional<std::string> GetEccPublicKey(uint8_t key_idx);
+std::optional<std::string> A71ChGetEccPublicKey(uint8_t key_idx);
 
 // Gets the sha256 hash for a buffer of data.
 //
 // @param data The buffer to the raw data to generate the hash.
 // @param data_len The length of the data buffer.
 // @return The sha256 hash for data or std::nullopt on failure.
-std::optional<std::string> GetSha256(uint8_t* data, uint16_t data_len);
+std::optional<std::string> A71ChGetSha256(uint8_t* data, uint16_t data_len);
 
 // Gets the sha256 hash for a vector of data.
 //
 // @param data The raw data to generate the hash.
 // @return The sha256 hash for data or std::nullopt on failure.
-std::optional<std::string> GetSha256(const std::vector<uint8_t>& data);
+std::optional<std::string> A71ChGetSha256(const std::vector<uint8_t>& data);
 
 // Gets the Elliptical Curve signature for a hash.
 //
@@ -75,24 +75,25 @@ std::optional<std::string> GetSha256(const std::vector<uint8_t>& data);
 // @param sha The buffer containing the sha256 hash of some data to sign.
 // @param sha_len The length of the sha.
 // @return The Ecc Signature or std::nullopt on failure.
-std::optional<std::string> GetEccSignature(uint8_t key_idx, const uint8_t* sha,
-                                           uint16_t sha_len);
+std::optional<std::string> A71ChGetEccSignature(uint8_t key_idx,
+                                                const uint8_t* sha,
+                                                uint16_t sha_len);
 
 // Gets the Elliptical Curve signature for a hash.
 //
 // @param key_idx The key storage index of the public key to sign this hash.
 // @param sha The sha256 hash for some data to sign.
 // @return The Ecc Signature or std::nullopt on failure.
-std::optional<std::string> GetEccSignature(uint8_t key_idx,
-                                           const std::vector<uint8_t>& data);
+std::optional<std::string> A71ChGetEccSignature(
+    uint8_t key_idx, const std::vector<uint8_t>& data);
 
 // Gets the Elliptical Curve signature for a hash.
 //
 // @param key_idx The key storage index of the public key to sign this hash.
 // @param sha The string of sha256 hash for some data to sign.
 // @return The Ecc Signature or std::nullopt on failure.
-std::optional<std::string> GetEccSignature(uint8_t key_idx,
-                                           const std::string& sha);
+std::optional<std::string> A71ChGetEccSignature(uint8_t key_idx,
+                                                const std::string& sha);
 
 // Verify whether signature is the signature of sha using ecc_key.
 //
@@ -103,8 +104,8 @@ std::optional<std::string> GetEccSignature(uint8_t key_idx,
 // @param signature The signature to verify.
 // @param signature_len The length of the signature.
 // @return true if verify success, else false.
-bool EccVerify(uint8_t key_idx, const uint8_t* sha, uint16_t sha_len,
-               const uint8_t* signature, uint16_t signature_len);
+bool A71ChEccVerify(uint8_t key_idx, const uint8_t* sha, uint16_t sha_len,
+                    const uint8_t* signature, uint16_t signature_len);
 
 // Verify whether signature is the signature of sha using ecc_key.
 //
@@ -113,8 +114,8 @@ bool EccVerify(uint8_t key_idx, const uint8_t* sha, uint16_t sha_len,
 // @param sha The sha256 hash to verify.
 // @param signature The signature to verify.
 // @return true if verify success, else false.
-bool EccVerify(uint8_t key_idx, const std::string& sha,
-               const std::string& signature);
+bool A71ChEccVerify(uint8_t key_idx, const std::string& sha,
+                    const std::string& signature);
 
 // Verify whether signature is the signature of sha using ecc_key.
 //
@@ -127,9 +128,9 @@ bool EccVerify(uint8_t key_idx, const std::string& sha,
 // @param signature The signature to verify.
 // @param signature_len The length of the signature.
 // @return true if verify success, else false.
-bool EccVerifyWithKey(const uint8_t* ecc_pub_key, uint16_t key_len,
-                      const uint8_t* sha, uint16_t sha_len,
-                      const uint8_t* signature, uint16_t signature_len);
+bool A71ChEccVerifyWithKey(const uint8_t* ecc_pub_key, uint16_t key_len,
+                           const uint8_t* sha, uint16_t sha_len,
+                           const uint8_t* signature, uint16_t signature_len);
 
 // Verify whether signature is the signature of sha using ecc_key.
 //
@@ -139,8 +140,9 @@ bool EccVerifyWithKey(const uint8_t* ecc_pub_key, uint16_t key_len,
 // @param sha The sha256 hash to verify.
 // @param signature The signature to verify.
 // @return true if verify success, else false.
-bool EccVerifyWithKey(const std::string& ecc_pub_key, const std::string& sha,
-                      const std::string& signature);
-}  // namespace coralmicro::a71ch
+bool A71ChEccVerifyWithKey(const std::string& ecc_pub_key,
+                           const std::string& sha,
+                           const std::string& signature);
+}  // namespace coralmicro
 
 #endif  // LIBS_A71CH_A71CH_H_

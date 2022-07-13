@@ -921,7 +921,7 @@ void WiFiSetAntenna(struct jsonrpc_request* request) {
 }
 
 void CryptoInit(struct jsonrpc_request* request) {
-  if (!coralmicro::a71ch::Init()) {
+  if (!coralmicro::A71ChInit()) {
     jsonrpc_return_error(request, -1, "Unable to initialize a71ch", nullptr);
     return;
   }
@@ -929,7 +929,7 @@ void CryptoInit(struct jsonrpc_request* request) {
 }
 
 void CryptoGetUID(struct jsonrpc_request* request) {
-  if (auto maybe_uid = coralmicro::a71ch::GetUId(); maybe_uid.has_value()) {
+  if (auto maybe_uid = coralmicro::A71ChGetUId(); maybe_uid.has_value()) {
     const auto& uid = maybe_uid.value();
     jsonrpc_return_success(request, "{%Q:%V}", "uid", uid.size(), uid.data());
     return;
@@ -940,7 +940,7 @@ void CryptoGetUID(struct jsonrpc_request* request) {
 void CryptoGetRandomBytes(struct jsonrpc_request* request) {
   int num_bytes;
   if (!JsonRpcGetIntegerParam(request, "num_bytes", &num_bytes)) return;
-  if (auto maybe_bytes = coralmicro::a71ch::GetRandomBytes(num_bytes);
+  if (auto maybe_bytes = coralmicro::A71ChGetRandomBytes(num_bytes);
       maybe_bytes.has_value()) {
     const auto& bytes = maybe_bytes.value();
     jsonrpc_return_success(request, "{%Q:%V}", "bytes", bytes.size(),
@@ -961,7 +961,7 @@ void CryptoGetSha256(struct jsonrpc_request* request) {
     jsonrpc_return_error(request, -1, "%s not found", file_name.c_str());
     return;
   }
-  auto maybe_sha = coralmicro::a71ch::GetSha256(file_content);
+  auto maybe_sha = coralmicro::A71ChGetSha256(file_content);
   if (maybe_sha.has_value()) {
     const auto& sha = maybe_sha.value();
     g_stored_resources[stored_sha_name] = {sha.begin(), sha.end()};
@@ -976,7 +976,7 @@ void CryptoGetSha256(struct jsonrpc_request* request) {
 void CryptoGetPublicEccKey(struct jsonrpc_request* request) {
   int index;
   if (!JsonRpcGetIntegerParam(request, "key_index", &index)) return;
-  if (auto ecc_pub_key = coralmicro::a71ch::GetEccPublicKey(index);
+  if (auto ecc_pub_key = coralmicro::A71ChGetEccPublicKey(index);
       ecc_pub_key.has_value()) {
     const auto& key = ecc_pub_key.value();
     jsonrpc_return_success(request, "{%Q:%V}", "ecc_pub_key", key.size(),
@@ -1004,7 +1004,7 @@ void CryptoGetEccSignature(struct jsonrpc_request* request) {
     return;
   }
   if (auto maybe_signature =
-          coralmicro::a71ch::GetEccSignature(index, *stored_sha);
+          coralmicro::A71ChGetEccSignature(index, *stored_sha);
       maybe_signature.has_value()) {
     const auto& signature = maybe_signature.value();
     g_stored_resources[stored_signature_name] = {signature.begin(),
@@ -1038,7 +1038,7 @@ void CryptoEccVerify(struct jsonrpc_request* request) {
                          nullptr);
     return;
   }
-  if (!coralmicro::a71ch::EccVerify(
+  if (!coralmicro::A71ChEccVerify(
           index, stored_sha->data(), stored_sha->size(),
           stored_signature->data(), stored_signature->size())) {
     jsonrpc_return_error(request, -1, "Failed to verify", nullptr);

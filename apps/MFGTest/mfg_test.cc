@@ -594,7 +594,7 @@ void ReadFile(struct jsonrpc_request* request) {
 void CheckA71CH(struct jsonrpc_request* request) {
   static bool a71ch_inited = false;
   if (!a71ch_inited) {
-    bool success = coralmicro::a71ch::Init();
+    bool success = coralmicro::A71ChInit();
     if (!success) {
       jsonrpc_return_error(request, -1, "failed to init a71ch", nullptr);
       return;

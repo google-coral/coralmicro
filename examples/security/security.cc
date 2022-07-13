@@ -25,13 +25,13 @@
 extern "C" void app_main(void* param) {
   vTaskDelay(pdMS_TO_TICKS(1000));
   // Initializes the A71 chip.
-  if (!coralmicro::a71ch::Init()) {
+  if (!coralmicro::A71ChInit()) {
     printf("Failed to initializes the a71ch chip\r\n");
     vTaskSuspend(nullptr);
   }
 
   // Get the A71's unique id.
-  if (auto a71ch_uid = coralmicro::a71ch::GetUId(); a71ch_uid.has_value()) {
+  if (auto a71ch_uid = coralmicro::A71ChGetUId(); a71ch_uid.has_value()) {
     printf("A71 Unique ID: %s\r\n",
            coralmicro::StrToHex(a71ch_uid.value()).c_str());
   } else {
@@ -41,7 +41,7 @@ extern "C" void app_main(void* param) {
 
   // Get random bytes from the A71.
   for (uint8_t random_len = 8; random_len <= 64; random_len <<= 1) {
-    if (auto random_bytes = coralmicro::a71ch::GetRandomBytes(random_len);
+    if (auto random_bytes = coralmicro::A71ChGetRandomBytes(random_len);
         random_bytes.has_value()) {
       printf("A71 Random %d Bytes: %s\r\n", random_len,
              coralmicro::StrToHex(random_bytes.value()).c_str());
@@ -55,7 +55,7 @@ extern "C" void app_main(void* param) {
   constexpr uint8_t kKeyIdx = 0;
 
   // Get the public ECC key at index 0 from the A71 chip.
-  auto maybe_ecc_pub_key = coralmicro::a71ch::GetEccPublicKey(kKeyIdx);
+  auto maybe_ecc_pub_key = coralmicro::A71ChGetEccPublicKey(kKeyIdx);
   if (maybe_ecc_pub_key.has_value()) {
     printf("A71 ECC public key %d: %s\r\n", kKeyIdx,
            coralmicro::StrToHex(maybe_ecc_pub_key.value()).c_str());
@@ -71,7 +71,7 @@ extern "C" void app_main(void* param) {
     printf("%s missing\r\n", kModelPath);
     vTaskSuspend(nullptr);
   }
-  auto maybe_sha = coralmicro::a71ch::GetSha256(model);
+  auto maybe_sha = coralmicro::A71ChGetSha256(model);
   if (maybe_sha.has_value()) {
     printf("testconv1-edgetpu.tflite sha: %s\r\n",
            coralmicro::StrToHex(maybe_sha.value()).c_str());
@@ -82,7 +82,7 @@ extern "C" void app_main(void* param) {
 
   // Get signature for this model with the key public key in index 0.
   const auto& sha = maybe_sha.value();
-  auto maybe_signature = coralmicro::a71ch::GetEccSignature(kKeyIdx, sha);
+  auto maybe_signature = coralmicro::A71ChGetEccSignature(kKeyIdx, sha);
   if (maybe_signature.has_value()) {
     printf("Signature: %s\r\n",
            coralmicro::StrToHex(maybe_signature.value()).c_str());
@@ -93,14 +93,14 @@ extern "C" void app_main(void* param) {
 
   // Verifying the signature using the key storage index.
   const auto& signature = maybe_signature.value();
-  printf("EccVerify: %s\r\n",
-         coralmicro::a71ch::EccVerify(kKeyIdx, sha, signature) ? "success"
-                                                               : "fail");
+  printf(
+      "EccVerify: %s\r\n",
+      coralmicro::A71ChEccVerify(kKeyIdx, sha, signature) ? "success" : "fail");
 
   // Verifying the signature using the key.
   const auto& ecc_pub_key = maybe_ecc_pub_key.value();
   printf("EccVerifyWithKey: %s\r\n",
-         coralmicro::a71ch::EccVerifyWithKey(ecc_pub_key, sha, signature)
+         coralmicro::A71ChEccVerifyWithKey(ecc_pub_key, sha, signature)
              ? "success"
              : "fail");
 
