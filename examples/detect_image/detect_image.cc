@@ -96,11 +96,8 @@ void Main() {
     }
 
     auto results = tensorflow::GetDetectionResults(&interpreter, 0.6, 3);
-    for (auto result : results) {
-        printf("id: %d score: %f xmin: %f ymin: %f xmax: %f ymax: %f\r\n",
-               result.id, result.score, result.bbox.xmin, result.bbox.ymin,
-               result.bbox.xmax, result.bbox.ymax);
-    }
+    printf("%s\r\n",
+           coralmicro::tensorflow::FormatDetectionOutput(results).c_str());
 }
 }  // namespace
 }  // namespace coralmicro

@@ -40,7 +40,7 @@ std::string FormatPosenetOutput(const std::vector<Pose>& poses) {
 }
 
 std::vector<Pose> GetPosenetOutput(tflite::MicroInterpreter* interpreter,
-                                   float threshold, bool print) {
+                                   float threshold) {
     auto* keypoints = tflite::GetTensorData<float>(interpreter->output(0));
     auto* keypoints_scores =
         tflite::GetTensorData<float>(interpreter->output(1));
@@ -63,9 +63,6 @@ std::vector<Pose> GetPosenetOutput(tflite::MicroInterpreter* interpreter,
             pose.keypoints[j].score = keypoint_scores[j];
         }
         poses.push_back(pose);
-    }
-    if (print) {
-        printf("%s\r\n", FormatPosenetOutput(poses).c_str());
     }
     return poses;
 }

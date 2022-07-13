@@ -63,8 +63,7 @@ extern "C" void app_main(void* param) {
 
     // Creates a micro interpreter.
     tflite::MicroMutableOpResolver<2> resolver;
-    resolver.AddCustom(coralmicro::kCustomOp,
-                       coralmicro::RegisterCustomOp());
+    resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
     resolver.AddCustom(coral::kPosenetDecoderOp,
                        coral::RegisterPosenetDecoderOp());
     auto interpreter = tflite::MicroInterpreter{
@@ -95,7 +94,10 @@ extern "C" void app_main(void* param) {
         vTaskSuspend(nullptr);
     }
     auto test_image_output = coralmicro::tensorflow::GetPosenetOutput(
-        &interpreter, /*threshold=*/0.5, /*print=*/true);
+        &interpreter, /*threshold=*/0.5);
+    printf(
+        "%s\r\n",
+        coralmicro::tensorflow::FormatPosenetOutput(test_image_output).c_str());
 
     // Starts the camera for live poses.
     coralmicro::CameraTask::GetSingleton()->SetPower(true);
@@ -124,7 +126,9 @@ extern "C" void app_main(void* param) {
             break;
         }
         auto output = coralmicro::tensorflow::GetPosenetOutput(
-            &interpreter, /*threshold=*/0.5, /*print=*/true);
+            &interpreter, /*threshold=*/0.5);
+        printf("%s\r\n",
+               coralmicro::tensorflow::FormatPosenetOutput(output).c_str());
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     coralmicro::CameraTask::GetSingleton()->SetPower(false);

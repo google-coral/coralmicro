@@ -47,6 +47,13 @@ struct Object {
     BBox<float> bbox;
 };
 
+// Format the detection outputs into a string.
+//
+// @param object a vector contains all the objects in an object detection
+// output.
+// @return A string showing the posenet's output.
+std::string FormatDetectionOutput(const std::vector<Object>& objects);
+
 // Converts detection output tensors into a vector of Objects.
 //
 // @param bboxes The output tensor for all detected bounding boxes in
@@ -79,6 +86,6 @@ std::vector<Object> GetDetectionResults(
     float threshold = -std::numeric_limits<float>::infinity(),
     size_t top_k = std::numeric_limits<size_t>::max());
 
-}  // namespace coralmicro
+}  // namespace coralmicro::tensorflow
 
 #endif  // LIBS_TENSORFLOW_DETECTION_H_

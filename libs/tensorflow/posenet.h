@@ -58,7 +58,6 @@ struct Pose {
 // Format the posenet outputs into a string.
 //
 // @param poses a vector contains all the poses in a posenet output.
-// score is under the threshold.
 // @return A string showing the posenet's output.
 std::string FormatPosenetOutput(const std::vector<Pose>& poses);
 
@@ -67,11 +66,9 @@ std::string FormatPosenetOutput(const std::vector<Pose>& poses);
 // @param interpreter The already-invoked interpreter for your posenet model.
 // @param threshold The score threshold for results. All returned
 // poses results have  a score greater-than-or-equal-to this value.
-// @param print Prints the posenet results before returning if set to true.
 std::vector<Pose> GetPosenetOutput(
     tflite::MicroInterpreter* interpreter,
-    float threshold = -std::numeric_limits<float>::infinity(),
-    bool print = false);
+    float threshold = -std::numeric_limits<float>::infinity());
 
 }  // namespace coralmicro::tensorflow
 

@@ -19,8 +19,7 @@
 #include <cmath>
 #include <queue>
 
-namespace coralmicro {
-namespace tensorflow {
+namespace coralmicro::tensorflow {
 
 namespace {
 struct ObjectComparator {
@@ -29,6 +28,19 @@ struct ObjectComparator {
     }
 };
 }  // namespace
+
+std::string FormatDetectionOutput(const std::vector<Object>& objects) {
+    std::string output;
+    for (const auto& object : objects) {
+        output += "id: " + std::to_string(object.id) +
+                  " -- score: " + std::to_string(object.score) +
+                  " -- xmin: " + std::to_string(object.bbox.xmin) +
+                  " -- ymin: " + std::to_string(object.bbox.ymin) +
+                  " -- xmax: " + std::to_string(object.bbox.xmax) +
+                  " -- ymax: " + std::to_string(object.bbox.ymax);
+    }
+    return output;
+}
 
 std::vector<Object> GetDetectionResults(const float* bboxes, const float* ids,
                                         const float* scores, size_t count,
@@ -65,7 +77,7 @@ std::vector<Object> GetDetectionResults(tflite::MicroInterpreter* interpreter,
                                         float threshold, size_t top_k) {
     if (interpreter->outputs().size() != 4) {
         printf("Output size mismatch\r\n");
-        return std::vector<Object>();
+        return {};
     }
 
     const float *bboxes, *ids, *scores, *count;
@@ -85,5 +97,4 @@ std::vector<Object> GetDetectionResults(tflite::MicroInterpreter* interpreter,
                                static_cast<size_t>(count[0]), threshold, top_k);
 }
 
-}  // namespace tensorflow
-}  // namespace coralmicro
+}  // namespace coralmicro::tensorflow
