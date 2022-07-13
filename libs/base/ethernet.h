@@ -18,6 +18,7 @@
 #define LIBS_BASE_ETHERNET_H_
 
 #include <optional>
+
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 
 namespace coralmicro {
@@ -25,17 +26,19 @@ namespace coralmicro {
 // Gets the ethernet interface, which contains info like
 // ip and hw addresses, interface names, etc.
 //
-// @return A pointer to the netif ethernet interface, or nullptr if `InitializeEthernet()` has
-// not been called or the POE add-on board failed to initialize. See:
+// @return A pointer to the netif ethernet interface, or nullptr if
+// `EthernetInit()` has not been called or the POE add-on board failed to
+// initialize. See:
 // https://os.mbed.com/docs/mbed-os/v6.15/mbed-os-api-doxy/structnetif.html
-struct netif* GetEthernetInterface();
+struct netif* EthernetGetInterface();
 
 // Initializes the ethernet module.
 //
-// This function requires that the POE add-on board is connected and it must be called
-// before `GetEthernetInterface()`.
-// @param default_iface True sets ethernet as the default network interface, false disables it.
-void InitializeEthernet(bool default_iface);
+// This function requires that the POE add-on board is connected and it must be
+// called before `EthernetGetInterface()`.
+// @param default_iface True sets ethernet as the default network interface,
+// false disables it.
+void EthernetInit(bool default_iface);
 
 // @cond Internal only, do not generate docs.
 // Writes data over the SMI to the specified PHY register.
@@ -51,7 +54,12 @@ status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data);
 //
 // @return A string representing the IPv4 IP address or `std::nullopt` on
 // failure.
-std::optional<std::string> GetEthernetIp();
+std::optional<std::string> EthernetGetIp();
+
+// Retrieves the ethernet speed that is stored in flash memory.
+// @returns The ethernet speed in Mbps.
+//   The default return value is 100, if no value is stored in flash.
+int EthernetGetSpeed();
 
 }  // namespace coralmicro
 

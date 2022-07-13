@@ -72,11 +72,6 @@ bool GetWiFiPSK(std::string* wifi_psk_out);
 // @returns True if the key was successfully stored; false otherwise.
 bool SetWiFiPSK(std::string* wifi_psk);
 
-// Retrieves the ethernet speed that is stored in flash memory.
-// @returns The ethernet speed in Mbps.
-//   The default return value is 100, if no value is stored in flash.
-int GetEthernetSpeed();
-
 }  // namespace utils
 }  // namespace coralmicro
 

@@ -16,6 +16,7 @@
 
 #include "libs/base/ethernet.h"
 
+#include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/utils.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.h"
@@ -40,7 +41,6 @@ phy_handle_t phyHandle = {
     .mdioHandle = &mdioHandle,
     .ops = &phyrtl8211f_ops,
 };
-
 
 constexpr uint32_t kBasicModeControlReg = 0;
 constexpr uint32_t kGigBaseControlReg = 9;
@@ -78,15 +78,13 @@ status_t EthernetPHYEnableSSC(bool auto_neg) {
 }
 }  // namespace
 
-struct netif* GetEthernetInterface() {
-    return eth_netif;
-}
+struct netif* EthernetGetInterface() { return eth_netif; }
 
 status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data) {
     return PHY_Write(&phyHandle, phy_reg, data);
 }
 
-void InitializeEthernet(bool default_iface) {
+void EthernetInit(bool default_iface) {
     ip4_addr_t netif_ipaddr, netif_netmask, netif_gw;
 
     phy_config_t phyConfig = {
@@ -96,7 +94,7 @@ void InitializeEthernet(bool default_iface) {
         .enableEEE = true,
     };
 
-    int speed = coralmicro::utils::GetEthernetSpeed();
+    int speed = EthernetGetSpeed();
     switch (speed) {
         case 1000:
             phyConfig.speed = kPHY_Speed1000M;
@@ -150,7 +148,7 @@ void InitializeEthernet(bool default_iface) {
     IP4_ADDR(&netif_netmask, 0, 0, 0, 0);
     IP4_ADDR(&netif_gw, 0, 0, 0, 0);
 
-    if(EthernetPHYEnableSSC(phyConfig.autoNeg)) {
+    if (EthernetPHYEnableSSC(phyConfig.autoNeg)) {
         printf("Failed enabling PHY SSC, proceeding.\r\n");
     }
 
@@ -165,7 +163,7 @@ void InitializeEthernet(bool default_iface) {
     eth_netif = &netif;
 }
 
-std::optional<std::string> GetEthernetIp() {
+std::optional<std::string> EthernetGetIp() {
     if (!eth_netif) {
         return std::nullopt;
     }
@@ -178,6 +176,18 @@ std::optional<std::string> GetEthernetIp() {
     }
 
     return ip4addr_ntoa(netif_ip4_addr(eth_netif));
+}
+
+int EthernetGetSpeed() {
+    std::string ethernet_speed;
+    uint16_t speed;
+    if (!LfsReadFile("/ethernet_speed", &ethernet_speed)) {
+        printf("Failed to read ethernet speed, assuming 100M.\r\n");
+        speed = 100;
+    } else {
+        speed = *reinterpret_cast<uint16_t*>(ethernet_speed.data());
+    }
+    return speed;
 }
 
 }  // namespace coralmicro

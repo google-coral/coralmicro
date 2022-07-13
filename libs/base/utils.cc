@@ -85,18 +85,6 @@ bool GetWiFiPSK(std::string* wifi_psk_out) {
     return coralmicro::LfsReadFile("/wifi_psk", wifi_psk_out);
 }
 
-int GetEthernetSpeed() {
-    std::string ethernet_speed;
-    uint16_t speed;
-    if (!coralmicro::LfsReadFile("/ethernet_speed", &ethernet_speed)) {
-        printf("Failed to read ethernet speed, assuming 100M.\r\n");
-        speed = 100;
-    } else {
-        speed = *reinterpret_cast<uint16_t*>(ethernet_speed.data());
-    }
-    return speed;
-}
-
 extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
     std::string wifi_country_code_out, wifi_revision_out;
     unsigned short wifi_revision = 0;

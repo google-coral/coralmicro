@@ -156,13 +156,13 @@ void get_image_from_camera(struct jsonrpc_request* request) {
 
 extern "C" void app_main(void* param) {
 #if defined(IMAGE_SERVER_ETHERNET)
-    coralmicro::InitializeEthernet(true);
-    auto* ethernet = coralmicro::GetEthernetInterface();
+    coralmicro::EthernetInit(/*default_iface=*/true);
+    auto* ethernet = coralmicro::EthernetGetInterface();
     if (!ethernet) {
         printf("Unable to bring up ethernet...\r\n");
         vTaskSuspend(nullptr);
     }
-    auto ethernet_ip = coralmicro::GetEthernetIp();
+    auto ethernet_ip = coralmicro::EthernetGetIp();
     if (!ethernet_ip.has_value()) {
         printf("Unable to get Ethernet IP\r\n");
         vTaskSuspend(nullptr);

@@ -98,8 +98,8 @@ bool PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
 void Main() {
     std::optional<std::string> our_ip_addr = std::nullopt;
 #if defined(CURL_ETHERNET)
-    coralmicro::InitializeEthernet(true);
-    our_ip_addr = coralmicro::GetEthernetIp();
+    coralmicro::EthernetInit(/*default_iface=*/true);
+    our_ip_addr = coralmicro::EthernetGetIp();
 #elif defined(CURL_WIFI)
     // Uncomment me to use the external antenna.
     // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);

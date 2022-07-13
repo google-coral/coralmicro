@@ -395,7 +395,7 @@ void Main() {
 // For the OOBE Demo, bring up WiFi and Ethernet. For now these are active
 // but unused.
 #if defined(OOBE_DEMO_ETHERNET)
-  InitializeEthernet(false);
+  EthernetInit(/*default_iface=*/false);
 #elif defined(OOBE_DEMO_WIFI)
   WiFiTurnOn();
   if (!WiFiConnect()) {

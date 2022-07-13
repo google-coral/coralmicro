@@ -23,7 +23,7 @@
 
 namespace {
 void EthGetIP(struct jsonrpc_request* request) {
-  struct netif* ethernet = coralmicro::GetEthernetInterface();
+  struct netif* ethernet = coralmicro::EthernetGetInterface();
   if (!ethernet) {
     jsonrpc_return_error(request, -1, "ethernet interface not found", nullptr);
     return;
@@ -64,7 +64,7 @@ void EthWritePHY(struct jsonrpc_request* request) {
 }  // namespace
 
 extern "C" void app_main(void* param) {
-  coralmicro::InitializeEthernet(false);
+  coralmicro::EthernetInit(/*default_iface=*/false);
 
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export("eth_get_ip", EthGetIP);
