@@ -65,26 +65,6 @@ bool GetUSBIPAddress(std::string* usb_ip_out) {
     return coralmicro::LfsReadFile("/usb_ip_address", usb_ip_out);
 }
 
-bool SetWiFiSSID(std::string* wifi_ssid) {
-    return coralmicro::LfsWriteFile(
-        "/wifi_ssid", reinterpret_cast<const uint8_t*>(wifi_ssid->c_str()),
-        wifi_ssid->size());
-}
-
-bool GetWiFiSSID(std::string* wifi_ssid_out) {
-    return coralmicro::LfsReadFile("/wifi_ssid", wifi_ssid_out);
-}
-
-bool SetWiFiPSK(std::string* wifi_psk) {
-    return coralmicro::LfsWriteFile(
-        "/wifi_psk", reinterpret_cast<const uint8_t*>(wifi_psk->c_str()),
-        wifi_psk->size());
-}
-
-bool GetWiFiPSK(std::string* wifi_psk_out) {
-    return coralmicro::LfsReadFile("/wifi_psk", wifi_psk_out);
-}
-
 extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
     std::string wifi_country_code_out, wifi_revision_out;
     unsigned short wifi_revision = 0;

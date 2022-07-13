@@ -52,26 +52,6 @@ bool GetUSBIPAddress(ip4_addr_t* usb_ip_out);
 // @returns True if the address was successfully retrieved; false otherwise.
 bool GetUSBIPAddress(std::string* usb_ip_out);
 
-// Gets the Wi-Fi SSID that is stored in flash memory.
-// @param wifi_ssid_out A pointer to a string in which to store the SSID.
-// @returns True if the SSID was successfully retrieved; false otherwise.
-bool GetWiFiSSID(std::string* wifi_ssid_out);
-
-// Sets the Wi-Fi SSID in flash memory.
-// @param wifi_ssid A pointer to a string containing the SSID.
-// @returns True if the SSID was successfully stored; false otherwise.
-bool SetWiFiSSID(std::string* wifi_ssid);
-
-// Gets the Wi-Fi key that is stored in flash memory.
-// @param wifi_ssid_out A pointer to a string in which to store the SSID.
-// @returns True if the SSID was successfully retrieved; false otherwise.
-bool GetWiFiPSK(std::string* wifi_psk_out);
-
-// Sets the Wi-Fi key in flash memory.
-// @param wifi_psk A pointer to a string containing the key.
-// @returns True if the key was successfully stored; false otherwise.
-bool SetWiFiPSK(std::string* wifi_psk);
-
 }  // namespace utils
 }  // namespace coralmicro
 
