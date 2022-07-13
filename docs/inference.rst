@@ -14,6 +14,17 @@ The following APIs simplify your code when working with
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
 
 
+Audio Classification
+----------------
+
+The following APIs assist when running audio classification using YAMNet models
+on a microcontroller with support for both CPU and Edge TPU.
+
+`[yamnet.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/yamnet.h>`_
+
+.. doxygenfile:: tensorflow/yamnet.h
+
+
 Image classification
 --------------------
 
