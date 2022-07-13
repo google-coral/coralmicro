@@ -28,10 +28,25 @@ namespace coralmicro {
 
 class Ipc {
    public:
+    // Defines the function type that processes
+    // IPC messages which is used as input for RegisterAppMessageHandler() ."
+    //
+    // @param data The message received. Must be a byte array of size 127.
+    // @param user_data Void Pointer to be used for an extra param if needed.
     using AppMessageHandler = std::function<void(
-        const uint8_t data[kIpcMessageBufferDataSize], void*)>;
+        const uint8_t data[kIpcMessageBufferDataSize], void* user_data)>;
+    // @cond Internal only, do not generate docs
     virtual void Init();
+    // @endcond
+
+    // Writes a message.
+    //
+    // @param message The message to send.
     void SendMessage(const IpcMessage& message);
+    // Callback method to the function, AppMessageHandler, that defines how to process message.
+    //
+    // @param AppMessageHandler Function that defines how to interpret the message.
+    // @param params Extra params to be used by the AppMessageHandler function if needed.
     void RegisterAppMessageHandler(AppMessageHandler, void* param);
 
    private:
