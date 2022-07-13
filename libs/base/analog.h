@@ -22,28 +22,27 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpadc.h"
 
 namespace coralmicro {
-namespace analog {
 
 // Available channels on ADC1.
-inline constexpr int kLPADC1ChannelCount = 6;
+inline constexpr int kAdc1ChannelCount = 6;
 // Available channels on ADC2.
-inline constexpr int kLPADC2ChannelCount = 7;
+inline constexpr int kAdc2ChannelCount = 7;
 
 // Enumeration of the ADCs and DACs that exist in the system.
-enum class Device {
+enum class AdcDevice {
     kAdc1,
     kAdc2,
 };
 
 // Enumeration of the choices for the primary side of an ADC.
-enum class Side {
+enum class AdcSide {
     kA,
     kB,
 };
 
 // Represents the configuration of an ADC.
 // Each ADC has a 12-bit resolution with 1.8V reference voltage.
-struct ADCConfig {
+struct AdcConfig {
     // Pointer to the base register of the ADC.
     ADC_Type* device;
     // Configuration for ADC conversion.
@@ -54,7 +53,7 @@ struct ADCConfig {
 
 // Initializes ADC device.
 // @param device ADC to initialize.
-void Init(Device device);
+void AdcInit(AdcDevice device);
 
 // Populates an `ADCConfig` struct based on the given parameters.
 // @param config Configuration struct to populate.
@@ -64,8 +63,8 @@ void Init(Device device);
 // @param primary_side Primary side of the ADC, if using differential mode.
 //   In single ended mode, the desired side.
 // @param differential Whether or not to run the ADC in differential mode.
-void CreateConfig(ADCConfig& config, Device device, int channel,
-                  Side primary_side, bool differential);
+void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
+                     AdcSide primary_side, bool differential);
 
 // Reads voltage values from an ADC.
 //
@@ -73,8 +72,8 @@ void CreateConfig(ADCConfig& config, Device device, int channel,
 // @param config ADC configuration to use.
 // @returns Digitized value of the voltage that the ADC is sensing.
 //          The ADC has 12 bits of precision, so the maximum value returned is 4095.
-uint16_t ReadADC(const ADCConfig& config);
-}  // namespace analog
+uint16_t AdcRead(const AdcConfig& config);
+
 
 // Initializes DAC device.
 // @param device DAC to initialize.

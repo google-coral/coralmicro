@@ -24,9 +24,9 @@
 #include <algorithm>
 #include <cassert>
 
-using coralmicro::analog::ADCConfig;
-using coralmicro::analog::Device;
-using coralmicro::analog::Side;
+using coralmicro::AdcConfig;
+using coralmicro::AdcDevice;
+using coralmicro::AdcSide;
 using coralmicro::PwmModuleConfig;
 using coralmicro::PwmPinConfig;
 
@@ -35,8 +35,8 @@ static constexpr int kAdcFullResolutionBits = 12;
 static constexpr int kDacFullResolutionBits = 12;
 static int adc_resolution_bits = 10;
 static int dac_resolution_bits = 8;
-static ADCConfig Config_A0;
-static ADCConfig Config_A1;
+static AdcConfig Config_A0;
+static AdcConfig Config_A1;
 static PwmModuleConfig pwm_config;
 
 
@@ -45,21 +45,21 @@ void wiringAnalogInit() {
     pwm_config.module = kPWM_Module_0;
     pwm_config.A.enabled = false;
     pwm_config.B.enabled = false;
-    coralmicro::analog::Init(Device::kAdc1);
+    coralmicro::AdcInit(AdcDevice::kAdc1);
     coralmicro::DacInit();
-    coralmicro::analog::CreateConfig(
+    coralmicro::AdcCreateConfig(
         Config_A0,
-        Device::kAdc1, 0,
-        Side::kB, false
+        AdcDevice::kAdc1, 0,
+        AdcSide::kB, false
     );
-    coralmicro::analog::CreateConfig(
+    coralmicro::AdcCreateConfig(
         Config_A1,
-        Device::kAdc1, 0,
-        Side::kA, false
+        AdcDevice::kAdc1, 0,
+        AdcSide::kA, false
     );
 }
 
-const ADCConfig& pinToADCConfig(pin_size_t pinNumber) {
+const AdcConfig& pinToADCConfig(pin_size_t pinNumber) {
     switch (pinNumber) {
         case A0:
             return Config_A0;
@@ -83,8 +83,8 @@ static void analogWriteDAC(pin_size_t pinNumber, int value) {
 
 int analogRead(pin_size_t pinNumber) {
     int adc_shift = kAdcFullResolutionBits - adc_resolution_bits;
-    const ADCConfig& config = pinToADCConfig(pinNumber);
-    return (coralmicro::analog::ReadADC(config) >> adc_shift);
+    const AdcConfig& config = pinToADCConfig(pinNumber);
+    return (coralmicro::AdcRead(config) >> adc_shift);
 }
 
 void analogReference(uint8_t mode) {}

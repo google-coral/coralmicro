@@ -21,14 +21,12 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dac12.h"
 
 namespace coralmicro {
-namespace analog {
 namespace {
-
-ADC_Type* DeviceToADC(Device d) {
+ADC_Type* DeviceToAdc(AdcDevice d) {
     switch (d) {
-        case Device::kAdc1:
+        case AdcDevice::kAdc1:
             return LPADC1;
-        case Device::kAdc2:
+        case AdcDevice::kAdc2:
             return LPADC2;
         default:
             return nullptr;
@@ -36,48 +34,48 @@ ADC_Type* DeviceToADC(Device d) {
     assert(false);
 }
 
-void GetDefaultConfig(ADCConfig& config) {
+void GetDefaultConfig(AdcConfig& config) {
     LPADC_GetDefaultConvCommandConfig(&config.conv_config);
     LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
 }
 } // namespace
 
-void Init(Device device) {
+void AdcInit(AdcDevice device) {
     lpadc_config_t adc_config;
     LPADC_GetDefaultConfig(&adc_config);
-    LPADC_Init(DeviceToADC(device), &adc_config);
+    LPADC_Init(DeviceToAdc(device), &adc_config);
 }
 
-void CreateConfig(ADCConfig& config, Device device, int channel,
-                  Side primary_side, bool differential) {
+void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
+                     AdcSide primary_side, bool differential) {
     GetDefaultConfig(config);
-    config.device = DeviceToADC(device);
+    config.device = DeviceToAdc(device);
 
     if (differential) {
         switch (primary_side) {
-            case Side::kA:
+            case AdcSide::kA:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelDiffBothSideAB;
-            case Side::kB:
+            case AdcSide::kB:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelDiffBothSideBA;
         }
     } else {
         switch (primary_side) {
-            case Side::kA:
+            case AdcSide::kA:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelSingleEndSideA;
-            case Side::kB:
+            case AdcSide::kB:
                 config.conv_config.sampleChannelMode =
                     kLPADC_SampleChannelSingleEndSideB;
         }
     }
 
-    if (device == Device::kAdc1) {
-        assert(channel < kLPADC1ChannelCount);
+    if (device == AdcDevice::kAdc1) {
+        assert(channel < kAdc1ChannelCount);
     }
-    if (device == Device::kAdc2) {
-        assert(channel < kLPADC2ChannelCount);
+    if (device == AdcDevice::kAdc2) {
+        assert(channel < kAdc2ChannelCount);
     }
 
     config.conv_config.channelNumber = channel;
@@ -85,7 +83,7 @@ void CreateConfig(ADCConfig& config, Device device, int channel,
     config.trigger_config.enableHardwareTrigger = false;
 }
 
-uint16_t ReadADC(const ADCConfig& config) {
+uint16_t AdcRead(const AdcConfig& config) {
     lpadc_conv_result_t result;
 
     LPADC_SetConvCommandConfig(config.device, 1, &config.conv_config);
@@ -96,7 +94,6 @@ uint16_t ReadADC(const ADCConfig& config) {
 
     return (result.convValue >> 3) & 0xFFF;
 }
-}  // namespace analog
 
 void DacInit() {
     dac12_config_t dac_config;
