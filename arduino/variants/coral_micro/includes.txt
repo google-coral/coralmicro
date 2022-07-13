@@ -10,4 +10,5 @@
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/usb/host
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/usb/include
 -iwithprefixbefore/include/third_party/flatbuffers/include/
+-iwithprefixbefore/include/third_party/modified/nxp/rt1176-sdk
 -iwithprefixbefore/include/third_party/tflite-micro/

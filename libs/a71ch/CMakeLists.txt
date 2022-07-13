@@ -16,9 +16,9 @@ add_library_m7(libs_a71ch STATIC
     a71ch.cc
     entropy.c
     # i2c_imxrt.c is copied from SDK, and modified to use the correct I2C bus for this device.
-    i2c_imxrt.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/a71ch/i2c_imxrt.c
     # sci2c.c is copied verbatim from the SDK, so that local import paths pick up our config header.
-    sci2c.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/a71ch/sci2c.c
     ${PROJECT_SOURCE_DIR}/third_party/a71ch/hostlib/hostLib/a71ch/src/a71ch_module.c
     ${PROJECT_SOURCE_DIR}/third_party/a71ch/hostlib/hostLib/api/src/ax_scp.c
     ${PROJECT_SOURCE_DIR}/third_party/a71ch/hostlib/hostLib/api/src/ax_sss_scp.c
@@ -47,7 +47,7 @@ add_library_m7(libs_a71ch STATIC
 target_compile_definitions(libs_a71ch PUBLIC
     AX_EMBEDDED
     SSS_USE_FTR_FILE
-    SSS_CONFIG_FILE="${PROJECT_SOURCE_DIR}/libs/a71ch/fsl_sss_ftr.h"
+    SSS_CONFIG_FILE="${PROJECT_SOURCE_DIR}/third_party/modified/a71ch/fsl_sss_ftr.h"
     SCI2C
     SCP_MODE=C_MAC_C_ENC_R_MAC_R_ENC
     SDK_OS_FREE_RTOS
@@ -56,6 +56,7 @@ target_compile_definitions(libs_a71ch PUBLIC
 
 target_include_directories(libs_a71ch PUBLIC
     .
+    ${PROJECT_SOURCE_DIR}/third_party/modified/a71ch
     ${PROJECT_SOURCE_DIR}/third_party/a71ch/hostlib/hostLib/inc
     ${PROJECT_SOURCE_DIR}/third_party/a71ch/hostlib/hostLib/libCommon/hostCrypto
     ${PROJECT_SOURCE_DIR}/third_party/a71ch/hostlib/hostLib/libCommon/infra

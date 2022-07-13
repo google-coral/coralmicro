@@ -18,15 +18,19 @@
 
 #include "libs/base/check.h"
 #include "libs/base/tasks.h"
-#include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/clock_config.h"
-#include "libs/nxp/rt1176-sdk/usb_host_config.h"
-#include "libs/usb/usb_host_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/modified/nxp/rt1176-sdk/board.h"
+
+/* clang-format off */
+#include "third_party/modified/nxp/rt1176-sdk/usb_host_config.h"
+#include "libs/usb/usb_host_task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_hci.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.h"
+/* clang-format on */
+
 
 extern "C" void USB_OTG2_IRQHandler(void) {
     USB_HostEhciIsrFunction(

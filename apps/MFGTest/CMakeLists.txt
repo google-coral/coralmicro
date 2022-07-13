@@ -29,7 +29,7 @@ target_link_libraries(MFGTest
 add_executable_m7(MFGTestWiFi
     mfg_test_wifi.cc
     mfg_test_iperf.cc
-    wiced_bt_cfg.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/wiced_bt_cfg.c
 )
 
 target_link_libraries(MFGTestWiFi

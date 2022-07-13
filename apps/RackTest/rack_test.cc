@@ -18,11 +18,11 @@
 #include "libs/base/ipc_m7.h"
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"
-#include "libs/coremark/core_portme.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/testlib/test_lib.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/modified/coremark/core_portme.h"
 
 #if defined TEST_WIFI
 #include "libs/base/wifi.h"

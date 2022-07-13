@@ -42,7 +42,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 
 extern "C" {
-#include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
+#include "third_party/modified/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
 namespace coralmicro::testlib {

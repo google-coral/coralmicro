@@ -1,1 +1,1 @@
-../../../../libs/FreeRTOS/FreeRTOSConfig.h
+../../../../third_party/modified/FreeRTOS/FreeRTOSConfig.h

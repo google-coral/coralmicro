@@ -15,9 +15,6 @@
 #include <cstdio>
 
 #include "examples/tflm_hello_world/hello_world_model.h"
-#include "libs/nxp/rt1176-sdk/board.h"
-#include "libs/nxp/rt1176-sdk/peripherals.h"
-#include "libs/nxp/rt1176-sdk/pin_mux.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"

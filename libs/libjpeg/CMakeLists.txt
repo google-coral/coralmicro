@@ -63,5 +63,6 @@ add_library_m7(libs_libjpeg
 
 target_include_directories(libs_libjpeg PUBLIC
     .
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/middleware/libjpeg/template
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/inc
 )

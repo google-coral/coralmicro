@@ -22,9 +22,12 @@
 #include <string>
 #include <vector>
 
-#include "libs/nxp/rt1176-sdk/usb_device_config.h"  // must be before usb_device.h
+/* clang-format off */
+#include "third_party/modified/nxp/rt1176-sdk/usb_device_config.h"  // must be before usb_device.h
 #include "libs/usb/descriptors.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
+/* clang-format on */
+
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"
 

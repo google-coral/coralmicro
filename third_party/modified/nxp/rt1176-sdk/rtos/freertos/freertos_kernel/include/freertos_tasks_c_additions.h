@@ -1,5 +1,4 @@
 /*
- * Original file: third_party/nxp/rt1176-sdk/rtos/freertos/freertos_kernel/include/freertos_tasks_c_additions.h
  * Copyright 2017-2019 NXP
  * All rights reserved.
  *

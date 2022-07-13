@@ -1,5 +1,5 @@
-#include "libs/nxp/rt1176-sdk/sdmmc_config.h"
-#include "libs/nxp/rt1176-sdk/pin_mux.h"
+#include "third_party/modified/nxp/rt1176-sdk/sdmmc_config.h"
+#include "third_party/modified/nxp/rt1176-sdk/pin_mux.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
 #include "third_party/nxp/rt1176-sdk/middleware/sdmmc/sdio/fsl_sdio.h"

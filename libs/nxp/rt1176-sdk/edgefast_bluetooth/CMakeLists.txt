@@ -73,7 +73,7 @@ add_library_m7(edgefast_bluetooth_internal
 )
 
 target_compile_options(edgefast_bluetooth_internal PRIVATE
-    -include ${PROJECT_SOURCE_DIR}/libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth_config.h
+    -include ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth_config.h
 )
 
 target_include_directories(edgefast_bluetooth_internal PUBLIC

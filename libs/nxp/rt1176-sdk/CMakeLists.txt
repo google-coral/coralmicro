@@ -14,45 +14,18 @@
 
 enable_language(ASM)
 
-if(CORAL_MICRO_BOARD_REVISION STREQUAL EVK)
-    set(libs_nxp_rt1176-sdk_SOURCES_REVISION
-        evkmimxrt1170_flexspi_nor_config.c
-        fsl_flexspi_nor_boot.c
-        pin_mux_evk.c
-    )
-    set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
-        CPU_MIMXRT1176DVMAA_cm7
-    )
-elseif(CORAL_MICRO_BOARD_REVISION STREQUAL P0)
-    set(libs_nxp_rt1176-sdk_SOURCES_REVISION
-        pin_mux_p0.c
-    )
-    set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
-        CPU_MIMXRT1176DVMAA_cm7
-    )
-elseif(CORAL_MICRO_BOARD_REVISION STREQUAL P1)
-    set(libs_nxp_rt1176-sdk_SOURCES_REVISION
-        pin_mux_p0.c
-    )
-    set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7
-        CPU_MIMXRT1176CVM8A_cm7
-    )
-else()
-    message(FATAL_ERROR "No revision selected.")
-endif()
+set(libs_nxp_rt1176-sdk_SOURCES_REVISION
+)
 
 set(libs_nxp_rt1176-sdk_SOURCES
-    board.c
     board_hardware.c
     clock_config.c
-    dlmalloc.c
-    peripherals.c
-    usb_device_class.c
     usb_device_cdc_eem.c
-    ${libs_nxp_rt1176-sdk_SOURCES_REVISION}
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/board.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/pin_mux.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/usb_device_class.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand/flexspi/fsl_flexspi_nand_flash.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists/fsl_component_generic_list.c
-    # ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/internal_flash/fsl_adapter_flexspi_nor_flash.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.c
@@ -123,12 +96,6 @@ set(libs_nxp_rt1176-sdk-m4_SOURCES
 )
 
 set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
-    # dlmalloc defines
-    HAVE_MMAP=0
-    ONLY_MSPACES
-    USE_DL_PREFIX
-    malloc_getpagesize=0x800
-    # Other defines
     FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1
     LWIP_ENET_FLEXIBLE_CONFIGURATION
     LWIP_POSIX_SOCKETS_IO_NAMES=0
@@ -144,17 +111,18 @@ set(libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS
 )
 
 set(libs_nxp_rt1176-sdk-m7_COMPILE_DEFINITIONS
-    ${libs_nxp_rt1176-sdk_COMPILE_DEFINITIONS_REVISION-m7}
+    CPU_MIMXRT1176CVM8A_cm7
     XIP_BOOT_HEADER_ENABLE=1
     XIP_EXTERNAL_FLASH=1
 )
 
 set(libs_nxp_rt1176-sdk-m4_COMPILE_DEFINITIONS
-    CPU_MIMXRT1176DVMAA_cm4
+    CPU_MIMXRT1176CVM8A_cm4
 )
 
 set(libs_nxp_rt1176-sdk_TARGET_INCLUDE_DIRECTORIES
     ${PROJECT_SOURCE_DIR}/libs/nxp/rt1176-sdk
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/xip
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/common_task
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/flash/nand
@@ -315,7 +283,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_freertos-m4
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_sdmmc
-    sdmmc_config.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/sdmmc_config.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/sdio/fsl_sdio.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_usdhc.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/sdmmc/host/usdhc/non_blocking/fsl_sdmmc_host.c
@@ -334,7 +302,7 @@ target_link_libraries(libs_nxp_rt1176-sdk_sdmmc
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_lwip
-    dhcp_server.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/dhcp_server.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/lwiperf/lwiperf.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif_kinetis.c
@@ -418,7 +386,7 @@ set(libs_nxp_rt1176-sdk_wiced_SOURCES
     bluetooth.cc
     bt_firmware_controller.c
     WICED/platform/MCU/LPC/WWD/wwd_platform.cc
-    rtos/freertos/vendors/nxp/wifi/wiced/iot_wifi.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/rtos/freertos/vendors/nxp/wifi/wiced/iot_wifi.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/platform_bluetooth.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/imxrt_port/wiced_rtos.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/RTOS/FreeRTOS/WWD/wwd_rtos.c
@@ -445,7 +413,8 @@ set(libs_nxp_rt1176-sdk_wiced_SOURCES
 )
 
 set(libs_nxp_rt1176-sdk_wiced_INCLUDE_DIRECTORIES
-    ${PROJECT_SOURCE_DIR}/libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/bt_app_inc
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Components/stack/include
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/wiced_bt/BTE/Projects/bte/main
@@ -619,7 +588,7 @@ target_include_directories(libs_nxp_rt1176-sdk-mbedtls PUBLIC
 )
 
 target_compile_definitions(libs_nxp_rt1176-sdk-mbedtls PUBLIC
-    MBEDTLS_CONFIG_FILE="libs/nxp/rt1176-sdk/ksdk_mbedtls_config.h"
+    MBEDTLS_CONFIG_FILE="third_party/modified/nxp/rt1176-sdk/ksdk_mbedtls_config.h"
 )
 
 target_sources(libs_nxp_rt1176-sdk_freertos PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)

@@ -19,8 +19,8 @@
 #include <cstdio>
 
 #include "libs/base/utils.h"
-#include "libs/nxp/rt1176-sdk/board.h"
 #include "libs/nxp/rt1176-sdk/clock_config.h"
+#include "third_party/modified/nxp/rt1176-sdk/board.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/phy/usb_phy.h"
 
 extern "C" void USB_OTG1_IRQHandler(void) {

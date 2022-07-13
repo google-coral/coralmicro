@@ -29,7 +29,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_BLE/bt_app_inc/wiced_bt_stack.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/wwd_wiced.h"
 extern "C" {
-#include "libs/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
+#include "third_party/modified/nxp/rt1176-sdk/rtos/freertos/libraries/abstractions/wifi/include/iot_wifi.h"
 }
 
 extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;

@@ -17,7 +17,7 @@
 #ifndef LIBS_BASE_TASKS_M4_H_
 #define LIBS_BASE_TASKS_M4_H_
 
-#include "libs/FreeRTOS/FreeRTOSConfig.h"
+#include "FreeRTOSConfig.h"
 
 #define IPC_TASK_PRIORITY (configMAX_PRIORITIES - 1)
 #define CONSOLE_TASK_PRIORITY (configMAX_PRIORITIES - 1)

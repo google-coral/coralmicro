@@ -21,7 +21,7 @@ endif()
 
 project(CoralMicroProject)
 
-include(cmake/bundle_static_library.cmake)
+include(third_party/github/cristianadam/bundle_static_library.cmake)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE OR NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type" FORCE)
