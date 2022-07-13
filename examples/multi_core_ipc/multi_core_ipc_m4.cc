@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "examples/message_passing/example_message.h"
+#include "examples/multi_core_ipc/example_message.h"
 #include "libs/base/ipc_m4.h"
 #include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/task.h"

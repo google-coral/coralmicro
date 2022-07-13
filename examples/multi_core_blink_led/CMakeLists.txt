@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(message_passing
-    message_passing.cc
+add_executable_m7(multi_core_blink_led
+    main_app_m7.cc
     M4_EXECUTABLE
-    message_passing_m4
+    multi_core_blink_led_m4
 )
 
-target_link_libraries(message_passing
+target_link_libraries(multi_core_blink_led
     libs_base-m7_freertos
 )
 
-add_executable_m4(message_passing_m4
-    message_passing_m4.cc
+add_executable_m4(multi_core_blink_led_m4
+    blink_led_m4.cc
 )
 
-target_link_libraries(message_passing_m4
+target_link_libraries(multi_core_blink_led_m4
     libs_base-m4_freertos
 )

@@ -12,20 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(freertos_multi_core
-    hello_world_cm7.cc
-    M4_EXECUTABLE
-    freertos_multi_core_m4
+add_executable_m7(blink_led
+    main_app.cc
 )
 
-target_link_libraries(freertos_multi_core
+target_link_libraries(blink_led
     libs_base-m7_freertos
-)
-
-add_executable_m4(freertos_multi_core_m4
-    hello_world_cm4.cc
-)
-
-target_link_libraries(freertos_multi_core_m4
-    libs_base-m4_freertos
 )

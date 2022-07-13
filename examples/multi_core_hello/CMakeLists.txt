@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(blink_led_m4
-    main_app_m7.cc
+add_executable_m7(multi_core_hello
+    hello_world_cm7.cc
     M4_EXECUTABLE
-    blink_led_m4_m4
+    multi_core_hello_m4
 )
 
-target_link_libraries(blink_led_m4
+target_link_libraries(multi_core_hello
     libs_base-m7_freertos
 )
 
-add_executable_m4(blink_led_m4_m4
-    blink_led_m4.cc
+add_executable_m4(multi_core_hello_m4
+    hello_world_cm4.cc
 )
 
-target_link_libraries(blink_led_m4_m4
+target_link_libraries(multi_core_hello_m4
     libs_base-m4_freertos
 )
