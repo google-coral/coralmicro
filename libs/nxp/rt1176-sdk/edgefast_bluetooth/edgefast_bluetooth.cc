@@ -11,6 +11,10 @@ extern unsigned int brcm_patch_ram_length;
 extern "C" wiced_result_t wiced_wlan_connectivity_init(void);
 void ble_pwr_on(void);
 
+extern "C" lfs_t* lfs_pl_init() {
+    return coralmicro::Lfs();
+}
+
 extern "C" int controller_hci_uart_get_configuration(controller_hci_uart_config_t *config) {
     if (!config) {
         return -1;

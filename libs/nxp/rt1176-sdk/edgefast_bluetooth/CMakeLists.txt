@@ -13,8 +13,6 @@
 # limitations under the License.
 
 add_library_m7(edgefast_bluetooth_internal
-    BT_storage_pl.cc
-    bt_ble_settings.cc
     edgefast_bluetooth.cc
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/host/bt_pal_a2dp.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/host/bt_pal_addr.c
@@ -49,6 +47,7 @@ add_library_m7(edgefast_bluetooth_internal
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/host/bt_pal_ssp.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/host/bt_pal_uuid.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/platform/bt_ble_platform.c
+    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/impl/ethermind/platform/bt_ble_settings.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/porting/atomic_c.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/porting/buf.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/porting/porting.c
@@ -60,6 +59,7 @@ add_library_m7(edgefast_bluetooth_internal
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/bluetooth/export/extension/smp_pl.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/osal/src/freertos/EM_timer.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/BT_status_pl.c
+    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/BT_storage_pl.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/btsnoop_pl.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/controller.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/hci_uart.c
