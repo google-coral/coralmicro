@@ -20,6 +20,7 @@ set -ex
 
 sudo apt-get update
 sudo apt-get -y install \
+  make \
   cmake \
   libhidapi-hidraw0 \
   libusb-1.0-0-dev \

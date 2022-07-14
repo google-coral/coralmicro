@@ -19,6 +19,7 @@
 set -ex
 
 brew install \
+  make \
   cmake \
   libusb \
   lsusb
