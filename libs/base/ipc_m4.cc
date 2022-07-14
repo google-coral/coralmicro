@@ -30,7 +30,7 @@ namespace coralmicro {
 void IpcM4::HandleSystemMessage(const IpcSystemMessage& message) {
     switch (message.type) {
         case IpcSystemMessageType::kConsoleBufferPtr:
-            SetM4ConsoleBufferPtr(static_cast<IpcStreamBuffer*>(
+            ConsoleM4SetBuffer(static_cast<IpcStreamBuffer*>(
                 message.message.console_buffer_ptr));
             break;
         default:

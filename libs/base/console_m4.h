@@ -21,8 +21,8 @@
 
 namespace coralmicro {
 
-void ConsoleInit();
-void SetM4ConsoleBufferPtr(IpcStreamBuffer* buffer);
+void ConsoleM4Init();
+void ConsoleM4SetBuffer(IpcStreamBuffer* buffer);
 
 }  // namespace coralmicro
 

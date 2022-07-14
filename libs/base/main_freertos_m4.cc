@@ -47,7 +47,7 @@ extern "C" int main(int argc, char** argv) __attribute__((weak));
 extern "C" int main(int argc, char** argv) {
     BOARD_InitHardware(true);
 
-    coralmicro::ConsoleInit();
+    coralmicro::ConsoleM4Init();
     CHECK(coralmicro::LfsInit());
     coralmicro::GpioInit();
 

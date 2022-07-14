@@ -29,8 +29,8 @@ struct ResetStats {
 
 void ResetToBootloader();
 void ResetToFlash();
-void StoreResetReason();
-ResetStats GetResetStats();
+void ResetStoreReason();
+ResetStats ResetGetStats();
 
 }  // namespace coralmicro
 

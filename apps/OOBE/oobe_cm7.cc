@@ -341,7 +341,7 @@ class CameraTask : private Task<CameraTask> {
 };
 
 void reset_count_rpc(struct jsonrpc_request* r) {
-  const auto reset_stats = GetResetStats();
+  const auto reset_stats = ResetGetStats();
   jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %d}", "watchdog_resets",
                          reset_stats.watchdog_resets, "lockup_resets",
                          reset_stats.lockup_resets, "reset_register",
