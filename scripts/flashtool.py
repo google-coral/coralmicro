@@ -90,6 +90,9 @@ ELFLOADER_TARGET_RAM = 0
 ELFLOADER_TARGET_PATH = 1
 ELFLOADER_TARGET_FILESYSTEM = 2
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+BUILD_DIR = os.path.join(SCRIPT_DIR, '..', 'build')
+
 def elfloader_msg_setsize(size):
     return struct.pack('=BBl', 0, ELFLOADER_SETSIZE, size)
 
@@ -613,7 +616,7 @@ def main():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     basic_group = parser.add_argument_group('Flashing options')
     basic_group.add_argument(
-        '--build_dir', '-b', type=str, required=True,
+        '--build_dir', '-b', type=str, default=BUILD_DIR,
         help='Path to the coralmicro build output.')
     basic_group.add_argument(
         '--subapp', type=str, required=False,
@@ -626,14 +629,8 @@ def main():
         This means the app will be overrwritten upon reset. Without this flag, \
         it flashes to the flash memory and resets the board to load it.')
     basic_group.add_argument(
-        '--noram', dest='ram', action='store_false',
-        help=argparse.SUPPRESS)
-    basic_group.add_argument(
-        '--noreset', dest='reset', action='store_false',
+        '--noreset', dest='noreset', action='store_true',
         help='Prevents resetting the board after flashing the board.')
-    basic_group.add_argument(
-        '--reset', dest='reset', action='store_true',
-        help=argparse.SUPPRESS)
     parser.add_argument(
         '--elfloader_path', type=str, required=False,
         help=argparse.SUPPRESS)
@@ -693,18 +690,12 @@ def main():
     advanced_group.add_argument(
         '--data_dir', type=str, required=False,
         help=argparse.SUPPRESS)
-    parser.add_argument(
-        '--program', dest='program', action='store_true',
-        help=argparse.SUPPRESS)
     advanced_group.add_argument(
-        '--noprogram', dest='program', action='store_false',
+        '--noprogram', dest='noprogram', action='store_true',
         help='Prevents flashing the program code (only data is flashed, \
         unless --nodata is also specified).')
-    parser.add_argument(
-        '--data', dest='data', action='store_true',
-        help=argparse.SUPPRESS)
     advanced_group.add_argument(
-        '--nodata', dest='data', action='store_false',
+        '--nodata', dest='nodata', action='store_true',
         help='Prevents flashing the app data (only program code is flashed, \
         unless --noprogram is also specified).')
     parser.add_argument(
@@ -809,7 +800,7 @@ def main():
         'blhost_path': blhost_path,
         'flashloader_path': flashloader_path,
         'ram': args.ram,
-        'reset': args.reset,
+        'reset': not args.noreset,
         'elfloader_path': elfloader_path,
         'elfloader_elf_path': elfloader_elf_path,
         'elf_path': elf_path,
@@ -824,8 +815,8 @@ def main():
         'debug': args.debug,
         'jlink_path': args.jlink_path,
         'toolchain_path': toolchain_path,
-        'program': args.program,
-        'data': args.data,
+        'program': not args.noprogram,
+        'data': not args.nodata,
     }
 
     sdp_devices = len(EnumerateSDP())
