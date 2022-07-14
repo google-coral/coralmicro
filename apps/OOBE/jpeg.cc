@@ -70,7 +70,7 @@ void JpegCompressImpl(struct jpeg_compress_struct* cinfo, unsigned char* rgb,
   const int row_stride = cinfo->image_width * 3;
   while (cinfo->next_scanline < cinfo->image_height) {
     auto* line = &rgb[cinfo->next_scanline * row_stride];
-    for (int j = 0; j < cinfo->image_width; ++j)
+    for (JDIMENSION j = 0; j < cinfo->image_width; ++j)
       std::swap(line[3 * j], line[3 * j + 2]);
     row_pointer[0] = line;
     jpeg_write_scanlines(cinfo, row_pointer, 1);

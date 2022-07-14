@@ -198,7 +198,9 @@ void elfloader_main(void *param) {
     if (elf_size != -1) {
       application_elf = std::make_unique<uint8_t[]>(elf_size);
       if (coralmicro::LfsReadFile(
-              "/default.elf", application_elf.get(), elf_size) != elf_size) {
+              "/default.elf",
+              application_elf.get(),
+              elf_size) != static_cast<size_t>(elf_size)) {
         application_elf.reset();
       }
     }

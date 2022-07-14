@@ -31,7 +31,7 @@
     }
 }
 
-extern "C" void app_main(void *param) {
+extern "C" [[noreturn]] void app_main(void *param) {
     xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, nullptr,
                 APP_TASK_PRIORITY, nullptr);
     bool on = true;

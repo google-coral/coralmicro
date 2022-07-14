@@ -30,7 +30,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
-extern "C" [[noreturn]] void app_main(void* param);
+extern "C" void app_main(void* param);
 
 namespace {
 lpi2c_rtos_handle_t i2c5_handle;

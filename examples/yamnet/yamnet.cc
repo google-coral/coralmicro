@@ -181,5 +181,4 @@ extern "C" [[noreturn]] void app_main(void* param) {
         vTaskDelay(pdMS_TO_TICKS(coralmicro::tensorflow::kYamnetDurationMs));
 #endif
     }
-    vTaskSuspend(nullptr);
 }

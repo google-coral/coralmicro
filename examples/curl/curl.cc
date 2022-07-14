@@ -38,12 +38,11 @@
 // When flashing this example, you must specify the "subapp" module name for
 // the flashtool, which you can see in the local CMakeLists.txt file.
 // For example, here's how to flash the Wi-Fi version of this example:
-//
-// python3 scripts/flashtool.py -b build -e curl --subapp curl_wifi \
-//   --wifi_ssid network-name --wifi_psk network-password
-
+/*
+python3 scripts/flashtool.py -b build -e curl --subapp curl_wifi \
+        --wifi_ssid network-name --wifi_psk network-password
+*/
 namespace coralmicro {
-
 namespace {
 struct DnsCallbackArg {
     SemaphoreHandle_t sema;
@@ -51,14 +50,14 @@ struct DnsCallbackArg {
     ip_addr_t ip_addr;
 };
 
-static size_t curl_writefunction(void* contents, size_t size, size_t nmemb,
-                                 void* param) {
+size_t curl_writefunction(void* contents, size_t size, size_t nmemb,
+                          void* param) {
     size_t* bytes_curled = reinterpret_cast<size_t*>(param);
     *bytes_curled = *bytes_curled + (size * nmemb);
     return size * nmemb;
 }
 
-static void CURLRequest(const char* url) {
+void CURLRequest(const char* url) {
     CURL* curl;
     CURLcode res;
 
@@ -105,7 +104,6 @@ bool PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
     return true;
 }
 
-}  // namespace
 void Main() {
     std::optional<std::string> our_ip_addr = std::nullopt;
 #if defined(CURL_ETHERNET)
@@ -155,7 +153,9 @@ void Main() {
 
     vTaskSuspend(nullptr);
 }
+}  // namespace
 }  // namespace coralmicro
+
 extern "C" void app_main(void* param) {
     (void)param;
     coralmicro::Main();
