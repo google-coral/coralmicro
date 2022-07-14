@@ -13,34 +13,32 @@
 // limitations under the License.
 
 #include "libs/base/pwm.h"
+
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
-
-#include <cstdio>
 
 // Runs simple PWM cycles with pins PWM_A (pin 10 on the left-side header)
 // and PWM_B (pin 9 on the left-side header).
 // Note: These pins output a max of 1.8V
 
 // [start-sphinx-snippet:pwm]
-extern "C" void app_main(void *param) {
-    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_00_FLEXPWM1_PWM0_A, 0U);
-    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_FLEXPWM1_PWM0_B, 0U);
-    printf("i'm so pwm\r\n");
-    coralmicro::PwmModuleConfig config;
-    memset(&config, 0, sizeof(config));
-    config.base = PWM1;
-    config.module = kPWM_Module_0;
-    config.A.enabled = true;
-    config.A.duty_cycle = 20;
-    config.B.enabled = true;
-    config.B.duty_cycle = 80;
-    coralmicro::PwmInit(config);
+extern "C" [[noreturn]] void app_main(void* param) {
+    coralmicro::PwmInit();
+    coralmicro::PwmPinConfig pin_a_config{
+        /*duty_cycle=*/20,
+        /*pin_setting=*/
+        coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value()};
+    coralmicro::PwmPinConfig pin_b_config{
+        /*duty_cycle=*/80,
+        /*pin_setting=*/
+        coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value()};
+    std::vector<coralmicro::PwmPinConfig> configs;
+    configs.push_back(pin_a_config);
+    configs.push_back(pin_b_config);
     while (true) {
-        coralmicro::PwmEnable(config, true);
+        coralmicro::PwmEnable(configs);
         vTaskDelay(pdMS_TO_TICKS(1000));
-        coralmicro::PwmEnable(config, false);
+        coralmicro::PwmDisable(configs);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

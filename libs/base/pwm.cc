@@ -18,7 +18,9 @@
 
 #include <cstdio>
 
+#include "libs/base/check.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_pwm.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_xbara.h"
 
@@ -38,9 +40,31 @@ pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
             assert(false);
     }
 }
+
 }  // namespace
 
-void PwmInit(const PwmModuleConfig& config) {
+std::optional<PwmPinSetting> PwmGetPinSetting(int pin) {
+    PwmPinSetting setting{};
+    setting.base = PWM1;
+    setting.sub_module = kPWM_Module_0;
+    switch (pin) {
+        case kPwmPin10:
+            setting.pwm_channel = kPWM_PwmA;
+            return setting;
+        case kPwmPin9:
+            setting.pwm_channel = kPWM_PwmB;
+            return setting;
+        default:
+            return std::nullopt;
+    }
+}
+
+void PwmInit() {
+    static bool muxed{false};
+    if (!muxed) {
+        IOMUXC_SetPinMux(IOMUXC_GPIO_AD_00_FLEXPWM1_PWM0_A, 0U);
+        IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_FLEXPWM1_PWM0_B, 0U);
+    }
     static bool xbar_inited = false;
     if (!xbar_inited) {
         XBARA_Init(XBARA1);
@@ -54,46 +78,48 @@ void PwmInit(const PwmModuleConfig& config) {
                                    kXBARA1_OutputFlexpwm1234Fault3);
         xbar_inited = true;
     }
+}
 
+void PwmEnable(const std::vector<PwmPinConfig>& pin_configs) {
+    if (pin_configs.empty()) return;
+
+    // Each pwm submodule only has 2 pins to output PWM.
+    CHECK(pin_configs.size() < 2);
+    if (pin_configs.size() == 2) {
+        CHECK(pin_configs[0].pin_setting.base ==
+              pin_configs[1].pin_setting.base);
+        CHECK(pin_configs[0].pin_setting.sub_module ==
+              pin_configs[1].pin_setting.sub_module);
+    }
+
+    const auto& base_addr = pin_configs[0].pin_setting.base;
+    const auto& sub_module = pin_configs[0].pin_setting.sub_module;
     pwm_config_t pwm_config;
     PWM_GetDefaultConfig(&pwm_config);
     pwm_config.prescale = kPWM_Prescale_Divide_4;
-    if (PWM_Init(config.base, config.module, &pwm_config) == kStatus_Fail) {
+    if (PWM_Init(base_addr, sub_module, &pwm_config) == kStatus_Fail) {
         printf("PWM_Init failed\r\n");
         return;
     }
-
-    uint32_t source_clock_hz = CLOCK_GetRootClockFreq(kCLOCK_Root_Bus);
-    pwm_signal_param_t signal_param[2];
-    int signal = 0;
-    if (config.A.enabled) {
-        signal_param[signal].pwmChannel = kPWM_PwmA;
-        signal_param[signal].level = kPWM_HighTrue;
-        signal_param[signal].dutyCyclePercent = config.A.duty_cycle;
-        signal_param[signal].faultState = kPWM_PwmFaultState0;
-        ++signal;
+    pwm_signal_param_t signal_param[pin_configs.size()];
+    for (size_t i = 0; i < pin_configs.size(); ++i) {
+        signal_param[i].pwmChannel = pin_configs[i].pin_setting.pwm_channel;
+        signal_param[i].level = kPWM_HighTrue;
+        signal_param[i].dutyCyclePercent = pin_configs[i].duty_cycle;
+        signal_param[i].faultState = kPWM_PwmFaultState0;
     }
-
-    if (config.B.enabled) {
-        signal_param[signal].pwmChannel = kPWM_PwmB;
-        signal_param[signal].level = kPWM_HighTrue;
-        signal_param[signal].dutyCyclePercent = config.B.duty_cycle;
-        signal_param[signal].faultState = kPWM_PwmFaultState0;
-        ++signal;
-    }
-
-    assert(signal > 0);
-    PWM_SetupPwm(config.base, config.module, &signal_param[0], signal,
+    auto source_clock_hz = CLOCK_GetRootClockFreq(kCLOCK_Root_Bus);
+    PWM_SetupPwm(base_addr, sub_module, &signal_param[0], pin_configs.size(),
                  kPWM_SignedCenterAligned, 1000, source_clock_hz);
-
-    PWM_SetPwmLdok(config.base, PwmModuleToControl(config.module), true);
+    PWM_SetPwmLdok(base_addr, PwmModuleToControl(sub_module), true);
+    PWM_StartTimer(base_addr, PwmModuleToControl(sub_module));
 }
 
-void PwmEnable(const PwmModuleConfig& config, bool enable) {
-    if (enable) {
-        PWM_StartTimer(config.base, PwmModuleToControl(config.module));
-    } else {
-        PWM_StopTimer(config.base, PwmModuleToControl(config.module));
+void PwmDisable(const std::vector<PwmPinConfig>& pin_configs) {
+    if (pin_configs.empty()) return;
+    for (const auto& pin_config : pin_configs) {
+        PWM_StopTimer(pin_config.pin_setting.base,
+                      PwmModuleToControl(pin_config.pin_setting.sub_module));
     }
 }
 }  // namespace coralmicro

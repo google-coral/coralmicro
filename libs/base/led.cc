@@ -36,6 +36,7 @@ bool LedSet(Led led, bool enable, unsigned int brightness) {
             break;
         case Led::kTpu:
 #if __CORTEX_M == 7
+            PwmInit();
             if (!GpioGet(Gpio::kEdgeTpuPmic)) {
                 printf("TPU LED requires TPU power to be enabled.\r\n");
                 ret = false;
@@ -44,17 +45,14 @@ bool LedSet(Led led, bool enable, unsigned int brightness) {
             if (brightness > kLedFullyOn) {
                 brightness = kLedFullyOff;
             }
-            PwmModuleConfig config;
-            config.base = PWM1;
-            config.module = kPWM_Module_1;
+            coralmicro::PwmPinConfig pin_a_config;
+            pin_a_config.duty_cycle = brightness;
+            pin_a_config.pin_setting =
+                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
             if (enable) {
-                config.A.enabled = true;
-                config.A.duty_cycle = brightness;
-                config.B.enabled = false;
-                PwmInit(config);
-                PwmEnable(config, true);
+                PwmEnable({pin_a_config});
             } else {
-                PwmEnable(config, false);
+                PwmDisable({pin_a_config});
             }
 #else
             ret = false;

@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-#include "Arduino.h"
-#include "wiring_private.h"
+#include <algorithm>
+#include <cassert>
 
+#include "Arduino.h"
 #include "libs/base/analog.h"
 #include "libs/base/led.h"
 #include "libs/base/pwm.h"
-
-#include <algorithm>
-#include <cassert>
+#include "wiring_private.h"
 
 using coralmicro::AdcConfig;
 using coralmicro::AdcDevice;
 using coralmicro::AdcSide;
-using coralmicro::PwmModuleConfig;
 using coralmicro::PwmPinConfig;
 
 static constexpr int kAdcFullResolutionBits = 12;
@@ -37,26 +35,15 @@ static int adc_resolution_bits = 10;
 static int dac_resolution_bits = 8;
 static AdcConfig Config_A0;
 static AdcConfig Config_A1;
-static PwmModuleConfig pwm_config;
-
 
 void wiringAnalogInit() {
-    pwm_config.base = PWM1;
-    pwm_config.module = kPWM_Module_0;
-    pwm_config.A.enabled = false;
-    pwm_config.B.enabled = false;
+    coralmicro::PwmInit();
     coralmicro::AdcInit(AdcDevice::kAdc1);
     coralmicro::DacInit();
-    coralmicro::AdcCreateConfig(
-        Config_A0,
-        AdcDevice::kAdc1, 0,
-        AdcSide::kB, false
-    );
-    coralmicro::AdcCreateConfig(
-        Config_A1,
-        AdcDevice::kAdc1, 0,
-        AdcSide::kA, false
-    );
+    coralmicro::AdcCreateConfig(Config_A0, AdcDevice::kAdc1, 0, AdcSide::kB,
+                                false);
+    coralmicro::AdcCreateConfig(Config_A1, AdcDevice::kAdc1, 0, AdcSide::kA,
+                                false);
 }
 
 const AdcConfig& pinToADCConfig(pin_size_t pinNumber) {
@@ -91,28 +78,31 @@ void analogReference(uint8_t mode) {}
 
 void analogWrite(pin_size_t pinNumber, int value) {
     assert(value <= 255);
-    PwmPinConfig *pin_config;
-    if (pinNumber == A3) {
-        pin_config = &pwm_config.A;
-    } else if (pinNumber == A4) {
-        pin_config = &pwm_config.B;
-    } else if (pinNumber == DAC0) {
-        analogWriteDAC(pinNumber, value);
-        return;
-    } else if (pinNumber == PIN_LED_TPU) {
-        coralmicro::LedSet(coralmicro::Led::kTpu, true,
-                               map(value,
-                                   0, 255,
-                                   coralmicro::kLedFullyOff,
+    coralmicro::PwmPinSetting pwm_pin_setting;
+    switch (pinNumber) {
+        case A3:  // Pwm pin 10.
+            pwm_pin_setting =
+                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
+            break;
+        case A4:  // Pwm pin 9.
+            pwm_pin_setting =
+                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value();
+            break;
+        case DAC0:
+            analogWriteDAC(pinNumber, value);
+            return;
+        case PIN_LED_TPU:
+            coralmicro::LedSet(coralmicro::Led::kTpu, true,
+                               map(value, 0, 255, coralmicro::kLedFullyOff,
                                    coralmicro::kLedFullyOn));
-        return;
-    } else {
-        assert(false);
+            return;
+        default:
+            assert(false);
     }
-    pin_config->enabled = true;
-    pin_config->duty_cycle = map(value, 0, 255, 0, 100);
-    coralmicro::PwmInit(pwm_config);
-    coralmicro::PwmEnable(pwm_config, true);
+    coralmicro::PwmPinConfig pin_config{
+        /*duty_cycle=*/map(value, 0, 255, 0, 100),
+        /*pin_setting=*/pwm_pin_setting};
+    coralmicro::PwmEnable({pin_config});
 }
 
 void analogReadResolution(int bits) {
