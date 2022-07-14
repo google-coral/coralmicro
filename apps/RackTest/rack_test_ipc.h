@@ -15,7 +15,7 @@
 #ifndef APPS_RACKTEST_RACK_TEST_IPC_H_
 #define APPS_RACKTEST_RACK_TEST_IPC_H_
 
-#include "libs/base/message_buffer.h"
+#include "libs/base/ipc_message_buffer.h"
 
 enum class RackTestAppMessageType : uint8_t {
   kXor = 0,

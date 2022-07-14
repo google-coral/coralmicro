@@ -15,7 +15,7 @@
 #ifndef _EXAMPLE_MESSAGE_PASSING_EXAMPlE_MESSAGE_H_
 #define _EXAMPLE_MESSAGE_PASSING_EXAMPlE_MESSAGE_H_
 
-#include "libs/base/message_buffer.h"
+#include "libs/base/ipc_message_buffer.h"
 
 namespace mp_example {
 

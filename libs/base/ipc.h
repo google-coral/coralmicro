@@ -19,7 +19,7 @@
 
 #include <functional>
 
-#include "libs/base/message_buffer.h"
+#include "libs/base/ipc_message_buffer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"

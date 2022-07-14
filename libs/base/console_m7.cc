@@ -23,7 +23,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/ipc_m7.h"
-#include "libs/base/message_buffer.h"
+#include "libs/base/ipc_message_buffer.h"
 #include "libs/base/mutex.h"
 #include "libs/base/tasks.h"
 #include "libs/usb/usb_device_task.h"

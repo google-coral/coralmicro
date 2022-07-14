@@ -19,7 +19,7 @@
 
 #include <array>
 
-#include "libs/base/message_buffer.h"
+#include "libs/base/ipc_message_buffer.h"
 #include "libs/cdc_acm/cdc_acm.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 

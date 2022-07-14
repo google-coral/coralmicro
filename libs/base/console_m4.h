@@ -17,7 +17,7 @@
 #ifndef LIBS_BASE_CONSOLE_M4_H_
 #define LIBS_BASE_CONSOLE_M4_H_
 
-#include "libs/base/message_buffer.h"
+#include "libs/base/ipc_message_buffer.h"
 
 namespace coralmicro {
 

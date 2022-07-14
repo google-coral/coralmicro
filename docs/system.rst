@@ -14,9 +14,9 @@ Inter-process communication (IPC)
 .. doxygenfile:: base/ipc_m4.h
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
 
-`[message_buffer.h source] <https://github.com/google-coral/micro/blob/master/libs/base/message_buffer.h>`_
+`[ipc_message_buffer.h source] <https://github.com/google-coral/micro/blob/master/libs/base/ipc_message_buffer.h>`_
 
-.. doxygenfile:: base/message_buffer.h
+.. doxygenfile:: base/ipc_message_buffer.h
 
 
 Mutex

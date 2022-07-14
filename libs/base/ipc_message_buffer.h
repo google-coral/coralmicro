@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBS_BASE_MESSAGE_BUFFER_H_
-#define LIBS_BASE_MESSAGE_BUFFER_H_
+#ifndef LIBS_BASE_IPC_MESSAGE_BUFFER_H_
+#define LIBS_BASE_IPC_MESSAGE_BUFFER_H_
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/message_buffer.h"
@@ -64,4 +64,4 @@ static_assert(sizeof(IpcSystemMessage) <= kIpcMessageBufferDataSize);
 
 }  // namespace coralmicro
 
-#endif  // LIBS_BASE_MESSAGE_BUFFER_H_
+#endif  // LIBS_BASE_IPC_MESSAGE_BUFFER_H_

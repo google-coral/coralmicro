@@ -21,7 +21,7 @@
 #include <memory>
 
 #include "libs/base/console_m7.h"
-#include "libs/base/message_buffer.h"
+#include "libs/base/ipc_message_buffer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/message_buffer.h"
 #include "third_party/freertos_kernel/include/task.h"
