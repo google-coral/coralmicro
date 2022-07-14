@@ -31,6 +31,17 @@
 #include "libs/curl/curl.h"
 /* clang-format on */
 
+// Demonstrates how to connect to the internet using either Wi-Fi or ethernet.
+// Be sure you have either the Coral Wireless Add-on Board or PoE Add-on Board
+// connected.
+//
+// When flashing this example, you must specify the "subapp" module name for
+// the flashtool, which you can see in the local CMakeLists.txt file.
+// For example, here's how to flash the Wi-Fi version of this example:
+//
+// python3 scripts/flashtool.py -b build -e curl --subapp curl_wifi \
+//   --wifi_ssid network-name --wifi_psk network-password
+
 namespace coralmicro {
 
 namespace {
@@ -98,22 +109,25 @@ bool PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
 void Main() {
     std::optional<std::string> our_ip_addr = std::nullopt;
 #if defined(CURL_ETHERNET)
+    printf("Attempting to use ethernet...\r\n");
     coralmicro::EthernetInit(/*default_iface=*/true);
     our_ip_addr = coralmicro::EthernetGetIp();
 #elif defined(CURL_WIFI)
+    printf("Attempting to use Wi-Fi...\r\n");
     // Uncomment me to use the external antenna.
     // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);
     bool success = false;
     success = coralmicro::WiFiTurnOn();
     if (!success) {
-        printf("Failed to turn on Wifi\r\n");
+        printf("Failed to turn on Wi-Fi\r\n");
         return;
     }
     success = coralmicro::WiFiConnect();
     if (!success) {
-        printf("falied to connect wifi\r\n");
+        printf("Failed to connect to Wi-Fi\r\n");
         return;
     }
+    printf("Wi-Fi connected\r\n");
     our_ip_addr = coralmicro::WiFiGetIp();
 #endif
 
@@ -137,6 +151,7 @@ void Main() {
     snprintf(uri.get(), size + 1, uri_fmt, hostname);
     CURLRequest(uri.get());
     curl_global_cleanup();
+    printf("Done.");
 
     vTaskSuspend(nullptr);
 }
