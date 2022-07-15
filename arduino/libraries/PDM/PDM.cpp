@@ -29,7 +29,16 @@ PDMClass::PDMClass()
 
 PDMClass::~PDMClass() { end(); }
 
-int PDMClass::begin() { return 0; }
+int PDMClass::begin() {
+    current_audio_cb_id_ = audio_service_.AddCallback(
+        this,
+        +[](void* ctx, const int32_t* samples, size_t num_samples) -> bool {
+            auto pdm = static_cast<PDMClass*>(ctx);
+            pdm->Append(samples, num_samples);
+            return true;
+        });
+    return 0;
+}
 
 void PDMClass::end() {
     if (current_audio_cb_id_.has_value()) {
@@ -48,13 +57,16 @@ int PDMClass::read(std::vector<int32_t>& buffer, size_t size) {
 }
 
 void PDMClass::onReceive(void (*function)(void)) {
+    if (function == nullptr) {
+        return;
+    }
     onReceive_ = function;
 
     if (current_audio_cb_id_.has_value()) {
         audio_service_.RemoveCallback(current_audio_cb_id_.value());
     }
 
-    audio_service_.AddCallback(
+    current_audio_cb_id_ = audio_service_.AddCallback(
         this,
         +[](void* ctx, const int32_t* samples, size_t num_samples) -> bool {
             auto pdm = static_cast<PDMClass*>(ctx);

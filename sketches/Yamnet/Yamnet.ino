@@ -29,8 +29,6 @@ constexpr char kModelName[] = "/models/yamnet_edgetpu.tflite";
 void setup() {
     Serial.begin(115200);
     SD.begin();
-
-    Mic.onReceive(pdmCallback);
     Mic.begin();
 
     tflite::MicroErrorReporter error_reporter;
@@ -113,5 +111,3 @@ void loop() {
 
     delay(coralmicro::tensorflow::kYamnetDurationMs);
 }
-
-void pdmCallback() {}
