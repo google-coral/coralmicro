@@ -33,13 +33,13 @@ void TempSensorInit() {
 
 float TempSensorRead(TempSensor sensor) {
     switch (sensor) {
-        case TempSensor::kCPU: {
+        case TempSensor::kCpu: {
             // Toggle CTRL1_START to get new single-shot read.
             TMPSNS_StopMeasure(TMPSNS);
             TMPSNS_StartMeasure(TMPSNS);
             return TMPSNS_GetCurrentTemperature(TMPSNS);
         }
-        case TempSensor::kTPU: {
+        case TempSensor::kTpu: {
             auto context = EdgeTpuManager::GetSingleton()->OpenDevice();
             return EdgeTpuManager::GetSingleton()->GetTemperature().value();
         }

@@ -22,6 +22,7 @@
 #include <limits>
 #include <string>
 
+#include "libs/base/check.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 
@@ -130,16 +131,16 @@ std::optional<std::string> WiFiGetIp() {
            std::to_string(ip[2]) + '.' + std::to_string(ip[3]);
 }
 
-bool WiFiSetAntenna(WiFiAntenna antenna) {
+void WiFiSetAntenna(WiFiAntenna antenna) {
     switch (antenna) {
         case WiFiAntenna::kInternal:
             GpioSet(Gpio::kAntennaSelect, false);
-            return true;
+            break;
         case WiFiAntenna::kExternal:
             GpioSet(Gpio::kAntennaSelect, true);
-            return true;
+            break;
         default:
-            return false;
+            CHECK(!"Invalid antenna value");
     }
 }
 

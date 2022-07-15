@@ -73,6 +73,18 @@ std::vector<uint8_t>* GetResource(const std::string& resource_name) {
   return &it->second;
 }
 
+std::optional<TempSensor> CheckTempSensor(int sensor_num) {
+  if (sensor_num == 0) return TempSensor::kCpu;
+  if (sensor_num == 1) return TempSensor::kTpu;
+  return std::nullopt;
+}
+
+std::optional<WiFiAntenna> CheckWiFiAntenna(int antenna_num) {
+  if (antenna_num == 0) return WiFiAntenna::kInternal;
+  if (antenna_num == 1) return WiFiAntenna::kExternal;
+  return std::nullopt;
+}
+
 namespace pended_functions {
 // These functions' signatures here are required to match with the
 // PendedFunction_t as described here:
@@ -707,13 +719,13 @@ void GetTemperature(struct jsonrpc_request* request) {
   if (!JsonRpcGetIntegerParam(request, "sensor", &sensor_num)) return;
 
   coralmicro::TempSensorInit();
-  auto sensor = static_cast<coralmicro::TempSensor>(sensor_num);
-  if (sensor >= coralmicro::TempSensor::kSensorCount) {
-    jsonrpc_return_error(request, -1, "Invalid temperature sensor", nullptr);
+  auto sensor = CheckTempSensor(sensor_num);
+  if (!sensor.has_value()) {
+    jsonrpc_return_error(request, -1, "Invalid sensor value", nullptr);
     return;
   }
 
-  float temperature = coralmicro::TempSensorRead(sensor);
+  float temperature = coralmicro::TempSensorRead(*sensor);
   jsonrpc_return_success(request, "{%Q:%g}", "temperature", temperature);
 }
 
@@ -911,13 +923,16 @@ void WiFiGetIp(struct jsonrpc_request* request) {
 }
 
 void WiFiSetAntenna(struct jsonrpc_request* request) {
-  int antenna;
-  if (!JsonRpcGetIntegerParam(request, "antenna", &antenna)) return;
+  int antenna_num;
+  if (!JsonRpcGetIntegerParam(request, "antenna", &antenna_num)) return;
 
-  if (!WiFiSetAntenna(static_cast<coralmicro::WiFiAntenna>(antenna))) {
-    jsonrpc_return_error(request, -1, "invalid antenna selection", nullptr);
+  auto antenna = CheckWiFiAntenna(antenna_num);
+  if (!antenna.has_value()) {
+    jsonrpc_return_error(request, -1, "Invalid antenna value", nullptr);
     return;
   }
+
+  WiFiSetAntenna(*antenna);
   jsonrpc_return_success(request, "{}");
 }
 

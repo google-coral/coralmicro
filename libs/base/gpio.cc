@@ -432,15 +432,28 @@ constexpr gpio_interrupt_mode_t InterruptModeToGpioIntMode[GpioInterruptMode::kI
 
 GpioCallback g_irq_handlers[Gpio::kCount];
 
-void IRQHandler(GPIO_Type* gpio, uint32_t pin) {
+void IrqHandler(GPIO_Type* gpio, uint32_t pin) {
     for (int i = 0; i < Gpio::kCount; ++i) {
         if (PinNameToModule[i] == gpio && PinNameToPin[i] == pin) {
-            GpioCallback handler = g_irq_handlers[i];
+            auto& handler = g_irq_handlers[i];
             if (handler) {
                 handler();
             }
             return;
         }
+    }
+}
+
+void CommonIrqHandler(GPIO_Type *base) {
+    uint32_t pins = GPIO_PortGetInterruptFlags(base);
+    GPIO_PortClearInterruptFlags(base, pins);
+    int i = 0;
+    while (pins) {
+        if (pins & 1) {
+            IrqHandler(base, i);
+        }
+        ++i;
+        pins = pins >> 1;
     }
 }
 }  // namespace
@@ -522,35 +535,11 @@ void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode) {
 void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb) {
     g_irq_handlers[gpio] = cb;
 }
-
-gpio_pin_config_t GetPinConfig(Gpio gpio) {
-    return PinNameToConfig[gpio];
-}
-
-void SetPinConfig(Gpio gpio, gpio_pin_config_t config) {
-    GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], &config);
-}
-
 }  // namespace coralmicro
-
-namespace {
-void GPIO_Common_IRQHandler(GPIO_Type *base) {
-    uint32_t pins = GPIO_PortGetInterruptFlags(base);
-    GPIO_PortClearInterruptFlags(base, pins);
-    int i = 0;
-    while (pins) {
-        if (pins & 1) {
-            coralmicro::IRQHandler(base, i);
-        }
-        ++i;
-        pins = pins >> 1;
-    }
-}
-}  // namespace
 
 #define GPIO_IRQHandler(base, irq) \
     extern "C" void irq() { \
-        GPIO_Common_IRQHandler(base); \
+        coralmicro::CommonIrqHandler(base); \
         SDK_ISR_EXIT_BARRIER; \
     }
 

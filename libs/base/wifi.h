@@ -32,9 +32,9 @@ inline constexpr int kDefaultRetryCount{5};
 // Represents the Wi-Fi antenna.
 enum class WiFiAntenna {
     // Internal built in Wi-Fi antenna.
-    kInternal = 0,
+    kInternal,
     // External custom Wi-Fi antenna.
-    kExternal = 1,
+    kExternal,
 };
 
 // Gets the Wi-Fi SSID that is stored in flash memory.
@@ -124,8 +124,7 @@ std::optional<std::string> WiFiGetIp();
 // Sets which Wi-Fi antenna type to use (internal or external).
 //
 // @param antenna The type of antenna to use.
-// @return True if the Wi-Fi antenna was enabled successfully; false otherwise.
-bool WiFiSetAntenna(WiFiAntenna antenna);
+void WiFiSetAntenna(WiFiAntenna antenna);
 
 }  // namespace coralmicro
 #endif  // LIBS_BASE_WIFI_H_
