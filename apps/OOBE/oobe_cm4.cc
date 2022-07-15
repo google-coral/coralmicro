@@ -32,8 +32,8 @@ bool g_status_led_state = true;
 
 void RespondToDetection(tflite::ErrorReporter* error_reporter,
                         int8_t person_score, int8_t no_person_score) {
-  TF_LITE_REPORT_ERROR(error_reporter, "person_score: %d no_person_score: %d",
-                       person_score, no_person_score);
+  printf("person_score: %d no_person_score: %d\r\n", person_score,
+         no_person_score);
 // For normal operation, use the person score to determine detection.
 // In the OOBE demo, this is handled by a constant timer.
 #if !defined(OOBE_DEMO)

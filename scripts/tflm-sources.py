@@ -49,7 +49,9 @@ def main():
                  '_main',
                  'kiss_fft_int16',
                  'debug_log',
-                 'frontend_memmap_generator']:
+                 'frontend_memmap_generator',
+                 'python',
+                 'tools']:
         files = exclude(files, word)
 
     for word in ['arc_custom',

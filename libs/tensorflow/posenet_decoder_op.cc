@@ -24,6 +24,7 @@
 #include "posenet_decoder.h"
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/kernels/kernel_util.h"
 
 namespace coral {
 namespace posenet_decoder_op {
@@ -34,6 +35,8 @@ using tflite::GetTensorData;
 using tflite::NumDimensions;
 using tflite::NumInputs;
 using tflite::NumOutputs;
+
+constexpr int kNumInputs = 4;
 
 constexpr int kInputTensorHeatmaps = 0;
 constexpr int kInputTensorShortOffsets = 1;
@@ -58,6 +61,9 @@ struct OpData {
   void* shorts_float_ptr;
   void* mids_float_ptr;
   void* longs_float_ptr;
+
+  int zero_point[kNumInputs];
+  float scale[kNumInputs];
 };
 
 void* Init(TfLiteContext* context, const char* buffer, size_t length) {
@@ -91,18 +97,21 @@ TfLiteStatus PrepTempTensor(TfLiteContext* context, void** temp_tensor_ptr,
   }
 }
 
-void DequantizeTensor(const TfLiteTensor* src, void* dst,
+void DequantizeTensor(const TfLiteEvalTensor* src, void* dst,
+                      const OpData* op_data, const int tensor_type,
                       float extra_scale = 1.0) {
+  if (tensor_type >= kNumInputs || tensor_type < 0) {
+    assert(false);
+  }
   if (src->type == kTfLiteUInt8) {
-    const int num_elements = src->bytes;
-    const float quant_zero_point = static_cast<float>(src->params.zero_point);
-    const float quant_scale = src->params.scale * extra_scale;
-    const uint8_t* src_data = GetTensorData<uint8_t>(src);
+    const int num_elements = tflite::micro::GetTensorShape(src).FlatSize();
+    const uint8_t* src_data = tflite::micro::GetTensorData<uint8_t>(src);
     assert(src_data != nullptr);
     float* dst_data = reinterpret_cast<float*>(dst);
     assert(dst_data != nullptr);
     for (int idx = 0; idx < num_elements; ++idx) {
-      dst_data[idx] = (src_data[idx] - quant_zero_point) * quant_scale;
+      dst_data[idx] = (src_data[idx] - op_data->zero_point[tensor_type]) *
+                      op_data->scale[tensor_type] * extra_scale;
     }
   } else {
     assert(false);
@@ -118,12 +127,15 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
     compute_masks = true;
   }
 
-  const TfLiteTensor* heatmaps = GetInput(context, node, kInputTensorHeatmaps);
+  tflite::MicroContext* micro_context = tflite::GetMicroContext(context);
+  TfLiteTensor* heatmaps =
+      micro_context->AllocateTempInputTensor(node, kInputTensorHeatmaps);
   TF_LITE_ENSURE(context, heatmaps != nullptr);
-  const TfLiteTensor* shorts =
-      GetInput(context, node, kInputTensorShortOffsets);
+  TfLiteTensor* shorts =
+      micro_context->AllocateTempInputTensor(node, kInputTensorShortOffsets);
   TF_LITE_ENSURE(context, shorts != nullptr);
-  const TfLiteTensor* mids = GetInput(context, node, kInputTensorMidOffsets);
+  TfLiteTensor* mids =
+      micro_context->AllocateTempInputTensor(node, kInputTensorMidOffsets);
   TF_LITE_ENSURE(context, mids != nullptr);
 
   TF_LITE_ENSURE(context, (heatmaps->type == kTfLiteUInt8 ||  //
@@ -145,14 +157,20 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_OK(
       context,
       PrepTempTensor(context, &op_data->heatmaps_float_ptr, heatmaps->dims));
+  op_data->scale[kInputTensorHeatmaps] = heatmaps->params.scale;
+  op_data->zero_point[kInputTensorHeatmaps] = heatmaps->params.zero_point;
   TF_LITE_ENSURE_OK(context, PrepTempTensor(context, &op_data->shorts_float_ptr,
                                             shorts->dims));
+  op_data->scale[kInputTensorShortOffsets] = shorts->params.scale;
+  op_data->zero_point[kInputTensorShortOffsets] = shorts->params.zero_point;
   TF_LITE_ENSURE_OK(
       context, PrepTempTensor(context, &op_data->mids_float_ptr, mids->dims));
+  op_data->scale[kInputTensorMidOffsets] = mids->params.scale;
+  op_data->zero_point[kInputTensorMidOffsets] = mids->params.zero_point;
 
   if (compute_masks) {
-    const TfLiteTensor* longs =
-        GetInput(context, node, kInputTensorLongOffsets);
+    TfLiteTensor* longs =
+        micro_context->AllocateTempInputTensor(node, kInputTensorLongOffsets);
     TF_LITE_ENSURE(context, longs != nullptr);
     TF_LITE_ENSURE(context, (longs->type == kTfLiteUInt8 ||  //
                              longs->type == kTfLiteFloat32));
@@ -163,7 +181,14 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
     TF_LITE_ENSURE_OK(
         context,
         PrepTempTensor(context, &op_data->longs_float_ptr, longs->dims));
+    op_data->scale[kInputTensorLongOffsets] = longs->params.scale;
+    op_data->zero_point[kInputTensorLongOffsets] = longs->params.zero_point;
+    micro_context->DeallocateTempTfLiteTensor(longs);
   }
+
+  micro_context->DeallocateTempTfLiteTensor(mids);
+  micro_context->DeallocateTempTfLiteTensor(shorts);
+  micro_context->DeallocateTempTfLiteTensor(heatmaps);
 
   return kTfLiteOk;
 }
@@ -172,18 +197,23 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   auto* op_data = reinterpret_cast<OpData*>(node->user_data);
 
   TF_LITE_ENSURE(context, op_data->stride > 0);
-  const TfLiteTensor* heatmaps = GetInput(context, node, kInputTensorHeatmaps);
+  const TfLiteEvalTensor* heatmaps =
+      tflite::micro::GetEvalInput(context, node, kInputTensorHeatmaps);
   TF_LITE_ENSURE(context, heatmaps != nullptr);
-  const TfLiteTensor* shorts =
-      GetInput(context, node, kInputTensorShortOffsets);
+  const TfLiteEvalTensor* shorts =
+      tflite::micro::GetEvalInput(context, node, kInputTensorShortOffsets);
   TF_LITE_ENSURE(context, shorts != nullptr);
-  const TfLiteTensor* mids = GetInput(context, node, kInputTensorMidOffsets);
+  const TfLiteEvalTensor* mids =
+      tflite::micro::GetEvalInput(context, node, kInputTensorMidOffsets);
   TF_LITE_ENSURE(context, mids != nullptr);
 
   // Dequantize (and rescale) input tensors
-  DequantizeTensor(heatmaps, op_data->heatmaps_float_ptr);
-  DequantizeTensor(shorts, op_data->shorts_float_ptr, 1.0 / op_data->stride);
-  DequantizeTensor(mids, op_data->mids_float_ptr, 1.0 / op_data->stride);
+  DequantizeTensor(heatmaps, op_data->heatmaps_float_ptr, op_data,
+                   kInputTensorHeatmaps);
+  DequantizeTensor(shorts, op_data->shorts_float_ptr, op_data,
+                   kInputTensorShortOffsets, 1.0 / op_data->stride);
+  DequantizeTensor(mids, op_data->mids_float_ptr, op_data,
+                   kInputTensorMidOffsets, 1.0 / op_data->stride);
 
   const float* heatmaps_data =
       reinterpret_cast<float*>(op_data->heatmaps_float_ptr);
@@ -191,21 +221,25 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       reinterpret_cast<float*>(op_data->shorts_float_ptr);
   const float* mids_data = reinterpret_cast<float*>(op_data->mids_float_ptr);
 
-  TfLiteTensor* pose_keypoints =
-      GetOutput(context, node, kOutputTensorPoseKeypoints);
+  TfLiteEvalTensor* pose_keypoints =
+      tflite::micro::GetEvalOutput(context, node, kOutputTensorPoseKeypoints);
   TF_LITE_ENSURE(context, pose_keypoints != nullptr);
-  TfLiteTensor* pose_keypoint_scores =
-      GetOutput(context, node, kOutputTensorPoseKeypointScores);
+  TfLiteEvalTensor* pose_keypoint_scores = tflite::micro::GetEvalOutput(
+      context, node, kOutputTensorPoseKeypointScores);
   TF_LITE_ENSURE(context, pose_keypoint_scores != nullptr);
-  TfLiteTensor* pose_scores = GetOutput(context, node, kOutputTensorPoseScores);
+  TfLiteEvalTensor* pose_scores =
+      tflite::micro::GetEvalOutput(context, node, kOutputTensorPoseScores);
   TF_LITE_ENSURE(context, pose_scores != nullptr);
-  TfLiteTensor* pose_count = GetOutput(context, node, kOutputTensorPoseCount);
+  TfLiteEvalTensor* pose_count =
+      tflite::micro::GetEvalOutput(context, node, kOutputTensorPoseCount);
   TF_LITE_ENSURE(context, pose_count != nullptr);
 
-  float* pose_keypoints_data = GetTensorData<float>(pose_keypoints);
-  float* pose_keypoint_scores_data = GetTensorData<float>(pose_keypoint_scores);
-  float* pose_scores_data = GetTensorData<float>(pose_scores);
-  float* pose_count_data = GetTensorData<float>(pose_count);
+  float* pose_keypoints_data =
+      tflite::micro::GetTensorData<float>(pose_keypoints);
+  float* pose_keypoint_scores_data =
+      tflite::micro::GetTensorData<float>(pose_keypoint_scores);
+  float* pose_scores_data = tflite::micro::GetTensorData<float>(pose_scores);
+  float* pose_count_data = tflite::micro::GetTensorData<float>(pose_count);
 
   const float nms_radius = op_data->nms_radius / op_data->stride;
   pose_count_data[0] = DecodeAllPoses(
@@ -219,16 +253,18 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       pose_scores_data);
 
   if (NumInputs(node) == 4) {
-    const TfLiteTensor* longs =
-        GetInput(context, node, kInputTensorLongOffsets);
+    const TfLiteEvalTensor* longs =
+        tflite::micro::GetEvalInput(context, node, kInputTensorLongOffsets);
     TF_LITE_ENSURE(context, longs != nullptr);
-    DequantizeTensor(longs, op_data->longs_float_ptr, 1.0 / op_data->stride);
+    DequantizeTensor(longs, op_data->longs_float_ptr, op_data,
+                     kInputTensorLongOffsets, 1.0 / op_data->stride);
     const float* longs_data =
         reinterpret_cast<float*>(op_data->longs_float_ptr);
-    TfLiteTensor* instance_masks =
-        GetOutput(context, node, kOutputTensorInstanceMasks);
+    TfLiteEvalTensor* instance_masks =
+        tflite::micro::GetEvalOutput(context, node, kOutputTensorInstanceMasks);
     TF_LITE_ENSURE(context, instance_masks != nullptr);
-    float* instance_masks_data = GetTensorData<float>(instance_masks);
+    float* instance_masks_data =
+        tflite::micro::GetTensorData<float>(instance_masks);
 
     DecodeInstanceMasks(longs_data, /*height = */ longs->dims->data[1],
                         /*width = */ longs->dims->data[2],

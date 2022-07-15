@@ -1,1 +1,0 @@
-../../../../../../../../../third_party/tflite-micro/tensorflow/lite/micro/recording_simple_memory_allocator.h

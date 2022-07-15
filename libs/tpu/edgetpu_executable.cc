@@ -16,7 +16,7 @@
 
 #include "libs/tpu/edgetpu_executable.h"
 
-#include "third_party/tflite-micro/tensorflow/lite/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/kernels/kernel_util.h"
 
 namespace {
 int TensorDataTypeSize(platforms::darwinn::DataType data_type) {
@@ -44,10 +44,10 @@ int TensorDataTypeSize(platforms::darwinn::DataType data_type) {
 
 namespace coralmicro {
 
-EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable *exe)
+EdgeTpuExecutable::EdgeTpuExecutable(const platforms::darwinn::Executable* exe)
     : executable_(exe) {
   if (executable_->output_layers()) {
-    for (const auto *output_layer : *(executable_->output_layers())) {
+    for (const auto* output_layer : *(executable_->output_layers())) {
       output_layers_[output_layer->name()->c_str()] =
           new OutputLayer(output_layer);
     }
@@ -68,21 +68,23 @@ EdgeTpuExecutable::~EdgeTpuExecutable() {
     }                         \
   } while (0);
 
-TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver &tpu_driver,
-                                       TfLiteContext *context,
-                                       TfLiteNode *node) {
-  const TfLiteTensor *input_tensor = tflite::GetInput(context, node, 0);
+TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver& tpu_driver,
+                                       TfLiteContext* context,
+                                       TfLiteNode* node) {
+  const TfLiteEvalTensor* input_tensor =
+      tflite::micro::GetEvalInput(context, node, 0);
+  const int input_size = tflite::micro::GetTensorShape(input_tensor).FlatSize();
   if (!input_tensor) {
     return kTfLiteError;
   }
 
-  const platforms::darwinn::DmaDescriptorHint *dma_hint;
-  const char *name;
-  uint8_t *output;
+  const platforms::darwinn::DmaDescriptorHint* dma_hint;
+  const char* name;
+  uint8_t* output;
   int32_t ins_idx;
-  const flatbuffers::Vector<uint8_t> *bitstream;
+  const flatbuffers::Vector<uint8_t>* bitstream;
 
-  for (const auto *hint : *(executable_->dma_hints()->hints())) {
+  for (const auto* hint : *(executable_->dma_hints()->hints())) {
     switch (hint->any_hint_type()) {
       case platforms::darwinn::AnyHint_DmaDescriptorHint:
         dma_hint = hint->any_hint_as_DmaDescriptorHint();
@@ -95,11 +97,11 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver &tpu_driver,
           case platforms::darwinn::Description_BASE_ADDRESS_INPUT_ACTIVATION:
             name = dma_hint->meta()->name()->c_str();
             if (executable_->input_layers()) {
-              for (const auto *input_layer : *(executable_->input_layers())) {
+              for (const auto* input_layer : *(executable_->input_layers())) {
                 if (!strcmp(input_layer->name()->c_str(), name)) {
                   if (OutputLayer::SignedDataType(input_layer->data_type())) {
                     OutputLayer::TransformSignedDataType(
-                        input_tensor->data.uint8, input_tensor->bytes,
+                        input_tensor->data.uint8, input_size,
                         TensorDataTypeSize(input_layer->data_type()),
                         input_layer->x_dim(), input_layer->y_dim(),
                         input_layer->z_dim());
@@ -142,7 +144,10 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver &tpu_driver,
 
   if (!output_layers_.empty()) {
     for (int i = 0; i < node->outputs->size; ++i) {
-      const TfLiteTensor *output_tensor = tflite::GetOutput(context, node, i);
+      const TfLiteEvalTensor* output_tensor =
+          tflite::micro::GetEvalOutput(context, node, i);
+      const int output_size =
+          tflite::micro::GetTensorShape(output_tensor).FlatSize();
       if (!output_tensor) {
         return kTfLiteError;
       }
@@ -151,11 +156,11 @@ TfLiteStatus EdgeTpuExecutable::Invoke(const TpuDriver &tpu_driver,
         printf("Executable does not have buffer for %s\r\n", name);
         return kTfLiteError;
       }
-      OutputLayer *output_layer = output_layers_[name];
+      OutputLayer* output_layer = output_layers_[name];
 
       output_layer->Relayout(output_tensor->data.uint8);
       output_layer->TransformSignedDataType(output_tensor->data.uint8,
-                                            output_tensor->bytes);
+                                            output_size);
     }
   }
 
@@ -180,8 +185,8 @@ bool OutputLayer::SignedDataType(platforms::darwinn::DataType type) {
     case platforms::darwinn::DataType_FIXED_POINT16:
       // TODO(b/136014872): DataType_SIGNED_FIXED_POINT32 (previously
       // DataType_FIXED_POINT32) is a signed number, see b/135944737.
-      // However, the function returns false, which looks like a bug. Please
-      // confirm it.
+      // However, the function returns false, which looks like a bug.
+      // Please confirm it.
     case platforms::darwinn::DataType_SIGNED_FIXED_POINT32:
     case platforms::darwinn::DataType_BFLOAT:
     case platforms::darwinn::DataType_HALF:
@@ -192,8 +197,8 @@ bool OutputLayer::SignedDataType(platforms::darwinn::DataType type) {
   return false;
 }
 
-void OutputLayer::Relayout(uint8_t *dest) const {
-  uint8_t *src = output_buffer_.get();
+void OutputLayer::Relayout(uint8_t* dest) const {
+  uint8_t* src = output_buffer_.get();
   const auto data_type_size = DataTypeSize();
   const int z_bytes = z_dim() * data_type_size;
 
@@ -219,18 +224,18 @@ void OutputLayer::Relayout(uint8_t *dest) const {
   } else {
     int z_bytes_padded;
     if (x_dim() > 1) {
-      // If x-dim is > 1, padded-z-size can be deduced by looking at difference
-      // between offset of element y=0,x=0,z=0 and y=0,x=1,z=0.
+      // If x-dim is > 1, padded-z-size can be deduced by looking at
+      // difference between offset of element y=0,x=0,z=0 and y=0,x=1,z=0.
       z_bytes_padded = GetBufferIndex(0, 1, 0) - GetBufferIndex(0, 0, 0);
     } else {
       // Otherwise when x-dim is 1 (y-dim must be > 1 in that case),
-      // padded-z-size can be deduced by looking at difference between offset of
-      // element y=0,x=0,z=0 and y=1,x=0,z=0.
+      // padded-z-size can be deduced by looking at difference between
+      // offset of element y=0,x=0,z=0 and y=1,x=0,z=0.
       z_bytes_padded = GetBufferIndex(1, 0, 0) - GetBufferIndex(0, 0, 0);
     }
     z_bytes_padded *= data_type_size;
 
-    const auto *layout = output_layer_->any_layer_as_OutputLayer()->layout();
+    const auto* layout = output_layer_->any_layer_as_OutputLayer()->layout();
     int last_x = 0;
     size_t active_tile_x_count = 0;
 
@@ -248,21 +253,20 @@ void OutputLayer::Relayout(uint8_t *dest) const {
     active_tile_x_sizes_[active_tile_x_count] = x_dim() - last_x;
     active_tile_x_count++;
 
-    // When the num_z_bytes parameter is a compile-time constant, the conditions
-    // in the innermost loop will be replaced with a single optimized path,
-    // specialized for that value.
-    // Specialization is provided for num_z_bytes value of 1 and 3.
-    // We can also make this a helper function and still realize the benefits
-    // provided we have a guaranteed way of ensuring this function would be
-    // inlined so that the compiler optimizations based on
-    // compile-time-constants can kick in.
+    // When the num_z_bytes parameter is a compile-time constant, the
+    // conditions in the innermost loop will be replaced with a single
+    // optimized path, specialized for that value. Specialization is
+    // provided for num_z_bytes value of 1 and 3. We can also make this a
+    // helper function and still realize the benefits provided we have a
+    // guaranteed way of ensuring this function would be inlined so that the
+    // compiler optimizations based on compile-time-constants can kick in.
 #define RELAYOUT_WITH_Z_BYTES_SPECIALIZATION(num_z_bytes, num_z_bytes_padded) \
   do {                                                                        \
     for (int y = 0; y < y_dim(); ++y) {                                       \
       const auto y_buffer_index = GetYBufferIndex(y);                         \
       int tile_starting_x = 0;                                                \
       for (size_t x_tile = 0; x_tile < active_tile_x_count; ++x_tile) {       \
-        const unsigned char *source =                                         \
+        const unsigned char* source =                                         \
             src + GetBufferIndex(y_buffer_index, tile_starting_x, 0) *        \
                       data_type_size;                                         \
         const int tile_x_size = active_tile_x_sizes_[x_tile];                 \
@@ -300,7 +304,7 @@ void OutputLayer::Relayout(uint8_t *dest) const {
   }
 }
 
-void OutputLayer::TransformSignedDataType(uint8_t *buffer, int buffer_size,
+void OutputLayer::TransformSignedDataType(uint8_t* buffer, int buffer_size,
                                           int data_type_size, int x_dim,
                                           int y_dim, int z_dim) {
   int buffer_index = 0;
@@ -308,8 +312,9 @@ void OutputLayer::TransformSignedDataType(uint8_t *buffer, int buffer_size,
   for (int y = 0; y < y_dim; ++y) {
     for (int x = 0; x < x_dim; ++x) {
       for (int z = 0; z < z_dim; ++z) {
-        // XORing with 128 on the last byte of each entry will flip the MSB of
-        // each entry. Please note that bytes are stored little endian.
+        // XORing with 128 on the last byte of each entry will flip the
+        // MSB of each entry. Please note that bytes are stored little
+        // endian.
         int msb_index = buffer_index + data_type_size - 1;
         buffer[msb_index] = buffer[msb_index] ^ 128;
         buffer_index += data_type_size;
@@ -318,7 +323,7 @@ void OutputLayer::TransformSignedDataType(uint8_t *buffer, int buffer_size,
   }
 }
 
-void OutputLayer::TransformSignedDataType(uint8_t *buffer,
+void OutputLayer::TransformSignedDataType(uint8_t* buffer,
                                           int buffer_size) const {
   if (!SignedDataType()) {
     return;
@@ -335,7 +340,7 @@ void OutputLayer::TransformSignedDataType(uint8_t *buffer,
 
 // Used in GetBufferIndex(int y, int x, int z)
 OutputLayer::YBufferIndex OutputLayer::GetYBufferIndex(int y) const {
-  const auto &layout = output_layer_->any_layer_as_OutputLayer()->layout();
+  const auto& layout = output_layer_->any_layer_as_OutputLayer()->layout();
   YBufferIndex output;
   output.y_linearized_tile_id =
       layout->y_coordinate_to_linear_tile_id_map()->Get(y);
@@ -347,9 +352,9 @@ int OutputLayer::GetBufferIndex(int y, int x, int z) const {
   return GetBufferIndex(GetYBufferIndex(y), x, z);
 }
 
-int OutputLayer::GetBufferIndex(const YBufferIndex &y_buffer_index, int x,
+int OutputLayer::GetBufferIndex(const YBufferIndex& y_buffer_index, int x,
                                 int z) const {
-  const auto &layout = output_layer_->any_layer_as_OutputLayer()->layout();
+  const auto& layout = output_layer_->any_layer_as_OutputLayer()->layout();
   const int linear_tile_id =
       y_buffer_index.y_linearized_tile_id +
       layout->x_coordinate_to_linear_tile_id_map()->Get(x);
