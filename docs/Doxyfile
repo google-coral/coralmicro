@@ -6,12 +6,7 @@ XML_OUTPUT             = xml
 SORT_GROUP_NAMES       = YES
 EXTRACT_ALL            = YES
 INPUT_FILTER           = ./doxygenate.sh
-INPUT                  = ../libs/tpu/ \
-                         ../libs/tensorflow/ \
-                         ../libs/cdc_acm/ \
-                         ../libs/cdc_eem/ \
-                         ../libs/rpc/ \
-                         ../libs/base/ \
+INPUT                  = ../libs/ \
                          ../arduino/libraries/
 
 EXCLUDE                = ../libs/tpu/edgetpu_driver.h

@@ -8,7 +8,7 @@ The following APIs simplify your code when working with
 `tflite::MicroInterpreter
 <https://github.com/tensorflow/tflite-micro/blob/main/tensorflow/lite/micro/micro_interpreter.h>`_.
 
-`[utils.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/utils.h>`_
+`[utils.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/utils.h>`_
 
 .. doxygenfile:: tensorflow/utils.h
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
@@ -20,7 +20,7 @@ Audio Classification
 The following APIs assist when running audio classification using YAMNet models
 on a microcontroller with support for both CPU and Edge TPU.
 
-`[yamnet.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/yamnet.h>`_
+`[yamnet.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/yamnet.h>`_
 
 .. doxygenfile:: tensorflow/yamnet.h
 
@@ -37,7 +37,7 @@ microcontroller with an Edge TPU.
    :start-after: [start-sphinx-snippet:classify-image]
    :end-before: [end-sphinx-snippet:classify-image]
 
-`[classification.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/classification.h>`_
+`[classification.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/classification.h>`_
 
 .. doxygenfile:: tensorflow/classification.h
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
@@ -55,7 +55,7 @@ microcontroller with an Edge TPU.
    :start-after: [start-sphinx-snippet:detect-image]
    :end-before: [end-sphinx-snippet:detect-image]
 
-`[detection.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/detection.h>`_
+`[detection.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/detection.h>`_
 
 .. doxygenfile:: tensorflow/detection.h
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
@@ -66,11 +66,11 @@ Pose estimation
 
 The following APIs assist when running pose estimation with PoseNet.
 
-`[posenet_decoder_op.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/posenet_decoder_op.h>`_
+`[posenet_decoder_op.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/posenet_decoder_op.h>`_
 
 .. doxygenfile:: tensorflow/posenet_decoder_op.h
 
-`[posenet.h source] <https://github.com/google-coral/coralmicro/blob/master/libs/tensorflow/posenet.h>`_
+`[posenet.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/posenet.h>`_
 
 .. doxygenfile:: tensorflow/posenet.h
 

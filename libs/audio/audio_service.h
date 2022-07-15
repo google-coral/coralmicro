@@ -88,6 +88,7 @@ class FreeRTOSStreamBuffer {
 //
 // Example:
 //
+// ```
 // namespace {
 // AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024>
 //     g_audio_buffers;
@@ -104,6 +105,7 @@ class FreeRTOSStreamBuffer {
 //     auto size = reader.FillBuffer();
 //     ProcessBuffer(buffer.data(), size);
 // }
+// ```
 //
 class AudioReader {
    public:
@@ -143,6 +145,7 @@ class AudioReader {
 //
 // Example:
 //
+// ```
 // namespace {
 // AudioDriverBuffers</*NumDmaBuffers=*/4, /*DmaBufferSize=*/6 * 1024>
 //     g_audio_buffers;
@@ -156,6 +159,7 @@ class AudioReader {
 //
 // auto id = service.AddCallback(...);
 // service.RemoveCallback(id);
+// ```
 //
 class AudioService {
    public:
@@ -188,6 +192,7 @@ class AudioService {
 //
 // Typical setup to access the latest 1000 ms of audio samples:
 //
+// ```
 //     AudioService* service = ...
 //
 //     LatestSamples latest(audio::MsToSamples(service->sample_rate(), 1000));
@@ -196,19 +201,24 @@ class AudioService {
 //             static_cast<LatestSamples*>(ctx)->Append(samples, num_samples);
 //             return true;
 //         });
+// ```
 //
 // Call `AccessLatestSamples()` to access the latest `num_samples` without a
 // copy. Samples start at `start_index`:
 //
+// ```
 //     latest.AccessLatestSamples([](const std::vector<int32_t>& samples,
 //                                   size_t start_index) {
 //         1st: [samples.begin() + start_index, samples.end())
 //         2nd: [samples.begin(),               samples.begin() + start_index)
 //     });
+// ```
 //
 // Call `CopyLatestSamples()` to get a copy of latest `num_samples`:
 //
+// ```
 //     auto last_second = latest.CopyLatestSamples();
+// ```
 //
 class LatestSamples {
    public:

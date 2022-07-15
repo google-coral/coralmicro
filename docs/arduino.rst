@@ -8,7 +8,7 @@ hardware interfaces on the Coral Dev Board Micro.
 Camera
 ----------
 
-`[coralmicro_camera.h source] <https://github.com/google-coral/coralmicro/blob/master/arduino/libraries/Camera/coralmicro_camera.h>`_
+`[coralmicro_camera.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/Camera/coralmicro_camera.h>`_
 
 .. doxygenfile:: Camera/coralmicro_camera.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib
@@ -17,7 +17,7 @@ Camera
 PDM microphone
 -----------------
 
-`[PDM.h source] <https://github.com/google-coral/coralmicro/blob/master/arduino/libraries/PDM/PDM.h>`_
+`[PDM.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/PDM/PDM.h>`_
 
 .. doxygenfile:: PDM/PDM.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib
@@ -26,7 +26,7 @@ PDM microphone
 SD card
 -----------------
 
-`[coralmicro_SD.h source] <https://github.com/google-coral/coralmicro/blob/master/arduino/libraries/SD/coralmicro_SD.h>`_
+`[coralmicro_SD.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/SD/coralmicro_SD.h>`_
 
 .. doxygenfile:: SD/coralmicro_SD.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib
@@ -35,7 +35,7 @@ SD card
 SPI
 -----------------
 
-`[SPI.h source] <https://github.com/google-coral/coralmicro/blob/master/arduino/libraries/SPI/SPI.h>`_
+`[SPI.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/SPI/SPI.h>`_
 
 .. doxygenfile:: SPI/SPI.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib
@@ -44,7 +44,7 @@ SPI
 Wire
 -----------------
 
-`[Wire.h source] <https://github.com/google-coral/coralmicro/blob/master/arduino/libraries/Wire/Wire.h>`_
+`[Wire.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/Wire/Wire.h>`_
 
 .. doxygenfile:: Wire/Wire.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib

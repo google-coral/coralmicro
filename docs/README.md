@@ -30,4 +30,5 @@ viewing--just open the `index.html` page. The `_build/web/` files are designed
 for publishing on the Coral website.
 
 For more information about the syntax in the RST files, see the
-[reStructuredText documentation](http://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html).
+[breathe docs](https://breathe.readthedocs.io/en/latest/directives.html) and
+[reStructuredText docs](http://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html).

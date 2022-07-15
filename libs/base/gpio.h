@@ -21,7 +21,7 @@
 
 namespace coralmicro {
 
-// Enumeration of the pre-configured GPIO pins.
+// Pre-configured GPIO pins.
 enum Gpio {
     // On-board Status LED (orange). Instead use `LedSet()`.
     kStatusLed,

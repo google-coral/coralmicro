@@ -125,6 +125,7 @@ void get_image_from_camera(struct jsonrpc_request* request) {
         return;
     }
 
+    //! [camera-stream] Doxygen snippet for camera.h
     coralmicro::CameraTask::GetSingleton()->SetPower(true);
     coralmicro::CameraTask::GetSingleton()->Enable(
         coralmicro::camera::Mode::kStreaming);
@@ -141,6 +142,7 @@ void get_image_from_camera(struct jsonrpc_request* request) {
     auto ret = coralmicro::CameraTask::GetFrame({fmt});
     coralmicro::CameraTask::GetSingleton()->Disable();
     coralmicro::CameraTask::GetSingleton()->SetPower(false);
+    //! [camera-stream] End snippet
 
     if (!ret) {
         jsonrpc_return_error(request, -1, "Failed to get image from camera.",
