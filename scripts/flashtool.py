@@ -663,7 +663,7 @@ def main():
         '--wifi_revision', type=int, required=False, default=None,
         help='The Wi-Fi revision to use with --wifi_ssid.')
     network_group.add_argument(
-        '--ethernet_speed', type=int, choices=[10, 100, 1000],
+        '--ethernet_speed', type=int, choices=[10, 100],
         required=False, default=None,
         help='The maximum ethernet speed in Mbps. Must be one of: \
         %(choices)s. Requires the Coral PoE Add-on Board (or similar).')

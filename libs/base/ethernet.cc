@@ -97,6 +97,10 @@ void EthernetInit(bool default_iface) {
     int speed = EthernetGetSpeed();
     switch (speed) {
         case 1000:
+            // Gigabit Ethernet is unsupported due to EMI concerns. If this is
+            // not a concern, this assert should be removed and 1000 should be
+            // added as a choice for ethernet_speed in scripts/flashtool.py.
+            assert(false && "1G Ethernet is unsupported");
             phyConfig.speed = kPHY_Speed1000M;
             break;
         case 100:
