@@ -36,11 +36,12 @@ class MutexLock {
     explicit MutexLock(SemaphoreHandle_t sema) : sema_(sema) {
         CHECK(xSemaphoreTake(sema_, portMAX_DELAY) == pdTRUE);
     }
-
+    // @cond
     ~MutexLock() { CHECK(xSemaphoreGive(sema_) == pdTRUE); }
 
     MutexLock(const MutexLock&) = delete;
     MutexLock& operator=(const MutexLock&) = delete;
+    // @endcond
 
    private:
     SemaphoreHandle_t sema_;
@@ -66,10 +67,12 @@ class MulticoreMutexLock {
 #endif
         SEMA4_Lock(SEMA4, gate_, core_);
     }
+    // @cond
     ~MulticoreMutexLock() { SEMA4_Unlock(SEMA4, gate_); }
 
     MulticoreMutexLock(const MutexLock&) = delete;
     MulticoreMutexLock& operator=(const MutexLock&) = delete;
+    // @endcond
 
    private:
     uint8_t gate_;
