@@ -39,16 +39,21 @@ class IpcM7 : public Ipc {
         static IpcM7 ipc;
         return &ipc;
     }
+
     // @cond Internal only, do not generate docs.
     void Init() override;
     // @endcond
+
+    // Starts the M4 core.
     void StartM4();
+
     // Checks if the M4 core is alive.
     //
     // @param millis The amount of time to wait for a response from the M4 core.
-    // @return True if the M4 core signals that it is ready to preform a task or preforming a task within the millis time limit,
-    // false otherwise.
+    // @return True if the M4 core signals that it is ready to preform a
+    // task or preforming a task within the millis time limit, false otherwise.
     bool M4IsAlive(uint32_t millis);
+
     // Checks if the M4 core is running a process.
     //
     // @return True if the M4 is running a process, false otherwise

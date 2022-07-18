@@ -26,10 +26,12 @@
 
 namespace coralmicro {
 // Defines a mutex lock over a given semaphore.
-// Any code in the code block following the mutex lock will only be processed after the semaphore is acquired.
-// Thus, code-blocks that use a mutex lock to acquire the same semaphore will result in thread-safe variables between said code-blocks.
-// After leaving the code-block the mutex lock releases the semaphore and the mutex-lock is deleted.
-
+// Any code in the code block following the mutex lock will only be processed
+// after the semaphore is acquired.
+// Thus, code-blocks that use a mutex lock to acquire the same semaphore will result in
+// thread-safe variables between said code-blocks.
+// After leaving the code-block the mutex lock releases the
+// semaphore and the mutex-lock is deleted.
 class MutexLock {
    public:
     // @param sema SemaphoreHandle to be acquired.
@@ -50,8 +52,10 @@ class MutexLock {
 // Defines a core specific mutex lock over a given semaphore gate.
 // Because each core has its own copy of semaphore gates,
 // two mutex locks operating on separate cores can acquire the same gate simultaneously.
-// This results in being able to use a multicore mutex lock to represent hardware resources specific to each core.
-// Thus, you can use multicore locks to partition hardware resources to concurrently run processes on different cores.
+// This results in being able to use a multicore mutex lock to represent hardware
+// resources specific to each core.
+// Thus, you can use multicore locks to partition hardware resources to
+// concurrently run processes on different cores.
 class MulticoreMutexLock {
   public:
    // @param gate Unsigned int representing the semaphore gate.

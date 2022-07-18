@@ -27,6 +27,7 @@ enum class IpcSystemMessageType : uint8_t {
     // kConsoleBufferPtr refers to a pointer to a console buffer.
     kConsoleBufferPtr,
 };
+
 // System Message to be sent from M4 or M7.
 //
 // @param type Identifier for the type of message, which will be a `kConsoleBufferPtr` which is a byte.
@@ -45,8 +46,10 @@ enum class IpcMessageType : uint8_t {
     // kApp refers to a byte array of size kIpcMessageBufferDataSize
     kApp,
 };
+
 // Size of the byte array containing a message.
 inline constexpr size_t kIpcMessageBufferDataSize = 127;
+
 // Message to be sent from an M4 or M7.
 //
 // @param type Identifier for the type of message.
@@ -58,6 +61,7 @@ struct IpcMessage {
         uint8_t data[kIpcMessageBufferDataSize];
     } message;
 } __attribute__((packed));
+
 // @cond Internal only, do not generate docs
 struct IpcMessageBuffer {
     MessageBufferHandle_t message_buffer;

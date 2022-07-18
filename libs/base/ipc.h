@@ -35,6 +35,7 @@ class Ipc {
     // @param user_data Void Pointer to be used for an extra param if needed.
     using AppMessageHandler = std::function<void(
         const uint8_t data[kIpcMessageBufferDataSize], void* user_data)>;
+
     // @cond Internal only, do not generate docs
     virtual void Init();
     // @endcond
@@ -43,6 +44,7 @@ class Ipc {
     //
     // @param message The message to send.
     void SendMessage(const IpcMessage& message);
+
     // Callback method to the function, AppMessageHandler, that defines how to process message.
     //
     // @param AppMessageHandler Function that defines how to interpret the message.
@@ -54,6 +56,7 @@ class Ipc {
                                                   void* context) {
         static_cast<Ipc*>(context)->FreeRtosMessageEventHandler(eventData);
     }
+
     void FreeRtosMessageEventHandler(uint16_t eventData);
 
     static void StaticTxTaskFn(void* param) {
