@@ -23,8 +23,7 @@
 extern "C" void app_main(void* param) {
     // Create and register message handler.
     auto message_handler =
-        [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
-           void* param) {
+        [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
             const auto* msg =
                 reinterpret_cast<const mp_example::ExampleAppMessage*>(data);
             if (msg->type == mp_example::ExampleMessageType::LED_STATUS) {
@@ -51,6 +50,6 @@ extern "C" void app_main(void* param) {
             }
         };
     coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(
-        message_handler, nullptr);
+        message_handler);
     vTaskSuspend(nullptr);
 }

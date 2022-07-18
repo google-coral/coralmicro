@@ -36,9 +36,8 @@ constexpr char kMethodGetFrame[] = "get_frame";
 
 std::vector<uint8_t> camera_rgb;
 
-void HandleAppMessage(
-    const uint8_t data[coralmicro::kIpcMessageBufferDataSize], void* param) {
-  auto rpc_task_handle = reinterpret_cast<TaskHandle_t>(param);
+void HandleAppMessage(const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
+                      TaskHandle_t rpc_task_handle) {
   const auto* app_message = reinterpret_cast<const RackTestAppMessage*>(data);
   switch (app_message->message_type) {
     case RackTestAppMessageType::kXor: {
@@ -182,7 +181,10 @@ coralmicro::HttpServer::Content UriHandler(const char* name) {
 
 extern "C" void app_main(void* param) {
   coralmicro::IpcM7::GetSingleton()->RegisterAppMessageHandler(
-      HandleAppMessage, xTaskGetHandle(TCPIP_THREAD_NAME));
+      [handle = xTaskGetHandle(TCPIP_THREAD_NAME)](
+          const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
+        HandleAppMessage(data, handle);
+      });
   jsonrpc_init(nullptr, nullptr);
 #if defined(TEST_WIFI)
   if (!coralmicro::WiFiTurnOn()) {

@@ -22,8 +22,7 @@
 extern "C" [[noreturn]] void app_main(void* param) {
     // Create and register message handler for the M7.
     auto message_handler =
-        [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
-           void* param) {
+        [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
             const auto* msg =
                 reinterpret_cast<const mp_example::ExampleAppMessage*>(data);
             if (msg->type == mp_example::ExampleMessageType::ACKNOWLEDGED) {
@@ -31,7 +30,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
             }
         };
     coralmicro::IpcM7::GetSingleton()->RegisterAppMessageHandler(
-        message_handler, nullptr);
+        message_handler);
     coralmicro::IpcM7::GetSingleton()->StartM4();
 
     bool led_status{false};

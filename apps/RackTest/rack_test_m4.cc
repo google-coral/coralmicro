@@ -20,8 +20,7 @@
 
 namespace {
 void HandleAppMessage(
-    const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
-    void* param) {
+    const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
   const RackTestAppMessage* app_message =
       reinterpret_cast<const RackTestAppMessage*>(data);
   switch (app_message->message_type) {
@@ -59,6 +58,6 @@ void HandleAppMessage(
 
 extern "C" void app_main(void* param) {
   coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(
-      HandleAppMessage, nullptr);
+      HandleAppMessage);
   vTaskSuspend(nullptr);
 }

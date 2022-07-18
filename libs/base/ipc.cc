@@ -31,17 +31,6 @@ void Ipc::FreeRtosMessageEventHandler(uint16_t eventData) {
     portYIELD_FROM_ISR(higher_priority_woken);
 }
 
-void Ipc::RegisterAppMessageHandler(AppMessageHandler handler, void* param) {
-    app_handler_ = handler;
-    app_handler_param_ = param;
-}
-
-void Ipc::HandleAppMessage(const uint8_t data[kIpcMessageBufferDataSize]) {
-    if (app_handler_) {
-        app_handler_(data, app_handler_param_);
-    }
-}
-
 void Ipc::SendMessage(const IpcMessage& message) {
     if (!tx_task_ || !tx_semaphore_) {
         return;

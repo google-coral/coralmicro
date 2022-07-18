@@ -228,8 +228,8 @@ class PosenetTask : private Task<PosenetTask> {
       char cmd;
       CHECK(xQueuePeek(queue_, &cmd, portMAX_DELAY) == pdTRUE);
       CHECK(interpreter_->Invoke() == kTfLiteOk);
-      auto poses = coralmicro::tensorflow::GetPosenetOutput(
-          interpreter_.get(), kThreshold);
+      auto poses = coralmicro::tensorflow::GetPosenetOutput(interpreter_.get(),
+                                                            kThreshold);
       if (!poses.empty()) {
         CreatePoseJson(poses, kThreshold, &json);
         network_task_->Send(kMessageTypePoseData, json.data(), json.size());
@@ -348,12 +348,6 @@ void reset_count_rpc(struct jsonrpc_request* r) {
                          reset_stats.reset_reason);
 }
 
-void HandleAppMessage(const uint8_t data[kIpcMessageBufferDataSize],
-                      void* param) {
-  (void)data;
-  vTaskResume(static_cast<TaskHandle_t>(param));
-}
-
 void Main() {
   constexpr WatchdogConfig wdt_config = {
       .timeout_s = 8,
@@ -413,8 +407,10 @@ void Main() {
   http_server.AddUriHandler(FileSystemUriHandler{});
   UseHttpServer(&http_server);
 
-  IpcM7::GetSingleton()->RegisterAppMessageHandler(HandleAppMessage,
-                                                   xTaskGetCurrentTaskHandle());
+  IpcM7::GetSingleton()->RegisterAppMessageHandler(
+      [handle = xTaskGetCurrentTaskHandle()](const uint8_t data[]) {
+        vTaskResume(handle);
+      });
 
   IpcM7::GetSingleton()->StartM4();
 

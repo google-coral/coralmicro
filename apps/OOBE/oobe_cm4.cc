@@ -28,13 +28,6 @@
 namespace {
 bool volatile g_person_detected = false;
 bool g_status_led_state = true;
-
-void HandleAppMessage(
-    const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
-    void* param) {
-  (void)data;
-  vTaskResume(reinterpret_cast<TaskHandle_t>(param));
-}
 }  // namespace
 
 void RespondToDetection(tflite::ErrorReporter* error_reporter,
@@ -50,8 +43,11 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
 
 extern "C" void app_main(void* param) {
   (void)param;
+
   coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(
-      HandleAppMessage, xTaskGetCurrentTaskHandle());
+      [handle = xTaskGetCurrentTaskHandle()](const uint8_t data[]) {
+        vTaskResume(handle);
+      });
   coralmicro::CameraTask::GetSingleton()->Init(I2C5Handle());
   coralmicro::CameraTask::GetSingleton()->SetPower(false);
   vTaskDelay(pdMS_TO_TICKS(100));
