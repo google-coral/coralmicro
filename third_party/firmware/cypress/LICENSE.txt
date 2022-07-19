@@ -1,0 +1,92 @@
+============================================================================
+ WICED SDK LICENSING INFORMATION FOR THIRD PARTY SOURCE CODE & OBJECT FILES
+============================================================================
+
+Code shipped with the WICED SDK is grouped into two categories:
+  1. Code/libraries that may be compiled and linked with the target application
+     - This code is provided under license terms similar to FreeBSD
+  2. Code/libraries that are part of the toolchain used to create the
+     application, but not included as part of the target application
+     - This code is provided under various license terms including variations
+       of GPL.
+
+1. Code/Libraries that may be compiled/linked with the target application
+  * ThreadX / NetX / NetXDuo object files & headers are licensed by Cypress from Express Logic, Inc.
+    - SDK Location : <WICED-SDK>/WICED/RTOS/ThreadX
+                     <WICED-SDK>/WICED/network/NetX
+                     <WICED-SDK>/WICED/network/NetX_Duo
+  * SSL/TLS object files and headers are licensed by Cypress from Cypherbridge Systems, LLC.
+    - SDK Location : <WICED-SDK>/WICED/security/BESL/TLS
+  * NewLIB - stdio library (printf etc.)
+    - SDK Location : <WICED-SDK>/tools/ARM_GNU, <WICED-SDK>/tools/source/ARM_GNU
+    - web          : newlib : http://sourceware.org/newlib/COPYING.NEWLIB
+                       (Licenses 21,22,24,25,27,28,29,30,31,32,33,34,36 do not apply)
+                       - libgloss : http://sourceware.org/cgi-bin/cvsweb.cgi/~checkout~/src/COPYING.LIBGLOSS?rev=1.14&content-type=text/plain&cvsroot=src
+                         (Licenses 6,7,11,12,13,15 do not apply)
+  * ARM CMSIS - Cortex Microcontroller Software Interface Standard
+    - SDK Location : <WICED-SDK>/WICED/platform/ARM_CM3/CMSIS
+                     <WICED-SDK>/WICED/platform/ARM_CM4/CMSIS
+  * STM32 Peripheral Library Drivers
+    - SDK Location : <WICED-SDK>/WICED/platform/MCU/STM32F1xx/peripherals/libraries
+                     <WICED-SDK>/WICED/platform/MCU/STM32F2xx/peripherals/libraries
+                     <WICED-SDK>/WICED/platform/MCU/STM32F4xx/peripherals/libraries
+  * Freescale Kinetis Peripheral Library Drivers
+    - SDK Location : <WICED-SDK>/WICED/platform/MCU/K60/peripherals/libraries
+                   : License : http://www.freescale.com/webapp/sps/download/license.jsp?colCode=KINETIS512_SC
+  * Atmel SAM Peripheral Library Drivers
+    - SDK Location : <WICED-SDK>/WICED/platform/MCU/SAM4S/peripherals/libraries
+  * NXP LPC Peripheral Library Drivers
+    - SDK Location : <WICED-SDK>/WICED/platform/MCU/LPC17xx/peripherals/libraries
+
+2. Code/Libraries that are part of the WICED Toolchain
+  * LibusbK Driver - Driver for the evaluation board
+    - SDK Location : <WICED-SDK>/tools/drivers/CYW9WCD1EVAL1/
+    - web          : libusbk.sourceforge.net/UsbK3/index.html#Licensing
+  * FTDI USB Serial port
+    - SDK Location : <WICED-SDK>/tools/drivers/BCM9WCD1EVAL1/
+    - web          : http://www.ftdichip.com/Drivers/VCP.htm
+  * OpenOCD - On-Chip Debugger
+    - SDK Location : <WICED-SDK>/tools/OpenOCD, <WICED-SDK>/tools/source/OpenOCD
+    - web          : http://openocd.git.sourceforge.net/git/gitweb.cgi?p=openocd/openocd;a=blob_plain;f=COPYING;hb=HEAD
+  * GNU Toolchain
+    - SDK Location : <WICED-SDK>/tools/ARM_GNU, <WICED-SDK>/tools/source/ARM_GNU
+    - web          : Yagarto: http://www.yagarto.de/source/toolchain/build-scripts-20091223.tar.bz2
+                   : Binutils : http://sourceware.org/cgi-bin/cvsweb.cgi/~checkout~/src/COPYING?rev=1.2&content-type=text/plain&cvsroot=src
+                   : Expat XML Parser : http://expat.cvs.sourceforge.net/viewvc/expat/expat/COPYING?revision=1.4&view=markup
+                   : GCC, the GNU Compiler Collection
+                       - GCC : http://gcc.gnu.org/onlinedocs/gcc-4.6.2/gcc/Copying.html#Copying
+                       - Zlib : http://www.gzip.org/zlib/zlib_license.html
+                       - Libiberty : http://gcc.gnu.org/onlinedocs/libiberty/Library-Copying.html#Library-Copying
+                   : LibGCC, http://gcc.gnu.org/onlinedocs/gccint/Libgcc.html
+                     special LibGCC exception to GPLv3 http://www.gnu.org/licenses/gcc-exception.html
+  * GNU Multiple Precision Arithmetic Library (License : http://www.gnu.org/copyleft/lesser.html)
+    - web : http://gmplib.org/manual/Copying.html#Copying
+            MPC  : http://www.multiprecision.org/
+            MPFR : http://www.mpfr.org/
+            GMP  : http://gmplib.org/
+  * GDB, The GNU Project Debugger
+    - SDK Location : <WICED-SDK>/tools/ARM_GNU/bin, <WICED-SDK>/tools/source/ARM_GNU
+    - web          : http://sourceware.org/gdb/current/onlinedocs/gdb/Copying.html#Copying
+  * MinGW tools
+    - SDK Location : <WICED-SDK>/tools/ARM_GNU/bin
+    - web          : Minimal System : http://www.mingw.org/wiki/msys/
+                       - cp, mkdir, rm, uname, touch, (GNU coreutils) : http://git.savannah.gnu.org/cgit/coreutils.git/tree/COPYING
+                       - make : http://cvs.savannah.gnu.org/viewvc/make/COPYING?root=make&view=markup
+                       - perl : http://dev.perl.org/licenses/
+                       - sh : http://git.savannah.gnu.org/cgit/bash.git/tree/COPYING
+  * GNU Linux Tools
+    - SDK Location : <WICED-SDK>/tools/ARM_GNU/bin
+    - web          : echo, cp, mkdir, rm, uname, touch, (GNU coreutils) http://git.savannah.gnu.org/cgit/coreutils.git/tree/COPYING
+                     make : http://cvs.savannah.gnu.org/viewvc/make/COPYING?root=make&view=markup
+                     perl : http://dev.perl.org/licenses/
+                     sh : http://git.savannah.gnu.org/cgit/bash.git/tree/COPYING
+  * Eclipse IDE & CDT GDB plugin (License http://www.eclipse.org/legal/epl-v10.html)
+    - web          : http://www.eclipse.org/
+                     http://www.eclipse.org/cdt
+  * Apple AirPlay
+    - SDK Location : <WICED-SDK>/libraries/daemons/airplay_server
+    - web          : https://developer.apple.com/programs/mfi/
+  * Apple Wireless Accessory Configuration (WAC)
+    - SDK Location : <WICED-SDK>/libraries/mfi/apple_wac
+    - web          : https://developer.apple.com/programs/mfi/
+    
