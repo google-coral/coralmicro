@@ -1,0 +1,5 @@
+-mcpu=cortex-m7
+-mfloat-abi=hard
+-mfpu=fpv5-d16
+-Xlinker --defsym=__use_shmem__=1
+--specs=nano.specs

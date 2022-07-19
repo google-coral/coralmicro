@@ -25,6 +25,7 @@
 #include "libs/base/check.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/wwd_wifi.h"
 
 namespace coralmicro {
 
@@ -129,6 +130,39 @@ std::optional<std::string> WiFiGetIp() {
   }
   return std::to_string(ip[0]) + '.' + std::to_string(ip[1]) + '.' +
          std::to_string(ip[2]) + '.' + std::to_string(ip[3]);
+}
+
+std::optional<std::array<uint8_t, 6>> WiFiGetMac() {
+  std::array<uint8_t, 6> mac;
+  if (WIFI_GetMAC(mac.data()) != eWiFiSuccess) {
+    return std::nullopt;
+  }
+
+  return mac;
+}
+
+std::optional<std::array<uint8_t, 6>> WiFiGetBssid() {
+  if (!WiFiIsConnected()) {
+    return std::nullopt;
+  }
+  wiced_mac_t bssid;
+  if (wwd_wifi_get_bssid(&bssid) != WWD_SUCCESS) {
+    return std::nullopt;
+  }
+  std::array<uint8_t, 6> ret_bssid;
+  memcpy(ret_bssid.data(), bssid.octet, 6);
+  return ret_bssid;
+}
+
+std::optional<int32_t> WiFiGetRssi() {
+  if (!WiFiIsConnected()) {
+    return std::nullopt;
+  }
+  int32_t rssi;
+  if (wwd_wifi_get_rssi(&rssi) != WWD_SUCCESS) {
+    return std::nullopt;
+  }
+  return rssi;
 }
 
 void WiFiSetAntenna(WiFiAntenna antenna) {

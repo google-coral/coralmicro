@@ -1,0 +1,1 @@
+../../../../../../../../../third_party/nxp/rt1176-sdk/components/uart/fsl_adapter_uart.h

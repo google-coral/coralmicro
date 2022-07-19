@@ -1,0 +1,1 @@
+../../../../../../../../../../../third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console/fsl_debug_console.h

@@ -220,18 +220,19 @@ def GetLibs(build_dir, libs_path, scanned, cached_files):
         sublibs |= GetLibs(build_dir, lib, scanned | libs_found, cached_files)
     return libs_found | sublibs
 
-def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino, data_dir, data):
+def CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, is_arduino, data_dirs, data):
     if not data:
         return dict()
     if is_arduino:
-        if not data_dir:
+        if not data_dirs:
             return dict()
         folder_resources = dict()
-        for root, dirs, files in os.walk(data_dir):
-            for file in files:
-                src_path = os.path.join(root, file)
-                tgt_path = src_path.replace(data_dir, '')
-                folder_resources[src_path] = tgt_path
+        for data_dir in data_dirs:
+            for root, dirs, files in os.walk(data_dir):
+                for file in files:
+                    src_path = os.path.join(root, file)
+                    tgt_path = src_path.replace(data_dir, '')
+                    folder_resources[src_path] = tgt_path
         return folder_resources
     libs_path = os.path.splitext(elf_path)[0] + '.libs'
     m4_exe_path = os.path.splitext(elf_path)[0] + '.m4_executable'
@@ -705,7 +706,7 @@ def main():
         help='Flashes using cached target files, which can speed up the \
         flashing process. You must first run scripts/cache_build.py.')
     advanced_group.add_argument(
-        '--data_dir', type=str, required=False,
+        '--data_dir', type=str, required=False, nargs='*',
         help=argparse.SUPPRESS)
     advanced_group.add_argument(
         '--noprogram', dest='noprogram', action='store_true',
@@ -772,12 +773,13 @@ def main():
         print(serial_list)
         return
 
-    data_dir = None
+    data_dirs = []
     if args.data_dir:
-      if not os.path.exists(args.data_dir):
-        print(f'Resource directory {args.data_dir} not found!')
-        return
-      data_dir = os.path.abspath(args.data_dir)
+        for dir in args.data_dir:
+            if not os.path.exists(dir):
+              print(f'Resource directory {dir} not found!')
+              return
+        data_dirs.append(os.path.abspath(dir))
 
     elf_path = args.elf_path if args.elf_path else None
     unstripped_elf_path = args.elf_path if args.elf_path else None
@@ -874,7 +876,7 @@ def main():
         data_files = None
         if not args.ram:
             print('Creating Filesystem')
-            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, args.arduino, data_dir, data)
+            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, args.arduino, data_dirs, data)
             if data_files is None:
                 print('Creating filesystem failed, exit')
                 return

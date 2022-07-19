@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-#include <Arduino.h>
-#include "wiring_private.h"
+#include "libs/base/wifi.h"
 
-#include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/task.h"
-
-// Override this in variant.cpp
-extern void variantInit() __attribute__((weak));
-void variantInit() {}
-
-extern "C" void app_main(void *param) {
-    variantInit();
-    wiringInit();
-    setup();
-    while (true) {
-        loop();
-        portYIELD();
-    }
-    vTaskSuspend(NULL);
+void variantInit() {
+    coralmicro::WiFiTurnOn();
 }

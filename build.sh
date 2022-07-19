@@ -154,7 +154,14 @@ EOF
     ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core install coral:coral_micro
     if [[ ! -z ${build_sketches} ]]; then
         for sketch in ${ROOTDIR}/sketches/*; do
-            ${ROOTDIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli compile -b coral:coral_micro:coral_micro ${sketch};
+            for variant in coral_micro coral_micro_wifi; do
+                if [[ ${sketch} =~ WiFi ]]; then
+                  if [[ ! ${variant} =~ wifi ]]; then
+                    continue
+                  fi
+                fi
+                ${ROOTDIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli compile -b coral:coral_micro:${variant} ${sketch};
+            done
         done
     fi
     fi

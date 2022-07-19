@@ -328,30 +328,31 @@ def core_main(args, **kwargs):
         build_dir = os.path.join(tmpdir, 'build')
         os.makedirs(build_dir)
         subprocess.check_call(['cmake', root_dir, '-DCORAL_MICRO_ARDUINO=1', '-G', 'Ninja'], cwd=build_dir)
-        subprocess.check_call(['ninja', '-C', build_dir, 'bundling_target', 'ELFLoader'])
-        libs_dir = os.path.join(core_out_dir, 'variants', 'coral_micro', 'libs')
-        os.makedirs(libs_dir, exist_ok=True)
+        subprocess.check_call(['ninja', '-C', build_dir, 'bundling_target_libs_arduino_coral_micro', 'bundling_target_libs_arduino_coral_micro_wifi', 'ELFLoader'])
+        for variant in ['coral_micro', 'coral_micro_wifi']:
+            libs_dir = os.path.join(core_out_dir, 'variants', variant, 'libs')
+            os.makedirs(libs_dir, exist_ok=True)
 
-        ar_path = os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-ar' + exe_extension)
+            ar_path = os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-ar' + exe_extension)
 
-        # Copy the arduino library bundle into the core.
-        with tempfile.TemporaryDirectory() as rebundle_dir:
-            arduino_rebundled_path = os.path.join(libs_dir, 'liblibs_arduino_bundled.a')
+            # Copy the arduino library bundle into the core.
+            with tempfile.TemporaryDirectory() as rebundle_dir:
+                arduino_rebundled_path = os.path.join(libs_dir, f'liblibs_arduino_{variant}_bundled.a')
 
-            # Merge static libraries into a bundle
-            static_libs_path = os.path.join(build_dir, 'libs_arduino_bundled.txt')
-            with open(static_libs_path) as static_libs_file:
-                unique_objects = set()
-                for path in static_libs_file.readlines():
-                    path = path.strip('\n')
-                    obj_paths = subprocess.check_output([ar_path, 't', path]).decode("utf-8").split('\n')
-                    root_obj_dir = os.path.dirname(path)
-                    for obj_path in obj_paths:
-                        unique_path = obj_path.split('CMakeFiles')[-1]
-                        obj_full_path = os.path.join(build_dir, obj_path)
-                        if unique_path not in unique_objects and obj_path != '':
-                            subprocess.check_call([ar_path, 'q', arduino_rebundled_path, obj_full_path], cwd=build_dir)
-                            unique_objects.add(unique_path)
+                # Merge static libraries into a bundle
+                static_libs_path = os.path.join(build_dir, f'libs_arduino_{variant}_bundled.txt')
+                with open(static_libs_path) as static_libs_file:
+                    unique_objects = set()
+                    for path in static_libs_file.readlines():
+                        path = path.strip('\n')
+                        obj_paths = subprocess.check_output([ar_path, 't', path]).decode("utf-8").split('\n')
+                        root_obj_dir = os.path.dirname(path)
+                        for obj_path in obj_paths:
+                            unique_path = obj_path.split('CMakeFiles')[-1]
+                            obj_full_path = os.path.join(build_dir, obj_path)
+                            if unique_path not in unique_objects and obj_path != '':
+                                subprocess.check_call([ar_path, 'q', arduino_rebundled_path, obj_full_path], cwd=build_dir)
+                                unique_objects.add(unique_path)
 
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'coral_micro')
         os.makedirs(bootloader_dir)

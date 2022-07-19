@@ -1,0 +1,1 @@
+../../../../../../../../../third_party/nxp/rt1176-sdk/components/serial_manager/fsl_component_serial_manager.h

@@ -99,6 +99,7 @@ static struct netif fsl_netif0;
 /* Temporary SSID */
 static wiced_ssid_t ssid = {0};
 
+static wiced_security_t security;
 
 static int wifi_is_enabled(void)
 {
@@ -156,6 +157,10 @@ static WIFISecurity_t conv_security_from_wiced(wiced_security_t api_sec)
 }
 
 
+WIFISecurity_t WIFI_GetSecurity(void) {
+    return conv_security_from_wiced(security);
+}
+
 void wiced_scan_results_handler( wiced_scan_result_t** result_ptr, void* user_data, wiced_scan_status_t status )
 {
     wiced_scan_buf *scan_buf = (wiced_scan_buf *) user_data;
@@ -205,7 +210,6 @@ static void iface_down(void)
     netifapi_netif_set_down(&fsl_netif0);
     netifapi_netif_remove(&fsl_netif0);
 }
-
 
 /**
  * @brief Initializes the Wi-Fi module.
@@ -430,6 +434,7 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
 
             /* Consider connected */
             wifi_set_connected(1);
+            security = auth_mode;
             result = eWiFiSuccess;
         } while(0);
         /* Release semaphore */

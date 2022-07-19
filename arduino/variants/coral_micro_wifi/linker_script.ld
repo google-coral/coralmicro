@@ -1,0 +1,1 @@
+../../../libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_ram.ld

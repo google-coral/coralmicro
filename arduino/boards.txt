@@ -2,7 +2,6 @@ coral_micro.name=Dev Board Micro
 coral_micro.build.core=arduino
 coral_micro.build.crossprefix=arm-none-eabi-
 coral_micro.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
-
 coral_micro.build.variant=coral_micro
 coral_micro.build.mcu=cortex-m7
 coral_micro.build.fpu=fpv5-d16
@@ -11,7 +10,7 @@ coral_micro.build.extra_flags=
 coral_micro.build.architecture=cortex-m7
 coral_micro.build.board=coral_micro_FREERTOS
 coral_micro.build.ldscript=linker_script.ld
-coral_micro.lib.freertos="{build.variant.path}/libs/liblibs_arduino_bundled.a"
+coral_micro.lib.freertos="{build.variant.path}/libs/liblibs_arduino_coral_micro_bundled.a"
 coral_micro.lib.freertos.arch.define=
 coral_micro.lib.freertos.defines={build.variant.path}/defines.txt
 coral_micro.lib.freertos.ldflags={build.variant.path}/ldflags.txt
@@ -19,13 +18,10 @@ coral_micro.lib.freertos.cflags={build.variant.path}/cflags.txt
 coral_micro.lib.freertos.cxxflags={build.variant.path}/cxxflags.txt
 coral_micro.lib.freertos.includes={build.variant.path}/includes.txt
 coral_micro.lib.freertos.extra_ldflags=
-
 coral_micro.bootloader.file={runtime.platform.path}/bootloaders/coral_micro/image.srec
-
 coral_micro.upload.tool=flashtool
 coral_micro.upload.protocol=
 coral_micro.upload.pattern={cmd.path} --elfloader_path {bootloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
-
 coral_micro.vid.0=0x18d1
 coral_micro.pid.0=0x9307
 coral_micro.vid.1=0x18d1
@@ -38,12 +34,55 @@ coral_micro.vid.4=0x18d1
 coral_micro.pid.4=0x93fe
 coral_micro.vid.5=0x18d1
 coral_micro.pid.5=0x93ff
-
 menu.upload=Upload sketch
 coral_micro.menu.upload.both=Sketch + Data
 coral_micro.menu.upload.program=Sketch only
 coral_micro.menu.upload.data=Data only
-
 coral_micro.menu.upload.both.upload.extra_flags=
 coral_micro.menu.upload.program.upload.extra_flags=--nodata
 coral_micro.menu.upload.data.upload.extra_flags=--noprogram
+
+coral_micro_wifi.name=Dev Board Micro + Wi-Fi
+coral_micro_wifi.build.core=arduino
+coral_micro_wifi.build.crossprefix=arm-none-eabi-
+coral_micro_wifi.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+coral_micro_wifi.build.variant=coral_micro_wifi
+coral_micro_wifi.build.mcu=cortex-m7
+coral_micro_wifi.build.fpu=fpv5-d16
+coral_micro_wifi.build.float-abi=hard
+coral_micro_wifi.build.extra_flags=
+coral_micro_wifi.build.architecture=cortex-m7
+coral_micro_wifi.build.board=coral_micro_FREERTOS_WIFI
+coral_micro_wifi.build.ldscript=linker_script.ld
+coral_micro_wifi.lib.freertos="{build.variant.path}/libs/liblibs_arduino_coral_micro_wifi_bundled.a"
+coral_micro_wifi.lib.freertos.arch.define=
+coral_micro_wifi.lib.freertos.defines={build.variant.path}/defines.txt
+coral_micro_wifi.lib.freertos.ldflags={build.variant.path}/ldflags.txt
+coral_micro_wifi.lib.freertos.cflags={build.variant.path}/cflags.txt
+coral_micro_wifi.lib.freertos.cxxflags={build.variant.path}/cxxflags.txt
+coral_micro_wifi.lib.freertos.includes={build.variant.path}/includes.txt
+coral_micro_wifi.lib.freertos.extra_ldflags=
+coral_micro_wifi.bootloader.file={runtime.platform.path}/bootloaders/coral_micro/image.srec
+coral_micro_wifi.data.dir={runtime.platform.path}/variants/coral_micro_wifi/data
+coral_micro_wifi.upload.tool=flashtool
+coral_micro_wifi.upload.protocol=
+coral_micro_wifi.upload.pattern={cmd.path} --elfloader_path {bootloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data --data_dir={data.dir} {upload.extra_flags}
+coral_micro_wifi.vid.0=0x18d1
+coral_micro_wifi.pid.0=0x9307
+coral_micro_wifi.vid.1=0x18d1
+coral_micro_wifi.pid.1=0x9308
+coral_micro_wifi.vid.2=0x0d28
+coral_micro_wifi.pid.2=0x0204
+coral_micro_wifi.vid.3=0x1fc9
+coral_micro_wifi.pid.3=0x0094
+coral_micro_wifi.vid.4=0x18d1
+coral_micro_wifi.pid.4=0x93fe
+coral_micro_wifi.vid.5=0x18d1
+coral_micro_wifi.pid.5=0x93ff
+menu.upload_wifi=Upload sketch
+coral_micro_wifi.menu.upload.both=Sketch + Data
+coral_micro_wifi.menu.upload.program=Sketch only
+coral_micro_wifi.menu.upload.data=Data only
+coral_micro_wifi.menu.upload.both.upload.extra_flags=
+coral_micro_wifi.menu.upload.program.upload.extra_flags=--nodata
+coral_micro_wifi.menu.upload.data.upload.extra_flags=--noprogram

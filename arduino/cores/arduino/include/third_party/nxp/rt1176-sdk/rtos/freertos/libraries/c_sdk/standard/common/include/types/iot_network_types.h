@@ -1,0 +1,1 @@
+../../../../../../../../../../../../../../../third_party/nxp/rt1176-sdk/rtos/freertos/libraries/c_sdk/standard/common/include/types/iot_network_types.h

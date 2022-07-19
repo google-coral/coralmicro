@@ -276,6 +276,8 @@ WIFIReturnCode_t WIFI_SetMode( WIFIDeviceMode_t xDeviceMode );
 WIFIReturnCode_t WIFI_GetMode( WIFIDeviceMode_t * pxDeviceMode );
 /* @[declare_wifi_wifi_getmode] */
 
+WIFISecurity_t WIFI_GetSecurity(void);
+
 /**
  * @brief Add a Wi-Fi Network profile.
  *

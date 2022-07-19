@@ -121,6 +121,22 @@ std::vector<WIFIScanResult_t> WiFiScan();
 // failure.
 std::optional<std::string> WiFiGetIp();
 
+// Gets the device's Wi-Fi MAC address.
+//
+// @return Byte array containing the MAC address or `std::nullopt` on failure.
+std::optional<std::array<uint8_t, 6>> WiFiGetMac();
+
+// Gets the BSSID (MAC address of connected Access Point).
+//
+// @return Byte array containing the MAC address or `std::nullopt` on
+// failure.
+std::optional<std::array<uint8_t, 6>> WiFiGetBssid();
+
+// Gets the RSSI of the connected access point.
+//
+// @return Signal strength in dBm or `std::nullopt` on failure.
+std::optional<int32_t> WiFiGetRssi();
+
 // Sets which Wi-Fi antenna type to use (internal or external).
 //
 // @param antenna The type of antenna to use.

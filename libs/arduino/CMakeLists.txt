@@ -12,11 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_library(libs_arduino STATIC
+add_library(libs_arduino_coral_micro STATIC
     CMakeLists.txt)
-target_link_libraries(libs_arduino
+target_link_libraries(libs_arduino_coral_micro
     libs_base-m7_freertos
     libs_flatbuffers
     libs_yamnet
 )
-bundle_static_library(libs_arduino libs_arduino_bundled)
+bundle_static_library(libs_arduino_coral_micro libs_arduino_coral_micro_bundled)
+
+add_library(libs_arduino_coral_micro_wifi STATIC
+    CMakeLists.txt)
+target_link_libraries(libs_arduino_coral_micro_wifi
+    libs_base-m7_freertos
+    libs_base-m7_wifi
+    libs_yamnet
+)
+bundle_static_library(libs_arduino_coral_micro_wifi libs_arduino_coral_micro_wifi_bundled)
