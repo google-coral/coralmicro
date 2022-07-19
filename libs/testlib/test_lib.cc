@@ -684,7 +684,7 @@ void PosenetStressRun(struct jsonrpc_request* request) {
         /*height=*/model_height,
         /*preserve_ratio=*/false,
         /*buffer=*/tflite::GetTensorData<uint8_t>(posenet_input)};
-    if (!coralmicro::CameraTask::GetFrame({fmt})) {
+    if (!coralmicro::CameraTask::GetSingleton()->GetFrame({fmt})) {
       jsonrpc_return_error(request, -1, "Failed to get frame from camera",
                            nullptr);
       break;
@@ -750,9 +750,17 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
   // a small amount of retrying to smooth that over.
   constexpr int kRetries = 3;
   for (int i = 0; i < kRetries; ++i) {
+    auto buffer = std::make_unique<uint8_t[]>(coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight * coralmicro::CameraTask::FormatToBPP(coralmicro::camera::Format::kRaw));
+    coralmicro::camera::FrameFormat fmt{
+        /*fmt=*/coralmicro::camera::Format::kRaw,
+        /*filter=*/coralmicro::camera::FilterMethod::kBilinear,
+        /*rotation=*/coralmicro::camera::Rotation::k0,
+        /*width=*/coralmicro::CameraTask::kWidth,
+        /*height=*/coralmicro::CameraTask::kHeight,
+        /*preserve_ratio=*/false,
+        /*buffer=*/buffer.get()};
     coralmicro::CameraTask::GetSingleton()->Trigger();
-    uint8_t* buffer = nullptr;
-    int index = coralmicro::CameraTask::GetSingleton()->GetFrame(&buffer, true);
+    coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
     uint8_t expected = 0;
     success = true;
     for (unsigned int i = 0;
@@ -768,7 +776,6 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
         expected = expected << 1;
       }
     }
-    coralmicro::CameraTask::GetSingleton()->ReturnFrame(index);
     if (success) {
       break;
     }

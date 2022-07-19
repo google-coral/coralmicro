@@ -71,7 +71,7 @@ int CameraClass::grab(uint8_t* buffer) {
             {format_, filter_, rotation_, width_, height_, preserve_ratio_, buffer});
     }
 
-    auto success = coralmicro::CameraTask::GetFrame(fmts);
+    auto success = coralmicro::CameraTask::GetSingleton()->GetFrame(fmts);
     if (!success) {
         printf("Failed to get frame from camera\r\n");
         return CameraStatus::FAILURE;

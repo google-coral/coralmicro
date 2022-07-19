@@ -139,7 +139,7 @@ void get_image_from_camera(struct jsonrpc_request* request) {
         false,
         image.data(),
         auto_white_balance};
-    auto ret = coralmicro::CameraTask::GetFrame({fmt});
+    auto ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
     coralmicro::CameraTask::GetSingleton()->Disable();
     coralmicro::CameraTask::GetSingleton()->SetPower(false);
     //! [camera-stream] End snippet

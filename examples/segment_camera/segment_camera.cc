@@ -87,8 +87,8 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
         image.data()};
 
     // Discard the first frame to ensure no power-on artifacts exist.
-    bool ret = coralmicro::CameraTask::GetFrame({fmt});
-    ret = coralmicro::CameraTask::GetFrame({fmt});
+    bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
+    ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
 
     coralmicro::CameraTask::GetSingleton()->Disable();
     coralmicro::CameraTask::GetSingleton()->SetPower(false);

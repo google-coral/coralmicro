@@ -295,7 +295,7 @@ class CameraTask : private Task<CameraTask> {
           fmt.filter = camera::FilterMethod::kBilinear;
           fmt.preserve_ratio = false;
           fmt.buffer = input.data();
-          coralmicro::CameraTask::GetFrame({fmt});
+          coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
 
           auto jpeg_size =
               JpegCompressRgb(input.data(), fmt.width, fmt.height,

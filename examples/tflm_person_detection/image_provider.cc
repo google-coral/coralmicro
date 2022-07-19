@@ -34,7 +34,7 @@ TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
     fmt.filter = coralmicro::camera::FilterMethod::kBilinear;
     fmt.preserve_ratio = false;
     fmt.buffer = unsigned_image_data.get();
-    bool ret = coralmicro::CameraTask::GetFrame({fmt});
+    bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
     for (int i = 0; i < image_width * image_height; ++i) {
         image_data[i] = unsigned_image_data[i] - 128;
     }

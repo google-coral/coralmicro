@@ -80,7 +80,7 @@ void DetectFromCamera(struct jsonrpc_request* r) {
                                      coralmicro::camera::Rotation::k0, model_width,
                                      model_height, false, image.data()};
 
-    bool ret = coralmicro::CameraTask::GetFrame({fmt});
+    bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
 
     coralmicro::CameraTask::GetSingleton()->Disable();
     coralmicro::CameraTask::GetSingleton()->SetPower(false);

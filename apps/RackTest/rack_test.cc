@@ -162,7 +162,7 @@ void GetFrame(struct jsonrpc_request* request) {
   fmt_rgb.preserve_ratio = false;
   fmt_rgb.buffer = camera_rgb.data();
 
-  bool success = coralmicro::CameraTask::GetFrame({fmt_rgb});
+  bool success = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt_rgb});
   coralmicro::CameraTask::GetSingleton()->SetPower(false);
 
   if (success)

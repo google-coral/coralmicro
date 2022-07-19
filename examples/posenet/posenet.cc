@@ -116,7 +116,7 @@ extern "C" void app_main(void* param) {
             /*height=*/model_height,
             /*preserve_ratio=*/false,
             /*buffer=*/tflite::GetTensorData<uint8_t>(posenet_input)};
-        if (!coralmicro::CameraTask::GetFrame({fmt})) {
+        if (!coralmicro::CameraTask::GetSingleton()->GetFrame({fmt})) {
             TF_LITE_REPORT_ERROR(&error_reporter,
                                  "Failed to get image from camera.");
             break;

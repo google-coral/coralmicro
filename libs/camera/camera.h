@@ -194,27 +194,19 @@ class CameraTask
   // Enables the camera to begin capture. You must call `SetPower()` before
   // this.
   // @param mode The operating mode.
-  void Enable(camera::Mode mode);
+  // @return True if camera is enabled, false otherwise.
+  bool Enable(camera::Mode mode);
 
   // Sets the camera into a low-power state, using appoximately 200 μW
   // (compared to approximately 4 mW when streaming). The camera configuration
   // is sustained so can quickly start again with `Enable()`.
   void Disable();
 
-  // @cond Do not generate docs
-  // TODO(atv): Convert this to return a class that cleans up?
-  int GetFrame(uint8_t** buffer, bool block);
-  // @endcond
-
   // Gets one frame from the camera buffer and processes it into one or
   // more formats.
   // @param fmts A list of image formats you want to receive.
   // @return True if image processing succeeds, false otherwise.
-  static bool GetFrame(const std::list<camera::FrameFormat>& fmts);
-
-  // @cond Do not generate docs
-  void ReturnFrame(int index);
-  // @endcond
+  bool GetFrame(const std::list<camera::FrameFormat>& fmts);
 
   // Turns the camera power on and off. You must call this before `Enable()`.
   // @param enable True to turn the camera on, false to turn it off.
@@ -243,13 +235,6 @@ class CameraTask
   // begin using images with `GetFrame()`.
   void DiscardFrames(int count);
 
-  // @cond Do not generate docs
-  // CSI driver wants width to be divisible by 8, and 324 is not.
-  // 324 * 324 == 13122 * 8 -- this makes the CSI driver happy!
-  static constexpr size_t kCsiWidth = 8;
-  static constexpr size_t kCsiHeight = 13122;
-  // @endcond
-
   // Native image pixel width.
   static constexpr size_t kWidth = 324;
 
@@ -263,6 +248,8 @@ class CameraTask
   static int FormatToBPP(camera::Format fmt);
 
  private:
+  int GetFrame(uint8_t** buffer, bool block);
+  void ReturnFrame(int index);
   void TaskInit() override;
   void RequestHandler(camera::Request* req) override;
   camera::EnableResponse HandleEnableRequest(const camera::Mode& mode);
@@ -295,6 +282,12 @@ class CameraTask
 
   static constexpr uint8_t kModelIdHExpected = 0x01;
   static constexpr uint8_t kModelIdLExpected = 0xB0;
+
+  // CSI driver wants width to be divisible by 8, and 324 is not.
+  // 324 * 324 == 13122 * 8 -- this makes the CSI driver happy!
+  static constexpr size_t kCsiWidth = 8;
+  static constexpr size_t kCsiHeight = 13122;
+
   lpi2c_rtos_handle_t* i2c_handle_;
   csi_handle_t csi_handle_;
   csi_config_t csi_config_;

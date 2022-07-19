@@ -63,7 +63,7 @@ static void take_picture_rpc(struct jsonrpc_request* r) {
     fmt.preserve_ratio = false;
     fmt.buffer = image_buffer.data();
 
-    bool ret = coralmicro::CameraTask::GetFrame({fmt});
+    bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
 
     coralmicro::CameraTask::GetSingleton()->Disable();
     coralmicro::CameraTask::GetSingleton()->SetPower(false);

@@ -111,13 +111,17 @@ int FramebufferPtrToIndex(const uint8_t* framebuffer_ptr) {
 }  // namespace
 
 bool CameraTask::GetFrame(const std::list<camera::FrameFormat>& fmts) {
+  if (mode_ == Mode::kStandBy) {
+    printf("Camera is in standby mode, cannot capture frame.\r\n");
+    return false;
+  }
   bool ret = true;
   uint8_t* raw = nullptr;
-  int index = GetSingleton()->GetFrame(&raw, true);
+  int index = GetFrame(&raw, true);
   if (!raw) {
     return false;
   }
-  if (GetSingleton()->mode_ == Mode::kTrigger) {
+  if (mode_ == Mode::kTrigger) {
     GpioSet(Gpio::kCameraTrigger, false);
   }
 
@@ -598,11 +602,16 @@ void CameraTask::ReturnFrame(int index) {
   SendRequest(req);
 }
 
-void CameraTask::Enable(Mode mode) {
+bool CameraTask::Enable(Mode mode) {
+  if (mode == Mode::kStandBy) {
+    printf("kStandBy is an invalid mode for CameraTask::Enable\r\n");
+    return false;
+  }
   Request req;
   req.type = RequestType::kEnable;
   req.request.mode = mode;
   SendRequest(req);
+  return true;
 }
 
 void CameraTask::Disable() {
