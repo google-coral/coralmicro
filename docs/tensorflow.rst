@@ -290,12 +290,12 @@ provided here.
 Audio Classification
 ----------------------
 
-The following APIs assist when running audio classification using YAMNet models
+The following APIs assist when running audio classification using audio models
 on a microcontroller with support for both CPU and Edge TPU.
 
-`[yamnet.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/yamnet.h>`_
+`[audio_models.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/audio_models.h>`_
 
-.. doxygenfile:: tensorflow/yamnet.h
+.. doxygenfile:: tensorflow/audio_models.h
 
 
 

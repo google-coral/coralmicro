@@ -19,8 +19,8 @@
 
 #include "Arduino.h"
 #include "coral_micro.h"
+#include "libs/tensorflow/audio_models.h"
 #include "libs/tensorflow/classification.h"
-#include "libs/tensorflow/yamnet.h"
 #include "third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.h"
 
 namespace {
@@ -84,8 +84,9 @@ void setup() {
     vTaskSuspend(nullptr);
   }
 
-  if (!coralmicro::tensorflow::YamNetPrepareFrontEnd(&frontend_state)) {
-    Serial.println("coralmicro::tensorflow::YamNetPrepareFrontEnd() failed.");
+  if (!coralmicro::tensorflow::PrepareAudioFrontEnd(
+          &frontend_state, coralmicro::tensorflow::AudioModel::kYAMNet)) {
+    Serial.println("coralmicro::tensorflow::PrepareAudioFrontEnd() failed.");
     return;
   }
 
