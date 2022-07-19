@@ -18,6 +18,7 @@
 
 #include "Arduino.h"
 #include "libs/base/gpio.h"
+#include "libs/base/timer.h"
 #include "pins_arduino.h"
 
 static coralmicro::Gpio PinNumberToGpio(pin_size_t pinNumber) {
@@ -101,5 +102,31 @@ void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback,
 void detachInterrupt(pin_size_t interruptNumber) {
     coralmicro::Gpio gpio = PinNumberToGpio(interruptNumber);
     coralmicro::GpioRegisterIrqHandler(gpio, nullptr);
-    coralmicro::GpioSetIntMode(gpio, coralmicro::GpioInterruptMode::kIntModeNone);
+    coralmicro::GpioSetIntMode(gpio,
+                               coralmicro::GpioInterruptMode::kIntModeNone);
+}
+
+unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
+    switch (pin) {
+        case PIN_BTN:
+        case D0:
+        case D1:
+        case D2:
+        case D3: {
+            delayMicroseconds(timeout);
+            auto stop_state = state == LOW ? HIGH : LOW;
+            while (digitalRead(pin) != state) {
+            }
+            auto start_time = coralmicro::TimerMicros();
+            while (digitalRead(pin) != stop_state) {
+            }
+            return coralmicro::TimerMicros() - start_time;
+        }
+        default:
+            assert(false);
+    }
+}
+
+unsigned long pulseInLong(uint8_t pin, uint8_t state, unsigned long timeout) {
+    return pulseIn(pin, state, timeout);
 }
