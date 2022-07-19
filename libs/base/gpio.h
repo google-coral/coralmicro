@@ -101,7 +101,7 @@ enum GpioInterruptMode {
 // The function type required by `RegisterIRQHandler()`.
 using GpioCallback = std::function<void()>;
 
-// @cond Internal only, do not generate docs
+// @cond Do not generate docs
 void GpioInit();
 // @endcond
 

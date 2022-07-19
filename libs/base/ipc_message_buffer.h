@@ -62,7 +62,7 @@ struct IpcMessage {
     } message;
 } __attribute__((packed));
 
-// @cond Internal only, do not generate docs
+// @cond Do not generate docs
 struct IpcMessageBuffer {
     MessageBufferHandle_t message_buffer;
     StaticMessageBuffer_t static_message_buffer;

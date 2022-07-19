@@ -36,7 +36,7 @@ class Ipc {
     using AppMessageHandler = std::function<void(
         const uint8_t data[kIpcMessageBufferDataSize], void* user_data)>;
 
-    // @cond Internal only, do not generate docs
+    // @cond Do not generate docs
     virtual void Init();
     // @endcond
 

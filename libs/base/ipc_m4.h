@@ -40,7 +40,7 @@ class IpcM4 : public Ipc {
         static IpcM4 ipc;
         return &ipc;
     }
-    // @cond Internal only, do not generate docs.
+    // @cond Do not generate docs.
     void Init() override;
     // @endcond
 

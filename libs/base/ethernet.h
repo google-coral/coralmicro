@@ -40,7 +40,7 @@ struct netif* EthernetGetInterface();
 // false disables it.
 void EthernetInit(bool default_iface);
 
-// @cond Internal only, do not generate docs.
+// @cond Do not generate docs.
 // Writes data over the SMI to the specified PHY register.
 //
 // @param phy_reg The PHY register to write to.

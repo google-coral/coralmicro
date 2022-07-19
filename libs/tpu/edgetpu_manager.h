@@ -57,7 +57,7 @@ class EdgeTpuContext {
     ~EdgeTpuContext();
 };
 
-// @cond Internal only, do not generate docs
+// @cond Do not generate docs
 class EdgeTpuPackage {
    public:
     EdgeTpuPackage(
@@ -93,7 +93,7 @@ class EdgeTpuManager {
         return &manager;
     }
 
-    // @cond Internal only, do not generate docs
+    // @cond Do not generate docs
     EdgeTpuPackage* RegisterPackage(const char* package_content, size_t length);
     TfLiteStatus Invoke(EdgeTpuPackage* package, TfLiteContext* context,
                         TfLiteNode* node);
@@ -114,7 +114,7 @@ class EdgeTpuManager {
     std::shared_ptr<EdgeTpuContext> OpenDevice(
         PerformanceMode mode = PerformanceMode::kHigh);
 
-    // @cond Internal only, do not generate docs
+    // @cond Do not generate docs
     void NotifyConnected(usb_host_edgetpu_instance_t* usb_instance);
     // @endcond
 
