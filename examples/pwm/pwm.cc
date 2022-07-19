@@ -26,10 +26,12 @@ extern "C" [[noreturn]] void app_main(void* param) {
     coralmicro::PwmInit();
     coralmicro::PwmPinConfig pin_a_config{
         /*duty_cycle=*/20,
+        /*frequency=*/1000,
         /*pin_setting=*/
         coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value()};
     coralmicro::PwmPinConfig pin_b_config{
         /*duty_cycle=*/80,
+        /*frequency=*/1000,
         /*pin_setting=*/
         coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value()};
     std::vector<coralmicro::PwmPinConfig> configs;

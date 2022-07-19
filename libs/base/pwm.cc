@@ -84,7 +84,7 @@ void PwmEnable(const std::vector<PwmPinConfig>& pin_configs) {
     if (pin_configs.empty()) return;
 
     // Each pwm submodule only has 2 pins to output PWM.
-    CHECK(pin_configs.size() < 2);
+    CHECK(pin_configs.size() <= 2);
     if (pin_configs.size() == 2) {
         CHECK(pin_configs[0].pin_setting.base ==
               pin_configs[1].pin_setting.base);
@@ -102,15 +102,16 @@ void PwmEnable(const std::vector<PwmPinConfig>& pin_configs) {
         return;
     }
     pwm_signal_param_t signal_param[pin_configs.size()];
+    auto source_clock_hz = CLOCK_GetRootClockFreq(kCLOCK_Root_Bus);
     for (size_t i = 0; i < pin_configs.size(); ++i) {
         signal_param[i].pwmChannel = pin_configs[i].pin_setting.pwm_channel;
         signal_param[i].level = kPWM_HighTrue;
         signal_param[i].dutyCyclePercent = pin_configs[i].duty_cycle;
         signal_param[i].faultState = kPWM_PwmFaultState0;
+        PWM_SetupPwm(base_addr, sub_module, &signal_param[i], 1,
+                     kPWM_SignedCenterAligned, pin_configs[i].frequency,
+                     source_clock_hz);
     }
-    auto source_clock_hz = CLOCK_GetRootClockFreq(kCLOCK_Root_Bus);
-    PWM_SetupPwm(base_addr, sub_module, &signal_param[0], pin_configs.size(),
-                 kPWM_SignedCenterAligned, 1000, source_clock_hz);
     PWM_SetPwmLdok(base_addr, PwmModuleToControl(sub_module), true);
     PWM_StartTimer(base_addr, PwmModuleToControl(sub_module));
 }

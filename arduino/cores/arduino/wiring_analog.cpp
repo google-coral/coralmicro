@@ -101,6 +101,7 @@ void analogWrite(pin_size_t pinNumber, int value) {
     }
     coralmicro::PwmPinConfig pin_config{
         /*duty_cycle=*/map(value, 0, 255, 0, 100),
+        /*frequency=*/1000,
         /*pin_setting=*/pwm_pin_setting};
     coralmicro::PwmEnable({pin_config});
 }
@@ -111,4 +112,49 @@ void analogReadResolution(int bits) {
 
 void analogWriteResolution(int bits) {
     dac_resolution_bits = std::max(1, std::min(bits, kDacFullResolutionBits));
+}
+
+void tone(uint8_t pin, unsigned int frequency, unsigned long duration) {
+    coralmicro::PwmInit();
+    coralmicro::PwmPinSetting pwm_pin_setting;
+    switch (pin) {
+        case A4:  // Pwm pin 9.
+            pwm_pin_setting =
+                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value();
+            break;
+        case A3:  // Pwm pin 10.
+            pwm_pin_setting =
+                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
+            break;
+        default:
+            assert(false);
+    }
+    coralmicro::PwmPinConfig pin_config{/*duty_cycle=*/50,
+                                        /*frequency=*/frequency,
+                                        /*pin_setting=*/pwm_pin_setting};
+    coralmicro::PwmEnable({pin_config});
+}
+
+// Via Arduino's API doc: If you want to play different pitches on multiple
+// pins, you need to call noTone() on one pin before calling tone() on the next
+// pin.
+void noTone(uint8_t pin) {
+    coralmicro::PwmInit();
+    coralmicro::PwmPinSetting pwm_pin_setting;
+    switch (pin) {
+        case A4:  // Pwm pin 9.
+            pwm_pin_setting =
+                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value();
+            break;
+        case A3:  // Pwm pin 10.
+            pwm_pin_setting =
+                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
+            break;
+        default:
+            assert(false);
+    }
+    coralmicro::PwmPinConfig pin_config{/*duty_cycle=*/0,
+                                        /*frequency=*/0,
+                                        /*pin_setting=*/pwm_pin_setting};
+    coralmicro::PwmDisable({pin_config});
 }

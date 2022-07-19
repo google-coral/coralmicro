@@ -45,6 +45,8 @@ struct PwmPinSetting {
 struct PwmPinConfig {
     // The duty cycle (from 0-100) of the PWM waveform.
     int duty_cycle;
+    // Frequency in hz.
+    uint32_t frequency;
     // The HW setting of the pin to start duty cycle.
     PwmPinSetting pin_setting;
 };
