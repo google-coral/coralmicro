@@ -22,9 +22,9 @@
 namespace coralmicro {
 
 struct ResetStats {
-    uint32_t reset_reason;
-    uint32_t watchdog_resets;
-    uint32_t lockup_resets;
+  uint32_t reset_reason;
+  uint32_t watchdog_resets;
+  uint32_t lockup_resets;
 };
 
 void ResetToBootloader();

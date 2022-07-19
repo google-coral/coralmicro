@@ -888,10 +888,10 @@ const TileConfigCsrOffsets kBeagleTileConfigCsrOffsets = {
 };
 
 const TileCsrOffsets kBeagleTileCsrOffsets = {
-    0x400c0,                  // NOLINT: opRunControl
+    0x400c0,                    // NOLINT: opRunControl
     static_cast<uint64_t>(-1),  // UNUSED, narrowToNarrowRunControl
-    0x40150,                  // NOLINT: narrowToWideRunControl
-    0x40110,                  // NOLINT: wideToNarrowRunControl
+    0x40150,                    // NOLINT: narrowToWideRunControl
+    0x40110,                    // NOLINT: wideToNarrowRunControl
     static_cast<uint64_t>(-1),  // UNUSED, opRunControl_0
     static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_0
     static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_0
@@ -916,14 +916,14 @@ const TileCsrOffsets kBeagleTileCsrOffsets = {
     static_cast<uint64_t>(-1),  // UNUSED, opRunControl_7
     static_cast<uint64_t>(-1),  // UNUSED, narrowToWideRunControl_7
     static_cast<uint64_t>(-1),  // UNUSED, wideToNarrowRunControl_7
-    0x40190,                  // NOLINT: ringBusConsumer0RunControl
-    0x401d0,                  // NOLINT: ringBusConsumer1RunControl
-    0x40210,                  // NOLINT: ringBusProducerRunControl
-    0x40250,                  // NOLINT: meshBus0RunControl
-    0x40298,                  // NOLINT: meshBus1RunControl
-    0x402e0,                  // NOLINT: meshBus2RunControl
-    0x40328,                  // NOLINT: meshBus3RunControl
-    0x40020,                  // NOLINT: deepSleep
+    0x40190,                    // NOLINT: ringBusConsumer0RunControl
+    0x401d0,                    // NOLINT: ringBusConsumer1RunControl
+    0x40210,                    // NOLINT: ringBusProducerRunControl
+    0x40250,                    // NOLINT: meshBus0RunControl
+    0x40298,                    // NOLINT: meshBus1RunControl
+    0x402e0,                    // NOLINT: meshBus2RunControl
+    0x40328,                    // NOLINT: meshBus3RunControl
+    0x40020,                    // NOLINT: deepSleep
 };
 
 const WireCsrOffsets kBeagleWireCsrOffsets = {

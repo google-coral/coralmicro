@@ -23,91 +23,91 @@
 namespace coralmicro {
 namespace {
 ADC_Type* DeviceToAdc(AdcDevice d) {
-    switch (d) {
-        case AdcDevice::kAdc1:
-            return LPADC1;
-        case AdcDevice::kAdc2:
-            return LPADC2;
-        default:
-            return nullptr;
-    }
-    assert(false);
+  switch (d) {
+    case AdcDevice::kAdc1:
+      return LPADC1;
+    case AdcDevice::kAdc2:
+      return LPADC2;
+    default:
+      return nullptr;
+  }
+  assert(false);
 }
 
 void GetDefaultConfig(AdcConfig& config) {
-    LPADC_GetDefaultConvCommandConfig(&config.conv_config);
-    LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
+  LPADC_GetDefaultConvCommandConfig(&config.conv_config);
+  LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
 }
-} // namespace
+}  // namespace
 
 void AdcInit(AdcDevice device) {
-    lpadc_config_t adc_config;
-    LPADC_GetDefaultConfig(&adc_config);
-    LPADC_Init(DeviceToAdc(device), &adc_config);
+  lpadc_config_t adc_config;
+  LPADC_GetDefaultConfig(&adc_config);
+  LPADC_Init(DeviceToAdc(device), &adc_config);
 }
 
 void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
                      AdcSide primary_side, bool differential) {
-    GetDefaultConfig(config);
-    config.device = DeviceToAdc(device);
+  GetDefaultConfig(config);
+  config.device = DeviceToAdc(device);
 
-    if (differential) {
-        switch (primary_side) {
-            case AdcSide::kA:
-                config.conv_config.sampleChannelMode =
-                    kLPADC_SampleChannelDiffBothSideAB;
-            case AdcSide::kB:
-                config.conv_config.sampleChannelMode =
-                    kLPADC_SampleChannelDiffBothSideBA;
-        }
-    } else {
-        switch (primary_side) {
-            case AdcSide::kA:
-                config.conv_config.sampleChannelMode =
-                    kLPADC_SampleChannelSingleEndSideA;
-            case AdcSide::kB:
-                config.conv_config.sampleChannelMode =
-                    kLPADC_SampleChannelSingleEndSideB;
-        }
+  if (differential) {
+    switch (primary_side) {
+      case AdcSide::kA:
+        config.conv_config.sampleChannelMode =
+            kLPADC_SampleChannelDiffBothSideAB;
+      case AdcSide::kB:
+        config.conv_config.sampleChannelMode =
+            kLPADC_SampleChannelDiffBothSideBA;
     }
+  } else {
+    switch (primary_side) {
+      case AdcSide::kA:
+        config.conv_config.sampleChannelMode =
+            kLPADC_SampleChannelSingleEndSideA;
+      case AdcSide::kB:
+        config.conv_config.sampleChannelMode =
+            kLPADC_SampleChannelSingleEndSideB;
+    }
+  }
 
-    if (device == AdcDevice::kAdc1) {
-        assert(channel < kAdc1ChannelCount);
-    }
-    if (device == AdcDevice::kAdc2) {
-        assert(channel < kAdc2ChannelCount);
-    }
+  if (device == AdcDevice::kAdc1) {
+    assert(channel < kAdc1ChannelCount);
+  }
+  if (device == AdcDevice::kAdc2) {
+    assert(channel < kAdc2ChannelCount);
+  }
 
-    config.conv_config.channelNumber = channel;
-    config.trigger_config.targetCommandId = 1;
-    config.trigger_config.enableHardwareTrigger = false;
+  config.conv_config.channelNumber = channel;
+  config.trigger_config.targetCommandId = 1;
+  config.trigger_config.enableHardwareTrigger = false;
 }
 
 uint16_t AdcRead(const AdcConfig& config) {
-    lpadc_conv_result_t result;
+  lpadc_conv_result_t result;
 
-    LPADC_SetConvCommandConfig(config.device, 1, &config.conv_config);
-    LPADC_SetConvTriggerConfig(config.device, 0, &config.trigger_config);
-    LPADC_DoSoftwareTrigger(config.device, 1);
-    while (!LPADC_GetConvResult(config.device, &result)) {
-    }
+  LPADC_SetConvCommandConfig(config.device, 1, &config.conv_config);
+  LPADC_SetConvTriggerConfig(config.device, 0, &config.trigger_config);
+  LPADC_DoSoftwareTrigger(config.device, 1);
+  while (!LPADC_GetConvResult(config.device, &result)) {
+  }
 
-    return (result.convValue >> 3) & 0xFFF;
+  return (result.convValue >> 3) & 0xFFF;
 }
 
 void DacInit() {
-    dac12_config_t dac_config;
-    DAC12_GetDefaultConfig(&dac_config);
-    dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
-    DAC12_Init(DAC, &dac_config);
+  dac12_config_t dac_config;
+  DAC12_GetDefaultConfig(&dac_config);
+  dac_config.referenceVoltageSource = kDAC12_ReferenceVoltageSourceAlt2;
+  DAC12_Init(DAC, &dac_config);
 }
 
 void DacEnable(bool enable) { DAC12_Enable(DAC, enable); }
 
 void DacWrite(uint16_t value) {
-    // 12-bit DAC, values range from 0 - 4095.
-    assert(value <= 4095);
-    DAC12_SetData(DAC, value);
+  // 12-bit DAC, values range from 0 - 4095.
+  assert(value <= 4095);
+  DAC12_SetData(DAC, value);
 }
 
 }  // namespace coralmicro

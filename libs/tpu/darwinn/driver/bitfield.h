@@ -46,9 +46,8 @@
 #include <stddef.h>
 
 #include <cassert>
-#include <limits>
-
 #include <cstdint>
+#include <limits>
 
 namespace platforms {
 namespace darwinn {
@@ -77,9 +76,7 @@ class Bitfield {
   }
 
   // Returns mask for Bitfield.
-  constexpr uint64_t mask() const {
-    return kMask;
-  }
+  constexpr uint64_t mask() const { return kMask; }
 
  private:
   // Supported bits in the underlying value.
@@ -93,9 +90,9 @@ class Bitfield {
                 "Bitfield cannot have its MSB position past 64-bit");
 
   // Any attempt to write outside of kMask will cause an error.
-  static constexpr uint64_t kMask =
-      (NUM_BITS == kMaxBits) ? (std::numeric_limits<uint64_t>::max())
-                             : (1ULL << NUM_BITS) - 1;
+  static constexpr uint64_t kMask = (NUM_BITS == kMaxBits)
+                                        ? (std::numeric_limits<uint64_t>::max())
+                                        : (1ULL << NUM_BITS) - 1;
 
   // Underlying value for Bitfield.
   uint64_t value_;

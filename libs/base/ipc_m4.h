@@ -31,24 +31,24 @@ namespace coralmicro {
 // Then you use the method `SendMessage()` to respond to the
 // M7 core with the result of the process run by the M4 core.
 class IpcM4 : public Ipc {
-   public:
-    // Creates the static IpcM4 object the first time `GetSingleton()`
-    // is called and returns the reference to the IpcM7 singleton.
-    //
-    // @return A reference to the singleton IpcM4 object.
-    static IpcM4* GetSingleton() {
-        static IpcM4 ipc;
-        return &ipc;
-    }
-    // @cond Do not generate docs.
-    void Init() override;
-    // @endcond
+ public:
+  // Creates the static IpcM4 object the first time `GetSingleton()`
+  // is called and returns the reference to the IpcM7 singleton.
+  //
+  // @return A reference to the singleton IpcM4 object.
+  static IpcM4* GetSingleton() {
+    static IpcM4 ipc;
+    return &ipc;
+  }
+  // @cond Do not generate docs.
+  void Init() override;
+  // @endcond
 
-   protected:
-    void RxTaskFn() override;
+ protected:
+  void RxTaskFn() override;
 
-   private:
-    void HandleSystemMessage(const IpcSystemMessage& message) override;
+ private:
+  void HandleSystemMessage(const IpcSystemMessage& message) override;
 };
 }  // namespace coralmicro
 

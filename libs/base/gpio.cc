@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include "libs/base/mutex.h"
 #include "libs/base/gpio.h"
+
+#include "libs/base/mutex.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
@@ -93,146 +94,174 @@ constexpr uint32_t PinNameToPin[Gpio::kCount] = {
 };
 
 gpio_pin_config_t PinNameToConfig[Gpio::kCount] = {
-    [Gpio::kStatusLed] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kUserLed] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kEdgeTpuPgood] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kEdgeTpuReset] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kEdgeTpuPmic] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kBtRegOn] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kUserButton] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_IntFallingEdge,
-    },
-    [Gpio::kCameraTrigger] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kAntennaSelect] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kBtHostWake] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kBtDevWake] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 1,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kEthPhyRst] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kCameraPrivacyOverride] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 1,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kCryptoRst] = {
-        .direction = kGPIO_DigitalOutput,
-        .outputLogic = 1,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kSpiCs] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kSpiSck] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kSpiSdo] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kSpiSdi] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kSda6] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kScl1] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kSda1] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kAA] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kAB] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kUartCts] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kUartRts] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kPwm1] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kPwm0] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
-    [Gpio::kScl6] = {
-        .direction = kGPIO_DigitalInput,
-        .outputLogic = 0,
-        .interruptMode = kGPIO_NoIntmode,
-    },
+    [Gpio::kStatusLed] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kUserLed] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kEdgeTpuPgood] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kEdgeTpuReset] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kEdgeTpuPmic] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kBtRegOn] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kUserButton] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_IntFallingEdge,
+        },
+    [Gpio::kCameraTrigger] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kAntennaSelect] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kBtHostWake] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kBtDevWake] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 1,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kEthPhyRst] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kCameraPrivacyOverride] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 1,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kCryptoRst] =
+        {
+            .direction = kGPIO_DigitalOutput,
+            .outputLogic = 1,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kSpiCs] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kSpiSck] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kSpiSdo] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kSpiSdi] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kSda6] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kScl1] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kSda1] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kAA] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kAB] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kUartCts] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kUartRts] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kPwm1] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kPwm0] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
+    [Gpio::kScl6] =
+        {
+            .direction = kGPIO_DigitalInput,
+            .outputLogic = 0,
+            .interruptMode = kGPIO_NoIntmode,
+        },
 };
 
 constexpr IRQn_Type PinNameToIRQ[Gpio::kCount] = {
@@ -421,127 +450,133 @@ constexpr uint32_t PinNameToPullDown[Gpio::kCount] = {
     [Gpio::kScl6] = 0x00000004,
 };
 
-constexpr gpio_interrupt_mode_t InterruptModeToGpioIntMode[GpioInterruptMode::kIntModeCount] = {
-    [GpioInterruptMode::kIntModeNone] = kGPIO_NoIntmode,
-    [GpioInterruptMode::kIntModeLow] = kGPIO_IntLowLevel,
-    [GpioInterruptMode::kIntModeHigh] = kGPIO_IntHighLevel,
-    [GpioInterruptMode::kIntModeRising] = kGPIO_IntRisingEdge,
-    [GpioInterruptMode::kIntModeFalling] = kGPIO_IntFallingEdge,
-    [GpioInterruptMode::kIntModeChanging] = kGPIO_IntRisingOrFallingEdge,
+constexpr gpio_interrupt_mode_t
+    InterruptModeToGpioIntMode[GpioInterruptMode::kIntModeCount] = {
+        [GpioInterruptMode::kIntModeNone] = kGPIO_NoIntmode,
+        [GpioInterruptMode::kIntModeLow] = kGPIO_IntLowLevel,
+        [GpioInterruptMode::kIntModeHigh] = kGPIO_IntHighLevel,
+        [GpioInterruptMode::kIntModeRising] = kGPIO_IntRisingEdge,
+        [GpioInterruptMode::kIntModeFalling] = kGPIO_IntFallingEdge,
+        [GpioInterruptMode::kIntModeChanging] = kGPIO_IntRisingOrFallingEdge,
 };
 
 GpioCallback g_irq_handlers[Gpio::kCount];
 
 void IrqHandler(GPIO_Type* gpio, uint32_t pin) {
-    for (int i = 0; i < Gpio::kCount; ++i) {
-        if (PinNameToModule[i] == gpio && PinNameToPin[i] == pin) {
-            auto& handler = g_irq_handlers[i];
-            if (handler) {
-                handler();
-            }
-            return;
-        }
+  for (int i = 0; i < Gpio::kCount; ++i) {
+    if (PinNameToModule[i] == gpio && PinNameToPin[i] == pin) {
+      auto& handler = g_irq_handlers[i];
+      if (handler) {
+        handler();
+      }
+      return;
     }
+  }
 }
 
-void CommonIrqHandler(GPIO_Type *base) {
-    uint32_t pins = GPIO_PortGetInterruptFlags(base);
-    GPIO_PortClearInterruptFlags(base, pins);
-    int i = 0;
-    while (pins) {
-        if (pins & 1) {
-            IrqHandler(base, i);
-        }
-        ++i;
-        pins = pins >> 1;
+void CommonIrqHandler(GPIO_Type* base) {
+  uint32_t pins = GPIO_PortGetInterruptFlags(base);
+  GPIO_PortClearInterruptFlags(base, pins);
+  int i = 0;
+  while (pins) {
+    if (pins & 1) {
+      IrqHandler(base, i);
     }
+    ++i;
+    pins = pins >> 1;
+  }
 }
 }  // namespace
 
 void GpioInit() {
-    g_mutex = xSemaphoreCreateMutexStatic(&g_mutex_storage);
+  g_mutex = xSemaphoreCreateMutexStatic(&g_mutex_storage);
 
-    for (int i = 0; i < Gpio::kCount; ++i) {
-        g_irq_handlers[i] = nullptr;
-        switch (i) {
-            case Gpio::kEdgeTpuPgood:
-            case Gpio::kEdgeTpuReset:
-            case Gpio::kEdgeTpuPmic:
-            case Gpio::kBtHostWake:
-            case Gpio::kBtDevWake:
-            case Gpio::kEthPhyRst:
+  for (int i = 0; i < Gpio::kCount; ++i) {
+    g_irq_handlers[i] = nullptr;
+    switch (i) {
+      case Gpio::kEdgeTpuPgood:
+      case Gpio::kEdgeTpuReset:
+      case Gpio::kEdgeTpuPmic:
+      case Gpio::kBtHostWake:
+      case Gpio::kBtDevWake:
+      case Gpio::kEthPhyRst:
 #if (__CORTEX_M == 4)
-                break; // Do not initialize tpu or ethernet gpios for the m4.
+        break;  // Do not initialize tpu or ethernet gpios for the m4.
 #endif
-            default:
-               GPIO_PinInit(PinNameToModule[i], PinNameToPin[i],
-                            &PinNameToConfig[i]);
-        }
-        if (PinNameToConfig[i].interruptMode != kGPIO_NoIntmode) {
-            GPIO_PinSetInterruptConfig(PinNameToModule[i], PinNameToPin[i], PinNameToConfig[i].interruptMode);
-            GPIO_PortClearInterruptFlags(PinNameToModule[i], GPIO_PortGetInterruptFlags(PinNameToModule[i]));
-            GPIO_PortEnableInterrupts(PinNameToModule[i], 1 << PinNameToPin[i]);
-            EnableIRQ(PinNameToIRQ[i]);
-            NVIC_SetPriority(PinNameToIRQ[i], 5);
-        }
+      default:
+        GPIO_PinInit(PinNameToModule[i], PinNameToPin[i], &PinNameToConfig[i]);
     }
+    if (PinNameToConfig[i].interruptMode != kGPIO_NoIntmode) {
+      GPIO_PinSetInterruptConfig(PinNameToModule[i], PinNameToPin[i],
+                                 PinNameToConfig[i].interruptMode);
+      GPIO_PortClearInterruptFlags(
+          PinNameToModule[i], GPIO_PortGetInterruptFlags(PinNameToModule[i]));
+      GPIO_PortEnableInterrupts(PinNameToModule[i], 1 << PinNameToPin[i]);
+      EnableIRQ(PinNameToIRQ[i]);
+      NVIC_SetPriority(PinNameToIRQ[i], 5);
+    }
+  }
 }
 
 void GpioSet(Gpio gpio, bool enable) {
-    MutexLock lock(g_mutex);
-    GPIO_PinWrite(PinNameToModule[gpio], PinNameToPin[gpio], enable);
+  MutexLock lock(g_mutex);
+  GPIO_PinWrite(PinNameToModule[gpio], PinNameToPin[gpio], enable);
 }
 
 bool GpioGet(Gpio gpio) {
-    MutexLock lock(g_mutex);
-    return GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
+  MutexLock lock(g_mutex);
+  return GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
 }
 
 void GpioSetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
-    auto *config = &PinNameToConfig[gpio];
-    config->direction = input ? kGPIO_DigitalInput : kGPIO_DigitalOutput;
-    GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
-    auto iomuxc = PinNameToIOMUXC[gpio];
-    uint32_t pin_config = *((volatile uint32_t*)iomuxc[4]);
-    pin_config &= ~PinNameToPullMask[gpio];
-    if (pull) {
-        if (pull_direction) {// up
-            pin_config |= PinNameToPullUp[gpio];
-        } else {
-            pin_config |= PinNameToPullDown[gpio];
-        }
+  auto* config = &PinNameToConfig[gpio];
+  config->direction = input ? kGPIO_DigitalInput : kGPIO_DigitalOutput;
+  GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
+  auto iomuxc = PinNameToIOMUXC[gpio];
+  uint32_t pin_config = *((volatile uint32_t*)iomuxc[4]);
+  pin_config &= ~PinNameToPullMask[gpio];
+  if (pull) {
+    if (pull_direction) {  // up
+      pin_config |= PinNameToPullUp[gpio];
     } else {
-        pin_config |= PinNameToNoPull[gpio];
+      pin_config |= PinNameToPullDown[gpio];
     }
-    IOMUXC_SetPinConfig(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4], pin_config);
+  } else {
+    pin_config |= PinNameToNoPull[gpio];
+  }
+  IOMUXC_SetPinConfig(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4],
+                      pin_config);
 }
 
 void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode) {
-    auto *config = &PinNameToConfig[gpio];
-    config->direction = kGPIO_DigitalInput;
-    config->interruptMode = InterruptModeToGpioIntMode[mode];
-    GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
-    if (PinNameToConfig[gpio].interruptMode != kGPIO_NoIntmode) {
-        GPIO_PinSetInterruptConfig(PinNameToModule[gpio], PinNameToPin[gpio], PinNameToConfig[gpio].interruptMode);
-        GPIO_PortClearInterruptFlags(PinNameToModule[gpio], GPIO_PortGetInterruptFlags(PinNameToModule[gpio]));
-        GPIO_PortEnableInterrupts(PinNameToModule[gpio], 1 << PinNameToPin[gpio]);
-        EnableIRQ(PinNameToIRQ[gpio]);
-        NVIC_SetPriority(PinNameToIRQ[gpio], 5);
-    } else {
-        DisableIRQ(PinNameToIRQ[gpio]);
-    }
+  auto* config = &PinNameToConfig[gpio];
+  config->direction = kGPIO_DigitalInput;
+  config->interruptMode = InterruptModeToGpioIntMode[mode];
+  GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
+  if (PinNameToConfig[gpio].interruptMode != kGPIO_NoIntmode) {
+    GPIO_PinSetInterruptConfig(PinNameToModule[gpio], PinNameToPin[gpio],
+                               PinNameToConfig[gpio].interruptMode);
+    GPIO_PortClearInterruptFlags(
+        PinNameToModule[gpio],
+        GPIO_PortGetInterruptFlags(PinNameToModule[gpio]));
+    GPIO_PortEnableInterrupts(PinNameToModule[gpio], 1 << PinNameToPin[gpio]);
+    EnableIRQ(PinNameToIRQ[gpio]);
+    NVIC_SetPriority(PinNameToIRQ[gpio], 5);
+  } else {
+    DisableIRQ(PinNameToIRQ[gpio]);
+  }
 }
 
 void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb) {
-    g_irq_handlers[gpio] = cb;
+  g_irq_handlers[gpio] = cb;
 }
 }  // namespace coralmicro
 
-#define GPIO_IRQHandler(base, irq) \
-    extern "C" void irq() { \
-        coralmicro::CommonIrqHandler(base); \
-        SDK_ISR_EXIT_BARRIER; \
-    }
+#define GPIO_IRQHandler(base, irq)      \
+  extern "C" void irq() {               \
+    coralmicro::CommonIrqHandler(base); \
+    SDK_ISR_EXIT_BARRIER;               \
+  }
 
 GPIO_IRQHandler(GPIO2, GPIO2_Combined_0_15_IRQHandler);
 GPIO_IRQHandler(GPIO2, GPIO2_Combined_16_31_IRQHandler);

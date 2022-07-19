@@ -22,29 +22,29 @@
 namespace coralmicro {
 namespace {
 void* CustomOpInit(TfLiteContext* context, const char* buffer, size_t length) {
-    return EdgeTpuManager::GetSingleton()->RegisterPackage(buffer, length);
+  return EdgeTpuManager::GetSingleton()->RegisterPackage(buffer, length);
 }
 
 void CustomOpFree(TfLiteContext* context, void* buffer) {}
 
 TfLiteStatus CustomOpPrepare(TfLiteContext* context, TfLiteNode* node) {
-    if (node->user_data == nullptr) return kTfLiteError;
-    return kTfLiteOk;
+  if (node->user_data == nullptr) return kTfLiteError;
+  return kTfLiteOk;
 }
 
 TfLiteStatus CustomOpInvoke(TfLiteContext* context, TfLiteNode* node) {
-    EdgeTpuPackage* package = static_cast<EdgeTpuPackage*>(node->user_data);
-    return EdgeTpuManager::GetSingleton()->Invoke(package, context, node);
+  EdgeTpuPackage* package = static_cast<EdgeTpuPackage*>(node->user_data);
+  return EdgeTpuManager::GetSingleton()->Invoke(package, context, node);
 }
 }  // namespace
 
 TfLiteRegistration* RegisterCustomOp() {
-    static TfLiteRegistration registration = {
-        CustomOpInit,
-        CustomOpFree,
-        CustomOpPrepare,
-        CustomOpInvoke,
-    };
-    return &registration;
+  static TfLiteRegistration registration = {
+      CustomOpInit,
+      CustomOpFree,
+      CustomOpPrepare,
+      CustomOpInvoke,
+  };
+  return &registration;
 }
 }  // namespace coralmicro

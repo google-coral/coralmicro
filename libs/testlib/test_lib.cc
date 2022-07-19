@@ -623,9 +623,10 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
   auto* output_mask = tflite::GetTensorData<uint8_t>(output_tensor);
   auto size = coralmicro::tensorflow::TensorSize(output_tensor);
 
-  jsonrpc_return_success(request, "{%Q:%lu, %Q:%V}", "latency",
-                         static_cast<uint32_t>(invoke_latency + preprocess_latency),
-                         "output_mask", size, output_mask);
+  jsonrpc_return_success(
+      request, "{%Q:%lu, %Q:%V}", "latency",
+      static_cast<uint32_t>(invoke_latency + preprocess_latency), "output_mask",
+      size, output_mask);
 }
 
 void PosenetStressRun(struct jsonrpc_request* request) {
@@ -1054,9 +1055,9 @@ void CryptoEccVerify(struct jsonrpc_request* request) {
                          nullptr);
     return;
   }
-  if (!coralmicro::A71ChEccVerify(
-          index, stored_sha->data(), stored_sha->size(),
-          stored_signature->data(), stored_signature->size())) {
+  if (!coralmicro::A71ChEccVerify(index, stored_sha->data(), stored_sha->size(),
+                                  stored_signature->data(),
+                                  stored_signature->size())) {
     jsonrpc_return_error(request, -1, "Failed to verify", nullptr);
     return;
   }

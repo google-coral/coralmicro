@@ -30,52 +30,52 @@ namespace coralmicro {
 // The read, defined by `RegisterAppMessageHandler()`, on the M7 IPC object is
 // used to confirm success or failure of the result of an M4 process.
 class IpcM7 : public Ipc {
-   public:
-    // Creates the static IpcM7 object the first time `GetSingleton()`
-    // is called and returns the reference to the IpcM7 singleton.
-    //
-    // @return A reference to the singleton IpcM4 object.
-    static IpcM7* GetSingleton() {
-        static IpcM7 ipc;
-        return &ipc;
-    }
+ public:
+  // Creates the static IpcM7 object the first time `GetSingleton()`
+  // is called and returns the reference to the IpcM7 singleton.
+  //
+  // @return A reference to the singleton IpcM4 object.
+  static IpcM7* GetSingleton() {
+    static IpcM7 ipc;
+    return &ipc;
+  }
 
-    // @cond Do not generate docs.
-    void Init() override;
-    // @endcond
+  // @cond Do not generate docs.
+  void Init() override;
+  // @endcond
 
-    // Starts the M4 core.
-    void StartM4();
+  // Starts the M4 core.
+  void StartM4();
 
-    // Checks if the M4 core is alive.
-    //
-    // @param millis The amount of time to wait for a response from the M4 core.
-    // @return True if the M4 core signals that it is ready to preform a
-    // task or preforming a task within the millis time limit, false otherwise.
-    bool M4IsAlive(uint32_t millis);
+  // Checks if the M4 core is alive.
+  //
+  // @param millis The amount of time to wait for a response from the M4 core.
+  // @return True if the M4 core signals that it is ready to preform a
+  // task or preforming a task within the millis time limit, false otherwise.
+  bool M4IsAlive(uint32_t millis);
 
-    // Checks if the M4 core is running a process.
-    //
-    // @return True if the M4 is running a process, false otherwise
-    static bool HasM4Application();
+  // Checks if the M4 core is running a process.
+  //
+  // @return True if the M4 is running a process, false otherwise
+  static bool HasM4Application();
 
-   protected:
-    void TxTaskFn() override;
+ protected:
+  void TxTaskFn() override;
 
-   private:
-    static void StaticRemoteAppEventHandler(uint16_t eventData, void* context) {
-        GetSingleton()->RemoteAppEventHandler(eventData, context);
-    }
-    void RemoteAppEventHandler(uint16_t eventData, void* context);
-    void HandleSystemMessage(const IpcSystemMessage& message) override;
+ private:
+  static void StaticRemoteAppEventHandler(uint16_t eventData, void* context) {
+    GetSingleton()->RemoteAppEventHandler(eventData, context);
+  }
+  void RemoteAppEventHandler(uint16_t eventData, void* context);
+  void HandleSystemMessage(const IpcSystemMessage& message) override;
 
-    static constexpr size_t kMessageBufferSize = 8 * sizeof(IpcMessage);
-    static uint8_t
-        tx_queue_storage_[kMessageBufferSize + sizeof(IpcMessageBuffer)]
-        __attribute__((section(".noinit.$rpmsg_sh_mem")));
-    static uint8_t
-        rx_queue_storage_[kMessageBufferSize + sizeof(IpcMessageBuffer)]
-        __attribute__((section(".noinit.$rpmsg_sh_mem")));
+  static constexpr size_t kMessageBufferSize = 8 * sizeof(IpcMessage);
+  static uint8_t
+      tx_queue_storage_[kMessageBufferSize + sizeof(IpcMessageBuffer)]
+      __attribute__((section(".noinit.$rpmsg_sh_mem")));
+  static uint8_t
+      rx_queue_storage_[kMessageBufferSize + sizeof(IpcMessageBuffer)]
+      __attribute__((section(".noinit.$rpmsg_sh_mem")));
 };
 }  // namespace coralmicro
 

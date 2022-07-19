@@ -17,6 +17,8 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_CHIP_CONFIG_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_CHIP_CONFIG_H_
 
+#include <cassert>
+
 #include "libs/tpu/darwinn/driver/config/aon_reset_csr_offsets.h"
 #include "libs/tpu/darwinn/driver/config/apex_csr_offsets.h"
 #include "libs/tpu/darwinn/driver/config/breakpoint_csr_offsets.h"
@@ -41,8 +43,6 @@
 #include "libs/tpu/darwinn/driver/config/trace_csr_offsets.h"
 #include "libs/tpu/darwinn/driver/config/usb_csr_offsets.h"
 #include "libs/tpu/darwinn/driver/config/wire_csr_offsets.h"
-
-#include <cassert>
 
 namespace platforms {
 namespace darwinn {

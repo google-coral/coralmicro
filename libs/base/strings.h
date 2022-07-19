@@ -34,7 +34,7 @@ namespace coralmicro {
 // @return The length of the const char string.
 template <size_t N>
 constexpr size_t StrLen(const char (&str)[N]) {
-    return N - 1;
+  return N - 1;
 }
 
 // Checks if a string starts with a prefix.
@@ -45,7 +45,7 @@ constexpr size_t StrLen(const char (&str)[N]) {
 // @return True if prefix is the prefix of s, else false.
 template <size_t N>
 bool StrStartsWith(const char* s, const char (&prefix)[N]) {
-    return std::strncmp(s, prefix, StrLen(prefix)) == 0;
+  return std::strncmp(s, prefix, StrLen(prefix)) == 0;
 }
 
 // Checks if a string ends with a suffix.
@@ -56,8 +56,8 @@ bool StrStartsWith(const char* s, const char (&prefix)[N]) {
 // @return True if suffix is the suffix of s, else false.
 template <size_t N>
 bool StrEndsWith(const std::string& s, const char (&suffix)[N]) {
-    if (s.size() < StrLen(suffix)) return false;
-    return std::strcmp(s.c_str() + s.size() - StrLen(suffix), suffix) == 0;
+  if (s.size() < StrLen(suffix)) return false;
+  return std::strcmp(s.c_str() + s.size() - StrLen(suffix), suffix) == 0;
 }
 
 // Appends a string to a source string.
@@ -68,13 +68,13 @@ bool StrEndsWith(const std::string& s, const char (&suffix)[N]) {
 // @tparam T The variadic class template that allows args to be any type.
 template <typename C, typename... T>
 void StrAppend(C* v, const char* format_str, T... args) {
-    static_assert(sizeof((*v)[0]) == 1);
+  static_assert(sizeof((*v)[0]) == 1);
 
-    const int size = std::snprintf(nullptr, 0, format_str, args...) + 1;
-    v->resize(v->size() + size);
-    auto* s = reinterpret_cast<char*>(v->data() + v->size() - size);
-    std::snprintf(s, size, format_str, args...);
-    v->pop_back();  // remove null terminator
+  const int size = std::snprintf(nullptr, 0, format_str, args...) + 1;
+  v->resize(v->size() + size);
+  auto* s = reinterpret_cast<char*>(v->data() + v->size() - size);
+  std::snprintf(s, size, format_str, args...);
+  v->pop_back();  // remove null terminator
 }
 
 // Returns a string's hexadecimal representation.
@@ -89,7 +89,7 @@ std::string StrToHex(const char* s, size_t size);
 // @param s The source string.
 // @return The hexadecimal representation of the string.
 inline std::string StrToHex(const std::string& s) {
-    return StrToHex(s.data(), s.size());
+  return StrToHex(s.data(), s.size());
 }
 
 }  // namespace coralmicro

@@ -30,7 +30,7 @@ namespace config {
 class BeagleChipConfig : public ChipConfig {
  public:
   ~BeagleChipConfig() override = default;
-  
+
   // Extracts CSR offsets for various modules in DarwiNN.
   const HibKernelCsrOffsets& GetHibKernelCsrOffsets() const override {
     return kBeagleHibKernelCsrOffsets;
@@ -65,7 +65,7 @@ class BeagleChipConfig : public ChipConfig {
     return kBeagleMsixCsrOffsets;
   }
   const WireCsrOffsets& GetWireCsrOffsets() const override {
-   assert(false);
+    assert(false);
     __builtin_unreachable();
   }
   const MiscCsrOffsets& GetMiscCsrOffsets() const {

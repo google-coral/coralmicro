@@ -47,23 +47,22 @@ inline constexpr int kYamnetFeatureSliceDurationMs = 25;
 // model.
 template <bool tForTpu>
 auto SetupYamNetResolver() {
-    constexpr unsigned int kNumOps = tForTpu ? 3 : 9;
-    auto resolver = tflite::MicroMutableOpResolver<kNumOps>();
-    resolver.AddQuantize();
-    resolver.AddDequantize();
-    if constexpr (tForTpu) {
-        resolver.AddCustom(coralmicro::kCustomOp,
-                           coralmicro::RegisterCustomOp());
-    } else {
-        resolver.AddReshape();
-        resolver.AddSplit();
-        resolver.AddConv2D();
-        resolver.AddDepthwiseConv2D();
-        resolver.AddLogistic();
-        resolver.AddMean();
-        resolver.AddFullyConnected();
-    }
-    return resolver;
+  constexpr unsigned int kNumOps = tForTpu ? 3 : 9;
+  auto resolver = tflite::MicroMutableOpResolver<kNumOps>();
+  resolver.AddQuantize();
+  resolver.AddDequantize();
+  if constexpr (tForTpu) {
+    resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
+  } else {
+    resolver.AddReshape();
+    resolver.AddSplit();
+    resolver.AddConv2D();
+    resolver.AddDepthwiseConv2D();
+    resolver.AddLogistic();
+    resolver.AddMean();
+    resolver.AddFullyConnected();
+  }
+  return resolver;
 }
 
 // Prepares the input preprocess engine for TensorFlow to converts raw audio

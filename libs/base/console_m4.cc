@@ -28,36 +28,34 @@ coralmicro::IpcStreamBuffer* console_buffer = nullptr;
 
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
 extern "C" int _write(int handle, char* buffer, int size) {
-    if ((handle != STDOUT_FILENO) && (handle != STDERR_FILENO)) {
-        return -1;
-    }
+  if ((handle != STDOUT_FILENO) && (handle != STDERR_FILENO)) {
+    return -1;
+  }
 
-    if (console_buffer) {
-        xStreamBufferSend(console_buffer->stream_buffer, buffer, size,
-                          portMAX_DELAY);
-    }
-    DbgConsole_SendDataReliable(reinterpret_cast<uint8_t*>(buffer), size);
+  if (console_buffer) {
+    xStreamBufferSend(console_buffer->stream_buffer, buffer, size,
+                      portMAX_DELAY);
+  }
+  DbgConsole_SendDataReliable(reinterpret_cast<uint8_t*>(buffer), size);
 #ifdef BLOCKING_PRINTF
-    DbgConsole_Flush();
+  DbgConsole_Flush();
 #endif
 
-    return size;
+  return size;
 }
 
 extern "C" int _read(int handle, char* buffer, int size) {
-    if (handle != STDIN_FILENO) {
-        return -1;
-    }
-
+  if (handle != STDIN_FILENO) {
     return -1;
+  }
+
+  return -1;
 }
 
 namespace coralmicro {
 
 void ConsoleM4Init() {}
 
-void ConsoleM4SetBuffer(IpcStreamBuffer* buffer) {
-    console_buffer = buffer;
-}
+void ConsoleM4SetBuffer(IpcStreamBuffer* buffer) { console_buffer = buffer; }
 
 }  // namespace coralmicro

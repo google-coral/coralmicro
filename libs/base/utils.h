@@ -35,7 +35,8 @@ namespace utils {
 uint64_t GetUniqueID();
 
 // Gets the hex string representation of the unique identifier.
-// @returns String containing the 64-bit unique identifier, as a printable hex string.
+// @returns String containing the 64-bit unique identifier, as a printable hex
+// string.
 std::string GetSerialNumber();
 
 // Gets the assigned MAC address from the device fuses.
@@ -43,7 +44,8 @@ std::string GetSerialNumber();
 std::array<uint8_t, 6> GetMacAddress();
 
 // Gets the USB IP address that is stored in flash memory.
-// @param usb_ip_out A pointer to a string in which to store a printable version of the IP.
+// @param usb_ip_out A pointer to a string in which to store a printable version
+// of the IP.
 // @returns True if the address was successfully retrieved; false otherwise.
 bool GetUsbIpAddress(std::string* usb_ip_out);
 

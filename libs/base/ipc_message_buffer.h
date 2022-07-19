@@ -24,27 +24,28 @@
 namespace coralmicro {
 // Identifier for the type of message being sent in a IpcSystemMessage.
 enum class IpcSystemMessageType : uint8_t {
-    // kConsoleBufferPtr refers to a pointer to a console buffer.
-    kConsoleBufferPtr,
+  // kConsoleBufferPtr refers to a pointer to a console buffer.
+  kConsoleBufferPtr,
 };
 
 // System Message to be sent from M4 or M7.
 //
-// @param type Identifier for the type of message, which will be a `kConsoleBufferPtr` which is a byte.
+// @param type Identifier for the type of message, which will be a
+// `kConsoleBufferPtr` which is a byte.
 // @param message Pointer to console buffer.
 struct IpcSystemMessage {
-    IpcSystemMessageType type;
-    union {
-        void* console_buffer_ptr;
-    } message;
+  IpcSystemMessageType type;
+  union {
+    void* console_buffer_ptr;
+  } message;
 } __attribute__((packed));
 
 // Identifier for the type of message being sent in a IpcMessage.
 enum class IpcMessageType : uint8_t {
-    // kSystem refers to a IpcSystemMessage
-    kSystem,
-    // kApp refers to a byte array of size kIpcMessageBufferDataSize
-    kApp,
+  // kSystem refers to a IpcSystemMessage
+  kSystem,
+  // kApp refers to a byte array of size kIpcMessageBufferDataSize
+  kApp,
 };
 
 // Size of the byte array containing a message.
@@ -53,26 +54,27 @@ inline constexpr size_t kIpcMessageBufferDataSize = 127;
 // Message to be sent from an M4 or M7.
 //
 // @param type Identifier for the type of message.
-// @param message The message to be sent, which must correspond to the given type.
+// @param message The message to be sent, which must correspond to the given
+// type.
 struct IpcMessage {
-    IpcMessageType type;
-    union {
-        IpcSystemMessage system;
-        uint8_t data[kIpcMessageBufferDataSize];
-    } message;
+  IpcMessageType type;
+  union {
+    IpcSystemMessage system;
+    uint8_t data[kIpcMessageBufferDataSize];
+  } message;
 } __attribute__((packed));
 
 // @cond Do not generate docs
 struct IpcMessageBuffer {
-    MessageBufferHandle_t message_buffer;
-    StaticMessageBuffer_t static_message_buffer;
-    uint8_t message_buffer_storage[];
+  MessageBufferHandle_t message_buffer;
+  StaticMessageBuffer_t static_message_buffer;
+  uint8_t message_buffer_storage[];
 };
 
 struct IpcStreamBuffer {
-    StreamBufferHandle_t stream_buffer;
-    StaticStreamBuffer_t static_stream_buffer;
-    uint8_t stream_buffer_storage[];
+  StreamBufferHandle_t stream_buffer;
+  StaticStreamBuffer_t static_stream_buffer;
+  uint8_t stream_buffer_storage[];
 };
 // @endcond
 

@@ -138,20 +138,26 @@ struct DebugHibUserCsrOffsets {
   uint64_t read_request_arbiter_queue_fetch_cycles_blocked_over_threshold;
   uint64_t read_request_arbiter_page_table_request_request_cycles;
   uint64_t read_request_arbiter_page_table_request_blocked_cycles;
-  uint64_t read_request_arbiter_page_table_request_blocked_by_arbitration_cycles;
-  uint64_t read_request_arbiter_page_table_request_cycles_blocked_over_threshold;
+  uint64_t
+      read_request_arbiter_page_table_request_blocked_by_arbitration_cycles;
+  uint64_t
+      read_request_arbiter_page_table_request_cycles_blocked_over_threshold;
   uint64_t write_request_arbiter_output_actv_request_cycles;
   uint64_t write_request_arbiter_output_actv_blocked_cycles;
   uint64_t write_request_arbiter_output_actv_blocked_by_arbitration_cycles;
   uint64_t write_request_arbiter_output_actv_cycles_blocked_over_threshold;
   uint64_t write_request_arbiter_status_block_write_request_cycles;
   uint64_t write_request_arbiter_status_block_write_blocked_cycles;
-  uint64_t write_request_arbiter_status_block_write_blocked_by_arbitration_cycles;
-  uint64_t write_request_arbiter_status_block_write_cycles_blocked_over_threshold;
+  uint64_t
+      write_request_arbiter_status_block_write_blocked_by_arbitration_cycles;
+  uint64_t
+      write_request_arbiter_status_block_write_cycles_blocked_over_threshold;
   uint64_t address_translation_arbiter_instruction_request_cycles;
   uint64_t address_translation_arbiter_instruction_blocked_cycles;
-  uint64_t address_translation_arbiter_instruction_blocked_by_arbitration_cycles;
-  uint64_t address_translation_arbiter_instruction_cycles_blocked_over_threshold;
+  uint64_t
+      address_translation_arbiter_instruction_blocked_by_arbitration_cycles;
+  uint64_t
+      address_translation_arbiter_instruction_cycles_blocked_over_threshold;
   uint64_t address_translation_arbiter_input_actv_request_cycles;
   uint64_t address_translation_arbiter_input_actv_blocked_cycles;
   uint64_t address_translation_arbiter_input_actv_blocked_by_arbitration_cycles;
@@ -168,12 +174,16 @@ struct DebugHibUserCsrOffsets {
       address_translation_arbiter_status_block_write_cycles_blocked_over_threshold;  // NOLINT
   uint64_t address_translation_arbiter_output_actv_request_cycles;
   uint64_t address_translation_arbiter_output_actv_blocked_cycles;
-  uint64_t address_translation_arbiter_output_actv_blocked_by_arbitration_cycles;
-  uint64_t address_translation_arbiter_output_actv_cycles_blocked_over_threshold;
+  uint64_t
+      address_translation_arbiter_output_actv_blocked_by_arbitration_cycles;
+  uint64_t
+      address_translation_arbiter_output_actv_cycles_blocked_over_threshold;
   uint64_t address_translation_arbiter_queue_fetch_request_cycles;
   uint64_t address_translation_arbiter_queue_fetch_blocked_cycles;
-  uint64_t address_translation_arbiter_queue_fetch_blocked_by_arbitration_cycles;
-  uint64_t address_translation_arbiter_queue_fetch_cycles_blocked_over_threshold;
+  uint64_t
+      address_translation_arbiter_queue_fetch_blocked_by_arbitration_cycles;
+  uint64_t
+      address_translation_arbiter_queue_fetch_cycles_blocked_over_threshold;
   uint64_t issued_interrupt_count;
   uint64_t data_read_16byte_count;
   uint64_t waiting_for_tag_cycles;

@@ -26,10 +26,10 @@ namespace coralmicro::tensorflow {
 
 // Represents a classification result.
 struct Class {
-    // The class label id.
-    int id;
-    // The prediction score.
-    float score;
+  // The class label id.
+  int id;
+  // The prediction score.
+  float score;
 };
 
 // Format the Classification outputs into a string.

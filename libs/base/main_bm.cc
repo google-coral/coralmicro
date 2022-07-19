@@ -20,9 +20,9 @@ extern "C" void app_main(void* param);
 
 extern "C" int main(int argc, char** argv) __attribute__((weak));
 extern "C" int main(int argc, char** argv) {
-    BOARD_InitHardware(true);
+  BOARD_InitHardware(true);
 
-    app_main(nullptr);
+  app_main(nullptr);
 
-    return 0;
+  return 0;
 }

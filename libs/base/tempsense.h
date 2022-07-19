@@ -21,10 +21,10 @@ namespace coralmicro {
 
 // Enumerates the various temperature sensors.
 enum class TempSensor {
-    // The CPU temperature sensor.
-    kCpu,
-    // The Edge TPU temperature sensor.
-    kTpu,
+  // The CPU temperature sensor.
+  kCpu,
+  // The Edge TPU temperature sensor.
+  kTpu,
 };
 
 // Initializes the temperature sensors.
@@ -41,6 +41,6 @@ void TempSensorInit();
 // @return The actual temperature in Celcius or 0.0 on failure.
 float TempSensorRead(TempSensor sensor);
 
-}  // namespace coralmicro::tempsense
+}  // namespace coralmicro
 
 #endif  // LIBS_BASE_TEMPSENSE_H_

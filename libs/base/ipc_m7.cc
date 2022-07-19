@@ -42,96 +42,96 @@ uint8_t IpcM7::rx_queue_storage_[IpcM7::kMessageBufferSize +
     __attribute__((section(".noinit.$rpmsg_sh_mem")));
 
 void IpcM7::RemoteAppEventHandler(uint16_t eventData, void* context) {
-    BaseType_t reschedule =
-        xTaskResumeFromISR(tx_task_) | xTaskResumeFromISR(rx_task_);
-    portYIELD_FROM_ISR(reschedule);
+  BaseType_t reschedule =
+      xTaskResumeFromISR(tx_task_) | xTaskResumeFromISR(rx_task_);
+  portYIELD_FROM_ISR(reschedule);
 }
 
 void IpcM7::HandleSystemMessage(const IpcSystemMessage& message) {
-    switch (message.type) {
-        default:
-            printf("Unhandled system message type: %d\r\n",
-                   static_cast<int>(message.type));
-    }
+  switch (message.type) {
+    default:
+      printf("Unhandled system message type: %d\r\n",
+             static_cast<int>(message.type));
+  }
 }
 
 void IpcM7::TxTaskFn() {
-    // Send the rx_queue_ address to the M4.
-    size_t tx_bytes;
-    tx_bytes = xMessageBufferSend(tx_queue_->message_buffer, &rx_queue_,
-                                  sizeof(rx_queue_), portMAX_DELAY);
-    if (tx_bytes == 0) {
-        printf("Failed to send s2p buffer address\r\n");
-    }
+  // Send the rx_queue_ address to the M4.
+  size_t tx_bytes;
+  tx_bytes = xMessageBufferSend(tx_queue_->message_buffer, &rx_queue_,
+                                sizeof(rx_queue_), portMAX_DELAY);
+  if (tx_bytes == 0) {
+    printf("Failed to send s2p buffer address\r\n");
+  }
 
-    Ipc::TxTaskFn();
+  Ipc::TxTaskFn();
 }
 
 bool IpcM7::M4IsAlive(uint32_t millis) {
-    constexpr int kSleepMs = 100;
-    uint32_t time_left = millis;
-    do {
-        eTaskState task_state = eTaskGetState(tx_task_);
-        if (task_state == eReady || task_state == eBlocked) {
-            return true;
-        }
-        if (time_left < kSleepMs) {
-            time_left = 0;
-        } else {
-            time_left -= kSleepMs;
-        }
-        vTaskDelay(pdMS_TO_TICKS(kSleepMs));
-    } while (time_left);
-    return false;
+  constexpr int kSleepMs = 100;
+  uint32_t time_left = millis;
+  do {
+    eTaskState task_state = eTaskGetState(tx_task_);
+    if (task_state == eReady || task_state == eBlocked) {
+      return true;
+    }
+    if (time_left < kSleepMs) {
+      time_left = 0;
+    } else {
+      time_left -= kSleepMs;
+    }
+    vTaskDelay(pdMS_TO_TICKS(kSleepMs));
+  } while (time_left);
+  return false;
 }
 
 bool IpcM7::HasM4Application() { return (m4_binary_start != 0xdeadbeef); }
 
 void IpcM7::Init() {
-    if (!HasM4Application()) {
-        return;
-    }
+  if (!HasM4Application()) {
+    return;
+  }
 
-    tx_queue_ = reinterpret_cast<IpcMessageBuffer*>(tx_queue_storage_);
-    tx_queue_->message_buffer = xMessageBufferCreateStatic(
-        kMessageBufferSize, tx_queue_->message_buffer_storage,
-        &tx_queue_->static_message_buffer);
-    if (!tx_queue_->message_buffer) {
-        return;
-    }
+  tx_queue_ = reinterpret_cast<IpcMessageBuffer*>(tx_queue_storage_);
+  tx_queue_->message_buffer = xMessageBufferCreateStatic(
+      kMessageBufferSize, tx_queue_->message_buffer_storage,
+      &tx_queue_->static_message_buffer);
+  if (!tx_queue_->message_buffer) {
+    return;
+  }
 
-    rx_queue_ = reinterpret_cast<IpcMessageBuffer*>(rx_queue_storage_);
-    rx_queue_->message_buffer = xMessageBufferCreateStatic(
-        kMessageBufferSize, rx_queue_->message_buffer_storage,
-        &rx_queue_->static_message_buffer);
-    if (!rx_queue_->message_buffer) {
-        return;
-    }
+  rx_queue_ = reinterpret_cast<IpcMessageBuffer*>(rx_queue_storage_);
+  rx_queue_->message_buffer = xMessageBufferCreateStatic(
+      kMessageBufferSize, rx_queue_->message_buffer_storage,
+      &rx_queue_->static_message_buffer);
+  if (!rx_queue_->message_buffer) {
+    return;
+  }
 
-    // Load the remote core's memory space with the program binary.
-    auto m4_start = reinterpret_cast<uint32_t>(&m4_binary_start);
-    auto m4_size = reinterpret_cast<uint32_t>(&m4_binary_size);
-    memcpy(reinterpret_cast<void*>(CORE1_BOOT_ADDRESS),
-           reinterpret_cast<void*>(m4_start), m4_size);
+  // Load the remote core's memory space with the program binary.
+  auto m4_start = reinterpret_cast<uint32_t>(&m4_binary_start);
+  auto m4_size = reinterpret_cast<uint32_t>(&m4_binary_size);
+  memcpy(reinterpret_cast<void*>(CORE1_BOOT_ADDRESS),
+         reinterpret_cast<void*>(m4_start), m4_size);
 
-    // Register callbacks for communication with the other core.
-    MCMGR_RegisterEvent(kMCMGR_RemoteApplicationEvent,
-                        IpcM7::StaticRemoteAppEventHandler, nullptr);
+  // Register callbacks for communication with the other core.
+  MCMGR_RegisterEvent(kMCMGR_RemoteApplicationEvent,
+                      IpcM7::StaticRemoteAppEventHandler, nullptr);
 
-    Ipc::Init();
+  Ipc::Init();
 }
 
 void IpcM7::StartM4() {
-    if (!HasM4Application()) {
-        return;
-    }
+  if (!HasM4Application()) {
+    return;
+  }
 
-    // Start up the remote core.
-    // Provide the address of the P->S message queue so that the remote core can
-    // receive messages from this core.
-    MCMGR_StartCore(kMCMGR_Core1, reinterpret_cast<void*>(CORE1_BOOT_ADDRESS),
-                    reinterpret_cast<uint32_t>(tx_queue_),
-                    kMCMGR_Start_Asynchronous);
+  // Start up the remote core.
+  // Provide the address of the P->S message queue so that the remote core can
+  // receive messages from this core.
+  MCMGR_StartCore(kMCMGR_Core1, reinterpret_cast<void*>(CORE1_BOOT_ADDRESS),
+                  reinterpret_cast<uint32_t>(tx_queue_),
+                  kMCMGR_Start_Asynchronous);
 }
 
 }  // namespace coralmicro

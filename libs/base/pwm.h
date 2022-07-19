@@ -33,22 +33,22 @@ inline constexpr int kPwmPin9 = 9;
 
 // Represents a PWM Pin's HW setting.
 struct PwmPinSetting {
-    // Pointer to the base register of the PWM module.
-    PWM_Type* base;
-    // The PWM submodule of this pin.
-    pwm_submodule_t sub_module;
-    // The channel of this pin.
-    pwm_channels_t pwm_channel;
+  // Pointer to the base register of the PWM module.
+  PWM_Type* base;
+  // The PWM submodule of this pin.
+  pwm_submodule_t sub_module;
+  // The channel of this pin.
+  pwm_channels_t pwm_channel;
 };
 
 // Represents the configuration for a single PWM pin.
 struct PwmPinConfig {
-    // The duty cycle (from 0-100) of the PWM waveform.
-    int duty_cycle;
-    // Frequency in hz.
-    uint32_t frequency;
-    // The HW setting of the pin to start duty cycle.
-    PwmPinSetting pin_setting;
+  // The duty cycle (from 0-100) of the PWM waveform.
+  int duty_cycle;
+  // Frequency in hz.
+  uint32_t frequency;
+  // The HW setting of the pin to start duty cycle.
+  PwmPinSetting pin_setting;
 };
 
 // Gets the HW settings for a pwm pin.

@@ -17,8 +17,9 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_BEAGLE_CSR_HELPER_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_BEAGLE_CSR_HELPER_H_
 
-#include "libs/tpu/darwinn/driver/bitfield.h"
 #include <cstdint>
+
+#include "libs/tpu/darwinn/driver/bitfield.h"
 
 namespace platforms {
 namespace darwinn {
@@ -82,7 +83,7 @@ class Omc0D0 {
 
   void set_tslope(uint64_t value) { reg_.tslope_ = value; }
   uint64_t tslope() const { return reg_.tslope_(); }
-  
+
   void set_t_setting(uint64_t value) { reg_.t_setting_ = value; }
   uint64_t t_setting() const { return reg_.t_setting_(); }
 
@@ -227,10 +228,14 @@ class RamBistCtrl1 {
   void set_raw(uint64_t value) { reg_.raw_ = value; }
   uint64_t raw() const { return reg_.raw_; }
 
-  void set_rg_rambist_gcbsel(uint64_t value) { reg_.rg_rambist_gcbsel_ = value; }
+  void set_rg_rambist_gcbsel(uint64_t value) {
+    reg_.rg_rambist_gcbsel_ = value;
+  }
   uint64_t rg_rambist_gcbsel() const { return reg_.rg_rambist_gcbsel_(); }
 
-  void set_rg_rambist_topsel(uint64_t value) { reg_.rg_rambist_topsel_ = value; }
+  void set_rg_rambist_topsel(uint64_t value) {
+    reg_.rg_rambist_topsel_ = value;
+  }
   uint64_t rg_rambist_topsel() const { return reg_.rg_rambist_topsel_(); }
 
   void set_rg_rambist_tckmode(uint64_t value) {
@@ -252,7 +257,9 @@ class RamBistCtrl1 {
   }
   uint64_t rg_mbist_int_status() const { return reg_.rg_mbist_int_status_(); }
 
-  void set_rg_mbist_int_mask(uint64_t value) { reg_.rg_mbist_int_mask_ = value; }
+  void set_rg_mbist_int_mask(uint64_t value) {
+    reg_.rg_mbist_int_mask_ = value;
+  }
   uint64_t rg_mbist_int_mask() const { return reg_.rg_mbist_int_mask_(); }
 
  private:
@@ -342,7 +349,9 @@ class ScuCtrl0 {
   void set_rg_usb_inact_phy_mode(uint64_t value) {
     reg_.rg_usb_inact_phy_mode_ = value;
   }
-  uint64_t rg_usb_inact_phy_mode() const { return reg_.rg_usb_inact_phy_mode_(); }
+  uint64_t rg_usb_inact_phy_mode() const {
+    return reg_.rg_usb_inact_phy_mode_();
+  }
 
  private:
   union {

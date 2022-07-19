@@ -20,8 +20,8 @@
 #include <numeric>
 #include <string>
 
-#include "posenet_decoder.h"
 #include "flatbuffers/flexbuffers.h"
+#include "posenet_decoder.h"
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 
@@ -54,10 +54,10 @@ struct OpData {
   float nms_radius;
 
   // Temporary tensors (e.g for dequantized values)
-  void *heatmaps_float_ptr;
-  void *shorts_float_ptr;
-  void *mids_float_ptr;
-  void *longs_float_ptr;
+  void* heatmaps_float_ptr;
+  void* shorts_float_ptr;
+  void* mids_float_ptr;
+  void* longs_float_ptr;
 };
 
 void* Init(TfLiteContext* context, const char* buffer, size_t length) {
@@ -77,8 +77,8 @@ void Free(TfLiteContext* context, void* buffer) {
   delete reinterpret_cast<OpData*>(buffer);
 }
 
-TfLiteStatus PrepTempTensor(TfLiteContext *context, void **temp_tensor_ptr,
-                            const TfLiteIntArray *dims) {
+TfLiteStatus PrepTempTensor(TfLiteContext* context, void** temp_tensor_ptr,
+                            const TfLiteIntArray* dims) {
   int bytes = sizeof(float);
   for (int i = 0; i < dims->size; ++i) {
     bytes *= dims->data[i];
@@ -145,9 +145,8 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_OK(
       context,
       PrepTempTensor(context, &op_data->heatmaps_float_ptr, heatmaps->dims));
-  TF_LITE_ENSURE_OK(
-      context,
-      PrepTempTensor(context, &op_data->shorts_float_ptr, shorts->dims));
+  TF_LITE_ENSURE_OK(context, PrepTempTensor(context, &op_data->shorts_float_ptr,
+                                            shorts->dims));
   TF_LITE_ENSURE_OK(
       context, PrepTempTensor(context, &op_data->mids_float_ptr, mids->dims));
 
@@ -186,8 +185,10 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   DequantizeTensor(shorts, op_data->shorts_float_ptr, 1.0 / op_data->stride);
   DequantizeTensor(mids, op_data->mids_float_ptr, 1.0 / op_data->stride);
 
-  const float* heatmaps_data = reinterpret_cast<float*>(op_data->heatmaps_float_ptr);
-  const float* shorts_data = reinterpret_cast<float*>(op_data->shorts_float_ptr);
+  const float* heatmaps_data =
+      reinterpret_cast<float*>(op_data->heatmaps_float_ptr);
+  const float* shorts_data =
+      reinterpret_cast<float*>(op_data->shorts_float_ptr);
   const float* mids_data = reinterpret_cast<float*>(op_data->mids_float_ptr);
 
   TfLiteTensor* pose_keypoints =
@@ -222,7 +223,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
         GetInput(context, node, kInputTensorLongOffsets);
     TF_LITE_ENSURE(context, longs != nullptr);
     DequantizeTensor(longs, op_data->longs_float_ptr, 1.0 / op_data->stride);
-    const float* longs_data = reinterpret_cast<float*>(op_data->longs_float_ptr);
+    const float* longs_data =
+        reinterpret_cast<float*>(op_data->longs_float_ptr);
     TfLiteTensor* instance_masks =
         GetOutput(context, node, kOutputTensorInstanceMasks);
     TF_LITE_ENSURE(context, instance_masks != nullptr);

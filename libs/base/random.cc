@@ -27,23 +27,23 @@ namespace coralmicro {
 using namespace random;
 
 void Random::RequestHandler(Request* req) {
-    Response resp;
-    caam_handle_t handle;
-    handle.jobRing = kCAAM_JobRing0;
-    status_t status =
-        CAAM_RNG_GetRandomData(CAAM, &handle, kCAAM_RngStateHandle0, req->out,
-                               req->len, kCAAM_RngDataAny, nullptr);
-    DCACHE_InvalidateByRange(reinterpret_cast<uint32_t>(req->out), req->len);
-    resp.success = (status == kStatus_Success);
-    req->callback(resp);
+  Response resp;
+  caam_handle_t handle;
+  handle.jobRing = kCAAM_JobRing0;
+  status_t status =
+      CAAM_RNG_GetRandomData(CAAM, &handle, kCAAM_RngStateHandle0, req->out,
+                             req->len, kCAAM_RngDataAny, nullptr);
+  DCACHE_InvalidateByRange(reinterpret_cast<uint32_t>(req->out), req->len);
+  resp.success = (status == kStatus_Success);
+  req->callback(resp);
 }
 
 bool Random::GetRandomNumber(void* out, size_t len) {
-    Request req;
-    req.out = out;
-    req.len = len;
-    Response resp = SendRequest(req);
-    return resp.success;
+  Request req;
+  req.out = out;
+  req.len = len;
+  Response resp = SendRequest(req);
+  return resp.success;
 }
 
 }  // namespace coralmicro

@@ -26,54 +26,54 @@
 namespace coralmicro::utils {
 
 uint64_t GetUniqueID() {
-    uint32_t fuse_val_hi, fuse_val_lo;
-    fuse_val_lo = OCOTP->FUSEN[16].FUSE;
-    fuse_val_hi = OCOTP->FUSEN[17].FUSE;
-    return ((static_cast<uint64_t>(fuse_val_hi) << 32) | fuse_val_lo);
+  uint32_t fuse_val_hi, fuse_val_lo;
+  fuse_val_lo = OCOTP->FUSEN[16].FUSE;
+  fuse_val_hi = OCOTP->FUSEN[17].FUSE;
+  return ((static_cast<uint64_t>(fuse_val_hi) << 32) | fuse_val_lo);
 }
 
 std::string GetSerialNumber() {
-    uint64_t id = coralmicro::utils::GetUniqueID();
-    char serial[17];  // 16 hex characters + \0
-    snprintf(serial, sizeof(serial), "%08lx%08lx",
-             static_cast<uint32_t>(id >> 32), static_cast<uint32_t>(id));
-    return serial;
+  uint64_t id = coralmicro::utils::GetUniqueID();
+  char serial[17];  // 16 hex characters + \0
+  snprintf(serial, sizeof(serial), "%08lx%08lx",
+           static_cast<uint32_t>(id >> 32), static_cast<uint32_t>(id));
+  return serial;
 }
 
 std::array<uint8_t, 6> GetMacAddress() {
-    uint32_t fuse_val_hi, fuse_val_lo;
-    fuse_val_lo = OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO)].FUSE;
-    fuse_val_hi =
-        OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI)].FUSE & 0xFFFF;
-    uint8_t a = (fuse_val_hi >> 8) & 0xFF;
-    uint8_t b = (fuse_val_hi)&0xFF;
-    uint8_t c = (fuse_val_lo >> 24) & 0xFF;
-    uint8_t d = (fuse_val_lo >> 16) & 0xFF;
-    uint8_t e = (fuse_val_lo >> 8) & 0xFF;
-    uint8_t f = (fuse_val_lo)&0xFF;
-    return std::array<uint8_t, 6>{a, b, c, d, e, f};
+  uint32_t fuse_val_hi, fuse_val_lo;
+  fuse_val_lo = OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO)].FUSE;
+  fuse_val_hi =
+      OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI)].FUSE & 0xFFFF;
+  uint8_t a = (fuse_val_hi >> 8) & 0xFF;
+  uint8_t b = (fuse_val_hi)&0xFF;
+  uint8_t c = (fuse_val_lo >> 24) & 0xFF;
+  uint8_t d = (fuse_val_lo >> 16) & 0xFF;
+  uint8_t e = (fuse_val_lo >> 8) & 0xFF;
+  uint8_t f = (fuse_val_lo)&0xFF;
+  return std::array<uint8_t, 6>{a, b, c, d, e, f};
 }
 
 bool GetUsbIpAddress(std::string* usb_ip_out) {
-    return coralmicro::LfsReadFile("/usb_ip_address", usb_ip_out);
+  return coralmicro::LfsReadFile("/usb_ip_address", usb_ip_out);
 }
 
 extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
-    std::string wifi_country_code_out, wifi_revision_out;
-    unsigned short wifi_revision = 0;
-    if (!coralmicro::LfsReadFile("/wifi_country", &wifi_country_code_out)) {
-        DbgConsole_Printf("failed to read back country, returning WW\r\n");
-        return WICED_COUNTRY_WORLD_WIDE_XX;
-    }
-    if (wifi_country_code_out.length() != 2) {
-        DbgConsole_Printf("wifi_country must be 2 bytes, returning WW\r\n");
-        return WICED_COUNTRY_WORLD_WIDE_XX;
-    }
-    if (coralmicro::LfsReadFile("/wifi_revision", &wifi_revision_out)) {
-        wifi_revision = *reinterpret_cast<uint16_t*>(wifi_revision_out.data());
-    }
-    return static_cast<wiced_country_code_t>(MK_CNTRY(
-        wifi_country_code_out[0], wifi_country_code_out[1], wifi_revision));
+  std::string wifi_country_code_out, wifi_revision_out;
+  unsigned short wifi_revision = 0;
+  if (!coralmicro::LfsReadFile("/wifi_country", &wifi_country_code_out)) {
+    DbgConsole_Printf("failed to read back country, returning WW\r\n");
+    return WICED_COUNTRY_WORLD_WIDE_XX;
+  }
+  if (wifi_country_code_out.length() != 2) {
+    DbgConsole_Printf("wifi_country must be 2 bytes, returning WW\r\n");
+    return WICED_COUNTRY_WORLD_WIDE_XX;
+  }
+  if (coralmicro::LfsReadFile("/wifi_revision", &wifi_revision_out)) {
+    wifi_revision = *reinterpret_cast<uint16_t*>(wifi_revision_out.data());
+  }
+  return static_cast<wiced_country_code_t>(MK_CNTRY(
+      wifi_country_code_out[0], wifi_country_code_out[1], wifi_revision));
 }
 
 }  // namespace coralmicro::utils

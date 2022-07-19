@@ -22,47 +22,47 @@
 namespace coralmicro {
 
 bool LedSet(Led led, bool enable) {
-    return LedSet(led, enable, enable ? kLedFullyOn : kLedFullyOff);
+  return LedSet(led, enable, enable ? kLedFullyOn : kLedFullyOff);
 }
 
 bool LedSet(Led led, bool enable, unsigned int brightness) {
-    bool ret = true;
-    switch (led) {
-        case Led::kStatus:
-            GpioSet(Gpio::kStatusLed, enable);
-            break;
-        case Led::kUser:
-            GpioSet(Gpio::kUserLed, enable);
-            break;
-        case Led::kTpu:
+  bool ret = true;
+  switch (led) {
+    case Led::kStatus:
+      GpioSet(Gpio::kStatusLed, enable);
+      break;
+    case Led::kUser:
+      GpioSet(Gpio::kUserLed, enable);
+      break;
+    case Led::kTpu:
 #if __CORTEX_M == 7
-            PwmInit();
-            if (!GpioGet(Gpio::kEdgeTpuPmic)) {
-                printf("TPU LED requires TPU power to be enabled.\r\n");
-                ret = false;
-                break;
-            }
-            if (brightness > kLedFullyOn) {
-                brightness = kLedFullyOff;
-            }
-            coralmicro::PwmPinConfig pin_a_config;
-            pin_a_config.duty_cycle = brightness;
-            pin_a_config.frequency = 1000;
-            pin_a_config.pin_setting =
-                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
-            if (enable) {
-                PwmEnable({pin_a_config});
-            } else {
-                PwmDisable({pin_a_config});
-            }
+      PwmInit();
+      if (!GpioGet(Gpio::kEdgeTpuPmic)) {
+        printf("TPU LED requires TPU power to be enabled.\r\n");
+        ret = false;
+        break;
+      }
+      if (brightness > kLedFullyOn) {
+        brightness = kLedFullyOff;
+      }
+      coralmicro::PwmPinConfig pin_a_config;
+      pin_a_config.duty_cycle = brightness;
+      pin_a_config.frequency = 1000;
+      pin_a_config.pin_setting =
+          coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
+      if (enable) {
+        PwmEnable({pin_a_config});
+      } else {
+        PwmDisable({pin_a_config});
+      }
 #else
-            ret = false;
+      ret = false;
 #endif
-            break;
-        default:
-            ret = false;
-    }
-    return ret;
+      break;
+    default:
+      ret = false;
+  }
+  return ret;
 }
 
 }  // namespace coralmicro

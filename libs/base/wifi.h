@@ -31,10 +31,10 @@ inline constexpr int kDefaultRetryCount{5};
 
 // Represents the Wi-Fi antenna.
 enum class WiFiAntenna {
-    // Internal built in Wi-Fi antenna.
-    kInternal,
-    // External custom Wi-Fi antenna.
-    kExternal,
+  // Internal built in Wi-Fi antenna.
+  kInternal,
+  // External custom Wi-Fi antenna.
+  kExternal,
 };
 
 // Gets the Wi-Fi SSID that is stored in flash memory.

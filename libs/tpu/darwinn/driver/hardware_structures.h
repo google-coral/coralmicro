@@ -18,8 +18,8 @@
 #define LIBS_TPU_DARWINN_DRIVER_HARDWARE_STRUCTURES_H_
 
 #include <stddef.h>
-#include <algorithm>
 
+#include <algorithm>
 #include <cstdint>
 
 namespace platforms {
@@ -110,10 +110,11 @@ static constexpr int kExtendedAddressSpacePrefixWidthBits = 32;
 static_assert(
     (kExtendedAddressSpaceStart >> kExtendedAddressSpacePrefixWidthBits) ==
         ((kExtendedAddressSpaceStart + kExtendedAddressSpaceSizeBytes - 1) >>
-                                                                           kExtendedAddressSpacePrefixWidthBits),
+         kExtendedAddressSpacePrefixWidthBits),
     "Extended address space range cannot span 4 GB boundaries.");
 static_assert((kExtendedAddressSpaceSizeBytes %
-                  kExtendedPageTableEntryAddressableBytes == 0),
+                   kExtendedPageTableEntryAddressableBytes ==
+               0),
               "Must be multiple of extended host page");
 
 // The upper 32 bits of the extended address space segment.
@@ -138,7 +139,7 @@ inline int GetNumSimplePageTableEntries(int num_page_table_entries) {
 // Returns number of extended page table entries given page table size.
 inline int GetNumExtendedPageTableEntries(int num_page_table_entries) {
   return num_page_table_entries -
-      GetNumSimplePageTableEntries(num_page_table_entries);
+         GetNumSimplePageTableEntries(num_page_table_entries);
 }
 
 // Run control settings for tiles and scalar core.

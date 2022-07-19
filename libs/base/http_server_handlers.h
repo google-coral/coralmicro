@@ -22,13 +22,13 @@
 namespace coralmicro {
 
 struct FileSystemUriHandler {
-    const char* prefix = "/fs/";
-    HttpServer::Content operator()(const char* uri);
+  const char* prefix = "/fs/";
+  HttpServer::Content operator()(const char* uri);
 };
 
 struct TaskStatsUriHandler {
-    const char* name = "/stats.html";
-    HttpServer::Content operator()(const char* uri);
+  const char* name = "/stats.html";
+  HttpServer::Content operator()(const char* uri);
 };
 
 }  // namespace coralmicro

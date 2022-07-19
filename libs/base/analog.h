@@ -30,25 +30,25 @@ inline constexpr int kAdc2ChannelCount = 7;
 
 // Enumeration of the ADCs and DACs that exist in the system.
 enum class AdcDevice {
-    kAdc1,
-    kAdc2,
+  kAdc1,
+  kAdc2,
 };
 
 // Enumeration of the choices for the primary side of an ADC.
 enum class AdcSide {
-    kA,
-    kB,
+  kA,
+  kB,
 };
 
 // Represents the configuration of an ADC.
 // Each ADC has a 12-bit resolution with 1.8V reference voltage.
 struct AdcConfig {
-    // Pointer to the base register of the ADC.
-    ADC_Type* device;
-    // Configuration for ADC conversion.
-    lpadc_conv_command_config_t conv_config;
-    // Configuration for ADC triggers.
-    lpadc_conv_trigger_config_t trigger_config;
+  // Pointer to the base register of the ADC.
+  ADC_Type* device;
+  // Configuration for ADC conversion.
+  lpadc_conv_command_config_t conv_config;
+  // Configuration for ADC triggers.
+  lpadc_conv_trigger_config_t trigger_config;
 };
 
 // Initializes ADC device.
@@ -58,8 +58,10 @@ void AdcInit(AdcDevice device);
 // Populates an `ADCConfig` struct based on the given parameters.
 // @param config Configuration struct to populate.
 // @param device Desired device to configure.
-// @param channel The ADC channel to use (must be less than the max number of channels).
-//   See `kLPADC1ChannelCount` and `kLPADC2ChannelCount` for the amount of channels.
+// @param channel The ADC channel to use (must be less than the max number of
+// channels).
+//   See `kLPADC1ChannelCount` and `kLPADC2ChannelCount` for the amount of
+//   channels.
 // @param primary_side Primary side of the ADC, if using differential mode.
 //   In single ended mode, the desired side.
 // @param differential Whether or not to run the ADC in differential mode.
@@ -71,9 +73,9 @@ void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
 // For example code, see `examples/analog/`.
 // @param config ADC configuration to use.
 // @returns Digitized value of the voltage that the ADC is sensing.
-//          The ADC has 12 bits of precision, so the maximum value returned is 4095.
+//          The ADC has 12 bits of precision, so the maximum value returned is
+//          4095.
 uint16_t AdcRead(const AdcConfig& config);
-
 
 // Initializes DAC device.
 // @param device DAC to initialize.

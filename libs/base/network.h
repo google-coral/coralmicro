@@ -28,7 +28,7 @@ IOStatus ReadBytes(int fd, void* bytes, size_t size);
 
 template <typename T>
 IOStatus ReadArray(int fd, T* array, size_t array_size) {
-    return ReadBytes(fd, array, array_size * sizeof(T));
+  return ReadBytes(fd, array, array_size * sizeof(T));
 }
 
 IOStatus WriteBytes(int fd, const void* bytes, size_t size,
@@ -36,7 +36,7 @@ IOStatus WriteBytes(int fd, const void* bytes, size_t size,
 
 template <typename T>
 IOStatus WriteArray(int fd, const T* array, size_t array_size) {
-    return WriteBytes(fd, array, array_size * sizeof(T));
+  return WriteBytes(fd, array, array_size * sizeof(T));
 }
 
 IOStatus WriteMessage(int fd, uint8_t type, const void* bytes, size_t size,

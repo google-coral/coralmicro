@@ -23,7 +23,7 @@
 
 #define USB_DEVICE_CONFIG_CDC_EEM_SUBCLASS_CODE (0x0C)
 
-#define EEM_HEADER_TYPE_MASK  (0x8000)
+#define EEM_HEADER_TYPE_MASK (0x8000)
 #define EEM_HEADER_TYPE_SHIFT (15)
 
 #define EEM_DATA_CRC_MASK (0x4000)
@@ -40,63 +40,55 @@
 #define EEM_COMMAND_ECHO_RESPONSE (1)
 
 typedef enum _usb_device_cdc_eem_event {
-    kUSB_DeviceEemEventRecvResponse = 0x1,
-    kUSB_DeviceEemEventSendResponse,
+  kUSB_DeviceEemEventRecvResponse = 0x1,
+  kUSB_DeviceEemEventSendResponse,
 } usb_device_cdc_eem_event_t;
 
 typedef struct _usb_device_cdc_eem_pipe {
-    uint8_t isBusy;
+  uint8_t isBusy;
 } usb_device_cdc_eem_pipe_t;
 
 typedef struct _usb_device_cdc_eem_struct {
-    usb_device_handle handle;
-    usb_device_class_config_struct_t *configStruct;
-    usb_device_interface_struct_t *dataInterfaceHandle;
-    usb_device_cdc_eem_pipe_t bulkIn;
-    usb_device_cdc_eem_pipe_t bulkOut;
-    uint8_t configuration;
-    uint8_t alternate;
-    uint8_t interfaceNumber;
-    uint8_t hasSentState;
+  usb_device_handle handle;
+  usb_device_class_config_struct_t *configStruct;
+  usb_device_interface_struct_t *dataInterfaceHandle;
+  usb_device_cdc_eem_pipe_t bulkIn;
+  usb_device_cdc_eem_pipe_t bulkOut;
+  uint8_t configuration;
+  uint8_t alternate;
+  uint8_t interfaceNumber;
+  uint8_t hasSentState;
 } usb_device_cdc_eem_struct_t;
 
 /*! @brief Definition of parameters for CDC ACM request. */
-typedef struct _usb_device_cdc_eem_request_param_struct
-{
-    uint8_t **buffer;        /*!< The pointer to the address of the buffer for CDC class request. */
-    uint32_t *length;        /*!< The pointer to the length of the buffer for CDC class request. */
-    uint16_t interfaceIndex; /*!< The interface index of the setup packet. */
-    uint16_t setupValue;     /*!< The wValue field of the setup packet. */
-    uint8_t isSetup;         /*!< The flag indicates if it is a setup packet, 1: yes, 0: no. */
+typedef struct _usb_device_cdc_eem_request_param_struct {
+  uint8_t **buffer; /*!< The pointer to the address of the buffer for CDC class
+                       request. */
+  uint32_t *length; /*!< The pointer to the length of the buffer for CDC class
+                       request. */
+  uint16_t interfaceIndex; /*!< The interface index of the setup packet. */
+  uint16_t setupValue;     /*!< The wValue field of the setup packet. */
+  uint8_t isSetup; /*!< The flag indicates if it is a setup packet, 1: yes, 0:
+                      no. */
 } usb_device_cdc_eem_request_param_struct_t;
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-usb_status_t USB_DeviceCdcEemInit(
-        uint8_t controllerId,
-        usb_device_class_config_struct_t *config,
-        class_handle_t *handle);
+usb_status_t USB_DeviceCdcEemInit(uint8_t controllerId,
+                                  usb_device_class_config_struct_t *config,
+                                  class_handle_t *handle);
 
 usb_status_t USB_DeviceCdcEemDeinit(class_handle_t handle);
 
-usb_status_t USB_DeviceCdcEemEvent(
-        void *handle,
-        uint32_t event,
-        void *param);
+usb_status_t USB_DeviceCdcEemEvent(void *handle, uint32_t event, void *param);
 
- usb_status_t USB_DeviceCdcEemSend(
-         class_handle_t handle,
-         uint8_t ep,
-         uint8_t *buffer,
-         uint32_t length);
+usb_status_t USB_DeviceCdcEemSend(class_handle_t handle, uint8_t ep,
+                                  uint8_t *buffer, uint32_t length);
 
-usb_status_t USB_DeviceCdcEemRecv(
-        class_handle_t handle,
-        uint8_t ep,
-        uint8_t *buffer,
-        uint32_t length);
+usb_status_t USB_DeviceCdcEemRecv(class_handle_t handle, uint8_t ep,
+                                  uint8_t *buffer, uint32_t length);
 
 #if defined(__cplusplus)
 }

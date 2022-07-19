@@ -39,20 +39,20 @@ inline const char* const KeypointTypes[] = {
 
 // Represents a keypoint of a pose object.
 struct Keypoint {
-    // The keypoint's x position relative to the model size.
-    float x;
-    // The keypoint's y position relative to the model size.
-    float y;
-    // The keypoint's score.
-    float score;
+  // The keypoint's x position relative to the model size.
+  float x;
+  // The keypoint's y position relative to the model size.
+  float y;
+  // The keypoint's score.
+  float score;
 };
 
 // Represents a pose in the output object.
 struct Pose {
-    // The pose's score.
-    float score;
-    // An array of keypoints in this pose.
-    Keypoint keypoints[kKeypoints];
+  // The pose's score.
+  float score;
+  // An array of keypoints in this pose.
+  Keypoint keypoints[kKeypoints];
 };
 
 // Format the posenet outputs into a string.

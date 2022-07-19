@@ -21,12 +21,12 @@ namespace coralmicro {
 
 // Available board LEDs
 enum class Led {
-    // Orange status LED.
-    kStatus,
-    // Green user-programmable LED.
-    kUser,
-    // White Edge TPU LED. The Edge TPU must be powered to use this.
-    kTpu,
+  // Orange status LED.
+  kStatus,
+  // Green user-programmable LED.
+  kUser,
+  // White Edge TPU LED. The Edge TPU must be powered to use this.
+  kTpu,
 };
 
 // Fully-on brightness for `Set(led, enable, brightness)`

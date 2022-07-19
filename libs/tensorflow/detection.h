@@ -27,24 +27,24 @@ namespace coralmicro::tensorflow {
 // Represents the bounding box of a detected object.
 template <typename T>
 struct BBox {
-    // The box y-minimum (top-most) point.
-    T ymin;
-    // The box x-minimum (left-most) point.
-    T xmin;
-    // The box y-maximum (bottom-most) point.
-    T ymax;
-    // The box x-maximum (right-most) point.
-    T xmax;
+  // The box y-minimum (top-most) point.
+  T ymin;
+  // The box x-minimum (left-most) point.
+  T xmin;
+  // The box y-maximum (bottom-most) point.
+  T ymax;
+  // The box x-maximum (right-most) point.
+  T xmax;
 };
 
 // Represents a detected object.
 struct Object {
-    // The class label id.
-    int id;
-    // The prediction score.
-    float score;
-    // The bounding-box (ymin,xmin,ymax,xmax).
-    BBox<float> bbox;
+  // The class label id.
+  int id;
+  // The prediction score.
+  float score;
+  // The bounding-box (ymin,xmin,ymax,xmax).
+  BBox<float> bbox;
 };
 
 // Format the detection outputs into a string.

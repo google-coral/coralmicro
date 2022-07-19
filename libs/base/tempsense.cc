@@ -23,30 +23,30 @@
 namespace coralmicro {
 
 void TempSensorInit() {
-    // Configure CPU for just single measurement mode.
-    tmpsns_config_t config;
-    TMPSNS_GetDefaultConfig(&config);
-    config.measureMode = kTEMPSENSOR_SingleMode;
+  // Configure CPU for just single measurement mode.
+  tmpsns_config_t config;
+  TMPSNS_GetDefaultConfig(&config);
+  config.measureMode = kTEMPSENSOR_SingleMode;
 
-    TMPSNS_Init(TMPSNS, &config);
+  TMPSNS_Init(TMPSNS, &config);
 }
 
 float TempSensorRead(TempSensor sensor) {
-    switch (sensor) {
-        case TempSensor::kCpu: {
-            // Toggle CTRL1_START to get new single-shot read.
-            TMPSNS_StopMeasure(TMPSNS);
-            TMPSNS_StartMeasure(TMPSNS);
-            return TMPSNS_GetCurrentTemperature(TMPSNS);
-        }
-        case TempSensor::kTpu: {
-            auto context = EdgeTpuManager::GetSingleton()->OpenDevice();
-            return EdgeTpuManager::GetSingleton()->GetTemperature().value();
-        }
-        default:
-            CHECK(!"Invalid sensor value");
-            return 0.0f;
+  switch (sensor) {
+    case TempSensor::kCpu: {
+      // Toggle CTRL1_START to get new single-shot read.
+      TMPSNS_StopMeasure(TMPSNS);
+      TMPSNS_StartMeasure(TMPSNS);
+      return TMPSNS_GetCurrentTemperature(TMPSNS);
     }
+    case TempSensor::kTpu: {
+      auto context = EdgeTpuManager::GetSingleton()->OpenDevice();
+      return EdgeTpuManager::GetSingleton()->GetTemperature().value();
+    }
+    default:
+      CHECK(!"Invalid sensor value");
+      return 0.0f;
+  }
 }
 
 }  // namespace coralmicro

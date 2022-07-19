@@ -28,13 +28,13 @@ namespace coralmicro {
 namespace random {
 
 struct Response {
-    bool success;
+  bool success;
 };
 
 struct Request {
-    void* out;
-    size_t len;
-    std::function<void(Response)> callback;
+  void* out;
+  size_t len;
+  std::function<void(Response)> callback;
 };
 
 }  // namespace random
@@ -44,15 +44,15 @@ inline constexpr char kRandomTaskName[] = "random_task";
 class Random : public QueueTask<random::Request, random::Response,
                                 kRandomTaskName, configMINIMAL_STACK_SIZE * 10,
                                 RANDOM_TASK_PRIORITY, /*QueueLength=*/4> {
-   public:
-    static Random* GetSingleton() {
-        static Random random;
-        return &random;
-    }
-    bool GetRandomNumber(void* out, size_t len);
+ public:
+  static Random* GetSingleton() {
+    static Random random;
+    return &random;
+  }
+  bool GetRandomNumber(void* out, size_t len);
 
-   private:
-    void RequestHandler(random::Request* req) override;
+ private:
+  void RequestHandler(random::Request* req) override;
 };
 
 }  // namespace coralmicro

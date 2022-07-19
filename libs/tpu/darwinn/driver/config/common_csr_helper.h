@@ -17,8 +17,9 @@
 #ifndef LIBS_TPU_DARWINN_DRIVER_CONFIG_COMMON_CSR_HELPER_H_
 #define LIBS_TPU_DARWINN_DRIVER_CONFIG_COMMON_CSR_HELPER_H_
 
-#include "libs/tpu/darwinn/driver/bitfield.h"
 #include <cstdint>
+
+#include "libs/tpu/darwinn/driver/bitfield.h"
 
 namespace platforms {
 namespace darwinn {
@@ -44,9 +45,13 @@ class HibError {
   uint64_t extended_page_fault() const { return reg_.extended_page_fault_(); }
   void set_csr_parity_error(uint64_t value) { reg_.csr_parity_error_ = value; }
   uint64_t csr_parity_error() const { return reg_.csr_parity_error_(); }
-  void set_axi_slave_b_error(uint64_t value) { reg_.axi_slave_b_error_ = value; }
+  void set_axi_slave_b_error(uint64_t value) {
+    reg_.axi_slave_b_error_ = value;
+  }
   uint64_t axi_slave_b_error() const { return reg_.axi_slave_b_error_(); }
-  void set_axi_slave_r_error(uint64_t value) { reg_.axi_slave_r_error_ = value; }
+  void set_axi_slave_r_error(uint64_t value) {
+    reg_.axi_slave_r_error_ = value;
+  }
   uint64_t axi_slave_r_error() const { return reg_.axi_slave_r_error_(); }
   void set_instruction_queue_bad_configuration(uint64_t value) {
     reg_.instruction_queue_bad_configuration_ = value;
@@ -400,13 +405,17 @@ class WireIntBitArray {
 
   void set_raw(uint64_t value) { reg_.raw_ = value; }
   uint64_t raw() const { return reg_.raw_; }
-  void set_instruction_queue(uint64_t value) { reg_.instruction_queue_ = value; }
+  void set_instruction_queue(uint64_t value) {
+    reg_.instruction_queue_ = value;
+  }
   uint64_t instruction_queue() const { return reg_.instruction_queue_(); }
   void set_input_actv_queue(uint64_t value) { reg_.input_actv_queue_ = value; }
   uint64_t input_actv_queue() const { return reg_.input_actv_queue_(); }
   void set_param_queue(uint64_t value) { reg_.param_queue_ = value; }
   uint64_t param_queue() const { return reg_.param_queue_(); }
-  void set_output_actv_queue(uint64_t value) { reg_.output_actv_queue_ = value; }
+  void set_output_actv_queue(uint64_t value) {
+    reg_.output_actv_queue_ = value;
+  }
   uint64_t output_actv_queue() const { return reg_.output_actv_queue_(); }
   void set_sc_host_0(uint64_t value) { reg_.sc_host_0_ = value; }
   uint64_t sc_host_0() const { return reg_.sc_host_0_(); }
@@ -574,7 +583,9 @@ class DeepSleep {
 
   void set_to_sleep_delay(uint64_t value) { reg_.to_sleep_delay_ = value; }
   void set_to_wake_delay(uint64_t value) { reg_.to_wake_delay_ = value; }
-  uint64_t narrow_mem_deep_sleep() const { return reg_.narrow_mem_deep_sleep_(); }
+  uint64_t narrow_mem_deep_sleep() const {
+    return reg_.narrow_mem_deep_sleep_();
+  }
   uint64_t wide_mem_deep_sleep() const { return reg_.wide_mem_deep_sleep_(); }
 
  private:

@@ -26,38 +26,38 @@
 namespace coralmicro {
 
 class UsbHostTask {
-   public:
-    UsbHostTask();
-    UsbHostTask(const UsbHostTask&) = delete;
-    UsbHostTask& operator=(const UsbHostTask&) = delete;
+ public:
+  UsbHostTask();
+  UsbHostTask(const UsbHostTask&) = delete;
+  UsbHostTask& operator=(const UsbHostTask&) = delete;
 
-    static UsbHostTask* GetSingleton() {
-        static UsbHostTask task;
-        return &task;
-    }
-    void Init();
+  static UsbHostTask* GetSingleton() {
+    static UsbHostTask task;
+    return &task;
+  }
+  void Init();
 
-    using UsbHostEventCallback =
-        std::function<usb_status_t(usb_host_handle, usb_device_handle,
-                                   usb_host_configuration_handle, uint32_t)>;
-    void RegisterUsbHostEventCallback(uint32_t vid, uint32_t pid,
-                                      UsbHostEventCallback fn);
-    usb_status_t HostEvent(usb_device_handle device_handle,
-                           usb_host_configuration_handle config_handle,
-                           uint32_t event_code);
+  using UsbHostEventCallback =
+      std::function<usb_status_t(usb_host_handle, usb_device_handle,
+                                 usb_host_configuration_handle, uint32_t)>;
+  void RegisterUsbHostEventCallback(uint32_t vid, uint32_t pid,
+                                    UsbHostEventCallback fn);
+  usb_status_t HostEvent(usb_device_handle device_handle,
+                         usb_host_configuration_handle config_handle,
+                         uint32_t event_code);
 
-    usb_host_handle host_handle() const { return host_handle_; }
+  usb_host_handle host_handle() const { return host_handle_; }
 
-   private:
-    static void StaticTaskMain(void* param) {
-        static_cast<UsbHostTask*>(param)->TaskMain();
-    }
-    void TaskMain();
-    usb_host_handle host_handle_;
+ private:
+  static void StaticTaskMain(void* param) {
+    static_cast<UsbHostTask*>(param)->TaskMain();
+  }
+  void TaskMain();
+  usb_host_handle host_handle_;
 
-    // Map from VID/PID to callback
-    // Key is VID in the top 16 bits, PID in the bottom 16 bits.
-    std::map<uint32_t, UsbHostEventCallback> host_event_callbacks_;
+  // Map from VID/PID to callback
+  // Key is VID in the top 16 bits, PID in the bottom 16 bits.
+  std::map<uint32_t, UsbHostEventCallback> host_event_callbacks_;
 };
 
 }  // namespace coralmicro
