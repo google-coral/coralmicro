@@ -78,12 +78,16 @@ def style_source_link(soup):
 
 
 def clean_index(soup):
-  """Removes the HTML table from the index page, leaving just lists of APIs."""
+  """Removes the HTML table from the index page, leaving just lists of APIs.
+     Also change links to use current directory not parent directory."""
   uls = soup.find_all('ul')
   for child in soup.find('div', class_='sphinx-reference').children:
     child.extract()
   for ul in uls:
     soup.find('div', class_='sphinx-reference').append(ul)
+  for a in soup.select('a[href^="../"]'):
+    href = a['href']
+    a['href'] = href[1:]
   return soup
 
 
