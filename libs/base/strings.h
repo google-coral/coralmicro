@@ -77,18 +77,20 @@ void StrAppend(C* v, const char* format_str, T... args) {
     v->pop_back();  // remove null terminator
 }
 
-// Gets a string's hexadecimal representation.
+// Returns a string's hexadecimal representation.
 //
-// @param src The source array of raw characters.
-// @param src_len The size of the source array.
-// @return The hexadecimal representation of the src string.
-std::string StrToHex(const char* src, size_t src_len);
+// @param s The source array of raw characters.
+// @param size The size of the source array.
+// @return The hexadecimal representation of the string.
+std::string StrToHex(const char* s, size_t size);
 
-// Gets a string's hexadecimal representation.
+// Returns a string's hexadecimal representation.
 //
-// @param src The source array of raw characters.
-// @return The hexadecimal representation of the src string.
-std::string StrToHex(const std::string& src);
+// @param s The source string.
+// @return The hexadecimal representation of the string.
+inline std::string StrToHex(const std::string& s) {
+    return StrToHex(s.data(), s.size());
+}
 
 }  // namespace coralmicro
 
