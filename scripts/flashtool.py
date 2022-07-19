@@ -796,6 +796,8 @@ def main():
         subprocess.check_call([os.path.join(toolchain_path, 'arm-none-eabi-strip'), '-s', elf_path, '-o', elf_path + '.stripped'])
         elf_path = elf_path + '.stripped'
 
+    data = not args.nodata
+    program = not args.noprogram
     state_machine_args = {
         'blhost_path': blhost_path,
         'flashloader_path': flashloader_path,
@@ -815,8 +817,8 @@ def main():
         'debug': args.debug,
         'jlink_path': args.jlink_path,
         'toolchain_path': toolchain_path,
-        'program': not args.noprogram,
-        'data': not args.nodata,
+        'program': program,
+        'data': data,
     }
 
     sdp_devices = len(EnumerateSDP())
@@ -860,11 +862,11 @@ def main():
         data_files = None
         if not args.ram:
             print('Creating Filesystem')
-            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, args.arduino, data_dir, args.data)
+            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, args.arduino, data_dir, data)
             if data_files is None:
                 print('Creating filesystem failed, exit')
                 return
-            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path, args.program and args.data)
+            sbfile_path = CreateSbFile(workdir, elftosb_path, elfloader_path, program and data)
             if not sbfile_path:
                 print('Creating sbfile failed, exit')
                 return

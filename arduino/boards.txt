@@ -44,6 +44,6 @@ coral_micro.menu.upload.both=Sketch + Data
 coral_micro.menu.upload.program=Sketch only
 coral_micro.menu.upload.data=Data only
 
-coral_micro.menu.upload.both.upload.extra_flags=--program --data
-coral_micro.menu.upload.program.upload.extra_flags=--program --nodata
-coral_micro.menu.upload.data.upload.extra_flags=--data --noprogram
+coral_micro.menu.upload.both.upload.extra_flags=
+coral_micro.menu.upload.program.upload.extra_flags=--nodata
+coral_micro.menu.upload.data.upload.extra_flags=--noprogram
