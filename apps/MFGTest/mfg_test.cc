@@ -14,6 +14,10 @@
 
 #include <array>
 #include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "apps/MFGTest/mfg_test_iperf.h"
 #include "libs/a71ch/a71ch.h"

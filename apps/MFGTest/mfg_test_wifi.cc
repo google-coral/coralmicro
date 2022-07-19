@@ -183,7 +183,8 @@ wiced_result_t ble_management_callback(
   switch (event) {
     case BTM_ENABLED_EVT: {
       coralmicro::MutexLock lock(ble_ready_mtx);
-      if (((wiced_bt_dev_enabled_t*)(p_event_data))->status == WICED_SUCCESS) {
+      if (reinterpret_cast<wiced_bt_dev_enabled_t*>(p_event_data)->status ==
+          WICED_SUCCESS) {
         ble_ready = true;
       } else {
         ble_ready = false;

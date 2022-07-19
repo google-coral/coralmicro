@@ -17,6 +17,7 @@
 #include "libs/base/http_server.h"
 
 #include <cstring>
+#include <memory>
 
 #include "libs/base/filesystem.h"
 

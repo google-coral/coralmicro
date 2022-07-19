@@ -17,6 +17,9 @@
 #ifndef SD_h
 #define SD_h
 
+#include <cstdint>
+#include <memory>
+
 #include "Arduino.h"
 #include "libs/base/filesystem.h"
 

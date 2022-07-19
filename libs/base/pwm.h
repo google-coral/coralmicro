@@ -28,8 +28,8 @@ namespace coralmicro {
 // PWM_A (pin 10 on the left-side header)
 // PWM_B (pin 9 on the left-side header).
 // Note: These pins output a max of 1.8V
-constexpr int kPwmPin10 = 10;
-constexpr int kPwmPin9 = 9;
+inline constexpr int kPwmPin10 = 10;
+inline constexpr int kPwmPin9 = 9;
 
 // Represents a PWM Pin's HW setting.
 struct PwmPinSetting {

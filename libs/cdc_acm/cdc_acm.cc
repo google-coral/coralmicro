@@ -78,7 +78,7 @@ usb_status_t CdcAcm::SetControlLineState(usb_device_cdc_acm_request_param_struct
     uart_bitmap[1] = (uart_state >> 8) & 0xFF;
 
     uint32_t len = sizeof(serial_state_buffer_);
-    usb_device_cdc_acm_struct_t* cdc_acm = (usb_device_cdc_acm_struct_t*)class_handle_;
+    auto* cdc_acm = reinterpret_cast<usb_device_cdc_acm_struct_t*>(class_handle_);
     if (cdc_acm->hasSentState == 0) {
         ret = USB_DeviceCdcAcmSend(
                 class_handle_, interrupt_in_ep_, serial_state_buffer_, len);
@@ -149,8 +149,8 @@ bool CdcAcm::HandleEvent(uint32_t event, void *param) {
 
 usb_status_t CdcAcm::Handler(uint32_t event, void *param) {
     usb_status_t ret = kStatus_USB_Error;
-    usb_device_endpoint_callback_message_struct_t* ep_cb = (usb_device_endpoint_callback_message_struct_t*)param;
-    usb_device_cdc_acm_request_param_struct_t* acm_param = (usb_device_cdc_acm_request_param_struct_t*)param;
+    auto* ep_cb = static_cast<usb_device_endpoint_callback_message_struct_t*>(param);
+    auto* acm_param = static_cast<usb_device_cdc_acm_request_param_struct_t*>(param);
     switch (event) {
         case kUSB_DeviceCdcEventSendResponse:
             if ((ep_cb->length != 0) && (ep_cb->length % cdc_acm_data_endpoints_[DATA_OUT].maxPacketSize) == 0) {
@@ -179,7 +179,7 @@ usb_status_t CdcAcm::Handler(uint32_t event, void *param) {
                     cdc_acm_data_endpoints_[DATA_OUT].maxPacketSize);
             break;
         case kUSB_DeviceCdcEventSerialStateNotif:
-            ((usb_device_cdc_acm_struct_t*)class_handle_)->hasSentState = 0;
+            reinterpret_cast<usb_device_cdc_acm_struct_t*>(class_handle_)->hasSentState = 0;
             ret = kStatus_USB_Success;
             break;
         case kUSB_DeviceCdcEventSetLineCoding:

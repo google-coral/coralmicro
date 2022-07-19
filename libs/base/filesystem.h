@@ -17,8 +17,7 @@
 #ifndef LIBS_BASE_FILESYSTEM_H_
 #define LIBS_BASE_FILESYSTEM_H_
 
-#include <cstdlib>
-#include <memory>
+#include <cstdint>
 #include <string>
 #include <vector>
 

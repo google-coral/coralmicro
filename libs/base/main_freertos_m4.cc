@@ -56,8 +56,8 @@ extern "C" int main(int argc, char** argv) {
     NVIC_SetPriority(LPI2C5_IRQn, 3);
     lpi2c_master_config_t config;
     LPI2C_MasterGetDefaultConfig(&config);
-    LPI2C_RTOS_Init(&i2c5_handle, (LPI2C_Type*)LPI2C5_BASE, &config,
-                    CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
+    LPI2C_RTOS_Init(&i2c5_handle, reinterpret_cast<LPI2C_Type*>(LPI2C5_BASE),
+                    &config, CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
     coralmicro::PmicTask::GetSingleton()->Init(&i2c5_handle);
 #endif

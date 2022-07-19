@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include "libs/base/filesystem.h"

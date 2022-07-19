@@ -112,7 +112,7 @@ err_t CdcEem::TransmitFrame(void* buffer, uint32_t length) {
     }
     usb_status_t status;
     uint32_t crc = PP_HTONL(0xdeadbeef);
-    uint16_t *header = (uint16_t*)tx_buffer_;
+    uint16_t *header = reinterpret_cast<uint16_t*>(tx_buffer_);
     *header = (0 << EEM_DATA_CRC_SHIFT) | ((length + sizeof(uint32_t)) & EEM_DATA_LEN_MASK);
     if (endianness_ == Endianness::kBigEndian) {
         *header = htons(*header);
@@ -193,7 +193,7 @@ usb_status_t CdcEem::SetControlLineState(usb_device_cdc_eem_request_param_struct
     uart_bitmap[1] = (uart_state >> 8) & 0xFF;
 
     uint32_t len = sizeof(serial_state_buffer_);
-    usb_device_cdc_eem_struct_t* cdc_eem = (usb_device_cdc_eem_struct_t*)class_handle_;
+    auto* cdc_eem = reinterpret_cast<usb_device_cdc_eem_struct_t*>(class_handle_);
     if (cdc_eem->hasSentState == 0) {
         ret = USB_DeviceCdcEemSend(
                 class_handle_, bulk_in_ep_, serial_state_buffer_, len);
@@ -282,8 +282,8 @@ bool CdcEem::HandleEvent(uint32_t event, void *param) {
 
 usb_status_t CdcEem::Handler(uint32_t event, void *param) {
     usb_status_t ret = kStatus_USB_Error;
-    usb_device_endpoint_callback_message_struct_t *ep_cb = (usb_device_endpoint_callback_message_struct_t*)param;
-    usb_device_cdc_eem_request_param_struct_t* eem_param = (usb_device_cdc_eem_request_param_struct_t*)param;
+    auto *ep_cb = static_cast<usb_device_endpoint_callback_message_struct_t*>(param);
+    auto* eem_param = static_cast<usb_device_cdc_eem_request_param_struct_t*>(param);
 
     switch (event) {
         case kUSB_DeviceEemEventRecvResponse: {

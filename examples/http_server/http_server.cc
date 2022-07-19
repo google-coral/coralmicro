@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include <cstring>
+#include <memory>
+#include <vector>
+#include <string>
 
 #include "libs/base/http_server.h"
 #include "libs/base/utils.h"
