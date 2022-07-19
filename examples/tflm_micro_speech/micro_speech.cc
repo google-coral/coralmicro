@@ -16,8 +16,8 @@
 #include <cstdio>
 #include <vector>
 
-#include "libs/base/tasks.h"
 #include "libs/audio/audio_driver.h"
+#include "libs/base/tasks.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -51,63 +51,62 @@ int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
 
 // From audio_provider.h
 int32_t LatestAudioTimestamp() {
-    return g_audio_buffer_end_index / kSamplesPerMs - 50;
+  return g_audio_buffer_end_index / kSamplesPerMs - 50;
 }
 
 // From audio_provider.h
 TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
                              int start_ms, int duration_ms,
                              int* audio_samples_size, int16_t** audio_samples) {
-    int32_t audio_buffer_end_index = g_audio_buffer_end_index;
+  int32_t audio_buffer_end_index = g_audio_buffer_end_index;
 
-    auto buffer_end_ms = audio_buffer_end_index / kSamplesPerMs;
-    auto buffer_start_ms = buffer_end_ms - kAudioBufferSizeMs;
+  auto buffer_end_ms = audio_buffer_end_index / kSamplesPerMs;
+  auto buffer_start_ms = buffer_end_ms - kAudioBufferSizeMs;
 
-    if (start_ms < buffer_start_ms) {
-        TF_LITE_REPORT_ERROR(error_reporter,
-                             "start_ms < buffer_start_ms (%d vs %d)", start_ms,
-                             buffer_start_ms);
-        return kTfLiteError;
-    }
+  if (start_ms < buffer_start_ms) {
+    TF_LITE_REPORT_ERROR(error_reporter,
+                         "start_ms < buffer_start_ms (%d vs %d)", start_ms,
+                         buffer_start_ms);
+    return kTfLiteError;
+  }
 
-    if (start_ms + duration_ms >= buffer_end_ms) {
-        TF_LITE_REPORT_ERROR(error_reporter,
-                             "start_ms + duration_ms > buffer_end_ms");
-        return kTfLiteError;
-    }
+  if (start_ms + duration_ms >= buffer_end_ms) {
+    TF_LITE_REPORT_ERROR(error_reporter,
+                         "start_ms + duration_ms > buffer_end_ms");
+    return kTfLiteError;
+  }
 
-    int offset =
-        audio_buffer_end_index + (start_ms - buffer_start_ms) * kSamplesPerMs;
-    for (int i = 0; i < kMaxAudioSampleSize; ++i)
-        g_audio_buffer_out[i] = g_audio_buffer[(offset + i) % kAudioBufferSize];
+  int offset =
+      audio_buffer_end_index + (start_ms - buffer_start_ms) * kSamplesPerMs;
+  for (int i = 0; i < kMaxAudioSampleSize; ++i)
+    g_audio_buffer_out[i] = g_audio_buffer[(offset + i) % kAudioBufferSize];
 
-    *audio_samples = g_audio_buffer_out;
-    *audio_samples_size = kMaxAudioSampleSize;
-    return kTfLiteOk;
+  *audio_samples = g_audio_buffer_out;
+  *audio_samples_size = kMaxAudioSampleSize;
+  return kTfLiteOk;
 }
 
 extern "C" void app_main(void* param) {
-    printf("Micro speech\r\n");
+  printf("Micro speech\r\n");
 
-    // Setup audio
-    coralmicro::AudioDriver driver(g_audio_buffers);
-    coralmicro::AudioDriverConfig config{coralmicro::AudioSampleRate::k16000_Hz,
-                                      kNumDmaBuffers, kDmaBufferSizeMs};
-    driver.Enable(
-        config, nullptr,
-        +[](void* param, const int32_t* buffer, size_t buffer_size) {
-            int32_t offset = g_audio_buffer_end_index;
-            for (size_t i = 0; i < buffer_size; ++i)
-                g_audio_buffer[(offset + i) % kAudioBufferSize] =
-                    buffer[i] >> 16;
-            g_audio_buffer_end_index += buffer_size;
-        });
+  // Setup audio
+  coralmicro::AudioDriver driver(g_audio_buffers);
+  coralmicro::AudioDriverConfig config{coralmicro::AudioSampleRate::k16000_Hz,
+                                       kNumDmaBuffers, kDmaBufferSizeMs};
+  driver.Enable(
+      config, nullptr,
+      +[](void* param, const int32_t* buffer, size_t buffer_size) {
+        int32_t offset = g_audio_buffer_end_index;
+        for (size_t i = 0; i < buffer_size; ++i)
+          g_audio_buffer[(offset + i) % kAudioBufferSize] = buffer[i] >> 16;
+        g_audio_buffer_end_index += buffer_size;
+      });
 
-    // Fill audio buffer
-    vTaskDelay(pdMS_TO_TICKS(kAudioBufferSizeMs));
+  // Fill audio buffer
+  vTaskDelay(pdMS_TO_TICKS(kAudioBufferSizeMs));
 
-    setup();
-    while (true) {
-        loop();
-    }
+  setup();
+  while (true) {
+    loop();
+  }
 }

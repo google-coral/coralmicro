@@ -37,74 +37,74 @@ constexpr char kModelPath[] =
 constexpr char kImagePath[] = "/examples/detect_image/cat_300x300.rgb";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 struct TensorArena {
-    alignas(16) uint8_t data[kTensorArenaSize];
+  alignas(16) uint8_t data[kTensorArenaSize];
 };
 
 void Main() {
-    std::vector<uint8_t> model;
-    if (!LfsReadFile(kModelPath, &model)) {
-        printf("ERROR: Failed to load %s\r\n", kModelPath);
-        return;
-    }
+  std::vector<uint8_t> model;
+  if (!LfsReadFile(kModelPath, &model)) {
+    printf("ERROR: Failed to load %s\r\n", kModelPath);
+    return;
+  }
 
-    std::vector<uint8_t> image;
-    if (!LfsReadFile(kImagePath, &image)) {
-        printf("ERROR: Failed to load %s\r\n", kImagePath);
-        return;
-    }
+  std::vector<uint8_t> image;
+  if (!LfsReadFile(kImagePath, &image)) {
+    printf("ERROR: Failed to load %s\r\n", kImagePath);
+    return;
+  }
 
-    auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
-    if (!tpu_context) {
-        printf("ERROR: Failed to get EdgeTpu context\r\n");
-        return;
-    }
+  auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
+  if (!tpu_context) {
+    printf("ERROR: Failed to get EdgeTpu context\r\n");
+    return;
+  }
 
-    tflite::MicroErrorReporter error_reporter;
-    tflite::MicroMutableOpResolver<3> resolver;
-    resolver.AddDequantize();
-    resolver.AddDetectionPostprocess();
-    resolver.AddCustom(kCustomOp, RegisterCustomOp());
+  tflite::MicroErrorReporter error_reporter;
+  tflite::MicroMutableOpResolver<3> resolver;
+  resolver.AddDequantize();
+  resolver.AddDetectionPostprocess();
+  resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
-    // As an alternative check STATIC_TENSOR_ARENA_IN_SDRAM macro.
-    auto tensor_arena = std::make_unique<TensorArena>();
-    tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()),
-                                         resolver, tensor_arena->data,
-                                         kTensorArenaSize, &error_reporter);
-    if (interpreter.AllocateTensors() != kTfLiteOk) {
-        printf("ERROR: AllocateTensors() failed\r\n");
-        return;
-    }
+  // As an alternative check STATIC_TENSOR_ARENA_IN_SDRAM macro.
+  auto tensor_arena = std::make_unique<TensorArena>();
+  tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()), resolver,
+                                       tensor_arena->data, kTensorArenaSize,
+                                       &error_reporter);
+  if (interpreter.AllocateTensors() != kTfLiteOk) {
+    printf("ERROR: AllocateTensors() failed\r\n");
+    return;
+  }
 
-    if (interpreter.inputs().size() != 1) {
-        printf("ERROR: Model must have only one input tensor\r\n");
-        return;
-    }
+  if (interpreter.inputs().size() != 1) {
+    printf("ERROR: Model must have only one input tensor\r\n");
+    return;
+  }
 
-    auto* input_tensor = interpreter.input_tensor(0);
-    if (input_tensor->type != kTfLiteUInt8 ||
-        input_tensor->bytes != image.size()) {
-        printf("ERROR: Invalid input tensor size\r\n");
-        return;
-    }
+  auto* input_tensor = interpreter.input_tensor(0);
+  if (input_tensor->type != kTfLiteUInt8 ||
+      input_tensor->bytes != image.size()) {
+    printf("ERROR: Invalid input tensor size\r\n");
+    return;
+  }
 
-    std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
-                image.size());
+  std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
+              image.size());
 
-    if (interpreter.Invoke() != kTfLiteOk) {
-        printf("ERROR: Invoke() failed\r\n");
-        return;
-    }
+  if (interpreter.Invoke() != kTfLiteOk) {
+    printf("ERROR: Invoke() failed\r\n");
+    return;
+  }
 
-    auto results = tensorflow::GetDetectionResults(&interpreter, 0.6, 3);
-    printf("%s\r\n",
-           coralmicro::tensorflow::FormatDetectionOutput(results).c_str());
+  auto results = tensorflow::GetDetectionResults(&interpreter, 0.6, 3);
+  printf("%s\r\n",
+         coralmicro::tensorflow::FormatDetectionOutput(results).c_str());
 }
 }  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
-    (void)param;
-    coralmicro::Main();
-    vTaskSuspend(nullptr);
+  (void)param;
+  coralmicro::Main();
+  vTaskSuspend(nullptr);
 }
 // [end-sphinx-snippet:detect-image]

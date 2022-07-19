@@ -22,12 +22,12 @@
 
 // [start-sphinx-snippet:blink-led]
 extern "C" [[noreturn]] void app_main(void *param) {
-    bool on = true;
-    while (true) {
-        on = !on;
-        coralmicro::LedSet(coralmicro::Led::kStatus, on);
-        coralmicro::LedSet(coralmicro::Led::kUser, on);
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
+  bool on = true;
+  while (true) {
+    on = !on;
+    coralmicro::LedSet(coralmicro::Led::kStatus, on);
+    coralmicro::LedSet(coralmicro::Led::kUser, on);
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
 }
 // [end-sphinx-snippet:blink-led]

@@ -45,120 +45,121 @@ python3 scripts/flashtool.py -b build -e curl --subapp curl_wifi \
 namespace coralmicro {
 namespace {
 struct DnsCallbackArg {
-    SemaphoreHandle_t sema;
-    const char *hostname;
-    ip_addr_t* ip_addr;
+  SemaphoreHandle_t sema;
+  const char* hostname;
+  ip_addr_t* ip_addr;
 };
 
 size_t curl_writefunction(void* contents, size_t size, size_t nmemb,
                           void* param) {
-    size_t* bytes_curled = reinterpret_cast<size_t*>(param);
-    *bytes_curled = *bytes_curled + (size * nmemb);
-    return size * nmemb;
+  size_t* bytes_curled = reinterpret_cast<size_t*>(param);
+  *bytes_curled = *bytes_curled + (size * nmemb);
+  return size * nmemb;
 }
 
 void CURLRequest(const char* url) {
-    CURL* curl;
-    CURLcode res;
+  CURL* curl;
+  CURLcode res;
 
-    curl = curl_easy_init();
-    printf("Curling %s\r\n", url);
-    if (curl) {
-        size_t bytes_curled = 0;
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes_curled);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunction);
-        res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            printf("curl_easy_perform failed: %s\r\n", curl_easy_strerror(res));
-        } else {
-            printf("Curling of %s successful! (%d bytes curled)\r\n", url,
-                   bytes_curled);
-        }
-        curl_easy_cleanup(curl);
+  curl = curl_easy_init();
+  printf("Curling %s\r\n", url);
+  if (curl) {
+    size_t bytes_curled = 0;
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes_curled);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunction);
+    res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+      printf("curl_easy_perform failed: %s\r\n", curl_easy_strerror(res));
+    } else {
+      printf("Curling of %s successful! (%d bytes curled)\r\n", url,
+             bytes_curled);
     }
+    curl_easy_cleanup(curl);
+  }
 }
 
 bool PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
-    DnsCallbackArg dns_arg;
-    dns_arg.ip_addr = addr;
-    dns_arg.sema = xSemaphoreCreateBinary();
-    dns_arg.hostname = hostname;
-    tcpip_callback([](void* ctx) {
+  DnsCallbackArg dns_arg;
+  dns_arg.ip_addr = addr;
+  dns_arg.sema = xSemaphoreCreateBinary();
+  dns_arg.hostname = hostname;
+  tcpip_callback(
+      [](void* ctx) {
         DnsCallbackArg* dns_arg = static_cast<DnsCallbackArg*>(ctx);
         dns_gethostbyname(
             dns_arg->hostname, dns_arg->ip_addr,
             [](const char* name, const ip_addr_t* ipaddr, void* callback_arg) {
-                DnsCallbackArg* dns_arg =
-                    reinterpret_cast<DnsCallbackArg*>(callback_arg);
-                if (ipaddr) {
-                    memcpy(dns_arg->ip_addr, ipaddr, sizeof(*ipaddr));
-                }
-                xSemaphoreGive(dns_arg->sema);
+              DnsCallbackArg* dns_arg =
+                  reinterpret_cast<DnsCallbackArg*>(callback_arg);
+              if (ipaddr) {
+                memcpy(dns_arg->ip_addr, ipaddr, sizeof(*ipaddr));
+              }
+              xSemaphoreGive(dns_arg->sema);
             },
             dns_arg);
-    }, &dns_arg);
-    xSemaphoreTake(dns_arg.sema, portMAX_DELAY);
-    vSemaphoreDelete(dns_arg.sema);
-    return true;
+      },
+      &dns_arg);
+  xSemaphoreTake(dns_arg.sema, portMAX_DELAY);
+  vSemaphoreDelete(dns_arg.sema);
+  return true;
 }
 
 void Main() {
-    std::optional<std::string> our_ip_addr = std::nullopt;
+  std::optional<std::string> our_ip_addr = std::nullopt;
 #if defined(CURL_ETHERNET)
-    printf("Attempting to use ethernet...\r\n");
-    coralmicro::EthernetInit(/*default_iface=*/true);
-    our_ip_addr = coralmicro::EthernetGetIp();
+  printf("Attempting to use ethernet...\r\n");
+  coralmicro::EthernetInit(/*default_iface=*/true);
+  our_ip_addr = coralmicro::EthernetGetIp();
 #elif defined(CURL_WIFI)
-    printf("Attempting to use Wi-Fi...\r\n");
-    // Uncomment me to use the external antenna.
-    // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);
-    bool success = false;
-    success = coralmicro::WiFiTurnOn();
-    if (!success) {
-        printf("Failed to turn on Wi-Fi\r\n");
-        return;
-    }
-    success = coralmicro::WiFiConnect();
-    if (!success) {
-        printf("Failed to connect to Wi-Fi\r\n");
-        return;
-    }
-    printf("Wi-Fi connected\r\n");
-    our_ip_addr = coralmicro::WiFiGetIp();
+  printf("Attempting to use Wi-Fi...\r\n");
+  // Uncomment me to use the external antenna.
+  // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);
+  bool success = false;
+  success = coralmicro::WiFiTurnOn();
+  if (!success) {
+    printf("Failed to turn on Wi-Fi\r\n");
+    return;
+  }
+  success = coralmicro::WiFiConnect();
+  if (!success) {
+    printf("Failed to connect to Wi-Fi\r\n");
+    return;
+  }
+  printf("Wi-Fi connected\r\n");
+  our_ip_addr = coralmicro::WiFiGetIp();
 #endif
 
-    if (our_ip_addr.has_value()) {
-        printf("DHCP succeeded, our IP is %s.\r\n", our_ip_addr.value().c_str());
-    } else {
-        printf("We didn't get an IP via DHCP, not progressing further.\r\n");
-        return;
-    }
+  if (our_ip_addr.has_value()) {
+    printf("DHCP succeeded, our IP is %s.\r\n", our_ip_addr.value().c_str());
+  } else {
+    printf("We didn't get an IP via DHCP, not progressing further.\r\n");
+    return;
+  }
 
+  const char* hostname = "www.example.com";
+  ip_addr_t dns_ip_addr;
+  PerformDnsLookup(hostname, &dns_ip_addr);
+  printf("%s -> %s\r\n", hostname, ipaddr_ntoa(&dns_ip_addr));
 
-    const char *hostname = "www.example.com";
-    ip_addr_t dns_ip_addr;
-    PerformDnsLookup(hostname, &dns_ip_addr);
-    printf("%s -> %s\r\n", hostname, ipaddr_ntoa(&dns_ip_addr));
+  curl_global_init(CURL_GLOBAL_ALL);
+  const char* uri_fmt = "http://%s:80/";
+  int size = snprintf(nullptr, 0, uri_fmt, hostname);
+  auto uri = std::make_unique<char>(size + 1);
+  snprintf(uri.get(), size + 1, uri_fmt, hostname);
+  CURLRequest(uri.get());
+  curl_global_cleanup();
+  printf("Done.");
 
-    curl_global_init(CURL_GLOBAL_ALL);
-    const char *uri_fmt = "http://%s:80/";
-    int size = snprintf(nullptr, 0, uri_fmt, hostname);
-    auto uri = std::make_unique<char>(size + 1);
-    snprintf(uri.get(), size + 1, uri_fmt, hostname);
-    CURLRequest(uri.get());
-    curl_global_cleanup();
-    printf("Done.");
-
-    vTaskSuspend(nullptr);
+  vTaskSuspend(nullptr);
 }
 }  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
-    (void)param;
-    coralmicro::Main();
-    vTaskSuspend(nullptr);
+  (void)param;
+  coralmicro::Main();
+  vTaskSuspend(nullptr);
 }

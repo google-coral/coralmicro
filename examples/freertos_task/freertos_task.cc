@@ -22,22 +22,22 @@
 // Starts a second task to blink one LED in each task.
 
 [[noreturn]] void blink_task(void* param) {
-    printf("Hello task.\r\n");
-    bool on = true;
-    while (true) {
-        on = !on;
-        coralmicro::LedSet(coralmicro::Led::kUser, on);
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
+  printf("Hello task.\r\n");
+  bool on = true;
+  while (true) {
+    on = !on;
+    coralmicro::LedSet(coralmicro::Led::kUser, on);
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
 }
 
-extern "C" [[noreturn]] void app_main(void *param) {
-    xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, nullptr,
-                APP_TASK_PRIORITY, nullptr);
-    bool on = true;
-    while (true) {
-        on = !on;
-        coralmicro::LedSet(coralmicro::Led::kStatus, on);
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
+extern "C" [[noreturn]] void app_main(void* param) {
+  xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, nullptr,
+              APP_TASK_PRIORITY, nullptr);
+  bool on = true;
+  while (true) {
+    on = !on;
+    coralmicro::LedSet(coralmicro::Led::kStatus, on);
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
 }

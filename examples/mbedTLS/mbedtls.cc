@@ -18,6 +18,8 @@
 
 #include MBEDTLS_CONFIG_FILE
 
+#include <cstdio>
+
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/base64.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/ccm.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/chacha20.h"
@@ -39,17 +41,14 @@
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/sha512.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/x509.h"
 
-#include <cstdio>
-
-// From third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/mbedtls_examples/mbedtls_selftest/cm7/selftest.c
-typedef struct
-{
-    const char *name;
-    int ( *function )( int /* verbose */ );
+// From
+// third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/mbedtls_examples/mbedtls_selftest/cm7/selftest.c
+typedef struct {
+  const char *name;
+  int (*function)(int /* verbose */);
 } selftest_t;
 
-const selftest_t selftests[] =
-{
+const selftest_t selftests[] = {
     {"aes", mbedtls_aes_self_test},
     {"base64", mbedtls_base64_self_test},
     {"ccm", mbedtls_ccm_self_test},
@@ -72,18 +71,17 @@ const selftest_t selftests[] =
     {"sha256", mbedtls_sha256_self_test},
     {"sha512", mbedtls_sha512_self_test},
     {"x509", mbedtls_x509_self_test},
-    {NULL, NULL}
-};
+    {NULL, NULL}};
 
 extern "C" void app_main(void *param) {
-    if (!coralmicro::A71ChInit()) {
-        printf("A71CH init failed\r\n");
-        vTaskSuspend(NULL);
-    }
-
-    for (const selftest_t* test = selftests; test->name != NULL; test++) {
-        test->function(1);
-    }
-
+  if (!coralmicro::A71ChInit()) {
+    printf("A71CH init failed\r\n");
     vTaskSuspend(NULL);
+  }
+
+  for (const selftest_t *test = selftests; test->name != NULL; test++) {
+    test->function(1);
+  }
+
+  vTaskSuspend(NULL);
 }

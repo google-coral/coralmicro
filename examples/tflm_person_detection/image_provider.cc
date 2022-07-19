@@ -11,32 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#include "examples/tflm_person_detection/test_helpers.h"
-#include "libs/camera/camera.h"
-#include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
-#include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 
 #include <cstring>
 #include <memory>
 
+#include "examples/tflm_person_detection/test_helpers.h"
+#include "libs/camera/camera.h"
+#include "third_party/flatbuffers/include/flatbuffers/flatbuffers.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/model_settings.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
 TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,
                       int image_height, int channels, int8_t* image_data) {
-
-    auto unsigned_image_data = std::make_unique<uint8_t[]>(image_width * image_height);
-    coralmicro::camera::FrameFormat fmt;
-    fmt.width = image_width;
-    fmt.height = image_height;
-    fmt.fmt = coralmicro::camera::Format::kY8;
-    fmt.filter = coralmicro::camera::FilterMethod::kBilinear;
-    fmt.preserve_ratio = false;
-    fmt.buffer = unsigned_image_data.get();
-    bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
-    for (int i = 0; i < image_width * image_height; ++i) {
-        image_data[i] = unsigned_image_data[i] - 128;
-    }
-    return ret ? kTfLiteOk : kTfLiteError;
+  auto unsigned_image_data =
+      std::make_unique<uint8_t[]>(image_width * image_height);
+  coralmicro::camera::FrameFormat fmt;
+  fmt.width = image_width;
+  fmt.height = image_height;
+  fmt.fmt = coralmicro::camera::Format::kY8;
+  fmt.filter = coralmicro::camera::FilterMethod::kBilinear;
+  fmt.preserve_ratio = false;
+  fmt.buffer = unsigned_image_data.get();
+  bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
+  for (int i = 0; i < image_width * image_height; ++i) {
+    image_data[i] = unsigned_image_data[i] - 128;
+  }
+  return ret ? kTfLiteOk : kTfLiteError;
 }

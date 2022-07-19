@@ -23,25 +23,25 @@
 
 // [start-sphinx-snippet:pwm]
 extern "C" [[noreturn]] void app_main(void* param) {
-    coralmicro::PwmInit();
-    coralmicro::PwmPinConfig pin_a_config{
-        /*duty_cycle=*/20,
-        /*frequency=*/1000,
-        /*pin_setting=*/
-        coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value()};
-    coralmicro::PwmPinConfig pin_b_config{
-        /*duty_cycle=*/80,
-        /*frequency=*/1000,
-        /*pin_setting=*/
-        coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value()};
-    std::vector<coralmicro::PwmPinConfig> configs;
-    configs.push_back(pin_a_config);
-    configs.push_back(pin_b_config);
-    while (true) {
-        coralmicro::PwmEnable(configs);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        coralmicro::PwmDisable(configs);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+  coralmicro::PwmInit();
+  coralmicro::PwmPinConfig pin_a_config{
+      /*duty_cycle=*/20,
+      /*frequency=*/1000,
+      /*pin_setting=*/
+      coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value()};
+  coralmicro::PwmPinConfig pin_b_config{
+      /*duty_cycle=*/80,
+      /*frequency=*/1000,
+      /*pin_setting=*/
+      coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value()};
+  std::vector<coralmicro::PwmPinConfig> configs;
+  configs.push_back(pin_a_config);
+  configs.push_back(pin_b_config);
+  while (true) {
+    coralmicro::PwmEnable(configs);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    coralmicro::PwmDisable(configs);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
 }
 // [end-sphinx-snippet:pwm]

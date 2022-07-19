@@ -21,35 +21,34 @@
 // and toggles the user LED based on the messages received.
 
 extern "C" void app_main(void* param) {
-    // Create and register message handler.
-    auto message_handler =
-        [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
-            const auto* msg =
-                reinterpret_cast<const mp_example::ExampleAppMessage*>(data);
-            if (msg->type == mp_example::ExampleMessageType::LED_STATUS) {
-                printf("[M4] LED_STATUS received\r\n");
-                switch (msg->led_status) {
-                    case mp_example::LEDStatus::ON: {
-                        coralmicro::LedSet(coralmicro::Led::kUser, true);
-                        break;
-                    }
-                    case mp_example::LEDStatus::OFF: {
-                        coralmicro::LedSet(coralmicro::Led::kUser, false);
-                        break;
-                    }
-                    default: {
-                        printf("Unknown LED_STATUS\r\n");
-                    }
-                }
-                coralmicro::IpcMessage reply{};
-                reply.type = coralmicro::IpcMessageType::kApp;
-                auto* ack = reinterpret_cast<mp_example::ExampleAppMessage*>(
-                    &reply.message.data);
-                ack->type = mp_example::ExampleMessageType::ACKNOWLEDGED;
-                coralmicro::IpcM4::GetSingleton()->SendMessage(reply);
+  // Create and register message handler.
+  auto message_handler =
+      [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
+        const auto* msg =
+            reinterpret_cast<const mp_example::ExampleAppMessage*>(data);
+        if (msg->type == mp_example::ExampleMessageType::LED_STATUS) {
+          printf("[M4] LED_STATUS received\r\n");
+          switch (msg->led_status) {
+            case mp_example::LEDStatus::ON: {
+              coralmicro::LedSet(coralmicro::Led::kUser, true);
+              break;
             }
-        };
-    coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(
-        message_handler);
-    vTaskSuspend(nullptr);
+            case mp_example::LEDStatus::OFF: {
+              coralmicro::LedSet(coralmicro::Led::kUser, false);
+              break;
+            }
+            default: {
+              printf("Unknown LED_STATUS\r\n");
+            }
+          }
+          coralmicro::IpcMessage reply{};
+          reply.type = coralmicro::IpcMessageType::kApp;
+          auto* ack = reinterpret_cast<mp_example::ExampleAppMessage*>(
+              &reply.message.data);
+          ack->type = mp_example::ExampleMessageType::ACKNOWLEDGED;
+          coralmicro::IpcM4::GetSingleton()->SendMessage(reply);
+        }
+      };
+  coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(message_handler);
+  vTaskSuspend(nullptr);
 }

@@ -20,14 +20,14 @@
 // Reads character input from the serial console and writes it back.
 
 extern "C" void app_main(void* param) {
-    printf("Type into the serial console.\r\n");
+  printf("Type into the serial console.\r\n");
 
-    char ch;
-    while(true) {
-        int bytes = coralmicro::ConsoleM7::GetSingleton()->Read(&ch, 1);
-        if (bytes == 1) {
-            coralmicro::ConsoleM7::GetSingleton()->Write(&ch, 1);
-        }
-        taskYIELD();
+  char ch;
+  while (true) {
+    int bytes = coralmicro::ConsoleM7::GetSingleton()->Read(&ch, 1);
+    if (bytes == 1) {
+      coralmicro::ConsoleM7::GetSingleton()->Write(&ch, 1);
     }
+    taskYIELD();
+  }
 }

@@ -21,8 +21,8 @@
 // Does nothing except start the M4, which runs blink_led_m4
 
 extern "C" void app_main(void* param) {
-    (void)param;
-    printf("Starting M4 from M7...\r\n");
-    coralmicro::IpcM7::GetSingleton()->StartM4();
-    vTaskSuspend(nullptr);
+  (void)param;
+  printf("Starting M4 from M7...\r\n");
+  coralmicro::IpcM7::GetSingleton()->StartM4();
+  vTaskSuspend(nullptr);
 }

@@ -19,23 +19,24 @@
 
 namespace mp_example {
 
-    enum class ExampleMessageType : uint8_t {
-        LED_STATUS,
-        ACKNOWLEDGED,
-    };
+enum class ExampleMessageType : uint8_t {
+  LED_STATUS,
+  ACKNOWLEDGED,
+};
 
-    enum class LEDStatus : uint8_t {
-        ON,
-        OFF,
-    };
+enum class LEDStatus : uint8_t {
+  ON,
+  OFF,
+};
 
-    struct ExampleAppMessage {
-        ExampleMessageType type;
-        LEDStatus led_status;
-    } __attribute__((packed));
+struct ExampleAppMessage {
+  ExampleMessageType type;
+  LEDStatus led_status;
+} __attribute__((packed));
 
-    static_assert(sizeof(ExampleAppMessage) <= coralmicro::kIpcMessageBufferDataSize);
+static_assert(sizeof(ExampleAppMessage) <=
+              coralmicro::kIpcMessageBufferDataSize);
 
-} // namespace mp_example
+}  // namespace mp_example
 
 #endif  // _EXAMPLE_MESSAGE_PASSING_EXAMPlE_MESSAGE_H_

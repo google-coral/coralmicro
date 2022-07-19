@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdio>
+
 #include "libs/base/mutex.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include <cstdio>
 
 extern "C" void app_main(void *param) {
-    while(true) {
-        coralmicro::MulticoreMutexLock lock(0);
-        printf("[M4] Hello.\r\n");
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
+  while (true) {
+    coralmicro::MulticoreMutexLock lock(0);
+    printf("[M4] Hello.\r\n");
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
 }

@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "libs/base/http_server.h"
+
 #include <cstring>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "libs/base/http_server.h"
-#include "libs/base/utils.h"
 #include "libs/base/strings.h"
+#include "libs/base/utils.h"
 
 // Hosts a simple HTTP server on the Dev Board Micro.
 //
@@ -30,30 +31,30 @@ namespace coralmicro {
 namespace {
 
 HttpServer::Content UriHandler(const char* path) {
-    printf("Request received for %s\r\n", path);
-    std::vector<uint8_t> html;
-    html.reserve(64);
-    if (std::strcmp(path, "/hello.html") == 0) {
-        printf("Hello World!\r\n");
-        StrAppend(&html, "<html><body>Hello World!</body></html>");
-        return html;
-    }
-    return {};
+  printf("Request received for %s\r\n", path);
+  std::vector<uint8_t> html;
+  html.reserve(64);
+  if (std::strcmp(path, "/hello.html") == 0) {
+    printf("Hello World!\r\n");
+    StrAppend(&html, "<html><body>Hello World!</body></html>");
+    return html;
+  }
+  return {};
 }
 
 }  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
-    (void)param;
-    printf("Starting server...\r\n");
-    coralmicro::HttpServer http_server;
-    http_server.AddUriHandler(coralmicro::UriHandler);
-    coralmicro::UseHttpServer(&http_server);
+  (void)param;
+  printf("Starting server...\r\n");
+  coralmicro::HttpServer http_server;
+  http_server.AddUriHandler(coralmicro::UriHandler);
+  coralmicro::UseHttpServer(&http_server);
 
-    std::string ip;
-    if (coralmicro::utils::GetUsbIpAddress(&ip)) {
-        printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "/hello.html");
-    }
-    vTaskSuspend(nullptr);
+  std::string ip;
+  if (coralmicro::utils::GetUsbIpAddress(&ip)) {
+    printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "/hello.html");
+  }
+  vTaskSuspend(nullptr);
 }
