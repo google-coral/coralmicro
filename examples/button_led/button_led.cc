@@ -14,6 +14,7 @@
 
 #include <cstdio>
 
+#include "libs/base/check.h"
 #include "libs/base/gpio.h"
 #include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -23,18 +24,24 @@
 
 //! [gpio-callback] Doxygen snippet for gpio.h
 bool user_led_on = false;
+TaskHandle_t app_main_handle = nullptr;
 
 // Callback for user button
 void OnButtonPressed() {
-    user_led_on = !user_led_on;
-    coralmicro::LedSet(coralmicro::Led::kUser, user_led_on);
+    xTaskResumeFromISR(app_main_handle);
 }
 
 extern "C" void app_main(void* param) {
     printf("Press the user button.\r\n");
+    app_main_handle = xTaskGetCurrentTaskHandle();
+    CHECK(app_main_handle);
 
     // Register callback for the user button
     coralmicro::GpioRegisterIrqHandler(coralmicro::Gpio::kUserButton, OnButtonPressed);
-    vTaskSuspend(nullptr);
+    while (true) {
+        vTaskSuspend(nullptr);
+        user_led_on = !user_led_on;
+        coralmicro::LedSet(coralmicro::Led::kUser, user_led_on);
+    }
 }
 //! [gpio-callback] End snippet
