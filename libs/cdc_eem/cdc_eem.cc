@@ -50,7 +50,9 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
                       configMINIMAL_STACK_SIZE * 10, this,
                       USB_DEVICE_TASK_PRIORITY, nullptr) == pdPASS);
 
-    if (!utils::GetUSBIPAddress(&netif_ipaddr_)) {
+    std::string usb_ip;
+    if (!utils::GetUsbIpAddress(&usb_ip) ||
+        !ipaddr_aton(usb_ip.c_str(), &netif_ipaddr_)) {
         IP4_ADDR(&netif_ipaddr_, 10, 10, 10, 1);
     }
     IP4_ADDR(&netif_netmask_, 255, 255, 255, 0);

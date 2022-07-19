@@ -43,14 +43,9 @@ std::string GetSerialNumber();
 std::array<uint8_t, 6> GetMacAddress();
 
 // Gets the USB IP address that is stored in flash memory.
-// @param usb_ip_out The `ip4_addr_t` structure in which to store the IP.
-// @returns True if the address was successfully retrieved; false otherwise.
-bool GetUSBIPAddress(ip4_addr_t* usb_ip_out);
-
-// Gets the USB IP address that is stored in flash memory.
 // @param usb_ip_out A pointer to a string in which to store a printable version of the IP.
 // @returns True if the address was successfully retrieved; false otherwise.
-bool GetUSBIPAddress(std::string* usb_ip_out);
+bool GetUsbIpAddress(std::string* usb_ip_out);
 
 }  // namespace utils
 }  // namespace coralmicro

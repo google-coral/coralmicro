@@ -49,7 +49,7 @@ extern "C" void app_main(void* param) {
     coralmicro::UseHttpServer(&http_server);
 
     std::string ip;
-    if (coralmicro::utils::GetUSBIPAddress(&ip)) {
+    if (coralmicro::utils::GetUsbIpAddress(&ip)) {
         printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "/hello.html");
     }
     vTaskSuspend(nullptr);

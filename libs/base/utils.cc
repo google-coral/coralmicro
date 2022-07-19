@@ -54,14 +54,7 @@ std::array<uint8_t, 6> GetMacAddress() {
     return std::array<uint8_t, 6>{a, b, c, d, e, f};
 }
 
-bool GetUSBIPAddress(ip4_addr_t* usb_ip_out) {
-    std::string usb_ip;
-    if (!GetUSBIPAddress(&usb_ip)) return false;
-    if (!ipaddr_aton(usb_ip.c_str(), usb_ip_out)) return false;
-    return true;
-}
-
-bool GetUSBIPAddress(std::string* usb_ip_out) {
+bool GetUsbIpAddress(std::string* usb_ip_out) {
     return coralmicro::LfsReadFile("/usb_ip_address", usb_ip_out);
 }
 

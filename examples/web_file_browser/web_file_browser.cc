@@ -194,7 +194,7 @@ extern "C" void app_main(void* param) {
     coralmicro::UseHttpServer(&http_server);
 
     std::string ip;
-    if (coralmicro::utils::GetUSBIPAddress(&ip)) {
+    if (coralmicro::utils::GetUsbIpAddress(&ip)) {
         printf("BROWSE:   http://%s%s\r\n", ip.c_str(), kUrlPrefix);
         printf("UPLOAD:   curl -X POST http://%s%sfile --data-binary @file\r\n",
                ip.c_str(), kUrlPrefix);
