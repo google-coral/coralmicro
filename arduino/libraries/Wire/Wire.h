@@ -38,7 +38,7 @@ typedef lpi2c_slave_transfer_t lpi2c_follower_transfer_t;
 // Then, the desired configuration will determine how the communication works.
 class HardwareI2C : public ::arduino::HardwareI2C {
   public:
-    // @cond Internal only, do not generate docs.
+    // @cond Do not generate docs.
     // Externally, use `begin()` and `end()`
     HardwareI2C(LPI2C_Type*);
     // @endcond

@@ -56,7 +56,7 @@ namespace arduino {
 // found in `sketches/PDM/`
 class PDMClass {
    public:
-    // @cond Internal only, do not generate docs.
+    // @cond Do not generate docs.
     PDMClass();
     ~PDMClass();
     // @endcond
@@ -94,7 +94,7 @@ class PDMClass {
     // @returns The amount of audio data values that were copied.
     int read(std::vector<int32_t>& buffer, size_t size);
 
-    // @cond Internal only, do not generate docs.
+    // @cond Do not generate docs.
     // Not Implemented
     void setGain(int gain);
     void setBufferSize(int bufferSize);

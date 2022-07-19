@@ -52,7 +52,7 @@ enum CameraStatus : int32_t {
 // and then access frames with `Camera.grab()`.  Example code can be found in `sketches/Camera`.
 class CameraClass {
    public:
-    // @cond Internal only, do not generate docs.
+    // @cond Do not generate docs.
     // Externally, use `begin()` and `end()`.
     CameraClass()
         : camera_{coralmicro::CameraTask::GetSingleton()},
@@ -141,7 +141,7 @@ class CameraClass {
     // @returns A `CameraStatus` value such as `SUCCESS` once the camera has started discarding frames.
     int discardFrames(int num_frames);
 
-    // @cond Internal only, do not generate docs.
+    // @cond Do not generate docs.
     // Unimplemented APIs left over from Portenta.
     int motionDetection(bool enable);
     int motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);

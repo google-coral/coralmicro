@@ -36,7 +36,7 @@ namespace arduino {
 // Code samples can be found in `sketches/SPI/` and `sketches/SPITranscation/`.
 class HardwareSPI : public ::arduino::HardwareSPI {
  public:
-  // @cond Internal only, do not generate docs.
+  // @cond Do not generate docs.
   // Externally, use `begin()` and `end()`
   HardwareSPI(LPSPI_Type*);
   // @endcond
@@ -65,13 +65,13 @@ class HardwareSPI : public ::arduino::HardwareSPI {
   // @param settings The desired SPI configuration.
   void updateSettings(::arduino::SPISettings settings);
 
-  // @cond Internal only, do not generate docs.
+  // @cond Do not generate docs.
   // Our SPI library does not support use with interrupts.
   void beginTransaction(::arduino::SPISettings settings);
   void endTransaction(void);
   // @endcond
 
-  // @cond Internal only, do not generate docs.
+  // @cond Do not generate docs.
   // attachInterrupt and detachInterrupt are undocumented and should not be
   // used, so they are unimplemented here.
   void attachInterrupt();
