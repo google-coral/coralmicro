@@ -51,7 +51,6 @@ extern "C" int main(int argc, char** argv) {
   CHECK(coralmicro::LfsInit());
   coralmicro::GpioInit();
 
-#if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
   // Initialize I2C5 state
   NVIC_SetPriority(LPI2C5_IRQn, 3);
   lpi2c_master_config_t config;
@@ -60,7 +59,6 @@ extern "C" int main(int argc, char** argv) {
                   &config, CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
   coralmicro::PmicTask::GetSingleton()->Init(&i2c5_handle);
-#endif
 
   constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;
   static StaticTask_t xTaskBuffer;

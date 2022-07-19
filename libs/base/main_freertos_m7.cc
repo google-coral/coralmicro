@@ -90,7 +90,6 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
   coralmicro::EdgeTpuTask::GetSingleton()->Init();
   coralmicro::TempSensorInit();
 
-#if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
   // Initialize I2C5 state
   NVIC_SetPriority(LPI2C5_IRQn, 3);
   lpi2c_master_config_t config;
@@ -100,7 +99,6 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
 
   coralmicro::PmicTask::GetSingleton()->Init(&i2c5_handle);
   coralmicro::CameraTask::GetSingleton()->Init(&i2c5_handle);
-#endif
 
   CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30,
                     nullptr, APP_TASK_PRIORITY, nullptr) == pdPASS);

@@ -148,24 +148,6 @@ void BOARD_InitNAND(void) {
     Nand_Flash_Init(&nand_config, &nand_handle);
 }
 
-#if defined(BOARD_REVISION_P0)
-void BOARD_FuseTamper(void) {
-    status_t status;
-    uint32_t fuse_val;
-    OCOTP_Init(OCOTP, 0);
-    status = OCOTP_ReadFuseShadowRegisterExt(OCOTP, 0x6, &fuse_val, 1);
-    if (status != kStatus_Success) {
-        return;
-    }
-
-    uint32_t tamper_disable_mask = 0xC000;
-    if (!(fuse_val & tamper_disable_mask)) {
-        fuse_val |= tamper_disable_mask;
-        status = OCOTP_WriteFuseShadowRegister(OCOTP, 0x6, fuse_val);
-    }
-}
-#endif
-
 void BOARD_InitHardware(bool init_console) {
     MCMGR_Init();
     BOARD_InitBootPins();
@@ -192,13 +174,7 @@ void BOARD_InitHardware(bool init_console) {
     memset((uint8_t*)sdram_bss, 0x0, sdram_bss_size);
 
     BOARD_InitCAAM();
-
-#if defined(BOARD_REVISION_P0)
-    BOARD_FuseTamper();
-#endif
 #endif  // __CORTEX_M == 7
 
-#if defined(BOARD_REVISION_P0) || defined(BOARD_REVISION_P1)
     BOARD_InitNAND();
-#endif
 }
