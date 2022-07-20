@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef WiringPrivate_h
-#define WiringPrivate_h
+#include "Arduino.h"
 
-void wiringInit();
-void wiringAnalogInit();
-#endif  // WiringPrivate_h
+// GPIO Pin 7 on the left-side header.
+constexpr uint8_t dataPin = D2;
+// GPIO Pin 8 on the left-side header.
+constexpr uint8_t clockPin = D1;
+
+void setup() {
+    pinMode(dataPin, OUTPUT);
+    pinMode(clockPin, OUTPUT);
+}
+
+void loop() {
+    for (uint8_t val = 0; val < 256; val++) {
+        shiftOut(dataPin, clockPin, LSBFIRST, val);
+        delay(1000);
+    }
+}

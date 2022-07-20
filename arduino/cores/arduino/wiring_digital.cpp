@@ -128,3 +128,36 @@ unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
 unsigned long pulseInLong(uint8_t pin, uint8_t state, unsigned long timeout) {
     return pulseIn(pin, state, timeout);
 }
+
+uint8_t shiftIn(pin_size_t dataPin, pin_size_t clockPin, BitOrder bitOrder) {
+    uint8_t value = 0;
+    uint8_t i;
+
+    for (i = 0; i < 8; ++i) {
+        digitalWrite(clockPin, HIGH);
+        if (bitOrder == LSBFIRST)
+            value |= digitalRead(dataPin) << i;
+        else  // MSBFIRST
+            value |= digitalRead(dataPin) << (7 - i);
+        digitalWrite(clockPin, LOW);
+    }
+    return value;
+}
+
+void shiftOut(pin_size_t dataPin, pin_size_t clockPin, BitOrder bitOrder,
+              uint8_t val) {
+    uint8_t i;
+
+    for (i = 0; i < 8; i++) {
+        if (bitOrder == LSBFIRST) {
+            digitalWrite(dataPin, (val & 1) ? HIGH : LOW);
+            val >>= 1;
+        } else {  // MSBFIRST
+            digitalWrite(dataPin, ((val & 128) != 0) ? HIGH : LOW);
+            val <<= 1;
+        }
+
+        digitalWrite(clockPin, HIGH);
+        digitalWrite(clockPin, LOW);
+    }
+}
