@@ -457,7 +457,7 @@ void Main() {
     IpcMessage msg;
     msg.type = IpcMessageType::kApp;
     IpcM7::GetSingleton()->SendMessage(msg);
-    return;
+    vTaskSuspend(nullptr);
   }
 }
 }  // namespace
