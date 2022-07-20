@@ -137,7 +137,7 @@ class Task {
 class NetworkTask : private Task<NetworkTask> {
  public:
   NetworkTask()
-      : Task("oobe_network_task", APP_TASK_PRIORITY),
+      : Task("oobe_network_task", kAppTaskPriority),
         mutex_(xSemaphoreCreateMutex()),
         last_pose_data_(xTaskGetTickCount()) {
     CHECK(mutex_);
@@ -203,7 +203,7 @@ class PosenetTask : private Task<PosenetTask> {
  public:
   explicit PosenetTask(NetworkTask* network_task_,
                        std::shared_ptr<tflite::MicroInterpreter> interpreter)
-      : Task("oobe_posenet_task", APP_TASK_PRIORITY),
+      : Task("oobe_posenet_task", kAppTaskPriority),
         network_task_(network_task_),
         queue_(xQueueCreate(1, sizeof(char))),
         interpreter_(std::move(interpreter)) {
@@ -247,7 +247,7 @@ class PosenetTask : private Task<PosenetTask> {
 class CameraTask : private Task<CameraTask> {
  public:
   CameraTask(NetworkTask* network_task, PosenetTask* posenet_task)
-      : Task("oobe_camera_task", APP_TASK_PRIORITY),
+      : Task("oobe_camera_task", kAppTaskPriority),
         network_task_(network_task),
         posenet_task_(posenet_task),
         queue_(xQueueCreate(2, sizeof(TaskMessage))) {

@@ -64,7 +64,7 @@ extern "C" int main(int argc, char** argv) {
   static StaticTask_t xTaskBuffer;
   static StackType_t xStack[stack_size];
   CHECK(xTaskCreateStatic(pre_app_main, "app_main", stack_size, nullptr,
-                          APP_TASK_PRIORITY, xStack, &xTaskBuffer));
+                          coralmicro::kAppTaskPriority, xStack, &xTaskBuffer));
 
   vTaskStartScheduler();
   return 0;

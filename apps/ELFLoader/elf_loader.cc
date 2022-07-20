@@ -93,7 +93,7 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
         case ElfloaderTarget::kRam:
           xTaskCreate(elfloader_main, "elfloader_main",
                       configMINIMAL_STACK_SIZE * 10, elfloader_recv_image,
-                      APP_TASK_PRIORITY, nullptr);
+                      coralmicro::kAppTaskPriority, nullptr);
           break;
         case ElfloaderTarget::kPath: {
           // TODO(atv): This stuff can fail. We should propagate errors back to
@@ -252,7 +252,7 @@ void usb_device_task(void *param) {
 
 void usb_timer_callback(TimerHandle_t timer) {
   xTaskCreate(elfloader_main, "elfloader_main", configMINIMAL_STACK_SIZE * 10,
-              nullptr, APP_TASK_PRIORITY, nullptr);
+              nullptr, coralmicro::kAppTaskPriority, nullptr);
 }
 }  // namespace
 
@@ -262,7 +262,7 @@ extern "C" int main(int argc, char **argv) {
 
   TaskHandle_t usb_task;
   xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10,
-              nullptr, USB_DEVICE_TASK_PRIORITY, &usb_task);
+              nullptr, coralmicro::kUsbDeviceTaskPriority, &usb_task);
   usb_timer = xTimerCreate("usb_timer", pdMS_TO_TICKS(1000), pdFALSE, usb_task,
                            usb_timer_callback);
 

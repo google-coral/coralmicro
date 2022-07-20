@@ -73,7 +73,7 @@ inline constexpr char kPmicTaskName[] = "pmic_task";
 
 class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName,
                                   configMINIMAL_STACK_SIZE * 10,
-                                  PMIC_TASK_PRIORITY, /*QueueLength=*/4> {
+                                  kPmicTaskPriority, /*QueueLength=*/4> {
  public:
   void Init(lpi2c_rtos_handle_t* i2c_handle);
   static PmicTask* GetSingleton() {

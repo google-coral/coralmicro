@@ -194,21 +194,21 @@ void ConsoleM7::Init(bool init_tx, bool init_rx) {
 
   CHECK(xTaskCreate(usb_device_task, "usb_device_task",
                     configMINIMAL_STACK_SIZE * 10, nullptr,
-                    USB_DEVICE_TASK_PRIORITY, nullptr) == pdPASS);
+                    kUsbDeviceTaskPriority, nullptr) == pdPASS);
   if (init_tx) {
     CHECK(xTaskCreate(StaticM7ConsoleTaskTxFn, "m7_console_task_tx",
                       configMINIMAL_STACK_SIZE * 10, nullptr,
-                      CONSOLE_TASK_PRIORITY, &tx_task_) == pdPASS);
+                      kConsoleTaskPriority, &tx_task_) == pdPASS);
   }
   if (init_rx) {
     CHECK(xTaskCreate(StaticM7ConsoleTaskRxFn, "m7_console_task_rx",
                       configMINIMAL_STACK_SIZE * 10, nullptr,
-                      CONSOLE_TASK_PRIORITY, &rx_task_) == pdPASS);
+                      kConsoleTaskPriority, &rx_task_) == pdPASS);
   }
   if (IpcM7::HasM4Application()) {
     CHECK(xTaskCreate(StaticM4ConsoleTaskFn, "m4_console_task",
                       configMINIMAL_STACK_SIZE * 10, nullptr,
-                      CONSOLE_TASK_PRIORITY, nullptr) == pdPASS);
+                      kConsoleTaskPriority, nullptr) == pdPASS);
   }
 }
 

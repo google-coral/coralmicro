@@ -92,7 +92,7 @@ void UsbHostTask::TaskMain() {
 
 void UsbHostTask::Init() {
   CHECK(xTaskCreate(UsbHostTask::StaticTaskMain, "UsbHostTask",
-                    configMINIMAL_STACK_SIZE * 10, this, USB_HOST_TASK_PRIORITY,
+                    configMINIMAL_STACK_SIZE * 10, this, kUsbHostTaskPriority,
                     nullptr) == pdPASS);
 }
 

@@ -82,10 +82,10 @@ void Ipc::Init() {
   MCMGR_RegisterEvent(kMCMGR_FreeRtosMessageBuffersEvent,
                       StaticFreeRtosMessageEventHandler, this);
   CHECK(xTaskCreate(Ipc::StaticTxTaskFn, "ipc_tx_task",
-                    configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY,
+                    configMINIMAL_STACK_SIZE * 10, this, kIpcTaskPriority,
                     &tx_task_) == pdPASS);
   CHECK(xTaskCreate(Ipc::StaticRxTaskFn, "ipc_rx_task",
-                    configMINIMAL_STACK_SIZE * 10, this, IPC_TASK_PRIORITY,
+                    configMINIMAL_STACK_SIZE * 10, this, kIpcTaskPriority,
                     &rx_task_) == pdPASS);
   vTaskSuspend(tx_task_);
   vTaskSuspend(rx_task_);

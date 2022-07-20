@@ -83,7 +83,7 @@ inline constexpr char kEdgeTpuTaskName[] = "edgetpu_task";
 
 class EdgeTpuTask
     : public QueueTask<edgetpu::Request, edgetpu::Response, kEdgeTpuTaskName,
-                       configMINIMAL_STACK_SIZE * 3, EDGETPU_TASK_PRIORITY,
+                       configMINIMAL_STACK_SIZE * 3, kEdgeTpuTaskPriority,
                        /*QueueLength=*/4> {
  public:
   bool GetPower();

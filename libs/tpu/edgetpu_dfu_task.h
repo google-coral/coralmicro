@@ -79,7 +79,7 @@ inline constexpr char kEdgeTpuDfuTaskName[] = "edgetpu_dfu_task";
 class EdgeTpuDfuTask
     : public QueueTask<edgetpu_dfu::Request, edgetpu_dfu::Response,
                        kEdgeTpuDfuTaskName, configMINIMAL_STACK_SIZE * 3,
-                       EDGETPU_DFU_TASK_PRIORITY, /*QueueLength=*/4> {
+                       kEdgeTpuDfuTaskPriority, /*QueueLength=*/4> {
  public:
   static EdgeTpuDfuTask *GetSingleton() {
     static EdgeTpuDfuTask task;

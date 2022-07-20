@@ -49,7 +49,7 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
   CHECK(tx_queue_);
   CHECK(xTaskCreate(CdcEem::StaticTaskFunction, "cdc_eem_task",
                     configMINIMAL_STACK_SIZE * 10, this,
-                    USB_DEVICE_TASK_PRIORITY, nullptr) == pdPASS);
+                    kUsbDeviceTaskPriority, nullptr) == pdPASS);
 
   std::string usb_ip;
   if (!utils::GetUsbIpAddress(&usb_ip) ||

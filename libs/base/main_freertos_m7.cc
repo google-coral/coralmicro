@@ -101,7 +101,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
   coralmicro::CameraTask::GetSingleton()->Init(&i2c5_handle);
 
   CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30,
-                    nullptr, APP_TASK_PRIORITY, nullptr) == pdPASS);
+                    nullptr, coralmicro::kAppTaskPriority, nullptr) == pdPASS);
 
   vTaskStartScheduler();
   return 0;

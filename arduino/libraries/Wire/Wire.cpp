@@ -96,7 +96,7 @@ void HardwareI2C::begin(uint8_t address) {
     uint32_t instance = LPI2C_GetInstance(base_);
 
     if (!receive_task_handle_) {
-        xTaskCreate(HardwareI2C::StaticOnReceiveHandler, "HardwareI2COnReceiveHandler", configMINIMAL_STACK_SIZE, this, APP_TASK_PRIORITY, &receive_task_handle_);
+        xTaskCreate(HardwareI2C::StaticOnReceiveHandler, "HardwareI2COnReceiveHandler", configMINIMAL_STACK_SIZE, this, kAppTaskPriority, &receive_task_handle_);
     }
 
     NVIC_SetPriority(kLpi2cIrqs[instance], 3);

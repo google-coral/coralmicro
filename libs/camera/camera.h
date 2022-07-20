@@ -176,7 +176,7 @@ inline constexpr char kCameraTaskName[] = "camera_task";
 // \snippet image_server/image_server.cc camera-stream
 class CameraTask
     : public QueueTask<camera::Request, camera::Response, kCameraTaskName,
-                       configMINIMAL_STACK_SIZE * 10, CAMERA_TASK_PRIORITY,
+                       configMINIMAL_STACK_SIZE * 10, kCameraTaskPriority,
                        /*QueueLength=*/4> {
  public:
   // @cond Do not generate docs
