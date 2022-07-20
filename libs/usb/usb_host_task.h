@@ -25,6 +25,7 @@
 
 namespace coralmicro {
 
+// Operates the Dev Board Micro as a USB host.
 class UsbHostTask {
  public:
   UsbHostTask();

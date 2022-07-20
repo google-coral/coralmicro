@@ -9,6 +9,8 @@ coralmicro API
    pins.rst
    system.rst
    network.rst
+   usb.rst
+   bluetooth.rst
    utils.rst
    arduino.rst
 =======

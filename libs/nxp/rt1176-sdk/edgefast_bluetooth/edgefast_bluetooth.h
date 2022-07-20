@@ -23,6 +23,14 @@
 #include "third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include/bluetooth/hci.h"
 /* clang-format on */
 
+// Initializes Bluetooth for the Dev Board Micro.
+//
+// Requires the Coral Wireless Add-on (or similar add-on board).
+//
+// This is a wrapper for `bt_enable()` and performs other board-specific setup.
+//
+// @param cb  Callback to notify when Bluetooth is enabled or fails to enable.
+//
 void InitEdgefastBluetooth(bt_ready_cb_t cb);
 
 #endif  // LIBS_NXP_RT1176_SDK_EDGEFAST_BLUETOOTH_EDGEFAST_BLUETOOTH_H_

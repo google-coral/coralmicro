@@ -33,6 +33,7 @@
 
 namespace coralmicro {
 
+// Operates the Dev Board Micro as a USB device.
 class UsbDeviceTask {
  public:
   using UsbSetHandleCallback = std::function<void(class_handle_t)>;
