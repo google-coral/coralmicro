@@ -20,24 +20,17 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-// Toggles the User LED in response to button presses
-
-//! [gpio-callback] Doxygen snippet for gpio.h
-bool user_led_on = false;
-TaskHandle_t app_main_handle = nullptr;
-
-// Callback for user button
-void OnButtonPressed() {
-    xTaskResumeFromISR(app_main_handle);
-}
-
-extern "C" void app_main(void* param) {
+// Toggles the User LED in response to button presses.
+extern "C" [[noreturn]] void app_main(void* param) {
     printf("Press the user button.\r\n");
-    app_main_handle = xTaskGetCurrentTaskHandle();
+    auto app_main_handle = xTaskGetCurrentTaskHandle();
     CHECK(app_main_handle);
 
-    // Register callback for the user button
-    coralmicro::GpioRegisterIrqHandler(coralmicro::Gpio::kUserButton, OnButtonPressed);
+    // Register callback for the user button.
+    coralmicro::GpioRegisterIrqHandler(
+        coralmicro::Gpio::kUserButton,
+        [&app_main_handle]() { xTaskResumeFromISR(app_main_handle); });
+    bool user_led_on{false};
     while (true) {
         vTaskSuspend(nullptr);
         user_led_on = !user_led_on;
