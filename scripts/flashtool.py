@@ -618,11 +618,26 @@ def main():
     basic_group.add_argument(
         '--build_dir', '-b', type=str, default=BUILD_DIR,
         help='Path to the coralmicro build output.')
+
+    app_elf_group = basic_group.add_mutually_exclusive_group(required=True)
+    app_elf_group.add_argument(
+        '--elf_path', type=str,
+        help='Path to your project\'s .stripped binary (ELF file). This must \
+        be the full path and filename.')
+    app_elf_group.add_argument(
+        '--app', '-a', type=str,
+        help='Name of the coralmicro "app" to flash. Must be used with \
+        --build_dir.')
+    app_elf_group.add_argument(
+        '--example', '-e', type=str,
+        help='Name of the coralmicro "example" to flash. Must be used with \
+        --build_dir.')
     basic_group.add_argument(
         '--subapp', type=str, required=False,
         help='The target name you want to flash. This is needed only when \
         using --app or --example and the target name is different than the \
         name given to those arguments.')
+
     basic_group.add_argument(
         '--ram', dest='ram', action='store_true',
         help='Flashes the app to the RAM only, instead of to flash memory. \
@@ -630,10 +645,7 @@ def main():
         it flashes to the flash memory and resets the board to load it.')
     basic_group.add_argument(
         '--noreset', dest='noreset', action='store_true',
-        help='Prevents resetting the board after flashing the board.')
-    parser.add_argument(
-        '--elfloader_path', type=str, required=False,
-        help=argparse.SUPPRESS)
+        help='Prevents resetting the board after flashing it.')
     basic_group.add_argument(
         '--serial', type=str, required=False,
         help='The board serial number you want to flash. This is necessary \
@@ -641,6 +653,10 @@ def main():
     parser.add_argument(
         '--list', dest='list', action='store_true',
         help='Prints all detected Coral Dev Board Micro devices.')
+
+    parser.add_argument(
+        '--elfloader_path', type=str, required=False,
+        help=argparse.SUPPRESS)
 
     network_group = parser.add_argument_group('Board network settings')
     network_group.add_argument(
@@ -702,20 +718,6 @@ def main():
         '--arduino', dest='arduino', action='store_true',
         help=argparse.SUPPRESS)
     parser.set_defaults(program=True, data=True, arduino=False)
-
-    app_elf_group = basic_group.add_mutually_exclusive_group(required=True)
-    app_elf_group.add_argument(
-        '--app', '-a', type=str,
-        help='Name of the coralmicro "app" to flash. Must be used with \
-        --build_dir.')
-    app_elf_group.add_argument(
-        '--example', '-e', type=str,
-        help='Name of the coralmicro "example" to flash. Must be used with \
-        --build_dir.')
-    app_elf_group.add_argument(
-        '--elf_path', type=str,
-        help='Path to your project\'s .stripped binary (ELF file). This must \
-        be the full path and filename.')
 
     args = parser.parse_args()
 
