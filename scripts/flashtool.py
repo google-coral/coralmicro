@@ -593,11 +593,12 @@ def StateStartGdb(jlink_path, toolchain_path, unstripped_elf_path):
 def state_name(state):
     return ''.join('_' + c if c.isupper() else c for c in state.__name__)[1:].upper()
 
-def RunFlashtool(state, **kwargs):
+def RunFlashtool(state, print_states=True, **kwargs):
     prev_state = None
     while True:
         if state is not StateFlashtoolError and state is not StateDone:
-          print(state_name(state))
+          if print_states:
+            print(state_name(state))
         if state is StateDone or state is StateFlashtoolError:
             break
         params = inspect.signature(state).parameters.values()
@@ -632,12 +633,15 @@ def main():
         '--example', '-e', type=str,
         help='Name of the coralmicro "example" to flash. Must be used with \
         --build_dir.')
+    app_elf_group.add_argument(
+        '--list', dest='list', action='store_true',
+        help='Prints all detected Coral Dev Board Micro devices.')
+
     basic_group.add_argument(
         '--subapp', type=str, required=False,
         help='The target name you want to flash. This is needed only when \
         using --app or --example and the target name is different than the \
         name given to those arguments.')
-
     basic_group.add_argument(
         '--ram', dest='ram', action='store_true',
         help='Flashes the app to the RAM only, instead of to flash memory. \
@@ -650,9 +654,6 @@ def main():
         '--serial', type=str, required=False,
         help='The board serial number you want to flash. This is necessary \
         only if you have multiple Coral Dev Board Micro devices connected.')
-    parser.add_argument(
-        '--list', dest='list', action='store_true',
-        help='Prints all detected Coral Dev Board Micro devices.')
 
     parser.add_argument(
         '--elfloader_path', type=str, required=False,
@@ -721,9 +722,6 @@ def main():
 
     args = parser.parse_args()
 
-    usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
-
-    build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
     cached_files = None
     if args.cached:
         cached_files_path = os.path.join(build_dir, 'cached_files.txt')
@@ -732,6 +730,47 @@ def main():
                 cached_files = file_list.read().splitlines()
     else:
         cached_files = None
+    build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
+    blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost' + exe_extension)
+    flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
+    elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir, cached_files)
+    elfloader_elf_path = os.path.join(os.path.dirname(elfloader_path), 'ELFLoader')
+    toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
+    state_machine_args = {
+        'blhost_path': blhost_path,
+        'flashloader_path': flashloader_path,
+        'elfloader_path': elfloader_path,
+        'elfloader_elf_path': elfloader_elf_path,
+        'toolchain_path': toolchain_path,
+    }
+    for path in state_machine_args.values():
+        if not os.path.exists(path):
+            print('%s does not exist' % path)
+            return
+
+    sdp_devices = len(EnumerateSDP())
+    flashloader_devices = len(EnumerateFlashloader())
+    for _ in range(sdp_devices):
+        RunFlashtool(StateCheckForSdp, print_states=False,
+                     target_elfloader=True, **state_machine_args)
+
+    for _ in range(flashloader_devices):
+        RunFlashtool(StateCheckForFlashloader, print_states=False,
+                     target_elfloader=True, **state_machine_args)
+
+    # Sleep to allow time for the last device we threw into elfloader
+    # to enumerate.
+    time.sleep(1.0)
+
+    serial_list = []
+    for elfloader in EnumerateElfloader():
+        serial_list.append(elfloader['serial_number'])
+
+    serial_list += EnumerateCoralMicro()
+
+    if args.list:
+        print(serial_list)
+        return
 
     data_dir = None
     if args.data_dir:
@@ -757,13 +796,7 @@ def main():
             args.subapp if args.subapp else elf_name)) if unstripped_elf_path is None else unstripped_elf_path
 
     print('Finding all necessary files')
-    elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir, cached_files)
-    elfloader_elf_path = os.path.join(os.path.dirname(elfloader_path), 'ELFLoader')
-
-    blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost' + exe_extension)
-    flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
     elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb' + exe_extension)
-    toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
     paths_to_check = [
         elf_path,
         unstripped_elf_path,
@@ -800,6 +833,7 @@ def main():
 
     data = not args.nodata
     program = not args.noprogram
+    usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
     state_machine_args = {
         'blhost_path': blhost_path,
         'flashloader_path': flashloader_path,
@@ -822,30 +856,6 @@ def main():
         'program': program,
         'data': data,
     }
-
-    sdp_devices = len(EnumerateSDP())
-    flashloader_devices = len(EnumerateFlashloader())
-    for _ in range(sdp_devices):
-        RunFlashtool(StateCheckForSdp,
-                     target_elfloader=True, **state_machine_args)
-
-    for _ in range(flashloader_devices):
-        RunFlashtool(StateCheckForFlashloader,
-                     target_elfloader=True, **state_machine_args)
-
-    # Sleep to allow time for the last device we threw into elfloader
-    # to enumerate.
-    time.sleep(1.0)
-
-    serial_list = []
-    for elfloader in EnumerateElfloader():
-        serial_list.append(elfloader['serial_number'])
-
-    serial_list += EnumerateCoralMicro()
-
-    if args.list:
-        print(serial_list)
-        return
 
     serial_number = os.getenv('CORAL_MICRO_SERIAL')
     if not serial_number:
