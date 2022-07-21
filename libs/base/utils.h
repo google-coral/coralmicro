@@ -32,7 +32,7 @@ namespace utils {
 
 // Gets the 64-bit unique identifiers of the RT1176.
 // @returns 64-bit value that is unique to the device.
-uint64_t GetUniqueID();
+uint64_t GetUniqueId();
 
 // Gets the hex string representation of the unique identifier.
 // @returns String containing the 64-bit unique identifier, as a printable hex

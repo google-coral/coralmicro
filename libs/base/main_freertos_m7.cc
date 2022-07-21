@@ -44,24 +44,24 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/httpd.h"
 
 namespace {
-lpi2c_rtos_handle_t i2c5_handle;
-coralmicro::CdcEem cdc_eem;
+lpi2c_rtos_handle_t g_i2c5_handle;
+coralmicro::CdcEem g_cdc_eem;
 
 void InitializeCDCEEM() {
   using namespace std::placeholders;
-  cdc_eem.Init(
+  g_cdc_eem.Init(
       coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
       coralmicro::UsbDeviceTask::GetSingleton()->next_descriptor_value(),
       coralmicro::UsbDeviceTask::GetSingleton()->next_interface_value());
   coralmicro::UsbDeviceTask::GetSingleton()->AddDevice(
-      cdc_eem.config_data(),
-      std::bind(&coralmicro::CdcEem::SetClassHandle, &cdc_eem, _1),
-      std::bind(&coralmicro::CdcEem::HandleEvent, &cdc_eem, _1, _2),
-      cdc_eem.descriptor_data(), cdc_eem.descriptor_data_size());
+      g_cdc_eem.config_data(),
+      std::bind(&coralmicro::CdcEem::SetClassHandle, &g_cdc_eem, _1),
+      std::bind(&coralmicro::CdcEem::HandleEvent, &g_cdc_eem, _1, _2),
+      g_cdc_eem.descriptor_data(), g_cdc_eem.descriptor_data_size());
 }
 }  // namespace
 
-extern "C" lpi2c_rtos_handle_t* I2C5Handle() { return &i2c5_handle; }
+extern "C" lpi2c_rtos_handle_t* I2C5Handle() { return &g_i2c5_handle; }
 
 extern "C" void app_main(void* param);
 extern "C" int main(int argc, char** argv) __attribute__((weak));
@@ -94,11 +94,11 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
   NVIC_SetPriority(LPI2C5_IRQn, 3);
   lpi2c_master_config_t config;
   LPI2C_MasterGetDefaultConfig(&config);
-  LPI2C_RTOS_Init(&i2c5_handle, reinterpret_cast<LPI2C_Type*>(LPI2C5_BASE),
+  LPI2C_RTOS_Init(&g_i2c5_handle, reinterpret_cast<LPI2C_Type*>(LPI2C5_BASE),
                   &config, CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
-  coralmicro::PmicTask::GetSingleton()->Init(&i2c5_handle);
-  coralmicro::CameraTask::GetSingleton()->Init(&i2c5_handle);
+  coralmicro::PmicTask::GetSingleton()->Init(&g_i2c5_handle);
+  coralmicro::CameraTask::GetSingleton()->Init(&g_i2c5_handle);
 
   CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30,
                     nullptr, coralmicro::kAppTaskPriority, nullptr) == pdPASS);

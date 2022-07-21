@@ -44,7 +44,7 @@ void EthGetIP(struct jsonrpc_request* request) {
                          ip4addr_ntoa(netif_ip4_addr(ethernet)));
 }
 
-void EthWritePHY(struct jsonrpc_request* request) {
+void EthWritePhy(struct jsonrpc_request* request) {
   int reg;
   if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg))
     return;
@@ -53,7 +53,7 @@ void EthWritePHY(struct jsonrpc_request* request) {
   if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "val", &val))
     return;
 
-  status_t status = coralmicro::EthernetPHYWrite(reg, val);
+  status_t status = coralmicro::EthernetPhyWrite(reg, val);
   if (status != kStatus_Success) {
     jsonrpc_return_error(request, -1, "EthernetPHYWrite failed", nullptr);
     return;
@@ -68,7 +68,7 @@ extern "C" void app_main(void* param) {
 
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export("eth_get_ip", EthGetIP);
-  jsonrpc_export("eth_write_phy", EthWritePHY);
+  jsonrpc_export("eth_write_phy", EthWritePhy);
   IperfInit();
   coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
   vTaskSuspend(nullptr);

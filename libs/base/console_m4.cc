@@ -54,8 +54,6 @@ extern "C" int _read(int handle, char* buffer, int size) {
 
 namespace coralmicro {
 
-void ConsoleM4Init() {}
-
 void ConsoleM4SetBuffer(IpcStreamBuffer* buffer) { console_buffer = buffer; }
 
 }  // namespace coralmicro

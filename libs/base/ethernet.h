@@ -47,7 +47,7 @@ void EthernetInit(bool default_iface);
 // @param data The data to write into that register.
 // @return A status code, see:
 // https://mcuxpresso.nxp.com/api_doc/dev/2349/a00344.html#ga7ff0b98bb1341c07acefb1473b6eda29
-status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data);
+status_t EthernetPhyWrite(uint32_t phy_reg, uint32_t data);
 // @endcond
 
 // Gets the device's Ethernet IP address.

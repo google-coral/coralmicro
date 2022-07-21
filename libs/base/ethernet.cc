@@ -29,16 +29,16 @@
 
 namespace coralmicro {
 namespace {
-struct netif netif;
-struct netif* eth_netif = nullptr;
+struct netif g_netif;
+struct netif* g_eth_netif = nullptr;
 
-mdio_handle_t mdioHandle = {
+mdio_handle_t g_mdio_handle = {
     .ops = &enet_ops,
 };
 
-phy_handle_t phyHandle = {
+phy_handle_t g_phy_handle = {
     .phyAddr = 1,
-    .mdioHandle = &mdioHandle,
+    .mdioHandle = &g_mdio_handle,
     .ops = &phyrtl8211f_ops,
 };
 
@@ -54,40 +54,40 @@ status_t EthernetPHYEnableSSC(bool auto_neg) {
   status_t status;
   const uint32_t reset = auto_neg ? 0x9200 : 0x8000;
   // Enable RXC SSC
-  status = EthernetPHYWrite(kPageSelectReg, 0x0C44);
-  status |= EthernetPHYWrite(kRXCSSCReg, 0x5F00);
-  status |= EthernetPHYWrite(kPageSelectReg, 0x0);
-  status |= EthernetPHYWrite(kBasicModeControlReg, reset);
+  status = EthernetPhyWrite(kPageSelectReg, 0x0C44);
+  status |= EthernetPhyWrite(kRXCSSCReg, 0x5F00);
+  status |= EthernetPhyWrite(kPageSelectReg, 0x0);
+  status |= EthernetPhyWrite(kBasicModeControlReg, reset);
 
   // Enable System Clock SSC
-  status |= EthernetPHYWrite(kPageSelectReg, 0x0C44);
-  status |= EthernetPHYWrite(kSystemClockSSCInitReg, 0x4F00);
-  status |= EthernetPHYWrite(kPageSelectReg, 0x0A43);
-  status |= PHY_Read(&phyHandle, kSystemClockSSCReg, &reg);
-  status |= EthernetPHYWrite(kSystemClockSSCReg, reg | (1U << 3));
-  status |= EthernetPHYWrite(kPageSelectReg, 0x0);
-  status |= EthernetPHYWrite(kBasicModeControlReg, reset);
+  status |= EthernetPhyWrite(kPageSelectReg, 0x0C44);
+  status |= EthernetPhyWrite(kSystemClockSSCInitReg, 0x4F00);
+  status |= EthernetPhyWrite(kPageSelectReg, 0x0A43);
+  status |= PHY_Read(&g_phy_handle, kSystemClockSSCReg, &reg);
+  status |= EthernetPhyWrite(kSystemClockSSCReg, reg | (1U << 3));
+  status |= EthernetPhyWrite(kPageSelectReg, 0x0);
+  status |= EthernetPhyWrite(kBasicModeControlReg, reset);
 
   // Disable CLK_OUT
-  status |= EthernetPHYWrite(kPageSelectReg, 0x0A43);
-  status |= PHY_Read(&phyHandle, kSystemClockSSCReg, &reg);
-  status |= EthernetPHYWrite(kSystemClockSSCReg, reg & ~1U);
-  status |= EthernetPHYWrite(kPageSelectReg, 0x0);
-  status |= EthernetPHYWrite(kBasicModeControlReg, reset);
+  status |= EthernetPhyWrite(kPageSelectReg, 0x0A43);
+  status |= PHY_Read(&g_phy_handle, kSystemClockSSCReg, &reg);
+  status |= EthernetPhyWrite(kSystemClockSSCReg, reg & ~1U);
+  status |= EthernetPhyWrite(kPageSelectReg, 0x0);
+  status |= EthernetPhyWrite(kBasicModeControlReg, reset);
   return status;
 }
 }  // namespace
 
-struct netif* EthernetGetInterface() { return eth_netif; }
+struct netif* EthernetGetInterface() { return g_eth_netif; }
 
-status_t EthernetPHYWrite(uint32_t phy_reg, uint32_t data) {
-  return PHY_Write(&phyHandle, phy_reg, data);
+status_t EthernetPhyWrite(uint32_t phy_reg, uint32_t data) {
+  return PHY_Write(&g_phy_handle, phy_reg, data);
 }
 
 void EthernetInit(bool default_iface) {
   ip4_addr_t netif_ipaddr, netif_netmask, netif_gw;
 
-  phy_config_t phyConfig = {
+  phy_config_t phy_config = {
       .phyAddr = 1,
       .duplex = kPHY_FullDuplex,
       .autoNeg = true,
@@ -100,23 +100,23 @@ void EthernetInit(bool default_iface) {
       // Gigabit Ethernet is unsupported due to EMI concerns. If this is
       // not a concern, this assert should be removed and 1000 should be
       // added as a choice for ethernet_speed in scripts/flashtool.py.
-      assert(false && "1G Ethernet is unsupported");
-      phyConfig.speed = kPHY_Speed1000M;
+      assert(!"1G Ethernet is unsupported");
+      phy_config.speed = kPHY_Speed1000M;
       break;
     case 100:
-      phyConfig.speed = kPHY_Speed100M;
+      phy_config.speed = kPHY_Speed100M;
       break;
     case 10:
-      phyConfig.speed = kPHY_Speed10M;
+      phy_config.speed = kPHY_Speed10M;
       break;
     default:
       printf("Invalid ethernet speed, assuming 100M\r\n");
-      phyConfig.speed = kPHY_Speed100M;
+      phy_config.speed = kPHY_Speed100M;
   }
 
   ethernetif_config_t enet_config = {
-      .phyHandle = &phyHandle,
-      .phyConfig = &phyConfig,
+      .phyHandle = &g_phy_handle,
+      .phyConfig = &phy_config,
       // MAC Address w/ Google prefix, and blank final 3 octets.
       // They will be populated below.
       .macAddress = {0x00, 0x1A, 0x11, 0x00, 0x00, 0x00},
@@ -125,7 +125,7 @@ void EthernetInit(bool default_iface) {
   // Populate the low bytes of the MAC address with our device's
   // unique ID.
   // In production units, addresses should be in fuses that we can read.
-  uint64_t unique_id = coralmicro::utils::GetUniqueID();
+  uint64_t unique_id = coralmicro::utils::GetUniqueId();
   enet_config.macAddress[3] = (unique_id >> 56) & 0xFF;
   enet_config.macAddress[4] = (unique_id >> 48) & 0xFF;
   enet_config.macAddress[5] = (unique_id >> 40) & 0xFF;
@@ -147,39 +147,39 @@ void EthernetInit(bool default_iface) {
   EnableIRQ(ENET_1G_MAC0_Tx_Rx_1_IRQn);
   EnableIRQ(ENET_1G_MAC0_Tx_Rx_2_IRQn);
 
-  mdioHandle.resource.csrClock_Hz = CLOCK_GetRootClockFreq(kCLOCK_Root_Bus);
+  g_mdio_handle.resource.csrClock_Hz = CLOCK_GetRootClockFreq(kCLOCK_Root_Bus);
   IP4_ADDR(&netif_ipaddr, 0, 0, 0, 0);
   IP4_ADDR(&netif_netmask, 0, 0, 0, 0);
   IP4_ADDR(&netif_gw, 0, 0, 0, 0);
 
-  if (EthernetPHYEnableSSC(phyConfig.autoNeg)) {
+  if (EthernetPHYEnableSSC(phy_config.autoNeg)) {
     printf("Failed enabling PHY SSC, proceeding.\r\n");
   }
 
-  netifapi_netif_add(&netif, &netif_ipaddr, &netif_netmask, &netif_gw,
+  netifapi_netif_add(&g_netif, &netif_ipaddr, &netif_netmask, &netif_gw,
                      &enet_config, ethernetif1_init, tcpip_input);
   if (default_iface) {
-    netifapi_netif_set_default(&netif);
+    netifapi_netif_set_default(&g_netif);
   }
 
-  netifapi_netif_set_up(&netif);
-  netifapi_dhcp_start(&netif);
-  eth_netif = &netif;
+  netifapi_netif_set_up(&g_netif);
+  netifapi_dhcp_start(&g_netif);
+  g_eth_netif = &g_netif;
 }
 
 std::optional<std::string> EthernetGetIp() {
-  if (!eth_netif) {
+  if (!g_eth_netif) {
     return std::nullopt;
   }
   while (true) {
-    auto* dhcp = netif_dhcp_data(eth_netif);
+    auto* dhcp = netif_dhcp_data(g_eth_netif);
     if (dhcp->state == DHCP_STATE_BOUND) {
       break;
     }
     taskYIELD();
   }
 
-  return ip4addr_ntoa(netif_ip4_addr(eth_netif));
+  return ip4addr_ntoa(netif_ip4_addr(g_eth_netif));
 }
 
 int EthernetGetSpeed() {

@@ -25,7 +25,7 @@
 
 namespace coralmicro::utils {
 
-uint64_t GetUniqueID() {
+uint64_t GetUniqueId() {
   uint32_t fuse_val_hi, fuse_val_lo;
   fuse_val_lo = OCOTP->FUSEN[16].FUSE;
   fuse_val_hi = OCOTP->FUSEN[17].FUSE;
@@ -33,7 +33,7 @@ uint64_t GetUniqueID() {
 }
 
 std::string GetSerialNumber() {
-  uint64_t id = coralmicro::utils::GetUniqueID();
+  uint64_t id = GetUniqueId();
   char serial[17];  // 16 hex characters + \0
   snprintf(serial, sizeof(serial), "%08lx%08lx",
            static_cast<uint32_t>(id >> 32), static_cast<uint32_t>(id));

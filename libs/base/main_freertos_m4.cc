@@ -33,7 +33,7 @@
 extern "C" void app_main(void* param);
 
 namespace {
-lpi2c_rtos_handle_t i2c5_handle;
+lpi2c_rtos_handle_t g_i2c5_handle;
 
 void pre_app_main(void* param) {
   coralmicro::IpcM4::GetSingleton()->Init();
@@ -41,13 +41,12 @@ void pre_app_main(void* param) {
 }
 }  // namespace
 
-extern "C" lpi2c_rtos_handle_t* I2C5Handle() { return &i2c5_handle; }
+extern "C" lpi2c_rtos_handle_t* I2C5Handle() { return &g_i2c5_handle; }
 
 extern "C" int main(int argc, char** argv) __attribute__((weak));
 extern "C" int main(int argc, char** argv) {
   BOARD_InitHardware(true);
 
-  coralmicro::ConsoleM4Init();
   CHECK(coralmicro::LfsInit());
   coralmicro::GpioInit();
 
@@ -55,10 +54,10 @@ extern "C" int main(int argc, char** argv) {
   NVIC_SetPriority(LPI2C5_IRQn, 3);
   lpi2c_master_config_t config;
   LPI2C_MasterGetDefaultConfig(&config);
-  LPI2C_RTOS_Init(&i2c5_handle, reinterpret_cast<LPI2C_Type*>(LPI2C5_BASE),
+  LPI2C_RTOS_Init(&g_i2c5_handle, reinterpret_cast<LPI2C_Type*>(LPI2C5_BASE),
                   &config, CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
-  coralmicro::PmicTask::GetSingleton()->Init(&i2c5_handle);
+  coralmicro::PmicTask::GetSingleton()->Init(&g_i2c5_handle);
 
   constexpr size_t stack_size = configMINIMAL_STACK_SIZE * 10;
   static StaticTask_t xTaskBuffer;
