@@ -18,42 +18,18 @@
 #define LIBS_BASE_RANDOM_H_
 
 #include <cstddef>
-#include <functional>
-
-#include "libs/base/queue_task.h"
-#include "libs/base/tasks.h"
 
 namespace coralmicro {
 
-namespace random {
+// Initializes hardware random number generator.
+void RandomInit();
 
-struct Response {
-  bool success;
-};
-
-struct Request {
-  void* out;
-  size_t len;
-  std::function<void(Response)> callback;
-};
-
-}  // namespace random
-
-inline constexpr char kRandomTaskName[] = "random_task";
-
-class Random : public QueueTask<random::Request, random::Response,
-                                kRandomTaskName, configMINIMAL_STACK_SIZE * 10,
-                                kRandomTaskPriority, /*QueueLength=*/4> {
- public:
-  static Random* GetSingleton() {
-    static Random random;
-    return &random;
-  }
-  bool GetRandomNumber(void* out, size_t len);
-
- private:
-  void RequestHandler(random::Request* req) override;
-};
+// Generates random byte sequence.
+//
+// @param buf Buffer to write random bytes to.
+// @param size Size of the buffer.
+// @returns True upon success, false otherwise.
+bool RandomGenerate(void* buf, size_t size);
 
 }  // namespace coralmicro
 

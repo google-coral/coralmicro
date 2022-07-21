@@ -78,7 +78,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
   coralmicro::TimerInit();
   coralmicro::GpioInit();
   coralmicro::IpcM7::GetSingleton()->Init();
-  coralmicro::Random::GetSingleton()->Init();
+  coralmicro::RandomInit();
   coralmicro::ConsoleM7::GetSingleton()->Init(init_console_tx, init_console_rx);
   CHECK(coralmicro::LfsInit());
   // Make sure this happens before EEM or WICED are initialized.
