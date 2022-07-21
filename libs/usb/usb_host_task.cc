@@ -106,7 +106,7 @@ UsbHostTask::UsbHostTask() {
 
   CLOCK_EnableUsbhs1PhyPllClock(kCLOCK_Usbphy480M, usb_clock_freq);
   CLOCK_EnableUsbhs1Clock(kCLOCK_Usb480M, usb_clock_freq);
-  USB_EhciPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phyConfig);
+  USB_EhciLowPowerPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phyConfig);
 
   const usb_status_t status =
       USB_HostInit(kUSBControllerId, &host_handle_, USB_HostEvent);

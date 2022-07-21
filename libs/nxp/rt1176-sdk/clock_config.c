@@ -84,10 +84,10 @@ outputs:
 - {id: FLEXSPI2_CLK_ROOT.outFreq, value: 24 MHz}
 - {id: GPT1_CLK_ROOT.outFreq, value: 24 MHz}
 - {id: GPT1_ipg_clk_highfreq.outFreq, value: 24 MHz}
-- {id: GPT2_CLK_ROOT.outFreq, value: 24 MHz}
-- {id: GPT2_ipg_clk_highfreq.outFreq, value: 24 MHz}
-- {id: GPT3_CLK_ROOT.outFreq, value: 24 MHz}
-- {id: GPT3_ipg_clk_highfreq.outFreq, value: 24 MHz}
+- {id: GPT2_CLK_ROOT.outFreq, value: 1 MHz}
+- {id: GPT2_ipg_clk_highfreq.outFreq, value: 1 MHz}
+- {id: GPT3_CLK_ROOT.outFreq, value: 1 MHz}
+- {id: GPT3_ipg_clk_highfreq.outFreq, value: 1 MHz}
 - {id: GPT4_CLK_ROOT.outFreq, value: 24 MHz}
 - {id: GPT4_ipg_clk_highfreq.outFreq, value: 24 MHz}
 - {id: GPT5_CLK_ROOT.outFreq, value: 24 MHz}
@@ -119,7 +119,7 @@ outputs:
 - {id: LPUART8_CLK_ROOT.outFreq, value: 24 MHz}
 - {id: LPUART9_CLK_ROOT.outFreq, value: 24 MHz}
 - {id: M4_CLK_ROOT.outFreq, value: 392.72 MHz, locked: true, accuracy: '0.001'}
-- {id: M4_SYSTICK_CLK_ROOT.outFreq, value: 24 MHz}
+- {id: M4_SYSTICK_CLK_ROOT.outFreq, value: 100 kHz, locked: true, accuracy: '0.001'}
 - {id: M7_CLK_ROOT.outFreq, value: 792 MHz, locked: true, accuracy: '0.001'}
 - {id: M7_SYSTICK_CLK_ROOT.outFreq, value: 100 kHz}
 - {id: MIC_CLK_ROOT.outFreq, value: 24.57 MHz, locked: true, accuracy: '0.001'}
@@ -198,6 +198,7 @@ settings:
 - {id: CCM.CLOCK_ROOT6.MUX.sel, value: ANADIG_PLL.SYS_PLL2_CLK}
 - {id: CCM.CLOCK_ROOT62.DIV.scale, value: '2', locked: true}
 - {id: CCM.CLOCK_ROOT62.MUX.sel, value: ANADIG_PLL.PLL_AUDIO_CLK}
+- {id: CCM.CLOCK_ROOT7.DIV.scale, value: '240'}
 - {id: CCM.CLOCK_ROOT8.DIV.scale, value: '240', locked: true}
 - {id: CLK_ROOT10_INIT_Config, value: disabled}
 - {id: CLK_ROOT11_INIT_Config, value: disabled}
@@ -469,7 +470,7 @@ void BOARD_BootClockRUN(void)
     /* Configure M4_SYSTICK using OSC_RC_48M_DIV2 */
 #if __CORTEX_M == 4
     rootCfg.mux = kCLOCK_M4_SYSTICK_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 1;
+    rootCfg.div = 240;
     CLOCK_SetRootClock(kCLOCK_Root_M4_Systick, &rootCfg);
 #endif
 
@@ -487,12 +488,12 @@ void BOARD_BootClockRUN(void)
 
     /* Configure GPT2 using OSC_RC_48M_DIV2 */
     rootCfg.mux = kCLOCK_GPT2_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 1;
+    rootCfg.div = 24;
     CLOCK_SetRootClock(kCLOCK_Root_Gpt2, &rootCfg);
 
     /* Configure GPT3 using OSC_RC_48M_DIV2 */
     rootCfg.mux = kCLOCK_GPT3_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 1;
+    rootCfg.div = 24;
     CLOCK_SetRootClock(kCLOCK_Root_Gpt3, &rootCfg);
 
     /* Configure GPT4 using OSC_RC_48M_DIV2 */

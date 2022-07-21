@@ -41,7 +41,12 @@
  *----------------------------------------------------------*/
 
 #define configUSE_PREEMPTION                    1
-#define configUSE_TICKLESS_IDLE                 0
+
+#define configUSE_TICKLESS_IDLE                 2
+/* configEXPECTED_IDLE_TIME_BEFORE_SLEEP is a number of ticks. */
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   10
+
+#define configSYSTICK_CLOCK_HZ                  (100000)
 #define configCPU_CLOCK_HZ                      (SystemCoreClock)
 #define configTICK_RATE_HZ                      ((TickType_t)1000)
 #define configMAX_PRIORITIES                    5

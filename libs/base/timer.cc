@@ -25,6 +25,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_snvs_hp.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_snvs_lp.h"
+#include "third_party/modified/nxp/rt1176-sdk/fsl_tickless_gpt.h"
 
 namespace coralmicro {
 namespace {
@@ -38,15 +39,23 @@ void TimerInit() {
   GPT_GetDefaultConfig(&gpt_config);
   gpt_config.clockSource = kGPT_ClockSource_Periph;
 
-  auto root_freq = CLOCK_GetRootClockFreq(kCLOCK_Root_Gpt1);
+#if (__CORTEX_M == 7)
+  auto gpt1_root_freq = CLOCK_GetRootClockFreq(kCLOCK_Root_Gpt1);
 
   GPT_Init(GPT1, &gpt_config);
   GPT_EnableInterrupts(GPT1, kGPT_RollOverFlagInterruptEnable);
   GPT_ClearStatusFlags(GPT1, kGPT_RollOverFlag);
   // Set the divider to get us close to 1MHz.
-  GPT_SetClockDivider(GPT1, root_freq / 1000000);
+  GPT_SetClockDivider(GPT1, gpt1_root_freq / 1000000);
   EnableIRQ(GPT1_IRQn);
   GPT_StartTimer(GPT1);
+
+  // GPT2 is used for tickless idle wakeup on CM7.
+  auto gpt2_root_freq = CLOCK_GetRootClockFreq(kCLOCK_Root_Gpt2);
+  GPT_Init(GPT2, &gpt_config);
+  GPT_SetClockDivider(GPT2, gpt2_root_freq / configGPT_CLOCK_HZ);
+  GPT_EnableInterrupts(GPT2, kGPT_OutputCompare1InterruptEnable);
+  EnableIRQ(GPT2_IRQn);
 
   snvs_hp_rtc_config_t hp_rtc_config;
   snvs_lp_srtc_config_t lp_rtc_config;
@@ -54,6 +63,14 @@ void TimerInit() {
   SNVS_LP_SRTC_GetDefaultConfig(&lp_rtc_config);
   SNVS_HP_RTC_Init(SNVS, &hp_rtc_config);
   SNVS_LP_SRTC_Init(SNVS, &lp_rtc_config);
+#else
+  // GPT3 is used for tickless idle wakeup on CM4.
+  auto gpt3_root_freq = CLOCK_GetRootClockFreq(kCLOCK_Root_Gpt3);
+  GPT_Init(GPT3, &gpt_config);
+  GPT_SetClockDivider(GPT3, gpt3_root_freq / configGPT_CLOCK_HZ);
+  GPT_EnableInterrupts(GPT3, kGPT_OutputCompare1InterruptEnable);
+  EnableIRQ(GPT3_IRQn);
+#endif
 }
 
 uint64_t TimerMicros() {

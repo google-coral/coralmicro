@@ -105,6 +105,8 @@
 /*! @brief if 1, class driver clear stall automatically; if 0, class driver don't clear stall. */
 #define USB_HOST_CONFIG_CLASS_AUTO_CLEAR_STALL (0U)
 
+#define USB_HOST_CONFIG_LOW_POWER_MODE (1U)
+
 /* KHCI configuration */
 #if ((defined USB_HOST_CONFIG_KHCI) && (USB_HOST_CONFIG_KHCI))
 

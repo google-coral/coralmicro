@@ -22,6 +22,7 @@
 #include "libs/base/gpio.h"
 #include "libs/base/ipc_m4.h"
 #include "libs/base/tasks.h"
+#include "libs/base/timer.h"
 #include "libs/camera/camera.h"
 #include "libs/nxp/rt1176-sdk/board_hardware.h"
 #include "libs/pmic/pmic.h"
@@ -50,6 +51,7 @@ extern "C" int main(int argc, char** argv) {
 
   CHECK(coralmicro::LfsInit());
   coralmicro::GpioInit();
+  coralmicro::TimerInit();
 
   // Initialize I2C5 state
   NVIC_SetPriority(LPI2C5_IRQn, 3);

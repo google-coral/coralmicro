@@ -81,7 +81,7 @@
 /* @} */
 
 /*! @brief Whether device is self power. 1U supported, 0U not supported */
-#define USB_DEVICE_CONFIG_SELF_POWER (1U)
+#define USB_DEVICE_CONFIG_SELF_POWER (0U)
 
 /*! @brief How many endpoints are supported in the stack. */
 #define USB_DEVICE_CONFIG_ENDPOINTS (6U)
@@ -138,7 +138,7 @@
 #define USB_DEVICE_CONFIG_BUFFER_PROPERTY_CACHEABLE (0U)
 
 /*! @brief Whether the low power mode is enabled or not. */
-#define USB_DEVICE_CONFIG_LOW_POWER_MODE (0U)
+#define USB_DEVICE_CONFIG_LOW_POWER_MODE (1U)
 
 #if ((defined(USB_DEVICE_CONFIG_LOW_POWER_MODE)) && (USB_DEVICE_CONFIG_LOW_POWER_MODE > 0U))
 /*! @brief Whether device remote wakeup supported. 1U supported, 0U not supported */

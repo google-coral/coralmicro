@@ -38,5 +38,7 @@ namespace {
 
 extern "C" void app_main(void* param) {
   (void)param;
+  // Create a task that keeps the device from attempting to sleep.
+  xTaskCreate([](void* param) { while(true) {} }, "wake task", configMINIMAL_STACK_SIZE, nullptr, 1U, nullptr);
   coralmicro::Main();
 }

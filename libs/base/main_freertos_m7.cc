@@ -105,6 +105,10 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
   CHECK(xTaskCreate(app_main, "app_main", configMINIMAL_STACK_SIZE * 30,
                     nullptr, coralmicro::kAppTaskPriority, nullptr) == pdPASS);
 
+  // Allows the AHB clock to run while the core is asleep,
+  // so that the TCM is accessible.
+  // See section 12.4.4.18 in the IMX1170 TRM for more details.
+  IOMUXC_GPR->GPR16 |= IOMUXC_GPR_GPR16_CM7_FORCE_HCLK_EN(1);
   vTaskStartScheduler();
   return 0;
 }

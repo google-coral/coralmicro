@@ -233,6 +233,7 @@ add_library_m7(libs_nxp_rt1176-sdk_freertos OBJECT
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpspi_freertos.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/fsl_tickless_gpt.c
     ${libs_nxp_rt1176-sdk-m7_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
     ${libs_FreeRTOS_SOURCES}
@@ -243,6 +244,7 @@ add_library_m4(libs_nxp_rt1176-sdk_freertos-m4 OBJECT
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpspi_freertos.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpuart_freertos.c
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/fsl_tickless_gpt.c
     ${libs_nxp_rt1176-sdk-m4_SOURCES}
     ${libs_nxp_rt1176-sdk_SOURCES}
     ${libs_nxp_rt1176-sdk-mcmgr_SOURCES}

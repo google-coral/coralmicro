@@ -134,6 +134,16 @@ usb_status_t UsbDeviceTask::Handler(usb_device_handle device_handle,
         ret = kStatus_USB_Success;
       }
       break;
+#if !defined(ELFLOADER)
+    case kUSB_DeviceEventSuspend:
+      USB_DeviceSetStatus(device_handle_, kUSB_DeviceStatusBusSuspend, nullptr);
+      ret = kStatus_USB_Success;
+      break;
+    case kUSB_DeviceEventResume:
+      USB_DeviceSetStatus(device_handle_, kUSB_DeviceStatusBusResume, nullptr);
+      ret = kStatus_USB_Success;
+      break;
+#endif
     default:
       printf("%s event unhandled 0x%lx\r\n", __func__, event);
   }
@@ -189,7 +199,7 @@ UsbDeviceTask::UsbDeviceTask() {
 
   CLOCK_EnableUsbhs0PhyPllClock(kCLOCK_Usbphy480M, usb_clock_freq);
   CLOCK_EnableUsbhs0Clock(kCLOCK_Usb480M, usb_clock_freq);
-  USB_EhciPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phy_config);
+  USB_EhciLowPowerPhyInit(kUSBControllerId, BOARD_XTAL0_CLK_HZ, &phy_config);
 
   constexpr IRQn_Type irq_number = USB_OTG1_IRQn;
   NVIC_SetPriority(irq_number, 6);

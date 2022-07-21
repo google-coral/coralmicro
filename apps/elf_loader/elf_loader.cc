@@ -260,6 +260,8 @@ extern "C" int main(int argc, char **argv) {
   coralmicro::LfsInit();
 
   TaskHandle_t usb_task;
+  // Create a task that keeps the device from attempting to sleep.
+  xTaskCreate([](void* param) { while(true) {} }, "wake task", configMINIMAL_STACK_SIZE, nullptr, 1U, nullptr);
   xTaskCreate(usb_device_task, "usb_device_task", configMINIMAL_STACK_SIZE * 10,
               nullptr, coralmicro::kUsbDeviceTaskPriority, &usb_task);
   usb_timer = xTimerCreate("usb_timer", pdMS_TO_TICKS(1000), pdFALSE, usb_task,
