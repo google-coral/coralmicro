@@ -16,6 +16,8 @@
 
 #include "libs/base/gpio.h"
 
+#include <utility>
+
 #include "libs/base/mutex.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -568,7 +570,7 @@ void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode) {
 }
 
 void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb) {
-  g_irq_handlers[gpio] = cb;
+  g_irq_handlers[gpio] = std::move(cb);
 }
 }  // namespace coralmicro
 

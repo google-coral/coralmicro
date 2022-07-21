@@ -115,6 +115,11 @@ bool CameraTask::GetFrame(const std::list<camera::FrameFormat>& fmts) {
     printf("Camera is in standby mode, cannot capture frame.\r\n");
     return false;
   }
+  if (mode_ == Mode::kTrigger && !GpioGet(Gpio::kCameraTrigger)) {
+    printf("Camera is in trigger mode but was never triggered\r\n");
+    return false;
+  }
+
   bool ret = true;
   uint8_t* raw = nullptr;
   int index = GetFrame(&raw, true);
