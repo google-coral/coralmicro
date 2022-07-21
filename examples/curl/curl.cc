@@ -151,7 +151,7 @@ void Main() {
   snprintf(uri.get(), size + 1, uri_fmt, hostname);
   CURLRequest(uri.get());
   curl_global_cleanup();
-  printf("Done.");
+  printf("Done.\r\n");
 
   vTaskSuspend(nullptr);
 }
