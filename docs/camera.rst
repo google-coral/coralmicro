@@ -9,15 +9,15 @@ APIs for the Dev Board Micro camera.
    :members:
    :undoc-members:
 
-.. doxygenstruct:: coralmicro::camera::FrameFormat
+.. doxygenstruct:: coralmicro::CameraFrameFormat
    :members:
    :undoc-members:
 
-.. doxygenenum:: coralmicro::camera::Mode
+.. doxygenenum:: coralmicro::CameraMode
 
-.. doxygenenum:: coralmicro::camera::Format
+.. doxygenenum:: coralmicro::CameraFormat
 
-.. doxygenenum:: coralmicro::camera::FilterMethod
+.. doxygenenum:: coralmicro::CameraFilterMethod
 
-.. doxygenenum:: coralmicro::camera::Rotation
+.. doxygenenum:: coralmicro::CameraRotation
 

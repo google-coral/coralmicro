@@ -73,7 +73,7 @@ extern "C" void app_main(void* param) {
   while (true) {
     printf("M4 main loop\r\n");
     coralmicro::CameraTask::GetSingleton()->Enable(
-        coralmicro::camera::Mode::kStreaming);
+        coralmicro::CameraMode::kStreaming);
     g_person_detected = false;
 
     while (true) {

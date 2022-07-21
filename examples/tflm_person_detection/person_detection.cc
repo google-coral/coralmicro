@@ -46,7 +46,7 @@ extern "C" void app_main(void* param) {
   vTaskDelay(pdMS_TO_TICKS(100));
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kStreaming);
+      coralmicro::CameraMode::kStreaming);
 
   setup();
   while (true) {

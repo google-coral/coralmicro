@@ -58,9 +58,9 @@ class CameraClass {
         : camera_{coralmicro::CameraTask::GetSingleton()},
           width_{0},
           height_{0},
-          format_{camera::Format::kRgb},
-          filter_{camera::FilterMethod::kBilinear},
-          test_pattern_{camera::TestPattern::kNone},
+          format_{CameraFormat::kRgb},
+          filter_{CameraFilterMethod::kBilinear},
+          test_pattern_{CameraTestPattern::kNone},
           preserve_ratio_{false},
           initialized_{false} {}
 
@@ -85,9 +85,9 @@ class CameraClass {
     // @param rotation The image rotation amount.
     // @returns `SUCCESS` once initialization has completed.
     int begin(int32_t width = 320, int32_t height = 320,
-              camera::Format fmt = camera::Format::kRgb,
-              camera::FilterMethod filter = camera::FilterMethod::kBilinear,
-              camera::Rotation rotation = camera::Rotation::k0,
+              CameraFormat fmt = CameraFormat::kRgb,
+              CameraFilterMethod filter = CameraFilterMethod::kBilinear,
+              CameraRotation rotation = CameraRotation::k0,
               bool preserve_ratio = false);
 
     // Turns the camera off.
@@ -121,7 +121,7 @@ class CameraClass {
     // 
     // @param pattern The desired new test pattern.
     // @returns A `CameraStatus` value such as `SUCCESS` once the pattern has been set.
-    int testPattern(coralmicro::camera::TestPattern pattern);
+    int testPattern(coralmicro::CameraTestPattern pattern);
 
     // Sets whether the image's aspect ratio is preserved.
     //
@@ -133,7 +133,7 @@ class CameraClass {
     //
     // @param fmt The image format.
     // @returns A `CameraSttus` value such as `SUCCESS` once the format has been set.
-    int format(coralmicro::camera::Format fmt);
+    int format(coralmicro::CameraFormat fmt);
 
     // Discards a set amount of frames captured by the camera.
     //
@@ -154,10 +154,10 @@ class CameraClass {
     std::unique_ptr<CameraTask> camera_;
     int32_t width_;
     int32_t height_;
-    coralmicro::camera::Format format_;
-    coralmicro::camera::FilterMethod filter_;
-    coralmicro::camera::Rotation rotation_;
-    coralmicro::camera::TestPattern test_pattern_;
+    coralmicro::CameraFormat format_;
+    coralmicro::CameraFilterMethod filter_;
+    coralmicro::CameraRotation rotation_;
+    coralmicro::CameraTestPattern test_pattern_;
     bool preserve_ratio_;
     bool initialized_;
 };

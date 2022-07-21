@@ -35,13 +35,13 @@ void get_captured_image(struct jsonrpc_request* request) {
   if (!testlib::JsonRpcGetIntegerParam(request, "height", &height)) {
     return;
   }
-  coralmicro::camera::Format format = coralmicro::camera::Format::kRgb;
+  auto format = coralmicro::CameraFormat::kRgb;
   std::vector<uint8_t> image(width * height *
                              coralmicro::CameraTask::FormatToBPP(format));
-  coralmicro::camera::FrameFormat fmt{
+  coralmicro::CameraFrameFormat fmt{
       /*fmt=*/format,
-      /*filter=*/coralmicro::camera::FilterMethod::kBilinear,
-      /*rotation=*/coralmicro::camera::Rotation::k0,
+      /*filter=*/coralmicro::CameraFilterMethod::kBilinear,
+      /*rotation=*/coralmicro::CameraRotation::k0,
       /*width=*/width,
       /*height=*/height,
       /*preserve_ratio=*/false,
@@ -62,7 +62,7 @@ void get_captured_image(struct jsonrpc_request* request) {
   // Starting Camera in triggered mode.
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kTrigger);
+      coralmicro::CameraMode::kTrigger);
 
   // Set up an RPC server that serves the latest image.
   jsonrpc_export("get_captured_image", coralmicro::get_captured_image);

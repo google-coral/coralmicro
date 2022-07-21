@@ -129,18 +129,18 @@ void GetFrame(struct jsonrpc_request* request) {
 
   int width = rpc_width_valid ? rpc_width : coralmicro::CameraTask::kWidth;
   int height = rpc_height_valid ? rpc_height : coralmicro::CameraTask::kHeight;
-  coralmicro::camera::Format format = coralmicro::camera::Format::kRgb;
+  auto format = coralmicro::CameraFormat::kRgb;
 
   if (rpc_format_valid) {
     constexpr char kFormatRGB[] = "RGB";
     constexpr char kFormatGrayscale[] = "L";
     if (memcmp(rpc_format.c_str(), kFormatRGB,
                std::min(rpc_format.length(), strlen(kFormatRGB))) == 0) {
-      format = coralmicro::camera::Format::kRgb;
+      format = coralmicro::CameraFormat::kRgb;
     }
     if (memcmp(rpc_format.c_str(), kFormatGrayscale,
                std::min(rpc_format.length(), strlen(kFormatGrayscale))) == 0) {
-      format = coralmicro::camera::Format::kY8;
+      format = coralmicro::CameraFormat::kY8;
     }
   }
 
@@ -148,15 +148,14 @@ void GetFrame(struct jsonrpc_request* request) {
                     coralmicro::CameraTask::FormatToBPP(format));
 
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::camera::TestPattern pattern =
-      coralmicro::camera::TestPattern::kColorBar;
+  auto pattern = coralmicro::CameraTestPattern::kColorBar;
   coralmicro::CameraTask::GetSingleton()->SetTestPattern(pattern);
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kStreaming);
-  coralmicro::camera::FrameFormat fmt_rgb{};
+      coralmicro::CameraMode::kStreaming);
 
+  coralmicro::CameraFrameFormat fmt_rgb{};
   fmt_rgb.fmt = format;
-  fmt_rgb.filter = coralmicro::camera::FilterMethod::kBilinear;
+  fmt_rgb.filter = coralmicro::CameraFilterMethod::kBilinear;
   fmt_rgb.width = width;
   fmt_rgb.height = height;
   fmt_rgb.preserve_ratio = false;

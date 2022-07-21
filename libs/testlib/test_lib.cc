@@ -674,12 +674,12 @@ void PosenetStressRun(struct jsonrpc_request* request) {
 
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kStreaming);
+      coralmicro::CameraMode::kStreaming);
   for (int i = 0; i < iterations; ++i) {
-    coralmicro::camera::FrameFormat fmt{
-        /*fmt=*/coralmicro::camera::Format::kRgb,
-        /*filter=*/coralmicro::camera::FilterMethod::kBilinear,
-        /*rotation=*/coralmicro::camera::Rotation::k0,
+    coralmicro::CameraFrameFormat fmt{
+        /*fmt=*/coralmicro::CameraFormat::kRgb,
+        /*filter=*/coralmicro::CameraFilterMethod::kBilinear,
+        /*rotation=*/coralmicro::CameraRotation::k0,
         /*width=*/model_width,
         /*height=*/model_height,
         /*preserve_ratio=*/false,
@@ -740,9 +740,9 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
     return;
   }
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kTrigger);
+      coralmicro::CameraMode::kTrigger);
   coralmicro::CameraTask::GetSingleton()->SetTestPattern(
-      coralmicro::camera::TestPattern::kWalkingOnes);
+      coralmicro::CameraTestPattern::kWalkingOnes);
 
   bool success = true;
   // Getting this test pattern doesn't seem to always work on the first try,
@@ -750,11 +750,11 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
   // a small amount of retrying to smooth that over.
   constexpr int kRetries = 3;
   for (int i = 0; i < kRetries; ++i) {
-    auto buffer = std::make_unique<uint8_t[]>(coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight * coralmicro::CameraTask::FormatToBPP(coralmicro::camera::Format::kRaw));
-    coralmicro::camera::FrameFormat fmt{
-        /*fmt=*/coralmicro::camera::Format::kRaw,
-        /*filter=*/coralmicro::camera::FilterMethod::kBilinear,
-        /*rotation=*/coralmicro::camera::Rotation::k0,
+    auto buffer = std::make_unique<uint8_t[]>(coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight * coralmicro::CameraTask::FormatToBPP(coralmicro::CameraFormat::kRaw));
+    coralmicro::CameraFrameFormat fmt{
+        /*fmt=*/coralmicro::CameraFormat::kRaw,
+        /*filter=*/coralmicro::CameraFilterMethod::kBilinear,
+        /*rotation=*/coralmicro::CameraRotation::k0,
         /*width=*/coralmicro::CameraTask::kWidth,
         /*height=*/coralmicro::CameraTask::kHeight,
         /*preserve_ratio=*/false,

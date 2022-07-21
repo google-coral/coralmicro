@@ -62,19 +62,19 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
 
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kStreaming);
+      coralmicro::CameraMode::kStreaming);
 
   // If the model name includes "bayered", provide the raw datastream from the
   // camera.
   bool bayered = strstr(kModelPath, "bayered");
   std::vector<uint8_t> image(model_width * model_height *
                              /*channels=*/(bayered ? 1 : 3));
-  auto format = bayered ? coralmicro::camera::Format::kRaw
-                        : coralmicro::camera::Format::kRgb;
-  coralmicro::camera::FrameFormat fmt{
+  auto format = bayered ? coralmicro::CameraFormat::kRaw
+                        : coralmicro::CameraFormat::kRgb;
+  coralmicro::CameraFrameFormat fmt{
       format,
-      coralmicro::camera::FilterMethod::kBilinear,
-      coralmicro::camera::Rotation::k0,
+      coralmicro::CameraFilterMethod::kBilinear,
+      coralmicro::CameraRotation::k0,
       model_width,
       model_height,
       false,

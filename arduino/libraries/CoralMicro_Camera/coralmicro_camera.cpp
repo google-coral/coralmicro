@@ -17,6 +17,7 @@
 #include "coralmicro_camera.h"
 
 #include <cstdio>
+#include <vector>
 
 namespace coralmicro {
 namespace arduino {
@@ -34,8 +35,8 @@ int CameraClass::begin(CameraResolution resolution) {
     }
 }
 
-int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
-                       camera::FilterMethod filter, camera::Rotation rotation,
+int CameraClass::begin(int32_t width, int32_t height, CameraFormat fmt,
+                       CameraFilterMethod filter, CameraRotation rotation,
                        bool preserve_ratio) {
     initialized_ = true;
     width_ = width;
@@ -45,7 +46,7 @@ int CameraClass::begin(int32_t width, int32_t height, camera::Format fmt,
     rotation_ = rotation;
     preserve_ratio_ = preserve_ratio;
     camera_->SetPower(true);
-    camera_->Enable(coralmicro::camera::Mode::kStreaming);
+    camera_->Enable(coralmicro::CameraMode::kStreaming);
     return CameraStatus::SUCCESS;
 }
 
@@ -60,10 +61,10 @@ int CameraClass::grab(uint8_t* buffer) {
         printf("%s Camera is not initialized...\n", __func__);
         return CameraStatus::NOT_INITIALIZED;
     }
-    std::list<coralmicro::camera::FrameFormat> fmts;
-    if (test_pattern_ != camera::TestPattern::kNone) {
-        fmts.push_back({camera::Format::kRaw, camera::FilterMethod::kBilinear,
-                        camera::Rotation::k0,
+    std::vector<coralmicro::CameraFrameFormat> fmts;
+    if (test_pattern_ != CameraTestPattern::kNone) {
+        fmts.push_back({CameraFormat::kRaw, CameraFilterMethod::kBilinear,
+                        CameraRotation::k0,
                         CameraTask::kWidth, CameraTask::kHeight,
                         preserve_ratio_, buffer});
     } else {
@@ -80,14 +81,14 @@ int CameraClass::grab(uint8_t* buffer) {
 }
 
 int CameraClass::testPattern(bool walking) {
-    auto test_pattern = walking ? coralmicro::camera::TestPattern::kWalkingOnes
-                                : coralmicro::camera::TestPattern::kNone;
+    auto test_pattern = walking ? coralmicro::CameraTestPattern::kWalkingOnes
+                                : coralmicro::CameraTestPattern::kNone;
     test_pattern_ = test_pattern;
     camera_->SetTestPattern(test_pattern_);
     return CameraStatus::SUCCESS;
 }
 
-int CameraClass::testPattern(coralmicro::camera::TestPattern pattern) {
+int CameraClass::testPattern(coralmicro::CameraTestPattern pattern) {
     test_pattern_ = pattern;
     camera_->SetTestPattern(test_pattern_);
     return CameraStatus::SUCCESS;
@@ -95,9 +96,9 @@ int CameraClass::testPattern(coralmicro::camera::TestPattern pattern) {
 
 int CameraClass::standby(bool enable) {
     if (enable) {
-        camera_->Enable(coralmicro::camera::Mode::kStreaming);
+        camera_->Enable(coralmicro::CameraMode::kStreaming);
     } else {
-        camera_->Enable(coralmicro::camera::Mode::kStandBy);
+        camera_->Enable(coralmicro::CameraMode::kStandBy);
     }
     return CameraStatus::SUCCESS;
 }
@@ -107,7 +108,7 @@ int CameraClass::preserveRatio(bool preserve_ratio) {
     return CameraStatus::SUCCESS;
 }
 
-int CameraClass::format(coralmicro::camera::Format fmt) {
+int CameraClass::format(coralmicro::CameraFormat fmt) {
     format_ = fmt;
     return CameraStatus::SUCCESS;
 }

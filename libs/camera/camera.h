@@ -19,7 +19,7 @@
 
 #include <cstdint>
 #include <functional>
-#include <list>
+#include <vector>
 
 #include "libs/base/queue_task.h"
 #include "libs/base/tasks.h"
@@ -28,10 +28,8 @@
 
 namespace coralmicro {
 
-namespace camera {
-
 // The camera operating mode for `CameraTask::Enable()`.
-enum class Mode : uint8_t {
+enum class CameraMode : uint8_t {
   // Do not use this. If you want to conserve power when not using the camera,
   // then use `CameraTask::Disable()`.
   kStandBy = 0,
@@ -44,6 +42,14 @@ enum class Mode : uint8_t {
   // into your preferred format with `CameraTask::GetFrame()`.
   kTrigger = 5,
 };
+
+enum class CameraTestPattern : uint8_t {
+  kNone = 0x00,
+  kColorBar = 0x01,
+  kWalkingOnes = 0x11,
+};
+
+namespace camera {
 
 enum class RequestType : uint8_t {
   kEnable,
@@ -78,14 +84,8 @@ struct PowerResponse {
   bool success;
 };
 
-enum class TestPattern : uint8_t {
-  kNone = 0x00,
-  kColorBar = 0x01,
-  kWalkingOnes = 0x11,
-};
-
 struct TestPatternRequest {
-  TestPattern pattern;
+  CameraTestPattern pattern;
 };
 
 struct Response {
@@ -103,14 +103,16 @@ struct Request {
     FrameRequest frame;
     PowerRequest power;
     TestPatternRequest test_pattern;
-    Mode mode;
+    CameraMode mode;
     DiscardRequest discard;
   } request;
   std::function<void(Response)> callback;
 };
 
-// Image format options, used with `FrameFormat`.
-enum class Format {
+}  // namespace camera
+
+// Image format options, used with `CameraFrameFormat`.
+enum class CameraFormat {
   // Currently not supported.
   kRgba,
   // RGB image.
@@ -122,13 +124,13 @@ enum class Format {
 };
 
 // Image resampling method (when resizing the image).
-enum class FilterMethod {
+enum class CameraFilterMethod {
   kBilinear = 0,
   kNearestNeighbor,
 };
 
 // Clockwise image rotations.
-enum class Rotation {
+enum class CameraRotation {
   k0,
   k90,
   k180,
@@ -137,13 +139,13 @@ enum class Rotation {
 
 // Specifies your image buffer location and any image processing you want to
 // perform when fetching images with `CameraTask::GetFrame()`.
-struct FrameFormat {
+struct CameraFrameFormat {
   // Image format such as RGB or raw.
-  Format fmt;
+  CameraFormat fmt;
   // Filter method such as bilinear (default) or nearest-neighbor.
-  FilterMethod filter = FilterMethod::kBilinear;
+  CameraFilterMethod filter = CameraFilterMethod::kBilinear;
   // Image rotation in 90-degree increments.
-  Rotation rotation = Rotation::k0;
+  CameraRotation rotation = CameraRotation::k0;
   // Image width. (Native size is `CameraTask::kWidth`.)
   int width;
   // Image height. (Native size is `CameraTask::kHeight`.)
@@ -157,7 +159,6 @@ struct FrameFormat {
   bool white_balance = true;
 };
 
-}  // namespace camera
 
 inline constexpr char kCameraTaskName[] = "camera_task";
 
@@ -169,7 +170,7 @@ inline constexpr char kCameraTaskName[] = "camera_task";
 // camera mode (continuous capture or single image capture) with `Enable()`.
 //
 // To get and process each frame, then call `GetFrame()` and
-// specify the image format with `camera::FrameFormat`.
+// specify the image format with `CameraFrameFormat`.
 //
 // **Example** (from `examples/image_server/`):
 //
@@ -195,7 +196,7 @@ class CameraTask
   // this.
   // @param mode The operating mode.
   // @return True if camera is enabled, false otherwise.
-  bool Enable(camera::Mode mode);
+  bool Enable(CameraMode mode);
 
   // Sets the camera into a low-power state, using appoximately 200 μW
   // (compared to approximately 4 mW when streaming). The camera configuration
@@ -206,7 +207,7 @@ class CameraTask
   // more formats.
   // @param fmts A list of image formats you want to receive.
   // @return True if image processing succeeds, false otherwise.
-  bool GetFrame(const std::list<camera::FrameFormat>& fmts);
+  bool GetFrame(const std::vector<CameraFrameFormat>& fmts);
 
   // Turns the camera power on and off. You must call this before `Enable()`.
   // @param enable True to turn the camera on, false to turn it off.
@@ -215,10 +216,10 @@ class CameraTask
 
   // Enables a camera test pattern instead of using actual sensor data.
   // @param pattern The test pattern to use.
-  void SetTestPattern(camera::TestPattern pattern);
+  void SetTestPattern(CameraTestPattern pattern);
 
   // Triggers image capture when the camera is enabled with
-  // `camera::Mode::kTrigger`.
+  // `CameraMode::kTrigger`.
   //
   // The raw image is held in the camera module memory and you must then
   // fetch it with `GetFrame()`.
@@ -243,35 +244,35 @@ class CameraTask
 
   // Gets the bytes-per-pixel (the number of color channels) used by the
   // given image format.
-  // @param The image format (from `camera::FrameFormat`).
+  // @param The image format (from `CameraFrameFormat`).
   // @return The number of bytes per pixel.
-  static int FormatToBPP(camera::Format fmt);
+  static int FormatToBPP(CameraFormat fmt);
 
  private:
   int GetFrame(uint8_t** buffer, bool block);
   void ReturnFrame(int index);
   void TaskInit() override;
   void RequestHandler(camera::Request* req) override;
-  camera::EnableResponse HandleEnableRequest(const camera::Mode& mode);
+  camera::EnableResponse HandleEnableRequest(const CameraMode& mode);
   void HandleDisableRequest();
   camera::PowerResponse HandlePowerRequest(const camera::PowerRequest& power);
   camera::FrameResponse HandleFrameRequest(const camera::FrameRequest& frame);
   void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
   void HandleDiscardRequest(const camera::DiscardRequest& discard);
-  void SetMode(const camera::Mode& mode);
+  void SetMode(const CameraMode& mode);
   bool Read(uint16_t reg, uint8_t* val);
   bool Write(uint16_t reg, uint8_t val);
   void SetDefaultRegisters();
   static void BayerToRGB(const uint8_t* camera_raw, uint8_t* camera_rgb,
-                         int width, int height, camera::FilterMethod filter,
-                         camera::Rotation rotation);
+                         int width, int height, CameraFilterMethod filter,
+                         CameraRotation rotation);
   static void BayerToRGBA(const uint8_t* camera_raw, uint8_t* camera_rgb,
-                          int width, int height, camera::FilterMethod filter,
-                          camera::Rotation rotation);
+                          int width, int height, CameraFilterMethod filter,
+                          CameraRotation rotation);
   static void BayerToGrayscale(const uint8_t* camera_raw,
                                uint8_t* camera_grayscale, int width, int height,
-                               camera::FilterMethod filter,
-                               camera::Rotation rotation);
+                               CameraFilterMethod filter,
+                               CameraRotation rotation);
   static void RGBToGrayscale(const uint8_t* camera_rgb,
                              uint8_t* camera_grayscale, int width, int height);
   static void AutoWhiteBalance(uint8_t* camera_rgb, int width, int height);
@@ -291,8 +292,8 @@ class CameraTask
   lpi2c_rtos_handle_t* i2c_handle_;
   csi_handle_t csi_handle_;
   csi_config_t csi_config_;
-  camera::Mode mode_;
-  camera::TestPattern test_pattern_;
+  CameraMode mode_;
+  CameraTestPattern test_pattern_;
 };
 
 }  // namespace coralmicro

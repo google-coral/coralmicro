@@ -36,49 +36,49 @@ using coralmicro::testlib::JsonRpcGetIntegerParam;
 using coralmicro::testlib::JsonRpcGetStringParam;
 
 bool FormatStringToFormat(const std::string& format_string,
-                          coralmicro::camera::Format* format) {
+                          coralmicro::CameraFormat* format) {
   if (format_string == "RGB") {
-    *format = coralmicro::camera::Format::kRgb;
+    *format = coralmicro::CameraFormat::kRgb;
     return true;
   }
   if (format_string == "GRAY") {
-    *format = coralmicro::camera::Format::kY8;
+    *format = coralmicro::CameraFormat::kY8;
     return true;
   }
   if (format_string == "RAW") {
-    *format = coralmicro::camera::Format::kRaw;
+    *format = coralmicro::CameraFormat::kRaw;
     return true;
   }
   return false;
 }
 
 bool FilterStringToFilter(const std::string& filter_string,
-                          coralmicro::camera::FilterMethod* filter) {
+                          coralmicro::CameraFilterMethod* filter) {
   if (filter_string == "BILINEAR") {
-    *filter = coralmicro::camera::FilterMethod::kBilinear;
+    *filter = coralmicro::CameraFilterMethod::kBilinear;
     return true;
   }
   if (filter_string == "NEAREST_NEIGHBOR") {
-    *filter = coralmicro::camera::FilterMethod::kNearestNeighbor;
+    *filter = coralmicro::CameraFilterMethod::kNearestNeighbor;
     return true;
   }
   return false;
 }
 
 bool RotationIntToRotation(const int& rotation_int,
-                           coralmicro::camera::Rotation* rotation) {
+                           coralmicro::CameraRotation* rotation) {
   switch (rotation_int) {
     case 0:
-      *rotation = coralmicro::camera::Rotation::k0;
+      *rotation = coralmicro::CameraRotation::k0;
       return true;
     case 90:
-      *rotation = coralmicro::camera::Rotation::k90;
+      *rotation = coralmicro::CameraRotation::k90;
       return true;
     case 180:
-      *rotation = coralmicro::camera::Rotation::k180;
+      *rotation = coralmicro::CameraRotation::k180;
       return true;
     case 270:
-      *rotation = coralmicro::camera::Rotation::k270;
+      *rotation = coralmicro::CameraRotation::k270;
       return true;
     default:
       return false;
@@ -88,10 +88,9 @@ bool RotationIntToRotation(const int& rotation_int,
 void get_image_from_camera(struct jsonrpc_request* request) {
   int width = coralmicro::CameraTask::kWidth;
   int height = coralmicro::CameraTask::kHeight;
-  coralmicro::camera::Format format = coralmicro::camera::Format::kRgb;
-  coralmicro::camera::FilterMethod filter =
-      coralmicro::camera::FilterMethod::kBilinear;
-  coralmicro::camera::Rotation rotation = coralmicro::camera::Rotation::k0;
+  auto format = coralmicro::CameraFormat::kRgb;
+  auto filter = coralmicro::CameraFilterMethod::kBilinear;
+  auto rotation = coralmicro::CameraRotation::k0;
   bool auto_white_balance = true;
 
   std::string format_rpc, filter_rpc;
@@ -132,10 +131,10 @@ void get_image_from_camera(struct jsonrpc_request* request) {
   //! [camera-stream] Doxygen snippet for camera.h
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kStreaming);
+      coralmicro::CameraMode::kStreaming);
   std::vector<uint8_t> image(width * height *
                              coralmicro::CameraTask::FormatToBPP(format));
-  coralmicro::camera::FrameFormat fmt{
+  coralmicro::CameraFrameFormat fmt{
       format, filter, rotation,     width,
       height, false,  image.data(), auto_white_balance};
   auto ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});

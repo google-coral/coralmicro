@@ -273,7 +273,7 @@ class CameraTask : private Task<CameraTask> {
           configASSERT(!started);
           started = true;
           coralmicro::CameraTask::GetSingleton()->Enable(
-              camera::Mode::kStreaming);
+              CameraMode::kStreaming);
           printf("Camera: started\r\n");
           QueueProcess();
           break;
@@ -288,11 +288,11 @@ class CameraTask : private Task<CameraTask> {
             continue;
           }
 
-          coralmicro::camera::FrameFormat fmt;
+          coralmicro::CameraFrameFormat fmt;
           fmt.width = kModelWidth;
           fmt.height = kModelHeight;
-          fmt.fmt = camera::Format::kRgb;
-          fmt.filter = camera::FilterMethod::kBilinear;
+          fmt.fmt = CameraFormat::kRgb;
+          fmt.filter = CameraFilterMethod::kBilinear;
           fmt.preserve_ratio = false;
           fmt.buffer = input.data();
           coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});

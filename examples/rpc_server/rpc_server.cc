@@ -46,13 +46,13 @@ static void serial_number_rpc(struct jsonrpc_request* r) {
 static void take_picture_rpc(struct jsonrpc_request* r) {
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::camera::Mode::kStreaming);
+      coralmicro::CameraMode::kStreaming);
   coralmicro::CameraTask::GetSingleton()->DiscardFrames(1);
   std::vector<uint8_t> image_buffer(coralmicro::CameraTask::kWidth *
                                     coralmicro::CameraTask::kHeight * 3);
-  coralmicro::camera::FrameFormat fmt;
-  fmt.fmt = coralmicro::camera::Format::kRgb;
-  fmt.filter = coralmicro::camera::FilterMethod::kBilinear;
+  coralmicro::CameraFrameFormat fmt;
+  fmt.fmt = coralmicro::CameraFormat::kRgb;
+  fmt.filter = coralmicro::CameraFilterMethod::kBilinear;
   fmt.width = coralmicro::CameraTask::kWidth;
   fmt.height = coralmicro::CameraTask::kHeight;
   fmt.preserve_ratio = false;
