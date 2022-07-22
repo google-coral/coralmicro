@@ -17,6 +17,7 @@
 #ifndef LIBS_PMIC_PMIC_H_
 #define LIBS_PMIC_PMIC_H_
 
+#include <cstdint>
 #include <functional>
 
 #include "libs/base/queue_task.h"
@@ -25,6 +26,12 @@
 
 namespace coralmicro {
 
+enum class PmicRail : uint8_t {
+  kCam2V8,
+  kCam1V8,
+  kMic1V8,
+};
+
 namespace pmic {
 
 enum class RequestType : uint8_t {
@@ -32,14 +39,8 @@ enum class RequestType : uint8_t {
   kChipId,
 };
 
-enum class Rail : uint8_t {
-  kCam2V8,
-  kCam1V8,
-  kMic1V8,
-};
-
 struct RailRequest {
-  Rail rail;
+  PmicRail rail;
   bool enable;
 };
 
@@ -58,15 +59,6 @@ struct Request {
   std::function<void(Response)> callback;
 };
 
-enum class PmicRegisters : uint16_t {
-  kPageCon = 0x000,
-  kLdo2Cont = 0x027,
-  kLdo3Cont = 0x028,
-  kLdo4Cont = 0x029,
-  kDeviceId = 0x181,
-  kUnknown = 0xFFF,
-};
-
 }  // namespace pmic
 
 inline constexpr char kPmicTaskName[] = "pmic_task";
@@ -80,16 +72,16 @@ class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName,
     static PmicTask pmic;
     return &pmic;
   }
-  void SetRailState(pmic::Rail rail, bool enable);
+  void SetRailState(PmicRail rail, bool enable);
   uint8_t GetChipId();
 
  private:
   void RequestHandler(pmic::Request* req) override;
   void HandleRailRequest(const pmic::RailRequest& rail);
   uint8_t HandleChipIdRequest();
-  void SetPage(uint16_t reg);
-  void Read(pmic::PmicRegisters reg, uint8_t* val);
-  void Write(pmic::PmicRegisters reg, uint8_t val);
+  bool SetPage(uint16_t reg);
+  bool Read(uint16_t reg, uint8_t* val);
+  bool Write(uint16_t reg, uint8_t val);
 
   lpi2c_rtos_handle_t* i2c_handle_;
 };

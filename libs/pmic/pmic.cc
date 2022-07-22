@@ -18,46 +18,55 @@
 
 #include <cstdio>
 
+#include "libs/base/check.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_lpi2c_freertos.h"
 
 namespace coralmicro {
-using namespace pmic;
 namespace {
 constexpr uint8_t kPmicAddress = 0x58;
+
+struct PmicRegisters {
+  enum : uint16_t {
+    kPageCon = 0x000,
+    kLdo2Cont = 0x027,
+    kLdo3Cont = 0x028,
+    kLdo4Cont = 0x029,
+    kDeviceId = 0x181,
+    kUnknown = 0xFFF,
+  };
+};
 }  // namespace
 
-void PmicTask::Read(PmicRegisters reg, uint8_t* val) {
-  uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
+bool PmicTask::Read(uint16_t reg, uint8_t* val) {
+  if (!SetPage(reg)) return false;
 
-  SetPage(static_cast<uint16_t>(reg));
   lpi2c_master_transfer_t transfer;
   transfer.flags = kLPI2C_TransferDefaultFlag;
   transfer.slaveAddress = kPmicAddress;
   transfer.direction = kLPI2C_Read;
-  transfer.subaddress = offset;
+  transfer.subaddress = reg & 0xFF;
   transfer.subaddressSize = sizeof(uint8_t);
   transfer.data = val;
   transfer.dataSize = sizeof(*val);
-  /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
+  return LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success;
 }
 
-void PmicTask::Write(PmicRegisters reg, uint8_t val) {
-  uint8_t offset = (static_cast<uint16_t>(reg) & 0xFF);
+bool PmicTask::Write(uint16_t reg, uint8_t val) {
+  if (!SetPage(reg)) return false;
 
-  SetPage(static_cast<uint16_t>(reg));
   lpi2c_master_transfer_t transfer;
   transfer.flags = kLPI2C_TransferDefaultFlag;
   transfer.slaveAddress = kPmicAddress;
   transfer.direction = kLPI2C_Write;
-  transfer.subaddress = offset;
+  transfer.subaddress = reg & 0xFF;
   transfer.subaddressSize = sizeof(uint8_t);
   transfer.data = &val;
   transfer.dataSize = sizeof(val);
-  /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
+  return LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success;
 }
 
-void PmicTask::SetPage(uint16_t reg) {
+bool PmicTask::SetPage(uint16_t reg) {
   uint8_t page = (reg >> 7) & 0x3;
   // Revert after transaction (probably not ideal. cache our page and only
   // change as needed)
@@ -71,7 +80,7 @@ void PmicTask::SetPage(uint16_t reg) {
   transfer.subaddressSize = sizeof(uint8_t);
   transfer.data = &page_con_reg;
   transfer.dataSize = sizeof(page_con_reg);
-  /* status_t status = */ LPI2C_RTOS_Transfer(i2c_handle_, &transfer);
+  return LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success;
 }
 
 void PmicTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
@@ -79,61 +88,61 @@ void PmicTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
   i2c_handle_ = i2c_handle;
 }
 
-void PmicTask::HandleRailRequest(const RailRequest& rail) {
-  PmicRegisters reg = PmicRegisters::kUnknown;
+void PmicTask::HandleRailRequest(const pmic::RailRequest& rail) {
+  auto reg = PmicRegisters::kUnknown;
   uint8_t val;
   switch (rail.rail) {
-    case Rail::kCam2V8:
+    case PmicRail::kCam2V8:
       reg = PmicRegisters::kLdo2Cont;
       break;
-    case Rail::kCam1V8:
+    case PmicRail::kCam1V8:
       reg = PmicRegisters::kLdo3Cont;
       break;
-    case Rail::kMic1V8:
+    case PmicRail::kMic1V8:
       reg = PmicRegisters::kLdo4Cont;
       break;
   }
-  Read(reg, &val);
+  CHECK(Read(reg, &val));
   if (rail.enable) {
     val |= 1;
   } else {
     val &= ~1;
   }
-  Write(reg, val);
+  CHECK(Write(reg, val));
 }
 
 uint8_t PmicTask::HandleChipIdRequest() {
   uint8_t device_id = 0xff;
-  Read(PmicRegisters::kDeviceId, &device_id);
+  CHECK(Read(PmicRegisters::kDeviceId, &device_id));
   return device_id;
 }
 
-void PmicTask::RequestHandler(Request* req) {
-  Response resp;
+void PmicTask::RequestHandler(pmic::Request* req) {
+  pmic::Response resp;
   resp.type = req->type;
   switch (req->type) {
-    case RequestType::kRail:
+    case pmic::RequestType::kRail:
       HandleRailRequest(req->request.rail);
       break;
-    case RequestType::kChipId:
+    case pmic::RequestType::kChipId:
       resp.response.chip_id = HandleChipIdRequest();
       break;
   }
   if (req->callback) req->callback(resp);
 }
 
-void PmicTask::SetRailState(Rail rail, bool enable) {
-  Request req;
-  req.type = RequestType::kRail;
+void PmicTask::SetRailState(PmicRail rail, bool enable) {
+  pmic::Request req;
+  req.type = pmic::RequestType::kRail;
   req.request.rail.rail = rail;
   req.request.rail.enable = enable;
   SendRequest(req);
 }
 
 uint8_t PmicTask::GetChipId() {
-  Request req;
-  req.type = RequestType::kChipId;
-  Response resp = SendRequest(req);
+  pmic::Request req;
+  req.type = pmic::RequestType::kChipId;
+  pmic::Response resp = SendRequest(req);
   return resp.response.chip_id;
 }
 
