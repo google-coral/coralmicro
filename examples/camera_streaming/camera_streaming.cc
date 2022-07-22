@@ -14,7 +14,7 @@
 
 #include <cstdio>
 
-#include "libs/base/check.h"
+#include "libs/base/utils.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/testlib/test_lib.h"
@@ -22,14 +22,14 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
 
-#if defined(IMAGE_SERVER_ETHERNET)
+#if defined(CAMERA_STREAMING_ETHERNET)
 #include "libs/base/ethernet.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
-#endif  // defined(IMAGE_SERVER_ETHERNET)
+#endif  // defined(CAMERA_STREAMING_ETHERNET)
 
-#if defined(IMAGE_SERVER_WIFI)
+#if defined(CAMERA_STREAMING_WIFI)
 #include "libs/base/wifi.h"
-#endif  // defined(IMAGE_SERVER_WIFI)
+#endif  // defined(CAMERA_STREAMING_WIFI)
 
 namespace {
 using coralmicro::testlib::JsonRpcGetBooleanParam;
@@ -130,17 +130,12 @@ void get_image_from_camera(struct jsonrpc_request* request) {
   }
 
   //! [camera-stream] Doxygen snippet for camera.h
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kStreaming);
   std::vector<uint8_t> image(width * height *
                              coralmicro::CameraTask::FormatToBPP(format));
   coralmicro::CameraFrameFormat fmt{
       format, filter, rotation,     width,
       height, false,  image.data(), auto_white_balance};
   auto ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
-  coralmicro::CameraTask::GetSingleton()->Disable();
-  coralmicro::CameraTask::GetSingleton()->SetPower(false);
   //! [camera-stream] End snippet
 
   if (!ret) {
@@ -156,8 +151,8 @@ void get_image_from_camera(struct jsonrpc_request* request) {
 }  // namespace
 
 extern "C" void app_main(void* param) {
-#if defined(IMAGE_SERVER_ETHERNET)
-  CHECK(coralmicro::EthernetInit(/*default_iface=*/true));
+#if defined(CAMERA_STREAMING_ETHERNET)
+  coralmicro::EthernetInit(/*default_iface=*/false);
   auto* ethernet = coralmicro::EthernetGetInterface();
   if (!ethernet) {
     printf("Unable to bring up ethernet...\r\n");
@@ -176,23 +171,44 @@ extern "C" void app_main(void* param) {
         reinterpret_cast<std::string*>(request->ctx->response_cb_data)
             ->c_str());
   });
-#elif defined(IMAGE_SERVER_WIFI)
+#elif defined(CAMERA_STREAMING_WIFI)
   if (!coralmicro::WiFiTurnOn()) {
-    printf("Unable to bring up wifi...\r\n");
+    printf("Unable to bring up WiFi...\r\n");
+    vTaskSuspend(nullptr);
   }
-  jsonrpc_export(coralmicro::testlib::kMethodWiFiConnect,
-                 coralmicro::testlib::WiFiConnect);
-  jsonrpc_export(coralmicro::testlib::kMethodWiFiGetIp,
-                 coralmicro::testlib::WiFiGetIp);
-  jsonrpc_export(coralmicro::testlib::kMethodWiFiGetStatus,
-                 coralmicro::testlib::WiFiGetStatus);
-
+  if (!coralmicro::WiFiConnect(10)) {
+    printf("Unable to connect to WiFi...\r\n");
+    vTaskSuspend(nullptr);
+  }
+  if (auto wifi_ip = coralmicro::WiFiGetIp(); wifi_ip.has_value()) {
+    printf("Starting Image RPC Server on: %s\r\n", wifi_ip.value().c_str());
+    jsonrpc_init(nullptr, &wifi_ip.value());
+    jsonrpc_export("wifi_get_ip", [](struct jsonrpc_request* request) {
+      jsonrpc_return_success(
+          request, "{%Q: %Q}", "wifi_ip",
+          reinterpret_cast<std::string*>(request->ctx->response_cb_data)
+              ->c_str());
+    });
+  } else {
+    printf("Failed to get Wifi Ip\r\n");
+    vTaskSuspend(nullptr);
+  }
 #else
-  printf("Starting Image RPC Server...\r\n");
+  std::string usb_ip;
+  if (!coralmicro::utils::GetUsbIpAddress(&usb_ip)) {
+    printf("Failed to get USB's Ip Address\r\n");
+    vTaskSuspend(nullptr);
+  }
+  printf("Starting Image RPC Server on: %s\r\n", usb_ip.c_str());
   jsonrpc_init(nullptr, nullptr);
-#endif  // defined(IMAGE_SERVER_ETHERNET)
+#endif  // defined(CAMERA_STREAMING_ETHERNET)
+
+  // Turn on camera for streaming mode.
+  coralmicro::CameraTask::GetSingleton()->SetPower(true);
+  coralmicro::CameraTask::GetSingleton()->Enable(
+      coralmicro::CameraMode::kStreaming);
+
   jsonrpc_export("get_image_from_camera", get_image_from_camera);
   coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
-  printf("Server started...\r\n");
   vTaskSuspend(nullptr);
 }

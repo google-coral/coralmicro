@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(IMAGE_SERVER_SRC image_server.cc)
+set(CAMERA_STREAMING_SRC camera_streaming.cc)
 
-set(IMAGE_SERVER_LINK_LIBRARIES
+set(CAMERA_STREAMING_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_rpc_http_server
     libs_mjson
@@ -22,38 +22,38 @@ set(IMAGE_SERVER_LINK_LIBRARIES
 )
 
 # USB
-add_executable_m7(image_server_usb
-    ${IMAGE_SERVER_SRC}
+add_executable_m7(camera_streaming_usb
+    ${CAMERA_STREAMING_SRC}
 )
 
-target_link_libraries(image_server_usb
-    ${IMAGE_SERVER_LINK_LIBRARIES}
+target_link_libraries(camera_streaming_usb
+    ${CAMERA_STREAMING_LINK_LIBRARIES}
 )
 
 # POE
-add_executable_m7(image_server_ethernet
-    ${IMAGE_SERVER_SRC}
+add_executable_m7(camera_streaming_ethernet
+    ${CAMERA_STREAMING_SRC}
 )
 
-target_compile_definitions(image_server_ethernet PUBLIC
-    IMAGE_SERVER_ETHERNET
+target_compile_definitions(camera_streaming_ethernet PUBLIC
+    CAMERA_STREAMING_ETHERNET
 )
 
-target_link_libraries(image_server_ethernet
-    ${IMAGE_SERVER_LINK_LIBRARIES}
+target_link_libraries(camera_streaming_ethernet
+    ${CAMERA_STREAMING_LINK_LIBRARIES}
     libs_base-m7_ethernet
 )
 
 # WIFI
-add_executable_m7(image_server_wifi
-    ${IMAGE_SERVER_SRC}
+add_executable_m7(camera_streaming_wifi
+    ${CAMERA_STREAMING_SRC}
 )
 
-target_compile_definitions(image_server_wifi PUBLIC
-    IMAGE_SERVER_WIFI
+target_compile_definitions(camera_streaming_wifi PUBLIC
+    CAMERA_STREAMING_WIFI
 )
 
-target_link_libraries(image_server_wifi
-    ${IMAGE_SERVER_LINK_LIBRARIES}
+target_link_libraries(camera_streaming_wifi
+    ${CAMERA_STREAMING_LINK_LIBRARIES}
     libs_nxp_rt1176-sdk_wiced
 )
