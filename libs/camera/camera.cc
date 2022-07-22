@@ -29,11 +29,10 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm4/fsl_cache.h"
 #endif
 
+#include <cstring>
 #include <memory>
 
 namespace coralmicro {
-using namespace camera;
-
 namespace {
 constexpr uint8_t kCameraAddress = 0x24;
 constexpr int kFramebufferCount = 4;
@@ -44,48 +43,48 @@ constexpr float kUint8Max = 255.0;
 
 struct CameraRegisters {
   enum : uint16_t {
-    MODEL_ID_H = 0x0000,
-    MODEL_ID_L = 0x0001,
-    MODE_SELECT = 0x0100,
-    SW_RESET = 0x0103,
-    ANALOG_GAIN = 0x0205,
-    DIGITAL_GAIN_H = 0x020E,
-    DIGITAL_GAIN_L = 0x020F,
-    DGAIN_CONTROL = 0x0350,
-    TEST_PATTERN_MODE = 0x0601,
-    BLC_CFG = 0x1000,
-    BLC_DITHER = 0x1001,
-    BLC_DARKPIXEL = 0x1002,
-    BLC_TGT = 0x1003,
-    BLI_EN = 0x1006,
-    BLC2_TGT = 0x1007,
-    DPC_CTRL = 0x1008,
-    CLUSTER_THR_HOT = 0x1009,
-    CLUSTER_THR_COLD = 0x100A,
-    SINGLE_THR_HOT = 0x100B,
-    SINGLE_THR_COLD = 0x100C,
-    VSYNC_HSYNC_PIXEL_SHIFT_EN = 0x1012,
-    AE_CTRL = 0x2100,
-    AE_TARGET_MEAN = 0x2101,
-    AE_MIN_MEAN = 0x2102,
-    CONVERGE_IN_TH = 0x2103,
-    CONVERGE_OUT_TH = 0x2104,
-    MAX_INTG_H = 0x2105,
-    MAX_INTG_L = 0x2106,
-    MIN_INTG = 0x2107,
-    MAX_AGAIN_FULL = 0x2108,
-    MAX_AGAIN_BIN2 = 0x2109,
-    MIN_AGAIN = 0x210A,
-    MAX_DGAIN = 0x210B,
-    MIN_DGAIN = 0x210C,
-    DAMPING_FACTOR = 0x210D,
-    FS_CTRL = 0x210E,
-    FS_60HZ_H = 0x210F,
-    FS_60HZ_L = 0x2110,
-    FS_50HZ_H = 0x2111,
-    FS_50HZ_L = 0x2112,
-    BIT_CONTROL = 0x3059,
-    OSC_CLK_DIV = 0x3060,
+    kModelIdH = 0x0000,
+    kModelIdL = 0x0001,
+    kModeSelect = 0x0100,
+    kSwReset = 0x0103,
+    kAnalogGain = 0x0205,
+    kDigitalGainH = 0x020E,
+    kDigitalGainL = 0x020F,
+    kDgainControl = 0x0350,
+    kTestPatternMode = 0x0601,
+    kBlcCfg = 0x1000,
+    kBlcDither = 0x1001,
+    kBlcDarkpixel = 0x1002,
+    kBlcTgt = 0x1003,
+    kBliEn = 0x1006,
+    kBlc2Tgt = 0x1007,
+    kDpcCtrl = 0x1008,
+    kClusterThrHot = 0x1009,
+    kClusterThrCold = 0x100A,
+    kSingleThrHot = 0x100B,
+    kSingleThrCold = 0x100C,
+    kVsyncHsyncPixelShiftEn = 0x1012,
+    kAeCtrl = 0x2100,
+    kAeTargetMean = 0x2101,
+    kAeMinMean = 0x2102,
+    kConvergeInTh = 0x2103,
+    kConvergeOutTh = 0x2104,
+    kMaxIntgH = 0x2105,
+    kMaxIntgL = 0x2106,
+    kMinIntg = 0x2107,
+    kMaxAgainFull = 0x2108,
+    kMaxAgainBin2 = 0x2109,
+    kMinAgain = 0x210A,
+    kMaxDgain = 0x210B,
+    kMinDgain = 0x210C,
+    kDampingFactor = 0x210D,
+    kFsCtrl = 0x210E,
+    kFs60HzH = 0x210F,
+    kFs60HzL = 0x2110,
+    kFs50HzH = 0x2111,
+    kFs50HzL = 0x2112,
+    kBitControl = 0x3059,
+    kOscClkDiv = 0x3060,
   };
 };
 
@@ -149,10 +148,9 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
               GetSingleton()->test_pattern_ == CameraTestPattern::kNone) {
             AutoWhiteBalance(buffer_rgb.get(), kWidth, kHeight);
           }
-          ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, fmt.buffer,
-                                fmt.width, fmt.height,
-                                FormatToBPP(CameraFormat::kRgb),
-                                fmt.preserve_ratio);
+          ResizeNearestNeighbor(
+              buffer_rgb.get(), kWidth, kHeight, fmt.buffer, fmt.width,
+              fmt.height, FormatToBPP(CameraFormat::kRgb), fmt.preserve_ratio);
         }
         break;
         case CameraFormat::kY8: {
@@ -179,8 +177,8 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
             ret = false;
             break;
           }
-          memcpy(fmt.buffer, raw,
-                 kWidth * kHeight * FormatToBPP(CameraFormat::kRaw));
+          std::memcpy(fmt.buffer, raw,
+                      kWidth * kHeight * FormatToBPP(CameraFormat::kRaw));
           ret = true;
           break;
         default:
@@ -213,7 +211,7 @@ void CameraTask::ResizeNearestNeighbor(const uint8_t* src, int src_w, int src_h,
 
   for (int y = 0; y < dst_h; y++) {
     if (y >= scaled_h) {
-      memset(dst, 0, dst_p);
+      std::memset(dst, 0, dst_p);
       dst += dst_p;
       continue;
     }
@@ -379,7 +377,8 @@ void BayerInternal(const uint8_t* camera_raw, int width, int height,
   }
 }
 
-void RotateXY(CameraRotation rotation, int in_x, int in_y, int* out_x, int* out_y) {
+void RotateXY(CameraRotation rotation, int in_x, int in_y, int* out_x,
+              int* out_y) {
   CHECK(out_x);
   CHECK(out_y);
 
@@ -427,7 +426,7 @@ void RotateXY(CameraRotation rotation, int in_x, int in_y, int* out_x, int* out_
 void CameraTask::BayerToRGB(const uint8_t* camera_raw, uint8_t* camera_rgb,
                             int width, int height, CameraFilterMethod filter,
                             CameraRotation rotation) {
-  memset(camera_rgb, 0, width * height * 3);
+  std::memset(camera_rgb, 0, width * height * 3);
   BayerInternal(camera_raw, width, height, filter,
                 [camera_rgb, width, height, rotation](int x, int y, uint8_t r,
                                                       uint8_t g, uint8_t b) {
@@ -442,7 +441,7 @@ void CameraTask::BayerToRGB(const uint8_t* camera_raw, uint8_t* camera_rgb,
 void CameraTask::BayerToRGBA(const uint8_t* camera_raw, uint8_t* camera_rgba,
                              int width, int height, CameraFilterMethod filter,
                              CameraRotation rotation) {
-  memset(camera_rgba, 0, width * height * 4);
+  std::memset(camera_rgba, 0, width * height * 4);
   BayerInternal(camera_raw, width, height, filter,
                 [camera_rgba, width, height, rotation](int x, int y, uint8_t r,
                                                        uint8_t g, uint8_t b) {
@@ -591,10 +590,10 @@ void CameraTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
 }
 
 int CameraTask::GetFrame(uint8_t** buffer, bool block) {
-  Request req;
-  req.type = RequestType::kFrame;
+  camera::Request req;
+  req.type = camera::RequestType::kFrame;
   req.request.frame.index = -1;
-  Response resp;
+  camera::Response resp;
   do {
     resp = SendRequest(req);
   } while (block && resp.response.frame.index == -1);
@@ -603,8 +602,8 @@ int CameraTask::GetFrame(uint8_t** buffer, bool block) {
 }
 
 void CameraTask::ReturnFrame(int index) {
-  Request req;
-  req.type = RequestType::kFrame;
+  camera::Request req;
+  req.type = camera::RequestType::kFrame;
   req.request.frame.index = index;
   SendRequest(req);
 }
@@ -614,30 +613,30 @@ bool CameraTask::Enable(CameraMode mode) {
     printf("kStandBy is an invalid mode for CameraTask::Enable\r\n");
     return false;
   }
-  Request req;
-  req.type = RequestType::kEnable;
+  camera::Request req;
+  req.type = camera::RequestType::kEnable;
   req.request.mode = mode;
   SendRequest(req);
   return true;
 }
 
 void CameraTask::Disable() {
-  Request req;
-  req.type = RequestType::kDisable;
+  camera::Request req;
+  req.type = camera::RequestType::kDisable;
   SendRequest(req);
 }
 
 bool CameraTask::SetPower(bool enable) {
-  Request req;
-  req.type = RequestType::kPower;
+  camera::Request req;
+  req.type = camera::RequestType::kPower;
   req.request.power.enable = enable;
-  Response resp = SendRequest(req);
+  camera::Response resp = SendRequest(req);
   return resp.response.power.success;
 }
 
 void CameraTask::SetTestPattern(CameraTestPattern pattern) {
-  Request req;
-  req.type = RequestType::kTestPattern;
+  camera::Request req;
+  req.type = camera::RequestType::kTestPattern;
   req.request.test_pattern.pattern = pattern;
   SendRequest(req);
 }
@@ -645,8 +644,8 @@ void CameraTask::SetTestPattern(CameraTestPattern pattern) {
 void CameraTask::Trigger() { GpioSet(Gpio::kCameraTrigger, true); }
 
 void CameraTask::DiscardFrames(int count) {
-  Request req;
-  req.type = RequestType::kDiscard;
+  camera::Request req;
+  req.type = camera::RequestType::kDiscard;
   req.request.discard.count = count;
   SendRequest(req);
 }
@@ -667,7 +666,7 @@ void CameraTask::TaskInit() {
     return;
   }
 
-  PowerRequest req;
+  camera::PowerRequest req;
   req.enable = false;
   HandlePowerRequest(req);
 }
@@ -675,8 +674,8 @@ void CameraTask::TaskInit() {
 void CameraTask::SetDefaultRegisters() {
   // Taken from Tensorflow's configuration in the person detection sample
   /* Analog settings */
-  Write(CameraRegisters::BLC_TGT, 0x08);
-  Write(CameraRegisters::BLC2_TGT, 0x08);
+  Write(CameraRegisters::kBlcTgt, 0x08);
+  Write(CameraRegisters::kBlc2Tgt, 0x08);
   /* These registers are RESERVED in the datasheet,
    * but without them the picture is bad. */
   Write(0x3044, 0x0A);
@@ -691,55 +690,55 @@ void CameraTask::SetDefaultRegisters() {
   Write(0x3056, 0xF8);
   Write(0x3057, 0x29);
   Write(0x3058, 0x1F);
-  Write(CameraRegisters::BIT_CONTROL, 0x1E);
+  Write(CameraRegisters::kBitControl, 0x1E);
   /* Digital settings */
-  Write(CameraRegisters::BLC_CFG, 0x43);
-  Write(CameraRegisters::BLC_DITHER, 0x40);
-  Write(CameraRegisters::BLC_DARKPIXEL, 0x32);
-  Write(CameraRegisters::DGAIN_CONTROL, 0x7F);
-  Write(CameraRegisters::BLI_EN, 0x01);
-  Write(CameraRegisters::DPC_CTRL, 0x00);
-  Write(CameraRegisters::CLUSTER_THR_HOT, 0xA0);
-  Write(CameraRegisters::CLUSTER_THR_COLD, 0x60);
-  Write(CameraRegisters::SINGLE_THR_HOT, 0x90);
-  Write(CameraRegisters::SINGLE_THR_COLD, 0x40);
+  Write(CameraRegisters::kBlcCfg, 0x43);
+  Write(CameraRegisters::kBlcDither, 0x40);
+  Write(CameraRegisters::kBlcDarkpixel, 0x32);
+  Write(CameraRegisters::kDgainControl, 0x7F);
+  Write(CameraRegisters::kBliEn, 0x01);
+  Write(CameraRegisters::kDpcCtrl, 0x00);
+  Write(CameraRegisters::kClusterThrHot, 0xA0);
+  Write(CameraRegisters::kClusterThrCold, 0x60);
+  Write(CameraRegisters::kSingleThrHot, 0x90);
+  Write(CameraRegisters::kSingleThrCold, 0x40);
   /* AE settings */
-  Write(CameraRegisters::AE_CTRL, 0x01);
-  Write(CameraRegisters::AE_TARGET_MEAN, 0x5F);
-  Write(CameraRegisters::AE_MIN_MEAN, 0x0A);
-  Write(CameraRegisters::CONVERGE_IN_TH, 0x03);
-  Write(CameraRegisters::CONVERGE_OUT_TH, 0x05);
-  Write(CameraRegisters::MAX_INTG_H, 0x02);
-  Write(CameraRegisters::MAX_INTG_L, 0x14);
-  Write(CameraRegisters::MIN_INTG, 0x02);
-  Write(CameraRegisters::MAX_AGAIN_FULL, 0x03);
-  Write(CameraRegisters::MAX_AGAIN_BIN2, 0x03);
-  Write(CameraRegisters::MIN_AGAIN, 0x00);
-  Write(CameraRegisters::MAX_DGAIN, 0x80);
-  Write(CameraRegisters::MIN_DGAIN, 0x40);
-  Write(CameraRegisters::DAMPING_FACTOR, 0x20);
+  Write(CameraRegisters::kAeCtrl, 0x01);
+  Write(CameraRegisters::kAeTargetMean, 0x5F);
+  Write(CameraRegisters::kAeMinMean, 0x0A);
+  Write(CameraRegisters::kConvergeInTh, 0x03);
+  Write(CameraRegisters::kConvergeOutTh, 0x05);
+  Write(CameraRegisters::kMaxIntgH, 0x02);
+  Write(CameraRegisters::kMaxIntgL, 0x14);
+  Write(CameraRegisters::kMinIntg, 0x02);
+  Write(CameraRegisters::kMaxAgainFull, 0x03);
+  Write(CameraRegisters::kMaxAgainBin2, 0x03);
+  Write(CameraRegisters::kMinAgain, 0x00);
+  Write(CameraRegisters::kMaxDgain, 0x80);
+  Write(CameraRegisters::kMinDgain, 0x40);
+  Write(CameraRegisters::kDampingFactor, 0x20);
   /* 60Hz flicker */
-  Write(CameraRegisters::FS_CTRL, 0x03);
-  Write(CameraRegisters::FS_60HZ_H, 0x00);
-  Write(CameraRegisters::FS_60HZ_L, 0x85);
-  Write(CameraRegisters::FS_50HZ_H, 0x00);
-  Write(CameraRegisters::FS_50HZ_L, 0xA0);
+  Write(CameraRegisters::kFsCtrl, 0x03);
+  Write(CameraRegisters::kFs60HzH, 0x00);
+  Write(CameraRegisters::kFs60HzL, 0x85);
+  Write(CameraRegisters::kFs50HzH, 0x00);
+  Write(CameraRegisters::kFs50HzL, 0xA0);
 }
 
-EnableResponse CameraTask::HandleEnableRequest(const CameraMode& mode) {
-  EnableResponse resp;
+camera::EnableResponse CameraTask::HandleEnableRequest(const CameraMode& mode) {
+  camera::EnableResponse resp;
   status_t status;
 
   // Gated clock mode
   uint8_t osc_clk_div;
-  Read(CameraRegisters::OSC_CLK_DIV, &osc_clk_div);
+  Read(CameraRegisters::kOscClkDiv, &osc_clk_div);
   osc_clk_div |= 1 << 5;
-  Write(CameraRegisters::OSC_CLK_DIV, osc_clk_div);
+  Write(CameraRegisters::kOscClkDiv, osc_clk_div);
 
   SetDefaultRegisters();
 
   // Shifting
-  Write(CameraRegisters::VSYNC_HSYNC_PIXEL_SHIFT_EN, 0x0);
+  Write(CameraRegisters::kVsyncHsyncPixelShiftEn, 0x0);
 
   status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
 
@@ -764,8 +763,9 @@ void CameraTask::HandleDisableRequest() {
   CSI_TransferStop(CSI, &csi_handle_);
 }
 
-PowerResponse CameraTask::HandlePowerRequest(const PowerRequest& power) {
-  PowerResponse resp;
+camera::PowerResponse CameraTask::HandlePowerRequest(
+    const camera::PowerRequest& power) {
+  camera::PowerResponse resp;
   resp.success = true;
   PmicTask::GetSingleton()->SetRailState(PmicRail::kCam2V8, power.enable);
   PmicTask::GetSingleton()->SetRailState(PmicRail::kCam1V8, power.enable);
@@ -774,9 +774,9 @@ PowerResponse CameraTask::HandlePowerRequest(const PowerRequest& power) {
   if (power.enable) {
     uint8_t model_id_h = 0xff, model_id_l = 0xff;
     for (int i = 0; i < 10; ++i) {
-      Read(CameraRegisters::MODEL_ID_H, &model_id_h);
-      Read(CameraRegisters::MODEL_ID_L, &model_id_l);
-      Write(CameraRegisters::SW_RESET, 0x00);
+      Read(CameraRegisters::kModelIdH, &model_id_h);
+      Read(CameraRegisters::kModelIdL, &model_id_l);
+      Write(CameraRegisters::kSwReset, 0x00);
       if (model_id_h == kModelIdHExpected && model_id_l == kModelIdLExpected) {
         break;
       }
@@ -791,8 +791,9 @@ PowerResponse CameraTask::HandlePowerRequest(const PowerRequest& power) {
   return resp;
 }
 
-FrameResponse CameraTask::HandleFrameRequest(const FrameRequest& frame) {
-  FrameResponse resp;
+camera::FrameResponse CameraTask::HandleFrameRequest(
+    const camera::FrameRequest& frame) {
+  camera::FrameResponse resp;
   resp.index = -1;
   uint32_t buffer;
   if (frame.index == -1) {  // GET
@@ -811,28 +812,28 @@ FrameResponse CameraTask::HandleFrameRequest(const FrameRequest& frame) {
 }
 
 void CameraTask::HandleTestPatternRequest(
-    const TestPatternRequest& test_pattern) {
+    const camera::TestPatternRequest& test_pattern) {
   if (test_pattern.pattern == CameraTestPattern::kNone) {
     SetDefaultRegisters();
   } else {
-    Write(CameraRegisters::AE_CTRL, 0x00);
-    Write(CameraRegisters::BLC_CFG, 0x00);
-    Write(CameraRegisters::DPC_CTRL, 0x00);
-    Write(CameraRegisters::ANALOG_GAIN, 0x00);
-    Write(CameraRegisters::DIGITAL_GAIN_H, 0x01);
-    Write(CameraRegisters::DIGITAL_GAIN_L, 0x00);
+    Write(CameraRegisters::kAeCtrl, 0x00);
+    Write(CameraRegisters::kBlcCfg, 0x00);
+    Write(CameraRegisters::kDpcCtrl, 0x00);
+    Write(CameraRegisters::kAnalogGain, 0x00);
+    Write(CameraRegisters::kDigitalGainH, 0x01);
+    Write(CameraRegisters::kDigitalGainL, 0x00);
   }
-  Write(CameraRegisters::TEST_PATTERN_MODE,
+  Write(CameraRegisters::kTestPatternMode,
         static_cast<uint8_t>(test_pattern.pattern));
   test_pattern_ = test_pattern.pattern;
 }
 
-void CameraTask::HandleDiscardRequest(const DiscardRequest& discard) {
+void CameraTask::HandleDiscardRequest(const camera::DiscardRequest& discard) {
   int discarded = 0;
   while (discarded < discard.count) {
-    FrameRequest request;
+    camera::FrameRequest request;
     request.index = -1;
-    FrameResponse resp = HandleFrameRequest(request);
+    camera::FrameResponse resp = HandleFrameRequest(request);
     if (resp.index != -1) {
       // Return the frame, and increment the discard counter.
       discarded++;
@@ -843,30 +844,30 @@ void CameraTask::HandleDiscardRequest(const DiscardRequest& discard) {
 }
 
 void CameraTask::SetMode(const CameraMode& mode) {
-  Write(CameraRegisters::MODE_SELECT, static_cast<uint8_t>(mode));
+  Write(CameraRegisters::kModeSelect, static_cast<uint8_t>(mode));
   mode_ = mode;
 }
 
-void CameraTask::RequestHandler(Request* req) {
-  Response resp;
+void CameraTask::RequestHandler(camera::Request* req) {
+  camera::Response resp;
   resp.type = req->type;
   switch (req->type) {
-    case RequestType::kEnable:
+    case camera::RequestType::kEnable:
       resp.response.enable = HandleEnableRequest(req->request.mode);
       break;
-    case RequestType::kDisable:
+    case camera::RequestType::kDisable:
       HandleDisableRequest();
       break;
-    case RequestType::kPower:
+    case camera::RequestType::kPower:
       resp.response.power = HandlePowerRequest(req->request.power);
       break;
-    case RequestType::kFrame:
+    case camera::RequestType::kFrame:
       resp.response.frame = HandleFrameRequest(req->request.frame);
       break;
-    case RequestType::kTestPattern:
+    case camera::RequestType::kTestPattern:
       HandleTestPatternRequest(req->request.test_pattern);
       break;
-    case RequestType::kDiscard:
+    case camera::RequestType::kDiscard:
       HandleDiscardRequest(req->request.discard);
       break;
   }
