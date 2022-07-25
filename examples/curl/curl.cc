@@ -23,6 +23,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/gpio.h"
+#include "libs/base/strings.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/dns.h"
@@ -51,18 +52,14 @@ struct DnsCallbackArg {
   ip_addr_t* ip_addr;
 };
 
-size_t curl_writefunction(void* contents, size_t size, size_t nmemb,
-                          void* param) {
-  size_t* bytes_curled = reinterpret_cast<size_t*>(param);
-  *bytes_curled = *bytes_curled + (size * nmemb);
+size_t CurlWrite(void* contents, size_t size, size_t nmemb, void* param) {
+  auto* bytes_curled = static_cast<size_t*>(param);
+  *bytes_curled += size * nmemb;
   return size * nmemb;
 }
 
-void CURLRequest(const char* url) {
-  CURL* curl;
-  CURLcode res;
-
-  curl = curl_easy_init();
+void CurlRequest(const char* url) {
+  CURL* curl = curl_easy_init();
   printf("Curling %s\r\n", url);
   if (curl) {
     size_t bytes_curled = 0;
@@ -70,8 +67,8 @@ void CURLRequest(const char* url) {
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes_curled);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunction);
-    res = curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite);
+    CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
       printf("curl_easy_perform failed: %s\r\n", curl_easy_strerror(res));
     } else {
@@ -82,34 +79,33 @@ void CURLRequest(const char* url) {
   }
 }
 
-bool PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
-  DnsCallbackArg dns_arg;
-  dns_arg.ip_addr = addr;
-  dns_arg.sema = xSemaphoreCreateBinary();
-  dns_arg.hostname = hostname;
+void PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
+  DnsCallbackArg arg;
+  arg.ip_addr = addr;
+  arg.sema = xSemaphoreCreateBinary();
+  arg.hostname = hostname;
+  CHECK(arg.sema);
   tcpip_callback(
       [](void* ctx) {
-        DnsCallbackArg* dns_arg = static_cast<DnsCallbackArg*>(ctx);
+        auto* arg = static_cast<DnsCallbackArg*>(ctx);
         dns_gethostbyname(
-            dns_arg->hostname, dns_arg->ip_addr,
+            arg->hostname, arg->ip_addr,
             [](const char* name, const ip_addr_t* ipaddr, void* callback_arg) {
-              DnsCallbackArg* dns_arg =
-                  reinterpret_cast<DnsCallbackArg*>(callback_arg);
-              if (ipaddr) {
-                memcpy(dns_arg->ip_addr, ipaddr, sizeof(*ipaddr));
+              auto* arg = static_cast<DnsCallbackArg*>(callback_arg);
+              if (ipaddr != nullptr) {
+                ip4_addr_copy(*arg->ip_addr, *ipaddr);
               }
-              xSemaphoreGive(dns_arg->sema);
+              CHECK(xSemaphoreGive(arg->sema) == pdTRUE);
             },
-            dns_arg);
+            arg);
       },
-      &dns_arg);
-  xSemaphoreTake(dns_arg.sema, portMAX_DELAY);
-  vSemaphoreDelete(dns_arg.sema);
-  return true;
+      &arg);
+  CHECK(xSemaphoreTake(arg.sema, portMAX_DELAY) == pdTRUE);
+  vSemaphoreDelete(arg.sema);
 }
 
 void Main() {
-  std::optional<std::string> our_ip_addr = std::nullopt;
+  std::optional<std::string> our_ip_addr;
 #if defined(CURL_ETHERNET)
   printf("Attempting to use ethernet...\r\n");
   CHECK(coralmicro::EthernetInit(/*default_iface=*/true));
@@ -118,8 +114,7 @@ void Main() {
   printf("Attempting to use Wi-Fi...\r\n");
   // Uncomment me to use the external antenna.
   // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);
-  bool success = false;
-  success = coralmicro::WiFiTurnOn();
+  bool success = coralmicro::WiFiTurnOn();
   if (!success) {
     printf("Failed to turn on Wi-Fi\r\n");
     return;
@@ -142,19 +137,21 @@ void Main() {
 
   const char* hostname = "www.example.com";
   ip_addr_t dns_ip_addr;
+  ip4_addr_set_any(&dns_ip_addr);
   PerformDnsLookup(hostname, &dns_ip_addr);
-  printf("%s -> %s\r\n", hostname, ipaddr_ntoa(&dns_ip_addr));
+  if (!ip4_addr_isany(&dns_ip_addr)) {
+    printf("%s -> %s\r\n", hostname, ipaddr_ntoa(&dns_ip_addr));
+  } else {
+    printf("Cannot resolve %s host name\r\n", hostname);
+    return;
+  }
 
   curl_global_init(CURL_GLOBAL_ALL);
-  const char* uri_fmt = "http://%s:80/";
-  int size = snprintf(nullptr, 0, uri_fmt, hostname);
-  auto uri = std::make_unique<char>(size + 1);
-  snprintf(uri.get(), size + 1, uri_fmt, hostname);
-  CURLRequest(uri.get());
+  std::string uri;
+  StrAppend(&uri, "http://%s:80/", hostname);
+  CurlRequest(uri.c_str());
   curl_global_cleanup();
   printf("Done.\r\n");
-
-  vTaskSuspend(nullptr);
 }
 }  // namespace
 }  // namespace coralmicro
