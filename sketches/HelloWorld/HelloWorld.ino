@@ -1,8 +1,5 @@
 #include <stdio.h>
 
-void setup() {
-    printf("Hello from Arduino world\r\n");
-}
+void setup() { printf("Hello from Arduino world\r\n"); }
 
-void loop() {
-}
+void loop() {}

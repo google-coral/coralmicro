@@ -5,24 +5,24 @@ volatile int samplesRead = 0;
 std::vector<int32_t> currentSamples;
 
 void setup() {
-    Serial.begin(115200);
+  Serial.begin(115200);
 
-    Mic.onReceive(onPDMData);
-    Mic.begin();
+  Mic.onReceive(onPDMData);
+  Mic.begin();
 }
 
 void loop() {
-    if (samplesRead) {
-        samplesRead = 0;
-        Serial.println(currentSamples[0]);
-    }
+  if (samplesRead) {
+    samplesRead = 0;
+    Serial.println(currentSamples[0]);
+  }
 }
 
 void onPDMData() {
-    samplesRead = Mic.available();
+  samplesRead = Mic.available();
 
-    if (samplesRead) {
-        currentSamples.clear();
-        Mic.read(currentSamples, samplesRead);
-    }
+  if (samplesRead) {
+    currentSamples.clear();
+    Mic.read(currentSamples, samplesRead);
+  }
 }

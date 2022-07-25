@@ -10,11 +10,11 @@ int buttonPin = PIN_BTN;
 PinStatus val = LOW;
 
 void setup() {
-    pinMode(ledPin, OUTPUT);
-    pinMode(buttonPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin, INPUT);
 }
 
 void loop() {
-    val = digitalRead(buttonPin);
-    digitalWrite(ledPin, val == LOW ? HIGH : LOW);
+  val = digitalRead(buttonPin);
+  digitalWrite(ledPin, val == LOW ? HIGH : LOW);
 }

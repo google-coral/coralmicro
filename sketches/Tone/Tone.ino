@@ -10,10 +10,10 @@ constexpr int Pin9 = A4;
 void setup() {}
 
 void loop() {
-    tone(/*pin=*/Pin10, /*frequency=*/1000);
-    delay(1000);
-    noTone(Pin10);
-    tone(/*pin=*/Pin9, /*frequency=*/2000);
-    delay(1000);
-    noTone(Pin9);
+  tone(/*pin=*/Pin10, /*frequency=*/1000);
+  delay(1000);
+  noTone(Pin10);
+  tone(/*pin=*/Pin9, /*frequency=*/2000);
+  delay(1000);
+  noTone(Pin9);
 }

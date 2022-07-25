@@ -15,7 +15,7 @@ void loop() {
   for (int bitOrder = 0; bitOrder <= 1; bitOrder++) {
     for (int spiMode = 0; spiMode <= 3; spiMode++) {
       SPI.updateSettings(arduino::SPISettings(clockFreq, BitOrder(bitOrder),
-                                                arduino::SPIMode(spiMode)));
+                                              arduino::SPIMode(spiMode)));
       Serial.println(SPI.transfer16(0x1234));
 
       Serial.println(SPI.transfer(0x01));

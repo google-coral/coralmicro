@@ -7,12 +7,10 @@ void setup() {
   Serial.begin(115200);
 }
 
-void loop() {
-  delay(100);
-}
+void loop() { delay(100); }
 
 void receiveEvent(int n) {
-  while(Wire.available() > 1) {
+  while (Wire.available() > 1) {
     char c = Wire.read();
     Serial.print(c);
   }

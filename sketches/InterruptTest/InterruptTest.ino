@@ -6,12 +6,12 @@
   This example code is in the public domain.
 
 */
-                           // Board pin
-const int buttonPin0 = D0; // SCL6
-const int buttonPin1 = D1; // RTS
-const int buttonPin2 = D2; // CTS
-const int buttonPin3 = D3; // SDA6
-const int buttonPin4 = D4; // User button
+// Board pin
+const int buttonPin0 = D0;  // SCL6
+const int buttonPin1 = D1;  // RTS
+const int buttonPin2 = D2;  // CTS
+const int buttonPin3 = D3;  // SDA6
+const int buttonPin4 = D4;  // User button
 volatile int counter0 = 0;
 volatile int counter1 = 0;
 volatile int counter2 = 0;
@@ -47,23 +47,12 @@ void loop() {
   delay(500);
 }
 
-void pin0_ISR() {
-  counter0++;
-}
+void pin0_ISR() { counter0++; }
 
-void pin1_ISR() {
-  counter1++;
-}
+void pin1_ISR() { counter1++; }
 
-void pin2_ISR() {
-  counter2++;
-}
+void pin2_ISR() { counter2++; }
 
-void pin3_ISR() {
-  counter3++;
-}
+void pin3_ISR() { counter3++; }
 
-void pin4_ISR() {
-  counter4++;
-}
-
+void pin4_ISR() { counter4++; }

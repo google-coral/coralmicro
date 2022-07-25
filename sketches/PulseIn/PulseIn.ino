@@ -21,17 +21,17 @@ constexpr int Button = PIN_BTN;
 unsigned long duration;
 
 void setup() {
-    Serial.begin(115200);
-    delay(1000);
-    Serial.println("Starting");
-    pinMode(Button, INPUT);
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println("Starting");
+  pinMode(Button, INPUT);
 }
 
 void loop() {
-    duration = pulseIn(Button, HIGH);
-    Serial.print("pulseIn duration: ");
-    Serial.println(duration);
-    duration = pulseInLong(Button, HIGH);
-    Serial.print("pulseInLong duration: ");
-    Serial.println(duration);
+  duration = pulseIn(Button, HIGH);
+  Serial.print("pulseIn duration: ");
+  Serial.println(duration);
+  duration = pulseInLong(Button, HIGH);
+  Serial.print("pulseInLong duration: ");
+  Serial.println(duration);
 }
