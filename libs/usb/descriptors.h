@@ -132,6 +132,12 @@ struct CdcEemClassDescriptor {
   EndpointDescriptor out_ep;
 } __attribute__((packed));
 
+struct MscUmsClassDescriptor {
+  InterfaceDescriptor iface;
+  EndpointDescriptor in_ep;
+  EndpointDescriptor out_ep;
+} __attribute__((packed));
+
 struct HidDescriptor {
   uint8_t length;
   uint8_t type;

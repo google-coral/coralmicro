@@ -12,8 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ELFLoader)
-add_subdirectory(MFGTest)
-add_subdirectory(RackTest)
-add_subdirectory(multicore_model_cascade)
-add_subdirectory(usb_drive)
+cmake_minimum_required(VERSION 3.13)
+project(usb_drive)
+
+include_directories(.)
+
+add_executable_m7(usb_drive
+    usb_drive.cc
+)
+
+target_include_directories(usb_drive PRIVATE
+    .
+)
+
+target_link_libraries(usb_drive
+    libs_base-ums_freertos
+)

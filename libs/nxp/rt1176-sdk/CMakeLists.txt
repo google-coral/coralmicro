@@ -21,6 +21,8 @@ set(libs_nxp_rt1176-sdk_SOURCES
     board_hardware.c
     clock_config.c
     usb_device_cdc_eem.c
+    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_msc.c
+    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_msc_ufi.c
     ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/board.c
     ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/pin_mux.c
     ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/usb_device_class.c

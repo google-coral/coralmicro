@@ -101,6 +101,26 @@ target_link_libraries(libs_base-m7_http_server
     libs_nxp_rt1176-sdk_lwip_httpd
 )
 
+add_library_m7(libs_base-ums_freertos STATIC
+    console_m7.cc
+    gpio.cc
+    main_freertos_ums.cc
+    random.cc
+    reset.cc
+    tempsense.cc
+    timer.cc
+    utils.cc
+)
+
+target_link_libraries(libs_base-ums_freertos
+    libs_nxp_rt1176-sdk-mbedtls
+    libs_nxp_rt1176-sdk_freertos
+    libs_nxp_rt1176-sdk-mcmgr_m7
+    libs_usb_device_task_freertos
+    libs_msc_ums_freertos
+    ${libs_base-m7_freertos_LINK_LIBRARIES_REVISION}
+)
+
 add_library_m4(libs_base-m4_freertos STATIC
     console_m4.cc
     filesystem.cc

@@ -58,7 +58,7 @@
 #define USB_DEVICE_CONFIG_CDC_RNDIS (0U)
 
 /*! @brief MSC instance count */
-#define USB_DEVICE_CONFIG_MSC (0U)
+#define USB_DEVICE_CONFIG_MSC (1U)
 
 /*! @brief Audio instance count */
 #define USB_DEVICE_CONFIG_AUDIO (0U)

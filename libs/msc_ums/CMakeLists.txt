@@ -12,8 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ELFLoader)
-add_subdirectory(MFGTest)
-add_subdirectory(RackTest)
-add_subdirectory(multicore_model_cascade)
-add_subdirectory(usb_drive)
+cmake_minimum_required(VERSION 3.13)
+
+set(libs_msc_ums_SOURCES
+    msc_ums.cc
+)
+
+add_library_m7(libs_msc_ums_freertos STATIC
+    ${libs_msc_ums_SOURCES}
+)
+target_link_libraries(libs_msc_ums_freertos
+    libs_base-m7_freertos
+)
