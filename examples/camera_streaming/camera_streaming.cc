@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cstdio>
+#include <optional>
 
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"
@@ -36,105 +37,86 @@ using coralmicro::testlib::JsonRpcGetBooleanParam;
 using coralmicro::testlib::JsonRpcGetIntegerParam;
 using coralmicro::testlib::JsonRpcGetStringParam;
 
-bool FormatStringToFormat(const std::string& format_string,
-                          coralmicro::CameraFormat* format) {
-  if (format_string == "RGB") {
-    *format = coralmicro::CameraFormat::kRgb;
-    return true;
-  }
-  if (format_string == "GRAY") {
-    *format = coralmicro::CameraFormat::kY8;
-    return true;
-  }
-  if (format_string == "RAW") {
-    *format = coralmicro::CameraFormat::kRaw;
-    return true;
-  }
-  return false;
+std::optional<coralmicro::CameraFormat> CheckCameraFormat(
+    const std::string& format) {
+  if (format == "RGB") return coralmicro::CameraFormat::kRgb;
+
+  if (format == "GRAY") return coralmicro::CameraFormat::kY8;
+
+  if (format == "RAW") return coralmicro::CameraFormat::kRaw;
+
+  return std::nullopt;
 }
 
-bool FilterStringToFilter(const std::string& filter_string,
-                          coralmicro::CameraFilterMethod* filter) {
-  if (filter_string == "BILINEAR") {
-    *filter = coralmicro::CameraFilterMethod::kBilinear;
-    return true;
-  }
-  if (filter_string == "NEAREST_NEIGHBOR") {
-    *filter = coralmicro::CameraFilterMethod::kNearestNeighbor;
-    return true;
-  }
-  return false;
+std::optional<coralmicro::CameraFilterMethod> CheckCameraFilterMethod(
+    const std::string& method) {
+  if (method == "BILINEAR") return coralmicro::CameraFilterMethod::kBilinear;
+
+  if (method == "NEAREST_NEIGHBOR")
+    return coralmicro::CameraFilterMethod::kNearestNeighbor;
+
+  return std::nullopt;
 }
 
-bool RotationIntToRotation(const int& rotation_int,
-                           coralmicro::CameraRotation* rotation) {
-  switch (rotation_int) {
+std::optional<coralmicro::CameraRotation> CheckCameraRotation(int rotation) {
+  switch (rotation) {
     case 0:
-      *rotation = coralmicro::CameraRotation::k0;
-      return true;
+      return coralmicro::CameraRotation::k0;
     case 90:
-      *rotation = coralmicro::CameraRotation::k90;
-      return true;
+      return coralmicro::CameraRotation::k90;
     case 180:
-      *rotation = coralmicro::CameraRotation::k180;
-      return true;
+      return coralmicro::CameraRotation::k180;
     case 270:
-      *rotation = coralmicro::CameraRotation::k270;
-      return true;
+      return coralmicro::CameraRotation::k270;
     default:
-      return false;
+      return std::nullopt;
   }
 }
 
-void get_image_from_camera(struct jsonrpc_request* request) {
-  int width = coralmicro::CameraTask::kWidth;
-  int height = coralmicro::CameraTask::kHeight;
-  auto format = coralmicro::CameraFormat::kRgb;
-  auto filter = coralmicro::CameraFilterMethod::kBilinear;
-  auto rotation = coralmicro::CameraRotation::k0;
-  bool auto_white_balance = true;
+void GetImageFromCamera(struct jsonrpc_request* request) {
+  using coralmicro::CameraTask;
 
-  std::string format_rpc, filter_rpc;
-  int rotation_rpc;
-  bool awb_rpc;
-  if (!JsonRpcGetIntegerParam(request, "width", &width)) {
-    return;
-  }
-  if (!JsonRpcGetIntegerParam(request, "height", &height)) {
-    return;
-  }
-  if (!JsonRpcGetStringParam(request, "format", &format_rpc)) {
-    return;
-  }
-  if (!JsonRpcGetStringParam(request, "filter", &filter_rpc)) {
-    return;
-  }
-  if (!JsonRpcGetIntegerParam(request, "rotation", &rotation_rpc)) {
-    return;
-  }
-  if (!JsonRpcGetBooleanParam(request, "auto_white_balance", &awb_rpc)) {
-    return;
-  }
+  int width;
+  if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
 
-  if (!FormatStringToFormat(format_rpc, &format)) {
+  int height;
+  if (!JsonRpcGetIntegerParam(request, "height", &height)) return;
+
+  std::string format_rpc;
+  if (!JsonRpcGetStringParam(request, "format", &format_rpc)) return;
+
+  auto format = CheckCameraFormat(format_rpc);
+  if (!format.has_value()) {
     jsonrpc_return_error(request, -1, "Unknown 'format'", nullptr);
     return;
   }
-  if (!FilterStringToFilter(filter_rpc, &filter)) {
+
+  std::string filter_rpc;
+  if (!JsonRpcGetStringParam(request, "filter", &filter_rpc)) return;
+
+  auto filter = CheckCameraFilterMethod(filter_rpc);
+  if (!filter.has_value()) {
     jsonrpc_return_error(request, -1, "Unknown 'filter'", nullptr);
     return;
   }
-  if (!RotationIntToRotation(rotation_rpc, &rotation)) {
+
+  int rotation_rpc;
+  if (!JsonRpcGetIntegerParam(request, "rotation", &rotation_rpc)) return;
+
+  auto rotation = CheckCameraRotation(rotation_rpc);
+  if (!rotation.has_value()) {
     jsonrpc_return_error(request, -1, "Unknown 'rotation'", nullptr);
     return;
   }
 
+  bool awb;
+  if (!JsonRpcGetBooleanParam(request, "auto_white_balance", &awb)) return;
+
   //! [camera-stream] Doxygen snippet for camera.h
   std::vector<uint8_t> image(width * height *
-                             coralmicro::CameraTask::FormatToBPP(format));
-  coralmicro::CameraFrameFormat fmt{
-      format, filter, rotation,     width,
-      height, false,  image.data(), auto_white_balance};
+                             coralmicro::CameraTask::FormatToBPP(*format));
+  coralmicro::CameraFrameFormat fmt{*format, *filter, *rotation,    width,
+                                    height,  false,   image.data(), awb};
   auto ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
   //! [camera-stream] End snippet
 
@@ -158,19 +140,21 @@ extern "C" void app_main(void* param) {
     printf("Unable to bring up ethernet...\r\n");
     vTaskSuspend(nullptr);
   }
+
   auto ethernet_ip = coralmicro::EthernetGetIp();
   if (!ethernet_ip.has_value()) {
     printf("Unable to get Ethernet IP\r\n");
     vTaskSuspend(nullptr);
   }
-  printf("Starting Image RPC Server on: %s\r\n", ethernet_ip.value().c_str());
+
+  printf("Starting Image RPC Server on: %s\r\n", ethernet_ip->c_str());
   jsonrpc_init(nullptr, &ethernet_ip.value());
-  jsonrpc_export("get_ethernet_ip", [](struct jsonrpc_request* request) {
-    jsonrpc_return_success(
-        request, "{%Q: %Q}", "ethernet_ip",
-        reinterpret_cast<std::string*>(request->ctx->response_cb_data)
-            ->c_str());
-  });
+  jsonrpc_export(
+      "get_ethernet_ip", +[](struct jsonrpc_request* request) {
+        jsonrpc_return_success(
+            request, "{%Q: %Q}", "ethernet_ip",
+            static_cast<std::string*>(request->ctx->response_cb_data)->c_str());
+      });
 #elif defined(CAMERA_STREAMING_WIFI)
   if (!coralmicro::WiFiTurnOn()) {
     printf("Unable to bring up WiFi...\r\n");
@@ -180,15 +164,16 @@ extern "C" void app_main(void* param) {
     printf("Unable to connect to WiFi...\r\n");
     vTaskSuspend(nullptr);
   }
-  if (auto wifi_ip = coralmicro::WiFiGetIp(); wifi_ip.has_value()) {
-    printf("Starting Image RPC Server on: %s\r\n", wifi_ip.value().c_str());
+  if (auto wifi_ip = coralmicro::WiFiGetIp()) {
+    printf("Starting Image RPC Server on: %s\r\n", wifi_ip->c_str());
     jsonrpc_init(nullptr, &wifi_ip.value());
-    jsonrpc_export("wifi_get_ip", [](struct jsonrpc_request* request) {
-      jsonrpc_return_success(
-          request, "{%Q: %Q}", "wifi_ip",
-          reinterpret_cast<std::string*>(request->ctx->response_cb_data)
-              ->c_str());
-    });
+    jsonrpc_export(
+        "wifi_get_ip", +[](struct jsonrpc_request* request) {
+          jsonrpc_return_success(
+              request, "{%Q: %Q}", "wifi_ip",
+              static_cast<std::string*>(request->ctx->response_cb_data)
+                  ->c_str());
+        });
   } else {
     printf("Failed to get Wifi Ip\r\n");
     vTaskSuspend(nullptr);
@@ -208,7 +193,7 @@ extern "C" void app_main(void* param) {
   coralmicro::CameraTask::GetSingleton()->Enable(
       coralmicro::CameraMode::kStreaming);
 
-  jsonrpc_export("get_image_from_camera", get_image_from_camera);
+  jsonrpc_export("get_image_from_camera", GetImageFromCamera);
   coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
   vTaskSuspend(nullptr);
 }
