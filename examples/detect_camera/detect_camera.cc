@@ -71,10 +71,6 @@ void DetectFromCamera(struct jsonrpc_request* r) {
 
   printf("width=%d; height=%d\n\r", model_width, model_height);
 
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kStreaming);
-
   std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
   coralmicro::CameraFrameFormat fmt{
       coralmicro::CameraFormat::kRgb,
@@ -85,10 +81,8 @@ void DetectFromCamera(struct jsonrpc_request* r) {
       false,
       image.data()};
 
+  coralmicro::CameraTask::GetSingleton()->Trigger();
   bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
-
-  coralmicro::CameraTask::GetSingleton()->Disable();
-  coralmicro::CameraTask::GetSingleton()->SetPower(false);
 
   if (!ret) {
     jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
@@ -154,6 +148,11 @@ extern "C" void app_main(void* param) {
     printf("ERROR: Model must have only one input tensor\r\n");
     vTaskSuspend(nullptr);
   }
+
+  // Starting Camera.
+  coralmicro::CameraTask::GetSingleton()->SetPower(true);
+  coralmicro::CameraTask::GetSingleton()->Enable(
+      coralmicro::CameraMode::kTrigger);
 
   printf("Initializing detection server...%p\r\n", &interpreter);
   jsonrpc_init(nullptr, &interpreter);

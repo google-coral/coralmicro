@@ -56,15 +56,14 @@ constexpr char kModelPath[] =
     "/models/keras_post_training_unet_mv2_128_quant_edgetpu.tflite";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
+
 void SegmentFromCamera(struct jsonrpc_request* r) {
   auto* interpreter =
       reinterpret_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
   auto* input_tensor = interpreter->input_tensor(0);
   int model_height = input_tensor->dims->data[1];
   int model_width = input_tensor->dims->data[2];
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kStreaming);
+
   std::vector<uint8_t> image(
       model_width * model_height *
       coralmicro::CameraTask::FormatToBPP(coralmicro::CameraFormat::kRgb));
@@ -76,11 +75,10 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
       model_height,
       false,
       image.data()};
-  // Discard the first frame to ensure no power-on artifacts exist.
+
+  coralmicro::CameraTask::GetSingleton()->Trigger();
   bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
-  ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
-  coralmicro::CameraTask::GetSingleton()->Disable();
-  coralmicro::CameraTask::GetSingleton()->SetPower(false);
+
   if (!ret) {
     jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
     return;
@@ -99,6 +97,7 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
                          image.size(), image.data(), "output_mask", mask_size,
                          output_mask);
 }
+
 void Main() {
   std::vector<uint8_t> model;
   if (!coralmicro::LfsReadFile(kModelPath, &model)) {
@@ -126,6 +125,12 @@ void Main() {
     printf("ERROR: Model must have only one input tensor\r\n");
     vTaskSuspend(nullptr);
   }
+
+  // Starting Camera.
+  coralmicro::CameraTask::GetSingleton()->SetPower(true);
+  coralmicro::CameraTask::GetSingleton()->Enable(
+      coralmicro::CameraMode::kTrigger);
+
   printf("Initializing segmentation server...%p\r\n", &interpreter);
   jsonrpc_init(nullptr, &interpreter);
   jsonrpc_export("segment_from_camera", SegmentFromCamera);
@@ -135,6 +140,7 @@ void Main() {
 }
 }  // namespace
 }  // namespace coralmicro
+
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();

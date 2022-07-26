@@ -60,10 +60,6 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
   int model_height = input_tensor->dims->data[1];
   int model_width = input_tensor->dims->data[2];
 
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kStreaming);
-
   // If the model name includes "bayered", provide the raw datastream from the
   // camera.
   bool bayered = strstr(kModelPath, "bayered");
@@ -80,11 +76,8 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
       false,
       image.data()};
 
-  // Discard the first frame to ensure no power-on artifacts exist.
+  coralmicro::CameraTask::GetSingleton()->Trigger();
   bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
-  ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
-  coralmicro::CameraTask::GetSingleton()->Disable();
-  coralmicro::CameraTask::GetSingleton()->SetPower(false);
 
   if (!ret) {
     jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
@@ -145,6 +138,11 @@ extern "C" void app_main(void* param) {
     printf("ERROR: Model must have only one input tensor\r\n");
     vTaskSuspend(nullptr);
   }
+
+  // Starting Camera.
+  coralmicro::CameraTask::GetSingleton()->SetPower(true);
+  coralmicro::CameraTask::GetSingleton()->Enable(
+      coralmicro::CameraMode::kTrigger);
 
   printf("Initializing classification server...%p\r\n", &interpreter);
   jsonrpc_init(nullptr, &interpreter);
