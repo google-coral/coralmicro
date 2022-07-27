@@ -43,20 +43,21 @@ pwm_module_control_t PwmModuleToControl(pwm_submodule_t module) {
 
 }  // namespace
 
-std::optional<PwmPinSetting> PwmGetPinSetting(int pin) {
+PwmPinSetting PwmPinSettingFor(PwmPin pin) {
   PwmPinSetting setting{};
   setting.base = PWM1;
   setting.sub_module = kPWM_Module_0;
   switch (pin) {
-    case kPwmPin10:
+    case PwmPin::k10:
       setting.pwm_channel = kPWM_PwmA;
-      return setting;
-    case kPwmPin9:
+      break;
+    case PwmPin::k9:
       setting.pwm_channel = kPWM_PwmB;
-      return setting;
+      break;
     default:
-      return std::nullopt;
+      CHECK(!"Invalid pin");
   }
+  return setting;
 }
 
 void PwmInit() {

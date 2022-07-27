@@ -28,8 +28,10 @@ namespace coralmicro {
 // PWM_A (pin 10 on the left-side header)
 // PWM_B (pin 9 on the left-side header).
 // Note: These pins output a max of 1.8V
-inline constexpr int kPwmPin10 = 10;
-inline constexpr int kPwmPin9 = 9;
+enum class PwmPin {
+  k9,
+  k10,
+};
 
 // Represents a PWM Pin's HW setting.
 struct PwmPinSetting {
@@ -55,7 +57,7 @@ struct PwmPinConfig {
 //
 // @param pin The pin to get settings for.
 // @return A setting for the pin or a std::nullopt.
-std::optional<PwmPinSetting> PwmGetPinSetting(int pin);
+PwmPinSetting PwmPinSettingFor(PwmPin pin);
 
 // Initializes the PWM module.
 void PwmInit();

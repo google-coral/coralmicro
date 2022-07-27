@@ -82,11 +82,11 @@ void analogWrite(pin_size_t pinNumber, int value) {
     switch (pinNumber) {
         case A3:  // Pwm pin 10.
             pwm_pin_setting =
-                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
+                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
             break;
         case A4:  // Pwm pin 9.
             pwm_pin_setting =
-                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value();
+                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
             break;
         case DAC0:
             analogWriteDAC(pinNumber, value);
@@ -120,11 +120,11 @@ void tone(uint8_t pin, unsigned int frequency, unsigned long duration) {
     switch (pin) {
         case A4:  // Pwm pin 9.
             pwm_pin_setting =
-                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value();
+                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
             break;
         case A3:  // Pwm pin 10.
             pwm_pin_setting =
-                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
+                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
             break;
         default:
             assert(false);
@@ -144,11 +144,11 @@ void noTone(uint8_t pin) {
     switch (pin) {
         case A4:  // Pwm pin 9.
             pwm_pin_setting =
-                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin9).value();
+                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
             break;
         case A3:  // Pwm pin 10.
             pwm_pin_setting =
-                coralmicro::PwmGetPinSetting(coralmicro::kPwmPin10).value();
+                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
             break;
         default:
             assert(false);
