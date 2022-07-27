@@ -141,9 +141,8 @@ void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode);
 //
 // @param Pin for which to register the handler.
 // @param cb Callback function that will be invoked when the interrupt is
-// raised.
-//           This is called from interrupt context, so it should not do much
-//           work.
+// raised. This is called from interrupt context, so it should not do much
+// work.
 void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb);
 
 }  // namespace coralmicro

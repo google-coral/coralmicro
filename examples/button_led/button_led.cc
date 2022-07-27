@@ -20,6 +20,8 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 // Toggles the User LED in response to button presses.
+
+//! [gpio-callback] Doxygen snippet for gpio.h
 extern "C" [[noreturn]] void app_main(void* param) {
   printf("Press the user button.\r\n");
 
