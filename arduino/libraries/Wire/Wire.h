@@ -28,7 +28,7 @@
 namespace coralmicro {
 namespace arduino {
 
-typedef lpi2c_slave_transfer_t lpi2c_follower_transfer_t;
+typedef lpi2c_slave_transfer_t lpi2c_target_transfer_t;
 
 // Allows for communication on the I2C bus.
 // Example code can be found in `sketches/I2CM-Reader`, `sketches/I2CM-Writer`,
@@ -150,15 +150,15 @@ class HardwareI2C : public ::arduino::HardwareI2C {
   };
 
  private:
-  static void StaticFollowerCallback(LPI2C_Type *base,
-                                     lpi2c_follower_transfer_t *transfer,
+  static void StaticTargetCallback(LPI2C_Type *base,
+                                     lpi2c_target_transfer_t *transfer,
                                      void *userData);
-  void FollowerCallback(LPI2C_Type *base, lpi2c_follower_transfer_t *transfer);
+  void TargetCallback(LPI2C_Type *base, lpi2c_target_transfer_t *transfer);
   static void StaticOnReceiveHandler(void *param);
   void OnReceiveHandler();
   LPI2C_Type *base_;
   lpi2c_rtos_handle_t handle_;
-  lpi2c_slave_handle_t follower_handle_;
+  lpi2c_slave_handle_t target_handle_;
   uint8_t tx_address_;
   std::function<void(int)> receive_cb_;
   std::function<void(void)> request_cb_;

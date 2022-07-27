@@ -24,15 +24,15 @@ extern "C" uint32_t LPI2C_GetInstance(LPI2C_Type *);
 namespace coralmicro {
 namespace arduino {
 
-void HardwareI2C::StaticFollowerCallback(LPI2C_Type *base,
-                                         lpi2c_follower_transfer_t *transfer,
+void HardwareI2C::StaticTargetCallback(LPI2C_Type *base,
+                                         lpi2c_target_transfer_t *transfer,
                                          void *userData) {
   assert(userData);
-  reinterpret_cast<HardwareI2C *>(userData)->FollowerCallback(base, transfer);
+  reinterpret_cast<HardwareI2C *>(userData)->TargetCallback(base, transfer);
 }
 
-void HardwareI2C::FollowerCallback(LPI2C_Type *base,
-                                   lpi2c_follower_transfer_t *transfer) {
+void HardwareI2C::TargetCallback(LPI2C_Type *base,
+                                   lpi2c_target_transfer_t *transfer) {
   assert(base == base_);
   switch (transfer->event) {
     case kLPI2C_SlaveAddressMatchEvent:
@@ -93,7 +93,7 @@ void HardwareI2C::OnReceiveHandler() {
   vTaskSuspend(NULL);
 }
 
-// Begin for follower devices
+// Begin for target devices
 void HardwareI2C::begin(uint8_t address) {
   lpi2c_slave_config_t config;
   uint32_t instance = LPI2C_GetInstance(base_);
@@ -109,10 +109,10 @@ void HardwareI2C::begin(uint8_t address) {
   config.address0 = address;
   LPI2C_SlaveInit(base_, &config, CLOCK_GetFreq(kCLOCK_OscRc48MDiv2));
 
-  LPI2C_SlaveTransferCreateHandle(base_, &follower_handle_,
-                                  HardwareI2C::StaticFollowerCallback, this);
+  LPI2C_SlaveTransferCreateHandle(base_, &target_handle_,
+                                  HardwareI2C::StaticTargetCallback, this);
   status_t status = LPI2C_SlaveTransferNonBlocking(
-      base_, &follower_handle_,
+      base_, &target_handle_,
       kLPI2C_SlaveCompletionEvent | kLPI2C_SlaveAddressMatchEvent);
 }
 
@@ -121,7 +121,7 @@ void HardwareI2C::end() {
   if (receive_task_handle_) {
     vTaskDelete(receive_task_handle_);
   }
-  LPI2C_SlaveTransferAbort(base_, &follower_handle_);
+  LPI2C_SlaveTransferAbort(base_, &target_handle_);
 }
 
 void HardwareI2C::setClock(uint32_t freq) {
