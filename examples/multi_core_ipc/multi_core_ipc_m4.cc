@@ -20,35 +20,24 @@
 // This runs on the M4 core and receives IPC messages from the M7
 // and toggles the user LED based on the messages received.
 
+namespace {
+void HandleM7Message(
+    const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
+  const auto* msg = reinterpret_cast<const ExampleAppMessage*>(data);
+  if (msg->type == ExampleMessageType::kLedStatus) {
+    printf("[M4] LED_STATUS received: %s\r\n", msg->led_status ? "ON" : "OFF");
+    coralmicro::LedSet(coralmicro::Led::kUser, msg->led_status);
+
+    coralmicro::IpcMessage msg{};
+    msg.type = coralmicro::IpcMessageType::kApp;
+    auto* app_msg = reinterpret_cast<ExampleAppMessage*>(&msg.message.data);
+    app_msg->type = ExampleMessageType::kAck;
+    coralmicro::IpcM4::GetSingleton()->SendMessage(msg);
+  }
+}
+}  // namespace
+
 extern "C" void app_main(void* param) {
-  // Create and register message handler.
-  auto message_handler =
-      [](const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
-        const auto* msg =
-            reinterpret_cast<const mp_example::ExampleAppMessage*>(data);
-        if (msg->type == mp_example::ExampleMessageType::LED_STATUS) {
-          printf("[M4] LED_STATUS received\r\n");
-          switch (msg->led_status) {
-            case mp_example::LEDStatus::ON: {
-              coralmicro::LedSet(coralmicro::Led::kUser, true);
-              break;
-            }
-            case mp_example::LEDStatus::OFF: {
-              coralmicro::LedSet(coralmicro::Led::kUser, false);
-              break;
-            }
-            default: {
-              printf("Unknown LED_STATUS\r\n");
-            }
-          }
-          coralmicro::IpcMessage reply{};
-          reply.type = coralmicro::IpcMessageType::kApp;
-          auto* ack = reinterpret_cast<mp_example::ExampleAppMessage*>(
-              &reply.message.data);
-          ack->type = mp_example::ExampleMessageType::ACKNOWLEDGED;
-          coralmicro::IpcM4::GetSingleton()->SendMessage(reply);
-        }
-      };
-  coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(message_handler);
+  coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(HandleM7Message);
   vTaskSuspend(nullptr);
 }

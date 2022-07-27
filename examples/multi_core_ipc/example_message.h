@@ -12,31 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _EXAMPLE_MESSAGE_PASSING_EXAMPlE_MESSAGE_H_
-#define _EXAMPLE_MESSAGE_PASSING_EXAMPlE_MESSAGE_H_
+#ifndef EXAMPLES_MULTI_CORE_IPC_EXAMPLE_MESSAGE_H_
+#define EXAMPLES_MULTI_CORE_IPC_EXAMPLE_MESSAGE_H_
 
 #include "libs/base/ipc_message_buffer.h"
 
-namespace mp_example {
-
 enum class ExampleMessageType : uint8_t {
-  LED_STATUS,
-  ACKNOWLEDGED,
-};
-
-enum class LEDStatus : uint8_t {
-  ON,
-  OFF,
+  kLedStatus,
+  kAck,
 };
 
 struct ExampleAppMessage {
   ExampleMessageType type;
-  LEDStatus led_status;
+  bool led_status;
 } __attribute__((packed));
 
 static_assert(sizeof(ExampleAppMessage) <=
               coralmicro::kIpcMessageBufferDataSize);
 
-}  // namespace mp_example
-
-#endif  // _EXAMPLE_MESSAGE_PASSING_EXAMPlE_MESSAGE_H_
+#endif  // EXAMPLES_MULTI_CORE_IPC_EXAMPLE_MESSAGE_H_
