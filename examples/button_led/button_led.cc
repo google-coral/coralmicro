@@ -14,7 +14,6 @@
 
 #include <cstdio>
 
-#include "libs/base/check.h"
 #include "libs/base/gpio.h"
 #include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -23,18 +22,16 @@
 // Toggles the User LED in response to button presses.
 extern "C" [[noreturn]] void app_main(void* param) {
   printf("Press the user button.\r\n");
-  auto app_main_handle = xTaskGetCurrentTaskHandle();
-  CHECK(app_main_handle);
 
   // Register callback for the user button.
   coralmicro::GpioRegisterIrqHandler(
       coralmicro::Gpio::kUserButton,
-      [&app_main_handle]() { xTaskResumeFromISR(app_main_handle); });
-  bool user_led_on{false};
+      [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); });
+  bool on = false;
   while (true) {
     vTaskSuspend(nullptr);
-    user_led_on = !user_led_on;
-    coralmicro::LedSet(coralmicro::Led::kUser, user_led_on);
+    on = !on;
+    coralmicro::LedSet(coralmicro::Led::kUser, on);
   }
 }
 //! [gpio-callback] End snippet

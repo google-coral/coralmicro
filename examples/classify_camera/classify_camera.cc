@@ -47,6 +47,7 @@
 //     'score': score,
 // }
 
+namespace coralmicro {
 namespace {
 constexpr char kModelPath[] = "/models/mnv2_324_quant_bayered_edgetpu.tflite";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
@@ -54,7 +55,7 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void ClassifyFromCamera(struct jsonrpc_request* r) {
   auto* interpreter =
-      reinterpret_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
+      static_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
 
   auto* input_tensor = interpreter->input_tensor(0);
   int model_height = input_tensor->dims->data[1];
@@ -65,19 +66,18 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
   bool bayered = strstr(kModelPath, "bayered");
   std::vector<uint8_t> image(model_width * model_height *
                              /*channels=*/(bayered ? 1 : 3));
-  auto format = bayered ? coralmicro::CameraFormat::kRaw
-                        : coralmicro::CameraFormat::kRgb;
-  coralmicro::CameraFrameFormat fmt{
-      format,
-      coralmicro::CameraFilterMethod::kBilinear,
-      coralmicro::CameraRotation::k0,
-      model_width,
-      model_height,
-      false,
-      image.data()};
+  auto format =
+      bayered ? coralmicro::CameraFormat::kRaw : coralmicro::CameraFormat::kRgb;
+  CameraFrameFormat fmt{format,
+                        CameraFilterMethod::kBilinear,
+                        CameraRotation::k0,
+                        model_width,
+                        model_height,
+                        false,
+                        image.data()};
 
-  coralmicro::CameraTask::GetSingleton()->Trigger();
-  bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
+  CameraTask::GetSingleton()->Trigger();
+  bool ret = CameraTask::GetSingleton()->GetFrame({fmt});
 
   if (!ret) {
     jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
@@ -92,8 +92,7 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
     return;
   }
 
-  auto results =
-      coralmicro::tensorflow::GetClassificationResults(interpreter, 0.0f, 1);
+  auto results = tensorflow::GetClassificationResults(interpreter, 0.0f, 1);
   if (!results.empty()) {
     const auto& result = results[0];
     jsonrpc_return_success(r,
@@ -107,47 +106,52 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
                          model_width, "height", model_height, "base64_data",
                          image.size(), image.data(), "bayered", bayered);
 }
-}  // namespace
 
-extern "C" void app_main(void* param) {
+void Main() {
   std::vector<uint8_t> model;
-  if (!coralmicro::LfsReadFile(kModelPath, &model)) {
+  if (!LfsReadFile(kModelPath, &model)) {
     printf("ERROR: Failed to load %s\r\n", kModelPath);
-    vTaskSuspend(nullptr);
+    return;
   }
 
-  auto tpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
+  auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
 
   tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<1> resolver;
-  resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
+  resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
   tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()), resolver,
                                        tensor_arena, kTensorArenaSize,
                                        &error_reporter);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("ERROR: AllocateTensors() failed\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
 
   if (interpreter.inputs().size() != 1) {
     printf("ERROR: Model must have only one input tensor\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
 
   // Starting Camera.
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kTrigger);
+  CameraTask::GetSingleton()->SetPower(true);
+  CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
   printf("Initializing classification server...%p\r\n", &interpreter);
   jsonrpc_init(nullptr, &interpreter);
   jsonrpc_export("classify_from_camera", ClassifyFromCamera);
-  coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
+  UseHttpServer(new JsonRpcHttpServer);
   printf("Classification server ready!\r\n");
+}
+}  // namespace
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
   vTaskSuspend(nullptr);
 }

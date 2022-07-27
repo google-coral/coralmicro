@@ -26,28 +26,25 @@
 // call will fail if the image was never captured.
 
 namespace coralmicro {
-void get_captured_image(struct jsonrpc_request* request) {
-  int width = coralmicro::CameraTask::kWidth;
-  int height = coralmicro::CameraTask::kHeight;
-  if (!testlib::JsonRpcGetIntegerParam(request, "width", &width)) {
-    return;
-  }
-  if (!testlib::JsonRpcGetIntegerParam(request, "height", &height)) {
-    return;
-  }
-  auto format = coralmicro::CameraFormat::kRgb;
-  std::vector<uint8_t> image(width * height *
-                             coralmicro::CameraTask::FormatToBPP(format));
-  coralmicro::CameraFrameFormat fmt{
-      /*fmt=*/format,
-      /*filter=*/coralmicro::CameraFilterMethod::kBilinear,
-      /*rotation=*/coralmicro::CameraRotation::k0,
-      /*width=*/width,
-      /*height=*/height,
-      /*preserve_ratio=*/false,
-      /*buffer=*/image.data(),
-      /*white_balance=*/true};
-  if (!coralmicro::CameraTask::GetSingleton()->GetFrame({fmt})) {
+namespace {
+void GetCapturedImage(struct jsonrpc_request* request) {
+  int width;
+  if (!testlib::JsonRpcGetIntegerParam(request, "width", &width)) return;
+
+  int height;
+  if (!testlib::JsonRpcGetIntegerParam(request, "height", &height)) return;
+
+  auto format = CameraFormat::kRgb;
+  std::vector<uint8_t> image(width * height * CameraTask::FormatToBPP(format));
+  CameraFrameFormat fmt{format,
+                        CameraFilterMethod::kBilinear,
+                        CameraRotation::k0,
+                        width,
+                        height,
+                        /*preserve_ratio=*/false,
+                        /*buffer=*/image.data(),
+                        /*white_balance=*/true};
+  if (!CameraTask::GetSingleton()->GetFrame({fmt})) {
     jsonrpc_return_error(request, -1, "Failed to get image from camera.",
                          nullptr);
     return;
@@ -60,29 +57,26 @@ void get_captured_image(struct jsonrpc_request* request) {
 
 [[noreturn]] void Main() {
   // Starting Camera in triggered mode.
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kTrigger);
+  CameraTask::GetSingleton()->SetPower(true);
+  CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
   // Set up an RPC server that serves the latest image.
-  jsonrpc_export("get_captured_image", coralmicro::get_captured_image);
-  coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
-
-  // Get main task handle.
-  auto main_task_handle = xTaskGetCurrentTaskHandle();
+  jsonrpc_export("get_captured_image", GetCapturedImage);
+  UseHttpServer(new JsonRpcHttpServer);
 
   // Register callback for the user button.
   printf("Press the user button to take a picture.\r\n");
-  coralmicro::GpioRegisterIrqHandler(
-      coralmicro::Gpio::kUserButton,
-      [&main_task_handle]() { xTaskResumeFromISR(main_task_handle); });
+  GpioRegisterIrqHandler(
+      Gpio::kUserButton,
+      [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); });
   while (true) {
     vTaskSuspend(nullptr);
-    coralmicro::CameraTask::GetSingleton()->Trigger();
+    CameraTask::GetSingleton()->Trigger();
     printf("Picture taken\r\n");
   }
 }
 
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

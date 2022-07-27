@@ -18,7 +18,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
-extern "C" void app_main(void* param) {
+extern "C" [[noreturn]] void app_main(void* param) {
   printf("Hello socket.\r\n");
 
   int listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -43,6 +43,4 @@ extern "C" void app_main(void* param) {
     send(accepted_socket, fixed_str, strlen(fixed_str), 0);
     closesocket(accepted_socket);
   }
-
-  vTaskSuspend(nullptr);
 }

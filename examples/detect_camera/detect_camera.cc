@@ -69,7 +69,7 @@ void DetectFromCamera(struct jsonrpc_request* r) {
   int model_height = input_tensor->dims->data[1];
   int model_width = input_tensor->dims->data[2];
 
-  printf("width=%d; height=%d\n\r", model_width, model_height);
+  printf("width=%d; height=%d\r\n", model_width, model_height);
 
   std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
   coralmicro::CameraFrameFormat fmt{

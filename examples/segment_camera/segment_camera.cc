@@ -59,25 +59,20 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void SegmentFromCamera(struct jsonrpc_request* r) {
   auto* interpreter =
-      reinterpret_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
+      static_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
   auto* input_tensor = interpreter->input_tensor(0);
   int model_height = input_tensor->dims->data[1];
   int model_width = input_tensor->dims->data[2];
 
-  std::vector<uint8_t> image(
-      model_width * model_height *
-      coralmicro::CameraTask::FormatToBPP(coralmicro::CameraFormat::kRgb));
-  coralmicro::CameraFrameFormat fmt{
-      coralmicro::CameraFormat::kRgb,
-      coralmicro::CameraFilterMethod::kBilinear,
-      coralmicro::CameraRotation::k0,
-      model_width,
-      model_height,
-      false,
-      image.data()};
+  std::vector<uint8_t> image(model_width * model_height *
+                             CameraTask::FormatToBPP(CameraFormat::kRgb));
+  CameraFrameFormat fmt{CameraFormat::kRgb, CameraFilterMethod::kBilinear,
+                        CameraRotation::k0, model_width,
+                        model_height,       false,
+                        image.data()};
 
-  coralmicro::CameraTask::GetSingleton()->Trigger();
-  bool ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
+  CameraTask::GetSingleton()->Trigger();
+  bool ret = CameraTask::GetSingleton()->GetFrame({fmt});
 
   if (!ret) {
     jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
@@ -91,7 +86,7 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
   }
   const auto& output_tensor = interpreter->output_tensor(0);
   const auto& output_mask = tflite::GetTensorData<uint8_t>(output_tensor);
-  const auto mask_size = coralmicro::tensorflow::TensorSize(output_tensor);
+  const auto mask_size = tensorflow::TensorSize(output_tensor);
   jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: %V}", "width",
                          model_width, "height", model_height, "base64_data",
                          image.size(), image.data(), "output_mask", mask_size,
@@ -100,43 +95,43 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
 
 void Main() {
   std::vector<uint8_t> model;
-  if (!coralmicro::LfsReadFile(kModelPath, &model)) {
+  if (!LfsReadFile(kModelPath, &model)) {
     printf("ERROR: Failed to load %s\r\n", kModelPath);
-    vTaskSuspend(nullptr);
+    return;
   }
-  auto tpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
+
+  auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
+
   tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<3> resolver;
   resolver.AddResizeBilinear();
   resolver.AddArgMax();
-  resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
+  resolver.AddCustom(kCustomOp, RegisterCustomOp());
   tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()), resolver,
                                        tensor_arena, kTensorArenaSize,
                                        &error_reporter);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("ERROR: AllocateTensors() failed\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
   if (interpreter.inputs().size() != 1) {
     printf("ERROR: Model must have only one input tensor\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
 
   // Starting Camera.
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kTrigger);
+  CameraTask::GetSingleton()->SetPower(true);
+  CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
   printf("Initializing segmentation server...%p\r\n", &interpreter);
   jsonrpc_init(nullptr, &interpreter);
   jsonrpc_export("segment_from_camera", SegmentFromCamera);
-  coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
+  UseHttpServer(new JsonRpcHttpServer);
   printf("Segmentation server ready!\r\n");
-  vTaskSuspend(nullptr);
 }
 }  // namespace
 }  // namespace coralmicro

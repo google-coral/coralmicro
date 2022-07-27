@@ -24,7 +24,9 @@
 // Note: The DAC outputs a max of 1.8V
 
 // [start-sphinx-snippet:dac-adc]
-extern "C" void app_main(void *param) {
+extern "C" [[noreturn]] void app_main(void *param) {
+  (void)param;
+
   coralmicro::AdcInit(coralmicro::AdcDevice::kAdc1);
   coralmicro::DacInit();
   coralmicro::AdcConfig config;

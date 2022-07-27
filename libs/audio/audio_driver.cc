@@ -124,7 +124,7 @@ bool AudioDriver::Enable(const AudioDriverConfig& config, void* callback_param,
       PDM, kPdmClock, static_cast<int32_t>(config.sample_rate));
   if (status != kStatus_Success) {
     // TODO(dkovalev): implement proper error handling.
-    printf("ERROR: PDM_SetSampleRateConfig() failed.\n\r");
+    printf("ERROR: PDM_SetSampleRateConfig() failed.\r\n");
     return false;
   }
   PDM_Reset(PDM);
@@ -145,7 +145,7 @@ bool AudioDriver::Enable(const AudioDriverConfig& config, void* callback_param,
   status = PDM_TransferReceiveEDMA(PDM, &pdm_edma_handle_, pdm_transfers_);
   if (status != kStatus_Success) {
     // TODO(dkovalev): implement proper error handling.
-    printf("ERROR: PDM_TransferReceiveEDMA() failed.\n\r");
+    printf("ERROR: PDM_TransferReceiveEDMA() failed.\r\n");
     return false;
   }
 

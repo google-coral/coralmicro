@@ -38,12 +38,14 @@
 //     'base64_data': image_bytes
 //     }
 // }
-static void serial_number_rpc(struct jsonrpc_request* r) {
-  std::string serial = coralmicro::utils::GetSerialNumber();
+
+namespace {
+void SerialNumber(struct jsonrpc_request* r) {
+  auto serial = coralmicro::utils::GetSerialNumber();
   jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", serial.size(),
                          serial.c_str());
 }
-static void take_picture_rpc(struct jsonrpc_request* r) {
+void TakePicture(struct jsonrpc_request* r) {
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   coralmicro::CameraTask::GetSingleton()->Enable(
       coralmicro::CameraMode::kStreaming);
@@ -69,10 +71,12 @@ static void take_picture_rpc(struct jsonrpc_request* r) {
     jsonrpc_return_error(r, -1, "failure", nullptr);
   }
 }
+}  // namespace
+
 extern "C" void app_main(void* param) {
   jsonrpc_init(nullptr, nullptr);
-  jsonrpc_export("serial_number", serial_number_rpc);
-  jsonrpc_export("take_picture", take_picture_rpc);
+  jsonrpc_export("serial_number", SerialNumber);
+  jsonrpc_export("take_picture", TakePicture);
   coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
   printf("RPC server ready\r\n");
   vTaskSuspend(nullptr);

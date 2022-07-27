@@ -71,17 +71,17 @@ const selftest_t selftests[] = {
     {"sha256", mbedtls_sha256_self_test},
     {"sha512", mbedtls_sha512_self_test},
     {"x509", mbedtls_x509_self_test},
-    {NULL, NULL}};
+    {nullptr, nullptr}};
 
 extern "C" void app_main(void *param) {
   if (!coralmicro::A71ChInit()) {
     printf("A71CH init failed\r\n");
-    vTaskSuspend(NULL);
+    vTaskSuspend(nullptr);
   }
 
-  for (const selftest_t *test = selftests; test->name != NULL; test++) {
+  for (const selftest_t *test = selftests; test->name != nullptr; test++) {
     test->function(1);
   }
 
-  vTaskSuspend(NULL);
+  vTaskSuspend(nullptr);
 }

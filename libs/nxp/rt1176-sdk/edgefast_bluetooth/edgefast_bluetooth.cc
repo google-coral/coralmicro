@@ -53,8 +53,8 @@ static void bt_ready_internal(int err_param) {
 
   // Kick the Bluetooth module into patchram download mode.
   constexpr int kCmdDownloadMode = 0x2E;
-  int err =
-      bt_hci_cmd_send_sync(BT_OP(BT_OGF_VS, kCmdDownloadMode), NULL, NULL);
+  int err = bt_hci_cmd_send_sync(BT_OP(BT_OGF_VS, kCmdDownloadMode), nullptr,
+                                 nullptr);
   if (err) {
     printf("Initializing patchram download failed: %d\r\n", err);
     return;
@@ -74,7 +74,7 @@ static void bt_ready_internal(int err_param) {
     memcpy(dat, &brcm_patchram_buf[offset], len);
     offset += len;
 
-    err = bt_hci_cmd_send_sync(opcode, buf, NULL);
+    err = bt_hci_cmd_send_sync(opcode, buf, nullptr);
     net_buf_unref(buf);
     if (err) {
       printf("Sending patchram packet failed: %d\r\n", err);
