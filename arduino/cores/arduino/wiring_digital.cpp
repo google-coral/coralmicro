@@ -95,15 +95,13 @@ void attachInterrupt(pin_size_t interruptNumber, voidFuncPtr callback,
                      PinStatus mode) {
     coralmicro::Gpio gpio = PinNumberToGpio(interruptNumber);
     auto interrupt_mode = PinStatusToInterruptMode(mode);
-    coralmicro::GpioSetIntMode(gpio, interrupt_mode);
-    coralmicro::GpioRegisterIrqHandler(gpio, callback);
+    coralmicro::GpioConfigureInterrupt(gpio, interrupt_mode, callback);
 }
 
 void detachInterrupt(pin_size_t interruptNumber) {
     coralmicro::Gpio gpio = PinNumberToGpio(interruptNumber);
-    coralmicro::GpioRegisterIrqHandler(gpio, nullptr);
-    coralmicro::GpioSetIntMode(gpio,
-                               coralmicro::GpioInterruptMode::kIntModeNone);
+    coralmicro::GpioConfigureInterrupt(gpio,
+                               coralmicro::GpioInterruptMode::kIntModeNone, [](){});
 }
 
 unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {

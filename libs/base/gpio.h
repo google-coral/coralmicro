@@ -130,21 +130,17 @@ bool GpioGet(Gpio gpio);
 void GpioSetMode(Gpio gpio, bool input, GpioPullDirection pull_direction);
 
 // Sets the interrupt mode of a GPIO.
-// @param gpio Pin to configure.
-// @param mode The style of interrupt to sense.
-void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode);
-
-// Register an interrupt handler for a GPIO.
 //
 // **Example** (from `examples/button_led/`):
 //
 // \snippet button_led/button_led.cc gpio-callback
 //
-// @param Pin for which to register the handler.
+// @param gpio Pin to configure.
+// @param mode The style of interrupt to sense.
 // @param cb Callback function that will be invoked when the interrupt is
 // raised. This is called from interrupt context, so it should not do much
 // work.
-void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb);
+void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode, GpioCallback cb);
 
 }  // namespace coralmicro
 

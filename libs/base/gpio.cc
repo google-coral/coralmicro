@@ -553,12 +553,13 @@ void GpioSetMode(Gpio gpio, bool input, GpioPullDirection pull_direction) {
                       pin_config);
 }
 
-void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode) {
+void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode, GpioCallback cb) {
   auto* config = &PinNameToConfig[gpio];
   config->direction = kGPIO_DigitalInput;
   config->interruptMode = InterruptModeToGpioIntMode[mode];
   GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
   if (PinNameToConfig[gpio].interruptMode != kGPIO_NoIntmode) {
+    g_irq_handlers[gpio] = std::move(cb);
     GPIO_PinSetInterruptConfig(PinNameToModule[gpio], PinNameToPin[gpio],
                                PinNameToConfig[gpio].interruptMode);
     GPIO_PortClearInterruptFlags(
@@ -569,11 +570,11 @@ void GpioSetIntMode(Gpio gpio, GpioInterruptMode mode) {
     NVIC_SetPriority(PinNameToIRQ[gpio], 5);
   } else {
     DisableIRQ(PinNameToIRQ[gpio]);
+    g_irq_handlers[gpio] = [](){};
   }
 }
 
 void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb) {
-  g_irq_handlers[gpio] = std::move(cb);
 }
 }  // namespace coralmicro
 

@@ -26,8 +26,9 @@ extern "C" [[noreturn]] void app_main(void* param) {
   printf("Press the user button.\r\n");
 
   // Register callback for the user button.
-  coralmicro::GpioRegisterIrqHandler(
+  coralmicro::GpioConfigureInterrupt(
       coralmicro::Gpio::kUserButton,
+      coralmicro::GpioInterruptMode::kIntModeFalling,
       [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); });
   bool on = false;
   while (true) {

@@ -66,8 +66,9 @@ void GetCapturedImage(struct jsonrpc_request* request) {
 
   // Register callback for the user button.
   printf("Press the user button to take a picture.\r\n");
-  GpioRegisterIrqHandler(
+  GpioConfigureInterrupt(
       Gpio::kUserButton,
+      GpioInterruptMode::kIntModeFalling,
       [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); });
   while (true) {
     vTaskSuspend(nullptr);
