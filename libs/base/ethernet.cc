@@ -16,6 +16,8 @@
 
 #include "libs/base/ethernet.h"
 
+#include <cstring>
+
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/utils.h"
@@ -23,6 +25,7 @@
 #include "third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
@@ -117,18 +120,9 @@ bool EthernetInit(bool default_iface) {
   ethernetif_config_t enet_config = {
       .phyHandle = &g_phy_handle,
       .phyConfig = &phy_config,
-      // MAC Address w/ Google prefix, and blank final 3 octets.
-      // They will be populated below.
-      .macAddress = {0x00, 0x1A, 0x11, 0x00, 0x00, 0x00},
   };
-
-  // Populate the low bytes of the MAC address with our device's
-  // unique ID.
-  // In production units, addresses should be in fuses that we can read.
-  uint64_t unique_id = coralmicro::utils::GetUniqueId();
-  enet_config.macAddress[3] = (unique_id >> 56) & 0xFF;
-  enet_config.macAddress[4] = (unique_id >> 48) & 0xFF;
-  enet_config.macAddress[5] = (unique_id >> 40) & 0xFF;
+  auto mac_address = EthernetGetMacAddress();
+  std::memcpy(enet_config.macAddress, mac_address.data(), sizeof(enet_config.macAddress));
 
   // Set ENET1G TX_CLK to ENET2_CLK_ROOT
   IOMUXC_GPR->GPR5 &= ~IOMUXC_GPR_GPR5_ENET1G_TX_CLK_SEL_MASK;
@@ -184,6 +178,20 @@ std::optional<std::string> EthernetGetIp() {
   }
 
   return ip4addr_ntoa(netif_ip4_addr(g_eth_netif));
+}
+
+std::array<uint8_t, 6> EthernetGetMacAddress() {
+  uint32_t fuse_val_hi, fuse_val_lo;
+  fuse_val_lo = OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_LO)].FUSE;
+  fuse_val_hi =
+      OCOTP->FUSEN[FUSE_ADDRESS_TO_OCOTP_INDEX(MAC1_ADDR_HI)].FUSE & 0xFFFF;
+  uint8_t a = (fuse_val_hi >> 8) & 0xFF;
+  uint8_t b = (fuse_val_hi)&0xFF;
+  uint8_t c = (fuse_val_lo >> 24) & 0xFF;
+  uint8_t d = (fuse_val_lo >> 16) & 0xFF;
+  uint8_t e = (fuse_val_lo >> 8) & 0xFF;
+  uint8_t f = (fuse_val_lo)&0xFF;
+  return std::array<uint8_t, 6>{a, b, c, d, e, f};
 }
 
 int EthernetGetSpeed() {

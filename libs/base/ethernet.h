@@ -17,6 +17,7 @@
 #ifndef LIBS_BASE_ETHERNET_H_
 #define LIBS_BASE_ETHERNET_H_
 
+#include <array>
 #include <optional>
 
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
@@ -56,6 +57,10 @@ status_t EthernetPhyWrite(uint32_t phy_reg, uint32_t data);
 // @return A string representing the IPv4 IP address or `std::nullopt` on
 // failure.
 std::optional<std::string> EthernetGetIp();
+
+// Gets the assigned MAC address from the device fuses.
+// @returns The MAC address assigned to the device.
+std::array<uint8_t, 6> EthernetGetMacAddress();
 
 // Retrieves the ethernet speed that is stored in flash memory.
 // @returns The ethernet speed in Mbps.

@@ -39,10 +39,6 @@ uint64_t GetUniqueId();
 // string.
 std::string GetSerialNumber();
 
-// Gets the assigned MAC address from the device fuses.
-// @returns The MAC address assigned to the device.
-std::array<uint8_t, 6> GetMacAddress();
-
 // Gets the USB IP address that is stored in flash memory.
 // @param usb_ip_out A pointer to a string in which to store a printable version
 // of the IP.

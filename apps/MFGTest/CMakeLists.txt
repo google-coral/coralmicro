@@ -19,6 +19,7 @@ add_executable_m7(MFGTest
 
 target_link_libraries(MFGTest
     libs_base-m7_freertos
+    libs_base-m7_ethernet
     libs_a71ch
     libs_rpc_http_server
     libs_mjson

@@ -22,6 +22,7 @@
 #include "apps/MFGTest/mfg_test_iperf.h"
 #include "libs/a71ch/a71ch.h"
 #include "libs/base/analog.h"
+#include "libs/base/ethernet.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/led.h"
 #include "libs/base/utils.h"
@@ -665,7 +666,7 @@ void FuseMACAddress(struct jsonrpc_request* request) {
 }
 
 void ReadMACAddress(struct jsonrpc_request* request) {
-  auto mac = coralmicro::utils::GetMacAddress();
+  auto mac = coralmicro::EthernetGetMacAddress();
   char mac_str[255];
   snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
