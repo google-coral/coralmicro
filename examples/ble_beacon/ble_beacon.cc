@@ -52,8 +52,8 @@ void bt_ready(int err) {
   }
 
   // https://github.com/zephyrproject-rtos/zephyr/pull/24829#issuecomment-622977341
-  const auto& conn = BT_LE_ADV_CONN;
-  err = bt_le_adv_start(conn, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
+  const auto& params = BT_LE_ADV_NCONN_IDENTITY;
+  err = bt_le_adv_start(params, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
   if (err) {
     printf("failed to start advertising\r\n");
     return;
