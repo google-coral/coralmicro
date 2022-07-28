@@ -21,20 +21,26 @@
 
 // Toggles the User LED in response to button presses.
 
+namespace coralmicro {
 //! [gpio-callback] Doxygen snippet for gpio.h
-extern "C" [[noreturn]] void app_main(void* param) {
+[[noreturn]] void Main() {
   printf("Press the user button.\r\n");
 
   // Register callback for the user button.
-  coralmicro::GpioConfigureInterrupt(
-      coralmicro::Gpio::kUserButton,
-      coralmicro::GpioInterruptMode::kIntModeFalling,
+  GpioConfigureInterrupt(
+      Gpio::kUserButton, GpioInterruptMode::kIntModeFalling,
       [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); });
   bool on = false;
   while (true) {
     vTaskSuspend(nullptr);
     on = !on;
-    coralmicro::LedSet(coralmicro::Led::kUser, on);
+    LedSet(Led::kUser, on);
   }
 }
 //! [gpio-callback] End snippet
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
+}

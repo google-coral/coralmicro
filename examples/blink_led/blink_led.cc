@@ -20,14 +20,21 @@
 
 // Blinks the user LED (green) and status LED (orange)
 
+namespace coralmicro {
 // [start-sphinx-snippet:blink-led]
-extern "C" [[noreturn]] void app_main(void *param) {
+[[noreturn]] void Main() {
   bool on = true;
   while (true) {
     on = !on;
-    coralmicro::LedSet(coralmicro::Led::kStatus, on);
-    coralmicro::LedSet(coralmicro::Led::kUser, on);
+    LedSet(Led::kStatus, on);
+    LedSet(Led::kUser, on);
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
 // [end-sphinx-snippet:blink-led]
+}  // namespace coralmicro
+
+extern "C" void app_main(void *param) {
+  (void)param;
+  coralmicro::Main();
+}

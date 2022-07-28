@@ -19,16 +19,18 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
 extern "C" [[noreturn]] void app_main(void* param) {
+  (void)param;
+
   printf("Hello socket.\r\n");
 
   int listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-  struct timeval tv;
+  struct timeval tv {};
   tv.tv_sec = 0;
   tv.tv_usec = 0;
   setsockopt(listening_socket, 0, SO_RCVTIMEO, &tv, sizeof(tv));
 
-  struct sockaddr_in bind_address;
+  struct sockaddr_in bind_address {};
   bind_address.sin_family = AF_INET;
   bind_address.sin_port = PP_HTONS(31337);
   bind_address.sin_addr.s_addr = PP_HTONL(INADDR_ANY);

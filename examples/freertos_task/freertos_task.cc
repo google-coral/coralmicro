@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cstdio>
+#include <memory>
 
 #include "libs/base/led.h"
 #include "libs/base/tasks.h"
@@ -21,23 +22,32 @@
 
 // Starts a second task to blink one LED in each task.
 
+namespace coralmicro {
+
 [[noreturn]] void blink_task(void* param) {
+  auto led_type = static_cast<Led*>(param);
   printf("Hello task.\r\n");
   bool on = true;
   while (true) {
     on = !on;
-    coralmicro::LedSet(coralmicro::Led::kUser, on);
+    LedSet(*led_type, on);
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
 
-extern "C" [[noreturn]] void app_main(void* param) {
-  xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, nullptr,
-              coralmicro::kAppTaskPriority, nullptr);
-  bool on = true;
-  while (true) {
-    on = !on;
-    coralmicro::LedSet(coralmicro::Led::kStatus, on);
-    vTaskDelay(pdMS_TO_TICKS(500));
-  }
+void Main() {
+  auto user_led = Led::kUser;
+  xTaskCreate(&blink_task, "blink_user_led_task", configMINIMAL_STACK_SIZE,
+              &user_led, kAppTaskPriority, nullptr);
+  auto status_led = Led::kStatus;
+  xTaskCreate(&blink_task, "blink_status_led_task", configMINIMAL_STACK_SIZE,
+              &status_led, kAppTaskPriority, nullptr);
+  vTaskSuspend(nullptr);
+}
+
+}  // namespace coralmicro
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
+  vTaskSuspend(nullptr);
 }

@@ -26,7 +26,6 @@
 // call will fail if the image was never captured.
 
 namespace coralmicro {
-namespace {
 void GetCapturedImage(struct jsonrpc_request* request) {
   int width;
   if (!testlib::JsonRpcGetIntegerParam(request, "width", &width)) return;
@@ -77,11 +76,9 @@ void GetCapturedImage(struct jsonrpc_request* request) {
   }
 }
 
-}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();
-  vTaskSuspend(nullptr);
 }

@@ -14,8 +14,7 @@
 
 #include <cstdio>
 
-extern "C" void app_main(void *param) {
+extern "C" [[noreturn]] void app_main(void *param) {
   printf("Hello world.\r\n");
-  while (true)
-    ;
+  while (true) {}
 }

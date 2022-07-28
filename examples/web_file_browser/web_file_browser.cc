@@ -31,7 +31,6 @@
 // curl commands.
 
 namespace coralmicro {
-namespace {
 constexpr char kUrlPrefix[] = "/fs/";
 
 void RemoveDuplicateChar(std::string& s, char ch) {
@@ -183,24 +182,26 @@ class FileHttpServer : public HttpServer {
   std::map<void*, Entry> files_;  // connection-to-entry map
 };
 
-}  // namespace
-}  // namespace coralmicro
-
-extern "C" void app_main(void* param) {
-  using coralmicro::kUrlPrefix;
-  (void)param;
+void Main() {
   printf("WebFileBrowser\r\n");
-  coralmicro::FileHttpServer http_server;
-  http_server.AddUriHandler(coralmicro::UriHandler);
-  coralmicro::UseHttpServer(&http_server);
+  FileHttpServer http_server;
+  http_server.AddUriHandler(UriHandler);
+  UseHttpServer(&http_server);
 
   std::string ip;
-  if (coralmicro::utils::GetUsbIpAddress(&ip)) {
+  if (utils::GetUsbIpAddress(&ip)) {
     printf("BROWSE:   http://%s%s\r\n", ip.c_str(), kUrlPrefix);
     printf("UPLOAD:   curl -X POST http://%s%sfile --data-binary @file\r\n",
            ip.c_str(), kUrlPrefix);
     printf("DOWNLOAD: curl -O http://%s%sfile\r\n", ip.c_str(), kUrlPrefix);
   }
+  vTaskSuspend(nullptr);
+}
 
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
   vTaskSuspend(nullptr);
 }

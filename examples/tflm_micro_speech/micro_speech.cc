@@ -14,12 +14,9 @@
 
 #include <atomic>
 #include <cstdio>
-#include <vector>
 
 #include "libs/audio/audio_driver.h"
-#include "libs/base/tasks.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
@@ -32,7 +29,7 @@
 // For more information about this model, see:
 // https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech
 
-namespace {
+namespace coralmicro {
 constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
 
 constexpr int kNumDmaBuffers = 10;
@@ -47,52 +44,14 @@ int16_t g_audio_buffer[kAudioBufferSize] __attribute__((aligned(16)));
 std::atomic<int32_t> g_audio_buffer_end_index = 0;
 
 int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
-}  // namespace
 
-// From audio_provider.h
-int32_t LatestAudioTimestamp() {
-  return g_audio_buffer_end_index / kSamplesPerMs - 50;
-}
-
-// From audio_provider.h
-TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
-                             int start_ms, int duration_ms,
-                             int* audio_samples_size, int16_t** audio_samples) {
-  int32_t audio_buffer_end_index = g_audio_buffer_end_index;
-
-  auto buffer_end_ms = audio_buffer_end_index / kSamplesPerMs;
-  auto buffer_start_ms = buffer_end_ms - kAudioBufferSizeMs;
-
-  if (start_ms < buffer_start_ms) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "start_ms < buffer_start_ms (%d vs %d)", start_ms,
-                         buffer_start_ms);
-    return kTfLiteError;
-  }
-
-  if (start_ms + duration_ms >= buffer_end_ms) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "start_ms + duration_ms > buffer_end_ms");
-    return kTfLiteError;
-  }
-
-  int offset =
-      audio_buffer_end_index + (start_ms - buffer_start_ms) * kSamplesPerMs;
-  for (int i = 0; i < kMaxAudioSampleSize; ++i)
-    g_audio_buffer_out[i] = g_audio_buffer[(offset + i) % kAudioBufferSize];
-
-  *audio_samples = g_audio_buffer_out;
-  *audio_samples_size = kMaxAudioSampleSize;
-  return kTfLiteOk;
-}
-
-extern "C" void app_main(void* param) {
+[[noreturn]] void Main() {
   printf("Micro speech\r\n");
 
   // Setup audio
-  coralmicro::AudioDriver driver(g_audio_buffers);
-  coralmicro::AudioDriverConfig config{coralmicro::AudioSampleRate::k16000_Hz,
-                                       kNumDmaBuffers, kDmaBufferSizeMs};
+  AudioDriver driver(g_audio_buffers);
+  AudioDriverConfig config{AudioSampleRate::k16000_Hz, kNumDmaBuffers,
+                           kDmaBufferSizeMs};
   driver.Enable(
       config, nullptr,
       +[](void* param, const int32_t* buffer, size_t buffer_size) {
@@ -109,4 +68,48 @@ extern "C" void app_main(void* param) {
   while (true) {
     loop();
   }
+}
+}  // namespace coralmicro
+
+// From audio_provider.h
+int32_t LatestAudioTimestamp() {
+  return coralmicro::g_audio_buffer_end_index / coralmicro::kSamplesPerMs - 50;
+}
+
+// From audio_provider.h
+TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
+                             int start_ms, int duration_ms,
+                             int* audio_samples_size, int16_t** audio_samples) {
+  int32_t audio_buffer_end_index = coralmicro::g_audio_buffer_end_index;
+
+  auto buffer_end_ms = audio_buffer_end_index / coralmicro::kSamplesPerMs;
+  auto buffer_start_ms = buffer_end_ms - coralmicro::kAudioBufferSizeMs;
+
+  if (start_ms < buffer_start_ms) {
+    TF_LITE_REPORT_ERROR(error_reporter,
+                         "start_ms < buffer_start_ms (%d vs %d)", start_ms,
+                         buffer_start_ms);
+    return kTfLiteError;
+  }
+
+  if (start_ms + duration_ms >= buffer_end_ms) {
+    TF_LITE_REPORT_ERROR(error_reporter,
+                         "start_ms + duration_ms > buffer_end_ms");
+    return kTfLiteError;
+  }
+
+  int offset = audio_buffer_end_index +
+               (start_ms - buffer_start_ms) * coralmicro::kSamplesPerMs;
+  for (int i = 0; i < kMaxAudioSampleSize; ++i)
+    coralmicro::g_audio_buffer_out[i] =
+        coralmicro::g_audio_buffer[(offset + i) % coralmicro::kAudioBufferSize];
+
+  *audio_samples = coralmicro::g_audio_buffer_out;
+  *audio_samples_size = kMaxAudioSampleSize;
+  return kTfLiteOk;
+}
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
 }

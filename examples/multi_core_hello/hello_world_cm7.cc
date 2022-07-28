@@ -13,15 +13,16 @@
 // limitations under the License.
 
 #include <cstdio>
-#include <cstring>
 
 #include "libs/base/ipc_m7.h"
 #include "libs/base/mutex.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-extern "C" void app_main(void *param) {
+extern "C" [[noreturn]] void app_main(void *param) {
+  (void)param;
   coralmicro::IpcM7::GetSingleton()->StartM4();
+  CHECK(coralmicro::IpcM7::GetSingleton()->M4IsAlive(500));
   while (true) {
     coralmicro::MulticoreMutexLock lock(0);
     printf("[M7] Hello.\r\n");

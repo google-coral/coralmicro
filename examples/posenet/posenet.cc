@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #include "libs/tensorflow/posenet.h"
 
 #include "libs/base/filesystem.h"
@@ -21,9 +22,11 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+
 // Runs pose estimation using PoseNet, running on the Edge TPU.
 // Scores and keypoint data is printed to the serial console.
-namespace {
+namespace coralmicro {
+
 constexpr int kModelArenaSize = 1 * 1024 * 1024;
 constexpr int kExtraArenaSize = 1 * 1024 * 1024;
 constexpr int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
@@ -31,20 +34,20 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr char kModelPath[] =
     "/models/posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
 constexpr char kTestInputPath[] = "/models/posenet_test_input_324.bin";
-}  // namespace
-extern "C" void app_main(void* param) {
+
+void Main() {
   tflite::MicroErrorReporter error_reporter;
   TF_LITE_REPORT_ERROR(&error_reporter, "Posenet!");
   // Turn on the TPU and get it's context.
-  auto tpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice(
-      coralmicro::PerformanceMode::kMax);
+  auto tpu_context =
+      EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
     vTaskSuspend(nullptr);
   }
   // Reads the model and checks version.
   std::vector<uint8_t> posenet_tflite;
-  if (!coralmicro::LfsReadFile(kModelPath, &posenet_tflite)) {
+  if (!LfsReadFile(kModelPath, &posenet_tflite)) {
     TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load model!");
     vTaskSuspend(nullptr);
   }
@@ -57,7 +60,7 @@ extern "C" void app_main(void* param) {
   }
   // Creates a micro interpreter.
   tflite::MicroMutableOpResolver<2> resolver;
-  resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
+  resolver.AddCustom(kCustomOp, RegisterCustomOp());
   resolver.AddCustom(coral::kPosenetDecoderOp,
                      coral::RegisterPosenetDecoderOp());
   auto interpreter = tflite::MicroInterpreter{
@@ -70,7 +73,7 @@ extern "C" void app_main(void* param) {
   // Runs posenet on a test image.
   printf("Getting outputs for posenet test input\r\n");
   std::vector<uint8_t> posenet_test_input_bin;
-  if (!coralmicro::LfsReadFile(kTestInputPath, &posenet_test_input_bin)) {
+  if (!LfsReadFile(kTestInputPath, &posenet_test_input_bin)) {
     TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load test input!");
     vTaskSuspend(nullptr);
   }
@@ -86,27 +89,24 @@ extern "C" void app_main(void* param) {
     vTaskSuspend(nullptr);
   }
   auto test_image_output =
-      coralmicro::tensorflow::GetPosenetOutput(&interpreter, /*threshold=*/0.5);
-  printf(
-      "%s\r\n",
-      coralmicro::tensorflow::FormatPosenetOutput(test_image_output).c_str());
+      tensorflow::GetPosenetOutput(&interpreter, /*threshold=*/0.5);
+  printf("%s\r\n", tensorflow::FormatPosenetOutput(test_image_output).c_str());
   // Starts the camera for live poses.
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kStreaming);
+  CameraTask::GetSingleton()->SetPower(true);
+  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
   printf("Starting live posenet\r\n");
   auto model_height = posenet_input->dims->data[1];
   auto model_width = posenet_input->dims->data[2];
   for (;;) {
-    coralmicro::CameraFrameFormat fmt{
-        /*fmt=*/coralmicro::CameraFormat::kRgb,
-        /*filter=*/coralmicro::CameraFilterMethod::kBilinear,
-        /*rotation=*/coralmicro::CameraRotation::k0,
+    CameraFrameFormat fmt{
+        /*fmt=*/CameraFormat::kRgb,
+        /*filter=*/CameraFilterMethod::kBilinear,
+        /*rotation=*/CameraRotation::k0,
         /*width=*/model_width,
         /*height=*/model_height,
         /*preserve_ratio=*/false,
         /*buffer=*/tflite::GetTensorData<uint8_t>(posenet_input)};
-    if (!coralmicro::CameraTask::GetSingleton()->GetFrame({fmt})) {
+    if (!CameraTask::GetSingleton()->GetFrame({fmt})) {
       TF_LITE_REPORT_ERROR(&error_reporter, "Failed to get image from camera.");
       break;
     }
@@ -114,12 +114,17 @@ extern "C" void app_main(void* param) {
       TF_LITE_REPORT_ERROR(&error_reporter, "Invoke failed.");
       break;
     }
-    auto output = coralmicro::tensorflow::GetPosenetOutput(&interpreter,
-                                                           /*threshold=*/0.5);
-    printf("%s\r\n",
-           coralmicro::tensorflow::FormatPosenetOutput(output).c_str());
+    auto output = tensorflow::GetPosenetOutput(&interpreter,
+                                               /*threshold=*/0.5);
+    printf("%s\r\n", tensorflow::FormatPosenetOutput(output).c_str());
     vTaskDelay(pdMS_TO_TICKS(100));
   }
-  coralmicro::CameraTask::GetSingleton()->SetPower(false);
+  CameraTask::GetSingleton()->SetPower(false);
+}
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
   vTaskSuspend(nullptr);
 }

@@ -43,6 +43,7 @@ void bt_ready(int err) {
     return;
   }
 }
+
 }  // namespace
 
 extern "C" void app_main(void* param) {

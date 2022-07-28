@@ -21,25 +21,29 @@
 // and PWM_B (pin 9 on the left-side header).
 // Note: These pins output a max of 1.8V
 
-// [start-sphinx-snippet:pwm]
-extern "C" [[noreturn]] void app_main(void* param) {
-  (void)param;
+namespace coralmicro {
 
-  coralmicro::PwmInit();
-  coralmicro::PwmPinConfig pin_a_config{
-      .duty_cycle = 20,
-      .frequency = 1000,
-      .pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10)};
-  coralmicro::PwmPinConfig pin_b_config{
-      .duty_cycle = 80,
-      .frequency = 1000,
-      .pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9)};
-  std::vector<coralmicro::PwmPinConfig> configs = {pin_a_config, pin_b_config};
+// [start-sphinx-snippet:pwm]
+[[noreturn]] void Main() {
+  PwmInit();
+  PwmPinConfig pin_a_config{.duty_cycle = 20,
+                            .frequency = 1000,
+                            .pin_setting = PwmPinSettingFor(PwmPin::k10)};
+  PwmPinConfig pin_b_config{.duty_cycle = 80,
+                            .frequency = 1000,
+                            .pin_setting = PwmPinSettingFor(PwmPin::k9)};
+  std::vector<PwmPinConfig> configs = {pin_a_config, pin_b_config};
   while (true) {
-    coralmicro::PwmEnable(configs);
+    PwmEnable(configs);
     vTaskDelay(pdMS_TO_TICKS(1000));
-    coralmicro::PwmDisable(configs);
+    PwmDisable(configs);
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
 // [end-sphinx-snippet:pwm]
+}  // namespace coralmicro
+
+extern "C" [[noreturn]] void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
+}

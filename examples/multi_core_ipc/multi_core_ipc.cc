@@ -20,18 +20,15 @@
 // This runs on the M7 core and sends IPC messages to the M4 with
 // instructions to toggle the user LED.
 
-namespace {
-void HandleM4Message(
-    const uint8_t data[coralmicro::kIpcMessageBufferDataSize]) {
+namespace coralmicro {
+void HandleM4Message(const uint8_t data[kIpcMessageBufferDataSize]) {
   const auto* msg = reinterpret_cast<const ExampleAppMessage*>(data);
   if (msg->type == ExampleMessageType::kAck) {
     printf("[M7] ACK received from M4\r\n");
   }
 }
-}  // namespace
-
-extern "C" [[noreturn]] void app_main(void* param) {
-  auto* ipc = coralmicro::IpcM7::GetSingleton();
+[[noreturn]] void Main() {
+  auto* ipc = IpcM7::GetSingleton();
   ipc->RegisterAppMessageHandler(HandleM4Message);
   ipc->StartM4();
   CHECK(ipc->M4IsAlive(500));
@@ -42,8 +39,8 @@ extern "C" [[noreturn]] void app_main(void* param) {
     printf("---\r\n[M7] Sending M4 LED_STATUS: %s\r\n",
            led_status ? "ON" : "OFF");
 
-    coralmicro::IpcMessage msg{};
-    msg.type = coralmicro::IpcMessageType::kApp;
+    IpcMessage msg{};
+    msg.type = IpcMessageType::kApp;
     auto* app_msg = reinterpret_cast<ExampleAppMessage*>(&msg.message.data);
     app_msg->type = ExampleMessageType::kLedStatus;
     app_msg->led_status = led_status;
@@ -51,4 +48,11 @@ extern "C" [[noreturn]] void app_main(void* param) {
 
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
+}
+
+}  // namespace coralmicro
+
+extern "C" [[noreturn]] void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
 }

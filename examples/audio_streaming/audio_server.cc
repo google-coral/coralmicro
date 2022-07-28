@@ -130,11 +130,11 @@ void ProcessClient(int client_socket) {
   printf("Done.\r\n\r\n");
 }
 
-void RunServer() {
+[[noreturn]] void Main() {
   const int server_socket = SocketServer(kPort, 5);
   if (server_socket == -1) {
     printf("ERROR: Cannot start server.\r\n");
-    return;
+    vTaskSuspend(nullptr);
   }
 
   while (true) {
@@ -156,6 +156,5 @@ void RunServer() {
 
 extern "C" void app_main(void* param) {
   (void)param;
-  coralmicro::RunServer();
-  vTaskSuspend(nullptr);
+  coralmicro::Main();
 }

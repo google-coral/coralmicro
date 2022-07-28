@@ -21,15 +21,22 @@
 // Blinks the user LED (green) and status LED (orange) from the M4.
 // This is started by main_app_m7.
 
+namespace coralmicro {
 // [start-sphinx-snippet:blink-led]
-extern "C" [[noreturn]] void app_main(void *param) {
+[[noreturn]] void Main() {
   printf("Blinking LED from M4.\r\n");
   bool on = true;
   while (true) {
     on = !on;
-    coralmicro::LedSet(coralmicro::Led::kStatus, on);
-    coralmicro::LedSet(coralmicro::Led::kUser, on);
+    LedSet(Led::kStatus, on);
+    LedSet(Led::kUser, on);
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
 // [end-sphinx-snippet:blink-led]
+}  // namespace coralmicro
+
+extern "C" void app_main(void *param) {
+  (void)param;
+  coralmicro::Main();
+}

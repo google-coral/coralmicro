@@ -44,5 +44,4 @@ namespace coralmicro {
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();
-  vTaskSuspend(nullptr);
 }

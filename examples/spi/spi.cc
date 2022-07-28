@@ -25,14 +25,14 @@ namespace coralmicro {
 // [start-sphinx-snippet:spi]
 void Main() {
   constexpr int kTransferBytes = 256;
-  std::array<uint8_t, kTransferBytes> tx_data;
-  std::array<uint8_t, kTransferBytes> rx_data;
+  std::array<uint8_t, kTransferBytes> tx_data{};
+  std::array<uint8_t, kTransferBytes> rx_data{};
   for (int i = 0; i < kTransferBytes; ++i) {
     tx_data[i] = i;
     rx_data[i] = 0;
   }
 
-  SpiConfig config;
+  SpiConfig config{};
   SpiGetDefaultConfig(&config);
   CHECK(SpiInit(config));
   CHECK(SpiTransfer(config, tx_data.data(), rx_data.data(), kTransferBytes));

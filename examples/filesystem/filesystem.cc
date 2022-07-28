@@ -84,13 +84,13 @@ void Main() {
   CHECK(MkdirOrExists("/dir1/dir13"));
   CHECK(MkdirOrExists("/dir2/dir21"));
 
-  CHECK(coralmicro::LfsDirExists("/dir1"));
-  CHECK(coralmicro::LfsDirExists("/dir2"));
-  CHECK(coralmicro::LfsDirExists("/dir1/dir11"));
-  CHECK(coralmicro::LfsDirExists("/dir1/dir13"));
-  CHECK(coralmicro::LfsDirExists("/dir2/dir21"));
+  CHECK(LfsDirExists("/dir1"));
+  CHECK(LfsDirExists("/dir2"));
+  CHECK(LfsDirExists("/dir1/dir11"));
+  CHECK(LfsDirExists("/dir1/dir13"));
+  CHECK(LfsDirExists("/dir2/dir21"));
 
-  CHECK(!coralmicro::LfsDirExists("/nonexistent"));
+  CHECK(!LfsDirExists("/nonexistent"));
 
   PrintFilesystemContents();
 
@@ -102,7 +102,7 @@ void Main() {
   CHECK(lfs_file_write(Lfs(), &file1, kFile1Str, std::strlen(kFile1Str)) ==
         static_cast<lfs_ssize_t>(std::strlen(kFile1Str)));
   CHECK(lfs_file_close(Lfs(), &file1) >= 0);
-  CHECK(coralmicro::LfsWriteFile("/dir2/file2",
+  CHECK(LfsWriteFile("/dir2/file2",
                                  reinterpret_cast<const uint8_t*>(kFile2Str),
                                  std::strlen(kFile2Str)));
 
@@ -113,7 +113,7 @@ void Main() {
   CHECK(lfs_file_close(Lfs(), &file1) >= 0);
 
   std::string readstr;
-  CHECK(coralmicro::LfsReadFile("/dir2/file2", &readstr));
+  CHECK(LfsReadFile("/dir2/file2", &readstr));
   CHECK(readstr.length() == std::strlen(kFile2Str));
 
   constexpr lfs_soff_t kSeekOffset = 6;

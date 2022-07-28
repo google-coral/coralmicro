@@ -24,23 +24,22 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-namespace {
+namespace coralmicro {
 constexpr int kTensorArenaSize = 1 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr int kNumDmaBuffers = 2;
 constexpr int kDmaBufferSizeMs = 50;
-constexpr int kDmaBufferSize = kNumDmaBuffers *
-                               coralmicro::tensorflow::kYamnetSampleRateMs *
-                               kDmaBufferSizeMs;
+constexpr int kDmaBufferSize =
+    kNumDmaBuffers * tensorflow::kYamnetSampleRateMs * kDmaBufferSizeMs;
 constexpr int kAudioServicePriority = 4;
 constexpr int kDropFirstSamplesMs = 150;
 
-coralmicro::AudioDriverBuffers<kNumDmaBuffers, kDmaBufferSize> audio_buffers;
-coralmicro::AudioDriver audio_driver(audio_buffers);
+AudioDriverBuffers<kNumDmaBuffers, kDmaBufferSize> audio_buffers;
+AudioDriver audio_driver(audio_buffers);
 
-constexpr int kAudioBufferSizeMs = coralmicro::tensorflow::kYamnetDurationMs;
+constexpr int kAudioBufferSizeMs = tensorflow::kYamnetDurationMs;
 constexpr int kAudioBufferSize =
-    kAudioBufferSizeMs * coralmicro::tensorflow::kYamnetSampleRateMs;
+    kAudioBufferSizeMs * tensorflow::kYamnetSampleRateMs;
 
 constexpr float kThreshold = 0.3;
 constexpr int kTopK = 5;
@@ -57,34 +56,31 @@ constexpr bool kUseTpu = true;
 // populated with raw audio input.
 void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
   auto input_tensor = interpreter->input_tensor(0);
-  auto preprocess_start = coralmicro::TimerMillis();
-  coralmicro::tensorflow::YamNetPreprocessInput(input_tensor, frontend_state);
+  auto preprocess_start = TimerMillis();
+  tensorflow::YamNetPreprocessInput(input_tensor, frontend_state);
   // Reset frontend state.
   FrontendReset(frontend_state);
-  auto preprocess_end = coralmicro::TimerMillis();
+  auto preprocess_end = TimerMillis();
   if (interpreter->Invoke() != kTfLiteOk) {
     printf("Failed to invoke on test input\r\n");
     vTaskSuspend(nullptr);
   }
-  auto current_time = coralmicro::TimerMillis();
+  auto current_time = TimerMillis();
   printf(
       "Yamnet preprocess time: %lums, invoke time: %lums, total: "
       "%lums\r\n",
       static_cast<uint32_t>(preprocess_end - preprocess_start),
       static_cast<uint32_t>(current_time - preprocess_end),
       static_cast<uint32_t>(current_time - preprocess_start));
-  auto results = coralmicro::tensorflow::GetClassificationResults(
-      interpreter, kThreshold, kTopK);
-  printf("%s\r\n",
-         coralmicro::tensorflow::FormatClassificationOutput(results).c_str());
+  auto results =
+      tensorflow::GetClassificationResults(interpreter, kThreshold, kTopK);
+  printf("%s\r\n", tensorflow::FormatClassificationOutput(results).c_str());
 }
 
-}  // namespace
-
-extern "C" [[noreturn]] void app_main(void* param) {
+[[noreturn]] void Main() {
   printf("YAMNet!!!\r\n");
   std::vector<uint8_t> yamnet_tflite;
-  if (!coralmicro::LfsReadFile(kModelName, &yamnet_tflite)) {
+  if (!LfsReadFile(kModelName, &yamnet_tflite)) {
     printf("Failed to load model\r\n");
     vTaskSuspend(nullptr);
   }
@@ -97,8 +93,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
   }
 
 #ifndef YAMNET_CPU
-  auto edgetpu_context =
-      coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice();
+  auto edgetpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!edgetpu_context) {
     printf("Failed to get TPU context\r\n");
     vTaskSuspend(nullptr);
@@ -106,8 +101,7 @@ extern "C" [[noreturn]] void app_main(void* param) {
 #endif
 
   tflite::MicroErrorReporter error_reporter;
-  auto yamnet_resolver =
-      coralmicro::tensorflow::SetupYamNetResolver</*tForTpu=*/kUseTpu>();
+  auto yamnet_resolver = tensorflow::SetupYamNetResolver</*tForTpu=*/kUseTpu>();
 
   tflite::MicroInterpreter interpreter{model, yamnet_resolver, tensor_arena,
                                        kTensorArenaSize, &error_reporter};
@@ -117,20 +111,19 @@ extern "C" [[noreturn]] void app_main(void* param) {
   }
 
   FrontendState frontend_state{};
-  if (!coralmicro::tensorflow::YamNetPrepareFrontEnd(&frontend_state)) {
-    printf("coralmicro::tensorflow::YamNetPrepareFrontEnd() failed.\r\n");
+  if (!tensorflow::YamNetPrepareFrontEnd(&frontend_state)) {
+    printf("tensorflow::YamNetPrepareFrontEnd() failed.\r\n");
     vTaskSuspend(nullptr);
   }
 
   // Run tensorflow on test input file.
   std::vector<uint8_t> yamnet_test_input_bin;
-  if (!coralmicro::LfsReadFile("/models/yamnet_test_audio.bin",
-                               &yamnet_test_input_bin)) {
+  if (!LfsReadFile("/models/yamnet_test_audio.bin", &yamnet_test_input_bin)) {
     printf("Failed to load test input!\r\n");
     vTaskSuspend(nullptr);
   }
   if (yamnet_test_input_bin.size() !=
-      coralmicro::tensorflow::kYamnetAudioSize * sizeof(int16_t)) {
+      tensorflow::kYamnetAudioSize * sizeof(int16_t)) {
     printf("Input audio size doesn't match expected\r\n");
     vTaskSuspend(nullptr);
   }
@@ -140,23 +133,21 @@ extern "C" [[noreturn]] void app_main(void* param) {
   run(&interpreter, &frontend_state);
 
   // Setup audio
-  coralmicro::AudioDriverConfig audio_config{
-      coralmicro::AudioSampleRate::k16000_Hz, kNumDmaBuffers, kDmaBufferSizeMs};
-  coralmicro::AudioService audio_service(
-      &audio_driver, audio_config, kAudioServicePriority, kDropFirstSamplesMs);
-  coralmicro::LatestSamples audio_latest(
-      coralmicro::MsToSamples(coralmicro::AudioSampleRate::k16000_Hz,
-                              coralmicro::tensorflow::kYamnetDurationMs));
+  AudioDriverConfig audio_config{AudioSampleRate::k16000_Hz, kNumDmaBuffers,
+                                 kDmaBufferSizeMs};
+  AudioService audio_service(&audio_driver, audio_config, kAudioServicePriority,
+                             kDropFirstSamplesMs);
+  LatestSamples audio_latest(
+      MsToSamples(AudioSampleRate::k16000_Hz, tensorflow::kYamnetDurationMs));
   audio_service.AddCallback(
       &audio_latest,
       +[](void* ctx, const int32_t* samples, size_t num_samples) {
-        static_cast<coralmicro::LatestSamples*>(ctx)->Append(samples,
-                                                             num_samples);
+        static_cast<LatestSamples*>(ctx)->Append(samples, num_samples);
         return true;
       });
 
   // Delay for the first buffers to fill.
-  vTaskDelay(pdMS_TO_TICKS(coralmicro::tensorflow::kYamnetDurationMs));
+  vTaskDelay(pdMS_TO_TICKS(tensorflow::kYamnetDurationMs));
   auto audio_input = tflite::GetTensorData<int16_t>(input_tensor);
   while (true) {
     audio_latest.AccessLatestSamples(
@@ -176,7 +167,14 @@ extern "C" [[noreturn]] void app_main(void* param) {
     run(&interpreter, &frontend_state);
 #ifndef YAMNET_CPU
     // Delay 975 ms to rate limit the TPU version.
-    vTaskDelay(pdMS_TO_TICKS(coralmicro::tensorflow::kYamnetDurationMs));
+    vTaskDelay(pdMS_TO_TICKS(tensorflow::kYamnetDurationMs));
 #endif
   }
+}
+
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
 }

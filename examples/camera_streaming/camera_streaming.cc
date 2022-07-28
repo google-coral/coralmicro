@@ -32,49 +32,46 @@
 #include "libs/base/wifi.h"
 #endif  // defined(CAMERA_STREAMING_WIFI)
 
-namespace {
-using coralmicro::testlib::JsonRpcGetBooleanParam;
-using coralmicro::testlib::JsonRpcGetIntegerParam;
-using coralmicro::testlib::JsonRpcGetStringParam;
+namespace coralmicro {
+using testlib::JsonRpcGetBooleanParam;
+using testlib::JsonRpcGetIntegerParam;
+using testlib::JsonRpcGetStringParam;
 
-std::optional<coralmicro::CameraFormat> CheckCameraFormat(
-    const std::string& format) {
-  if (format == "RGB") return coralmicro::CameraFormat::kRgb;
+std::optional<CameraFormat> CheckCameraFormat(const std::string& format) {
+  if (format == "RGB") return CameraFormat::kRgb;
 
-  if (format == "GRAY") return coralmicro::CameraFormat::kY8;
+  if (format == "GRAY") return CameraFormat::kY8;
 
-  if (format == "RAW") return coralmicro::CameraFormat::kRaw;
+  if (format == "RAW") return CameraFormat::kRaw;
 
   return std::nullopt;
 }
 
-std::optional<coralmicro::CameraFilterMethod> CheckCameraFilterMethod(
+std::optional<CameraFilterMethod> CheckCameraFilterMethod(
     const std::string& method) {
-  if (method == "BILINEAR") return coralmicro::CameraFilterMethod::kBilinear;
+  if (method == "BILINEAR") return CameraFilterMethod::kBilinear;
 
-  if (method == "NEAREST_NEIGHBOR")
-    return coralmicro::CameraFilterMethod::kNearestNeighbor;
+  if (method == "NEAREST_NEIGHBOR") return CameraFilterMethod::kNearestNeighbor;
 
   return std::nullopt;
 }
 
-std::optional<coralmicro::CameraRotation> CheckCameraRotation(int rotation) {
+std::optional<CameraRotation> CheckCameraRotation(int rotation) {
   switch (rotation) {
     case 0:
-      return coralmicro::CameraRotation::k0;
+      return CameraRotation::k0;
     case 90:
-      return coralmicro::CameraRotation::k90;
+      return CameraRotation::k90;
     case 180:
-      return coralmicro::CameraRotation::k180;
+      return CameraRotation::k180;
     case 270:
-      return coralmicro::CameraRotation::k270;
+      return CameraRotation::k270;
     default:
       return std::nullopt;
   }
 }
 
 void GetImageFromCamera(struct jsonrpc_request* request) {
-  using coralmicro::CameraTask;
 
   int width;
   if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
@@ -113,11 +110,10 @@ void GetImageFromCamera(struct jsonrpc_request* request) {
   if (!JsonRpcGetBooleanParam(request, "auto_white_balance", &awb)) return;
 
   //! [camera-stream] Doxygen snippet for camera.h
-  std::vector<uint8_t> image(width * height *
-                             coralmicro::CameraFormatBpp(*format));
-  coralmicro::CameraFrameFormat fmt{*format, *filter, *rotation,    width,
-                                    height,  false,   image.data(), awb};
-  auto ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
+  std::vector<uint8_t> image(width * height * CameraFormatBpp(*format));
+  CameraFrameFormat fmt{*format, *filter, *rotation,    width,
+                        height,  false,   image.data(), awb};
+  auto ret = CameraTask::GetSingleton()->GetFrame({fmt});
   //! [camera-stream] End snippet
 
   if (!ret) {
@@ -130,18 +126,16 @@ void GetImageFromCamera(struct jsonrpc_request* request) {
                          image.data());
 }
 
-}  // namespace
-
-extern "C" void app_main(void* param) {
+void Main() {
 #if defined(CAMERA_STREAMING_ETHERNET)
-  coralmicro::EthernetInit(/*default_iface=*/false);
-  auto* ethernet = coralmicro::EthernetGetInterface();
+  EthernetInit(/*default_iface=*/false);
+  auto* ethernet = EthernetGetInterface();
   if (!ethernet) {
     printf("Unable to bring up ethernet...\r\n");
     vTaskSuspend(nullptr);
   }
 
-  auto ethernet_ip = coralmicro::EthernetGetIp();
+  auto ethernet_ip = EthernetGetIp();
   if (!ethernet_ip.has_value()) {
     printf("Unable to get Ethernet IP\r\n");
     vTaskSuspend(nullptr);
@@ -156,15 +150,15 @@ extern "C" void app_main(void* param) {
             static_cast<std::string*>(request->ctx->response_cb_data)->c_str());
       });
 #elif defined(CAMERA_STREAMING_WIFI)
-  if (!coralmicro::WiFiTurnOn()) {
+  if (!WiFiTurnOn()) {
     printf("Unable to bring up WiFi...\r\n");
     vTaskSuspend(nullptr);
   }
-  if (!coralmicro::WiFiConnect(10)) {
+  if (!WiFiConnect(10)) {
     printf("Unable to connect to WiFi...\r\n");
     vTaskSuspend(nullptr);
   }
-  if (auto wifi_ip = coralmicro::WiFiGetIp()) {
+  if (auto wifi_ip = WiFiGetIp()) {
     printf("Starting Image RPC Server on: %s\r\n", wifi_ip->c_str());
     jsonrpc_init(nullptr, &wifi_ip.value());
     jsonrpc_export(
@@ -180,7 +174,7 @@ extern "C" void app_main(void* param) {
   }
 #else
   std::string usb_ip;
-  if (!coralmicro::utils::GetUsbIpAddress(&usb_ip)) {
+  if (!utils::GetUsbIpAddress(&usb_ip)) {
     printf("Failed to get USB's Ip Address\r\n");
     vTaskSuspend(nullptr);
   }
@@ -189,11 +183,17 @@ extern "C" void app_main(void* param) {
 #endif  // defined(CAMERA_STREAMING_ETHERNET)
 
   // Turn on camera for streaming mode.
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kStreaming);
+  CameraTask::GetSingleton()->SetPower(true);
+  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
 
   jsonrpc_export("get_image_from_camera", GetImageFromCamera);
-  coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
+  UseHttpServer(new JsonRpcHttpServer);
+  vTaskSuspend(nullptr);
+}
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
   vTaskSuspend(nullptr);
 }

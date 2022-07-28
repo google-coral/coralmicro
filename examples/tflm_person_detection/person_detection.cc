@@ -37,22 +37,25 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
                        person_score, no_person_score);
 
   bool person_detected = person_score > no_person_score;
-  coralmicro::LedSet(coralmicro::Led::kUser, person_detected);
-  coralmicro::LedSet(coralmicro::Led::kStatus, person_detected);
+  LedSet(coralmicro::Led::kUser, person_detected);
+  LedSet(coralmicro::Led::kStatus, person_detected);
 }
 
-extern "C" void app_main(void* param) {
-  coralmicro::CameraTask::GetSingleton()->SetPower(false);
+namespace coralmicro {
+[[noreturn]] void Main() {
+  CameraTask::GetSingleton()->SetPower(false);
   vTaskDelay(pdMS_TO_TICKS(100));
-  coralmicro::CameraTask::GetSingleton()->SetPower(true);
-  coralmicro::CameraTask::GetSingleton()->Enable(
-      coralmicro::CameraMode::kStreaming);
+  CameraTask::GetSingleton()->SetPower(true);
+  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
 
   setup();
   while (true) {
     loop();
   }
-  coralmicro::CameraTask::GetSingleton()->Disable();
-  coralmicro::CameraTask::GetSingleton()->SetPower(false);
-  vTaskSuspend(nullptr);
+}
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
 }

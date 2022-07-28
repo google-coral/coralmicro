@@ -48,7 +48,6 @@
 // }
 
 namespace coralmicro {
-namespace {
 constexpr char kModelPath[] = "/models/mnv2_324_quant_bayered_edgetpu.tflite";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
@@ -66,8 +65,7 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
   bool bayered = strstr(kModelPath, "bayered");
   std::vector<uint8_t> image(model_width * model_height *
                              /*channels=*/(bayered ? 1 : 3));
-  auto format =
-      bayered ? coralmicro::CameraFormat::kRaw : coralmicro::CameraFormat::kRgb;
+  auto format = bayered ? CameraFormat::kRaw : CameraFormat::kRgb;
   CameraFrameFormat fmt{format,
                         CameraFilterMethod::kBilinear,
                         CameraRotation::k0,
@@ -146,8 +144,8 @@ void Main() {
   jsonrpc_export("classify_from_camera", ClassifyFromCamera);
   UseHttpServer(new JsonRpcHttpServer);
   printf("Classification server ready!\r\n");
+  vTaskSuspend(nullptr);
 }
-}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

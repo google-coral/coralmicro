@@ -19,7 +19,8 @@
 
 // Reads character input from the serial console and writes it back.
 
-extern "C" void app_main(void* param) {
+extern "C" [[noreturn]] void app_main(void* param) {
+  (void)param;
   printf("Type into the serial console.\r\n");
 
   char ch;

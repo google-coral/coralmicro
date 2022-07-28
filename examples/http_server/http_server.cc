@@ -15,7 +15,6 @@
 #include "libs/base/http_server.h"
 
 #include <cstring>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,7 +27,6 @@
 // shown in the serial terminal, such as http://10.10.10.1/hello.html
 
 namespace coralmicro {
-namespace {
 
 HttpServer::Content UriHandler(const char* path) {
   printf("Request received for %s\r\n", path);
@@ -42,19 +40,23 @@ HttpServer::Content UriHandler(const char* path) {
   return {};
 }
 
-}  // namespace
+void Main() {
+  printf("Starting server...\r\n");
+  HttpServer http_server;
+  http_server.AddUriHandler(UriHandler);
+  UseHttpServer(&http_server);
+
+  std::string ip;
+  if (utils::GetUsbIpAddress(&ip)) {
+    printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "hello.html");
+  }
+  vTaskSuspend(nullptr);
+}
+
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
   (void)param;
-  printf("Starting server...\r\n");
-  coralmicro::HttpServer http_server;
-  http_server.AddUriHandler(coralmicro::UriHandler);
-  coralmicro::UseHttpServer(&http_server);
-
-  std::string ip;
-  if (coralmicro::utils::GetUsbIpAddress(&ip)) {
-    printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "hello.html");
-  }
+  coralmicro::Main();
   vTaskSuspend(nullptr);
 }

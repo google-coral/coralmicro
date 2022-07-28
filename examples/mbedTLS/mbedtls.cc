@@ -41,6 +41,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/sha512.h"
 #include "third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/x509.h"
 
+namespace {
 // From
 // third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/mbedtls_examples/mbedtls_selftest/cm7/selftest.c
 typedef struct {
@@ -73,7 +74,10 @@ const selftest_t selftests[] = {
     {"x509", mbedtls_x509_self_test},
     {nullptr, nullptr}};
 
+}  // namespace
+
 extern "C" void app_main(void *param) {
+  (void)param;
   if (!coralmicro::A71ChInit()) {
     printf("A71CH init failed\r\n");
     vTaskSuspend(nullptr);
@@ -82,6 +86,5 @@ extern "C" void app_main(void *param) {
   for (const selftest_t *test = selftests; test->name != nullptr; test++) {
     test->function(1);
   }
-
   vTaskSuspend(nullptr);
 }

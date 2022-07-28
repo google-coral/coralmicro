@@ -18,7 +18,8 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-extern "C" void app_main(void *param) {
+extern "C" [[noreturn]] void app_main(void *param) {
+  (void)param;
   while (true) {
     coralmicro::MulticoreMutexLock lock(0);
     printf("[M4] Hello.\r\n");

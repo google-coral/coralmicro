@@ -22,7 +22,8 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-extern "C" void app_main(void* param) {
+namespace coralmicro {
+void Main() {
   vTaskDelay(pdMS_TO_TICKS(1000));
   // Initializes the A71 chip.
   if (!coralmicro::A71ChInit()) {
@@ -107,5 +108,11 @@ extern "C" void app_main(void* param) {
   printf(
       "\r\nSee examples/security/README.md for instructions to verify "
       "manually.\r\n");
+}
+}  // namespace coralmicro
+
+extern "C" void app_main(void* param) {
+  (void)param;
+  coralmicro::Main();
   vTaskSuspend(nullptr);
 }

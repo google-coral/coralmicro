@@ -45,7 +45,6 @@ python3 scripts/flashtool.py -b build -e curl --subapp curl_wifi \
         --wifi_ssid network-name --wifi_psk network-password
 */
 namespace coralmicro {
-namespace {
 struct DnsCallbackArg {
   SemaphoreHandle_t sema;
   const char* hostname;
@@ -80,7 +79,7 @@ void CurlRequest(const char* url) {
 }
 
 void PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
-  DnsCallbackArg arg;
+  DnsCallbackArg arg{};
   arg.ip_addr = addr;
   arg.sema = xSemaphoreCreateBinary();
   arg.hostname = hostname;
@@ -108,24 +107,24 @@ void Main() {
   std::optional<std::string> our_ip_addr;
 #if defined(CURL_ETHERNET)
   printf("Attempting to use ethernet...\r\n");
-  CHECK(coralmicro::EthernetInit(/*default_iface=*/true));
-  our_ip_addr = coralmicro::EthernetGetIp();
+  CHECK(EthernetInit(/*default_iface=*/true));
+  our_ip_addr = EthernetGetIp();
 #elif defined(CURL_WIFI)
   printf("Attempting to use Wi-Fi...\r\n");
   // Uncomment me to use the external antenna.
-  // coralmicro::SetWiFiAntenna(coralmicro::WiFiAntenna::kExternal);
-  bool success = coralmicro::WiFiTurnOn();
+  // SetWiFiAntenna(WiFiAntenna::kExternal);
+  bool success = WiFiTurnOn();
   if (!success) {
     printf("Failed to turn on Wi-Fi\r\n");
     return;
   }
-  success = coralmicro::WiFiConnect();
+  success = WiFiConnect();
   if (!success) {
     printf("Failed to connect to Wi-Fi\r\n");
     return;
   }
   printf("Wi-Fi connected\r\n");
-  our_ip_addr = coralmicro::WiFiGetIp();
+  our_ip_addr = WiFiGetIp();
 #endif
 
   if (our_ip_addr.has_value()) {
@@ -153,7 +152,6 @@ void Main() {
   curl_global_cleanup();
   printf("Done.\r\n");
 }
-}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

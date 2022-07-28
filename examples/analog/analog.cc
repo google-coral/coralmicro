@@ -23,21 +23,28 @@
 // and writes it to the DAC (pin 9 on the right-side header)
 // Note: The DAC outputs a max of 1.8V
 
+namespace coralmicro {
 // [start-sphinx-snippet:dac-adc]
-extern "C" [[noreturn]] void app_main(void *param) {
-  (void)param;
-
-  coralmicro::AdcInit(coralmicro::AdcDevice::kAdc1);
-  coralmicro::DacInit();
-  coralmicro::AdcConfig config;
-  coralmicro::AdcCreateConfig(config, coralmicro::AdcDevice::kAdc1, 0,
-                              coralmicro::AdcSide::kB,
-                              /*differential=*/false);
-  coralmicro::DacEnable(true);
+[[noreturn]] void Main() {
+  AdcInit(AdcDevice::kAdc1);
+  DacInit();
+  AdcConfig config{};
+  AdcCreateConfig(config,
+                  /*device=*/AdcDevice::kAdc1,
+                  /*channel=*/0,
+                  /*primary_side=*/AdcSide::kB,
+                  /*differential=*/false);
+  DacEnable(true);
   while (true) {
-    uint16_t val = coralmicro::AdcRead(config);
-    coralmicro::DacWrite(val);
+    uint16_t val = AdcRead(config);
+    DacWrite(val);
     printf("ADC val: %u\r\n", val);
   }
 }
 // [end-sphinx-snippet:dac-adc]
+}  // namespace coralmicro
+
+extern "C" void app_main(void *param) {
+  (void)param;
+  coralmicro::Main();
+}

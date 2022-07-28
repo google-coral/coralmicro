@@ -47,7 +47,6 @@ const int kModelArenaSize = 4096;
 const int kExtraArenaSize = 4096;
 const int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
 uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)));
-}  // namespace
 
 static void loop() {
   float position = static_cast<float>(inference_count) /
@@ -73,7 +72,8 @@ static void loop() {
     inference_count = 0;
   }
 }
-static void hello_task(void* param) {
+
+[[noreturn]] void hello_task(void* param) {
   printf("Starting inference task...\r\n");
   while (true) {
     loop();
@@ -81,7 +81,11 @@ static void hello_task(void* param) {
   }
 }
 
-extern "C" void app_main(void* param) {
+}  // namespace
+
+extern "C" [[noreturn]] void app_main(void* param) {
+  (void)param;
+
   static tflite::MicroErrorReporter micro_error_reporter;
   error_reporter = &micro_error_reporter;
   TF_LITE_REPORT_ERROR(error_reporter, "HelloTensorflowFreeRTOS!");

@@ -51,7 +51,6 @@
 // Class 2: Pixel bordering the pet.
 // Class 3: None of the above/a surrounding pixel.
 namespace coralmicro {
-namespace {
 constexpr char kModelPath[] =
     "/models/keras_post_training_unet_mv2_128_quant_edgetpu.tflite";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
@@ -132,8 +131,8 @@ void Main() {
   jsonrpc_export("segment_from_camera", SegmentFromCamera);
   UseHttpServer(new JsonRpcHttpServer);
   printf("Segmentation server ready!\r\n");
+  vTaskSuspend(nullptr);
 }
-}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

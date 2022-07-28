@@ -64,6 +64,7 @@ void bt_ready(int err) {
 
   printf("Beacon started, advertising as %s\r\n", addr_s);
 }
+
 }  // namespace
 
 extern "C" void app_main(void* param) {
