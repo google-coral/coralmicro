@@ -37,7 +37,8 @@ enum Gpio {
   kBtRegOn,
   // On-board User button. Active low.
   kUserButton,
-  // Trigger GPIO for single-shot camera capture.
+  // Trigger GPIO for single-shot camera capture. Not to be used by apps;
+  // instead see `CameraTask::Trigger()`.
   kCameraTrigger,
   // Selects between on-board antenna and antenna connector (for Wi-Fi and BT).
   // Low for internal, high for external.
@@ -80,29 +81,39 @@ enum Gpio {
   kPwm0,
   // I2C6_SCL (GPIO_LPSR_07); left header (J9), pin 11
   kScl6,
+  // Number of pre-configured GPIOs
   kCount,
 
+  // @cond Do not generate docs
   kArduinoD0 = kScl6,
   kArduinoD1 = kUartRts,
   kArduinoD2 = kUartCts,
   kArduinoD3 = kSda6,
+  // @endcond
 };
 
-// Enumeration of available interrupt modes for GPIOs.
+// Interrupt modes for use with `GpioConfigureInterrupt()`.
 enum GpioInterruptMode {
+  // Disables GPIO interrupt
   kIntModeNone,
+  // Interrupt when line is low
   kIntModeLow,
+  // Interrupt when line is high
   kIntModeHigh,
+  // Interrupt when line is rising
   kIntModeRising,
+  // Interrupt when line is falling
   kIntModeFalling,
+  // Interrupt when line is either rising or falling
   kIntModeChanging,
+  // Number of interrupt modes
   kIntModeCount
 };
 
-// Enumeration of gpio pull direction.
+// GPIO pull directions for `GpioSetMode()`.
 enum GpioPullDirection { kPullUp, kPullDown, kNone };
 
-// The function type required by `RegisterIRQHandler()`.
+// The function type required by `GpioConfigureInterrupt()`.
 using GpioCallback = std::function<void()>;
 
 // @cond Do not generate docs
@@ -111,10 +122,9 @@ void GpioInit();
 
 // Sets the output value of a GPIO.
 // @param gpio Pin to configure. Only pins in the `Gpio` enumeration can be
-// configured with this module.
-//             To use a GPIO that is not covered by this module,
-//             use the functions in
-//             `third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h`
+//  configured with this module. To use a GPIO that is not covered by this
+//  module, use the functions in
+//  `third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h`
 // @param enable Whether to set the pin to high or low.
 void GpioSet(Gpio gpio, bool enable);
 
@@ -126,10 +136,10 @@ bool GpioGet(Gpio gpio);
 // Sets the mode of a GPIO.
 // @param gpio Pin to configure.
 // @param input True sets the pin as an input; false sets it as an output.
-// @param pull_direction The direction of the pull.
+// @param pull_direction Either `kPullUp`, `kPullDown`, or `kNone`.
 void GpioSetMode(Gpio gpio, bool input, GpioPullDirection pull_direction);
 
-// Sets the interrupt mode of a GPIO.
+// Sets the interrupt mode and callback for a GPIO.
 //
 // **Example** (from `examples/button_led/`):
 //

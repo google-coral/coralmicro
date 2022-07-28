@@ -1,0 +1,208 @@
+<style>
+td {
+  text-align: center;
+}
+.style0 {
+  border-collapse:collapse;
+}
+.style1 {
+  color:#434343;
+  background-color:#eeeeee;
+}
+.style2 {
+  color:#434343;
+}
+.style3 {
+  background-color:#4a5759;
+  color: #ffffff;
+}
+.style4 {
+  color:#434343;
+  background-color:#ff8376;
+}
+.style5 {
+  color:#434343;
+  background-color:#f3f3f3;
+}
+.style6 {
+  color:#434343;
+  background-color:#f5b841;
+}
+.style7 {
+  color:#434343;
+  background-color:#e5d352;
+}
+.style8 {
+  color:#434343;
+  background-color:#59a4e1;
+}
+.style9 {
+  color:#434343;
+  background-color:#b79ced;
+}
+.style10 {
+  color:#434343;
+  background-color:#4bc6b9;
+}
+.style99 {
+  font-family: monospace;
+}
+</style>
+</head>
+<body>
+
+<table class="style0" style="font-size:85%">
+<caption><strong>Table 1. </strong>Default GPIO configuration </caption>
+  <thead>
+    <tr>
+      <th colspan="4" class="style1"><strong>Left header (J9)</strong></th>
+      <th class="style1"></th>
+      <th colspan="4" class="style1"><strong>Right header (J10)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="style1"><strong>MCU signal</strong></td>
+      <td class="style1"><strong>Default state</strong></td>
+      <td class="style1"><strong>GPIO </strong></td>
+      <td class="style1"><strong>Primary function</strong></td>
+      <td class="style1"><strong>Pin</strong></td>
+      <td class="style1"><strong>Primary function</strong></td>
+      <td class="style1"><strong>GPIO </strong></td>
+      <td class="style1"><strong>Default state</strong></td>
+      <td class="style1"><strong>MCU signal</strong></td>
+    </tr>
+    <tr>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style3">Ground</td>
+      <td class="style2">1</td>
+      <td class="style3">Ground</td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+    </tr>
+    <tr>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style4">1.8 V out</td>
+      <td class="style2">2</td>
+      <td class="style4">1.8 V out</td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_AD_06</td>
+      <td class="style2">High-Z</td>
+      <td class="style99">kAA (kA)</td>
+      <td class="style5">ADC1_CH0A</td>
+      <td class="style2">3</td>
+      <td class="style4">3.3 V out</td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_AD_07</td>
+      <td class="style2">High-Z</td>
+      <td class="style99">kAB (kB)</td>
+      <td class="style5">ADC1_CH0B</td>
+      <td class="style2">4</td>
+      <td class="style6">RTC 3.0 V in</td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_EMC_B1_40</td>
+      <td class="style2">High-Z</td>
+      <td class="style2"></td>
+      <td class="style7">UART6_TX</td>
+      <td class="style2">5</td>
+      <td class="style8">SPI6_CS0</td>
+      <td class="style99">kSpiCs</td>
+      <td class="style2">High-Z</td>
+      <td class="style2">GPIO_LPSR_09</td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_EMC_B1_41</td>
+      <td class="style2">High-Z</td>
+      <td class="style2"></td>
+      <td class="style7">UART6_RX</td>
+      <td class="style2">6</td>
+      <td class="style8">SPI6_SCK</td>
+      <td class="style99">kSpiSck</td>
+      <td class="style2">High-Z</td>
+      <td class="style2">GPIO_LPSR_10</td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_EMC_B2_00</td>
+      <td class="style2">High-Z</td>
+      <td class="style99">kUartCts</td>
+      <td class="style7">UART6_CTS</td>
+      <td class="style2">7</td>
+      <td class="style8">SPI6_SDO</td>
+      <td class="style99">kSpiSdo</td>
+      <td class="style2">High-Z</td>
+      <td class="style2">GPIO_LPSR_11</td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_EMC_B2_01</td>
+      <td class="style2">High-Z</td>
+      <td class="style99">kUartRts</td>
+      <td class="style7">UART6_RTS</td>
+      <td class="style2">8</td>
+      <td class="style8">SPI6_SDI</td>
+      <td class="style99">kSpiSdi</td>
+      <td class="style2">High-Z</td>
+      <td class="style2">GPIO_LPSR_12</td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_AD_01</td>
+      <td class="style2">High-Z</td>
+      <td class="style99">kPwm1</td>
+      <td class="style9">PWM_B</td>
+      <td class="style2">9</td>
+      <td class="style5">DAC_OUT</td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2">DAC_OUT</td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_AD_00</td>
+      <td class="style2">High-Z</td>
+      <td class="style99">kPwm0</td>
+      <td class="style9">PWM_A</td>
+      <td class="style2">10</td>
+      <td class="style10">I2C6_SDA</td>
+      <td class="style99">kSda6</td>
+      <td class="style2">High</td>
+      <td class="style2">GPIO_LPSR_06</td>
+    </tr>
+    <tr>
+      <td class="style2">GPIO_LPSR_07</td>
+      <td class="style2">High-Z</td>
+      <td class="style99">kScl6</td>
+      <td class="style10">I2C6_SCL</td>
+      <td class="style2">11</td>
+      <td class="style10">I2C1_SCL</td>
+      <td class="style99">kScl1</td>
+      <td class="style2">High</td>
+      <td class="style2">GPIO_AD_32</td>
+    </tr>
+    <tr>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style2"></td>
+      <td class="style4">VSYS</td>
+      <td class="style2">12</td>
+      <td class="style10">I2C1_SDA</td>
+      <td class="style99">kSda1</td>
+      <td class="style2">High</td>
+      <td class="style2">GPIO_AD_33</td>
+    </tr>
+  </tbody>
+</table>

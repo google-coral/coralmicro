@@ -22,6 +22,7 @@
 // Connect the SDI and SDO pins to each other to execute this successfully.
 
 namespace coralmicro {
+// [start-sphinx-snippet:spi]
 void Main() {
   constexpr int kTransferBytes = 256;
   std::array<uint8_t, kTransferBytes> tx_data;
@@ -41,6 +42,7 @@ void Main() {
   }
   printf("Transaction success!\r\n");
 }
+// [end-sphinx-snippet:spi]
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

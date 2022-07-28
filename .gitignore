@@ -4,6 +4,7 @@
 /arduino-cli.yaml
 /build
 /build-*
+/docs/_build
 .DS_Store
 .gdb_history
 __pycache__

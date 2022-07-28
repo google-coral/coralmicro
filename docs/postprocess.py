@@ -76,6 +76,12 @@ def style_source_link(soup):
     p['class'] = 'cpp-source-link'
   return soup
 
+def fix_image_paths(soup):
+  """Converts relative path image URIs to absolute paths for website."""
+  for img in soup.select('img[src^="images"]'):
+    img['src'] = '/static/docs/reference/micro/' + img['src']
+  return soup
+
 
 def clean_index(soup):
   """Removes the HTML table from the index page, leaving just lists of APIs.
@@ -101,6 +107,7 @@ def process(file):
   soup = remove_coral(soup)
   soup = remove_subclass_string(soup)
   soup = style_source_link(soup)
+  soup = fix_image_paths(soup)
   if os.path.split(file)[1] == 'index.md':
     soup = clean_index(soup)
   with open(file, 'w') as output:

@@ -65,6 +65,7 @@ html_theme = 'coral_theme'
 html_theme_path = ['.']
 html_file_suffix = '.md'
 html_link_suffix = '/'
+html_extra_path = ['extras']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'none'

@@ -28,15 +28,19 @@ inline constexpr int kAdc1ChannelCount = 6;
 // Available channels on ADC2.
 inline constexpr int kAdc2ChannelCount = 7;
 
-// Enumeration of the ADCs and DACs that exist in the system.
+// ADC devices that exist in the system.
 enum class AdcDevice {
+  // Both ADC lines on the GPIO header use this one
   kAdc1,
+  // Not available
   kAdc2,
 };
 
-// Enumeration of the choices for the primary side of an ADC.
+// Choices for the primary side of an ADC.
 enum class AdcSide {
+  // ADC1_CH0A (GPIO_AD_06); left header, pin 3
   kA,
+  // ADC1_CH0B (GPIO_AD_07); left header, pin 4
   kB,
 };
 
@@ -57,24 +61,21 @@ void AdcInit(AdcDevice device);
 
 // Populates an `ADCConfig` struct based on the given parameters.
 // @param config Configuration struct to populate.
-// @param device Desired device to configure.
+// @param device Desired device to configure. (Always `AdcDevice::Adc1` when
+//   using ADCs on the board header.)
 // @param channel The ADC channel to use (must be less than the max number of
-// channels).
-//   See `kLPADC1ChannelCount` and `kLPADC2ChannelCount` for the amount of
-//   channels.
-// @param primary_side Primary side of the ADC, if using differential mode.
-//   In single ended mode, the desired side.
+// channels: `kAdc1ChannelCount`).
+// @param primary_side In single ended mode, this is the pin that's connected.
+//   In differential mode, this is the pin to use as the primary side.
 // @param differential Whether or not to run the ADC in differential mode.
 void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
                      AdcSide primary_side, bool differential);
 
 // Reads voltage values from an ADC.
 //
-// For example code, see `examples/analog/`.
 // @param config ADC configuration to use.
 // @returns Digitized value of the voltage that the ADC is sensing.
-//          The ADC has 12 bits of precision, so the maximum value returned is
-//          4095.
+//   The ADC has 12 bits of precision, so the maximum value returned is 4095.
 uint16_t AdcRead(const AdcConfig& config);
 
 // Initializes DAC device.

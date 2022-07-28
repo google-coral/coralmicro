@@ -8,9 +8,9 @@ hardware interfaces on the Coral Dev Board Micro.
 Camera
 ----------
 
-`[coralmicro_camera.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/Camera/coralmicro_camera.h>`_
+`[coralmicro_camera.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_Camera/coralmicro_camera.h>`_
 
-.. doxygenfile:: Camera/coralmicro_camera.h
+.. doxygenfile:: CoralMicro_Camera/coralmicro_camera.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib
 
 
@@ -26,9 +26,9 @@ PDM microphone
 SD card
 -----------------
 
-`[coralmicro_SD.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/SD/coralmicro_SD.h>`_
+`[coralmicro_SD.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_SD/coralmicro_SD.h>`_
 
-.. doxygenfile:: SD/coralmicro_SD.h
+.. doxygenfile:: CoralMicro_SD/coralmicro_SD.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib
 
 
