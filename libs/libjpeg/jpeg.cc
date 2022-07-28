@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "apps/OOBE/jpeg.h"
+#include "libs/libjpeg/jpeg.h"
 
 #include <algorithm>
 

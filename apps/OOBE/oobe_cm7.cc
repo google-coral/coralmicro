@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "apps/OOBE/jpeg.h"
+#include "libs/libjpeg/jpeg.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/http_server_handlers.h"
 #include "libs/base/ipc_m7.h"

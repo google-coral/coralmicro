@@ -66,3 +66,21 @@ target_include_directories(libs_libjpeg PUBLIC
     ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/middleware/libjpeg/template
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/libjpeg/inc
 )
+
+add_library_m7(libs_jpeg_m7 STATIC
+    jpeg.cc
+)
+
+target_link_libraries(libs_jpeg_m7
+    libs_base-m7_freertos
+    libs_libjpeg
+)
+
+add_library_m4(libs_jpeg_m4 STATIC
+    jpeg.cc
+)
+
+target_link_libraries(libs_jpeg_m4
+    libs_base-m4_freertos
+    libs_libjpeg
+)

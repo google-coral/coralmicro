@@ -137,7 +137,7 @@ class HttpServer {
   };
 
   // Defines the allowed response types returned by `AddUriHandler()`.
-  // Successful requests will typically respond with with the content in
+  // Successful requests will typically respond with the content in
   // a string, a dynamic buffer (a vector), or a `StaticBuffer`, or an
   // empty vector if the URI is unhandled.
   using Content = std::variant<std::monostate,        // Not found

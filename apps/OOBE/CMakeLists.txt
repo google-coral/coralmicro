@@ -13,14 +13,13 @@
 # limitations under the License.
 
 set(OOBE_SOURCES
-    jpeg.cc
     oobe_cm7.cc
 )
 
 set(OOBE_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_base-m7_network
-    libs_libjpeg
+    libs_jpeg_m7
     libs_rpc_http_server
 )
 

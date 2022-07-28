@@ -54,7 +54,7 @@ extern "C" void app_main(void* param) {
 
   std::string ip;
   if (coralmicro::utils::GetUsbIpAddress(&ip)) {
-    printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "/hello.html");
+    printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "hello.html");
   }
   vTaskSuspend(nullptr);
 }

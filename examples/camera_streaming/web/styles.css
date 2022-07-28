@@ -87,20 +87,6 @@ body {
     border-top: 1px solid #53bfc1;
 }
 
-#submit-button {
-    margin-left: 10px;
-    margin-top: 5px;
-    height: 22px;
-    width: 75px;
-    background: #fd5e4d;
-    text-align: center;
-    color: #ffffff;
-}
-
-#submit-button:hover {
-    background: #fd854a !important;
-}
-
 .slider {
     position: absolute;
     cursor: pointer;
