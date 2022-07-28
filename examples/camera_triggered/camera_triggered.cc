@@ -35,7 +35,7 @@ void GetCapturedImage(struct jsonrpc_request* request) {
   if (!testlib::JsonRpcGetIntegerParam(request, "height", &height)) return;
 
   auto format = CameraFormat::kRgb;
-  std::vector<uint8_t> image(width * height * CameraTask::FormatToBPP(format));
+  std::vector<uint8_t> image(width * height * CameraFormatBpp(format));
   CameraFrameFormat fmt{format,
                         CameraFilterMethod::kBilinear,
                         CameraRotation::k0,

@@ -109,6 +109,19 @@ int FramebufferPtrToIndex(const uint8_t* framebuffer_ptr) {
 }
 }  // namespace
 
+int CameraFormatBpp(CameraFormat fmt) {
+  switch (fmt) {
+    case CameraFormat::kRgba:
+      return 4;
+    case CameraFormat::kRgb:
+      return 3;
+    case CameraFormat::kRaw:
+    case CameraFormat::kY8:
+      return 1;
+  }
+  return 0;
+}
+
 bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
   if (mode_ == CameraMode::kStandBy) {
     printf("Camera is in standby mode, cannot capture frame.\r\n");
@@ -141,16 +154,17 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
           }
         } else {
           auto buffer_rgb = std::make_unique<uint8_t[]>(
-              FormatToBPP(CameraFormat::kRgb) * kWidth * kHeight);
+              CameraFormatBpp(CameraFormat::kRgb) * kWidth * kHeight);
           BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter,
                      fmt.rotation);
           if (fmt.white_balance &&
               GetSingleton()->test_pattern_ == CameraTestPattern::kNone) {
             AutoWhiteBalance(buffer_rgb.get(), kWidth, kHeight);
           }
-          ResizeNearestNeighbor(
-              buffer_rgb.get(), kWidth, kHeight, fmt.buffer, fmt.width,
-              fmt.height, FormatToBPP(CameraFormat::kRgb), fmt.preserve_ratio);
+          ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, fmt.buffer,
+                                fmt.width, fmt.height,
+                                CameraFormatBpp(CameraFormat::kRgb),
+                                fmt.preserve_ratio);
         }
         break;
         case CameraFormat::kY8: {
@@ -159,15 +173,15 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
                              fmt.rotation);
           } else {
             auto buffer_rgb = std::make_unique<uint8_t[]>(
-                FormatToBPP(CameraFormat::kRgb) * kWidth * kHeight);
+                CameraFormatBpp(CameraFormat::kRgb) * kWidth * kHeight);
             auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(
-                FormatToBPP(CameraFormat::kRgb) * fmt.width * fmt.height);
+                CameraFormatBpp(CameraFormat::kRgb) * fmt.width * fmt.height);
             BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter,
                        fmt.rotation);
-            ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight,
-                                  buffer_rgb_scaled.get(), fmt.width,
-                                  fmt.height, FormatToBPP(CameraFormat::kRgb),
-                                  fmt.preserve_ratio);
+            ResizeNearestNeighbor(
+                buffer_rgb.get(), kWidth, kHeight, buffer_rgb_scaled.get(),
+                fmt.width, fmt.height, CameraFormatBpp(CameraFormat::kRgb),
+                fmt.preserve_ratio);
             RGBToGrayscale(buffer_rgb_scaled.get(), fmt.buffer, fmt.width,
                            fmt.height);
           }
@@ -178,7 +192,7 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
             break;
           }
           std::memcpy(fmt.buffer, raw,
-                      kWidth * kHeight * FormatToBPP(CameraFormat::kRaw));
+                      kWidth * kHeight * CameraFormatBpp(CameraFormat::kRaw));
           ret = true;
           break;
         default:
@@ -536,19 +550,6 @@ void CameraTask::AutoWhiteBalance(uint8_t* camera_rgb, int width, int height) {
     camera_rgb[i * 3 + 2] = static_cast<uint8_t>(
         std::min(255UL, (static_cast<uint32_t>(b) * b_gain_i) >> 8));
   }
-}
-
-int CameraTask::FormatToBPP(CameraFormat fmt) {
-  switch (fmt) {
-    case CameraFormat::kRgba:
-      return 4;
-    case CameraFormat::kRgb:
-      return 3;
-    case CameraFormat::kRaw:
-    case CameraFormat::kY8:
-      return 1;
-  }
-  return 0;
 }
 
 extern "C" void CSI_DriverIRQHandler(void);

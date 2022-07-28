@@ -750,7 +750,9 @@ void CaptureTestPattern(struct jsonrpc_request* request) {
   // a small amount of retrying to smooth that over.
   constexpr int kRetries = 3;
   for (int i = 0; i < kRetries; ++i) {
-    auto buffer = std::make_unique<uint8_t[]>(coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight * coralmicro::CameraTask::FormatToBPP(coralmicro::CameraFormat::kRaw));
+    auto buffer = std::make_unique<uint8_t[]>(
+        coralmicro::CameraTask::kWidth * coralmicro::CameraTask::kHeight *
+        coralmicro::CameraFormatBpp(coralmicro::CameraFormat::kRaw));
     coralmicro::CameraFrameFormat fmt{
         /*fmt=*/coralmicro::CameraFormat::kRaw,
         /*filter=*/coralmicro::CameraFilterMethod::kBilinear,

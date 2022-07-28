@@ -114,7 +114,7 @@ void GetImageFromCamera(struct jsonrpc_request* request) {
 
   //! [camera-stream] Doxygen snippet for camera.h
   std::vector<uint8_t> image(width * height *
-                             coralmicro::CameraTask::FormatToBPP(*format));
+                             coralmicro::CameraFormatBpp(*format));
   coralmicro::CameraFrameFormat fmt{*format, *filter, *rotation,    width,
                                     height,  false,   image.data(), awb};
   auto ret = coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});

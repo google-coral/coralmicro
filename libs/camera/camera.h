@@ -123,6 +123,12 @@ enum class CameraFormat {
   kRaw,
 };
 
+// Gets the bytes-per-pixel (the number of color channels) used by the
+// given image format.
+// @param The image format (from `CameraFormat`).
+// @return The number of bytes per pixel.
+int CameraFormatBpp(CameraFormat fmt);
+
 // Image resampling method (when resizing the image).
 enum class CameraFilterMethod {
   kBilinear = 0,
@@ -158,7 +164,6 @@ struct CameraFrameFormat {
   // Set true to perform auto whitebalancing (default), false to disable it.
   bool white_balance = true;
 };
-
 
 inline constexpr char kCameraTaskName[] = "camera_task";
 
@@ -241,12 +246,6 @@ class CameraTask
 
   // Native image pixel height.
   static constexpr size_t kHeight = 324;
-
-  // Gets the bytes-per-pixel (the number of color channels) used by the
-  // given image format.
-  // @param The image format (from `CameraFrameFormat`).
-  // @return The number of bytes per pixel.
-  static int FormatToBPP(CameraFormat fmt);
 
  private:
   int GetFrame(uint8_t** buffer, bool block);

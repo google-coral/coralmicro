@@ -144,8 +144,7 @@ void GetFrame(struct jsonrpc_request* request) {
     }
   }
 
-  camera_rgb.resize(width * height *
-                    coralmicro::CameraTask::FormatToBPP(format));
+  camera_rgb.resize(width * height * coralmicro::CameraFormatBpp(format));
 
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   auto pattern = coralmicro::CameraTestPattern::kColorBar;
