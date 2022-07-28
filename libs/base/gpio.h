@@ -99,6 +99,9 @@ enum GpioInterruptMode {
   kIntModeCount
 };
 
+// Enumeration of gpio pull direction.
+enum GpioPullDirection { kPullUp, kPullDown, kNone };
+
 // The function type required by `RegisterIRQHandler()`.
 using GpioCallback = std::function<void()>;
 
@@ -123,10 +126,8 @@ bool GpioGet(Gpio gpio);
 // Sets the mode of a GPIO.
 // @param gpio Pin to configure.
 // @param input True sets the pin as an input; false sets it as an output.
-// @param pull True enables the pin to have a pull; false disables it.
-// @param pull_direction True enables pull up; false enables pull down. This is
-// ignored if `pull` is false.
-void GpioSetMode(Gpio gpio, bool input, bool pull, bool pull_direction);
+// @param pull_direction The direction of the pull.
+void GpioSetMode(Gpio gpio, bool input, GpioPullDirection pull_direction);
 
 // Sets the interrupt mode of a GPIO.
 // @param gpio Pin to configure.

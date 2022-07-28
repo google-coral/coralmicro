@@ -65,16 +65,16 @@ void pinMode(pin_size_t pinNumber, PinMode pinMode) {
     coralmicro::Gpio gpio = PinNumberToGpio(pinNumber);
     switch (pinMode) {
         case INPUT:
-            coralmicro::GpioSetMode(gpio, true, false, false);
+            coralmicro::GpioSetMode(gpio, true, coralmicro::GpioPullDirection::kNone);
             break;
         case OUTPUT:
-            coralmicro::GpioSetMode(gpio, false, false, false);
+            coralmicro::GpioSetMode(gpio, false, coralmicro::GpioPullDirection::kNone);
             break;
         case INPUT_PULLUP:
-            coralmicro::GpioSetMode(gpio, true, true, true);
+            coralmicro::GpioSetMode(gpio, true, coralmicro::GpioPullDirection::kPullUp);
             break;
         case INPUT_PULLDOWN:
-            coralmicro::GpioSetMode(gpio, true, true, false);
+            coralmicro::GpioSetMode(gpio, true, coralmicro::GpioPullDirection::kPullDown);
             break;
     }
 }

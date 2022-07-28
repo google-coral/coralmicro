@@ -530,21 +530,24 @@ bool GpioGet(Gpio gpio) {
   return GPIO_PinRead(PinNameToModule[gpio], PinNameToPin[gpio]);
 }
 
-void GpioSetMode(Gpio gpio, bool input, bool pull, bool pull_direction) {
+void GpioSetMode(Gpio gpio, bool input, GpioPullDirection pull_direction) {
   auto* config = &PinNameToConfig[gpio];
   config->direction = input ? kGPIO_DigitalInput : kGPIO_DigitalOutput;
   GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
   auto iomuxc = PinNameToIOMUXC[gpio];
   uint32_t pin_config = *((volatile uint32_t*)iomuxc[4]);
   pin_config &= ~PinNameToPullMask[gpio];
-  if (pull) {
-    if (pull_direction) {  // up
+  switch (pull_direction) {
+    case GpioPullDirection::kPullUp:
       pin_config |= PinNameToPullUp[gpio];
-    } else {
+      break;
+    case GpioPullDirection::kPullDown:
       pin_config |= PinNameToPullDown[gpio];
-    }
-  } else {
-    pin_config |= PinNameToNoPull[gpio];
+      break;
+    case GpioPullDirection::kNone:
+    default:
+      pin_config |= PinNameToNoPull[gpio];
+      break;
   }
   IOMUXC_SetPinConfig(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4],
                       pin_config);

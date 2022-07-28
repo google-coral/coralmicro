@@ -18,14 +18,14 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro {
-void Main() {
+[[noreturn]] void Main() {
   constexpr Gpio kGpiosToTest[] = {
       kSpiCs, kSpiSck, kSpiSdo,  kSpiSdi,  kSda6, kScl1, kSda1,
       kAA,    kAB,     kUartCts, kUartRts, kPwm1, kPwm0, kScl6,
   };
 
   for (auto gpio : kGpiosToTest) {
-    GpioSetMode(gpio, false, false, false);
+    GpioSetMode(gpio, false, GpioPullDirection::kNone);
   }
 
   printf("Periodically toggling header GPIOs...\r\n");
