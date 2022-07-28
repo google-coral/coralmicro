@@ -113,8 +113,6 @@ struct Request {
 
 // Image format options, used with `CameraFrameFormat`.
 enum class CameraFormat {
-  // Currently not supported.
-  kRgba,
   // RGB image.
   kRgb,
   // Y8 (grayscale) image.
@@ -131,7 +129,7 @@ int CameraFormatBpp(CameraFormat fmt);
 
 // Image resampling method (when resizing the image).
 enum class CameraFilterMethod {
-  kBilinear = 0,
+  kBilinear,
   kNearestNeighbor,
 };
 
@@ -262,31 +260,6 @@ class CameraTask
   bool Read(uint16_t reg, uint8_t* val);
   bool Write(uint16_t reg, uint8_t val);
   void SetDefaultRegisters();
-  static void BayerToRGB(const uint8_t* camera_raw, uint8_t* camera_rgb,
-                         int width, int height, CameraFilterMethod filter,
-                         CameraRotation rotation);
-  static void BayerToRGBA(const uint8_t* camera_raw, uint8_t* camera_rgb,
-                          int width, int height, CameraFilterMethod filter,
-                          CameraRotation rotation);
-  static void BayerToGrayscale(const uint8_t* camera_raw,
-                               uint8_t* camera_grayscale, int width, int height,
-                               CameraFilterMethod filter,
-                               CameraRotation rotation);
-  static void RGBToGrayscale(const uint8_t* camera_rgb,
-                             uint8_t* camera_grayscale, int width, int height);
-  static void AutoWhiteBalance(uint8_t* camera_rgb, int width, int height);
-  static void ResizeNearestNeighbor(const uint8_t* src, int src_width,
-                                    int src_height, uint8_t* dst, int dst_width,
-                                    int dst_height, int components,
-                                    bool preserve_aspect);
-
-  static constexpr uint8_t kModelIdHExpected = 0x01;
-  static constexpr uint8_t kModelIdLExpected = 0xB0;
-
-  // CSI driver wants width to be divisible by 8, and 324 is not.
-  // 324 * 324 == 13122 * 8 -- this makes the CSI driver happy!
-  static constexpr size_t kCsiWidth = 8;
-  static constexpr size_t kCsiHeight = 13122;
 
   lpi2c_rtos_handle_t* i2c_handle_;
   csi_handle_t csi_handle_;

@@ -41,6 +41,14 @@ constexpr float kGreenCoefficient = .7152;
 constexpr float kBlueCoefficient = .0722;
 constexpr float kUint8Max = 255.0;
 
+constexpr uint8_t kModelIdHExpected = 0x01;
+constexpr uint8_t kModelIdLExpected = 0xB0;
+
+// CSI driver wants width to be divisible by 8, and 324 is not.
+// 324 * 324 == 13122 * 8 -- this makes the CSI driver happy!
+constexpr size_t kCsiWidth = 8;
+constexpr size_t kCsiHeight = 13122;
+
 struct CameraRegisters {
   enum : uint16_t {
     kModelIdH = 0x0000,
@@ -107,107 +115,10 @@ int FramebufferPtrToIndex(const uint8_t* framebuffer_ptr) {
   }
   return -1;
 }
-}  // namespace
 
-int CameraFormatBpp(CameraFormat fmt) {
-  switch (fmt) {
-    case CameraFormat::kRgba:
-      return 4;
-    case CameraFormat::kRgb:
-      return 3;
-    case CameraFormat::kRaw:
-    case CameraFormat::kY8:
-      return 1;
-  }
-  return 0;
-}
-
-bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
-  if (mode_ == CameraMode::kStandBy) {
-    printf("Camera is in standby mode, cannot capture frame.\r\n");
-    return false;
-  }
-  if (mode_ == CameraMode::kTrigger && !GpioGet(Gpio::kCameraTrigger)) {
-    printf("Camera is in trigger mode but was never triggered\r\n");
-    return false;
-  }
-
-  bool ret = true;
-  uint8_t* raw = nullptr;
-  int index = GetFrame(&raw, true);
-  if (!raw) {
-    return false;
-  }
-  if (mode_ == CameraMode::kTrigger) {
-    GpioSet(Gpio::kCameraTrigger, false);
-  }
-
-  for (const CameraFrameFormat& fmt : fmts) {
-    switch (fmt.fmt) {
-      case CameraFormat::kRgb: {
-        if (fmt.width == kWidth && fmt.height == kHeight) {
-          BayerToRGB(raw, fmt.buffer, fmt.width, fmt.height, fmt.filter,
-                     fmt.rotation);
-          if (fmt.white_balance &&
-              GetSingleton()->test_pattern_ == CameraTestPattern::kNone) {
-            AutoWhiteBalance(fmt.buffer, fmt.width, fmt.height);
-          }
-        } else {
-          auto buffer_rgb = std::make_unique<uint8_t[]>(
-              CameraFormatBpp(CameraFormat::kRgb) * kWidth * kHeight);
-          BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter,
-                     fmt.rotation);
-          if (fmt.white_balance &&
-              GetSingleton()->test_pattern_ == CameraTestPattern::kNone) {
-            AutoWhiteBalance(buffer_rgb.get(), kWidth, kHeight);
-          }
-          ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, fmt.buffer,
-                                fmt.width, fmt.height,
-                                CameraFormatBpp(CameraFormat::kRgb),
-                                fmt.preserve_ratio);
-        }
-        break;
-        case CameraFormat::kY8: {
-          if (fmt.width == kWidth && fmt.height == kHeight) {
-            BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight, fmt.filter,
-                             fmt.rotation);
-          } else {
-            auto buffer_rgb = std::make_unique<uint8_t[]>(
-                CameraFormatBpp(CameraFormat::kRgb) * kWidth * kHeight);
-            auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(
-                CameraFormatBpp(CameraFormat::kRgb) * fmt.width * fmt.height);
-            BayerToRGB(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter,
-                       fmt.rotation);
-            ResizeNearestNeighbor(
-                buffer_rgb.get(), kWidth, kHeight, buffer_rgb_scaled.get(),
-                fmt.width, fmt.height, CameraFormatBpp(CameraFormat::kRgb),
-                fmt.preserve_ratio);
-            RGBToGrayscale(buffer_rgb_scaled.get(), fmt.buffer, fmt.width,
-                           fmt.height);
-          }
-        } break;
-        case CameraFormat::kRaw:
-          if (fmt.width != kWidth || fmt.height != kHeight) {
-            ret = false;
-            break;
-          }
-          std::memcpy(fmt.buffer, raw,
-                      kWidth * kHeight * CameraFormatBpp(CameraFormat::kRaw));
-          ret = true;
-          break;
-        default:
-          ret = false;
-      }
-    }
-  }
-
-  GetSingleton()->ReturnFrame(index);
-  return ret;
-}
-
-void CameraTask::ResizeNearestNeighbor(const uint8_t* src, int src_w, int src_h,
-                                       uint8_t* dst, int dst_w, int dst_h,
-                                       int comps, bool preserve_aspect) {
+void ResizeNearestNeighbor(const uint8_t* src, int src_w, int src_h,
+                           uint8_t* dst, int dst_w, int dst_h, int comps,
+                           bool preserve_aspect) {
   int src_p = src_w * comps;
   int dst_p = dst_w * comps;
   float ratio_src = (float)src_w / src_h;
@@ -241,7 +152,6 @@ void CameraTask::ResizeNearestNeighbor(const uint8_t* src, int src_w, int src_h,
   }
 }
 
-namespace {
 template <typename Callback>
 void BayerInternal(const uint8_t* camera_raw, int width, int height,
                    CameraFilterMethod filter, Callback callback) {
@@ -435,11 +345,9 @@ void RotateXY(CameraRotation rotation, int in_x, int in_y, int* out_x,
   CHECK(*out_y < static_cast<int>(CameraTask::kHeight));
 }
 
-}  // namespace
-
-void CameraTask::BayerToRGB(const uint8_t* camera_raw, uint8_t* camera_rgb,
-                            int width, int height, CameraFilterMethod filter,
-                            CameraRotation rotation) {
+void BayerToRgb(const uint8_t* camera_raw, uint8_t* camera_rgb, int width,
+                int height, CameraFilterMethod filter,
+                CameraRotation rotation) {
   std::memset(camera_rgb, 0, width * height * 3);
   BayerInternal(camera_raw, width, height, filter,
                 [camera_rgb, width, height, rotation](int x, int y, uint8_t r,
@@ -452,25 +360,9 @@ void CameraTask::BayerToRGB(const uint8_t* camera_raw, uint8_t* camera_rgb,
                 });
 }
 
-void CameraTask::BayerToRGBA(const uint8_t* camera_raw, uint8_t* camera_rgba,
-                             int width, int height, CameraFilterMethod filter,
-                             CameraRotation rotation) {
-  std::memset(camera_rgba, 0, width * height * 4);
-  BayerInternal(camera_raw, width, height, filter,
-                [camera_rgba, width, height, rotation](int x, int y, uint8_t r,
-                                                       uint8_t g, uint8_t b) {
-                  int rot_x, rot_y;
-                  RotateXY(rotation, x, y, &rot_x, &rot_y);
-                  camera_rgba[(rot_x * 4) + (rot_y * width * 4) + 0] = r;
-                  camera_rgba[(rot_x * 4) + (rot_y * width * 4) + 1] = g;
-                  camera_rgba[(rot_x * 4) + (rot_y * width * 4) + 2] = b;
-                });
-}
-
-void CameraTask::BayerToGrayscale(const uint8_t* camera_raw,
-                                  uint8_t* camera_grayscale, int width,
-                                  int height, CameraFilterMethod filter,
-                                  CameraRotation rotation) {
+void BayerToGrayscale(const uint8_t* camera_raw, uint8_t* camera_grayscale,
+                      int width, int height, CameraFilterMethod filter,
+                      CameraRotation rotation) {
   BayerInternal(camera_raw, width, height, filter,
                 [camera_grayscale, width, height, rotation](
                     int x, int y, uint8_t r, uint8_t g, uint8_t b) {
@@ -487,9 +379,8 @@ void CameraTask::BayerToGrayscale(const uint8_t* camera_raw,
                 });
 }
 
-void CameraTask::RGBToGrayscale(const uint8_t* camera_rgb,
-                                uint8_t* camera_grayscale, int width,
-                                int height) {
+void RgbToGrayscale(const uint8_t* camera_rgb, uint8_t* camera_grayscale,
+                    int width, int height) {
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
       float r_f =
@@ -509,19 +400,19 @@ void CameraTask::RGBToGrayscale(const uint8_t* camera_rgb,
   }
 }
 
-void CameraTask::AutoWhiteBalance(uint8_t* camera_rgb, int width, int height) {
+void AutoWhiteBalance(uint8_t* camera_rgb, int width, int height) {
   unsigned int r_sum = 0, g_sum = 0, b_sum = 0;
   float r_sum_f = 0.0, g_sum_f = 0.0, b_sum_f = 0.0;
   float threshold = 0.9f;
   uint16_t threshold16 = static_cast<uint16_t>(threshold * 255);
-  uint16_t minRGB, maxRGB;
+  uint16_t min_rgb, max_rgb;
   for (int i = 0; i < width * height; ++i) {
     uint8_t r = camera_rgb[i * 3 + 0];
     uint8_t g = camera_rgb[i * 3 + 1];
     uint8_t b = camera_rgb[i * 3 + 2];
-    minRGB = static_cast<uint16_t>(std::min(r, std::min(g, b)));
-    maxRGB = static_cast<uint16_t>(std::max(r, std::max(g, b)));
-    if (((maxRGB - minRGB) * 255) > (threshold16 * maxRGB)) {
+    min_rgb = static_cast<uint16_t>(std::min(r, std::min(g, b)));
+    max_rgb = static_cast<uint16_t>(std::max(r, std::max(g, b)));
+    if (((max_rgb - min_rgb) * 255) > (threshold16 * max_rgb)) {
       continue;
     }
     r_sum += r;
@@ -551,11 +442,106 @@ void CameraTask::AutoWhiteBalance(uint8_t* camera_rgb, int width, int height) {
         std::min(255UL, (static_cast<uint32_t>(b) * b_gain_i) >> 8));
   }
 }
+}  // namespace
 
 extern "C" void CSI_DriverIRQHandler(void);
 extern "C" void CSI_IRQHandler(void) {
   CSI_DriverIRQHandler();
   __DSB();
+}
+
+int CameraFormatBpp(CameraFormat fmt) {
+  switch (fmt) {
+    case CameraFormat::kRgb:
+      return 3;
+    case CameraFormat::kRaw:
+    case CameraFormat::kY8:
+      return 1;
+  }
+  return 0;
+}
+
+bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
+  if (mode_ == CameraMode::kStandBy) {
+    printf("Camera is in standby mode, cannot capture frame.\r\n");
+    return false;
+  }
+  if (mode_ == CameraMode::kTrigger && !GpioGet(Gpio::kCameraTrigger)) {
+    printf("Camera is in trigger mode but was never triggered\r\n");
+    return false;
+  }
+
+  bool ret = true;
+  uint8_t* raw = nullptr;
+  int index = GetFrame(&raw, true);
+  if (!raw) {
+    return false;
+  }
+  if (mode_ == CameraMode::kTrigger) {
+    GpioSet(Gpio::kCameraTrigger, false);
+  }
+
+  for (const CameraFrameFormat& fmt : fmts) {
+    switch (fmt.fmt) {
+      case CameraFormat::kRgb: {
+        if (fmt.width == kWidth && fmt.height == kHeight) {
+          BayerToRgb(raw, fmt.buffer, fmt.width, fmt.height, fmt.filter,
+                     fmt.rotation);
+          if (fmt.white_balance &&
+              GetSingleton()->test_pattern_ == CameraTestPattern::kNone) {
+            AutoWhiteBalance(fmt.buffer, fmt.width, fmt.height);
+          }
+        } else {
+          auto buffer_rgb = std::make_unique<uint8_t[]>(
+              CameraFormatBpp(CameraFormat::kRgb) * kWidth * kHeight);
+          BayerToRgb(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter,
+                     fmt.rotation);
+          if (fmt.white_balance &&
+              GetSingleton()->test_pattern_ == CameraTestPattern::kNone) {
+            AutoWhiteBalance(buffer_rgb.get(), kWidth, kHeight);
+          }
+          ResizeNearestNeighbor(buffer_rgb.get(), kWidth, kHeight, fmt.buffer,
+                                fmt.width, fmt.height,
+                                CameraFormatBpp(CameraFormat::kRgb),
+                                fmt.preserve_ratio);
+        }
+        break;
+        case CameraFormat::kY8: {
+          if (fmt.width == kWidth && fmt.height == kHeight) {
+            BayerToGrayscale(raw, fmt.buffer, kWidth, kHeight, fmt.filter,
+                             fmt.rotation);
+          } else {
+            auto buffer_rgb = std::make_unique<uint8_t[]>(
+                CameraFormatBpp(CameraFormat::kRgb) * kWidth * kHeight);
+            auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(
+                CameraFormatBpp(CameraFormat::kRgb) * fmt.width * fmt.height);
+            BayerToRgb(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter,
+                       fmt.rotation);
+            ResizeNearestNeighbor(
+                buffer_rgb.get(), kWidth, kHeight, buffer_rgb_scaled.get(),
+                fmt.width, fmt.height, CameraFormatBpp(CameraFormat::kRgb),
+                fmt.preserve_ratio);
+            RgbToGrayscale(buffer_rgb_scaled.get(), fmt.buffer, fmt.width,
+                           fmt.height);
+          }
+        } break;
+        case CameraFormat::kRaw:
+          if (fmt.width != kWidth || fmt.height != kHeight) {
+            ret = false;
+            break;
+          }
+          std::memcpy(fmt.buffer, raw,
+                      kWidth * kHeight * CameraFormatBpp(CameraFormat::kRaw));
+          ret = true;
+          break;
+        default:
+          ret = false;
+      }
+    }
+  }
+
+  GetSingleton()->ReturnFrame(index);
+  return ret;
 }
 
 bool CameraTask::Read(uint16_t reg, uint8_t* val) {
