@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef APPS_OOBEE_JPEG_H_
-#define APPS_OOBEE_JPEG_H_
+#ifndef LIBS_LIBJPEG_JPEG_H_
+#define LIBS_LIBJPEG_JPEG_H_
+
+#include <cstdint>
+#include <vector>
 
 namespace coralmicro {
 
@@ -25,9 +28,14 @@ struct JpegBuffer {
   unsigned char* data;
   unsigned long size;
 };
+
+// You have to deallocate data from JpegBuffer with `free()`.
 JpegBuffer JpegCompressRgb(unsigned char* rgb, int width, int height,
                            int quality);
 
+void JpegCompressRgb(unsigned char* rgb, int width, int height, int quality,
+                     std::vector<uint8_t>* out);
+
 };  // namespace coralmicro
 
-#endif  // APPS_OOBEE_JPEG_H_
+#endif  // LIBS_LIBJPEG_JPEG_H_

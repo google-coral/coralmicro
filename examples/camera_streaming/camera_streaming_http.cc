@@ -28,19 +28,13 @@
 // webpage.
 
 namespace coralmicro {
-
-coralmicro::HttpServer g_http_server;
+namespace {
 constexpr char kIndexFileName[] = "/coral_micro_camera.html";
 constexpr char kCameraStreamUrlPrefix[] = "/camera_stream";
 
 HttpServer::Content UriHandler(const char* uri) {
-  if (StrEndsWith(uri, kIndexFileName)) {
-    if (std::vector<uint8_t> page_content;
-        LfsReadFile(kIndexFileName, &page_content)) {
-      return page_content;
-    }
-    printf("Unable to read: %s\r\n", kIndexFileName);
-    return {};
+  if (StrEndsWith(uri, "index.shtml")) {
+    return std::string(kIndexFileName);
   } else if (StrEndsWith(uri, kCameraStreamUrlPrefix)) {
     std::vector<uint8_t> buf(CameraTask::kWidth * CameraTask::kHeight *
                              CameraFormatBpp(CameraFormat::kRgb));
@@ -54,31 +48,32 @@ HttpServer::Content UriHandler(const char* uri) {
       printf("Unable to get frame from camera\r\n");
       return {};
     }
-    auto jpeg =
-        JpegCompressRgb(buf.data(), fmt.width, fmt.height, /*quality=*/75);
-    return std::vector<uint8_t>{jpeg.data, jpeg.data + jpeg.size};
+
+    std::vector<uint8_t> jpeg;
+    JpegCompressRgb(buf.data(), fmt.width, fmt.height, /*quality=*/75, &jpeg);
+    return jpeg;
   }
   return {};
 }
 
 void Main() {
-  // Starts Camera in streaming mode.
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
 
-  g_http_server.AddUriHandler(UriHandler);
-  UseHttpServer(&g_http_server);
+  HttpServer http_server;
+  http_server.AddUriHandler(UriHandler);
+  UseHttpServer(&http_server);
 
-  std::string ip;
-  if (utils::GetUsbIpAddress(&ip)) {
-    printf("Serving on: http://%s%s\r\n", ip.c_str(), kIndexFileName);
+  std::string usb_ip;
+  if (utils::GetUsbIpAddress(&usb_ip)) {
+    printf("Serving on: http://%s\r\n", usb_ip.c_str());
   }
+  vTaskSuspend(nullptr);
 }
-
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();
-  vTaskSuspend(nullptr);
 }

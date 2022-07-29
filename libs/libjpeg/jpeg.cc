@@ -20,6 +20,55 @@
 
 namespace coralmicro {
 namespace {
+constexpr size_t kVectorSizeIncrement = 10 * 1024;
+
+struct vector_destination_mgr {
+  struct jpeg_destination_mgr pub;
+
+  std::vector<uint8_t>* out;
+};
+
+METHODDEF(void)
+init_vector_destination(j_compress_ptr cinfo) { (void)cinfo; }
+
+METHODDEF(boolean)
+empty_vector_output_buffer(j_compress_ptr cinfo) {
+  auto* dest = reinterpret_cast<vector_destination_mgr*>(cinfo->dest);
+
+  auto size = dest->out->size();
+  dest->out->resize(size + kVectorSizeIncrement);
+
+  dest->pub.next_output_byte = dest->out->data() + size;
+  dest->pub.free_in_buffer = kVectorSizeIncrement;
+
+  return TRUE;
+}
+
+METHODDEF(void)
+term_vector_destination(j_compress_ptr cinfo) {
+  auto* dest = reinterpret_cast<vector_destination_mgr*>(cinfo->dest);
+
+  dest->out->resize(dest->out->size() - dest->pub.free_in_buffer);
+}
+
+void jpeg_vector_dest(j_compress_ptr cinfo, std::vector<uint8_t>* out) {
+  if (cinfo->dest == nullptr) {
+    cinfo->dest = (struct jpeg_destination_mgr*)(*cinfo->mem->alloc_small)(
+        (j_common_ptr)cinfo, JPOOL_PERMANENT, sizeof(vector_destination_mgr));
+  }
+
+  out->resize(kVectorSizeIncrement);
+
+  auto* dest = reinterpret_cast<vector_destination_mgr*>(cinfo->dest);
+  dest->pub.init_destination = init_vector_destination;
+  dest->pub.empty_output_buffer = empty_vector_output_buffer;
+  dest->pub.term_destination = term_vector_destination;
+  dest->pub.next_output_byte = out->data();
+  dest->pub.free_in_buffer = kVectorSizeIncrement;
+
+  dest->out = out;
+}
+
 struct buf_destination_mgr {
   struct jpeg_destination_mgr pub;
   unsigned long size;
@@ -117,6 +166,23 @@ JpegBuffer JpegCompressRgb(unsigned char* rgb, int width, int height,
 
   JpegCompressImpl(&cinfo, rgb, quality);
   return res;
+}
+
+void JpegCompressRgb(unsigned char* rgb, int width, int height, int quality,
+                     std::vector<uint8_t>* out) {
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_compress(&cinfo);
+
+  jpeg_vector_dest(&cinfo, out);
+
+  cinfo.image_width = width;
+  cinfo.image_height = height;
+  cinfo.input_components = 3;
+  cinfo.in_color_space = JCS_RGB;
+
+  JpegCompressImpl(&cinfo, rgb, quality);
 }
 
 }  // namespace coralmicro
