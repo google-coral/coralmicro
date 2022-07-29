@@ -25,12 +25,14 @@
 // 'get_captured_image' rpc call when the User Button is clicked. Note: the rpc
 // call will fail if the image was never captured.
 
+// [start-snippet:camera-trigger]
 namespace coralmicro {
 void GetCapturedImage(struct jsonrpc_request* request) {
   int width;
-  if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
-
   int height;
+
+  // The width and height are specified by the RPC client.
+  if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
   if (!JsonRpcGetIntegerParam(request, "height", &height)) return;
 
   auto format = CameraFormat::kRgb;
@@ -82,3 +84,4 @@ extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();
 }
+// [end-snippet:camera-trigger]

@@ -53,6 +53,13 @@ def clean_pre(soup):
   return soup
 
 
+def lazy_escape_percent(string):
+  """Escapes percent signs that break Jinja build"""
+  # Doing this with BS4 proved impossible because it fights hard to
+  # enforce unicode entities whenever possible.
+  return string.replace('%Q', '&percnt;Q')
+
+
 def remove_coral(soup):
   """Removes 'coral' namespace link that does nothing."""
   for a in soup.select('a[title=coral]'):
@@ -111,7 +118,7 @@ def process(file):
   if os.path.split(file)[1] == 'index.md':
     soup = clean_index(soup)
   with open(file, 'w') as output:
-    output.write(str(soup))
+    output.write(lazy_escape_percent(str(soup)))
 
 
 def main():

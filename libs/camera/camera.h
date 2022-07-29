@@ -43,11 +43,15 @@ enum class CameraMode : uint8_t {
   kTrigger = 5,
 };
 
+// Test patterns to use with `CameraTask::SetTestPattern()`
 enum class CameraTestPattern : uint8_t {
   kNone = 0x00,
   kColorBar = 0x01,
   kWalkingOnes = 0x11,
 };
+
+// @cond Do not generate docs
+inline constexpr char kCameraTaskName[] = "camera_task";
 
 namespace camera {
 
@@ -110,6 +114,7 @@ struct Request {
 };
 
 }  // namespace camera
+// @endcond
 
 // Image format options, used with `CameraFrameFormat`.
 enum class CameraFormat {
@@ -163,21 +168,9 @@ struct CameraFrameFormat {
   bool white_balance = true;
 };
 
-inline constexpr char kCameraTaskName[] = "camera_task";
-
 // Provides access to the Dev Board Micro camera.
 //
-// All camera control is handled through the `CameraTask` singleton, which you
-// can get with `CameraTask::GetSingleton()`.
-// Then you must power on the camera with `SetPower()` and specify the
-// camera mode (continuous capture or single image capture) with `Enable()`.
-//
-// To get and process each frame, then call `GetFrame()` and
-// specify the image format with `CameraFrameFormat`.
-//
-// **Example** (from `examples/image_server/`):
-//
-// \snippet image_server/image_server.cc camera-stream
+// You can access the shared camera object with `CameraTask::GetSingleton()`.
 class CameraTask
     : public QueueTask<camera::Request, camera::Response, kCameraTaskName,
                        configMINIMAL_STACK_SIZE * 10, kCameraTaskPriority,
@@ -203,11 +196,17 @@ class CameraTask
 
   // Sets the camera into a low-power state, using appoximately 200 μW
   // (compared to approximately 4 mW when streaming). The camera configuration
-  // is sustained so can quickly start again with `Enable()`.
+  // is sustained so it can quickly start again with `Enable()`.
   void Disable();
 
   // Gets one frame from the camera buffer and processes it into one or
   // more formats.
+  //
+  // @note This blocks until a new frame is available from the camera. However,
+  // if trigger mode, it returns false if the camera has not been trigged (via
+  // `CameraTask::Trigger`) since the last time `CameraTask::GetFrame` was
+  // called.
+  //
   // @param fmts A list of image formats you want to receive.
   // @return True if image processing succeeds, false otherwise.
   bool GetFrame(const std::vector<CameraFrameFormat>& fmts);
