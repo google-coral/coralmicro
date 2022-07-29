@@ -40,3 +40,11 @@ RPC HTTP server
 
 .. doxygenfile:: rpc/rpc_http_server.h
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
+
+RPC Utils
+-------------------------
+
+`[rpc_utils.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/rpc/rpc_utils.h>`_
+
+.. doxygenfile:: rpc/rpc_utils.h
+   :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type

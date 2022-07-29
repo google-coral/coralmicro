@@ -16,9 +16,10 @@ set(CAMERA_STREAMING_SRC camera_streaming.cc)
 
 set(CAMERA_STREAMING_LINK_LIBRARIES
     libs_base-m7_freertos
-    libs_rpc_http_server
+    libs_camera_freertos
     libs_mjson
-    libs_testlib
+    libs_rpc_http_server
+    libs_rpc_utils
 )
 
 # USB
@@ -56,6 +57,7 @@ target_compile_definitions(camera_streaming_wifi PUBLIC
 target_link_libraries(camera_streaming_wifi
     ${CAMERA_STREAMING_LINK_LIBRARIES}
     libs_nxp_rt1176-sdk_wiced
+    libs_base-m7_wifi
 )
 
 add_executable_m7(camera_streaming_http

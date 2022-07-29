@@ -18,7 +18,7 @@
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
-#include "libs/testlib/test_lib.h"
+#include "libs/rpc/rpc_utils.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
@@ -34,9 +34,6 @@
 
 namespace coralmicro {
 namespace {
-using testlib::JsonRpcGetBooleanParam;
-using testlib::JsonRpcGetIntegerParam;
-using testlib::JsonRpcGetStringParam;
 
 std::optional<CameraFormat> CheckCameraFormat(const std::string& format) {
   if (format == "RGB") return CameraFormat::kRgb;

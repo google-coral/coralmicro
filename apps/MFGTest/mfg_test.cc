@@ -28,6 +28,7 @@
 #include "libs/base/utils.h"
 #include "libs/pmic/pmic.h"
 #include "libs/rpc/rpc_http_server.h"
+#include "libs/rpc/rpc_utils.h"
 #include "libs/tpu/edgetpu_task.h"
 #include "libs/testlib/test_lib.h"
 #include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
@@ -37,10 +38,10 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_ocotp.h"
 
 namespace {
-using coralmicro::testlib::JsonRpcGetBase64Param;
-using coralmicro::testlib::JsonRpcGetBooleanParam;
-using coralmicro::testlib::JsonRpcGetIntegerParam;
-using coralmicro::testlib::JsonRpcGetStringParam;
+using coralmicro::JsonRpcGetBase64Param;
+using coralmicro::JsonRpcGetBooleanParam;
+using coralmicro::JsonRpcGetIntegerParam;
+using coralmicro::JsonRpcGetStringParam;
 
 // In the below maps, data about pins to be tested via the loopback fixture
 // is provided. Pins on J5 are numbered from 1-100, and pins on J6 are numbered

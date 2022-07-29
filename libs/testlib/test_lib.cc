@@ -29,6 +29,7 @@
 #include "libs/base/utils.h"
 #include "libs/base/wifi.h"
 #include "libs/camera/camera.h"
+#include "libs/rpc/rpc_utils.h"
 #include "libs/tensorflow/classification.h"
 #include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
@@ -58,15 +59,6 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 // Map for containing uploaded resources.
 // Key is the output of StrHash with the resource name as the parameter.
 std::map<std::string, std::vector<uint8_t>> g_stored_resources;
-
-std::unique_ptr<char[]> JSONRPCCreateParamFormatString(const char* param_name) {
-  const char* param_format = "$[0].%s";
-  // +1 for null terminator.
-  auto size = snprintf(nullptr, 0, param_format, param_name) + 1;
-  auto param_pattern = std::make_unique<char[]>(size);
-  snprintf(param_pattern.get(), size, param_format, param_name);
-  return param_pattern;
-}
 
 std::vector<uint8_t>* GetResource(const std::string& resource_name) {
   auto it = g_stored_resources.find(resource_name);
@@ -108,83 +100,6 @@ auto WiFiSafeConnect = [](void* wifi_network_params, uint32_t retries) {
 }  // namespace pended_functions
 }  // namespace
 
-void JsonRpcReturnBadParam(struct jsonrpc_request* request, const char* message,
-                           const char* param_name) {
-  jsonrpc_return_error(request, JSONRPC_ERROR_BAD_PARAMS, message, "{%Q:%Q}",
-                       "param", param_name);
-}
-
-bool JsonRpcGetIntegerParam(struct jsonrpc_request* request,
-                            const char* param_name, int* out) {
-  auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-
-  double value;
-  if (mjson_get_number(request->params, request->params_len,
-                       param_pattern.get(), &value) == 0) {
-    JsonRpcReturnBadParam(request, "invalid param", param_name);
-    return false;
-  }
-
-  *out = static_cast<int>(value);
-  return true;
-}
-
-bool JsonRpcGetBooleanParam(struct jsonrpc_request* request,
-                            const char* param_name, bool* out) {
-  auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-
-  int value;
-  if (mjson_get_bool(request->params, request->params_len, param_pattern.get(),
-                     &value) == 0) {
-    JsonRpcReturnBadParam(request, "invalid param", param_name);
-    return false;
-  }
-
-  *out = static_cast<bool>(value);
-  return true;
-}
-
-bool JsonRpcGetStringParam(struct jsonrpc_request* request,
-                           const char* param_name, std::string* out) {
-  auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-
-  ssize_t size = 0;
-  int tok = mjson_find(request->params, request->params_len,
-                       param_pattern.get(), nullptr, &size);
-  if (tok != MJSON_TOK_STRING) {
-    JsonRpcReturnBadParam(request, "invalid param", param_name);
-    return false;
-  }
-
-  out->resize(size);
-  auto len = mjson_get_string(request->params, request->params_len,
-                              param_pattern.get(), out->data(), out->size());
-  out->resize(len);
-  return true;
-}
-
-bool JsonRpcGetBase64Param(struct jsonrpc_request* request,
-                           const char* param_name, std::vector<uint8_t>* out) {
-  auto param_pattern = JSONRPCCreateParamFormatString(param_name);
-
-  ssize_t size = 0;
-  int tok = mjson_find(request->params, request->params_len,
-                       param_pattern.get(), nullptr, &size);
-  if (tok != MJSON_TOK_STRING) {
-    JsonRpcReturnBadParam(request, "invalid param", param_name);
-    return false;
-  }
-
-  // `size` includes both quotes, `size - 2` is the real string size. Base64
-  // encodes every 3 bytes as 4 chars. Buffer size of `3 * ceil(size - 2) / 4`
-  // should be enough.
-  out->resize(3 * (((size - 2) + 3) / 4));
-  auto len = mjson_get_base64(request->params, request->params_len,
-                              param_pattern.get(),
-                              reinterpret_cast<char*>(out->data()), size);
-  out->resize(len);
-  return true;
-}
 
 // Implementation of "get_serial_number" RPC.
 // Returns JSON results with the key "serial_number" and the serial, as a
@@ -632,7 +547,7 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
 
 void PosenetStressRun(struct jsonrpc_request* request) {
   int iterations;
-  if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "iterations",
+  if (!coralmicro::JsonRpcGetIntegerParam(request, "iterations",
                                                    &iterations))
     return;
 

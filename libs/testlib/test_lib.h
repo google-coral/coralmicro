@@ -56,15 +56,6 @@ inline constexpr char kMethodCryptoGetEccSignature[] =
 inline constexpr char kMethodCryptoEccVerify[] = "a71ch_ecc_verify";
 inline constexpr char kMethodBleScan[] = "ble_scan";
 
-bool JsonRpcGetIntegerParam(struct jsonrpc_request* request,
-                            const char* param_name, int* out);
-bool JsonRpcGetBooleanParam(struct jsonrpc_request* request,
-                            const char* param_name, bool* out);
-bool JsonRpcGetStringParam(struct jsonrpc_request* request,
-                           const char* param_name, std::string* out);
-bool JsonRpcGetBase64Param(struct jsonrpc_request* request,
-                           const char* param_name, std::vector<uint8_t>* out);
-
 void GetSerialNumber(struct jsonrpc_request* request);
 void RunTestConv1(struct jsonrpc_request* request);
 void SetTPUPowerState(struct jsonrpc_request* request);

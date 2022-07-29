@@ -16,7 +16,7 @@
 #include "libs/base/ethernet.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/rpc/rpc_http_server.h"
-#include "libs/testlib/test_lib.h"
+#include "libs/rpc/rpc_utils.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
@@ -46,11 +46,11 @@ void EthGetIP(struct jsonrpc_request* request) {
 
 void EthWritePhy(struct jsonrpc_request* request) {
   int reg;
-  if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "reg", &reg))
+  if (!coralmicro::JsonRpcGetIntegerParam(request, "reg", &reg))
     return;
 
   int val;
-  if (!coralmicro::testlib::JsonRpcGetIntegerParam(request, "val", &val))
+  if (!coralmicro::JsonRpcGetIntegerParam(request, "val", &val))
     return;
 
   status_t status = coralmicro::EthernetPhyWrite(reg, val);

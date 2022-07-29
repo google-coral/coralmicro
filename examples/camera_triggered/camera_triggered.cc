@@ -17,7 +17,7 @@
 #include "libs/base/gpio.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
-#include "libs/testlib/test_lib.h"
+#include "libs/rpc/rpc_utils.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -28,10 +28,10 @@
 namespace coralmicro {
 void GetCapturedImage(struct jsonrpc_request* request) {
   int width;
-  if (!testlib::JsonRpcGetIntegerParam(request, "width", &width)) return;
+  if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
 
   int height;
-  if (!testlib::JsonRpcGetIntegerParam(request, "height", &height)) return;
+  if (!JsonRpcGetIntegerParam(request, "height", &height)) return;
 
   auto format = CameraFormat::kRgb;
   std::vector<uint8_t> image(width * height * CameraFormatBpp(format));

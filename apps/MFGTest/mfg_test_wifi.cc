@@ -22,6 +22,7 @@
 #include "libs/base/utils.h"
 #include "libs/base/wifi.h"
 #include "libs/rpc/rpc_http_server.h"
+#include "libs/rpc/rpc_utils.h"
 #include "libs/testlib/test_lib.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -36,7 +37,7 @@ extern const wiced_bt_cfg_settings_t wiced_bt_cfg_settings;
 extern const wiced_bt_cfg_buf_pool_t wiced_bt_cfg_buf_pools[];
 
 namespace {
-using coralmicro::testlib::JsonRpcGetStringParam;
+using coralmicro::JsonRpcGetStringParam;
 
 void WiFiGetAP(struct jsonrpc_request* request) {
   std::string name;

@@ -16,7 +16,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/mutex.h"
-#include "libs/testlib/test_lib.h"
+#include "libs/rpc/rpc_utils.h"
 #include "third_party/freertos_kernel/include/timers.h"
 #include "third_party/mjson/src/mjson.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/lwiperf.h"
@@ -26,9 +26,9 @@
 /*  -u (UDP), -i (interval), -l (data length) and -b (bandwidth) */
 
 namespace {
-using coralmicro::testlib::JsonRpcGetBooleanParam;
-using coralmicro::testlib::JsonRpcGetIntegerParam;
-using coralmicro::testlib::JsonRpcGetStringParam;
+using coralmicro::JsonRpcGetBooleanParam;
+using coralmicro::JsonRpcGetIntegerParam;
+using coralmicro::JsonRpcGetStringParam;
 
 struct IperfContext {
   SemaphoreHandle_t mutex;

@@ -19,6 +19,6 @@ add_executable_m7(camera_triggered
 target_link_libraries(camera_triggered
     libs_base-m7_freertos
     libs_rpc_http_server
+    libs_rpc_utils
     libs_mjson
-    libs_testlib
 )

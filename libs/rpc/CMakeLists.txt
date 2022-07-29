@@ -21,3 +21,12 @@ target_link_libraries(libs_rpc_http_server
     libs_base-m7_freertos
     libs_base-m7_http_server
 )
+
+add_library_m7(libs_rpc_utils STATIC
+    rpc_utils.cc
+)
+
+target_link_libraries(libs_rpc_utils
+    libs_mjson
+    libs_base-m7_freertos
+)

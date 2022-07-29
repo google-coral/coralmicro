@@ -27,7 +27,7 @@ namespace coralmicro {
 
 class JsonRpcHttpServer : public coralmicro::HttpServer {
  public:
-  JsonRpcHttpServer(struct jsonrpc_ctx* ctx = &jsonrpc_default_context)
+  explicit JsonRpcHttpServer(struct jsonrpc_ctx* ctx = &jsonrpc_default_context)
       : ctx_(ctx) {}
 
   err_t PostBegin(void* connection, const char* uri, const char* http_request,

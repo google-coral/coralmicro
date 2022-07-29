@@ -19,6 +19,7 @@
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
+#include "libs/rpc/rpc_utils.h"
 #include "libs/testlib/test_lib.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -59,7 +60,7 @@ void HandleAppMessage(const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
 
 void M4XOR(struct jsonrpc_request* request) {
   std::string value_string;
-  if (!coralmicro::testlib::JsonRpcGetStringParam(request, "value",
+  if (!coralmicro::JsonRpcGetStringParam(request, "value",
                                                   &value_string))
     return;
 
@@ -124,10 +125,10 @@ void GetFrame(struct jsonrpc_request* request) {
   int rpc_width, rpc_height;
   std::string rpc_format;
   bool rpc_width_valid =
-      coralmicro::testlib::JsonRpcGetIntegerParam(request, "width", &rpc_width);
-  bool rpc_height_valid = coralmicro::testlib::JsonRpcGetIntegerParam(
+      coralmicro::JsonRpcGetIntegerParam(request, "width", &rpc_width);
+  bool rpc_height_valid = coralmicro::JsonRpcGetIntegerParam(
       request, "height", &rpc_height);
-  bool rpc_format_valid = coralmicro::testlib::JsonRpcGetStringParam(
+  bool rpc_format_valid = coralmicro::JsonRpcGetStringParam(
       request, "format", &rpc_format);
 
   int width = rpc_width_valid ? rpc_width : coralmicro::CameraTask::kWidth;

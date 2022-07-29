@@ -17,6 +17,7 @@ set(RACK_TEST_LINK_LIBRARIES
     libs_coremark-m7
     libs_mjson
     libs_rpc_http_server
+    libs_rpc_utils
     libs_tpu_dfu_task_freertos
     libs_tpu_task_freertos
     libs_usb_host_task_freertos
