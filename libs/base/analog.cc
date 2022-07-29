@@ -22,34 +22,22 @@
 
 namespace coralmicro {
 namespace {
-ADC_Type* DeviceToAdc(AdcDevice d) {
-  switch (d) {
-    case AdcDevice::kAdc1:
-      return LPADC1;
-    case AdcDevice::kAdc2:
-      return LPADC2;
-    default:
-      return nullptr;
-  }
-  assert(false);
-}
-
 void GetDefaultConfig(AdcConfig& config) {
   LPADC_GetDefaultConvCommandConfig(&config.conv_config);
   LPADC_GetDefaultConvTriggerConfig(&config.trigger_config);
 }
 }  // namespace
 
-void AdcInit(AdcDevice device) {
+void AdcInit() {
   lpadc_config_t adc_config;
   LPADC_GetDefaultConfig(&adc_config);
-  LPADC_Init(DeviceToAdc(device), &adc_config);
+  LPADC_Init(LPADC1, &adc_config);
 }
 
-void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
+void AdcCreateConfig(AdcConfig& config, int channel,
                      AdcSide primary_side, bool differential) {
   GetDefaultConfig(config);
-  config.device = DeviceToAdc(device);
+  config.device = LPADC1;
 
   if (differential) {
     switch (primary_side) {
@@ -71,12 +59,7 @@ void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
     }
   }
 
-  if (device == AdcDevice::kAdc1) {
-    assert(channel < kAdc1ChannelCount);
-  }
-  if (device == AdcDevice::kAdc2) {
-    assert(channel < kAdc2ChannelCount);
-  }
+  assert(channel < kAdc1ChannelCount);
 
   config.conv_config.channelNumber = channel;
   config.trigger_config.targetCommandId = 1;

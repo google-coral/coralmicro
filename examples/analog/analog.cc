@@ -26,11 +26,10 @@
 namespace coralmicro {
 // [start-sphinx-snippet:dac-adc]
 [[noreturn]] void Main() {
-  AdcInit(AdcDevice::kAdc1);
+  AdcInit();
   DacInit();
   AdcConfig config{};
   AdcCreateConfig(config,
-                  /*device=*/AdcDevice::kAdc1,
                   /*channel=*/0,
                   /*primary_side=*/AdcSide::kB,
                   /*differential=*/false);

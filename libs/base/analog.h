@@ -25,16 +25,6 @@ namespace coralmicro {
 
 // Available channels on ADC1.
 inline constexpr int kAdc1ChannelCount = 6;
-// Available channels on ADC2.
-inline constexpr int kAdc2ChannelCount = 7;
-
-// ADC devices that exist in the system.
-enum class AdcDevice {
-  // Both ADC lines on the GPIO header use this one
-  kAdc1,
-  // Not available
-  kAdc2,
-};
 
 // Choices for the primary side of an ADC.
 enum class AdcSide {
@@ -56,19 +46,16 @@ struct AdcConfig {
 };
 
 // Initializes ADC device.
-// @param device ADC to initialize.
-void AdcInit(AdcDevice device);
+void AdcInit();
 
 // Populates an `ADCConfig` struct based on the given parameters.
 // @param config Configuration struct to populate.
-// @param device Desired device to configure. (Always `AdcDevice::Adc1` when
-//   using ADCs on the board header.)
 // @param channel The ADC channel to use (must be less than the max number of
 // channels: `kAdc1ChannelCount`).
 // @param primary_side In single ended mode, this is the pin that's connected.
 //   In differential mode, this is the pin to use as the primary side.
 // @param differential Whether or not to run the ADC in differential mode.
-void AdcCreateConfig(AdcConfig& config, AdcDevice device, int channel,
+void AdcCreateConfig(AdcConfig& config, int channel,
                      AdcSide primary_side, bool differential);
 
 // Reads voltage values from an ADC.

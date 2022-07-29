@@ -24,7 +24,6 @@
 #include "wiring_private.h"
 
 using coralmicro::AdcConfig;
-using coralmicro::AdcDevice;
 using coralmicro::AdcSide;
 using coralmicro::PwmPinConfig;
 
@@ -38,11 +37,11 @@ static AdcConfig Config_A1;
 
 void wiringAnalogInit() {
   coralmicro::PwmInit();
-  coralmicro::AdcInit(AdcDevice::kAdc1);
+  coralmicro::AdcInit();
   coralmicro::DacInit();
-  coralmicro::AdcCreateConfig(Config_A0, AdcDevice::kAdc1, 0, AdcSide::kB,
+  coralmicro::AdcCreateConfig(Config_A0, 0, AdcSide::kB,
                               false);
-  coralmicro::AdcCreateConfig(Config_A1, AdcDevice::kAdc1, 0, AdcSide::kA,
+  coralmicro::AdcCreateConfig(Config_A1, 0, AdcSide::kA,
                               false);
 }
 
