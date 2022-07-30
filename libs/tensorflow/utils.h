@@ -23,12 +23,21 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-// Allocate tensor arena statically in SDRAM.
+// Allocates a uint8_t tensor arena statically in the Dev Board Micro SDRAM
+// (max of 64 MB). This is slightly slower than OCRAM due to off-chip I/O
+// overhead costs.
+// @param name The variable name for this allocation.
+// @param size The byte size to allocate. This macro automatically aligns the
+// size to 16 bits.
 #define STATIC_TENSOR_ARENA_IN_SDRAM(name, size)         \
   static uint8_t name[size] __attribute__((aligned(16))) \
   __attribute__((section(".sdram_bss,\"aw\",%nobits @")))
 
-// Allocate tensor arena statically in on-chip RAM.
+// Allocates a uint8_t tensor arena statically in the RT1176 on-chip RAM
+// (max of 1.25 MB).
+// @param name The variable name for this allocation.
+// @param size The byte size to allocate. This macro automatically aligns the
+// size to 16 bits.
 #define STATIC_TENSOR_ARENA_IN_OCRAM(name, size)         \
   static uint8_t name[size] __attribute__((aligned(16))) \
   __attribute__((section(".ocram_bss,\"aw\",%nobits @")))

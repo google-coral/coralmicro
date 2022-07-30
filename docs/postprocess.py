@@ -20,6 +20,8 @@ import re
 
 from bs4 import BeautifulSoup
 
+from postprocess_wtd import lazy_tflm_cleanup
+
 
 def remove_title(soup):
   """Deletes the extra H1 title."""
@@ -108,6 +110,9 @@ def process(file):
   """Runs all the cleanup functions."""
   print('Post-processing ' + file)
   soup = BeautifulSoup(open(file), 'html.parser')
+  if os.path.split(file)[1] == 'tensorflow.md':
+    # This must run before relocate_h2id
+    soup = lazy_tflm_cleanup(soup)
   soup = remove_title(soup)
   soup = relocate_h2id(soup)
   soup = clean_pre(soup)

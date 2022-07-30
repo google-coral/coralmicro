@@ -49,6 +49,8 @@ makeSphinxPreview() {
     -D html_theme="sphinx_rtd_theme" \
     -D html_file_suffix=".html" \
     -D html_link_suffix=".html"
+  # Some custom tweaks to the output:
+  python3 postprocess_wtd.py -f ${PREVIEW_DIR}/
   echo "All done. Preview pages are in ${PREVIEW_DIR}."
 }
 

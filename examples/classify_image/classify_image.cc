@@ -46,7 +46,7 @@ void Main() {
     return;
   }
 
-  //! [edgetpu-context] Doxygen snippet for edgetpu_manager.h
+  // [start-sphinx-snippet:edgetpu]
   auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
@@ -60,7 +60,7 @@ void Main() {
   tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()), resolver,
                                        tensor_arena, kTensorArenaSize,
                                        &error_reporter);
-  //! [edgetpu-context] End snippet
+  // [end-sphinx-snippet:edgetpu]
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("ERROR: AllocateTensors() failed\r\n");
     return;

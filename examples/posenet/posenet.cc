@@ -25,6 +25,8 @@
 
 // Runs pose estimation using PoseNet, running on the Edge TPU.
 // Scores and keypoint data is printed to the serial console.
+
+// [start-sphinx-snippet:posenet]
 namespace coralmicro {
 namespace {
 
@@ -130,3 +132,4 @@ extern "C" void app_main(void* param) {
   coralmicro::Main();
   vTaskSuspend(nullptr);
 }
+// [end-sphinx-snippet:posenet]

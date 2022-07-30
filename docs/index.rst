@@ -2,8 +2,7 @@ coralmicro API
 ==============
 
 .. toctree::
-   edgetpu.rst
-   inference.rst
+   tensorflow.rst
    camera.rst
    audio.rst
    pins.rst

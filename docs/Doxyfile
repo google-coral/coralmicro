@@ -7,6 +7,7 @@ SORT_GROUP_NAMES       = YES
 EXTRACT_ALL            = YES
 INPUT_FILTER           = ./doxygenate.sh
 INPUT                  = ../libs/ \
+                         ../third_party/tflite-micro/tensorflow/lite/micro/ \
                          ../arduino/libraries/ \
                          ../third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include/
 

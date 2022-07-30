@@ -32,29 +32,24 @@
 
 namespace coralmicro {
 
-// This class is essentially a representation of the Edge TPU, so there is one
-// shared `EdgeTpuContext` used by all model interpreters. Instances of this
-// class should always be allocated with `EdgeTpuManager::OpenDevice()`.
+// This class is a representation of the Edge TPU device, so there is one
+// shared `EdgeTpuContext` used by all model interpreters.
 //
-// Unlike the libcoral C++ API, when using this coralmicro C++ API, you do not
-// need to pass the `EdgeTpuContext` to the `tflite::MicroInterpreter`, but the
-// context must be opened and the custom op must be registered before you create
-// an interpreter. (This is different because libcoral is based on TensorFlow
-// Lite and coralmicro is based on TensorFlow Lite for Microcontrollers.)
+// Instances of this should be allocated with `EdgeTpuManager::OpenDevice()`.
 //
-// The lifetime of the Edge TPU context must be longer than all associated
+// The `EdgeTpuContext` can be shared among multiple software components, and
+// the life of this object is directly tied to the Edge TPU power, so the
+// Edge TPU powers down after the last `EdgeTpuContext` reference leaves scope.
+//
+// The lifetime of the `EdgeTpuContext` must be longer than all associated
 // `tflite::MicroInterpreter` instances.
-//
-// The life of this object is directly tied to the Edge TPU power. So when this
-// object is destroyed, the Edge TPU powers down.
-//
-// **Example** (from `examples/classify_image/`):
-//
-// \snippet classify_image/classify_image.cc edgetpu-context
 class EdgeTpuContext {
  public:
+  // @cond Do not generate docs
+  // Use EdgeTpuManager::OpenDevice() instead.
   EdgeTpuContext();
   ~EdgeTpuContext();
+  // @endcond
 };
 
 // @cond Do not generate docs
@@ -82,11 +77,13 @@ class EdgeTpuPackage {
 // Singleton Edge TPU manager for allocating new instances of `EdgeTpuContext`.
 class EdgeTpuManager {
  public:
+  // @cond Do not generate docs
   EdgeTpuManager();
   EdgeTpuManager(const EdgeTpuManager&) = delete;
   EdgeTpuManager& operator=(const EdgeTpuManager&) = delete;
+  // @endcond
 
-  // Gets a pointer to the EdgeTpuManager singleton object.
+  // Gets a pointer to the `EdgeTpuManager` singleton object.
   static EdgeTpuManager* GetSingleton() {
     static EdgeTpuManager manager;
     return &manager;
@@ -98,11 +95,15 @@ class EdgeTpuManager {
                       TfLiteNode* node);
   // @endcond
 
-  // Opens the default Edge TPU device.
+  // Gets the default Edge TPU device (and starts it if necessary).
   //
-  // The Edge TPU device (represented as `EdgeTpuContext`) can be shared among
-  // multiple software components. The device is closed after the last
-  // reference leaves scope.
+  // The Edge TPU device (represented by `EdgeTpuContext`) can be shared among
+  // multiple software components, and the `EdgeTpuManager` is a singleton
+  // object, so you should always call this function like this:
+  //
+  // ```
+  // auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
+  // ```
   //
   // @param mode The `PerformanceMode` to use for the Edge TPU. Options are:
   // `kMax` (500Mhz), `kHigh` (250Mhz), `kMedium` (125Mhz), or `kLow` (63Mhz).

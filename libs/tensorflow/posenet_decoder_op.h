@@ -21,12 +21,12 @@
 
 namespace coralmicro {
 
-// Posenet custom op name. Pass this to
+// PoseNet custom op name. Pass this to
 // `tflite::MicroMutableOpResolver::AddCustom()`.
 inline constexpr char kPosenetDecoderOp[] = "PosenetDecoderOp";
 
-// Returns pointer to an instance of `tflite::TfLiteRegistration` to handle
-// Posenet custom ops. Pass this to
+// Returns pointer to an instance of `tflite::TfLiteRegistration` to handle the
+// custom op for post-processing PoseNet output tensors on the MCU. Pass this to
 // `tflite::MicroMutableOpResolver::AddCustom()`.
 TfLiteRegistration* RegisterPosenetDecoderOp();
 

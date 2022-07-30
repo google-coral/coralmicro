@@ -47,11 +47,11 @@ struct Object {
   BBox<float> bbox;
 };
 
-// Format the detection outputs into a string.
+// Formats the detection outputs into a string.
 //
-// @param object a vector contains all the objects in an object detection
+// @param object A vector with all the objects in an object detection
 // output.
-// @return A string showing the posenet's output.
+// @return A description of all detected objects.
 std::string FormatDetectionOutput(const std::vector<Object>& objects);
 
 // Converts detection output tensors into a vector of Objects.

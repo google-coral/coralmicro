@@ -55,17 +55,17 @@ struct Pose {
   Keypoint keypoints[kKeypoints];
 };
 
-// Format the posenet outputs into a string.
+// Format the PoseNet outputs into a string.
 //
-// @param poses a vector contains all the poses in a posenet output.
+// @param poses A vector contains all the poses in a posenet output.
 // @return A string showing the posenet's output.
 std::string FormatPosenetOutput(const std::vector<Pose>& poses);
 
-// Gets the results from a posenet model in the form of a vector of poses.
+// Gets the results from a PoseNet model in the form of a vector of poses.
 //
-// @param interpreter The already-invoked interpreter for your posenet model.
+// @param interpreter The already-invoked interpreter for your PoseNet model.
 // @param threshold The score threshold for results. All returned
-// poses results have  a score greater-than-or-equal-to this value.
+// pose results have a score greater-than-or-equal-to this value.
 std::vector<Pose> GetPosenetOutput(
     tflite::MicroInterpreter* interpreter,
     float threshold = -std::numeric_limits<float>::infinity());
