@@ -50,7 +50,7 @@ elif (system_name == 'Darwin'):
      platform_name = 'osx'
 else:
      platform_dir = 'linux/amd64'
-     toolchain_dir = 'toolchain'
+     toolchain_dir = 'toolchain-linux'
      platform_name = 'linux64'
 
 def CreateFlashtoolExe(core_out_dir, root_dir):

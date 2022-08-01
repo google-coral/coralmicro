@@ -7,9 +7,6 @@
 [submodule "third_party/nxp/rt1176-sdk"]
 	path = third_party/nxp/rt1176-sdk
 	url = https://github.com/google-coral/coralmicro-rt1176-sdk
-[submodule "third_party/toolchain"]
-	path = third_party/toolchain
-	url = https://spacepark.googlesource.com/valiant/toolchain
 [submodule "third_party/flatbuffers"]
 	path = third_party/flatbuffers
 	url = https://github.com/google/flatbuffers
@@ -43,9 +40,6 @@
 [submodule "third_party/coremark"]
 	path = third_party/coremark
 	url = https://github.com/eembc/coremark
-[submodule "third_party/toolchain-win"]
-	path = third_party/toolchain-win
-	url = https://spacepark.googlesource.com/valiant/toolchain
 [submodule "third_party/tflite-micro"]
 	path = third_party/tflite-micro
 	url = https://github.com/tensorflow/tflite-micro.git

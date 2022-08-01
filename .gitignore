@@ -11,3 +11,4 @@
 __pycache__
 *.spec
 *.swp
+third_party/toolchain-*

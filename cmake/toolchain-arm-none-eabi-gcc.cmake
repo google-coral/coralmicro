@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.18)
 
 get_filename_component(CORAL_MICRO_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/.." REALPATH)
 
@@ -28,24 +28,35 @@ set(CMAKE_C_ARCHIVE_FINISH "")
 set(CMAKE_CXX_ARCHIVE_FINISH "")
 
 if (${CMAKE_HOST_WIN32})
-get_filename_component(CMAKE_AR ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-ar.exe REALPATH CACHE)
-get_filename_component(CMAKE_C_COMPILER ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc.exe REALPATH CACHE)
-get_filename_component(CMAKE_CXX_COMPILER ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++.exe REALPATH CACHE)
-get_filename_component(CMAKE_OBJCOPY ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy.exe REALPATH CACHE)
-get_filename_component(CMAKE_STRIP ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-win/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip.exe REALPATH CACHE)
+    set(TOOLCHAIN_DIR ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-win)
+    set(TOOLCHAIN_PREFIX "gcc-arm-none-eabi-9-2020-q2-update")
+    set(TOOLCHAIN_ARCHIVE ${TOOLCHAIN_DIR}/toolchain-win.zip)
+    set(TOOLCHAIN_EXE_EXTENSION ".exe")
+    set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-win32.zip")
 elseif(${CMAKE_HOST_APPLE})
-get_filename_component(CMAKE_AR ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-ar REALPATH CACHE)
-get_filename_component(CMAKE_C_COMPILER ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH CACHE)
-get_filename_component(CMAKE_CXX_COMPILER ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH CACHE)
-get_filename_component(CMAKE_OBJCOPY ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy REALPATH CACHE)
-get_filename_component(CMAKE_STRIP ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-mac/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip REALPATH CACHE)
-else()
-get_filename_component(CMAKE_AR ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-ar REALPATH CACHE)
-get_filename_component(CMAKE_C_COMPILER ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc REALPATH CACHE)
-get_filename_component(CMAKE_CXX_COMPILER ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++ REALPATH CACHE)
-get_filename_component(CMAKE_OBJCOPY ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy REALPATH CACHE)
-get_filename_component(CMAKE_STRIP ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip REALPATH CACHE)
+    set(TOOLCHAIN_DIR ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-mac)
+    set(TOOLCHAIN_PREFIX "")
+    set(TOOLCHAIN_ARCHIVE ${TOOLCHAIN_DIR}/toolchain-mac.tar.bz2)
+    set(TOOLCHAIN_EXE_EXTENSION "")
+    set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2")
+else() # Linux
+    set(TOOLCHAIN_DIR ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-linux)
+    set(TOOLCHAIN_PREFIX "")
+    set(TOOLCHAIN_ARCHIVE ${TOOLCHAIN_DIR}/toolchain-linux.tar.bz2)
+    set(TOOLCHAIN_EXE_EXTENSION "")
+    set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2")
 endif()
+
+if (NOT EXISTS ${TOOLCHAIN_DIR})
+    message(STATUS "Fetching ${TOOLCHAIN_URL}")
+    file(DOWNLOAD ${TOOLCHAIN_URL} ${TOOLCHAIN_ARCHIVE})
+    file(ARCHIVE_EXTRACT INPUT ${TOOLCHAIN_ARCHIVE} DESTINATION ${TOOLCHAIN_DIR}/${TOOLCHAIN_PREFIX})
+endif()
+get_filename_component(CMAKE_AR ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-ar${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_C_COMPILER ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_OBJCOPY ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_STRIP ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
 
 execute_process(
     COMMAND ${CMAKE_C_COMPILER} -print-libgcc-file-name
