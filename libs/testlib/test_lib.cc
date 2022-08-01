@@ -92,7 +92,7 @@ auto WiFiSafeDisconnect = [](void* = nullptr, uint32_t = 0) {
 auto WiFiSafeConnect = [](void* wifi_network_params, uint32_t retries) {
   WiFiSafeDisconnect();
   auto* params = static_cast<WIFINetworkParams_t*>(wifi_network_params);
-  coralmicro::WiFiConnect(params, static_cast<int>(retries));
+  coralmicro::WiFiConnect(*params, static_cast<int>(retries));
   free(const_cast<char*>(params->pcSSID));
   free(const_cast<char*>(params->pcPassword));
   delete params;

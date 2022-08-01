@@ -45,7 +45,7 @@ bool WiFiGetDefaultSsid(std::string* wifi_ssid_out);
 // Sets the Wi-Fi SSID in flash memory.
 // @param wifi_ssid A pointer to a string containing the SSID.
 // @returns True if the SSID was successfully stored; false otherwise.
-bool WiFiSetDefaultSsid(std::string* wifi_ssid);
+bool WiFiSetDefaultSsid(const std::string& wifi_ssid);
 
 // Gets the Wi-Fi key that is stored in flash memory.
 // @param wifi_ssid_out A pointer to a string in which to store the SSID.
@@ -55,7 +55,7 @@ bool WiFiGetDefaultPsk(std::string* wifi_psk_out);
 // Sets the Wi-Fi key in flash memory.
 // @param wifi_psk A pointer to a string containing the key.
 // @returns True if the key was successfully stored; false otherwise.
-bool WiFiSetDefaultPsk(std::string* wifi_psk);
+bool WiFiSetDefaultPsk(const std::string& wifi_psk);
 
 // Turns on the Wi-Fi module.
 //
@@ -79,7 +79,7 @@ bool WiFiIsConnected();
 // https://aws.github.io/amazon-freertos/202107.00/html1/struct_w_i_f_i_network_params__t.html
 // @param retry_count The max number of connection attempts. Default is 5.
 // @return True if successfully connected to Wi-Fi; false otherwise.
-bool WiFiConnect(const WIFINetworkParams_t* network_params,
+bool WiFiConnect(const WIFINetworkParams_t& network_params,
                  int retry_count = kDefaultRetryCount);
 
 // Connects to a Wi-Fi network with the given network name and password.

@@ -33,20 +33,16 @@ bool WiFiGetDefaultSsid(std::string* wifi_ssid_out) {
   return LfsReadFile("/wifi_ssid", wifi_ssid_out);
 }
 
-bool WiFiSetDefaultSsid(std::string* wifi_ssid) {
-  return LfsWriteFile("/wifi_ssid",
-                      reinterpret_cast<const uint8_t*>(wifi_ssid->c_str()),
-                      wifi_ssid->size());
-}
-
-bool WiFiSetDefaultPsk(std::string* wifi_psk) {
-  return LfsWriteFile("/wifi_psk",
-                      reinterpret_cast<const uint8_t*>(wifi_psk->c_str()),
-                      wifi_psk->size());
+bool WiFiSetDefaultSsid(const std::string& wifi_ssid) {
+  return LfsWriteFile("/wifi_ssid", wifi_ssid);
 }
 
 bool WiFiGetDefaultPsk(std::string* wifi_psk_out) {
   return LfsReadFile("/wifi_psk", wifi_psk_out);
+}
+
+bool WiFiSetDefaultPsk(const std::string& wifi_psk) {
+  return LfsWriteFile("/wifi_psk", wifi_psk);
 }
 
 bool WiFiTurnOn() { return WIFI_On() == eWiFiSuccess; }
@@ -55,13 +51,13 @@ bool WiFiTurnOff() { return WIFI_Off() == eWiFiSuccess; }
 
 bool WiFiIsConnected() { return WIFI_IsConnected(); }
 
-bool WiFiConnect(const WIFINetworkParams_t* network_params, int retry_count) {
+bool WiFiConnect(const WIFINetworkParams_t& network_params, int retry_count) {
   while (retry_count != 0) {
-    if (WIFI_ConnectAP(network_params) == eWiFiSuccess) return true;
+    if (WIFI_ConnectAP(&network_params) == eWiFiSuccess) return true;
     --retry_count;
   }
 
-  printf("Failed to connect to %s\r\n", network_params->pcSSID);
+  printf("Failed to connect to %s\r\n", network_params.pcSSID);
   return false;
 }
 
@@ -81,7 +77,7 @@ bool WiFiConnect(const char* ssid, const char* psk, int retry_count) {
     params.ucPasswordLength = 0;
     params.xSecurity = eWiFiSecurityOpen;
   }
-  return WiFiConnect(&params, retry_count);
+  return WiFiConnect(params, retry_count);
 }
 
 bool WiFiConnect(int retry_count) {

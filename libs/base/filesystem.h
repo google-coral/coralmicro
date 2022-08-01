@@ -96,6 +96,13 @@ size_t LfsReadFile(const char* path, uint8_t* buf, size_t size);
 // @returns True upon success, false otherwise.
 bool LfsWriteFile(const char* path, const uint8_t* buf, size_t size);
 
+// Writes content of the string to file.
+//
+// @param path File path to write.
+// @param str String to write data from.
+// @returns True upon success, false otherwise.
+bool LfsWriteFile(const char* path, const std::string& str);
+
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_FILESYSTEM_H_
