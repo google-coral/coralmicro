@@ -44,3 +44,10 @@ Security
 `[a71ch.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/a71ch/a71ch.h>`_
 
 .. doxygenfile:: a71ch/a71ch.h
+
+jpeg
+-------------------------
+
+`[jpeg.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/jpeg/jpeg.h>`_
+
+.. doxygenfile:: jpeg/jpeg.h
