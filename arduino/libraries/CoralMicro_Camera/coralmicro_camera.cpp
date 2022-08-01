@@ -23,125 +23,124 @@ namespace coralmicro {
 namespace arduino {
 
 int CameraClass::begin(CameraResolution resolution) {
-    switch (resolution) {
-        case CAMERA_R160x120:
-            return begin(160, 120);
-        case CAMERA_R320x240:
-            return begin(320, 240);
-        case CAMERA_R320x320:
-        case CAMERA_RMAX:
-        default:
-            return begin(320, 320);
-    }
+  switch (resolution) {
+    case CAMERA_R160x120:
+      return begin(160, 120);
+    case CAMERA_R320x240:
+      return begin(320, 240);
+    case CAMERA_R320x320:
+    case CAMERA_RMAX:
+    default:
+      return begin(320, 320);
+  }
 }
 
 int CameraClass::begin(int32_t width, int32_t height, CameraFormat fmt,
                        CameraFilterMethod filter, CameraRotation rotation,
                        bool preserve_ratio) {
-    initialized_ = true;
-    width_ = width;
-    height_ = height;
-    format_ = fmt;
-    filter_ = filter;
-    rotation_ = rotation;
-    preserve_ratio_ = preserve_ratio;
-    camera_->SetPower(true);
-    camera_->Enable(coralmicro::CameraMode::kStreaming);
-    return CameraStatus::SUCCESS;
+  initialized_ = true;
+  width_ = width;
+  height_ = height;
+  format_ = fmt;
+  filter_ = filter;
+  rotation_ = rotation;
+  preserve_ratio_ = preserve_ratio;
+  camera_->SetPower(true);
+  camera_->Enable(coralmicro::CameraMode::kStreaming);
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::end() {
-    camera_->Disable();
-    camera_->SetPower(false);
-    initialized_ = false;
+  camera_->Disable();
+  camera_->SetPower(false);
+  initialized_ = false;
 }
 
 int CameraClass::grab(uint8_t* buffer) {
-    if (!initialized_) {
-        printf("%s Camera is not initialized...\n", __func__);
-        return CameraStatus::NOT_INITIALIZED;
-    }
-    std::vector<coralmicro::CameraFrameFormat> fmts;
-    if (test_pattern_ != CameraTestPattern::kNone) {
-        fmts.push_back({CameraFormat::kRaw, CameraFilterMethod::kBilinear,
-                        CameraRotation::k0,
-                        CameraTask::kWidth, CameraTask::kHeight,
-                        preserve_ratio_, buffer});
-    } else {
-        fmts.push_back(
-            {format_, filter_, rotation_, width_, height_, preserve_ratio_, buffer});
-    }
+  if (!initialized_) {
+    printf("%s Camera is not initialized...\n", __func__);
+    return CameraStatus::NOT_INITIALIZED;
+  }
+  std::vector<coralmicro::CameraFrameFormat> fmts;
+  if (test_pattern_ != CameraTestPattern::kNone) {
+    fmts.push_back({CameraFormat::kRaw, CameraFilterMethod::kBilinear,
+                    CameraRotation::k0, CameraTask::kWidth, CameraTask::kHeight,
+                    preserve_ratio_, buffer});
+  } else {
+    fmts.push_back({format_, filter_, rotation_, width_, height_,
+                    preserve_ratio_, buffer});
+  }
 
-    auto success = coralmicro::CameraTask::GetSingleton()->GetFrame(fmts);
-    if (!success) {
-        printf("Failed to get frame from camera\r\n");
-        return CameraStatus::FAILURE;
-    }
-    return CameraStatus::SUCCESS;
+  auto success = coralmicro::CameraTask::GetSingleton()->GetFrame(fmts);
+  if (!success) {
+    printf("Failed to get frame from camera\r\n");
+    return CameraStatus::FAILURE;
+  }
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::testPattern(bool walking) {
-    auto test_pattern = walking ? coralmicro::CameraTestPattern::kWalkingOnes
-                                : coralmicro::CameraTestPattern::kNone;
-    test_pattern_ = test_pattern;
-    camera_->SetTestPattern(test_pattern_);
-    return CameraStatus::SUCCESS;
+  auto test_pattern = walking ? coralmicro::CameraTestPattern::kWalkingOnes
+                              : coralmicro::CameraTestPattern::kNone;
+  test_pattern_ = test_pattern;
+  camera_->SetTestPattern(test_pattern_);
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::testPattern(coralmicro::CameraTestPattern pattern) {
-    test_pattern_ = pattern;
-    camera_->SetTestPattern(test_pattern_);
-    return CameraStatus::SUCCESS;
+  test_pattern_ = pattern;
+  camera_->SetTestPattern(test_pattern_);
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::standby(bool enable) {
-    if (enable) {
-        camera_->Enable(coralmicro::CameraMode::kStreaming);
-    } else {
-        camera_->Enable(coralmicro::CameraMode::kStandBy);
-    }
-    return CameraStatus::SUCCESS;
+  if (enable) {
+    camera_->Enable(coralmicro::CameraMode::kStreaming);
+  } else {
+    camera_->Enable(coralmicro::CameraMode::kStandBy);
+  }
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::preserveRatio(bool preserve_ratio) {
-    preserve_ratio_ = preserve_ratio;
-    return CameraStatus::SUCCESS;
+  preserve_ratio_ = preserve_ratio;
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::format(coralmicro::CameraFormat fmt) {
-    format_ = fmt;
-    return CameraStatus::SUCCESS;
+  format_ = fmt;
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::discardFrames(int num_frames) {
-    camera_->DiscardFrames(num_frames);
-    return CameraStatus::SUCCESS;
+  camera_->DiscardFrames(num_frames);
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::motionDetection(bool enable) {
-    printf("%s not implemented\n", __func__);
-    return CameraStatus::UNIMPLEMENTED;
+  printf("%s not implemented\n", __func__);
+  return CameraStatus::UNIMPLEMENTED;
 }
 
 int CameraClass::motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w,
                                        uint32_t h) {
-    printf("%s not implemented\n", __func__);
-    return CameraStatus::UNIMPLEMENTED;
+  printf("%s not implemented\n", __func__);
+  return CameraStatus::UNIMPLEMENTED;
 }
 
 int CameraClass::motionDetectionThreshold(uint32_t threshold) {
-    printf("%s not implemented\n", __func__);
-    return CameraStatus::UNIMPLEMENTED;
+  printf("%s not implemented\n", __func__);
+  return CameraStatus::UNIMPLEMENTED;
 }
 
 int CameraClass::motionDetected() {
-    printf("%s not implemented\n", __func__);
-    return CameraStatus::UNIMPLEMENTED;
+  printf("%s not implemented\n", __func__);
+  return CameraStatus::UNIMPLEMENTED;
 }
 
 int CameraClass::framerate(uint32_t framerate) {
-    printf("%s not implemented\n", __func__);
-    return CameraStatus::UNIMPLEMENTED;
+  printf("%s not implemented\n", __func__);
+  return CameraStatus::UNIMPLEMENTED;
 }
 
 }  // namespace arduino

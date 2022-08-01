@@ -62,7 +62,7 @@ class File : public Stream {
   virtual size_t write(const uint8_t *buf, size_t size);
 
   // Reads one value from the file.
-  // 
+  //
   // @returns The value read from the file.
   virtual int read();
 
@@ -73,7 +73,8 @@ class File : public Stream {
 
   // The amount of data left in the file.
   //
-  // @returns The amount of data until the end of the file, given the current position.
+  // @returns The amount of data until the end of the file, given the current
+  // position.
   virtual int available();
 
   // Ensures the data is written to the file.
@@ -116,7 +117,7 @@ class File : public Stream {
   char *name();
 
   // Determines whether the file object is a directory.
-  // 
+  //
   // @returns True if the file object is a directory, false otherwise.
   bool isDirectory(void) { return is_dir_; }
 
@@ -134,22 +135,22 @@ class File : public Stream {
   friend class SDClass;
 };
 
-// Exposes the Coral Micro device's internal filesystem, treating it as if it was an SD card.  
-// You should not initialize this object yourself; instead include `coralmicro_SD.h` and then use the global `SD` instance.
-// `begin()` and `end()` are unnecessary calls, because the filesystem is initialized
-// when the device boots up and cannot be deinitialized.  Example code can be found in 
-// `sketches/SDFileSystemTest/`.
+// Exposes the Coral Micro device's internal filesystem, treating it as if it
+// was an SD card. You should not initialize this object yourself; instead
+// include `coralmicro_SD.h` and then use the global `SD` instance. `begin()`
+// and `end()` are unnecessary calls, because the filesystem is initialized when
+// the device boots up and cannot be deinitialized.  Example code can be found
+// in `sketches/SDFileSystemTest/`.
 class SDClass {
  public:
-
   // This function is unused and is here to match the Arduino API.
-  // 
+  //
   // @param csPin Unused and is here to match the Arduino API.
   // @returns True if initialization was successful, false otherwise.
   bool begin(uint8_t csPin = DONT_CARE);
 
   // This function is unused and is here to match the Arduino API.
-  // 
+  //
   // @param csPin Unused and is here to match the Arduino API.
   // @param clock Unused and is here to match the Arduino API.
   // @returns True if initialization was successful, false otherwise.
@@ -176,13 +177,13 @@ class SDClass {
   }
 
   // Determines whether a file or directory exists at the given path.
-  // 
+  //
   // @param filepath The path to check for a file.
   // @returns True if a file exists at the path; false otherwise.
   bool exists(const char *filepath);
 
   // Determines whether a file or directory exists at the given path.
-  // 
+  //
   // @param filepath The path to check for a file.
   // @returns True if a file exists at the path, false otheriwse.
   bool exists(const String &filepath) { return exists(filepath.c_str()); }
@@ -231,7 +232,7 @@ class SDClass {
 
 typedef coralmicro::arduino::SDLib::File SDFile;
 
-// This is the global `SDClass` instance you should use instead of 
+// This is the global `SDClass` instance you should use instead of
 // creating your own instance of `SDClass`.
 extern coralmicro::arduino::SDLib::SDClass SD;
 

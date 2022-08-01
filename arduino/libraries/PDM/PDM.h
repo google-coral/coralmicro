@@ -55,61 +55,61 @@ namespace arduino {
 // activate with `onReceive()`, and deactivate with `end()`. Example code can be
 // found in `sketches/PDM/`
 class PDMClass {
-   public:
-    // @cond Do not generate docs.
-    PDMClass();
-    ~PDMClass();
-    // @endcond
+ public:
+  // @cond Do not generate docs.
+  PDMClass();
+  ~PDMClass();
+  // @endcond
 
-    // Start recording data with the PDM microphone.
-    int begin();
+  // Start recording data with the PDM microphone.
+  int begin();
 
-    // Sets the current audio callback function. The microphone starts as soon
-    // as `begin()` is called, however this function adds an extra callback that
-    // gets executed as soon as new data are received. Within the callback, you
-    // can call `available()` and `read()` to access the microphone data.
-    //
-    // @param function The function to call when audio data is received.  The
-    // function should not have any arguments and not have a return value.
-    void onReceive(void (*function)(void));
+  // Sets the current audio callback function. The microphone starts as soon
+  // as `begin()` is called, however this function adds an extra callback that
+  // gets executed as soon as new data are received. Within the callback, you
+  // can call `available()` and `read()` to access the microphone data.
+  //
+  // @param function The function to call when audio data is received.  The
+  // function should not have any arguments and not have a return value.
+  void onReceive(void (*function)(void));
 
-    // Removes the current callback, effectively turning off the microphone.
-    //
-    void end();
+  // Removes the current callback, effectively turning off the microphone.
+  //
+  void end();
 
-    // Gets the amount of available data in the audio buffer.
-    // Data is stored in the buffer as `uint32_t`s, and the sizes
-    // in this function refer to the amount of values in the buffer.
-    //
-    // @returns The amount of data values stored in the underlying buffer
-    // that are ready to be read.
-    int available();
+  // Gets the amount of available data in the audio buffer.
+  // Data is stored in the buffer as `uint32_t`s, and the sizes
+  // in this function refer to the amount of values in the buffer.
+  //
+  // @returns The amount of data values stored in the underlying buffer
+  // that are ready to be read.
+  int available();
 
-    // Reads data from the audio buffer.
-    // Data is stored in the buffer as `uint32_t`s, and the sizes
-    // in this function refer to the amount of values in the buffer.
-    //
-    // @param buffer The buffer that will receive the copied audio data.
-    // @param size The amount of audio data values to copy.
-    // @returns The amount of audio data values that were copied.
-    int read(std::vector<int32_t>& buffer, size_t size);
+  // Reads data from the audio buffer.
+  // Data is stored in the buffer as `uint32_t`s, and the sizes
+  // in this function refer to the amount of values in the buffer.
+  //
+  // @param buffer The buffer that will receive the copied audio data.
+  // @param size The amount of audio data values to copy.
+  // @returns The amount of audio data values that were copied.
+  int read(std::vector<int32_t>& buffer, size_t size);
 
-    // @cond Do not generate docs.
-    // Not Implemented
-    void setGain(int gain);
-    void setBufferSize(int bufferSize);
-    // @endcond
+  // @cond Do not generate docs.
+  // Not Implemented
+  void setGain(int gain);
+  void setBufferSize(int bufferSize);
+  // @endcond
 
-   private:
-    void Append(const int32_t* samples, size_t num_samples);
+ private:
+  void Append(const int32_t* samples, size_t num_samples);
 
-    AudioDriver driver_;
-    AudioDriverConfig config_;
-    AudioService audio_service_;
-    LatestSamples latest_samples_;
-    std::optional<int> current_audio_cb_id_;
+  AudioDriver driver_;
+  AudioDriverConfig config_;
+  AudioService audio_service_;
+  LatestSamples latest_samples_;
+  std::optional<int> current_audio_cb_id_;
 
-    void (*onReceive_)(void);
+  void (*onReceive_)(void);
 };
 
 }  // namespace arduino

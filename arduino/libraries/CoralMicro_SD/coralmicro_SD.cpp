@@ -33,9 +33,9 @@ File SDClass::open(const char *filename, uint8_t mode) {
   if (lfs_dir_open(Lfs(), dir_handle.get(), filename) >= 0) {
     return SDLib::File(dir_handle, filename);
   } else if (lfs_file_open(Lfs(), file_handle.get(), filename,
-                           mode == FILE_WRITE ?
-                               LFS_O_APPEND | LFS_O_CREAT | LFS_O_RDWR :
-                               LFS_O_RDONLY) >= 0) {
+                           mode == FILE_WRITE
+                               ? LFS_O_APPEND | LFS_O_CREAT | LFS_O_RDWR
+                               : LFS_O_RDONLY) >= 0) {
     return SDLib::File(file_handle, filename, mode == FILE_WRITE);
   } else {
     return SDLib::File();

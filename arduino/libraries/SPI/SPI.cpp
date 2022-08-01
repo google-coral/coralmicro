@@ -74,9 +74,7 @@ void HardwareSPI::updateSettings(::arduino::SPISettings settings) {
   LPSPI_MasterInit(base_, &config_, settings.getClockFreq());
 }
 
-void HardwareSPI::beginTransaction(::arduino::SPISettings settings) {
-
-}
+void HardwareSPI::beginTransaction(::arduino::SPISettings settings) {}
 
 void HardwareSPI::endTransaction(void) {
   // endTransaction is not supposed to reset the settings, so LPSPI_RTOS_Deinit

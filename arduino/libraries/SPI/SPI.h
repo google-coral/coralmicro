@@ -29,11 +29,12 @@ namespace arduino {
 // Allows for communication with SPI devices.
 // SPI devices communicate through the use of the `transfer` functions,
 // which simultaneously exchange data between the two devices.
-// For more details about SPI, see [Wikipedia's page](https://https://en.wikipedia.org/wiki/Serial_Peripheral_Interface).
-// The Coral Micro device must be the controller and transfers are
-// not supported from within interrupts.
-// You should not initialize this object yourself; instead include `SPI.h` and then use the global `SPI` instance.
-// Code samples can be found in `sketches/SPI/` and `sketches/SPITranscation/`.
+// For more details about SPI, see [Wikipedia's
+// page](https://https://en.wikipedia.org/wiki/Serial_Peripheral_Interface). The
+// Coral Micro device must be the controller and transfers are not supported
+// from within interrupts. You should not initialize this object yourself;
+// instead include `SPI.h` and then use the global `SPI` instance. Code samples
+// can be found in `sketches/SPI/` and `sketches/SPITranscation/`.
 class HardwareSPI : public ::arduino::HardwareSPI {
  public:
   // @cond Do not generate docs.
@@ -48,14 +49,14 @@ class HardwareSPI : public ::arduino::HardwareSPI {
   uint8_t transfer(uint8_t data);
 
   // Exchanges two bytes of data with SPI transfer.
-  // 
+  //
   // @param data The data for the peripheral device.
   // @returns The data received from the peripheral device.
   uint16_t transfer16(uint16_t data);
 
   // Exchanges an array of data in-place with SPI transfer.
   //
-  // @param buf The data for the peripheral device.  As 
+  // @param buf The data for the peripheral device.  As
   // data is received, the buffer is overwritten.
   // @param count The length of the data in bytes.
   void transfer(void* buf, size_t count);
@@ -104,7 +105,7 @@ class HardwareSPI : public ::arduino::HardwareSPI {
 }  // namespace arduino
 }  // namespace coralmicro
 
-// This is the global `HardwareSPI` instance you should use instead of 
+// This is the global `HardwareSPI` instance you should use instead of
 // creating your own instance of `HardwareSPI`.
 extern coralmicro::arduino::HardwareSPI SPI;
 
