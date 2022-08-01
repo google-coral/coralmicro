@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "libs/libjpeg/jpeg.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/http_server_handlers.h"
 #include "libs/base/ipc_m7.h"
@@ -23,6 +22,7 @@
 #include "libs/base/strings.h"
 #include "libs/base/watchdog.h"
 #include "libs/camera/camera.h"
+#include "libs/libjpeg/jpeg.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/posenet.h"
 #include "libs/tpu/edgetpu_manager.h"
@@ -372,8 +372,7 @@ void Main() {
   tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<2> resolver;
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
-  resolver.AddCustom(coral::kPosenetDecoderOp,
-                     coral::RegisterPosenetDecoderOp());
+  resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
   auto interpreter = std::make_shared<tflite::MicroInterpreter>(
       tflite::GetModel(posenet_tflite.data()), resolver, tensor_arena,
       kTensorArenaSize, &error_reporter);

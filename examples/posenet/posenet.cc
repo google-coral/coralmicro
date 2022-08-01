@@ -62,8 +62,7 @@ void Main() {
   // Creates a micro interpreter.
   tflite::MicroMutableOpResolver<2> resolver;
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
-  resolver.AddCustom(coral::kPosenetDecoderOp,
-                     coral::RegisterPosenetDecoderOp());
+  resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
   auto interpreter = tflite::MicroInterpreter{
       model, resolver, tensor_arena, kTensorArenaSize, &error_reporter};
   if (interpreter.AllocateTensors() != kTfLiteOk) {

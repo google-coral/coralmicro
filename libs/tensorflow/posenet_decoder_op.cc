@@ -26,7 +26,7 @@
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 
-namespace coral {
+namespace coralmicro {
 namespace posenet_decoder_op {
 
 using tflite::GetInput;
@@ -286,4 +286,4 @@ TfLiteRegistration* RegisterPosenetDecoderOp() {
   return &r;
 }
 
-}  // namespace coral
+}  // namespace coralmicro

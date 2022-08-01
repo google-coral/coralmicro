@@ -19,7 +19,7 @@
 
 #include "tensorflow/lite/c/common.h"
 
-namespace coral {
+namespace coralmicro {
 
 // Posenet custom op name. Pass this to
 // `tflite::MicroMutableOpResolver::AddCustom()`.
@@ -30,6 +30,6 @@ inline constexpr char kPosenetDecoderOp[] = "PosenetDecoderOp";
 // `tflite::MicroMutableOpResolver::AddCustom()`.
 TfLiteRegistration* RegisterPosenetDecoderOp();
 
-}  // namespace coral
+}  // namespace coralmicro
 
 #endif  // LIBS_POSENET_POSENET_DECODER_OP_H_

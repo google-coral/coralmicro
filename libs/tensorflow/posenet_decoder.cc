@@ -23,7 +23,7 @@
 #include <numeric>
 #include <vector>
 
-namespace coral {
+namespace coralmicro {
 
 using posenet_decoder_op::kNumKeypoints;
 using posenet_decoder_op::Point;
@@ -601,4 +601,4 @@ void DecodeInstanceMasks(const float* long_offsets, int height, int width,
 }
 
 }  // namespace posenet_decoder_op
-}  // namespace coral
+}  // namespace coralmicro

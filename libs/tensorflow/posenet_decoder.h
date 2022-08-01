@@ -21,7 +21,7 @@
 #include <queue>
 #include <vector>
 
-namespace coral {
+namespace coralmicro {
 
 // An adjacency list representing the directed edges connecting keypoints.
 struct AdjacencyList {
@@ -229,6 +229,6 @@ int MatchEmbeddingToInstance(const int y_location, const int x_location,
                              const size_t num_poses, const int num_keypoints,
                              const int refinement_steps, const int stride);
 
-}  // namespace coral
+}  // namespace coralmicro
 
 #endif  // LIBS_POSENET_POSENET_DECODER_H_

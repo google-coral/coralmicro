@@ -100,7 +100,6 @@ auto WiFiSafeConnect = [](void* wifi_network_params, uint32_t retries) {
 }  // namespace pended_functions
 }  // namespace
 
-
 // Implementation of "get_serial_number" RPC.
 // Returns JSON results with the key "serial_number" and the serial, as a
 // string.
@@ -547,8 +546,7 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
 
 void PosenetStressRun(struct jsonrpc_request* request) {
   int iterations;
-  if (!coralmicro::JsonRpcGetIntegerParam(request, "iterations",
-                                                   &iterations))
+  if (!coralmicro::JsonRpcGetIntegerParam(request, "iterations", &iterations))
     return;
 
   // Turn on the TPU and get it's context.
@@ -575,8 +573,7 @@ void PosenetStressRun(struct jsonrpc_request* request) {
   // Creates a micro interpreter.
   tflite::MicroMutableOpResolver<2> resolver;
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
-  resolver.AddCustom(coral::kPosenetDecoderOp,
-                     coral::RegisterPosenetDecoderOp());
+  resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
   tflite::MicroErrorReporter error_reporter;
   auto interpreter = tflite::MicroInterpreter{
       model, resolver, tensor_arena, kTensorArenaSize, &error_reporter};
