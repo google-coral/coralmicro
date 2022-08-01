@@ -128,15 +128,20 @@ sketch:
 EOF
     local platform_name=""
     local flashtool_name=""
+    local cli_name=""
+    local cli_version="0.25.1"
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         platform_name="linux64"
         flashtool_name="linux"
+        cli_name="Linux_64bit.tar.gz"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         platform_name="osx"
         flashtool_name="mac"
+        cli_name="macOS_64bit.tar.gz"
     elif [[ "$OSTYPE" == "win32" ]]; then
         platform_name="windows"
         flashtool_name="win"
+        cli_name="Windows_64bit.zip"
     else
         die "unkown platform name : $OSTYPE"
     fi
@@ -149,9 +154,10 @@ EOF
     --core_url=http://localhost:8000/coral-micro-$(git rev-parse HEAD).tar.bz2 \
     --core_sha256=$(sha256sum ${build_dir}/coral-micro-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
     --${flashtool_name}_flashtool_url=http://localhost:8000/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 \
-    --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1)
-    ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core update-index
-    ${SCRIPT_DIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli core install coral:coral_micro
+    --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
+    --arduino_cli_url=https://github.com/arduino/arduino-cli/releases/download/${cli_version}/arduino-cli_${cli_version}_${cli_name}
+    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core update-index
+    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core install coral:coral_micro
     if [[ ! -z ${build_sketches} ]]; then
         for sketch in ${ROOTDIR}/sketches/*; do
             for variant in coral_micro coral_micro_wifi; do
@@ -160,7 +166,7 @@ EOF
                     continue
                   fi
                 fi
-                ${ROOTDIR}/third_party/arduino-cli/${flashtool_name}/arduino-cli compile -b coral:coral_micro:${variant} ${sketch};
+                ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:coral_micro:${variant} ${sketch};
             done
         done
     fi

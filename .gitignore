@@ -5,6 +5,7 @@
 /build
 /build-*
 /docs/_build
+/third_party/arduino-cli/*
 .DS_Store
 .gdb_history
 __pycache__
