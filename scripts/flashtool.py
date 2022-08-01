@@ -165,6 +165,50 @@ def EnumerateCoralMicro():
             serial_list.append(matches.group(2).lower())
     return serial_list
 
+def FindFlashloaderSrec(build_dir, cached_files):
+    default_path = os.path.join(build_dir, 'libs', 'nxp', 'flashloader', 'image.srec')
+    if os.path.exists(default_path):
+        return default_path
+    if cached_files:
+        for f in cached_files:
+            if 'flashloader/image.srec' in f:
+                return f
+    else:
+        for root, dirs, files in os.walk(build_dir):
+            if os.path.split(root)[1] == "flashloader":
+                for file in files:
+                    if file == "image.srec":
+                        return os.path.join(root, file)
+    return None
+
+def MakeFlashloader(build_dir, cached_files, elftosb_path):
+    srec_path = FindFlashloaderSrec(build_dir, cached_files)
+    if not srec_path:
+        return None
+    return MakeFlashloaderFromSrec(srec_path, elftosb_path)
+
+def MakeFlashloaderFromSrec(srec_path, elftosb_path):
+    workdir = tempfile.TemporaryDirectory()
+    bdfile_path = os.path.join(workdir.name, 'flashloader.bd')
+    flashloader_path = os.path.join(workdir.name, 'ivt_flashloader.bin')
+    with open(bdfile_path, 'w') as bdfile:
+        bdfile.write(
+'''options {
+    flags = 0x00;
+    startAddress = 0x2024ff00;
+    ivtOffset = 0x0;
+    initialLoadSize = 0x2000;
+    entryPointAddress = 0x20250000;
+}
+sources {
+    elfFile = extern(0);
+}
+section (0) {
+}
+''')
+    subprocess.check_call([elftosb_path, '-f', 'imx', '-V', '-c', bdfile_path, '-o', flashloader_path, srec_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return (workdir, flashloader_path)
+
 def FindElfloader(build_dir, cached_files):
     default_path = os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
     if os.path.exists(default_path):
@@ -659,6 +703,9 @@ def main():
     parser.add_argument(
         '--elfloader_path', type=str, required=False,
         help=argparse.SUPPRESS)
+    parser.add_argument(
+        '--flashloader_path', type=str, required=False,
+        help=argparse.SUPPRESS)
 
     network_group = parser.add_argument_group('Board network settings')
     network_group.add_argument(
@@ -723,6 +770,7 @@ def main():
 
     args = parser.parse_args()
 
+    build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
     cached_files = None
     if args.cached:
         cached_files_path = os.path.join(build_dir, 'cached_files.txt')
@@ -731,12 +779,16 @@ def main():
                 cached_files = file_list.read().splitlines()
     else:
         cached_files = None
-    build_dir = os.path.abspath(args.build_dir) if args.build_dir else None
+    elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb' + exe_extension)
+    if not os.path.exists(elftosb_path):
+        print('%s does not exist' % path)
+        return
+
     blhost_path = os.path.join(root_dir, 'third_party', 'nxp', 'blhost', 'bin', platform_dir, 'blhost' + exe_extension)
-    flashloader_path = os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin')
     elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(build_dir, cached_files)
     elfloader_elf_path = os.path.join(os.path.dirname(elfloader_path), 'ELFLoader')
     toolchain_path = args.toolchain if args.toolchain else os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
+    (flashloader_workdir, flashloader_path) = MakeFlashloaderFromSrec(args.flashloader_path, elftosb_path) if args.flashloader_path else MakeFlashloader(build_dir, cached_files, elftosb_path)
     state_machine_args = {
         'blhost_path': blhost_path,
         'flashloader_path': flashloader_path,
@@ -798,7 +850,6 @@ def main():
             args.subapp if args.subapp else elf_name)) if unstripped_elf_path is None else unstripped_elf_path
 
     print('Finding all necessary files')
-    elftosb_path = os.path.join(root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb' + exe_extension)
     paths_to_check = [
         elf_path,
         unstripped_elf_path,

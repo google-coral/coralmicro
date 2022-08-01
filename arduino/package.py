@@ -87,8 +87,6 @@ def CreateFlashtoolExe(core_out_dir, root_dir):
         os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-objdump' + exe_extension) + pyinstaller_separator + os.path.join('third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
         '--add-binary',
         os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-strip' + exe_extension) + pyinstaller_separator + os.path.join('third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin'),
-        '--add-binary',
-        os.path.join(root_dir, 'third_party', 'nxp', 'flashloader', 'ivt_flashloader.bin') + pyinstaller_separator + os.path.join('third_party', 'nxp', 'flashloader'),
         '--hidden-import', 'progress.bar',
         '--hidden-import', 'progress',
         '--hidden-import', 'hexformat',
@@ -328,7 +326,7 @@ def core_main(args, **kwargs):
         build_dir = os.path.join(tmpdir, 'build')
         os.makedirs(build_dir)
         subprocess.check_call(['cmake', root_dir, '-DCORAL_MICRO_ARDUINO=1', '-G', 'Ninja'], cwd=build_dir)
-        subprocess.check_call(['ninja', '-C', build_dir, 'bundling_target_libs_arduino_coral_micro', 'bundling_target_libs_arduino_coral_micro_wifi', 'ELFLoader'])
+        subprocess.check_call(['ninja', '-C', build_dir, 'bundling_target_libs_arduino_coral_micro', 'bundling_target_libs_arduino_coral_micro_wifi', 'ELFLoader', 'flashloader'])
         for variant in ['coral_micro', 'coral_micro_wifi']:
             libs_dir = os.path.join(core_out_dir, 'variants', variant, 'libs')
             os.makedirs(libs_dir, exist_ok=True)
@@ -356,8 +354,9 @@ def core_main(args, **kwargs):
 
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'coral_micro')
         os.makedirs(bootloader_dir)
-        shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'), bootloader_dir)
-        shutil.copy(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'), bootloader_dir)
+        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'), os.path.join(bootloader_dir, 'elfloader.srec'))
+        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'), os.path.join(bootloader_dir, 'ELFLoader'))
+        shutil.copyfile(os.path.join(build_dir, 'libs', 'nxp', 'flashloader', 'image.srec'), os.path.join(bootloader_dir, 'flashloader.srec'))
 
         # tbz2 everything
         tar_path = os.path.join(args.output_dir, 'coral-micro-%s.tar.bz2' % git_revision)
