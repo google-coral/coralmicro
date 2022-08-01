@@ -72,7 +72,6 @@ bool MkdirOrExists(const char* path) {
   return (ret == LFS_ERR_OK || ret == LFS_ERR_EXIST);
 }
 
-}  // namespace
 void Main() {
   printf("Begin filesystem example\r\n");
   PrintFilesystemContents();
@@ -152,7 +151,9 @@ void Main() {
   printf("End filesystem example\r\n");
 }
 
+}  // namespace
 }  // namespace coralmicro
+
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();

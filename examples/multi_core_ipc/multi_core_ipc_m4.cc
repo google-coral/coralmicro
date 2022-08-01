@@ -21,6 +21,8 @@
 // and toggles the user LED based on the messages received.
 
 namespace coralmicro {
+namespace {
+
 void HandleM7Message(const uint8_t data[kIpcMessageBufferDataSize]) {
   const auto* msg = reinterpret_cast<const ExampleAppMessage*>(data);
   if (msg->type == ExampleMessageType::kLedStatus) {
@@ -35,6 +37,7 @@ void HandleM7Message(const uint8_t data[kIpcMessageBufferDataSize]) {
   }
 }
 
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

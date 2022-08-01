@@ -40,6 +40,8 @@
 // }
 
 namespace coralmicro {
+namespace {
+
 void SerialNumber(struct jsonrpc_request* r) {
   auto serial = utils::GetSerialNumber();
   jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", serial.size(),
@@ -79,6 +81,7 @@ void Main() {
   printf("RPC server ready\r\n");
 }
 
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

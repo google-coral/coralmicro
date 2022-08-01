@@ -31,6 +31,7 @@
 
 // [start-sphinx-snippet:detect-image]
 namespace coralmicro {
+namespace {
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
 constexpr char kImagePath[] = "/examples/detect_image/cat_300x300.rgb";
@@ -95,9 +96,9 @@ void Main() {
   }
 
   auto results = tensorflow::GetDetectionResults(&interpreter, 0.6, 3);
-  printf("%s\r\n",
-         tensorflow::FormatDetectionOutput(results).c_str());
+  printf("%s\r\n", tensorflow::FormatDetectionOutput(results).c_str());
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

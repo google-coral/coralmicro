@@ -29,6 +29,7 @@
 
 namespace coralmicro {
 namespace {
+
 constexpr char kIndexFileName[] = "/coral_micro_camera.html";
 constexpr char kCameraStreamUrlPrefix[] = "/camera_stream";
 

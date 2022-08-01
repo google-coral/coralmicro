@@ -45,6 +45,7 @@ python3 scripts/flashtool.py -b build -e curl --subapp curl_wifi \
         --wifi_ssid network-name --wifi_psk network-password
 */
 namespace coralmicro {
+namespace {
 struct DnsCallbackArg {
   SemaphoreHandle_t sema;
   const char* hostname;
@@ -152,6 +153,7 @@ void Main() {
   curl_global_cleanup();
   printf("Done.\r\n");
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

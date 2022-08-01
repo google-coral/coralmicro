@@ -25,6 +25,8 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
 namespace coralmicro {
+namespace {
+
 constexpr int kTensorArenaSize = 1 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr int kNumDmaBuffers = 2;
@@ -172,6 +174,7 @@ void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
   }
 }
 
+} // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

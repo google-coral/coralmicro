@@ -33,6 +33,7 @@
 #endif  // defined(CAMERA_STREAMING_WIFI)
 
 namespace coralmicro {
+namespace {
 using testlib::JsonRpcGetBooleanParam;
 using testlib::JsonRpcGetIntegerParam;
 using testlib::JsonRpcGetStringParam;
@@ -72,7 +73,6 @@ std::optional<CameraRotation> CheckCameraRotation(int rotation) {
 }
 
 void GetImageFromCamera(struct jsonrpc_request* request) {
-
   int width;
   if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
 
@@ -190,6 +190,7 @@ void Main() {
   UseHttpServer(new JsonRpcHttpServer);
   vTaskSuspend(nullptr);
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

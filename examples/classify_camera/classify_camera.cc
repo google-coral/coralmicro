@@ -48,6 +48,7 @@
 // }
 
 namespace coralmicro {
+namespace {
 constexpr char kModelPath[] = "/models/mnv2_324_quant_bayered_edgetpu.tflite";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
@@ -146,6 +147,7 @@ void Main() {
   printf("Classification server ready!\r\n");
   vTaskSuspend(nullptr);
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

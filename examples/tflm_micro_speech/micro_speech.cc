@@ -30,6 +30,7 @@
 // https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech
 
 namespace coralmicro {
+namespace {
 constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
 
 constexpr int kNumDmaBuffers = 10;
@@ -69,6 +70,7 @@ int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
     loop();
   }
 }
+} // namespace
 }  // namespace coralmicro
 
 // From audio_provider.h

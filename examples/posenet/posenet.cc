@@ -26,6 +26,7 @@
 // Runs pose estimation using PoseNet, running on the Edge TPU.
 // Scores and keypoint data is printed to the serial console.
 namespace coralmicro {
+namespace {
 
 constexpr int kModelArenaSize = 1 * 1024 * 1024;
 constexpr int kExtraArenaSize = 1 * 1024 * 1024;
@@ -121,6 +122,8 @@ void Main() {
   }
   CameraTask::GetSingleton()->SetPower(false);
 }
+
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

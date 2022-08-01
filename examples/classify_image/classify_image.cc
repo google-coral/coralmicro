@@ -31,6 +31,7 @@
 
 // [start-sphinx-snippet:classify-image]
 namespace coralmicro {
+namespace {
 constexpr char kModelPath[] =
     "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
 constexpr char kImagePath[] = "/examples/classify_image/cat_224x224.rgb";
@@ -98,6 +99,7 @@ void Main() {
   for (auto& result : results)
     printf("Label ID: %d Score: %f\r\n", result.id, result.score);
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

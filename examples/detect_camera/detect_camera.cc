@@ -54,6 +54,7 @@
 // }
 
 namespace coralmicro {
+namespace {
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
 // An area of memory to use for input, output, and intermediate arrays.
@@ -155,6 +156,7 @@ void Main() {
   vTaskSuspend(nullptr);
 }
 
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

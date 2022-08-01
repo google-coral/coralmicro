@@ -27,6 +27,7 @@
 // shown in the serial terminal, such as http://10.10.10.1/hello.html
 
 namespace coralmicro {
+namespace {
 
 HttpServer::Content UriHandler(const char* path) {
   printf("Request received for %s\r\n", path);
@@ -53,6 +54,7 @@ void Main() {
   vTaskSuspend(nullptr);
 }
 
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

@@ -21,12 +21,15 @@
 // instructions to toggle the user LED.
 
 namespace coralmicro {
+namespace {
+
 void HandleM4Message(const uint8_t data[kIpcMessageBufferDataSize]) {
   const auto* msg = reinterpret_cast<const ExampleAppMessage*>(data);
   if (msg->type == ExampleMessageType::kAck) {
     printf("[M7] ACK received from M4\r\n");
   }
 }
+
 [[noreturn]] void Main() {
   auto* ipc = IpcM7::GetSingleton();
   ipc->RegisterAppMessageHandler(HandleM4Message);
@@ -50,6 +53,7 @@ void HandleM4Message(const uint8_t data[kIpcMessageBufferDataSize]) {
   }
 }
 
+} // namespace
 }  // namespace coralmicro
 
 extern "C" [[noreturn]] void app_main(void* param) {

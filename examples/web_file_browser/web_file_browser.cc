@@ -31,6 +31,8 @@
 // curl commands.
 
 namespace coralmicro {
+namespace {
+
 constexpr char kUrlPrefix[] = "/fs/";
 
 void RemoveDuplicateChar(std::string& s, char ch) {
@@ -198,6 +200,7 @@ void Main() {
   vTaskSuspend(nullptr);
 }
 
+} // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
