@@ -21,15 +21,26 @@
 
 namespace coralmicro {
 
+// Represents reset stats.
 struct ResetStats {
+  // Reset reason, could hold kSRC_M7CoreWdogResetFlag or kSRC_M7CoreM7LockUpResetFlag.
   uint32_t reset_reason;
+  // Number of watchdog resets.
   uint32_t watchdog_resets;
+  // Number of lockup resets.
   uint32_t lockup_resets;
 };
 
+// Reset the board to bootloader mode.
 void ResetToBootloader();
+
+// Reset the board to flash mode.
 void ResetToFlash();
-void ResetStoreReason();
+
+// Stores the current reset stats.
+void ResetStoreStats();
+
+// Gets the current reset stats.
 ResetStats ResetGetStats();
 
 }  // namespace coralmicro

@@ -74,7 +74,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
                          bool init_console_rx) {
   BOARD_InitHardware(true);
   SEMA4_Init(SEMA4);
-  coralmicro::ResetStoreReason();
+  coralmicro::ResetStoreStats();
   coralmicro::TimerInit();
   coralmicro::GpioInit();
   coralmicro::IpcM7::GetSingleton()->Init();

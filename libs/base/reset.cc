@@ -36,7 +36,7 @@ void ResetToBootloader() {
 
 void ResetToFlash() { SNVS->LPCR |= SNVS_LPCR_TOP_MASK; }
 
-void ResetStoreReason() {
+void ResetStoreStats() {
   uint32_t watchdog_trip_count, lockup_count;
   reset_stats.reset_reason = SRC_GetResetStatusFlags(SRC);
   SRC_ClearGlobalSystemResetStatus(SRC, 0xFFFFFFFF);
