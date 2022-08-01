@@ -16,16 +16,21 @@
 
 #include "libs/base/led.h"
 
+#include <algorithm>
+
 #include "libs/base/gpio.h"
 #include "libs/base/pwm.h"
 
 namespace coralmicro {
 
 bool LedSet(Led led, bool enable) {
-  return LedSet(led, enable, enable ? kLedFullyOn : kLedFullyOff);
+  return LedSetBrightness(led, enable ? kLedFullyOn : kLedFullyOff);
 }
 
-bool LedSet(Led led, bool enable, unsigned int brightness) {
+bool LedSetBrightness(Led led, int brightness) {
+  brightness = std::clamp(brightness, kLedFullyOff, kLedFullyOn);
+  bool enable = brightness > kLedFullyOff;
+
   bool ret = true;
   switch (led) {
     case Led::kStatus:
@@ -41,9 +46,6 @@ bool LedSet(Led led, bool enable, unsigned int brightness) {
         printf("TPU LED requires TPU power to be enabled.\r\n");
         ret = false;
         break;
-      }
-      if (brightness > kLedFullyOn) {
-        brightness = kLedFullyOff;
       }
       coralmicro::PwmPinConfig pin_a_config;
       pin_a_config.duty_cycle = brightness;

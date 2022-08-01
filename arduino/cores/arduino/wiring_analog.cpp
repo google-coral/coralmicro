@@ -92,8 +92,8 @@ void analogWrite(pin_size_t pinNumber, int value) {
             analogWriteDAC(pinNumber, value);
             return;
         case PIN_LED_TPU:
-            coralmicro::LedSet(coralmicro::Led::kTpu, true,
-                               map(value, 0, 255, coralmicro::kLedFullyOff,
+            coralmicro::LedSetBrightness(coralmicro::Led::kTpu,
+                map(value, 0, 255, coralmicro::kLedFullyOff,
                                    coralmicro::kLedFullyOn));
             return;
         default:

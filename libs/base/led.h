@@ -30,10 +30,10 @@ enum class Led {
 };
 
 // Fully-on brightness for `Set(led, enable, brightness)`
-inline constexpr unsigned int kLedFullyOn = 100;
+inline constexpr int kLedFullyOn = 100;
 
 // Fully-off brightness for `Set(led, enable, brightness)`
-inline constexpr unsigned int kLedFullyOff = 0;
+inline constexpr int kLedFullyOff = 0;
 
 // Turns an LED on or off.
 //
@@ -45,10 +45,9 @@ bool LedSet(Led led, bool enable);
 // Turns an LED on or off with brightness setting.
 //
 // @param led The LED to enable/disable.
-// @param enable True turns the LED on, false turns it off.
 // @param brightness The LED brightness, from 0 to 100.
 // @returns True upon success, false otherwise.
-bool LedSet(Led led, bool enable, unsigned int brightness);
+bool LedSetBrightness(Led led, int brightness);
 
 }  // namespace coralmicro
 
