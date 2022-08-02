@@ -100,7 +100,8 @@ void elfloader_recv(const uint8_t *buffer, uint32_t length) {
           // the Python side if possible.
           auto dir = coralmicro::LfsDirname(elfloader_recv_path);
           coralmicro::LfsMakeDirs(dir.c_str());
-          lfs_file_open(Lfs(), &file_handle, elfloader_recv_path, LFS_O_TRUNC | LFS_O_CREAT | LFS_O_RDWR);
+          lfs_file_open(Lfs(), &file_handle, elfloader_recv_path,
+                        LFS_O_TRUNC | LFS_O_CREAT | LFS_O_RDWR);
           free(elfloader_recv_path);
           elfloader_recv_path = nullptr;
         } break;
@@ -197,10 +198,8 @@ void elfloader_main(void *param) {
     elf_size = coralmicro::LfsSize("/default.elf");
     if (elf_size != -1) {
       application_elf = std::make_unique<uint8_t[]>(elf_size);
-      if (coralmicro::LfsReadFile(
-              "/default.elf",
-              application_elf.get(),
-              elf_size) != static_cast<size_t>(elf_size)) {
+      if (coralmicro::LfsReadFile("/default.elf", application_elf.get(),
+                                  elf_size) != static_cast<size_t>(elf_size)) {
         application_elf.reset();
       }
     }

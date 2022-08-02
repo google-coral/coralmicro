@@ -29,8 +29,8 @@
 #include "libs/pmic/pmic.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/rpc/rpc_utils.h"
-#include "libs/tpu/edgetpu_task.h"
 #include "libs/testlib/test_lib.h"
+#include "libs/tpu/edgetpu_task.h"
 #include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -669,8 +669,8 @@ void FuseMACAddress(struct jsonrpc_request* request) {
 void ReadMACAddress(struct jsonrpc_request* request) {
   auto mac = coralmicro::EthernetGetMacAddress();
   char mac_str[255];
-  snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
-           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0],
+           mac[1], mac[2], mac[3], mac[4], mac[5]);
   jsonrpc_return_success(request, "{%Q:%Q}", "address", mac_str);
 }
 }  // namespace

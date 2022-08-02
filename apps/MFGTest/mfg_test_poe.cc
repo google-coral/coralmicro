@@ -46,12 +46,10 @@ void EthGetIP(struct jsonrpc_request* request) {
 
 void EthWritePhy(struct jsonrpc_request* request) {
   int reg;
-  if (!coralmicro::JsonRpcGetIntegerParam(request, "reg", &reg))
-    return;
+  if (!coralmicro::JsonRpcGetIntegerParam(request, "reg", &reg)) return;
 
   int val;
-  if (!coralmicro::JsonRpcGetIntegerParam(request, "val", &val))
-    return;
+  if (!coralmicro::JsonRpcGetIntegerParam(request, "val", &val)) return;
 
   status_t status = coralmicro::EthernetPhyWrite(reg, val);
   if (status != kStatus_Success) {

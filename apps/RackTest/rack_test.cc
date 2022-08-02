@@ -60,8 +60,7 @@ void HandleAppMessage(const uint8_t data[coralmicro::kIpcMessageBufferDataSize],
 
 void M4XOR(struct jsonrpc_request* request) {
   std::string value_string;
-  if (!coralmicro::JsonRpcGetStringParam(request, "value",
-                                                  &value_string))
+  if (!coralmicro::JsonRpcGetStringParam(request, "value", &value_string))
     return;
 
   if (!coralmicro::IpcM7::GetSingleton()->M4IsAlive(1000 /*ms*/)) {
@@ -126,10 +125,10 @@ void GetFrame(struct jsonrpc_request* request) {
   std::string rpc_format;
   bool rpc_width_valid =
       coralmicro::JsonRpcGetIntegerParam(request, "width", &rpc_width);
-  bool rpc_height_valid = coralmicro::JsonRpcGetIntegerParam(
-      request, "height", &rpc_height);
-  bool rpc_format_valid = coralmicro::JsonRpcGetStringParam(
-      request, "format", &rpc_format);
+  bool rpc_height_valid =
+      coralmicro::JsonRpcGetIntegerParam(request, "height", &rpc_height);
+  bool rpc_format_valid =
+      coralmicro::JsonRpcGetStringParam(request, "format", &rpc_format);
 
   int width = rpc_width_valid ? rpc_width : coralmicro::CameraTask::kWidth;
   int height = rpc_height_valid ? rpc_height : coralmicro::CameraTask::kHeight;
