@@ -25,5 +25,4 @@ add_executable_m7(tflm_micro_speech
 
 target_link_libraries(tflm_micro_speech
     libs_base-m7_freertos
-    libs_tensorflow-m7
 )

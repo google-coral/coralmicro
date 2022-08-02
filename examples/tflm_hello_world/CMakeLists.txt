@@ -19,5 +19,4 @@ add_executable_m7(tflm_hello_world
 
 target_link_libraries(tflm_hello_world
     libs_base-m7_freertos
-    libs_tensorflow-m7
 )

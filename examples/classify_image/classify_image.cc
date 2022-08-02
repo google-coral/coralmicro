@@ -17,6 +17,7 @@
 
 #include "libs/base/filesystem.h"
 #include "libs/tensorflow/classification.h"
+#include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -36,9 +37,7 @@ constexpr char kModelPath[] =
     "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
 constexpr char kImagePath[] = "/examples/classify_image/cat_224x224.rgb";
 constexpr int kTensorArenaSize = 1024 * 1024;
-struct TensorArena {
-  alignas(16) uint8_t data[kTensorArenaSize];
-};
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void Main() {
   std::vector<uint8_t> model;
@@ -64,10 +63,8 @@ void Main() {
   tflite::MicroMutableOpResolver<1> resolver;
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
-  // As an alternative check STATIC_TENSOR_ARENA_IN_SDRAM macro.
-  auto tensor_arena = std::make_unique<TensorArena>();
   tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()), resolver,
-                                       tensor_arena->data, kTensorArenaSize,
+                                       tensor_arena, kTensorArenaSize,
                                        &error_reporter);
   //! [edgetpu-context] End snippet
   if (interpreter.AllocateTensors() != kTfLiteOk) {

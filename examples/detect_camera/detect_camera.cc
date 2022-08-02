@@ -19,6 +19,7 @@
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/detection.h"
+#include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -59,8 +60,7 @@ constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
 // An area of memory to use for input, output, and intermediate arrays.
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
-uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
-__attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void DetectFromCamera(struct jsonrpc_request* r) {
   auto* interpreter =

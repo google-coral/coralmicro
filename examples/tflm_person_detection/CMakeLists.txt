@@ -23,5 +23,4 @@ add_executable_m7(tflm_person_detection
 
 target_link_libraries(tflm_person_detection
     libs_base-m7_freertos
-    libs_tensorflow-m7
 )
