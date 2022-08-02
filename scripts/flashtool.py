@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from pathlib import Path
-from progress.bar import Bar
+from progress.bar import Bar, Progress
 import argparse
 import contextlib
 import hexformat
@@ -33,6 +33,30 @@ import sys
 import tempfile
 import time
 import usb.core
+
+class ArduinoBar(Progress):
+    file = None
+    def __init__(self, *args, **kwargs):
+        super(ArduinoBar, self).__init__(*args, **kwargs)
+        self.last_percent = 0
+        print(f'Transferring {self.message}')
+        sys.stdout.flush()
+
+    def update(self):
+        progress_decile = int(self.percent / 10)
+        last_progress_decile = int(self.last_percent / 10)
+
+        if self.percent == 100.0:
+            print(f'{self.message} done')
+            sys.stdout.flush()
+            return
+
+        if progress_decile > last_progress_decile:
+            print(f'{self.message} {progress_decile}0%')
+            sys.stdout.flush()
+
+        self.last_percent = self.percent
+
 
 platform_dir = ''
 toolchain_dir = ''
@@ -553,16 +577,20 @@ def ElfloaderTransferData(h, data, target, bar=None):
     if bar:
         bar.finish()
 
-def StateProgramElfloader(elf_path, debug=False, serial_number=None):
+def StateProgramElfloader(elf_path, arduino, debug=False, serial_number=None):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         data = read_file(elf_path)
+        if not arduino:
+          bar = Bar(elf_path, max=len(data))
+        else:
+          bar = ArduinoBar(elf_path, max=len(data))
         ElfloaderTransferData(h, data, ELFLOADER_TARGET_RAM,
-                              bar=Bar(elf_path, max=len(data)))
+                              bar=bar)
         if not debug:
             return FlashtoolDone('Flashing to RAM is complete, your application should be executing.')
         return StateStartGdb
 
-def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None, program=True, data=True):
+def StateProgramDataFiles(elf_path, data_files, usb_ip_address, arduino, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None, program=True, data=True):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         if program and data:
             h.write(elfloader_msg_format())
@@ -592,9 +620,14 @@ def StateProgramDataFiles(elf_path, data_files, usb_ip_address, wifi_ssid=None, 
             else:
                 raise RuntimeError('src_file must be "str" or "bytes"')
 
+            if not arduino:
+              bar = Bar(target_file, max=len(data))
+            else:
+              bar = ArduinoBar(target_file, max=len(data))
+
             ElfloaderTransferData(h, target_file.encode(), ELFLOADER_TARGET_PATH)
             ElfloaderTransferData(h, data, ELFLOADER_TARGET_FILESYSTEM,
-                                  bar=Bar(target_file, max=len(data)))
+                                  bar=bar)
 
         return StateResetToFlash
 
@@ -908,6 +941,7 @@ def main():
         'toolchain_path': toolchain_path,
         'program': program,
         'data': data,
+        'arduino': args.arduino,
     }
 
     serial_number = os.getenv('CORAL_MICRO_SERIAL')
