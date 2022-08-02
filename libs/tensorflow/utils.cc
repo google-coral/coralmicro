@@ -20,8 +20,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/test_helpers.h"
 
-namespace coralmicro {
-namespace tensorflow {
+namespace coralmicro::tensorflow {
 
 bool ResizeImage(const ImageDims& in_dims, const uint8_t* uin,
                  const ImageDims& out_dims, uint8_t* uout) {
@@ -94,5 +93,4 @@ bool ResizeImage(const ImageDims& in_dims, const uint8_t* uin,
   return true;
 }
 
-}  // namespace tensorflow
-}  // namespace coralmicro
+}  // namespace coralmicro::tensorflow

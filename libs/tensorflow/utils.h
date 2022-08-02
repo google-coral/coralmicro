@@ -33,8 +33,7 @@
   static uint8_t name[size] __attribute__((aligned(16))) \
   __attribute__((section(".ocram_bss,\"aw\",%nobits @")))
 
-namespace coralmicro {
-namespace tensorflow {
+namespace coralmicro::tensorflow {
 
 // Represents the dimensions of an image.
 struct ImageDims {
@@ -46,9 +45,12 @@ struct ImageDims {
   int depth;
 };
 
+// Operator == to compares 2 ImageDims object.
 inline bool operator==(const ImageDims& a, const ImageDims& b) {
   return a.height == b.height && a.width == b.width && a.depth == b.depth;
 }
+
+// Gets an ImageDims's size.
 inline int ImageSize(const ImageDims& dims) {
   return dims.height * dims.width * dims.depth;
 }
@@ -62,6 +64,8 @@ bool ResizeImage(const ImageDims& in_dims, const uint8_t* uin,
                  const ImageDims& out_dims, uint8_t* uout);
 
 // Gets the size of a tensor.
+// @param tensor The tensor to get the size.
+// @return The size of the tensor.
 inline int TensorSize(TfLiteTensor* tensor) {
   int size = 1;
   for (int i = 0; i < tensor->dims->size; ++i) {
@@ -72,17 +76,27 @@ inline int TensorSize(TfLiteTensor* tensor) {
 
 // Dequantizes data.
 //
-// You should instead use `DequantizeTensor()`.
+// @param tensor_size The tensor's size.
+// @param tensor_data The tensor's data.
+// @param dequant_data The buffer to return the dequantized data to.
+// @param scale The scale of the input tensor.
+// @param zero_point The zero point of the input tensor.
+// @tparam I The data type of tensor_data.
+// @tparam O The desired data type of the dequantized data.
+// Note: You should instead use `DequantizeTensor()`.
 template <typename I, typename O>
-void Dequantize(int count, I* tensor_data, O* dequant_data, float scale,
+void Dequantize(int tensor_size, I* tensor_data, O* dequant_data, float scale,
                 float zero_point) {
-  for (int i = 0; i < count; ++i) {
+  for (int i = 0; i < tensor_size; ++i) {
     dequant_data[i] = scale * (tensor_data[i] - zero_point);
   }
 }
 
 // Dequantizes a tensor.
 //
+// @param tensor The tensor to dequantize.
+// @return A vector of quantized data.
+// @tparam T The desired output type of the dequantized data.
 // When using a model adapter API such as `GetClassificationResults()`,
 // this dequantization is done for you.
 template <typename T>
@@ -103,7 +117,6 @@ std::vector<T> DequantizeTensor(TfLiteTensor* tensor) {
 
   return result;
 }
-}  // namespace tensorflow
-}  // namespace coralmicro
+}  // namespace coralmicro::tensorflow
 
 #endif  // LIBS_TENSORFLOW_UTILS_H_
