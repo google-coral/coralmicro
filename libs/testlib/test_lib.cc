@@ -548,6 +548,16 @@ void PosenetStressRun(struct jsonrpc_request* request) {
   int iterations;
   if (!coralmicro::JsonRpcGetIntegerParam(request, "iterations", &iterations))
     return;
+  std::string model_resource_name;
+  if (!JsonRpcGetStringParam(request, "model_resource_name",
+                             &model_resource_name))
+    return;
+
+  const auto* model_resource = GetResource(model_resource_name);
+  if (!model_resource) {
+    jsonrpc_return_error(request, -1, "missing model resource", nullptr);
+    return;
+  }
 
   // Turn on the TPU and get it's context.
   auto tpu_context = coralmicro::EdgeTpuManager::GetSingleton()->OpenDevice(
@@ -557,18 +567,7 @@ void PosenetStressRun(struct jsonrpc_request* request) {
     jsonrpc_return_error(request, -1, "Failed to get tpu context", nullptr);
     return;
   }
-
-  constexpr char kModelPath[] =
-      "/models/"
-      "posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
-  // Reads the model and checks version.
-  std::vector<uint8_t> posenet_tflite;
-  if (!coralmicro::LfsReadFile(kModelPath, &posenet_tflite)) {
-    printf("ERROR: Failed to get EdgeTpu context\r\n");
-    jsonrpc_return_error(request, -1, "Failed to get posenet model", nullptr);
-    return;
-  }
-  auto* model = tflite::GetModel(posenet_tflite.data());
+  auto* model = tflite::GetModel(model_resource->data());
 
   // Creates a micro interpreter.
   tflite::MicroMutableOpResolver<2> resolver;
