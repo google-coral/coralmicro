@@ -17,14 +17,16 @@
 #ifndef LIBS_CDC_EEM_CDC_EEM_H_
 #define LIBS_CDC_EEM_CDC_EEM_H_
 
+#include <map>
+
+// clang-format off
 #include "libs/usb/descriptors.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/netifapi.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
-#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h" // Must be above other class headers.
+#include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
+#include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"  // Must be above other class headers.
 #include "libs/nxp/rt1176-sdk/usb_device_cdc_eem.h"
-
-#include <map>
+// clang-format on
 
 namespace coralmicro {
 

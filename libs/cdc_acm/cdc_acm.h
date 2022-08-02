@@ -20,6 +20,7 @@
 #include <functional>
 #include <map>
 
+// clang-format off
 #include "libs/usb/descriptors.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
@@ -27,6 +28,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"  // Must be above other class headers.
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_cdc_acm.h"
+// clang-format on
 
 typedef struct _usb_host_cdc_line_coding_struct {
   uint32_t dwDTERate;  /*!< Data terminal rate, in bits per second*/
