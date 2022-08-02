@@ -1,0 +1,49 @@
+The Coral Dev Board Micro software uses third party libraries, some of which
+are included in this folder (third_party), some of which are pulled from
+other GitHub repos, and some which are downloaded at build time. Details of
+the licenses are included in the individual folders.
+
+Bundled in this repo:
+* elftosb (Custom)
+* wlan-firmware (Custom)
+
+Submodule to another google-coral repo:
+* a71ch (Custom)
+* blhost (BSD-3)
+* rt1176-sdk (BSD-3)
+
+Submodule to external repo:
+* ArduinoCore-API (LGPL 2.1)
+* CMSIS (Apache 2.0)
+* coremark (Apache 2.0)
+* curl (Custom)
+* cyw-bt-patch (Custom)
+* flatbuffer (Apache 2.0)
+* gemmlowp (Apache 2.0)
+* kissfft (BSD-3)
+* mjson (BSD-3)
+* FreeRTOS_helpers (Custom)
+* FreeRTOS-Kernel (MIT)
+* ruy (Apache 2.0)
+* tflite-micro (Apache 2.0)
+
+Imported at build time:
+* arduino-cli (GPL v3)
+* GNU Toolchain (GPL v3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
