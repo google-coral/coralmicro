@@ -29,7 +29,7 @@ namespace coralmicro {
 class Ipc {
  public:
   // Defines the function type that processes
-  // IPC messages which is used as input for RegisterAppMessageHandler()."
+  // IPC messages which is used as input for RegisterAppMessageHandler().
   //
   // @param data The message received. Must be a byte array of size
   // kIpcMessageBufferDataSize.

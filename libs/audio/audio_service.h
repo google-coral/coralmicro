@@ -30,6 +30,7 @@
 namespace coralmicro {
 
 template <typename T>
+// @cond
 class FreeRTOSStreamBuffer {
  public:
   FreeRTOSStreamBuffer() : handle_(nullptr) {}
@@ -81,8 +82,9 @@ class FreeRTOSStreamBuffer {
  private:
   StreamBufferHandle_t handle_;
 };
+// @endcond
 
-// Class to read audio samples from the microphone in real time.
+// Class to read audio samples from the on-board PDM microphone in real time.
 //
 // Example:
 //
@@ -107,20 +109,48 @@ class FreeRTOSStreamBuffer {
 //
 class AudioReader {
  public:
+  // Constructor for an AudioReader object.
+  // Calls Enable() from driver to start receiving audio.
+  //
+  // @param driver Pointer to the AudioDriver to be used by the audio reader.
+  // @param config Configuration for driver.
   AudioReader(AudioDriver* driver, const AudioDriverConfig& config);
+  // Calls Disable() from driver.
   ~AudioReader();
 
+  // Gets the buffer that the AudioService populates with samples.
+  //
+  // @return Buffer containing samples.
   const std::vector<int32_t>& Buffer() const { return buffer_; }
 
+  // Fills the audio buffer audio data from the microphone of size sample_size
+  // defined in config.
+  //
+  // @return Size of received data.
   size_t FillBuffer();
 
+  // Discards a minimum amount of samples.
+  // Drop is used to avoid distortion caused when connecting to audio
+  // for the first time.
+  //
+  // @param min_count  Minimum number of samples to drop.
+  // @return Number of samples dropped.
   int Drop(int min_count) {
     int count = 0;
     while (count < min_count) count += FillBuffer();
     return count;
   }
-
+  // Gets the amount of times that the buffer did not receive all the samples
+  // that were sent.
+  //
+  // @return The amount of times that the buffer did not receive all the samples
+  // that were sent.
   int OverflowCount() const { return overflow_count_; }
+  // Gets the amount of times that the buffer did not store all the samples that
+  // were received.
+  //
+  // @return The amount of times that the buffer did not store all the samples
+  // that were received.
   int UnderflowCount() const { return underflow_count_; }
 
  private:
@@ -137,7 +167,7 @@ class AudioReader {
 };
 
 // Class to get audio samples from the microphone. Each client must provide
-// the `AudioServiceCallback` function to continuously receive new microphone
+// the `AudioService::Callback` function to continuously receive new microphone
 // samples. Internally microphone is only enabled when there is at least one
 // client, otherwise microphone is completely disabled (no power is consumed).
 //
@@ -161,18 +191,54 @@ class AudioReader {
 //
 class AudioService {
  public:
+  // Defines the function type that processes
+  // new audio samples. To add a Callback use `AddCallback()`.
+  // Callback is called automatically when running AudioService by
+  // a dedicated FreeRTOS task.
+  //
+  // @param ctx Extra parameters for the callback function.
+  // @param samples Pointer to the audio samples.
+  // @param num_samples Number of audio samples.
+  // @return True if the callback should be continued to be called,
+  // false otherwise.
   using Callback = bool (*)(void* ctx, const int32_t* samples,
                             size_t num_samples);
 
+  // Constructor for an AudioService object.
+  //
+  // @param driver Pointer to the AudioDriver to be used by the audio reader.
+  // @param config Configuration for driver.
+  // @param task_priority Priority for internal FreeRTOS task that
+  // dispatches audio samples to registered callbacks.
+  // @param drop_first_samples_ms Amount, in milliseconds,
+  // of audio to drop at the start of recording.
   AudioService(AudioDriver* driver, const AudioDriverConfig& config,
                int task_priority, int drop_first_samples_ms);
+  //@cond
   AudioService(const AudioService&) = delete;
   AudioService& operator=(const AudioService&) = delete;
   ~AudioService();
+  //@endcond
 
+  // Adds a CallBack function, that defines how to process audio, to a list of
+  // callback methods that are continuously called on by a dedicated FreeRTOS
+  // task.
+  //
+  // @param ctx Extra params for fn.
+  // @param fn the Callback function to be registered.
+  // @return id of the callback function, fn, to be registered.
+  // This id is used as the param for RemoveCallBack() to remove
+  // the specific callback function.
   int AddCallback(void* ctx, Callback fn);
+  // Removes already registered callback.
+  //
+  // @param id Id of the CallBack function to remove.
+  // @return True if successfully removed, false otherwise.
   bool RemoveCallback(int id);
 
+  // Gets the audio driver config.
+  //
+  // @return the audio driver config.
   const AudioDriverConfig& Config() const { return config_; }
 
  private:
@@ -220,13 +286,26 @@ class AudioService {
 //
 class LatestSamples {
  public:
+  // Constructor for LatestSamples object.
+  //
+  // @param num_samples Fixed number of samples to access.
   explicit LatestSamples(size_t num_samples);
+  // @cond
   LatestSamples(const LatestSamples&) = delete;
   LatestSamples& operator=(const LatestSamples&) = delete;
   ~LatestSamples();
+  // @endcond
 
+  // Gets the size of the samples to be accessed.
+  //
+  // @return The size of the samples to be accessed.
   size_t NumSamples() const { return samples_.size(); };
 
+  // Saves the latest samples which can be accessed with
+  // 'AccessLatestSamples()'.
+  //
+  // @param samples Pointer to the audio samples.
+  // @param num_samples Number of audio samples.
   void Append(const int32_t* samples, size_t num_samples) {
     MutexLock lock(mutex_);
     for (size_t i = 0; i < num_samples; ++i)
@@ -234,12 +313,20 @@ class LatestSamples {
     pos_ = (pos_ + num_samples) % samples_.size();
   }
 
+  // Accesses the latest samples without a copy and applies a function to them.
+  //
+  // @param f Function to apply to samples.
+  // Function params are: std::vector<int32_t> samples (the latest samples),
+  // size_t pos (starting index of samples)
   template <typename F>
   void AccessLatestSamples(F f) const {
     MutexLock lock(mutex_);
     f(samples_, pos_);
   }
 
+  // Creates a copy of the latest samples.
+  //
+  // @return Copy of the latest samples.
   std::vector<int32_t> CopyLatestSamples() const {
     MutexLock lock(mutex_);
     std::vector<int32_t> copy(samples_);
