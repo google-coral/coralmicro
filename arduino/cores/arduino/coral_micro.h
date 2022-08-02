@@ -24,4 +24,4 @@
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-#endif //  CORAL_MICRO_H_
+#endif  //  CORAL_MICRO_H_

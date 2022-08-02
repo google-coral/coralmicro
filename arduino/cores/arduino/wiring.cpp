@@ -15,30 +15,25 @@
  */
 
 #include "Arduino.h"
-#include "wiring_private.h"
-
 #include "libs/base/timer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_clock.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.h"
+#include "wiring_private.h"
 
-void wiringInit() {
-    wiringAnalogInit();
-}
+void wiringInit() { wiringAnalogInit(); }
 
-void delay(unsigned long ms) {
-    vTaskDelay(pdMS_TO_TICKS(ms));
-}
+void delay(unsigned long ms) { vTaskDelay(pdMS_TO_TICKS(ms)); }
 
 void delayMicroseconds(unsigned int us) {
-    SDK_DelayAtLeastUs(us, CLOCK_GetFreq(kCLOCK_CpuClk));
+  SDK_DelayAtLeastUs(us, CLOCK_GetFreq(kCLOCK_CpuClk));
 }
 
 unsigned long millis() {
-    return static_cast<unsigned long>(coralmicro::TimerMillis());
+  return static_cast<unsigned long>(coralmicro::TimerMillis());
 }
 
 unsigned long micros() {
-    return static_cast<unsigned long>(coralmicro::TimerMicros());
+  return static_cast<unsigned long>(coralmicro::TimerMicros());
 }

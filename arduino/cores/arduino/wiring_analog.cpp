@@ -37,124 +37,117 @@ static AdcConfig Config_A0;
 static AdcConfig Config_A1;
 
 void wiringAnalogInit() {
-    coralmicro::PwmInit();
-    coralmicro::AdcInit(AdcDevice::kAdc1);
-    coralmicro::DacInit();
-    coralmicro::AdcCreateConfig(Config_A0, AdcDevice::kAdc1, 0, AdcSide::kB,
-                                false);
-    coralmicro::AdcCreateConfig(Config_A1, AdcDevice::kAdc1, 0, AdcSide::kA,
-                                false);
+  coralmicro::PwmInit();
+  coralmicro::AdcInit(AdcDevice::kAdc1);
+  coralmicro::DacInit();
+  coralmicro::AdcCreateConfig(Config_A0, AdcDevice::kAdc1, 0, AdcSide::kB,
+                              false);
+  coralmicro::AdcCreateConfig(Config_A1, AdcDevice::kAdc1, 0, AdcSide::kA,
+                              false);
 }
 
 const AdcConfig& pinToADCConfig(pin_size_t pinNumber) {
-    switch (pinNumber) {
-        case A0:
-            return Config_A0;
-        case A1:
-            return Config_A1;
-    }
-    assert(false);
+  switch (pinNumber) {
+    case A0:
+      return Config_A0;
+    case A1:
+      return Config_A1;
+  }
+  assert(false);
 }
 
 static void analogWriteDAC(pin_size_t pinNumber, int value) {
-    assert(pinNumber == DAC0);
-    int dac_shift = kDacFullResolutionBits - dac_resolution_bits;
-    int shift_value = dac_resolution_bits;
-    if (value) {
-        coralmicro::DacEnable(true);
-        coralmicro::DacWrite(value << dac_shift);
-    } else {
-        coralmicro::DacEnable(false);
-    }
+  assert(pinNumber == DAC0);
+  int dac_shift = kDacFullResolutionBits - dac_resolution_bits;
+  int shift_value = dac_resolution_bits;
+  if (value) {
+    coralmicro::DacEnable(true);
+    coralmicro::DacWrite(value << dac_shift);
+  } else {
+    coralmicro::DacEnable(false);
+  }
 }
 
 int analogRead(pin_size_t pinNumber) {
-    int adc_shift = kAdcFullResolutionBits - adc_resolution_bits;
-    const AdcConfig& config = pinToADCConfig(pinNumber);
-    return (coralmicro::AdcRead(config) >> adc_shift);
+  int adc_shift = kAdcFullResolutionBits - adc_resolution_bits;
+  const AdcConfig& config = pinToADCConfig(pinNumber);
+  return (coralmicro::AdcRead(config) >> adc_shift);
 }
 
 void analogReference(uint8_t mode) {}
 
 void analogWrite(pin_size_t pinNumber, int value) {
-    assert(value <= 255);
-    coralmicro::PwmPinSetting pwm_pin_setting;
-    switch (pinNumber) {
-        case A3:  // Pwm pin 10.
-            pwm_pin_setting =
-                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
-            break;
-        case A4:  // Pwm pin 9.
-            pwm_pin_setting =
-                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
-            break;
-        case DAC0:
-            analogWriteDAC(pinNumber, value);
-            return;
-        case PIN_LED_TPU:
-            coralmicro::LedSetBrightness(coralmicro::Led::kTpu,
-                map(value, 0, 255, coralmicro::kLedFullyOff,
-                                   coralmicro::kLedFullyOn));
-            return;
-        default:
-            assert(false);
-    }
-    coralmicro::PwmPinConfig pin_config{
-        /*duty_cycle=*/map(value, 0, 255, 0, 100),
-        /*frequency=*/1000,
-        /*pin_setting=*/pwm_pin_setting};
-    coralmicro::PwmEnable({pin_config});
+  assert(value <= 255);
+  coralmicro::PwmPinSetting pwm_pin_setting;
+  switch (pinNumber) {
+    case A3:  // Pwm pin 10.
+      pwm_pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
+      break;
+    case A4:  // Pwm pin 9.
+      pwm_pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
+      break;
+    case DAC0:
+      analogWriteDAC(pinNumber, value);
+      return;
+    case PIN_LED_TPU:
+      coralmicro::LedSetBrightness(coralmicro::Led::kTpu,
+                                   map(value, 0, 255, coralmicro::kLedFullyOff,
+                                       coralmicro::kLedFullyOn));
+      return;
+    default:
+      assert(false);
+  }
+  coralmicro::PwmPinConfig pin_config{/*duty_cycle=*/map(value, 0, 255, 0, 100),
+                                      /*frequency=*/1000,
+                                      /*pin_setting=*/pwm_pin_setting};
+  coralmicro::PwmEnable({pin_config});
 }
 
 void analogReadResolution(int bits) {
-    adc_resolution_bits = std::max(1, std::min(bits, kAdcFullResolutionBits));
+  adc_resolution_bits = std::max(1, std::min(bits, kAdcFullResolutionBits));
 }
 
 void analogWriteResolution(int bits) {
-    dac_resolution_bits = std::max(1, std::min(bits, kDacFullResolutionBits));
+  dac_resolution_bits = std::max(1, std::min(bits, kDacFullResolutionBits));
 }
 
 void tone(uint8_t pin, unsigned int frequency, unsigned long duration) {
-    coralmicro::PwmInit();
-    coralmicro::PwmPinSetting pwm_pin_setting;
-    switch (pin) {
-        case A4:  // Pwm pin 9.
-            pwm_pin_setting =
-                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
-            break;
-        case A3:  // Pwm pin 10.
-            pwm_pin_setting =
-                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
-            break;
-        default:
-            assert(false);
-    }
-    coralmicro::PwmPinConfig pin_config{/*duty_cycle=*/50,
-                                        /*frequency=*/frequency,
-                                        /*pin_setting=*/pwm_pin_setting};
-    coralmicro::PwmEnable({pin_config});
+  coralmicro::PwmInit();
+  coralmicro::PwmPinSetting pwm_pin_setting;
+  switch (pin) {
+    case A4:  // Pwm pin 9.
+      pwm_pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
+      break;
+    case A3:  // Pwm pin 10.
+      pwm_pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
+      break;
+    default:
+      assert(false);
+  }
+  coralmicro::PwmPinConfig pin_config{/*duty_cycle=*/50,
+                                      /*frequency=*/frequency,
+                                      /*pin_setting=*/pwm_pin_setting};
+  coralmicro::PwmEnable({pin_config});
 }
 
 // Via Arduino's API doc: If you want to play different pitches on multiple
 // pins, you need to call noTone() on one pin before calling tone() on the next
 // pin.
 void noTone(uint8_t pin) {
-    coralmicro::PwmInit();
-    coralmicro::PwmPinSetting pwm_pin_setting;
-    switch (pin) {
-        case A4:  // Pwm pin 9.
-            pwm_pin_setting =
-                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
-            break;
-        case A3:  // Pwm pin 10.
-            pwm_pin_setting =
-                coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
-            break;
-        default:
-            assert(false);
-    }
-    coralmicro::PwmPinConfig pin_config{/*duty_cycle=*/0,
-                                        /*frequency=*/0,
-                                        /*pin_setting=*/pwm_pin_setting};
-    coralmicro::PwmDisable({pin_config});
+  coralmicro::PwmInit();
+  coralmicro::PwmPinSetting pwm_pin_setting;
+  switch (pin) {
+    case A4:  // Pwm pin 9.
+      pwm_pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k9);
+      break;
+    case A3:  // Pwm pin 10.
+      pwm_pin_setting = coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
+      break;
+    default:
+      assert(false);
+  }
+  coralmicro::PwmPinConfig pin_config{/*duty_cycle=*/0,
+                                      /*frequency=*/0,
+                                      /*pin_setting=*/pwm_pin_setting};
+  coralmicro::PwmDisable({pin_config});
 }

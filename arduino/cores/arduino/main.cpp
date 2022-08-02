@@ -15,22 +15,22 @@
  */
 
 #include <Arduino.h>
-#include "wiring_private.h"
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "wiring_private.h"
 
 // Override this in variant.cpp
 extern void variantInit() __attribute__((weak));
 void variantInit() {}
 
 extern "C" void app_main(void *param) {
-    variantInit();
-    wiringInit();
-    setup();
-    while (true) {
-        loop();
-        portYIELD();
-    }
-    vTaskSuspend(NULL);
+  variantInit();
+  wiringInit();
+  setup();
+  while (true) {
+    loop();
+    portYIELD();
+  }
+  vTaskSuspend(NULL);
 }
