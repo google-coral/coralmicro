@@ -1,0 +1,54 @@
+Release Name: elftosb
+Release Version: 5.1.19
+Package License: LA_OPT_NXP_Software_License.htm - Production Use, Section 2.3 applies
+
+Host tools Source          Description: Source code for elftosb                                      
+                           Author: Freescale                                 
+                           License: Open Source - BSD-3-Clause               
+                           Format: source code                               
+                           Location: proj/elftosb                    
+
+Host tools - options       Description: Command line parsing utility         
+support                    Author: bradapp@enteract.com                      
+                           License: Open Source - MIT                        
+                           URL: http://www.bradapp.com                       
+                           Format: source code                               
+                           Location:
+                           proj/elftosb/common/options.h,                                           
+                           proj/elftosb/common/options.cpp
+
+Host tools - SHA-1         Description: Implementation of the SHA-1 algorithm
+                           Author: Dominik Reichl                            
+                           <dominik.reichl@t-online.de>                      
+                           License: Public Domain                            
+                           URL: http://www.dominik-reichl.de/                
+                           Format: source code                               
+                           Location:                                         
+                           proj/elftosb/common/SHA1.h,                                              
+                           proj/elftosb/common/SHA1.cpp                                             
+
+Host tools - Rijndael      Description: C++ interface to the Vincent Rijmen's
+                           Rijndael block cipher                             
+                           Author: Szymon Stefanek (stefanek@tin.it)         
+                           License: Public Domain                            
+                           Format: source code
+                           Location: 
+                           proj/elftosb/common/rijndael.h,                                              
+                           proj/elftosb/common/rijndael.cpp                                             
+
+Host tools - Flex          Description: Fast lexical analyzer generator.
+                           License: Open Source - BSD-2-Clause    
+                           URL: https://github.com/westes/flex                        
+                           Format: source code
+                           Location: 
+                           proj/elftosb/common/FlexLex.h                                             
+                                           
+mbedtls                    Description: Cryptographic and SSL/TLS Library    
+                           Author: ARM                                       
+                           License: Apache-2.0                               
+                           name: MBED TLS stack                              
+                           URL: https://tls.mbed.org/                    
+                           version: 2.3.0                                    
+                           Format: source code                               
+                           Location:                                         
+                           proj/elftosb/mbedtls
