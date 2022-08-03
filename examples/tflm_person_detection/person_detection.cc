@@ -38,7 +38,6 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
 
   bool person_detected = person_score > no_person_score;
   LedSet(coralmicro::Led::kUser, person_detected);
-  LedSet(coralmicro::Led::kStatus, person_detected);
 }
 
 namespace coralmicro {
