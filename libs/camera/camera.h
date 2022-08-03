@@ -50,6 +50,18 @@ enum class CameraTestPattern : uint8_t {
   kWalkingOnes = 0x11,
 };
 
+using CameraMotionDetectionCallback = void (*)(void* param);
+
+struct CameraMotionDetectionConfig {
+  CameraMotionDetectionCallback cb;
+  void* cb_param;
+  bool enable;
+  size_t x0;
+  size_t y0;
+  size_t x1;
+  size_t y1;
+};
+
 // @cond Do not generate docs
 inline constexpr char kCameraTaskName[] = "camera_task";
 
@@ -82,17 +94,6 @@ struct DiscardRequest {
   int count;
 };
 
-typedef void (*MotionDetectionCallback)(void* param);
-struct MotionDetectionConfig {
-  MotionDetectionCallback cb;
-  void* cb_param;
-  bool enable;
-  size_t x0;
-  size_t y0;
-  size_t x1;
-  size_t y1;
-};
-
 struct EnableResponse {
   bool success;
 };
@@ -122,7 +123,7 @@ struct Request {
     TestPatternRequest test_pattern;
     CameraMode mode;
     DiscardRequest discard;
-    MotionDetectionConfig motion_detection_config;
+    CameraMotionDetectionConfig motion_detection_config;
   } request;
   std::function<void(Response)> callback;
 };
@@ -258,12 +259,12 @@ class CameraTask
   //
   // @param config The `MotionDetectionConfig` struct to fill with default
   // values.
-  void GetMotionDetectionConfigDefault(camera::MotionDetectionConfig& config);
+  void GetMotionDetectionConfigDefault(CameraMotionDetectionConfig& config);
 
   // Sets the configuration for hardware motion detection.
   //
   // @param config `MotionDetectionConfig` to apply to the camera.
-  void SetMotionDetectionConfig(const camera::MotionDetectionConfig& config);
+  void SetMotionDetectionConfig(const CameraMotionDetectionConfig& config);
 
   // Native image pixel width.
   static constexpr size_t kWidth = 324;
@@ -283,7 +284,7 @@ class CameraTask
   void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
   void HandleDiscardRequest(const camera::DiscardRequest& discard);
   void HandleMotionDetectionInterrupt();
-  void HandleMotionDetectionConfig(const camera::MotionDetectionConfig& config);
+  void HandleMotionDetectionConfig(const CameraMotionDetectionConfig& config);
   void SetMode(const CameraMode& mode);
   bool Read(uint16_t reg, uint8_t* val);
   bool Write(uint16_t reg, uint8_t val);
@@ -295,7 +296,7 @@ class CameraTask
   csi_config_t csi_config_;
   CameraMode mode_;
   CameraTestPattern test_pattern_;
-  camera::MotionDetectionConfig md_config_;
+  CameraMotionDetectionConfig md_config_;
 };
 
 }  // namespace coralmicro

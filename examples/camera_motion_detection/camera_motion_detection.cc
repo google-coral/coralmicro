@@ -34,7 +34,7 @@ void Main() {
   // Enable Power, configure motion detection, and enable streaming.
   CameraTask::GetSingleton()->SetPower(true);
 
-  camera::MotionDetectionConfig config;
+  CameraMotionDetectionConfig config;
   CameraTask::GetSingleton()->GetMotionDetectionConfigDefault(config);
   config.cb = [](void* param) {
     TimerHandle_t timer = reinterpret_cast<TimerHandle_t>(param);
@@ -47,15 +47,11 @@ void Main() {
     }
   };
   config.cb_param = motion_detection_timer;
-  CameraTask::GetSingleton()->SetMotionDetectionConfig(config);
 
+  CameraTask::GetSingleton()->SetMotionDetectionConfig(config);
   CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
 
   vTaskSuspend(nullptr);
-
-  // Disable streaming, and turn the power off.
-  CameraTask::GetSingleton()->Disable();
-  CameraTask::GetSingleton()->SetPower(false);
 }
 }  // namespace
 }  // namespace coralmicro

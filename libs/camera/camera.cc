@@ -872,7 +872,7 @@ void CameraTask::HandleDiscardRequest(const camera::DiscardRequest& discard) {
 }
 
 void CameraTask::GetMotionDetectionConfigDefault(
-    camera::MotionDetectionConfig& config) {
+    CameraMotionDetectionConfig& config) {
   config.cb = nullptr;
   config.cb_param = nullptr;
   config.enable = true;
@@ -883,7 +883,7 @@ void CameraTask::GetMotionDetectionConfigDefault(
 }
 
 void CameraTask::SetMotionDetectionConfig(
-    const camera::MotionDetectionConfig& config) {
+    const CameraMotionDetectionConfig& config) {
   camera::Request req;
   req.type = camera::RequestType::kMotionDetectionConfig;
   req.request.motion_detection_config = config;
@@ -891,7 +891,7 @@ void CameraTask::SetMotionDetectionConfig(
 }
 
 void CameraTask::HandleMotionDetectionConfig(
-    const camera::MotionDetectionConfig& config) {
+    const CameraMotionDetectionConfig& config) {
   md_config_ = config;
   SetMotionDetectionRegisters();
 }
