@@ -114,7 +114,7 @@ void Main() {
   printf("Attempting to use Wi-Fi...\r\n");
   // Uncomment me to use the external antenna.
   // SetWiFiAntenna(WiFiAntenna::kExternal);
-  bool success = WiFiTurnOn();
+  bool success = WiFiTurnOn(/*default_iface=*/true);
   if (!success) {
     printf("Failed to turn on Wi-Fi\r\n");
     return;

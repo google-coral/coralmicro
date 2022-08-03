@@ -59,8 +59,9 @@ bool WiFiSetDefaultPsk(const std::string& wifi_psk);
 
 // Turns on the Wi-Fi module.
 //
+// @param default_iface True sets Wi-Fi as the default network interface.
 // @return True if successfully turned on; false otherwise.
-bool WiFiTurnOn();
+bool WiFiTurnOn(bool default_iface);
 
 // Turns off the Wi-Fi module.
 //

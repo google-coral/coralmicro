@@ -147,7 +147,7 @@ void Main() {
             static_cast<std::string*>(request->ctx->response_cb_data)->c_str());
       });
 #elif defined(CAMERA_STREAMING_WIFI)
-  if (!WiFiTurnOn()) {
+  if (!WiFiTurnOn(/*default_iface=*/false)) {
     printf("Unable to bring up WiFi...\r\n");
     vTaskSuspend(nullptr);
   }

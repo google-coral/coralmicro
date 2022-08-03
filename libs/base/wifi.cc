@@ -45,7 +45,7 @@ bool WiFiSetDefaultPsk(const std::string& wifi_psk) {
   return LfsWriteFile("/wifi_psk", wifi_psk);
 }
 
-bool WiFiTurnOn() { return WIFI_On() == eWiFiSuccess; }
+bool WiFiTurnOn(bool default_iface) { return WIFI_On(default_iface) == eWiFiSuccess; }
 
 bool WiFiTurnOff() { return WIFI_Off() == eWiFiSuccess; }
 

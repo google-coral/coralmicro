@@ -165,7 +165,7 @@ typedef struct
  * @return @ref eWiFiSuccess if Wi-Fi module was successfully turned on, failure code otherwise.
  */
 /* @[declare_wifi_wifi_on] */
-WIFIReturnCode_t WIFI_On( void );
+WIFIReturnCode_t WIFI_On(bool default_iface);
 /* @[declare_wifi_wifi_on] */
 
 /**

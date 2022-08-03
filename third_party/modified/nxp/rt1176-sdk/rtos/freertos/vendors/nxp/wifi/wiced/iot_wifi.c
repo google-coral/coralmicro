@@ -192,7 +192,7 @@ void wiced_scan_results_handler( wiced_scan_result_t** result_ptr, void* user_da
 }
 
 
-static void iface_up(void)
+static void iface_up(bool default_iface)
 {
     IP4_ADDR(&fsl_netif0_ipaddr, 0, 0, 0, 0);
     IP4_ADDR(&fsl_netif0_netmask, 0, 0, 0, 0);
@@ -202,6 +202,10 @@ static void iface_up(void)
               wlanif_init, tcpip_input);
 
     netifapi_netif_set_up(&fsl_netif0);
+
+    if (default_iface) {
+      netifapi_netif_set_default(&fsl_netif0);
+    }
 }
 
 
@@ -219,7 +223,7 @@ static void iface_down(void)
  *
  * @return eWiFiSuccess if everything succeeds, eWiFiFailure otherwise.
  */
-WIFIReturnCode_t WIFI_On( void )
+WIFIReturnCode_t WIFI_On(bool default_iface)
 {
     /* NOTE: this function is thread unsave,
      * caller is repsonsible for proper protection */
@@ -264,7 +268,7 @@ WIFIReturnCode_t WIFI_On( void )
         }
 
         /* Enable default iface */
-        iface_up();
+        iface_up(default_iface);
 
         wifi_set_enabled(1);
         return eWiFiSuccess;

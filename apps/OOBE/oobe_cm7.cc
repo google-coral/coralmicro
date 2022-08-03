@@ -395,7 +395,7 @@ void Main() {
     vTaskSuspend(nullptr);
   }
 #elif defined(OOBE_DEMO_WIFI)
-  WiFiTurnOn();
+  WiFiTurnOn(/*default_iface=*/false);
   if (!WiFiConnect()) {
     // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
     LedSet(Led::kStatus, true);

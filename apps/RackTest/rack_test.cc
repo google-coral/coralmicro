@@ -188,7 +188,7 @@ extern "C" void app_main(void* param) {
       });
   jsonrpc_init(nullptr, nullptr);
 #if defined(TEST_WIFI)
-  if (!coralmicro::WiFiTurnOn()) {
+  if (!coralmicro::WiFiTurnOn(/*default_iface=*/false)) {
     printf("Wi-Fi failed to come up (is the Wi-Fi board attached?)\r\n");
     vTaskSuspend(nullptr);
   }

@@ -17,5 +17,5 @@
 #include "libs/base/wifi.h"
 
 void variantInit() {
-    coralmicro::WiFiTurnOn();
+    coralmicro::WiFiTurnOn(/*default_iface=*/true);
 }
