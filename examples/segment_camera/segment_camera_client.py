@@ -16,11 +16,10 @@
 import argparse
 import base64
 import numpy as np
-import re
 import requests
 import sys
 
-from PIL import Image, ImageDraw
+from PIL import Image
 
 """
 Displays classification results received from the segment_camera server

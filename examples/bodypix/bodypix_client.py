@@ -14,13 +14,12 @@
 # limitations under the License.
 
 import base64
-import re
 import requests
 import numpy as np
 import scipy.ndimage
 import scipy.misc
 
-from PIL import Image, ImageDraw
+from PIL import Image
 
 _HEATMAP_MASK_LENGTH = 21
 

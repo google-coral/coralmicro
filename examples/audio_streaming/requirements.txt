@@ -1,0 +1,1 @@
+pyaudio==0.2.12 # Requires portaudio19-dev for Linux and portaudio for Mac.

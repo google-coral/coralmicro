@@ -1,0 +1,12 @@
+# Requirements for examples.
+-r ../examples/segment_camera/requirements.txt
+-r ../examples/audio_streaming/requirements.txt
+-r ../examples/camera_triggered/requirements.txt
+-r ../examples/detect_camera/requirements.txt
+-r ../examples/camera_streaming/requirements.txt
+-r ../examples/classify_camera/requirements.txt
+-r ../examples/bodypix/requirements.txt
+-r ../examples/rpc_server/requirements.txt
+
+# Requirements for app.
+-r ../apps/OOBE/requirements.txt

@@ -22,7 +22,8 @@ brew install \
   make \
   cmake \
   libusb \
-  lsusb
+  lsusb \
+  coreutils
 
 python3 -m pip install pip --upgrade
 python3 -m pip install -r scripts/requirements.txt
