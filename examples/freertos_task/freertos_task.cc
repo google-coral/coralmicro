@@ -23,7 +23,7 @@
 // Starts a second task to blink one LED in each task.
 
 namespace coralmicro {
-
+namespace {
 [[noreturn]] void blink_task(void* param) {
   auto led_type = static_cast<Led*>(param);
   printf("Hello task.\r\n");
@@ -44,8 +44,9 @@ void Main() {
               &status_led, kAppTaskPriority, nullptr);
   vTaskSuspend(nullptr);
 }
-
+}  // namespace
 }  // namespace coralmicro
+
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();

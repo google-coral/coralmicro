@@ -23,6 +23,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro {
+namespace {
 void Main() {
   vTaskDelay(pdMS_TO_TICKS(1000));
   // Initializes the A71 chip.
@@ -109,6 +110,7 @@ void Main() {
       "\r\nSee examples/security/README.md for instructions to verify "
       "manually.\r\n");
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

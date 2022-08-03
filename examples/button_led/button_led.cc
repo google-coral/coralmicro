@@ -22,6 +22,7 @@
 // Toggles the User LED in response to button presses.
 
 namespace coralmicro {
+namespace {
 //! [gpio-callback] Doxygen snippet for gpio.h
 [[noreturn]] void Main() {
   printf("Press the user button.\r\n");
@@ -38,6 +39,7 @@ namespace coralmicro {
   }
 }
 //! [gpio-callback] End snippet
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

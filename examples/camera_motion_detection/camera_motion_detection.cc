@@ -22,7 +22,7 @@
 #include "third_party/freertos_kernel/include/timers.h"
 
 namespace coralmicro {
-
+namespace {
 void Main() {
   printf("Camera Motion Detection example\r\n");
 
@@ -57,6 +57,7 @@ void Main() {
   CameraTask::GetSingleton()->Disable();
   CameraTask::GetSingleton()->SetPower(false);
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

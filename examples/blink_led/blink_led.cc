@@ -21,6 +21,7 @@
 // Blinks the user LED (green) and status LED (orange)
 
 namespace coralmicro {
+namespace {
 // [start-sphinx-snippet:blink-led]
 [[noreturn]] void Main() {
   bool on = true;
@@ -32,6 +33,7 @@ namespace coralmicro {
   }
 }
 // [end-sphinx-snippet:blink-led]
+}
 }  // namespace coralmicro
 
 extern "C" void app_main(void *param) {

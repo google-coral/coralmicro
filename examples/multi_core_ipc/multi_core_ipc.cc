@@ -53,7 +53,7 @@ void HandleM4Message(const uint8_t data[kIpcMessageBufferDataSize]) {
   }
 }
 
-} // namespace
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" [[noreturn]] void app_main(void* param) {

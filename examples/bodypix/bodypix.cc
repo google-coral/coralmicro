@@ -33,7 +33,6 @@ constexpr float kConfidenceThreshold = 0.5f;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr char kModelPath[] =
     "/models/bodypix_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
-}  // namespace
 
 void RunBodypix(struct jsonrpc_request* r) {
   auto* interpreter =
@@ -147,6 +146,7 @@ void Main() {
   printf("Bodypix server ready!\r\n");
   vTaskSuspend(nullptr);
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

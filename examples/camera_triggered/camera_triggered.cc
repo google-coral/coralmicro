@@ -27,6 +27,7 @@
 
 // [start-snippet:camera-trigger]
 namespace coralmicro {
+namespace {
 void GetCapturedImage(struct jsonrpc_request* request) {
   int width;
   int height;
@@ -77,7 +78,7 @@ void GetCapturedImage(struct jsonrpc_request* request) {
     printf("Picture taken\r\n");
   }
 }
-
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

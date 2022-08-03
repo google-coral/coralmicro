@@ -22,7 +22,7 @@
 // Note: These pins output a max of 1.8V
 
 namespace coralmicro {
-
+namespace {
 // [start-sphinx-snippet:pwm]
 [[noreturn]] void Main() {
   PwmInit();
@@ -41,6 +41,7 @@ namespace coralmicro {
   }
 }
 // [end-sphinx-snippet:pwm]
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" [[noreturn]] void app_main(void* param) {

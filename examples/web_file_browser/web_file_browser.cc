@@ -200,7 +200,7 @@ void Main() {
   vTaskSuspend(nullptr);
 }
 
-} // namespace
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {

@@ -22,6 +22,7 @@
 // This is started by main_app_m7.
 
 namespace coralmicro {
+namespace {
 // [start-sphinx-snippet:blink-led]
 [[noreturn]] void Main() {
   printf("Blinking LED from M4.\r\n");
@@ -34,6 +35,7 @@ namespace coralmicro {
   }
 }
 // [end-sphinx-snippet:blink-led]
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void *param) {

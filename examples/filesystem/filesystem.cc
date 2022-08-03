@@ -21,7 +21,6 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro {
-
 namespace {
 void PrintDirectory(lfs_dir_t* dir, const char* path, int num_tabs) {
   constexpr int kMaxDepth = 3;
@@ -150,7 +149,6 @@ void Main() {
   PrintFilesystemContents();
   printf("End filesystem example\r\n");
 }
-
 }  // namespace
 }  // namespace coralmicro
 

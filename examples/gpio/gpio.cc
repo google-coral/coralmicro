@@ -18,6 +18,7 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro {
+namespace {
 [[noreturn]] void Main() {
   constexpr Gpio kGpiosToTest[] = {
       kSpiCs, kSpiSck, kSpiSdo,  kSpiSdi,  kSda6, kScl1, kSda1,
@@ -39,6 +40,7 @@ namespace coralmicro {
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void* param) {
