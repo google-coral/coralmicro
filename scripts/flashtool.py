@@ -50,7 +50,7 @@ elif system_name == 'Darwin':
    skip_hid_readback = True
 elif system_name == 'Linux':
    platform_dir = 'linux/amd64'
-   toolchain_dir = 'toolchain'
+   toolchain_dir = 'toolchain-linux'
 else:
    print('Unknown operating system!' + system_name)
    raise OSError
