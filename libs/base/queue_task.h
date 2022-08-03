@@ -22,6 +22,7 @@
 #include "third_party/freertos_kernel/include/queue.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_common.h"
 
 namespace coralmicro {
 
@@ -58,7 +59,14 @@ class QueueTask {
   }
 
   void SendRequestAsync(Request& req) {
-    CHECK(xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200)) == pdTRUE);
+    // If IPSR is non-zero, we are in an interrupt.
+    if (__get_IPSR() != 0) {
+      BaseType_t reschedule;
+      CHECK(xQueueSendFromISR(request_queue_, &req, &reschedule) == pdTRUE);
+      portYIELD_FROM_ISR(reschedule);
+    } else {
+      CHECK(xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200)) == pdTRUE);
+    }
   }
 
   StaticTask_t task_;

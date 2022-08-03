@@ -72,6 +72,15 @@ struct CameraRegisters {
     kSingleThrHot = 0x100B,
     kSingleThrCold = 0x100C,
     kVsyncHsyncPixelShiftEn = 0x1012,
+    kStatisticCtrl = 0x2000,
+    kMdLroiXStartH = 0x2011,
+    kMdLroiXStartL = 0x2012,
+    kMdLroiYStartH = 0x2013,
+    kMdLroiYStartL = 0x2014,
+    kMdLroiXEndH = 0x2015,
+    kMdLroiXEndL = 0x2016,
+    kMdLroiYEndH = 0x2017,
+    kMdLroiYEndL = 0x2018,
     kAeCtrl = 0x2100,
     kAeTargetMean = 0x2101,
     kAeMinMean = 0x2102,
@@ -91,6 +100,9 @@ struct CameraRegisters {
     kFs60HzL = 0x2110,
     kFs50HzH = 0x2111,
     kFs50HzL = 0x2112,
+    kMdCtrl = 0x2150,
+    kMdThl = 0x215B,
+    kI2cClear = 0x2153,
     kBitControl = 0x3059,
     kOscClkDiv = 0x3060,
   };
@@ -574,6 +586,14 @@ void CameraTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
   QueueTask::Init();
   i2c_handle_ = i2c_handle;
   mode_ = CameraMode::kStandBy;
+  GetMotionDetectionConfigDefault(md_config_);
+  md_config_.enable = false;
+  GpioConfigureInterrupt(
+      Gpio::kCameraInt, GpioInterruptMode::kIntModeRising, [this]() {
+        camera::Request req;
+        req.type = camera::RequestType::kMotionDetectionInterrupt;
+        this->SendRequestAsync(req);
+      });
 }
 
 int CameraTask::GetFrame(uint8_t** buffer, bool block) {
@@ -658,6 +678,24 @@ void CameraTask::TaskInit() {
   HandlePowerRequest(req);
 }
 
+void CameraTask::SetMotionDetectionRegisters() {
+  if (md_config_.enable) {
+    Write(CameraRegisters::kMdCtrl, 3);
+    Write(CameraRegisters::kMdThl, 1);
+    Write(CameraRegisters::kMdLroiXStartH, md_config_.x0 >> 8);
+    Write(CameraRegisters::kMdLroiXStartL, md_config_.x0 & 0xFF);
+    Write(CameraRegisters::kMdLroiYStartH, md_config_.y0 >> 8);
+    Write(CameraRegisters::kMdLroiYStartL, md_config_.y0 & 0xFF);
+    Write(CameraRegisters::kMdLroiXEndH, md_config_.x1 >> 8);
+    Write(CameraRegisters::kMdLroiXEndL, md_config_.x1 & 0xFF);
+    Write(CameraRegisters::kMdLroiYEndH, md_config_.y1 >> 8);
+    Write(CameraRegisters::kMdLroiYEndL, md_config_.y1 & 0xFF);
+    Write(CameraRegisters::kI2cClear, 1);
+  } else {
+    Write(CameraRegisters::kMdCtrl, 0);
+  }
+}
+
 void CameraTask::SetDefaultRegisters() {
   // Taken from Tensorflow's configuration in the person detection sample
   /* Analog settings */
@@ -690,6 +728,7 @@ void CameraTask::SetDefaultRegisters() {
   Write(CameraRegisters::kSingleThrHot, 0x90);
   Write(CameraRegisters::kSingleThrCold, 0x40);
   /* AE settings */
+  Write(CameraRegisters::kStatisticCtrl, 0x07);
   Write(CameraRegisters::kAeCtrl, 0x01);
   Write(CameraRegisters::kAeTargetMean, 0x5F);
   Write(CameraRegisters::kAeMinMean, 0x0A);
@@ -710,6 +749,8 @@ void CameraTask::SetDefaultRegisters() {
   Write(CameraRegisters::kFs60HzL, 0x85);
   Write(CameraRegisters::kFs50HzH, 0x00);
   Write(CameraRegisters::kFs50HzL, 0xA0);
+
+  SetMotionDetectionRegisters();
 }
 
 camera::EnableResponse CameraTask::HandleEnableRequest(const CameraMode& mode) {
@@ -830,6 +871,38 @@ void CameraTask::HandleDiscardRequest(const camera::DiscardRequest& discard) {
   }
 }
 
+void CameraTask::GetMotionDetectionConfigDefault(
+    camera::MotionDetectionConfig& config) {
+  config.cb = nullptr;
+  config.cb_param = nullptr;
+  config.enable = true;
+  config.x0 = 0;
+  config.y0 = 0;
+  config.x1 = kWidth - 1;
+  config.y1 = kHeight - 1;
+}
+
+void CameraTask::SetMotionDetectionConfig(
+    const camera::MotionDetectionConfig& config) {
+  camera::Request req;
+  req.type = camera::RequestType::kMotionDetectionConfig;
+  req.request.motion_detection_config = config;
+  SendRequest(req);
+}
+
+void CameraTask::HandleMotionDetectionConfig(
+    const camera::MotionDetectionConfig& config) {
+  md_config_ = config;
+  SetMotionDetectionRegisters();
+}
+
+void CameraTask::HandleMotionDetectionInterrupt() {
+  Write(CameraRegisters::kI2cClear, 1);
+  if (md_config_.cb) {
+    md_config_.cb(md_config_.cb_param);
+  }
+}
+
 void CameraTask::SetMode(const CameraMode& mode) {
   Write(CameraRegisters::kModeSelect, static_cast<uint8_t>(mode));
   mode_ = mode;
@@ -856,6 +929,12 @@ void CameraTask::RequestHandler(camera::Request* req) {
       break;
     case camera::RequestType::kDiscard:
       HandleDiscardRequest(req->request.discard);
+      break;
+    case camera::RequestType::kMotionDetectionInterrupt:
+      HandleMotionDetectionInterrupt();
+      break;
+    case camera::RequestType::kMotionDetectionConfig:
+      HandleMotionDetectionConfig(req->request.motion_detection_config);
       break;
   }
   if (req->callback) req->callback(resp);

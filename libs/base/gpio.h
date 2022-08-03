@@ -40,6 +40,8 @@ enum Gpio {
   // Trigger GPIO for single-shot camera capture. Not to be used by apps;
   // instead see `CameraTask::Trigger()`.
   kCameraTrigger,
+  // Input from the camera to indicate motion was detected.
+  kCameraInt,
   // Selects between on-board antenna and antenna connector (for Wi-Fi and BT).
   // Low for internal, high for external.
   kAntennaSelect,

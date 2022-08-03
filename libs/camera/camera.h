@@ -62,6 +62,8 @@ enum class RequestType : uint8_t {
   kPower,
   kTestPattern,
   kDiscard,
+  kMotionDetectionInterrupt,
+  kMotionDetectionConfig,
 };
 
 struct FrameRequest {
@@ -78,6 +80,17 @@ struct PowerRequest {
 
 struct DiscardRequest {
   int count;
+};
+
+typedef void (*MotionDetectionCallback)(void* param);
+struct MotionDetectionConfig {
+  MotionDetectionCallback cb;
+  void* cb_param;
+  bool enable;
+  size_t x0;
+  size_t y0;
+  size_t x1;
+  size_t y1;
 };
 
 struct EnableResponse {
@@ -109,6 +122,7 @@ struct Request {
     TestPatternRequest test_pattern;
     CameraMode mode;
     DiscardRequest discard;
+    MotionDetectionConfig motion_detection_config;
   } request;
   std::function<void(Response)> callback;
 };
@@ -238,6 +252,18 @@ class CameraTask
   // begin using images with `GetFrame()`.
   void DiscardFrames(int count);
 
+  // Populates the `config` parameter with a default configuration for motion
+  // detection.
+  //
+  // @param config The `MotionDetectionConfig` struct to fill with default
+  // values.
+  void GetMotionDetectionConfigDefault(camera::MotionDetectionConfig& config);
+
+  // Sets the configuration for hardware motion detection.
+  //
+  // @param config `MotionDetectionConfig` to apply to the camera.
+  void SetMotionDetectionConfig(const camera::MotionDetectionConfig& config);
+
   // Native image pixel width.
   static constexpr size_t kWidth = 324;
 
@@ -255,16 +281,20 @@ class CameraTask
   camera::FrameResponse HandleFrameRequest(const camera::FrameRequest& frame);
   void HandleTestPatternRequest(const camera::TestPatternRequest& test_pattern);
   void HandleDiscardRequest(const camera::DiscardRequest& discard);
+  void HandleMotionDetectionInterrupt();
+  void HandleMotionDetectionConfig(const camera::MotionDetectionConfig& config);
   void SetMode(const CameraMode& mode);
   bool Read(uint16_t reg, uint8_t* val);
   bool Write(uint16_t reg, uint8_t val);
   void SetDefaultRegisters();
+  void SetMotionDetectionRegisters();
 
   lpi2c_rtos_handle_t* i2c_handle_;
   csi_handle_t csi_handle_;
   csi_config_t csi_config_;
   CameraMode mode_;
   CameraTestPattern test_pattern_;
+  camera::MotionDetectionConfig md_config_;
 };
 
 }  // namespace coralmicro
