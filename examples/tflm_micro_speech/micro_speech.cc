@@ -15,10 +15,12 @@
 #include <atomic>
 #include <cstdio>
 
+#include "libs/base/led.h"
 #include "libs/audio/audio_driver.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/command_responder.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/main_functions.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
 
@@ -28,6 +30,26 @@
 //
 // For more information about this model, see:
 // https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech
+
+
+void RespondToCommand(tflite::ErrorReporter* error_reporter,
+                      int32_t current_time, const char* found_command,
+                      uint8_t score, bool is_new_command) {
+  if (is_new_command) {
+    TF_LITE_REPORT_ERROR(error_reporter, "Heard %s (%d) @%dms", found_command,
+                         score, current_time);
+    if (strcmp(found_command, "yes") == 0) {
+      LedSet(coralmicro::Led::kUser, true);
+      LedSet(coralmicro::Led::kStatus, false);
+    } else if (strcmp(found_command, "no") == 0) {
+      LedSet(coralmicro::Led::kUser, false);
+      LedSet(coralmicro::Led::kStatus, true);
+    } else {
+      LedSet(coralmicro::Led::kUser, false);
+      LedSet(coralmicro::Led::kStatus, false);
+    }
+  }
+}
 
 namespace coralmicro {
 namespace {
