@@ -286,7 +286,7 @@ class PoseCanvas(tk.Frame):
 def create_tk(width, height, fullscreen=False, do_stop=lambda: None):
     root = tk.Tk()
     root.attributes('-fullscreen', fullscreen)
-    root.title("Dev Board Micro OOBE")
+    root.title("Dev Board Micro Multicore Model Cascade")
     root.geometry(f'{width}x{height}')
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
@@ -371,7 +371,7 @@ def SocketClient(host, port):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OOBE UI',
+    parser = argparse.ArgumentParser(description='Multicore Model Cascade UI',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--host', '--device_ip_address',
                         type=str, default='10.10.10.1')

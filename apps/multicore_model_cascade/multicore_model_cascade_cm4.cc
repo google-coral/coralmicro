@@ -35,10 +35,10 @@ void RespondToDetection(tflite::ErrorReporter* error_reporter,
   printf("person_score: %d no_person_score: %d\r\n", person_score,
          no_person_score);
 // For normal operation, use the person score to determine detection.
-// In the OOBE demo, this is handled by a constant timer.
-#if !defined(OOBE_DEMO)
+// In the demo version, this is handled by a constant timer.
+#if !defined(MULTICORE_MODEL_CASCADE_DEMO)
   g_person_detected = (person_score > no_person_score);
-#endif  // !defined(OOBE_DEMO)
+#endif  // !defined(MULTICORE_MODEL_CASCADE_DEMO)
 }
 
 extern "C" void app_main(void* param) {
@@ -63,12 +63,12 @@ extern "C" void app_main(void* param) {
       });
   xTimerStart(status_led_timer, 0);
 
-#if defined(OOBE_DEMO)
+#if defined(MULTICORE_MODEL_CASCADE_DEMO)
   TimerHandle_t m4_timer = xTimerCreate(
       "m4_timer", pdMS_TO_TICKS(10000), pdTRUE, nullptr,
       +[](TimerHandle_t xTimer) { g_person_detected = true; });
   xTimerStart(m4_timer, 0);
-#endif  // defined(OOBE_DEMO)
+#endif  // defined(MULTICORE_MODEL_CASCADE_DEMO)
 
   while (true) {
     printf("M4 main loop\r\n");
@@ -80,11 +80,9 @@ extern "C" void app_main(void* param) {
       loop();
       coralmicro::LedSet(coralmicro::Led::kUser, g_person_detected);
 
-#if !defined(OOBE_SIMPLE)
       if (g_person_detected) {
         break;
       }
-#endif
     }
     printf("Person detected, let M7 take over.\r\n");
     coralmicro::CameraTask::GetSingleton()->Disable();

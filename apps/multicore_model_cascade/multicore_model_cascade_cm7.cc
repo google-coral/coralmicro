@@ -32,13 +32,13 @@
 #include "third_party/mjson/src/mjson.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-#if defined(OOBE_DEMO_ETHERNET)
+#if defined(MULTICORE_MODEL_CASCADE_ETHERNET)
 #include "libs/base/ethernet.h"
-#endif  // defined(OOBE_DEMO_ETHERNET)
+#endif  // defined(MULTICORE_MODEL_CASCADE_ETHERNET)
 
-#if defined(OOBE_DEMO_WIFI)
+#if defined(MULTICORE_MODEL_CASCADE_WIFI)
 #include "libs/base/wifi.h"
-#endif  // defined(OOBE_DEMO_WIFI)
+#endif  // defined(MULTICORE_MODEL_CASCADE_WIFI)
 
 #include <cstdio>
 #include <cstring>
@@ -137,7 +137,7 @@ class Task {
 class NetworkTask : private Task<NetworkTask> {
  public:
   NetworkTask()
-      : Task("oobe_network_task", kAppTaskPriority),
+      : Task("cascade_network_task", kAppTaskPriority),
         mutex_(xSemaphoreCreateMutex()),
         last_pose_data_(xTaskGetTickCount()) {
     CHECK(mutex_);
@@ -203,7 +203,7 @@ class PosenetTask : private Task<PosenetTask> {
  public:
   explicit PosenetTask(NetworkTask* network_task_,
                        std::shared_ptr<tflite::MicroInterpreter> interpreter)
-      : Task("oobe_posenet_task", kAppTaskPriority),
+      : Task("cascade_posenet_task", kAppTaskPriority),
         network_task_(network_task_),
         queue_(xQueueCreate(1, sizeof(char))),
         interpreter_(std::move(interpreter)) {
@@ -247,7 +247,7 @@ class PosenetTask : private Task<PosenetTask> {
 class CameraTask : private Task<CameraTask> {
  public:
   CameraTask(NetworkTask* network_task, PosenetTask* posenet_task)
-      : Task("oobe_camera_task", kAppTaskPriority),
+      : Task("cascade_camera_task", kAppTaskPriority),
         network_task_(network_task),
         posenet_task_(posenet_task),
         queue_(xQueueCreate(2, sizeof(TaskMessage))) {
@@ -385,16 +385,14 @@ void Main() {
   PosenetTask posenet_task(&network_task, interpreter);
   CameraTask camera_task(&network_task, &posenet_task);
 
-// For the OOBE Demo, bring up WiFi and Ethernet. For now these are active
-// but unused.
-#if defined(OOBE_DEMO_ETHERNET)
+#if defined(MULTICORE_MODEL_CASCADE_ETHERNET)
   if (!EthernetInit(/*default_iface=*/false)) {
     // If initializing Ethernet fails, turn our LEDs on solid, and halt.
     LedSet(Led::kStatus, true);
     LedSet(Led::kUser, true);
     vTaskSuspend(nullptr);
   }
-#elif defined(OOBE_DEMO_WIFI)
+#elif defined(MULTICORE_MODEL_CASCADE_WIFI)
   WiFiTurnOn(/*default_iface=*/false);
   if (!WiFiConnect()) {
     // If connecting to wi-fi fails, turn our LEDs on solid, and halt.
@@ -402,7 +400,7 @@ void Main() {
     LedSet(Led::kUser, true);
     vTaskSuspend(nullptr);
   }
-#endif  // defined(OOBE_DEMO_ETHERNET)
+#endif  // defined(MULTICORE_MODEL_CASCADE_ETHERNET)
 
   JsonRpcHttpServer http_server;
   jsonrpc_init(nullptr, nullptr);
@@ -418,9 +416,9 @@ void Main() {
 
   IpcM7::GetSingleton()->StartM4();
 
-#if defined(OOBE_DEMO)
+#if defined(MULTICORE_MODEL_CASCADE_DEMO)
   int count = 0;
-#endif  // defined (OOBE_DEMO)
+#endif  // defined (MULTICORE_MODEL_CASCADE_DEMO)
 
   bool low_power = true;
   vTaskSuspend(nullptr);
@@ -434,10 +432,10 @@ void Main() {
     camera_task.Start();
 
     while (true) {
-// For OOBE Demo, run 20 iterations of this loop - each contains a one
-// second delay. For normal OOBE, check that the posenet task hasn't
+// For the demo, run 20 iterations of this loop - each contains a one
+// second delay. For normal operation, check that the posenet task hasn't
 // progressed for 5 seconds (i.e. no poses detected).
-#if defined(OOBE_DEMO)
+#if defined(MULTICORE_MODEL_CASCADE_DEMO)
       if (count >= 20) {
         count = 0;
         break;
@@ -446,7 +444,7 @@ void Main() {
       printf("M7 %d\r\n", count);
 #else
       if (network_task.PosenetInactiveForMs(5000)) break;
-#endif  // defined(OOBE_DEMO)
+#endif  // defined(MULTICORE_MODEL_CASCADE_DEMO)
 
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
