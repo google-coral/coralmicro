@@ -13,8 +13,11 @@
 // limitations under the License.
 
 #include <cstdio>
+#include "third_party/freertos_kernel/include/FreeRTOS.h"
+#include "third_party/freertos_kernel/include/task.h"
 
 extern "C" [[noreturn]] void app_main(void *param) {
+  (void)param;
   printf("Hello world.\r\n");
-  while (true) {}
+  vTaskSuspend(nullptr);
 }

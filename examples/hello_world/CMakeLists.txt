@@ -17,5 +17,5 @@ add_executable_m7(hello_world
 )
 
 target_link_libraries(hello_world
-    libs_base-m7_bm
+    libs_base-m7_freertos
 )
