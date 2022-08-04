@@ -46,12 +46,6 @@ void Main() {
     return;
   }
 
-  std::vector<uint8_t> image;
-  if (!LfsReadFile(kImagePath, &image)) {
-    printf("ERROR: Failed to load %s\r\n", kImagePath);
-    return;
-  }
-
   auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
@@ -78,14 +72,11 @@ void Main() {
   }
 
   auto* input_tensor = interpreter.input_tensor(0);
-  if (input_tensor->type != kTfLiteUInt8 ||
-      input_tensor->bytes != image.size()) {
-    printf("ERROR: Invalid input tensor size\r\n");
+  if (!LfsReadFile(kImagePath, tflite::GetTensorData<uint8_t>(input_tensor),
+                   input_tensor->bytes)) {
+    printf("ERROR: Failed to load %s\r\n", kImagePath);
     return;
   }
-
-  std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
-              image.size());
 
   if (interpreter.Invoke() != kTfLiteOk) {
     printf("ERROR: Invoke() failed\r\n");
