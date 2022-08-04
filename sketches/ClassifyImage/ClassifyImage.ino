@@ -13,8 +13,8 @@ std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 
 const int kTensorArenaSize = 1024 * 1024;
-static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
-__attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
+
 int tpuPin = PIN_LED_TPU;
 }  // namespace
 

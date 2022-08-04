@@ -18,8 +18,7 @@ std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 tflite::MicroMutableOpResolver<3> resolver;
 
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
-static uint8_t tensor_arena[kTensorArenaSize] __attribute__((aligned(16)))
-__attribute__((section(".sdram_bss,\"aw\",%nobits @")));
+STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 }  // namespace
 
 void setup() {
