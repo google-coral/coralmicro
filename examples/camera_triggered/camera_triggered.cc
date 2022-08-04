@@ -40,7 +40,7 @@ void GetCapturedImage(struct jsonrpc_request* request) {
   std::vector<uint8_t> image(width * height * CameraFormatBpp(format));
   CameraFrameFormat fmt{format,
                         CameraFilterMethod::kBilinear,
-                        CameraRotation::k0,
+                        CameraRotation::k270,
                         width,
                         height,
                         /*preserve_ratio=*/false,

@@ -68,7 +68,7 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
   std::vector<uint8_t> image(model_width * model_height *
                              CameraFormatBpp(CameraFormat::kRgb));
   CameraFrameFormat fmt{CameraFormat::kRgb, CameraFilterMethod::kBilinear,
-                        CameraRotation::k0, model_width,
+                        CameraRotation::k270, model_width,
                         model_height,       false,
                         image.data()};
 

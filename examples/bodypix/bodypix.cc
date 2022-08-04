@@ -56,7 +56,7 @@ void RunBodypix(struct jsonrpc_request* r) {
 
   CameraFrameFormat fmt{/*fmt=*/CameraFormat::kRgb,
                         /*filter=*/CameraFilterMethod::kBilinear,
-                        /*rotation=*/CameraRotation::k0,
+                        /*rotation=*/CameraRotation::k270,
                         /*width=*/model_width,
                         /*height=*/model_height,
                         /*preserve_ratio=*/false,

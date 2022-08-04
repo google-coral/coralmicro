@@ -27,7 +27,7 @@ parser.add_argument('--ethernet', action='store_true', help='Get image from ethe
 parser.add_argument('--ethernet_ip', type=str, required=False, help='Dev Board Micro Ethernet IP address.')
 parser.add_argument('--image_width', type=int, default=700, help='Specify image width.')
 parser.add_argument('--image_height', type=int, default=700, help='Specify image height.')
-parser.add_argument('--image_rotation', type=int, default=0, choices=[0, 90, 180, 270], help='Image rotation (degrees)')
+parser.add_argument('--image_rotation', type=int, default=270, choices=[0, 90, 180, 270], help='Image rotation (degrees)')
 parser.add_argument('--image_format', type=str, default='RGB', choices=['RGB', 'GRAY', 'RAW'], help='Pixel format')
 parser.add_argument('--image_filter', type=str, default='BILINEAR', choices=['BILINEAR', 'NEAREST_NEIGHBOR'], help='Demosaic interpolation method')
 parser.add_argument('--auto_white_balance', action='store_true', help='Enable white balancing')

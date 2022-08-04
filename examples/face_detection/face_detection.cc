@@ -82,7 +82,7 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
   while (true) {
     CameraFrameFormat fmt{CameraFormat::kRgb,
                           CameraFilterMethod::kBilinear,
-                          CameraRotation::k0,
+                          CameraRotation::k270,
                           model_width,
                           model_height,
                           false,

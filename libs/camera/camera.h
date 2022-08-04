@@ -167,8 +167,9 @@ struct CameraFrameFormat {
   CameraFormat fmt;
   // Filter method such as bilinear (default) or nearest-neighbor.
   CameraFilterMethod filter = CameraFilterMethod::kBilinear;
-  // Image rotation in 90-degree increments.
-  CameraRotation rotation = CameraRotation::k0;
+  // Image rotation in 90-degree increments. Default is 270 degree which
+  // corresponds to the device held vertically with USB port facing down.
+  CameraRotation rotation = CameraRotation::k270;
   // Image width. (Native size is `CameraTask::kWidth`.)
   int width;
   // Image height. (Native size is `CameraTask::kHeight`.)

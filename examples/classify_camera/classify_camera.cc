@@ -69,7 +69,7 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
   auto format = bayered ? CameraFormat::kRaw : CameraFormat::kRgb;
   CameraFrameFormat fmt{format,
                         CameraFilterMethod::kBilinear,
-                        CameraRotation::k0,
+                        CameraRotation::k270,
                         model_width,
                         model_height,
                         false,
