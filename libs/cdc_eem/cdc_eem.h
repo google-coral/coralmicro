@@ -156,7 +156,6 @@ class CdcEem {
                  .interval = 0},
   };
 
-  uint8_t serial_state_buffer_[10];
   uint8_t tx_buffer_[512];
   uint8_t rx_buffer_[512];
   uint8_t bulk_in_ep_, bulk_out_ep_;

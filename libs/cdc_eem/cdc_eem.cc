@@ -97,8 +97,10 @@ err_t CdcEem::NetifInit(struct netif *netif) {
 
 err_t CdcEem::TxFunc(struct netif *netif, struct pbuf *p) {
   auto *packet = new std::vector<uint8_t>(p->tot_len);
-  if (pbuf_copy_partial(p, packet->data(), p->tot_len, 0) != p->tot_len)
+  if (pbuf_copy_partial(p, packet->data(), p->tot_len, 0) != p->tot_len) {
+    delete packet;
     return ERR_IF;
+  }
 
   if (xQueueSendToBack(tx_queue_, &packet, 0) != pdTRUE) {
     delete packet;
@@ -140,23 +142,13 @@ err_t CdcEem::TransmitFrame(void *buffer, uint32_t length) {
 }
 
 err_t CdcEem::ReceiveFrame(uint8_t *buffer, uint32_t length) {
-  struct netif *tmp_netif;
-  for (tmp_netif = netif_list;
-       (tmp_netif != nullptr) && (tmp_netif->state != this);
-       tmp_netif = tmp_netif->next) {
-  }
-  if (!tmp_netif) {
-    printf("Couldn't find EEM interface\r\n");
-    return ERR_IF;
-  }
-
   struct pbuf *frame = pbuf_alloc(PBUF_RAW, length, PBUF_POOL);
   if (!frame) {
     printf("Failed to allocate pbuf\r\n");
     return ERR_BUF;
   }
   pbuf_take(frame, buffer, length);
-  err_t ret = tmp_netif->input(frame, tmp_netif);
+  err_t ret = netif_.input(frame, &netif_);
   if (ret != ERR_OK) {
     printf("tcpip_input() failed %d\r\n", ret);
     pbuf_free_callback(frame);
@@ -168,13 +160,9 @@ err_t CdcEem::ReceiveFrame(uint8_t *buffer, uint32_t length) {
 
 usb_status_t CdcEem::SetControlLineState(
     usb_device_cdc_eem_request_param_struct_t *eem_param) {
-  usb_status_t ret = kStatus_USB_Error;
-
   uint8_t dte_status = eem_param->setupValue;
   uint16_t uart_state = 0;
 
-  uint8_t dte_present =
-      (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE);
   uint8_t carrier_present =
       (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_CARRIER_ACTIVATION);
   if (carrier_present) {
@@ -183,31 +171,33 @@ usb_status_t CdcEem::SetControlLineState(
     uart_state &= ~USB_DEVICE_CDC_UART_STATE_TX_CARRIER;
   }
 
+  uint8_t dte_present =
+      (dte_status & USB_DEVICE_CDC_CONTROL_SIG_BITMAP_DTE_PRESENCE);
   if (dte_present) {
     uart_state |= USB_DEVICE_CDC_UART_STATE_RX_CARRIER;
   } else {
     uart_state &= ~USB_DEVICE_CDC_UART_STATE_RX_CARRIER;
   }
 
-  serial_state_buffer_[0] = 0xA1;  // NotifyRequestType
-  serial_state_buffer_[1] = USB_DEVICE_CDC_NOTIF_SERIAL_STATE;
-  serial_state_buffer_[2] = 0x00;
-  serial_state_buffer_[3] = 0x00;
-  serial_state_buffer_[4] = eem_param->interfaceIndex;
-  serial_state_buffer_[5] = 0x00;
-  serial_state_buffer_[6] = 0x02;  // UartBitmapSize
-  serial_state_buffer_[7] = 0x00;
+  uint8_t serial_state_buffer[10] = {
+      0xA1,  // NotifyRequestType
+      USB_DEVICE_CDC_NOTIF_SERIAL_STATE,
+      0x00,
+      0x00,
+      static_cast<uint8_t>(eem_param->interfaceIndex),
+      0x00,
+      0x02,  // UartBitmapSize
+      0x00,
+      static_cast<uint8_t>(uart_state & 0xFF),
+      static_cast<uint8_t>((uart_state >> 8) & 0xFF),
+  };
 
-  uint8_t *uart_bitmap = &serial_state_buffer_[8];
-  uart_bitmap[0] = uart_state & 0xFF;
-  uart_bitmap[1] = (uart_state >> 8) & 0xFF;
-
-  uint32_t len = sizeof(serial_state_buffer_);
   auto *cdc_eem =
       reinterpret_cast<usb_device_cdc_eem_struct_t *>(class_handle_);
+  usb_status_t ret = kStatus_USB_Error;
   if (cdc_eem->hasSentState == 0) {
-    ret = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, serial_state_buffer_,
-                               len);
+    ret = USB_DeviceCdcEemSend(class_handle_, bulk_in_ep_, serial_state_buffer,
+                               sizeof(serial_state_buffer));
     if (ret != kStatus_USB_Success) {
       DbgConsole_Printf("USB_DeviceCdcEemSend failed in %s\r\n", __func__);
     }
@@ -219,8 +209,8 @@ usb_status_t CdcEem::SetControlLineState(
 
 void CdcEem::DetectEndianness(uint32_t packet_length) {
   if (endianness_ == Endianness::kUnknown) {
-    uint16_t packet_hdr_le = *((uint16_t *)rx_buffer_);
-    uint16_t packet_hdr_be = ntohs(*((uint16_t *)rx_buffer_));
+    uint16_t packet_hdr_le = *reinterpret_cast<uint16_t *>(rx_buffer_);
+    uint16_t packet_hdr_be = ntohs(*reinterpret_cast<uint16_t *>(rx_buffer_));
     // Two-byte packets are usually EEM command packets, but we can't
     // detect endianness from them with certainty -- so we will not try.
     if (packet_length <= sizeof(uint16_t)) {
@@ -247,7 +237,7 @@ void CdcEem::ProcessPacket(uint32_t packet_length) {
     return;
   }
 
-  uint16_t packet_hdr = *((uint16_t *)rx_buffer_);
+  uint16_t packet_hdr = *reinterpret_cast<uint16_t *>(rx_buffer_);
   if (endianness_ == Endianness::kBigEndian) {
     packet_hdr = ntohs(packet_hdr);
   }
