@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
 from progress.bar import Bar, Progress
 import argparse
 import contextlib
@@ -590,21 +589,45 @@ def StateProgramElfloader(elf_path, arduino, debug=False, serial_number=None):
             return FlashtoolDone('Flashing to RAM is complete, your application should be executing.')
         return StateStartGdb
 
-def StateProgramDataFiles(elf_path, data_files, usb_ip_address, arduino, wifi_ssid=None, wifi_psk=None, wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None, program=True, data=True):
+def StateProgramDataFiles(
+        elf_path, data_files, usb_ip_address, arduino, wifi_config=None, wifi_ssid=None, wifi_psk=None,
+        wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None, program=True, data=True):
     with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
         if program and data:
             h.write(elfloader_msg_format())
         if program:
             data_files[elf_path] = '/default.elf'
         data_files[str(usb_ip_address).encode()] = USB_IP_ADDRESS_FILE
-        if wifi_ssid is not None:
-            data_files[wifi_ssid.encode()] = WIFI_SSID_FILE
-        if wifi_psk is not None:
-            data_files[wifi_psk.encode()] = WIFI_PSK_FILE
-        if wifi_country is not None:
-            data_files[wifi_country.encode()] = WIFI_COUNTRY_FILE
-        if wifi_revision is not None:
-            data_files[struct.pack('<H', wifi_revision)] = WIFI_REVISION_FILE
+        if wifi_config is not None:
+            if not os.path.exists(wifi_config):
+                raise RuntimeError(f'wifi_config: {wifi_config} does not exist')
+            with open(wifi_config) as wc_file:
+                found_ssid = False
+                for line in wc_file:
+                    if 'ssid' in line:
+                        found_ssid = True
+                        ssid = line.split('=')[1].strip().rstrip(os.linesep)
+                        data_files[ssid.encode()] = WIFI_SSID_FILE
+                    if 'psk' in line:
+                        password = line.split('=')[1].strip().rstrip(os.linesep)
+                        data_files[password.encode()] = WIFI_PSK_FILE
+                    if 'country' in line:
+                        country = line.split('=')[1].strip().rstrip(os.linesep)
+                        data_files[country.encode()] = WIFI_COUNTRY_FILE
+                    if 'revision' in line:
+                        revision = line.split('=')[1].strip().rstrip(os.linesep)
+                        data_files[struct.pack('<H', int(revision))] = WIFI_REVISION_FILE
+                if not found_ssid:
+                    raise RuntimeError(f'wifi_config: {wifi_config} did not specified ssid.')
+        else:
+            if wifi_ssid is not None:
+                data_files[wifi_ssid.encode()] = WIFI_SSID_FILE
+            if wifi_psk is not None:
+                data_files[wifi_psk.encode()] = WIFI_PSK_FILE
+            if wifi_country is not None:
+                data_files[wifi_country.encode()] = WIFI_COUNTRY_FILE
+            if wifi_revision is not None:
+                data_files[struct.pack('<H', wifi_revision)] = WIFI_REVISION_FILE
         if ethernet_speed is not None:
             data_files[struct.pack('<H', ethernet_speed)] = ETHERNET_SPEED_FILE
         for src_file, target_file in data_files.items():
@@ -628,7 +651,6 @@ def StateProgramDataFiles(elf_path, data_files, usb_ip_address, arduino, wifi_ss
             ElfloaderTransferData(h, target_file.encode(), ELFLOADER_TARGET_PATH)
             ElfloaderTransferData(h, data, ELFLOADER_TARGET_FILESYSTEM,
                                   bar=bar)
-
         return StateResetToFlash
 
 def StateResetToBootloader(serial_number=None, reset=False):
@@ -744,6 +766,14 @@ def main():
     network_group.add_argument(
         '--usb_ip_address', type=str, required=False, default='10.10.10.1',
         help='The board IP address for Ethernet-over-USB connections.')
+    network_group.add_argument(
+        "--wifi_config", type=str, required=False, default=None,
+        help="Path to the wifi config file, must be in text format:  \
+             ssid=your-wifi-ssid \
+             psk=your-wifi-password \
+             country=wifi-country-code \
+             revision=wifi-revision \
+             If specified, ssid is required.")
     network_group.add_argument(
         '--wifi_ssid', type=str, required=False, default=None,
         help='The default Wi-Fi SSID for the board to use. \
@@ -931,6 +961,7 @@ def main():
         'unstripped_elf_path': unstripped_elf_path,
         'root_dir': root_dir,
         'usb_ip_address': usb_ip_address,
+        'wifi_config': args.wifi_config,
         'wifi_ssid': args.wifi_ssid,
         'wifi_psk': args.wifi_psk,
         'wifi_country': args.wifi_country,
