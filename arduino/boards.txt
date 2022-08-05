@@ -43,7 +43,7 @@ coral_micro.menu.upload.both.upload.extra_flags=
 coral_micro.menu.upload.program.upload.extra_flags=--nodata
 coral_micro.menu.upload.data.upload.extra_flags=--noprogram
 
-coral_micro_wifi.name=Dev Board Micro + Wi-Fi
+coral_micro_wifi.name=Dev Board Micro + Wireless Add-on
 coral_micro_wifi.build.core=arduino
 coral_micro_wifi.build.crossprefix=arm-none-eabi-
 coral_micro_wifi.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
