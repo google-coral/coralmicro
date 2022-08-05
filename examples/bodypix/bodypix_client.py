@@ -15,12 +15,12 @@
 
 import base64
 import requests
+import math
 import numpy as np
-import scipy.ndimage
-import scipy.misc
 
 from PIL import Image
 
+_IMAGE_SIZE = 324
 _HEATMAP_MASK_LENGTH = 21
 
 def get_field_or_die(data, field_name):
@@ -58,19 +58,23 @@ def main():
         mask_segments_data, dtype=np.uint8, count=-1)
 
     # Match the dimensions of the original tensor
-    predicted_mask = predicted_mask.reshape(21, 21)
+    predicted_mask = predicted_mask.reshape(_HEATMAP_MASK_LENGTH, _HEATMAP_MASK_LENGTH)
 
-    # Blow up the heatmap to match the image size, and turn it red
+    # Turn the heatmap red
     rgb_heatmap = np.dstack([predicted_mask[:,:]]*3)
     rgb_heatmap[:,:,1:] = 0
 
-    rescale_factor = [
-      width/_HEATMAP_MASK_LENGTH,
-      height/_HEATMAP_MASK_LENGTH,
-      1]
-    rgb_heatmap = scipy.ndimage.zoom(rgb_heatmap, rescale_factor, order=0)
+    # Assume image is square, current model is for 324x324 images
+    rescale_factor = math.ceil(width/_HEATMAP_MASK_LENGTH)
 
-    heatmap_im = Image.fromarray(rgb_heatmap)
+    # Blow up the heatmap to match the image size
+    rgb_heatmap = np.kron(rgb_heatmap, np.ones((rescale_factor, rescale_factor, 1)))
+
+    # Blown up version using ceiling, so clip the edges down to the exact size.
+    clip_size = int((rgb_heatmap.shape[0] - _IMAGE_SIZE)/2)
+    rgb_heatmap = rgb_heatmap[clip_size:_IMAGE_SIZE+clip_size, clip_size:_IMAGE_SIZE+clip_size]
+
+    heatmap_im = Image.fromarray(rgb_heatmap.astype('uint8'))
 
     # Display the input image and segmentation results.
     output_img = Image.new('RGB', (2 * width, height))
