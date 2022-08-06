@@ -14,4 +14,5 @@ INPUT                  = ../libs/ \
 EXCLUDE                = ../libs/tpu/edgetpu_driver.h
 FILE_PATTERNS          = *.h
 RECURSIVE              = YES
-EXAMPLE_PATH           = ../examples/
+EXAMPLE_PATH           = ../examples/ \
+                         ../sketches/

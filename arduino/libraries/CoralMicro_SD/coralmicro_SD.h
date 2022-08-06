@@ -135,8 +135,10 @@ class File : public Stream {
   friend class SDClass;
 };
 
-// Exposes the Coral Micro device's internal filesystem, treating it as if it
-// was an SD card. You should not initialize this object yourself; instead
+// Exposes the Dev Board Micro's internal filesystem, treating it as if it
+// were an SD card.
+//
+// You should not initialize this object yourself; instead
 // include `coralmicro_SD.h` and then use the global `SD` instance. `begin()`
 // and `end()` are unnecessary calls, because the filesystem is initialized when
 // the device boots up and cannot be deinitialized.  Example code can be found

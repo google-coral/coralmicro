@@ -49,11 +49,9 @@ namespace coralmicro {
 namespace arduino {
 
 // Exposes the Coral Micro device's native PDM microphone.
+//
 // You should not initialize this object yourself; instead include `PDM.h` and
-// then use the global `Mic` instance. The microphone will remain powered and
-// process input whenever there is an active audo callback, which you can
-// activate with `onReceive()`, and deactivate with `end()`. Example code can be
-// found in `sketches/PDM/`
+// then use the global `Mic` instance.
 class PDMClass {
  public:
   // @cond Do not generate docs.

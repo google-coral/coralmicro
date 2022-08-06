@@ -28,11 +28,10 @@ namespace arduino {
 
 // Allows for communication with SPI devices.
 // SPI devices communicate through the use of the `transfer` functions,
-// which simultaneously exchange data between the two devices.
-// For more details about SPI, see [Wikipedia's
-// page](https://https://en.wikipedia.org/wiki/Serial_Peripheral_Interface). The
-// Coral Micro device must be the controller and transfers are not supported
-// from within interrupts. You should not initialize this object yourself;
+// which simultaneously exchange data between the two devices, but they
+// cannot be used from within interrupts.
+//
+// You should not initialize this object yourself;
 // instead include `SPI.h` and then use the global `SPI` instance. Code samples
 // can be found in `sketches/SPI/` and `sketches/SPITranscation/`.
 class HardwareSPI : public ::arduino::HardwareSPI {
@@ -64,6 +63,7 @@ class HardwareSPI : public ::arduino::HardwareSPI {
   // Updates the SPI configuration.
   //
   // @param settings The desired SPI configuration.
+  //   See [SPISettings](https://www.arduino.cc/reference/en/language/functions/communication/spi/spisettings/).
   void updateSettings(::arduino::SPISettings settings);
 
   // @cond Do not generate docs.

@@ -1,3 +1,4 @@
+// [start-snippet:ardu-spi]
 #include "Arduino.h"
 #include "SPI.h"
 
@@ -27,3 +28,4 @@ void loop() {
     }
   }
 }
+// [end-snippet:ardu-spi]

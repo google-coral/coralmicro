@@ -3,6 +3,7 @@
   on the Coral Dev Board Micro.
 */
 
+// [start-snippet:ardu-led]
 #include "Arduino.h"
 
 int ledPin = PIN_LED_USER;
@@ -24,3 +25,4 @@ void loop() {
   val = digitalRead(buttonPin);
   digitalWrite(ledPin, val == LOW ? HIGH : LOW);
 }
+// [end-snippet:ardu-led]

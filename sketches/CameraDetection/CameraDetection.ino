@@ -1,3 +1,4 @@
+// [start-snippet:ardu-detection]
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>
 
@@ -145,3 +146,4 @@ void loop() {
     Serial.println(result.bbox.ymax);
   }
 }
+// [end-snippet:ardu-detection]

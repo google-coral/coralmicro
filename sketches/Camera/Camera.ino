@@ -1,3 +1,4 @@
+// [start-snippet:ardu-camera]
 #include <coralmicro_camera.h>
 
 #include <cstdint>
@@ -56,3 +57,4 @@ void loop() {
   }
   delay(5000);
 }
+// [end-snippet:ardu-camera]

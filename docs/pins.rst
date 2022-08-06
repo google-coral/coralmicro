@@ -20,6 +20,10 @@ the coralmicro APIs available for these pins, plus APIs for the on-board LEDs.
    </figure>
 
 
+.. note::
+   All pins are powered by the 1.8 V power rail, and provide a max current of
+   approximately 6 mA on most pins.
+
 .. warning::
    When handling any of these pins, be cautious
    to avoid electrostatic discharge or contact with conductive materials
@@ -28,31 +32,16 @@ the coralmicro APIs available for these pins, plus APIs for the on-board LEDs.
    property.
 
 
-Pinout
-----------
-
-Figure 1 illustrates the pin locations on the board and table 1 includes the
-pin names for use with the following GPIO APIs.
-
-.. raw:: html
-   :file: includes/pinout-table.html
-
-
-.. note::
-   All pins are powered by the 1.8 V power rail, and provide a max current of
-   approximately 6 mA on most pins.
-
-
 GPIO
 -------------------------
 
 Almost all digital pins on the 12-pin headers can be used for GPIO
 (exceptions are the UART TX/RX and DAC pins).
 
-To use a GPIO, specify the pin direction and pull-up or pull-down with
-:cpp:any:`coralmicro::GpioSetMode` and then set the value or get the value with
+To use a GPIO, specify the GPIO pin name (indicated in figure 1), the
+direction, and pull-up or pull-down with
+:cpp:any:`coralmicro::GpioSetMode`. Then set the value or get the value with
 :cpp:any:`coralmicro::GpioSet` and :cpp:any:`coralmicro::GpioGet()`.
-See table 1 for the appropriate GPIO pin names to use with these functions.
 
 For example::
 

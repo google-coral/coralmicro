@@ -1,3 +1,4 @@
+// [start-snippet:ardu-i2c]
 #include "Arduino.h"
 #include "Wire.h"
 
@@ -22,3 +23,5 @@ void loop() {
   x++;
   delay(500);
 }
+// [end-snippet:ardu-i2c]
+

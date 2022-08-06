@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// [start-snippet:ardu-wifi]
 #include "Arduino.h"
 #include "WiFi.h"
 
@@ -78,3 +79,4 @@ void setup() {
 }
 
 void loop() {}
+// [end-snippet:ardu-wifi]

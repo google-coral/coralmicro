@@ -1,3 +1,4 @@
+// [start-snippet:ardu-pdm]
 #include "Arduino.h"
 #include "PDM.h"
 
@@ -30,3 +31,4 @@ void onPDMData() {
     Mic.read(currentSamples, samplesRead);
   }
 }
+// [end-snippet:ardu-pdm]

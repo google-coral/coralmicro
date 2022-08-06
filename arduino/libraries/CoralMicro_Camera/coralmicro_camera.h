@@ -89,10 +89,9 @@ class FrameBuffer {
 };
 
 // Exposes the Coral Micro device's native camera.
+//
 // You should not initialize this object yourself; instead include
-// `coralmicro_camera.h` and then use the global `Camera` instance.  You can
-// start the camera with `Camera.begin()` and then access frames with
-// `Camera.grab()`.  Example code can be found in `sketches/Camera`.
+// `coralmicro_camera.h` and then use the global `Camera` instance.
 class CameraClass {
  public:
   // @cond Do not generate docs.
