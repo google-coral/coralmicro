@@ -65,6 +65,10 @@ void setup() {
   Serial.print("Network RSSI: ");
   Serial.println(rssi);
 
+  IPAddress ip = WiFi.localIP();
+  Serial.print("Ip address: ");
+  Serial.println(ip);
+
   WiFi.disconnect();
 }
 

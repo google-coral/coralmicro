@@ -132,6 +132,10 @@ class WiFiClass {
   // @returns Address of MAC on success; nullptr otherwise.
   uint8_t* macAddress(uint8_t* mac);
 
+  // Retrieves the board's wifi ip address.
+  // @returns The wifi ip address of the board.
+  IPAddress localIP();
+
  private:
   std::unique_ptr<char[]> ssid_ = nullptr;
   std::vector<WIFIScanResult_t> scan_results_;

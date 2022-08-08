@@ -118,6 +118,16 @@ uint8_t* WiFiClass::macAddress(uint8_t* mac) {
   return mac;
 }
 
+IPAddress WiFiClass::localIP() {
+  if (WiFiIsConnected()) {
+    uint8_t ip[4];
+    if (WIFI_GetIP(ip) == eWiFiSuccess) {
+      return IPAddress(ip);
+    }
+  }
+  return IPAddress();
+}
+
 }  // namespace arduino
 }  // namespace coralmicro
 
