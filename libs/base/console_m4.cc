@@ -72,6 +72,8 @@ void ConsoleM4EmergencyWrite(const char* fmt, ...) {
   }
 }
 
+void ConsoleM4Init() { while (!console_buffer) { taskYIELD(); } }
+
 void ConsoleM4SetBuffer(IpcStreamBuffer* buffer) { console_buffer = buffer; }
 
 }  // namespace coralmicro

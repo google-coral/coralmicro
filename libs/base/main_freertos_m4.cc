@@ -37,6 +37,7 @@ lpi2c_rtos_handle_t g_i2c5_handle;
 
 void pre_app_main(void* param) {
   coralmicro::IpcM4::GetSingleton()->Init();
+  coralmicro::ConsoleM4Init();
   app_main(param);
 }
 }  // namespace
