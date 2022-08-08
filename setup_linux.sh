@@ -18,6 +18,8 @@
 
 set -ex
 
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 sudo apt-get update
 sudo apt-get -y install \
   make \
@@ -29,8 +31,11 @@ sudo apt-get -y install \
   python3-pip
 
 python3 -m pip install pip --upgrade
-python3 -m pip install -r scripts/requirements.txt
+python3 -m pip install -r "${SCRIPT_DIR}/scripts/requirements.txt"
 
-sudo cp scripts/99-coral-micro.rules /etc/udev/rules.d
-sudo udevadm control --reload-rules
-sudo udevadm trigger
+if [[ -x "$(command -v udevadm)" ]]; then
+  sudo cp "${SCRIPT_DIR}/scripts/99-coral-micro.rules" /etc/udev/rules.d/
+  sudo udevadm control --reload-rules
+  sudo udevadm trigger
+fi
+
