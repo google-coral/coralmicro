@@ -46,6 +46,9 @@ enum CameraStatus : int32_t {
   UNIMPLEMENTED = 2,
 };
 
+// Motion detection callback.
+using md_callback_t = void (*)(void* param);
+
 // Exposes the Coral Micro device's native camera.
 // You should not initialize this object yourself; instead include
 // `coralmicro_camera.h` and then use the global `Camera` instance.  You can
@@ -55,15 +58,7 @@ class CameraClass {
  public:
   // @cond Do not generate docs.
   // Externally, use `begin()` and `end()`.
-  CameraClass()
-      : camera_{coralmicro::CameraTask::GetSingleton()},
-        width_{0},
-        height_{0},
-        format_{CameraFormat::kRgb},
-        filter_{CameraFilterMethod::kBilinear},
-        test_pattern_{CameraTestPattern::kNone},
-        preserve_ratio_{false},
-        initialized_{false} {}
+  CameraClass();
 
   ~CameraClass() {
     camera_->Disable();
@@ -86,12 +81,13 @@ class CameraClass {
   // @param fmt The image format.
   // @param filter The bayer filtering method.
   // @param rotation The image rotation amount.
+  // @param auto_white_balance Applies auto white balance if true.
   // @returns `SUCCESS` once initialization has completed.
   int begin(int32_t width = 320, int32_t height = 320,
             CameraFormat fmt = CameraFormat::kRgb,
             CameraFilterMethod filter = CameraFilterMethod::kBilinear,
             CameraRotation rotation = CameraRotation::k0,
-            bool preserve_ratio = false);
+            bool preserve_ratio = false, bool auto_white_balance = true);
 
   // Turns the camera off.
   //
@@ -152,10 +148,24 @@ class CameraClass {
   // started discarding frames.
   int discardFrames(int num_frames);
 
+  // Enables or disables HW motion detection.
+  //
+  // @param enable True enables motion detection, false disable it.
+  // @param callback The function to call when the camera detected motion.
+  // @param cb_param The callback parameter.
+  int motionDetection(bool enable, md_callback_t callback = nullptr,
+                      void* cb_param = nullptr);
+
+  // Sets the motion detection windows.
+  //
+  // @param x The top left x coordinate to monitor motion detection.
+  // @param y the top left y coordinate to monitor motion detection.
+  // @param w The width of the window to monitor for motion.
+  // @param h the height of the window to monitor for motion.
+  int motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+
   // @cond Do not generate docs.
   // Unimplemented APIs left over from Portenta.
-  int motionDetection(bool enable);
-  int motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
   int motionDetectionThreshold(uint32_t threshold);
   int motionDetected();
   int framerate(uint32_t framerate);
@@ -170,7 +180,9 @@ class CameraClass {
   coralmicro::CameraRotation rotation_;
   coralmicro::CameraTestPattern test_pattern_;
   bool preserve_ratio_;
+  bool auto_white_balance_;
   bool initialized_;
+  coralmicro::CameraMotionDetectionConfig md_config_;
 };
 }  // namespace arduino
 }  // namespace coralmicro

@@ -22,6 +22,20 @@
 namespace coralmicro {
 namespace arduino {
 
+CameraClass::CameraClass()
+    : camera_{coralmicro::CameraTask::GetSingleton()},
+      width_{0},
+      height_{0},
+      format_{CameraFormat::kRgb},
+      filter_{CameraFilterMethod::kBilinear},
+      test_pattern_{CameraTestPattern::kNone},
+      preserve_ratio_{false},
+      auto_white_balance_{false},
+      initialized_{false} {
+  coralmicro::CameraTask::GetSingleton()->GetMotionDetectionConfigDefault(
+      md_config_);
+}
+
 int CameraClass::begin(CameraResolution resolution) {
   switch (resolution) {
     case CAMERA_R160x120:
@@ -37,7 +51,7 @@ int CameraClass::begin(CameraResolution resolution) {
 
 int CameraClass::begin(int32_t width, int32_t height, CameraFormat fmt,
                        CameraFilterMethod filter, CameraRotation rotation,
-                       bool preserve_ratio) {
+                       bool preserve_ratio, bool auto_white_balance) {
   initialized_ = true;
   width_ = width;
   height_ = height;
@@ -45,6 +59,7 @@ int CameraClass::begin(int32_t width, int32_t height, CameraFormat fmt,
   filter_ = filter;
   rotation_ = rotation;
   preserve_ratio_ = preserve_ratio;
+  auto_white_balance_ = auto_white_balance;
   camera_->SetPower(true);
   camera_->Enable(coralmicro::CameraMode::kStreaming);
   return CameraStatus::SUCCESS;
@@ -65,10 +80,10 @@ int CameraClass::grab(uint8_t* buffer) {
   if (test_pattern_ != CameraTestPattern::kNone) {
     fmts.push_back({CameraFormat::kRaw, CameraFilterMethod::kBilinear,
                     CameraRotation::k0, CameraTask::kWidth, CameraTask::kHeight,
-                    preserve_ratio_, buffer});
+                    preserve_ratio_, buffer, auto_white_balance_});
   } else {
     fmts.push_back({format_, filter_, rotation_, width_, height_,
-                    preserve_ratio_, buffer});
+                    preserve_ratio_, buffer, auto_white_balance_});
   }
 
   auto success = coralmicro::CameraTask::GetSingleton()->GetFrame(fmts);
@@ -80,9 +95,8 @@ int CameraClass::grab(uint8_t* buffer) {
 }
 
 int CameraClass::testPattern(bool walking) {
-  auto test_pattern = walking ? coralmicro::CameraTestPattern::kWalkingOnes
-                              : coralmicro::CameraTestPattern::kNone;
-  test_pattern_ = test_pattern;
+  test_pattern_ = walking ? coralmicro::CameraTestPattern::kWalkingOnes
+                          : coralmicro::CameraTestPattern::kNone;
   camera_->SetTestPattern(test_pattern_);
   return CameraStatus::SUCCESS;
 }
@@ -95,9 +109,9 @@ int CameraClass::testPattern(coralmicro::CameraTestPattern pattern) {
 
 int CameraClass::standby(bool enable) {
   if (enable) {
-    camera_->Enable(coralmicro::CameraMode::kStreaming);
-  } else {
     camera_->Enable(coralmicro::CameraMode::kStandBy);
+  } else {
+    camera_->Enable(coralmicro::CameraMode::kStreaming);
   }
   return CameraStatus::SUCCESS;
 }
@@ -117,23 +131,40 @@ int CameraClass::discardFrames(int num_frames) {
   return CameraStatus::SUCCESS;
 }
 
-int CameraClass::motionDetection(bool enable) {
-  printf("%s not implemented\n", __func__);
-  return CameraStatus::UNIMPLEMENTED;
+int CameraClass::motionDetection(bool enable, md_callback_t callback,
+                                 void* cb_param) {
+  if (!initialized_) {
+    printf("%s Camera is not initialized...\n", __func__);
+    return CameraStatus::NOT_INITIALIZED;
+  }
+  if (!callback) {
+    printf("%s motion detection callback cannot be null\n", __func__);
+    return CameraStatus::FAILURE;
+  }
+  md_config_.enable = enable;
+  md_config_.cb = callback;
+  if (cb_param) md_config_.cb_param = cb_param;
+  CameraTask::GetSingleton()->SetMotionDetectionConfig(md_config_);
+  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
+  return CameraStatus::SUCCESS;
 }
 
 int CameraClass::motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w,
                                        uint32_t h) {
-  printf("%s not implemented\n", __func__);
-  return CameraStatus::UNIMPLEMENTED;
+  if (x > width_ || (x + y) > width_ || y > height_ || (y + h) > height_) {
+    printf("Motion Detection window is out of bound\r\n");
+    return CameraStatus::FAILURE;
+  }
+  md_config_.x0 = x;
+  md_config_.x1 = x + w;
+  md_config_.y0 = y;
+  md_config_.y1 = y + h;
+  return CameraStatus::SUCCESS;
 }
+
+int CameraClass::motionDetected() { return CameraStatus::SUCCESS; }
 
 int CameraClass::motionDetectionThreshold(uint32_t threshold) {
-  printf("%s not implemented\n", __func__);
-  return CameraStatus::UNIMPLEMENTED;
-}
-
-int CameraClass::motionDetected() {
   printf("%s not implemented\n", __func__);
   return CameraStatus::UNIMPLEMENTED;
 }
