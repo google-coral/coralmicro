@@ -20,6 +20,7 @@
 
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/timer.h"
 #include "libs/base/utils.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/mdio/enet/fsl_enet_mdio.h"
@@ -166,13 +167,23 @@ bool EthernetInit(bool default_iface) {
 }
 
 std::optional<std::string> EthernetGetIp() {
+  return EthernetGetIp(/*timeout_ms=*/30 * 1000);
+}
+
+std::optional<std::string> EthernetGetIp(uint64_t timeout_ms) {
   if (!g_eth_netif) {
     return std::nullopt;
   }
+
+  auto start_time = TimerMillis();
   while (true) {
     auto* dhcp = netif_dhcp_data(g_eth_netif);
     if (dhcp->state == DHCP_STATE_BOUND) {
       break;
+    }
+    auto now = TimerMillis();
+    if ((now - start_time) >= timeout_ms) {
+      return std::nullopt;
     }
     taskYIELD();
   }

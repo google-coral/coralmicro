@@ -52,11 +52,18 @@ bool EthernetInit(bool default_iface);
 status_t EthernetPhyWrite(uint32_t phy_reg, uint32_t data);
 // @endcond
 
-// Gets the device's Ethernet IP address.
+// Gets the device's Ethernet IP address, with a timeout of 30s.
 //
 // @return A string representing the IPv4 IP address or `std::nullopt` on
 // failure.
 std::optional<std::string> EthernetGetIp();
+
+// Gets the device's Ethernet IP address.
+//
+// @param timeout_ms Amount of time to wait for DHCP to finish, in milliseconds.
+// @return A string representing the IPv4 IP address or `std::nullopt` on
+// failure.
+std::optional<std::string> EthernetGetIp(uint64_t timeout_ms);
 
 // Gets the assigned MAC address from the device fuses.
 // @returns The MAC address assigned to the device.
