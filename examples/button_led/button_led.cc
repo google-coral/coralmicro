@@ -34,7 +34,8 @@ namespace {
   // Register callback for the user button.
   GpioConfigureInterrupt(
       Gpio::kUserButton, GpioInterruptMode::kIntModeFalling,
-      [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); });
+      [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); },
+      /*debounce_interval_us=*/50 * 1e3);
   bool on = false;
   while (true) {
     vTaskSuspend(nullptr);
