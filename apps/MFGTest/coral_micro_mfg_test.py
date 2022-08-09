@@ -65,6 +65,7 @@ class CoralMicroMFGTest(object):
             print(payload)
         return requests.post(self.url, json=payload).json()
 
+    @rpc
     def get_serial_number(self):
         """Gets the serial number from the device
 

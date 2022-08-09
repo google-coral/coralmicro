@@ -55,6 +55,9 @@ enum Gpio {
   kCameraPrivacyOverride,
   // Reset signal to the A71CH. Active low.
   kCryptoRst,
+  // Enable signal for the switch that blocks LPUART1 during boot.
+  // Set high to allow the LPUART1 signal to pass through.
+  kLpuart1SwitchEnable,
   // SPI6_CS (GPIO_LPSR_09); right header (J10); pin 5
   kSpiCs,
   // SPI6_SCK (GPIO_LPSR_10); right header (J10); pin 6
