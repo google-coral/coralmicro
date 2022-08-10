@@ -14,6 +14,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/image_provider.h"
 
 #include <memory>
+
 #include "libs/camera/camera.h"
 
 TfLiteStatus GetImage(tflite::ErrorReporter* error_reporter, int image_width,

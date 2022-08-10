@@ -15,6 +15,7 @@
 #include <cstdio>
 
 #include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/rpc/rpc_utils.h"
@@ -58,6 +59,10 @@ void GetCapturedImage(struct jsonrpc_request* request) {
 }
 
 [[noreturn]] void Main() {
+  printf("Coral Micro Camera Triggered Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   // Starting Camera in triggered mode.
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
@@ -69,8 +74,7 @@ void GetCapturedImage(struct jsonrpc_request* request) {
   // Register callback for the user button.
   printf("Press the user button to take a picture.\r\n");
   GpioConfigureInterrupt(
-      Gpio::kUserButton,
-      GpioInterruptMode::kIntModeFalling,
+      Gpio::kUserButton, GpioInterruptMode::kIntModeFalling,
       [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); });
   while (true) {
     vTaskSuspend(nullptr);

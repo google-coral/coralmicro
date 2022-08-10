@@ -15,6 +15,7 @@
 #include "examples/multi_core_ipc/example_message.h"
 #include "libs/base/check.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 // This runs on the M7 core and sends IPC messages to the M4 with
@@ -31,6 +32,10 @@ void HandleM4Message(const uint8_t data[kIpcMessageBufferDataSize]) {
 }
 
 [[noreturn]] void Main() {
+  printf("Coral Micro Multicore IPC M7 Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   auto* ipc = IpcM7::GetSingleton();
   ipc->RegisterAppMessageHandler(HandleM4Message);
   ipc->StartM4();

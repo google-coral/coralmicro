@@ -16,6 +16,7 @@
 
 #include <cstdio>
 
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -26,6 +27,10 @@
 namespace coralmicro {
 // [start-sphinx-snippet:dac-adc]
 [[noreturn]] void Main() {
+  printf("Coral Micro Analog Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   AdcInit();
   DacInit();
   AdcConfig config{};

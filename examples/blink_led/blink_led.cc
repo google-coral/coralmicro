@@ -24,6 +24,8 @@ namespace coralmicro {
 namespace {
 // [start-sphinx-snippet:blink-led]
 [[noreturn]] void Main() {
+  printf("Coral Micro Blink LED Example!\r\n");
+
   bool on = true;
   while (true) {
     on = !on;
@@ -33,7 +35,7 @@ namespace {
   }
 }
 // [end-sphinx-snippet:blink-led]
-}
+}  // namespace
 }  // namespace coralmicro
 
 extern "C" void app_main(void *param) {

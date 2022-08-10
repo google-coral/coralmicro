@@ -24,7 +24,9 @@
 namespace coralmicro {
 namespace {
 void Main() {
-  printf("Camera Motion Detection example\r\n");
+  printf("Coral Micro Camera Motion Detection example\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
 
   TimerHandle_t motion_detection_timer = xTimerCreate(
       "motion_detection_timer", pdMS_TO_TICKS(1000), pdFALSE, nullptr,
@@ -34,10 +36,10 @@ void Main() {
   // Enable Power, configure motion detection, and enable streaming.
   CameraTask::GetSingleton()->SetPower(true);
 
-  CameraMotionDetectionConfig config;
+  CameraMotionDetectionConfig config{};
   CameraTask::GetSingleton()->GetMotionDetectionConfigDefault(config);
   config.cb = [](void* param) {
-    TimerHandle_t timer = reinterpret_cast<TimerHandle_t>(param);
+    auto timer = reinterpret_cast<TimerHandle_t>(param);
     CHECK(timer);
     LedSet(Led::kUser, true);
     if (xTimerIsTimerActive(timer) == pdTRUE) {

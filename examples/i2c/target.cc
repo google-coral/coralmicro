@@ -16,12 +16,17 @@
 
 #include "libs/base/check.h"
 #include "libs/base/i2c.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro {
 namespace {
 void Main() {
+  printf("Coral Micro i2c Target Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   constexpr int kTargetAddress = 0x42;
   constexpr int kTransferSize = 16;
   auto config = I2cGetDefaultConfig(coralmicro::I2c::kI2c6);

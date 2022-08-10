@@ -15,6 +15,7 @@
 #include <cstdio>
 
 #include "examples/tflm_hello_world/hello_world_model.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
@@ -85,6 +86,9 @@ static void loop() {
 
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
+  printf("Coral Micro Hello Tensorflow FreeRTOS Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(coralmicro::Led::kStatus, true);
 
   static tflite::MicroErrorReporter micro_error_reporter;
   error_reporter = &micro_error_reporter;

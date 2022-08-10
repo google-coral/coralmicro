@@ -20,6 +20,8 @@
 
 extern "C" [[noreturn]] void app_main(void *param) {
   (void)param;
+  printf("Coral Micro Multicore Hello World M4 Example!\r\n");
+
   while (true) {
     coralmicro::MulticoreMutexLock lock(0);
     printf("[M4] Hello.\r\n");

@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <optional>
 
+#include "libs/base/led.h"
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
@@ -124,6 +125,10 @@ void GetImageFromCamera(struct jsonrpc_request* request) {
 }
 
 void Main() {
+  printf("Coral Micro Camera Streaming RPC Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
 #if defined(CAMERA_STREAMING_ETHERNET)
   EthernetInit(/*default_iface=*/false);
   auto* ethernet = EthernetGetInterface();

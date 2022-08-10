@@ -56,5 +56,9 @@ namespace coralmicro {
 
 extern "C" void app_main(void* param) {
   (void)param;
+  printf("Coral Micro Person Detection Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(coralmicro::Led::kStatus, true);
+
   coralmicro::Main();
 }

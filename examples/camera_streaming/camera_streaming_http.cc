@@ -15,8 +15,8 @@
 #include <cstdio>
 #include <vector>
 
-#include "libs/base/filesystem.h"
 #include "libs/base/http_server.h"
+#include "libs/base/led.h"
 #include "libs/base/strings.h"
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"
@@ -58,6 +58,10 @@ HttpServer::Content UriHandler(const char* uri) {
 }
 
 void Main() {
+  printf("Coral Micro Camera HTTP Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
 

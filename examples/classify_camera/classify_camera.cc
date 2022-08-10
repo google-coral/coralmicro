@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "libs/base/filesystem.h"
+#include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/classification.h"
@@ -107,6 +108,10 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
 }
 
 void Main() {
+  printf("Coral Micro Classify Camera Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   std::vector<uint8_t> model;
   if (!LfsReadFile(kModelPath, &model)) {
     printf("ERROR: Failed to load %s\r\n", kModelPath);

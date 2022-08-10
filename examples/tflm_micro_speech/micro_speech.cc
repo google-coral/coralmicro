@@ -15,8 +15,8 @@
 #include <atomic>
 #include <cstdio>
 
-#include "libs/base/led.h"
 #include "libs/audio/audio_driver.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
@@ -30,7 +30,6 @@
 //
 // For more information about this model, see:
 // https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech
-
 
 void RespondToCommand(tflite::ErrorReporter* error_reporter,
                       int32_t current_time, const char* found_command,
@@ -69,7 +68,7 @@ std::atomic<int32_t> g_audio_buffer_end_index = 0;
 int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
 
 [[noreturn]] void Main() {
-  printf("Micro speech\r\n");
+  printf("Coral Micro Micro Speech Example!\r\n");
 
   // Setup audio
   AudioDriver driver(g_audio_buffers);
@@ -92,7 +91,7 @@ int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
     loop();
   }
 }
-} // namespace
+}  // namespace
 }  // namespace coralmicro
 
 // From audio_provider.h

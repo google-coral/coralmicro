@@ -17,15 +17,18 @@
 #include "libs/a71ch/a71ch.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "libs/base/strings.h"
-#include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro {
 namespace {
 void Main() {
-  vTaskDelay(pdMS_TO_TICKS(1000));
+  printf("Coral Micro Security Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   // Initializes the A71 chip.
   if (!coralmicro::A71ChInit()) {
     printf("Failed to initializes the a71ch chip\r\n");

@@ -11,12 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <cassert>
 #include <cstdio>
-#include <map>
 #include <memory>
 #include <vector>
 
+#include "libs/base/led.h"
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
@@ -74,6 +73,10 @@ void TakePicture(struct jsonrpc_request* r) {
 }
 
 void Main() {
+  printf("Coral Micro RPC Server Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export("serial_number", SerialNumber);
   jsonrpc_export("take_picture", TakePicture);

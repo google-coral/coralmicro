@@ -16,6 +16,7 @@
 #include "libs/tensorflow/posenet.h"
 
 #include "libs/base/filesystem.h"
+#include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tpu/edgetpu_manager.h"
@@ -39,6 +40,10 @@ constexpr char kModelPath[] =
 constexpr char kTestInputPath[] = "/models/posenet_test_input_324.bin";
 
 void Main() {
+  printf("Coral Micro Posenet Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   tflite::MicroErrorReporter error_reporter;
   TF_LITE_REPORT_ERROR(&error_reporter, "Posenet!");
   // Turn on the TPU and get it's context.

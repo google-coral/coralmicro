@@ -21,6 +21,7 @@
 
 #include "libs/base/filesystem.h"
 #include "libs/base/http_server.h"
+#include "libs/base/led.h"
 #include "libs/base/strings.h"
 #include "libs/base/utils.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -185,7 +186,10 @@ class FileHttpServer : public HttpServer {
 };
 
 void Main() {
-  printf("WebFileBrowser\r\n");
+  printf("Coral Micro Web File Browser Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   FileHttpServer http_server;
   http_server.AddUriHandler(UriHandler);
   UseHttpServer(&http_server);

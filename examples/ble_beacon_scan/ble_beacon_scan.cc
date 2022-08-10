@@ -16,6 +16,7 @@
 // Original sample at:
 // https://github.com/zephyrproject-rtos/zephyr/blob/main/samples/bluetooth/scan_adv/src/main.c
 
+#include "libs/base/led.h"
 #include "libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -48,6 +49,11 @@ void bt_ready(int err) {
 
 extern "C" void app_main(void* param) {
   (void)param;
+
+  printf("Coral Micro BLE Beacon Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(coralmicro::Led::kStatus, true);
+
   InitEdgefastBluetooth(bt_ready);
   vTaskSuspend(nullptr);
 }

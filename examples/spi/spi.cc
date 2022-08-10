@@ -15,6 +15,7 @@
 #include "libs/base/spi.h"
 
 #include "libs/base/check.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -25,6 +26,10 @@ namespace coralmicro {
 namespace {
 // [start-sphinx-snippet:spi]
 void Main() {
+  printf("Coral Micro Multicore LED M4 Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   constexpr int kTransferBytes = 256;
   std::array<uint8_t, kTransferBytes> tx_data{};
   std::array<uint8_t, kTransferBytes> rx_data{};

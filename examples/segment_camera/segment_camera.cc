@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "libs/base/filesystem.h"
+#include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/utils.h"
@@ -26,6 +27,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+
 // Runs a local server with an endpoint called 'segment_from_camera',
 // which will capture an image from the board's camera, run the image through a
 // segmentation model and return the results in a JSON response.
@@ -50,6 +52,7 @@
 // Class 1: Pixel belonging to the pet.
 // Class 2: Pixel bordering the pet.
 // Class 3: None of the above/a surrounding pixel.
+
 namespace coralmicro {
 namespace {
 
@@ -67,9 +70,9 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
 
   std::vector<uint8_t> image(model_width * model_height *
                              CameraFormatBpp(CameraFormat::kRgb));
-  CameraFrameFormat fmt{CameraFormat::kRgb, CameraFilterMethod::kBilinear,
+  CameraFrameFormat fmt{CameraFormat::kRgb,   CameraFilterMethod::kBilinear,
                         CameraRotation::k270, model_width,
-                        model_height,       false,
+                        model_height,         false,
                         image.data()};
 
   CameraTask::GetSingleton()->Trigger();
@@ -95,6 +98,10 @@ void SegmentFromCamera(struct jsonrpc_request* r) {
 }
 
 void Main() {
+  printf("Coral Micro Segment Camera Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   std::vector<uint8_t> model;
   if (!LfsReadFile(kModelPath, &model)) {
     printf("ERROR: Failed to load %s\r\n", kModelPath);

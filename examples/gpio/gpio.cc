@@ -14,12 +14,18 @@
 
 #include "libs/base/gpio.h"
 
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 namespace coralmicro {
 namespace {
+
 [[noreturn]] void Main() {
+  printf("Coral Micro GPIO Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   constexpr Gpio kGpiosToTest[] = {
       kSpiCs, kSpiSck, kSpiSdo,  kSpiSdi,  kSda6, kScl1, kSda1,
       kAA,    kAB,     kUartCts, kUartRts, kPwm1, kPwm0, kScl6,

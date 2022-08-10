@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "libs/a71ch/a71ch.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -78,6 +79,11 @@ const selftest_t selftests[] = {
 
 extern "C" void app_main(void *param) {
   (void)param;
+
+  printf("Coral Micro mbedtls Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(coralmicro::Led::kStatus, true);
+
   if (!coralmicro::A71ChInit()) {
     printf("A71CH init failed\r\n");
     vTaskSuspend(nullptr);

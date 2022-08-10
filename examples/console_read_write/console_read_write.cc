@@ -15,12 +15,18 @@
 #include <cstdio>
 
 #include "libs/base/console_m7.h"
+#include "libs/base/led.h"
 #include "libs/base/tasks.h"
 
 // Reads character input from the serial console and writes it back.
 
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
+
+  printf("Coral Micro Console Read Write Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(coralmicro::Led::kStatus, true);
+
   printf("Type into the serial console.\r\n");
 
   char ch;

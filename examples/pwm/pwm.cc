@@ -14,6 +14,7 @@
 
 #include "libs/base/pwm.h"
 
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -25,6 +26,10 @@ namespace coralmicro {
 namespace {
 // [start-sphinx-snippet:pwm]
 [[noreturn]] void Main() {
+  printf("Coral Micro PWM Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   PwmInit();
   PwmPinConfig pin_a_config{.duty_cycle = 20,
                             .frequency = 1000,

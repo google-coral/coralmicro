@@ -13,11 +13,17 @@
 // limitations under the License.
 
 #include <cstdio>
+
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
 extern "C" [[noreturn]] void app_main(void *param) {
   (void)param;
+  printf("Coral Micro Hello World Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(coralmicro::Led::kStatus, true);
+
   printf("Hello world.\r\n");
   vTaskSuspend(nullptr);
 }

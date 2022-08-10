@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include "libs/base/led.h"
 #include "libs/base/strings.h"
 #include "libs/base/utils.h"
 
@@ -42,6 +43,10 @@ HttpServer::Content UriHandler(const char* path) {
 }
 
 void Main() {
+  printf("Coral Micro HTTP Server Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   printf("Starting server...\r\n");
   HttpServer http_server;
   http_server.AddUriHandler(UriHandler);

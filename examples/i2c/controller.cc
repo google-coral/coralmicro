@@ -17,6 +17,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/i2c.h"
+#include "libs/base/led.h"
 #include "libs/base/utils.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -24,6 +25,10 @@
 namespace coralmicro {
 namespace {
 void Main() {
+  printf("Coral Micro i2c Controller Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   auto config = I2cGetDefaultConfig(coralmicro::I2c::kI2c1);
   I2cInitController(config);
 

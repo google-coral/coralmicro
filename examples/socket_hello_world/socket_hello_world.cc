@@ -14,14 +14,16 @@
 
 #include <cstdio>
 
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
-
-  printf("Hello socket.\r\n");
+  printf("Coral Micro Socket Hello World Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(coralmicro::Led::kStatus, true);
 
   int listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 

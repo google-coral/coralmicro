@@ -16,6 +16,7 @@
 
 #include "libs/audio/audio_service.h"
 #include "libs/base/filesystem.h"
+#include "libs/base/led.h"
 #include "libs/base/timer.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
@@ -80,7 +81,10 @@ void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
 }
 
 [[noreturn]] void Main() {
-  printf("YAMNet!!!\r\n");
+  printf("Coral Micro YamNet Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   std::vector<uint8_t> yamnet_tflite;
   if (!LfsReadFile(kModelName, &yamnet_tflite)) {
     printf("Failed to load model\r\n");

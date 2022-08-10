@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <errno.h>
-
 #include <algorithm>
 #include <cstdio>
-#include <cstring>
 
 #include "libs/audio/audio_service.h"
+#include "libs/base/led.h"
 #include "libs/base/network.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/freertos_kernel/include/stream_buffer.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
@@ -131,6 +128,10 @@ void ProcessClient(int client_socket) {
 }
 
 [[noreturn]] void Main() {
+  printf("Coral Micro Audio Streaming Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   const int server_socket = SocketServer(kPort, 5);
   if (server_socket == -1) {
     printf("ERROR: Cannot start server.\r\n");

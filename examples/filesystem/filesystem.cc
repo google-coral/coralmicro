@@ -17,6 +17,7 @@
 #include <cstring>
 
 #include "libs/base/check.h"
+#include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
@@ -72,6 +73,10 @@ bool MkdirOrExists(const char* path) {
 }
 
 void Main() {
+  printf("Coral Micro Filesystem Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   printf("Begin filesystem example\r\n");
   PrintFilesystemContents();
 
@@ -100,9 +105,8 @@ void Main() {
   CHECK(lfs_file_write(Lfs(), &file1, kFile1Str, std::strlen(kFile1Str)) ==
         static_cast<lfs_ssize_t>(std::strlen(kFile1Str)));
   CHECK(lfs_file_close(Lfs(), &file1) >= 0);
-  CHECK(LfsWriteFile("/dir2/file2",
-                                 reinterpret_cast<const uint8_t*>(kFile2Str),
-                                 std::strlen(kFile2Str)));
+  CHECK(LfsWriteFile("/dir2/file2", reinterpret_cast<const uint8_t*>(kFile2Str),
+                     std::strlen(kFile2Str)));
 
   char readbuf[255];
   CHECK(lfs_file_open(Lfs(), &file1, "/dir1/file1", LFS_O_RDONLY) >= 0);

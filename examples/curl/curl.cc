@@ -23,6 +23,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/gpio.h"
+#include "libs/base/led.h"
 #include "libs/base/strings.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -105,6 +106,10 @@ void PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
 }
 
 void Main() {
+  printf("Coral Micro Camera Curl Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
+
   std::optional<std::string> our_ip_addr;
 #if defined(CURL_ETHERNET)
   printf("Attempting to use ethernet...\r\n");

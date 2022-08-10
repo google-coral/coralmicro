@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "libs/base/filesystem.h"
+#include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/posenet.h"
@@ -21,7 +22,6 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
@@ -97,14 +97,14 @@ void RunBodypix(struct jsonrpc_request* r) {
                          model_width, "height", model_height, "base64_data",
                          image.size(), image.data(), "output_mask1",
                          segment_size, float_segments);
-
-  return;
 }
 
 void Main() {
-  tflite::MicroErrorReporter error_reporter;
-  printf("Bodypix!\r\n");
+  printf("Coral Micro Bodypix Example!\r\n");
+  // Status LED turn on to shows board is on.
+  LedSet(Led::kStatus, true);
 
+  tflite::MicroErrorReporter error_reporter;
   // Turn on the TPU and get it's context.
   auto tpu_context =
       EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);

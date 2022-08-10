@@ -41,7 +41,6 @@ flatbuffers::FlatBufferBuilder* BuilderInstance() {
   return inst;
 }
 
-
 ModelBuilder::Operator ModelBuilder::RegisterOp(BuiltinOperator op,
                                                 const char* custom_code,
                                                 int32_t version) {
@@ -74,8 +73,8 @@ void ModelBuilder::AddMetadata(const char* description_string,
 
   metadata_buffers_[nbr_of_metadata_buffers_] = tflite::CreateBuffer(
       *builder_, builder_->CreateVector(
-          reinterpret_cast<const uint8_t*>(metadata_buffer_data),
-          sizeof(uint32_t) * num_elements));
+                     reinterpret_cast<const uint8_t*>(metadata_buffer_data),
+                     sizeof(uint32_t) * num_elements));
 
   ModelBuilder::nbr_of_metadata_buffers_++;
 }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <cstdio>
-#include <memory>
 
 #include "libs/base/led.h"
 #include "libs/base/tasks.h"
@@ -36,6 +35,8 @@ namespace {
 }
 
 void Main() {
+  printf("Coral Micro FreeRTOS Task Example!\r\n");
+
   auto user_led = Led::kUser;
   xTaskCreate(&blink_task, "blink_user_led_task", configMINIMAL_STACK_SIZE,
               &user_led, kAppTaskPriority, nullptr);
