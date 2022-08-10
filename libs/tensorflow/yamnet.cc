@@ -48,9 +48,9 @@ bool YamNetPrepareFrontEnd(FrontendState* frontend_state) {
   return true;
 }
 
-void YamNetPreprocessInput(TfLiteTensor* input_tensor,
+void YamNetPreprocessInput(const int16_t* audio_input,
+                           TfLiteTensor* input_tensor,
                            FrontendState* frontend_state) {
-  CHECK(input_tensor);
   CHECK(frontend_state);
   // Run frontend process for raw audio data.
   // TODO(michaelbrooks): Properly slice the data so that we don't need to
@@ -58,7 +58,7 @@ void YamNetPreprocessInput(TfLiteTensor* input_tensor,
   constexpr float kExpectedSpectraMax = 3.5f;
   std::vector<int16_t> feature_buffer(kYamnetFeatureElementCount);
   size_t num_samples_remaining = kYamnetAudioSize;
-  auto* raw_audio = tflite::GetTensorData<int16_t>(input_tensor);
+  auto* raw_audio = audio_input;
   int count = 0;
   while (num_samples_remaining > 0) {
     size_t num_samples_read;

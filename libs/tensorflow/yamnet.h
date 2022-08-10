@@ -75,11 +75,13 @@ bool YamNetPrepareFrontEnd(FrontendState* frontend_state);
 
 // Performs input preprocessing to convert raw input to spectrogram.
 //
-// @param input_tensor The tensor you want to pre-process for a TensorFlow
-// model, must not be nullptr.
+// @param audio_data An array of signed int16 audio data.
+// @param input_tensor The tensor where the preprocessed spectrogram data
+// is stored.
 // @param frontend_state The populated frontend state that you want to
 // preprocess the input tensor, must not be nullptr.
-void YamNetPreprocessInput(TfLiteTensor* input_tensor,
+void YamNetPreprocessInput(const int16_t* audio_data,
+                           TfLiteTensor* input_tensor,
                            FrontendState* frontend_state);
 
 }  // namespace coralmicro::tensorflow

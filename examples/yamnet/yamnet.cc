@@ -47,6 +47,8 @@ constexpr int kAudioBufferSize =
 constexpr float kThreshold = 0.3;
 constexpr int kTopK = 5;
 
+std::array<int16_t, tensorflow::kYamnetAudioSize> audio_input;
+
 #ifdef YAMNET_CPU
 constexpr char kModelName[] = "/models/yamnet.tflite";
 constexpr bool kUseTpu = false;
@@ -60,7 +62,8 @@ constexpr bool kUseTpu = true;
 void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
   auto input_tensor = interpreter->input_tensor(0);
   auto preprocess_start = TimerMillis();
-  tensorflow::YamNetPreprocessInput(input_tensor, frontend_state);
+  tensorflow::YamNetPreprocessInput(audio_input.data(), input_tensor,
+                                    frontend_state);
   // Reset frontend state.
   FrontendReset(frontend_state);
   auto preprocess_end = TimerMillis();
@@ -151,14 +154,11 @@ void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
         static_cast<LatestSamples*>(ctx)->Append(samples, num_samples);
         return true;
       });
-
   // Delay for the first buffers to fill.
   vTaskDelay(pdMS_TO_TICKS(tensorflow::kYamnetDurationMs));
-  auto audio_input = tflite::GetTensorData<int16_t>(input_tensor);
   while (true) {
     audio_latest.AccessLatestSamples(
-        [&audio_input](const std::vector<int32_t>& samples,
-                       size_t start_index) {
+        [](const std::vector<int32_t>& samples, size_t start_index) {
           size_t i, j = 0;
           // Starting with start_index, grab until the end of the buffer.
           for (i = 0; i < samples.size() - start_index; ++i) {

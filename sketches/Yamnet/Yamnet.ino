@@ -15,6 +15,7 @@ std::vector<uint8_t> model_data;
 std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 TfLiteTensor* input_tensor = nullptr;
+std::array<int16_t, coralmicro::tensorflow::kYamnetAudioSize> audio_input;
 
 constexpr int kTensorArenaSize = 1 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
@@ -81,9 +82,6 @@ void loop() {
     return;
   }
 
-  input_tensor = interpreter->input_tensor(0);
-  auto audio_input = tflite::GetTensorData<int16_t>(input_tensor);
-
   int samplesRead = Mic.available();
   Mic.read(currentSamples, samplesRead);
 
@@ -91,7 +89,8 @@ void loop() {
     audio_input[i] = currentSamples[i] >> 16;
   }
 
-  coralmicro::tensorflow::YamNetPreprocessInput(input_tensor, &frontend_state);
+  coralmicro::tensorflow::YamNetPreprocessInput(audio_input.data(),
+    input_tensor, &frontend_state);
   // Reset frontend state.
   FrontendReset(&frontend_state);
   if (interpreter->Invoke() != kTfLiteOk) {
