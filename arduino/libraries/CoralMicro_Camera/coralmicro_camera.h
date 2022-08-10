@@ -34,6 +34,8 @@ enum CameraResolution : uint32_t {
   CAMERA_R320x240 = 0x01,
   // 320x320 Resolution
   CAMERA_R320x320 = 0x02,
+  // 324x324 Default camera resolution.
+  CAMERA_R324x324 = 0x03,
   CAMERA_RMAX
 };
 
@@ -48,6 +50,43 @@ enum CameraStatus : int32_t {
 
 // Motion detection callback.
 using md_callback_t = void (*)(void* param);
+
+// Represents an image's frame buffer.
+class FrameBuffer {
+ public:
+  // Constructs a new frame buffer object without allocating framebuffer
+  // pointer.
+  FrameBuffer();
+
+  // Destroys and delete the frame buffer if it is allocated.
+  // Note: The buffer must be allocated with `new []` and not `malloc()`.
+  ~FrameBuffer();
+
+  // Gets the frame buffer size.
+  // @return The buffer's size.
+  uint32_t getBufferSize();
+
+  // Gets the frame buffer's data.
+  // @return The pointer to the frame buffer's data.
+  uint8_t* getBuffer();
+
+  // Set the frame buffer's data.
+  // @param buffer The frame buffer pointer to set.
+  // @param frame_size The frame buffer size to set.
+  void setBuffer(uint8_t* buffer, uint32_t frame_size);
+
+  // Checks if the frame buffer has a fixed size.
+  // @return true if the frame buffer has been allocated and the size is known.
+  bool hasFixedSize();
+
+  // Checks if the frame buffer is allocated.
+  // @return true if the framebuffer is allocated, else false.
+  bool isAllocated();
+
+ private:
+  uint32_t fb_size_;
+  uint8_t* fb_;
+};
 
 // Exposes the Coral Micro device's native camera.
 // You should not initialize this object yourself; instead include
@@ -72,7 +111,7 @@ class CameraClass {
   // resolution.
   // @returns A `CameraStatus` value such as `SUCCESS` once initialization has
   // completed.
-  int begin(CameraResolution resolution = CAMERA_R320x320);
+  int begin(CameraResolution resolution = CAMERA_R324x324);
 
   // Starts the camera.
   //
@@ -89,10 +128,6 @@ class CameraClass {
             CameraRotation rotation = CameraRotation::k0,
             bool preserve_ratio = false, bool auto_white_balance = true);
 
-  // Turns the camera off.
-  //
-  int end();
-
   // Grabs a camera frame.
   //
   // @param buffer The buffer where the frame will be stored.
@@ -101,30 +136,42 @@ class CameraClass {
   // `FAILURE` if a frame was not captured.
   int grab(uint8_t* buffer);
 
+  // Grabs a camera frame.
+  //
+  // @param buffer The buffer where the frame will be stored.
+  // @returns A `CameraStatus` value such as `SUCCESS` if a frame was captured
+  // from the camera, `NOT_INITIALIZED` if the camera was not initialized, or
+  // `FAILURE` if a frame was not captured.
+  // Note: buffer does not have to be allocated, this function will
+  // automatically allocate the memory needed to store the image data.
+  int grab(FrameBuffer& buffer);
+
   // Changes the camera mode.
   //
-  // @param enable Sets the camera to streaming mode if true,
-  // and sets the camera to standby mode if false.
+  // @param enable Sets the camera to standby mode if true, and sets the camera
+  // to streaming mode if false.
   // @returns A `CameraStatus` value such as `SUCCESS` once the camera mode is
   // set.
-  int standby(bool enable);
+  int setStandby(bool enable);
 
   // Changes the camera's test pattern.  Test pattern data is fake data that
   // replaces camera sensor data when the value is not `NONE`.
   //
   // @param walking Sets the test pattern to `WALKING_ONES` if true,
   // and to `NONE` if false.
+  // @param enable Starts test pattern if true, else only set the test pattern.
   // @returns A `CameraStatus` value such as `SUCCESS` once the pattern has been
   // set.
-  int testPattern(bool walking);
+  int setTestPattern(bool enable, bool walking);
 
   // Changes the camera's test pattern.  Test pattern data is fake data that
   // replaces camera sensor data when the value is not `NONE`.
   //
   // @param pattern The desired new test pattern.
+  // @param enable Starts test pattern if true, else only set the test pattern.
   // @returns A `CameraStatus` value such as `SUCCESS` once the pattern has been
   // set.
-  int testPattern(coralmicro::CameraTestPattern pattern);
+  int setTestPattern(bool enable, coralmicro::CameraTestPattern pattern);
 
   // Sets whether the image's aspect ratio is preserved.
   //
@@ -132,14 +179,14 @@ class CameraClass {
   // true.
   // @returns A `CameraStatus` value such as `SUCCESS` once the configuration
   // has been set.
-  int preserveRatio(bool preserve_ratio);
+  int setPreserveRatio(bool preserve_ratio);
 
   // Sets the image format.
   //
   // @param fmt The image format.
   // @returns A `CameraSttus` value such as `SUCCESS` once the format has been
   // set.
-  int format(coralmicro::CameraFormat fmt);
+  int setPixelFormat(coralmicro::CameraFormat fmt);
 
   // Discards a set amount of frames captured by the camera.
   //
@@ -150,11 +197,13 @@ class CameraClass {
 
   // Enables or disables HW motion detection.
   //
-  // @param enable True enables motion detection, false disable it.
   // @param callback The function to call when the camera detected motion.
   // @param cb_param The callback parameter.
-  int motionDetection(bool enable, md_callback_t callback = nullptr,
-                      void* cb_param = nullptr);
+  int enableMotionDetection(md_callback_t callback = nullptr,
+                            void* cb_param = nullptr);
+
+  // Disables motion detection.
+  int disableMotionDetection();
 
   // Sets the motion detection windows.
   //
@@ -162,13 +211,13 @@ class CameraClass {
   // @param y the top left y coordinate to monitor motion detection.
   // @param w The width of the window to monitor for motion.
   // @param h the height of the window to monitor for motion.
-  int motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+  int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 
   // @cond Do not generate docs.
   // Unimplemented APIs left over from Portenta.
-  int motionDetectionThreshold(uint32_t threshold);
-  int motionDetected();
-  int framerate(uint32_t framerate);
+  int setMotionDetectionThreshold(uint32_t threshold);
+  int setMotionDetected();
+  int setFramerate(uint32_t framerate);
   // @endcond
 
  private:
