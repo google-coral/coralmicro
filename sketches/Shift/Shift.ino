@@ -22,13 +22,19 @@ constexpr uint8_t dataPin = D2;
 constexpr uint8_t clockPin = D1;
 
 void setup() {
-    pinMode(dataPin, OUTPUT);
-    pinMode(clockPin, OUTPUT);
+  Serial.begin(115200);
+  // Turn on Status LED to shows board is on.
+  pinMode(PIN_LED_STATUS, OUTPUT);
+  digitalWrite(PIN_LED_STATUS, HIGH);
+  Serial.println("Coral Micro Arduino Shift!");
+
+  pinMode(dataPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
 }
 
 void loop() {
-    for (uint8_t val = 0; val < 256; val++) {
-        shiftOut(dataPin, clockPin, LSBFIRST, val);
-        delay(1000);
-    }
+  for (uint8_t val = 0; val < 256; val++) {
+    shiftOut(dataPin, clockPin, LSBFIRST, val);
+    delay(1000);
+  }
 }

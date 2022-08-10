@@ -14,6 +14,11 @@ auto frame_buffer = std::make_unique<uint8_t[]>(width * height * channels);
 
 void setup() {
   Serial.begin(115200);
+  // Turn on Status LED to shows board is on.
+  pinMode(PIN_LED_STATUS, OUTPUT);
+  digitalWrite(PIN_LED_STATUS, HIGH);
+  Serial.println("Coral Micro Arduino Camera!");
+
   if (Camera.begin(width, height) != CameraStatus::SUCCESS) {
     Serial.println("Failed to start camera");
     return;
