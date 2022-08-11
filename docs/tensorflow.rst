@@ -2,13 +2,18 @@ TensorFlow Lite Micro APIs
 ===========================
 
 The Coral Dev Board Micro allows you to run two types of TensorFlow models:
-TensorFlow Lite models that run on the Cortex M7 microcontroller (MCU) and
+TensorFlow Lite Micro models that run on entirely the microcontroller (MCU) and
 TensorFlow Lite models that are compiled for acceleration on the Coral Edge TPU.
-If you've used any of the other Coral boards or accelerators, beware that
-inferencing on the Dev Board Micro may look familiar, but it is different
-because it's a microcontroller platform.
+Although you can run TensorFlow Lite Micro models on either MCU core
+(M4 or M7), currently, you must execute Edge TPU models from the M7.
 
-To run any TensorFlow model on the Dev Board Micro, you must use the
+.. note::
+   If you have experience with TensorFlow Lite on other platforms (including
+   other Coral boards/accelerators), a lot of the code to run inference on the
+   Dev Board Micro should be familiar, but the APIs are actually different
+   for microcontrollers, so your code is not 100% portable.
+
+To run any TensorFlow Lite model on the Dev Board Micro, you must use the
 TensorFlow interpreter provided by
 `TensorFlow Lite for Microcontrollers <https://www.tensorflow.org/lite/microcontrollers>`_
 (TFLM): :cpp:any:`tflite::MicroInterpreter`.
