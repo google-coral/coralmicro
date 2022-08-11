@@ -14,25 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef LIBS_BASE_TIMER_H_
-#define LIBS_BASE_TIMER_H_
-
-#include <cstdint>
-#include <ctime>
+#ifndef LIBS_BASE_NTP_H_
+#define LIBS_BASE_NTP_H_
 
 namespace coralmicro {
+void NtpInit();
+}
 
-void TimerInit();
-
-// Microseconds since boot.
-uint64_t TimerMicros();
-
-// Milliseconds since boot.
-inline uint64_t TimerMillis() { return TimerMicros() / 1000; }
-
-void TimerSetRtcTime(uint32_t sec);
-void TimerGetRtcTime(struct tm* time);
-
-}  // namespace coralmicro
-
-#endif  // LIBS_BASE_TIMER_H_
+#endif  // LIBS_BASE_NTP_H_

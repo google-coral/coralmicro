@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef LIBS_BASE_TIMER_H_
-#define LIBS_BASE_TIMER_H_
+#include "libs/base/ntp.h"
 
-#include <cstdint>
-#include <ctime>
+#include "libs/base/check.h"
+#include "libs/base/timer.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/tcpip.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/sntp.h"
 
 namespace coralmicro {
 
-void TimerInit();
-
-// Microseconds since boot.
-uint64_t TimerMicros();
-
-// Milliseconds since boot.
-inline uint64_t TimerMillis() { return TimerMicros() / 1000; }
-
-void TimerSetRtcTime(uint32_t sec);
-void TimerGetRtcTime(struct tm* time);
+void NtpInit() {
+  tcpip_callback([](void*) -> void {
+    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    sntp_setservername(0, "0.pool.ntp.org");
+    sntp_setservername(1, "1.pool.ntp.org");
+    sntp_setservername(2, "2.pool.ntp.org");
+    sntp_setservername(3, "3.pool.ntp.org");
+    sntp_init();
+  }, nullptr);
+}
 
 }  // namespace coralmicro
 
-#endif  // LIBS_BASE_TIMER_H_
+extern "C" void sntp_set_system_time(uint32_t sec) {
+  coralmicro::TimerSetRtcTime(sec);
+}

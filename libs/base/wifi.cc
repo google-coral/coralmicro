@@ -25,6 +25,7 @@
 #include "libs/base/check.h"
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/ntp.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/wwd_wifi.h"
 
 namespace coralmicro {
@@ -53,7 +54,10 @@ bool WiFiIsConnected() { return WIFI_IsConnected(); }
 
 bool WiFiConnect(const WIFINetworkParams_t& network_params, int retry_count) {
   while (retry_count != 0) {
-    if (WIFI_ConnectAP(&network_params) == eWiFiSuccess) return true;
+    if (WIFI_ConnectAP(&network_params) == eWiFiSuccess) {
+      NtpInit();
+      return true;
+    }
     --retry_count;
   }
 

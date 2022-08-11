@@ -20,6 +20,7 @@
 
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
+#include "libs/base/ntp.h"
 #include "libs/base/timer.h"
 #include "libs/base/utils.h"
 #include "third_party/nxp/rt1176-sdk/components/phy/device/phyrtl8211f/fsl_phyrtl8211f.h"
@@ -163,6 +164,7 @@ bool EthernetInit(bool default_iface) {
   netifapi_netif_set_up(&g_netif);
   netifapi_dhcp_start(&g_netif);
   g_eth_netif = &g_netif;
+  NtpInit();
   return true;
 }
 

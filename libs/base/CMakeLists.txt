@@ -38,6 +38,7 @@ add_library_m7(libs_base-m7_freertos STATIC
     ipc_m7.cc
     led.cc
     main_freertos_m7.cc
+    ntp.cc
     pwm.cc
     random.cc
     reset.cc

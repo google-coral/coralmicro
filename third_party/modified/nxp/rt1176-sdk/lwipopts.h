@@ -275,6 +275,8 @@ Some MCU allow computing and verifying the IP, UDP, TCP and ICMP checksums by ha
 #define DEFAULT_THREAD_PRIO 3
 #endif
 
+#define SNTP_SET_SYSTEM_TIME(sec) sntp_set_system_time(sec)
+
 /*
    ------------------------------------
    ---------- Debugging options ----------
