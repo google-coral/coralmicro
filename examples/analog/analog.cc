@@ -38,6 +38,9 @@ namespace coralmicro {
                   /*channel=*/0,
                   /*primary_side=*/AdcSide::kB,
                   /*differential=*/false);
+
+  // Set the DAC to 0V before we enable it initially.
+  DacWrite(0);
   DacEnable(true);
   while (true) {
     uint16_t val = AdcRead(config);

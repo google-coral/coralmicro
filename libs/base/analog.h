@@ -69,11 +69,12 @@ uint16_t AdcRead(const AdcConfig& config);
 // @param device DAC to initialize.
 void DacInit();
 
-// Sets the state of the DAC.
+// Sets the state of the DAC. It is recommended that you set
+// a voltage with `DacWrite` prior to enabling the DAC.
 // @param enable True enables the DAC; false disables it.
 void DacEnable(bool enable);
 
-// Writes voltage values to the DAC. You must first call `EnableDAC()`.
+// Writes voltage values to the DAC.
 //
 // For example code, see `examples/analog/`.
 // @param value The voltage value to output.

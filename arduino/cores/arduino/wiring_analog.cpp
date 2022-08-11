@@ -60,8 +60,8 @@ static void analogWriteDAC(pin_size_t pinNumber, int value) {
   int dac_shift = kDacFullResolutionBits - dac_resolution_bits;
   int shift_value = dac_resolution_bits;
   if (value) {
-    coralmicro::DacEnable(true);
     coralmicro::DacWrite(value << dac_shift);
+    coralmicro::DacEnable(true);
   } else {
     coralmicro::DacEnable(false);
   }
