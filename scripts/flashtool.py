@@ -1005,5 +1005,16 @@ def main():
                      data_files=data_files, serial_number=serial_number,
                      **state_machine_args)
 
+def is_apple_python():
+  return any('Python3.framework' in path for path in sys.path)
+
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except usb.core.NoBackendError:
+        print('Python interpreter cannot find libusb, please install it.')
+        print('You can run either setup_mac.sh or setup_linux.sh script for that.')
+        if sys.platform == 'darwin' and is_apple_python():
+            print('If you are using Homebrew, try to run two commands:')
+            print('  brew install libusb')
+            print('  sudo ln -s $(brew --prefix)/lib/libusb-1.0.0.dylib /usr/local/lib/libusb.dylib')
