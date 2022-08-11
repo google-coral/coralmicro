@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "libs/base/mutex.h"
+#include "libs/base/timer.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpio.h"
@@ -491,15 +492,23 @@ constexpr gpio_interrupt_mode_t
 };
 
 GpioCallback g_irq_handlers[Gpio::kCount];
+uint64_t g_irq_debounce_us[Gpio::kCount];
+uint64_t g_irq_last_time_us[Gpio::kCount];
 
 void IrqHandler(GPIO_Type* gpio, uint32_t pin) {
   for (int i = 0; i < Gpio::kCount; ++i) {
     if (PinNameToModule[i] == gpio && PinNameToPin[i] == pin) {
       auto& handler = g_irq_handlers[i];
-      if (handler) {
-        handler();
+      auto now = TimerMicros();
+      if (g_irq_debounce_us[i] == 0 ||
+          (g_irq_debounce_us[i] &&
+           ((now - g_irq_last_time_us[i]) >= g_irq_debounce_us[i]))) {
+        if (handler) {
+          handler();
+        }
+        g_irq_last_time_us[i] = now;
+        return;
       }
-      return;
     }
   }
 }
@@ -523,6 +532,8 @@ void GpioInit() {
 
   for (int i = 0; i < Gpio::kCount; ++i) {
     g_irq_handlers[i] = nullptr;
+    g_irq_debounce_us[i] = 0;
+    g_irq_last_time_us[i] = 0;
     switch (i) {
       case Gpio::kEdgeTpuPgood:
       case Gpio::kEdgeTpuReset:
@@ -581,13 +592,21 @@ void GpioSetMode(Gpio gpio, bool input, GpioPullDirection pull_direction) {
                       pin_config);
 }
 
-void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode, GpioCallback cb) {
+void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode,
+                            GpioCallback cb) {
+  GpioConfigureInterrupt(gpio, mode, cb, 0);
+}
+
+void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode, GpioCallback cb,
+                            uint64_t debounce_interval_us) {
   auto* config = &PinNameToConfig[gpio];
   config->direction = kGPIO_DigitalInput;
   config->interruptMode = InterruptModeToGpioIntMode[mode];
   GPIO_PinInit(PinNameToModule[gpio], PinNameToPin[gpio], config);
   if (PinNameToConfig[gpio].interruptMode != kGPIO_NoIntmode) {
     g_irq_handlers[gpio] = std::move(cb);
+    g_irq_debounce_us[gpio] = debounce_interval_us;
+    g_irq_last_time_us[gpio] = TimerMicros();
     GPIO_PinSetInterruptConfig(PinNameToModule[gpio], PinNameToPin[gpio],
                                PinNameToConfig[gpio].interruptMode);
     GPIO_PortClearInterruptFlags(
@@ -598,12 +617,13 @@ void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode, GpioCallback cb) 
     NVIC_SetPriority(PinNameToIRQ[gpio], 5);
   } else {
     DisableIRQ(PinNameToIRQ[gpio]);
-    g_irq_handlers[gpio] = [](){};
+    g_irq_handlers[gpio] = []() {};
+    g_irq_debounce_us[gpio] = 0;
+    g_irq_last_time_us[gpio] = 0;
   }
 }
 
-void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb) {
-}
+void GpioRegisterIrqHandler(Gpio gpio, GpioCallback cb) {}
 }  // namespace coralmicro
 
 #define GPIO_IRQHandler(base, irq)      \
