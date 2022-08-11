@@ -128,8 +128,8 @@ void ProcessClient(int client_socket) {
 }
 
 [[noreturn]] void Main() {
-  printf("Coral Micro Audio Streaming Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Audio Streaming Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   const int server_socket = SocketServer(kPort, 5);

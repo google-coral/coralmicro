@@ -73,8 +73,8 @@ void TakePicture(struct jsonrpc_request* r) {
 }
 
 void Main() {
-  printf("Coral Micro RPC Server Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("RPC Server Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   jsonrpc_init(nullptr, nullptr);

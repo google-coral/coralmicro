@@ -25,8 +25,8 @@ namespace coralmicro {
 namespace {
 //! [gpio-callback] Doxygen snippet for gpio.h
 [[noreturn]] void Main() {
-  printf("Coral Micro Button LED Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Button LED Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   printf("Press the user button.\r\n");

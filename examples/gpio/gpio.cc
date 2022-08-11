@@ -22,8 +22,8 @@ namespace coralmicro {
 namespace {
 
 [[noreturn]] void Main() {
-  printf("Coral Micro GPIO Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("GPIO Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   constexpr Gpio kGpiosToTest[] = {

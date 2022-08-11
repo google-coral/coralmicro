@@ -68,7 +68,7 @@ std::atomic<int32_t> g_audio_buffer_end_index = 0;
 int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
 
 [[noreturn]] void Main() {
-  printf("Coral Micro Micro Speech Example!\r\n");
+  printf("Micro Speech Example!\r\n");
 
   // Setup audio
   AudioDriver driver(g_audio_buffers);

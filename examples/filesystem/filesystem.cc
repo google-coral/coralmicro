@@ -73,8 +73,8 @@ bool MkdirOrExists(const char* path) {
 }
 
 void Main() {
-  printf("Coral Micro Filesystem Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Filesystem Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   printf("Begin filesystem example\r\n");

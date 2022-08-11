@@ -42,7 +42,7 @@ void HandleM7Message(const uint8_t data[kIpcMessageBufferDataSize]) {
 
 extern "C" void app_main(void* param) {
   (void)param;
-  printf("Coral Micro Multicore IPC M4 Example!\r\n");
+  printf("M4 started.\r\n");
 
   coralmicro::IpcM4::GetSingleton()->RegisterAppMessageHandler(
       coralmicro::HandleM7Message);

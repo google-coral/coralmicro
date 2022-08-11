@@ -32,8 +32,8 @@ void HandleM4Message(const uint8_t data[kIpcMessageBufferDataSize]) {
 }
 
 [[noreturn]] void Main() {
-  printf("Coral Micro Multicore IPC M7 Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Multicore IPC Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   auto* ipc = IpcM7::GetSingleton();

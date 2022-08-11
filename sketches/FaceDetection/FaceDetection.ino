@@ -26,10 +26,10 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void setup() {
   Serial.begin(115200);
-  // Turn on Status LED to shows board is on.
+  // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Coral Micro Arduino Face Detection!");
+  Serial.println("Arduino Face Detection!");
 
   SD.begin();
 

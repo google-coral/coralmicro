@@ -100,8 +100,8 @@ void RunBodypix(struct jsonrpc_request* r) {
 }
 
 void Main() {
-  printf("Coral Micro Bodypix Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Bodypix Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   tflite::MicroErrorReporter error_reporter;

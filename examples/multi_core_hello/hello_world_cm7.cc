@@ -23,8 +23,8 @@
 extern "C" [[noreturn]] void app_main(void *param) {
   (void)param;
 
-  printf("Coral Micro Multicore Hello World M7 Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Multicore Hello World Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(coralmicro::Led::kStatus, true);
 
   coralmicro::IpcM7::GetSingleton()->StartM4();

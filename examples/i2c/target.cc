@@ -23,8 +23,8 @@
 namespace coralmicro {
 namespace {
 void Main() {
-  printf("Coral Micro i2c Target Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("i2c Target Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   constexpr int kTargetAddress = 0x42;

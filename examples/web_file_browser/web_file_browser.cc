@@ -186,8 +186,8 @@ class FileHttpServer : public HttpServer {
 };
 
 void Main() {
-  printf("Coral Micro Web File Browser Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Web File Browser Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   FileHttpServer http_server;

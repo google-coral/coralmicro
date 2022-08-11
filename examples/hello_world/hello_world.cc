@@ -20,10 +20,9 @@
 
 extern "C" [[noreturn]] void app_main(void *param) {
   (void)param;
-  printf("Coral Micro Hello World Example!\r\n");
-  // Status LED turn on to shows board is on.
+  // Turn on Status LED to show the board is on.
   LedSet(coralmicro::Led::kStatus, true);
 
-  printf("Hello world.\r\n");
+  printf("Hello world!\r\n");
   vTaskSuspend(nullptr);
 }

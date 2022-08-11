@@ -43,8 +43,8 @@ HttpServer::Content UriHandler(const char* path) {
 }
 
 void Main() {
-  printf("Coral Micro HTTP Server Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("HTTP Server Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   printf("Starting server...\r\n");

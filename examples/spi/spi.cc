@@ -26,8 +26,8 @@ namespace coralmicro {
 namespace {
 // [start-sphinx-snippet:spi]
 void Main() {
-  printf("Coral Micro Multicore LED M4 Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("SPI Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   constexpr int kTransferBytes = 256;

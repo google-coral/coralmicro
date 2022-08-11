@@ -39,8 +39,8 @@ constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 [[noreturn]] void Main() {
-  printf("Coral Micro Face Detection Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Face Detection Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   std::vector<uint8_t> model;

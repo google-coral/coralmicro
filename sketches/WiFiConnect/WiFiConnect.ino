@@ -36,10 +36,10 @@ void printMacAddress(uint8_t* mac) {
 
 void setup() {
   Serial.begin(115200);
-  // Turn on Status LED to shows board is on.
+  // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Coral Micro Arduino Wi-Fi Connect!");
+  Serial.println("Arduino Wi-Fi Connect!");
 
   int connected = WL_DISCONNECTED;
   if (strlen(kPsk) > 0) {

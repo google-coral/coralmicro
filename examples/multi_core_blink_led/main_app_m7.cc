@@ -21,7 +21,7 @@
 
 extern "C" void app_main(void* param) {
   (void)param;
-  printf("Coral Micro Multicore LED M7 Example!\r\n");
+  printf("Multicore LED Example!\r\n");
 
   coralmicro::IpcM7::GetSingleton()->StartM4();
   CHECK(coralmicro::IpcM7::GetSingleton()->M4IsAlive(500));

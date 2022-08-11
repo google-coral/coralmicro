@@ -27,8 +27,8 @@
 namespace coralmicro {
 // [start-sphinx-snippet:dac-adc]
 [[noreturn]] void Main() {
-  printf("Coral Micro Analog Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Analog Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   AdcInit();

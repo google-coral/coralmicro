@@ -23,8 +23,8 @@
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
 
-  printf("Coral Micro Console Read Write Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Console Read Write Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(coralmicro::Led::kStatus, true);
 
   printf("Type into the serial console.\r\n");

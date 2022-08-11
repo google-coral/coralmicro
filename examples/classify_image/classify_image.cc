@@ -40,8 +40,8 @@ constexpr int kTensorArenaSize = 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void Main() {
-  printf("Coral Micro Classify Image Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Classify Image Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   std::vector<uint8_t> model;

@@ -40,8 +40,8 @@ constexpr char kModelPath[] =
 constexpr char kTestInputPath[] = "/models/posenet_test_input_324.bin";
 
 void Main() {
-  printf("Coral Micro Posenet Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Posenet Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   tflite::MicroErrorReporter error_reporter;

@@ -26,8 +26,8 @@ namespace coralmicro {
 namespace {
 // [start-sphinx-snippet:pwm]
 [[noreturn]] void Main() {
-  printf("Coral Micro PWM Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("PWM Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   PwmInit();

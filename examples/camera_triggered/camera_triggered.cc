@@ -59,8 +59,8 @@ void GetCapturedImage(struct jsonrpc_request* request) {
 }
 
 [[noreturn]] void Main() {
-  printf("Coral Micro Camera Triggered Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Camera Triggered Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   // Starting Camera in triggered mode.

@@ -25,8 +25,8 @@
 namespace coralmicro {
 namespace {
 void Main() {
-  printf("Coral Micro Security Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Security Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   // Initializes the A71 chip.

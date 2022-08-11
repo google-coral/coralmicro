@@ -24,12 +24,13 @@ namespace coralmicro {
 namespace {
 // [start-sphinx-snippet:blink-led]
 [[noreturn]] void Main() {
-  printf("Coral Micro Blink LED Example!\r\n");
+  printf("Blink LED Example!\r\n");
+  // Turn on Status LED to show the board is on.
+  LedSet(Led::kStatus, true);
 
   bool on = true;
   while (true) {
     on = !on;
-    LedSet(Led::kStatus, on);
     LedSet(Led::kUser, on);
     vTaskDelay(pdMS_TO_TICKS(500));
   }

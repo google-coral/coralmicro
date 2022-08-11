@@ -25,8 +25,8 @@
 namespace coralmicro {
 namespace {
 void Main() {
-  printf("Coral Micro i2c Controller Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("i2c Controller Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   auto config = I2cGetDefaultConfig(coralmicro::I2c::kI2c1);

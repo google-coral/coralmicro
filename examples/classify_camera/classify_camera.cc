@@ -108,8 +108,8 @@ void ClassifyFromCamera(struct jsonrpc_request* r) {
 }
 
 void Main() {
-  printf("Coral Micro Classify Camera Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Classify Camera Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   std::vector<uint8_t> model;

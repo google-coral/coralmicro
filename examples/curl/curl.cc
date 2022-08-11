@@ -106,8 +106,8 @@ void PerformDnsLookup(const char* hostname, ip_addr_t* addr) {
 }
 
 void Main() {
-  printf("Coral Micro Camera Curl Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Camera Curl Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   std::optional<std::string> our_ip_addr;

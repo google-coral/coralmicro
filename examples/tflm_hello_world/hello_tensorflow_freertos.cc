@@ -86,8 +86,8 @@ static void loop() {
 
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
-  printf("Coral Micro Hello Tensorflow FreeRTOS Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Hello Tensorflow FreeRTOS Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(coralmicro::Led::kStatus, true);
 
   static tflite::MicroErrorReporter micro_error_reporter;

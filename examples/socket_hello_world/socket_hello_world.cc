@@ -21,8 +21,8 @@
 
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
-  printf("Coral Micro Socket Hello World Example!\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Socket Hello World Example!\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(coralmicro::Led::kStatus, true);
 
   int listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);

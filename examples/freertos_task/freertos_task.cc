@@ -35,7 +35,7 @@ namespace {
 }
 
 void Main() {
-  printf("Coral Micro FreeRTOS Task Example!\r\n");
+  printf("FreeRTOS Task Example!\r\n");
 
   auto user_led = Led::kUser;
   xTaskCreate(&blink_task, "blink_user_led_task", configMINIMAL_STACK_SIZE,

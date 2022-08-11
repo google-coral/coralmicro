@@ -24,8 +24,8 @@
 namespace coralmicro {
 namespace {
 void Main() {
-  printf("Coral Micro Camera Motion Detection example\r\n");
-  // Status LED turn on to shows board is on.
+  printf("Camera Motion Detection example\r\n");
+  // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   TimerHandle_t motion_detection_timer = xTimerCreate(
