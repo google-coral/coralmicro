@@ -82,6 +82,7 @@ class PmicTask : public QueueTask<pmic::Request, pmic::Response, kPmicTaskName,
   bool SetPage(uint16_t reg);
   bool Read(uint16_t reg, uint8_t* val);
   bool Write(uint16_t reg, uint8_t val);
+  bool Transfer(lpi2c_master_transfer_t *transfer);
 
   lpi2c_rtos_handle_t* i2c_handle_;
 };

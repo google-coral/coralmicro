@@ -25,6 +25,7 @@
 namespace coralmicro {
 namespace {
 constexpr uint8_t kPmicAddress = 0x58;
+constexpr uint32_t kMaxTransferRetries = 10;
 
 struct PmicRegisters {
   enum : uint16_t {
@@ -49,7 +50,7 @@ bool PmicTask::Read(uint16_t reg, uint8_t* val) {
   transfer.subaddressSize = sizeof(uint8_t);
   transfer.data = val;
   transfer.dataSize = sizeof(*val);
-  return LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success;
+  return Transfer(&transfer);
 }
 
 bool PmicTask::Write(uint16_t reg, uint8_t val) {
@@ -63,7 +64,7 @@ bool PmicTask::Write(uint16_t reg, uint8_t val) {
   transfer.subaddressSize = sizeof(uint8_t);
   transfer.data = &val;
   transfer.dataSize = sizeof(val);
-  return LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success;
+  return Transfer(&transfer);
 }
 
 bool PmicTask::SetPage(uint16_t reg) {
@@ -80,7 +81,28 @@ bool PmicTask::SetPage(uint16_t reg) {
   transfer.subaddressSize = sizeof(uint8_t);
   transfer.data = &page_con_reg;
   transfer.dataSize = sizeof(page_con_reg);
-  return LPI2C_RTOS_Transfer(i2c_handle_, &transfer) == kStatus_Success;
+  return Transfer(&transfer);
+}
+
+bool PmicTask::Transfer(lpi2c_master_transfer_t *transfer) {
+  status_t res = kStatus_Success;
+  uint32_t attempts = 0;
+
+  do {
+    if (res == kStatus_LPI2C_Busy) {
+      taskYIELD();
+    } else if (res == kStatus_LPI2C_ArbitrationLost) {
+      attempts++;
+      if (attempts >= kMaxTransferRetries) {
+        break;
+      } else {
+        // Retry right away.
+      }
+    }
+    res = LPI2C_RTOS_Transfer(i2c_handle_, transfer);
+  } while((res == kStatus_LPI2C_Busy) || (res == kStatus_LPI2C_ArbitrationLost));
+
+  return res == kStatus_Success;
 }
 
 void PmicTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
