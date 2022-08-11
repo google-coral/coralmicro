@@ -162,10 +162,11 @@ void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode, GpioCallback cb);
 // @param gpio Pin to configure.
 // @param mode The style of interrupt to sense.
 // @param cb Callback function that will be invoked when the interrupt is
+// raised. This is called from interrupt context, so it should not do much
+// work.
 // @param debounce_interval_us Minimum interval in microseconds between repeated
 // invocations of `cb`. Useful for cases where the GPIO line could toggle back
-// and forth more frequently than expected, such as a mechanical button. raised.
-// This is called from interrupt context, so it should not do much work.
+// and forth more frequently than expected, such as a mechanical button.
 void GpioConfigureInterrupt(Gpio gpio, GpioInterruptMode mode, GpioCallback cb,
                             uint64_t debounce_interval_us);
 
