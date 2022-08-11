@@ -72,6 +72,7 @@
 #define CURL_DISABLE_TFTP 1
 
 #define USE_MBEDTLS 1
+#define USE_LWIPSOCK 1
 
 #define CURL_CA_BUNDLE "/ca-certificates.crt"
 
