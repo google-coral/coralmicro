@@ -492,35 +492,6 @@ target_link_libraries(libs_nxp_rt1176-sdk_wiced
     ${libs_nxp_rt1176-sdk_wiced_TARGET_LINK_LIBRARIES}
 )
 
-add_library_m7(libs_nxp_rt1176-sdk_wiced_mfgtest
-    WICED/WWD/internal/chips/43455/resources-mfgtest.c
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/wlu_server.c
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/wl/exe/wlu_server_shared.c
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/wl/exe/wlu_pipe.c
-    ${libs_nxp_rt1176-sdk_wiced_SOURCES}
-    DATA
-    ${PROJECT_SOURCE_DIR}/third_party/firmware/cypress/43455C0-mfgtest.bin
-    ${PROJECT_SOURCE_DIR}/third_party/firmware/cypress/43455C0-mfgtest.clm_blob
-)
-
-target_include_directories(libs_nxp_rt1176-sdk_wiced_mfgtest PUBLIC
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/include
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/common/include
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/shared/bcmwifi/include
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/libraries/test/wl_tool/43455C0/wl/exe
-    ${libs_nxp_rt1176-sdk_wiced_INCLUDE_DIRECTORIES}
-)
-
-target_compile_definitions(libs_nxp_rt1176-sdk_wiced_mfgtest PUBLIC
-    RWL_SERIAL
-    TARGET_wiced
-    ${libs_nxp_rt1176-sdk_wiced_COMPILE_DEFINITIONS}
-)
-
-target_link_libraries(libs_nxp_rt1176-sdk_wiced_mfgtest
-    ${libs_nxp_rt1176-sdk_wiced_TARGET_LINK_LIBRARIES}
-)
-
 add_library_m7(libs_nxp_rt1176-sdk-mbedtls
     mbedtls.cc
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/aes.c
