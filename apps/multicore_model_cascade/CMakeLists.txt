@@ -34,9 +34,7 @@ target_link_libraries(multicore_model_cascade
 )
 
 set(multicore_model_cascade_m4_SOURCES
-    image_provider.cc
     multicore_model_cascade_cm4.cc
-    main_functions.cc
     DATA
     ${PROJECT_SOURCE_DIR}/models/person_detect_model.tflite
     ${PROJECT_SOURCE_DIR}/models/posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite

@@ -61,10 +61,7 @@ constexpr int kMessageTypeImageData = 1;
 constexpr int kMessageTypePoseData = 2;
 constexpr int kLowPowerChange = 3;
 
-// Defines known attributes for the model that's used in this app.
-constexpr int kModelArenaSize = 1 * 1024 * 1024;
-constexpr int kExtraArenaSize = 1 * 1024 * 1024;
-constexpr int kTensorArenaSize = kModelArenaSize + kExtraArenaSize;
+constexpr int kTensorArenaSize = 1024 * 1024 * 2;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr char kModelPath[] =
     "/models/"
@@ -105,11 +102,10 @@ void CreatePoseJson(const std::vector<tensorflow::Pose>& poses, float threshold,
     StrAppend(json, "{\n");
     StrAppend(json, "  \"score\": %g,\n", pose.score);
     StrAppend(json, "  \"keypoints\": [\n");
-    for (int j = 0; j < coralmicro::tensorflow::kKeypoints; ++j) {
+    for (int j = 0; j < tensorflow::kKeypoints; ++j) {
       const auto& kp = pose.keypoints[j];
       StrAppend(json, "    [%g, %g, %g]", kp.score, kp.x, kp.y);
-      StrAppend(json,
-                j != coralmicro::tensorflow::kKeypoints - 1 ? ",\n" : "\n");
+      StrAppend(json, j != tensorflow::kKeypoints - 1 ? ",\n" : "\n");
     }
     StrAppend(json, "  ]\n");
     StrAppend(json, "}");
@@ -228,9 +224,9 @@ class PosenetTask : private Task<PosenetTask> {
       char cmd;
       CHECK(xQueuePeek(queue_, &cmd, portMAX_DELAY) == pdTRUE);
       CHECK(interpreter_->Invoke() == kTfLiteOk);
-      auto poses = coralmicro::tensorflow::GetPosenetOutput(interpreter_.get(),
-                                                            kThreshold);
+      auto poses = tensorflow::GetPosenetOutput(interpreter_.get(), kThreshold);
       if (!poses.empty()) {
+        printf("%s\r\n", tensorflow::FormatPosenetOutput(poses).c_str());
         CreatePoseJson(poses, kThreshold, &json);
         network_task_->Send(kMessageTypePoseData, json.data(), json.size());
       }
@@ -244,9 +240,9 @@ class PosenetTask : private Task<PosenetTask> {
   std::shared_ptr<tflite::MicroInterpreter> interpreter_;
 };
 
-class CameraTask : private Task<CameraTask> {
+class MainTask : private Task<MainTask> {
  public:
-  CameraTask(NetworkTask* network_task, PosenetTask* posenet_task)
+  MainTask(NetworkTask* network_task, PosenetTask* posenet_task)
       : Task("cascade_camera_task", kAppTaskPriority),
         network_task_(network_task),
         posenet_task_(posenet_task),
@@ -264,7 +260,7 @@ class CameraTask : private Task<CameraTask> {
     std::vector<uint8_t> input(kModelSize);
     std::vector<unsigned char> jpeg(1024 * 70);
 
-    TaskMessage message;
+    TaskMessage message{};
     while (true) {
       CHECK(xQueueReceive(queue_, &message, portMAX_DELAY) == pdTRUE);
 
@@ -272,16 +268,15 @@ class CameraTask : private Task<CameraTask> {
         case kCmdStart:
           configASSERT(!started);
           started = true;
-          coralmicro::CameraTask::GetSingleton()->Enable(
-              CameraMode::kStreaming);
-          printf("Camera: started\r\n");
+          CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
+          printf("M7 Main Task: started\r\n");
           QueueProcess();
           break;
         case kCmdStop:
           configASSERT(started);
-          coralmicro::CameraTask::GetSingleton()->Disable();
+          CameraTask::GetSingleton()->Disable();
           started = false;
-          printf("Camera: stopped\r\n");
+          printf("M7 Main Task: stopped\r\n");
           break;
         case kCmdProcess: {
           if (!started) {
@@ -295,7 +290,7 @@ class CameraTask : private Task<CameraTask> {
           fmt.filter = CameraFilterMethod::kBilinear;
           fmt.preserve_ratio = false;
           fmt.buffer = input.data();
-          coralmicro::CameraTask::GetSingleton()->GetFrame({fmt});
+          CameraTask::GetSingleton()->GetFrame({fmt});
 
           auto jpeg_size =
               JpegCompressRgb(input.data(), fmt.width, fmt.height,
@@ -348,7 +343,9 @@ void reset_count_rpc(struct jsonrpc_request* r) {
                          reset_stats.reset_reason);
 }
 
-void Main() {
+[[noreturn]] void Main() {
+  printf("Multicore Model Cascade!\r\n");
+
   constexpr WatchdogConfig wdt_config = {
       .timeout_s = 8,
       .pet_rate_s = 3,
@@ -360,30 +357,30 @@ void Main() {
       EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
   if (!tpu_context) {
     printf("Failed to get tpu context.\r\n");
-    return;
+    vTaskSuspend(nullptr);
   }
   std::vector<uint8_t> posenet_tflite;
-  if (!coralmicro::LfsReadFile(kModelPath, &posenet_tflite)) {
+  if (!LfsReadFile(kModelPath, &posenet_tflite)) {
     printf("ERROR: Failed to read model: %s\r\n", kModelPath);
-    return;
+    vTaskSuspend(nullptr);
   }
 
   // Starts the posenet engine.
   tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<2> resolver;
-  resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
+  resolver.AddCustom(kCustomOp, RegisterCustomOp());
   resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
   auto interpreter = std::make_shared<tflite::MicroInterpreter>(
       tflite::GetModel(posenet_tflite.data()), resolver, tensor_arena,
       kTensorArenaSize, &error_reporter);
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     printf("Failed to allocate tensor\r\n");
-    return;
+    vTaskSuspend(nullptr);
   }
   // Starts all tasks.
   NetworkTask network_task;
   PosenetTask posenet_task(&network_task, interpreter);
-  CameraTask camera_task(&network_task, &posenet_task);
+  MainTask main_task(&network_task, &posenet_task);
 
 #if defined(MULTICORE_MODEL_CASCADE_ETHERNET)
   if (!EthernetInit(/*default_iface=*/false)) {
@@ -409,6 +406,7 @@ void Main() {
   http_server.AddUriHandler(FileSystemUriHandler{});
   UseHttpServer(&http_server);
 
+  // This handler resume this m7 task, as soon as signal from m4 is received.
   IpcM7::GetSingleton()->RegisterAppMessageHandler(
       [handle = xTaskGetCurrentTaskHandle()](const uint8_t data[]) {
         vTaskResume(handle);
@@ -423,40 +421,41 @@ void Main() {
   bool low_power = true;
   vTaskSuspend(nullptr);
   while (true) {
-    printf("CM7 awoken\r\n");
     low_power = false;
     network_task.Send(kLowPowerChange, &low_power, 1);
     network_task.ResetPosenetTimer();
 
     // Start camera_task processing, which will start posenet_task.
-    camera_task.Start();
+    main_task.Start();
 
     while (true) {
-// For the demo, run 20 iterations of this loop - each contains a one
-// second delay. For normal operation, check that the posenet task hasn't
-// progressed for 5 seconds (i.e. no poses detected).
+// For the demo, run 20 iterations of this loop - each contains a one-second
+// delay. For normal operation, check that the posenet task hasn't progressed
+// for 5 seconds (i.e. no poses detected).
 #if defined(MULTICORE_MODEL_CASCADE_DEMO)
       if (count >= 20) {
+        printf("Transitioning back to M4\r\n");
         count = 0;
         break;
       }
       ++count;
       printf("M7 %d\r\n", count);
 #else
-      if (network_task.PosenetInactiveForMs(5000)) break;
+      if (network_task.PosenetInactiveForMs(5000)) {
+        printf("No poses detected for 5 seconds\r\n");
+        break;
+      }
 #endif  // defined(MULTICORE_MODEL_CASCADE_DEMO)
-
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
-    printf("Transition back to M4\r\n");
     low_power = true;
     network_task.Send(kLowPowerChange, &low_power, 1);
 
     // Stop camera_task processing. This will also stop posenet_task.
-    camera_task.Stop();
+    main_task.Stop();
 
-    IpcMessage msg;
+    IpcMessage msg{};
     msg.type = IpcMessageType::kApp;
     IpcM7::GetSingleton()->SendMessage(msg);
     vTaskSuspend(nullptr);
@@ -468,5 +467,4 @@ void Main() {
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();
-  vTaskSuspend(nullptr);
 }
