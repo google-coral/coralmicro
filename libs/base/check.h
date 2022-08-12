@@ -21,13 +21,30 @@
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
+#include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/fsl_device_registers.h"
 
-#define CHECK(a)                                                    \
-  do {                                                              \
-    if (!(a)) {                                                     \
-      printf("%s:%d %s was not true.\r\n", __FILE__, __LINE__, #a); \
-      vTaskSuspend(nullptr);                                        \
-    }                                                               \
+#if (__CORTEX_M == 7)
+#include "libs/base/console_m7.h"
+#define CHECK(a)                                                 \
+  do {                                                           \
+    if (!(a)) {                                                  \
+      coralmicro::ConsoleM7::GetSingleton()->EmergencyWrite(     \
+          "%s:%d %s was not true.\r\n", __FILE__, __LINE__, #a); \
+      vTaskSuspendAll();                                         \
+    }                                                            \
   } while (0)
+#elif (__CORTEX_M == 4)
+#include "libs/base/console_m4.h"
+#define CHECK(a)                                                        \
+  do {                                                                  \
+    if (!(a)) {                                                         \
+      coralmicro::ConsoleM4EmergencyWrite("%s:%d %s was not true.\r\n", \
+                                          __FILE__, __LINE__, #a);      \
+      vTaskSuspendAll();                                                \
+    }                                                                   \
+  } while (0)
+#else
+#error "Unsupported platform"
+#endif
 
 #endif  // LIBS_BASE_CHECK_H_

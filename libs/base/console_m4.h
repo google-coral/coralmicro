@@ -21,6 +21,7 @@
 
 namespace coralmicro {
 
+void ConsoleM4EmergencyWrite(const char* fmt, ...);
 void ConsoleM4SetBuffer(IpcStreamBuffer* buffer);
 
 }  // namespace coralmicro

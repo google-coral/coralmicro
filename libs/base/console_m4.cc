@@ -16,6 +16,7 @@
 
 #include "libs/base/console_m4.h"
 
+#include <array>
 #include <unistd.h>
 
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
@@ -24,6 +25,9 @@
 
 namespace {
 coralmicro::IpcStreamBuffer* console_buffer = nullptr;
+
+constexpr size_t kEmergencyBufferSize = 256;
+std::array<char, kEmergencyBufferSize> emergency_buffer;
 }  // namespace
 
 extern "C" int DbgConsole_SendDataReliable(uint8_t*, size_t);
@@ -53,6 +57,20 @@ extern "C" int _read(int handle, char* buffer, int size) {
 }
 
 namespace coralmicro {
+
+void ConsoleM4EmergencyWrite(const char* fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  int len = vsnprintf(emergency_buffer.data(), emergency_buffer.size(), fmt, ap);
+  va_end(ap);
+
+  DbgConsole_SendDataReliable(reinterpret_cast<uint8_t*>(emergency_buffer.data()), len);
+  DbgConsole_Flush();
+  if (console_buffer) {
+    xStreamBufferSend(console_buffer->stream_buffer, emergency_buffer.data(), len,
+                      portMAX_DELAY);
+  }
+}
 
 void ConsoleM4SetBuffer(IpcStreamBuffer* buffer) { console_buffer = buffer; }
 

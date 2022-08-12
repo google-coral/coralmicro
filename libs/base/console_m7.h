@@ -42,6 +42,8 @@ class ConsoleM7 {
     return (rx_buffer_available_ ? rx_buffer_[rx_buffer_read_] : -1);
   }
 
+  void EmergencyWrite(const char* fmt, ...);
+
  private:
   struct ConsoleMessage {
     int len;
@@ -82,6 +84,9 @@ class ConsoleM7 {
 
   static constexpr size_t kRxBufferSize = 64;
   std::array<uint8_t, kRxBufferSize> rx_buffer_;
+
+  static constexpr size_t kEmergencyBufferSize = 256;
+  std::array<char, kEmergencyBufferSize> emergency_buffer_;
   size_t rx_buffer_read_ = 0, rx_buffer_write_ = 0, rx_buffer_available_ = 0;
   SemaphoreHandle_t rx_mutex_;
 
