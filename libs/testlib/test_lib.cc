@@ -760,8 +760,8 @@ void CaptureAudio(struct jsonrpc_request* request) {
   } params{samples.data(), samples.data() + samples.size()};
 
   g_audio_driver.Enable(
-      config, &params, +[](void* param, const int32_t* buf, size_t size) {
-        auto* params = static_cast<AudioParams*>(param);
+      config, &params, +[](void* ctx, const int32_t* buf, size_t size) {
+        auto* params = static_cast<AudioParams*>(ctx);
         if (params->first + size <= params->last) {
           std::memcpy(params->first, buf, size * sizeof(buf[0]));
           params->first += size;

@@ -103,10 +103,10 @@ class AudioDriver {
   // Callback function type to receive audio samples.
   // Called directly by the ISR.
   //
-  // @param param Extra parameters for the callback function.
+  // @param ctx Extra parameters for the callback function.
   // @param dma_buffer Pointer to the audio buffer.
   // @param dma_buffer_size Size of the audio buffer in samples.
-  using Callback = void (*)(void* param, const int32_t* dma_buffer,
+  using Callback = void (*)(void* ctx, const int32_t* dma_buffer,
                             size_t dma_buffer_size);
   // Constructs an AudioDriver using provided amount and size of DMA buffers.
   //
@@ -127,19 +127,18 @@ class AudioDriver {
   //
   // @param config Configuration for the AudioDriver.
   // Used to check if there is space for the specific AudioDriver.
-  // @param callback_param Extra parameters for callback.
-  // @param callback Callback that defines how to process the audio sample.
+  // @param ctx Extra parameters for callback.
+  // @param fn Callback that defines how to process the audio sample.
   // @return True if successfully manages to turn on the microphone,
   // False otherwise.
-  bool Enable(const AudioDriverConfig& config, void* callback_param,
-              Callback callback);
+  bool Enable(const AudioDriverConfig& config, void* ctx, Callback fn);
   // Stops processing of new audio data and turns off microphone.
   void Disable();
 
  private:
   static void StaticPdmCallback(PDM_Type* base, pdm_edma_handle_t* handle,
-                                status_t status, void* userData) {
-    static_cast<AudioDriver*>(userData)->PdmCallback(base, handle, status);
+                                status_t status, void* user_data) {
+    static_cast<AudioDriver*>(user_data)->PdmCallback(base, handle, status);
   }
   void PdmCallback(PDM_Type* base, pdm_edma_handle_t* handle, status_t status);
 
@@ -158,8 +157,8 @@ class AudioDriver {
   volatile int pdm_transfer_index_;
   size_t pdm_transfer_count_;
 
-  void* callback_param_;
-  Callback callback_;
+  void* ctx_;
+  Callback fn_;
 };
 
 }  // namespace coralmicro

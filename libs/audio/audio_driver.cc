@@ -20,7 +20,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_dmamux.h"
 
-extern "C" void PDM_ERROR_IRQHandler(void) {
+extern "C" void PDM_ERROR_IRQHandler() {
   uint32_t status = 0;
   status = PDM_GetStatus(PDM);
   if (status & PDM_STAT_LOWFREQF_MASK) {
@@ -60,18 +60,18 @@ void AudioDriver::PdmCallback(PDM_Type* base, pdm_edma_handle_t* handle,
                               status_t status) {
   auto& pdm_transfer = pdm_transfers_[pdm_transfer_index_];
 
-  callback_(callback_param_,
-            const_cast<int32_t*>(
-                reinterpret_cast<volatile int32_t*>(pdm_transfer.data)),
-            pdm_transfer.dataSize / sizeof(int32_t));
+  fn_(ctx_,
+      const_cast<int32_t*>(
+          reinterpret_cast<volatile int32_t*>(pdm_transfer.data)),
+      pdm_transfer.dataSize / sizeof(int32_t));
 
   pdm_transfer_index_ = (pdm_transfer_index_ + 1) % pdm_transfer_count_;
 
   __DSB();
 }
 
-bool AudioDriver::Enable(const AudioDriverConfig& config, void* callback_param,
-                         Callback callback) {
+bool AudioDriver::Enable(const AudioDriverConfig& config, void* ctx,
+                         Callback fn) {
   if (config.num_dma_buffers > max_num_dma_buffers_) {
     printf("ERROR: Too many DMA buffers.\r\n");
     return false;
@@ -85,8 +85,8 @@ bool AudioDriver::Enable(const AudioDriverConfig& config, void* callback_param,
 
   pdm_transfer_index_ = 0;
   pdm_transfer_count_ = config.num_dma_buffers;
-  callback_param_ = callback_param;
-  callback_ = callback;
+  ctx_ = ctx;
+  fn_ = fn;
 
   PmicTask::GetSingleton()->SetRailState(PmicRail::kMic1V8, true);
 

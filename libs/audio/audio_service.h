@@ -154,7 +154,7 @@ class AudioReader {
   int UnderflowCount() const { return underflow_count_; }
 
  private:
-  static void Callback(void* param, const int32_t* buf, size_t size);
+  static void Callback(void* ctx, const int32_t* buf, size_t size);
 
   AudioDriver* driver_;
 

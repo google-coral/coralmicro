@@ -76,7 +76,7 @@ int16_t g_audio_buffer_out[kMaxAudioSampleSize] __attribute__((aligned(16)));
                            kDmaBufferSizeMs};
   driver.Enable(
       config, nullptr,
-      +[](void* param, const int32_t* buffer, size_t buffer_size) {
+      +[](void* ctx, const int32_t* buffer, size_t buffer_size) {
         int32_t offset = g_audio_buffer_end_index;
         for (size_t i = 0; i < buffer_size; ++i)
           g_audio_buffer[(offset + i) % kAudioBufferSize] = buffer[i] >> 16;

@@ -80,9 +80,9 @@ size_t AudioReader::FillBuffer() {
   return received_size;
 }
 
-void AudioReader::Callback(void* param, const int32_t* buf, size_t size) {
+void AudioReader::Callback(void* ctx, const int32_t* buf, size_t size) {
   portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-  auto* self = static_cast<AudioReader*>(param);
+  auto* self = static_cast<AudioReader*>(ctx);
   auto sent_size =
       self->ring_buffer_.SendFromISR(buf, size, &xHigherPriorityTaskWoken);
   if (size != sent_size) ++self->overflow_count_;
