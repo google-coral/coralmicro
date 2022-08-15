@@ -14,33 +14,24 @@
 # limitations under the License.
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly ARDUINO_CLI=${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli
+readonly PACKAGE_PY=${SCRIPT_DIR}/arduino/package.py
 
 function die {
     echo "$@" >/dev/stderr
     exit 1
 }
 
-ROOTDIR=''
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    if [[ ! $(type greadlink) > /dev/null ]]; then
-        die "Install greadlink: brew install coreutils"
-    fi
-    ROOTDIR=$(greadlink -f "${SCRIPT_DIR}")
-else
-    ROOTDIR=$(readlink -f "${SCRIPT_DIR}")
-fi
-readonly ROOTDIR
-
 function main {
     local usage=$(cat <<EOF
 Usage: docker_build.sh [-b <build_dir>]
-  -b <build_dir>   directory in which to generate artifacts (defaults to ${ROOTDIR}/build)
+  -b <build_dir>   directory in which to generate artifacts (defaults to ${SCRIPT_DIR}/build)
   -a               build arduino library archive
   -s               build all arduino sketches
   -n               build using ninja
 EOF
 )
-    local build_dir
+    local build_dir="${SCRIPT_DIR}/build"
     local build_arduino
     local build_sketches
     local args=$(getopt hmansb: $*)
@@ -77,9 +68,9 @@ EOF
 
     if [[ -z "${build_dir}" ]]; then
         if [[ ! -z "${ninja}" ]]; then
-            build_dir="${ROOTDIR}/build-ninja"
+            build_dir="${SCRIPT_DIR}/build-ninja"
         else
-            build_dir="${ROOTDIR}/build"
+            build_dir="${SCRIPT_DIR}/build"
         fi
     fi
 
@@ -91,8 +82,7 @@ EOF
 
     set -xe
 
-    mkdir -p ${build_dir}
-    cmake -B ${build_dir} -G "${generator}"
+    cmake -B ${build_dir} -G "${generator}" -S "${SCRIPT_DIR}"
 
     if [[ ! -z "${ninja}" ]]; then
         ninja -C ${build_dir}
@@ -101,19 +91,20 @@ EOF
     fi
 
     if [[ ! -z ${build_arduino} ]]; then
-        python3 -m pip install -r ${ROOTDIR}/arduino/requirements.txt
-        python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --core
-        python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --flashtool
-        cat <<EOF >${ROOTDIR}/arduino-cli.yaml
+        python3 -m pip install -r ${SCRIPT_DIR}/arduino/requirements.txt
+        python3 ${PACKAGE_PY} --output_dir=${build_dir} --core
+        python3 ${PACKAGE_PY} --output_dir=${build_dir} --flashtool
+
+        cat <<EOF >${SCRIPT_DIR}/arduino-cli.yaml
 board_manager:
   additional_urls:
     - file://${build_dir}/package_coral_index.json
 daemon:
   port: "50051"
 directories:
-  data: ${ROOTDIR}/.arduino15
-  downloads: ${ROOTDIR}/.arduino15/staging
-  user: ${ROOTDIR}/.arduino15/user
+  data: ${SCRIPT_DIR}/.arduino15
+  downloads: ${SCRIPT_DIR}/.arduino15/staging
+  user: ${SCRIPT_DIR}/.arduino15/user
 library:
   enable_unsafe_install: true
 logging:
@@ -126,50 +117,55 @@ metrics:
 sketch:
   always_export_binaries: false
 EOF
-    local platform_name=""
-    local flashtool_name=""
-    local cli_name=""
-    local cli_version="0.25.1"
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        platform_name="linux64"
-        flashtool_name="linux"
-        cli_name="Linux_64bit.tar.gz"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        platform_name="osx"
-        flashtool_name="mac"
-        cli_name="macOS_64bit.tar.gz"
-    elif [[ "$OSTYPE" == "win32" ]]; then
-        platform_name="windows"
-        flashtool_name="win"
-        cli_name="Windows_64bit.zip"
-    else
-        die "unkown platform name : $OSTYPE"
-    fi
+        local platform_name
+        local flashtool_name
+        local cli_name
+        local cli_version="0.25.1"
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            platform_name="linux64"
+            flashtool_name="linux"
+            cli_name="Linux_64bit.tar.gz"
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            platform_name="osx"
+            flashtool_name="mac"
+            cli_name="macOS_64bit.tar.gz"
+        elif [[ "$OSTYPE" == "win32" ]]; then
+            platform_name="windows"
+            flashtool_name="win"
+            cli_name="Windows_64bit.zip"
+        else
+            die "Unknown platform name : $OSTYPE"
+        fi
 
-    python3 -m http.server --directory ${build_dir} &
-    http_pid="$!"
-    trap "kill ${http_pid}" EXIT
-    python3 ${ROOTDIR}/arduino/package.py --output_dir=${build_dir} --manifest \
-    --manifest_revision=9.9.9 \
-    --core_url=http://localhost:8000/coral-micro-$(git rev-parse HEAD).tar.bz2 \
-    --core_sha256=$(sha256sum ${build_dir}/coral-micro-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
-    --${flashtool_name}_flashtool_url=http://localhost:8000/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 \
-    --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2 | cut -d ' ' -f 1) \
-    --arduino_cli_url=https://github.com/arduino/arduino-cli/releases/download/${cli_version}/arduino-cli_${cli_version}_${cli_name}
-    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core update-index
-    ${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli core install coral:coral_micro
-    if [[ ! -z ${build_sketches} ]]; then
-        for sketch in ${ROOTDIR}/sketches/*; do
-            for variant in coral_micro coral_micro_wifi; do
-                if [[ ${sketch} =~ WiFi ]]; then
-                  if [[ ! ${variant} =~ wifi ]]; then
-                    continue
-                  fi
-                fi
-                ${ROOTDIR}/third_party/arduino-cli/arduino-cli compile -b coral:coral_micro:${variant} ${sketch};
+        python3 -m http.server --directory ${build_dir} &
+        http_pid="$!"
+        trap "kill ${http_pid}" EXIT
+
+        local core_archive_name=coral-micro-$(git rev-parse HEAD).tar.bz2
+        local flashtool_archive_name=coral-flashtool-${platform_name}-$(git rev-parse HEAD).tar.bz2
+
+        python3 "${PACKAGE_PY}" --output_dir=${build_dir} --manifest \
+          --manifest_revision=9.9.9 \
+          --core_url=http://localhost:8000/${core_archive_name} \
+          --core_sha256=$(sha256sum ${build_dir}/${core_archive_name} | cut -d ' ' -f 1) \
+          --${flashtool_name}_flashtool_url=http://localhost:8000/${flashtool_archive_name} \
+          --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/${flashtool_archive_name} | cut -d ' ' -f 1) \
+          --arduino_cli_url=https://github.com/arduino/arduino-cli/releases/download/${cli_version}/arduino-cli_${cli_version}_${cli_name}
+        "${ARDUINO_CLI}" core update-index
+        "${ARDUINO_CLI}" core install coral:coral_micro
+
+        if [[ ! -z ${build_sketches} ]]; then
+            for sketch in ${SCRIPT_DIR}/sketches/*; do
+                for variant in coral_micro coral_micro_wifi; do
+                    if [[ ${sketch} =~ WiFi ]]; then
+                        if [[ ! ${variant} =~ wifi ]]; then
+                            continue
+                        fi
+                    fi
+                    "${ARDUINO_CLI}" compile -b coral:coral_micro:${variant} ${sketch};
+                done
             done
-        done
-    fi
+        fi
     fi
 }
 
