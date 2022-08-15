@@ -55,8 +55,8 @@ void AdcInit();
 // @param primary_side In single ended mode, this is the pin that's connected.
 //   In differential mode, this is the pin to use as the primary side.
 // @param differential Whether or not to run the ADC in differential mode.
-void AdcCreateConfig(AdcConfig& config, int channel,
-                     AdcSide primary_side, bool differential);
+void AdcCreateConfig(AdcConfig& config, int channel, AdcSide primary_side,
+                     bool differential);
 
 // Reads voltage values from an ADC.
 //

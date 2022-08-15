@@ -283,7 +283,7 @@ bool LfsWriteFile(const char* path, const uint8_t* buf, size_t size) {
 }
 
 bool LfsWriteFile(const char* path, const std::string& str) {
-  return LfsWriteFile(
-      path, reinterpret_cast<const uint8_t*>(str.c_str()), str.size());
+  return LfsWriteFile(path, reinterpret_cast<const uint8_t*>(str.c_str()),
+                      str.size());
 }
 }  // namespace coralmicro

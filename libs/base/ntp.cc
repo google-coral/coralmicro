@@ -18,20 +18,22 @@
 
 #include "libs/base/check.h"
 #include "libs/base/timer.h"
-#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/tcpip.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/apps/sntp.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/tcpip.h"
 
 namespace coralmicro {
 
 void NtpInit() {
-  tcpip_callback([](void*) -> void {
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, "0.pool.ntp.org");
-    sntp_setservername(1, "1.pool.ntp.org");
-    sntp_setservername(2, "2.pool.ntp.org");
-    sntp_setservername(3, "3.pool.ntp.org");
-    sntp_init();
-  }, nullptr);
+  tcpip_callback(
+      [](void*) -> void {
+        sntp_setoperatingmode(SNTP_OPMODE_POLL);
+        sntp_setservername(0, "0.pool.ntp.org");
+        sntp_setservername(1, "1.pool.ntp.org");
+        sntp_setservername(2, "2.pool.ntp.org");
+        sntp_setservername(3, "3.pool.ntp.org");
+        sntp_init();
+      },
+      nullptr);
 }
 
 }  // namespace coralmicro

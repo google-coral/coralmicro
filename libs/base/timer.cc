@@ -16,9 +16,10 @@
 
 #include "libs/base/timer.h"
 
+#include <sys/time.h>
+
 #include <climits>
 #include <ctime>
-#include <sys/time.h>
 
 #include "libs/base/check.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_gpt.h"
@@ -59,7 +60,7 @@ uint64_t TimerMicros() {
          static_cast<uint64_t>(GPT_GetCurrentTimerCount(GPT1));
 }
 
-void TimerGetRtcTime(struct tm* time) {
+void TimerGetRtcTime(struct tm *time) {
   snvs_hp_rtc_datetime_t hp_date;
   SNVS_HP_RTC_GetDatetime(SNVS, &hp_date);
   time->tm_year = hp_date.year - 1900;
@@ -104,7 +105,7 @@ extern "C" uint32_t vPortGetRunTimeCounterValue() {
   return static_cast<uint32_t>(coralmicro::TimerMicros());
 }
 
-extern "C" int _gettimeofday (struct timeval *__p, void *__tz) {
+extern "C" int _gettimeofday(struct timeval *__p, void *__tz) {
   struct tm now;
   coralmicro::TimerGetRtcTime(&now);
   __p->tv_sec = mktime(&now);

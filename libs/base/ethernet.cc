@@ -124,7 +124,8 @@ bool EthernetInit(bool default_iface) {
       .phyConfig = &phy_config,
   };
   auto mac_address = EthernetGetMacAddress();
-  std::memcpy(enet_config.macAddress, mac_address.data(), sizeof(enet_config.macAddress));
+  std::memcpy(enet_config.macAddress, mac_address.data(),
+              sizeof(enet_config.macAddress));
 
   // Set ENET1G TX_CLK to ENET2_CLK_ROOT
   IOMUXC_GPR->GPR5 &= ~IOMUXC_GPR_GPR5_ENET1G_TX_CLK_SEL_MASK;
@@ -152,8 +153,9 @@ bool EthernetInit(bool default_iface) {
     printf("Failed enabling PHY SSC, proceeding.\r\n");
   }
 
-  err_t err = netifapi_netif_add(&g_netif, &netif_ipaddr, &netif_netmask, &netif_gw,
-                                 &enet_config, ethernetif1_init, tcpip_input);
+  err_t err =
+      netifapi_netif_add(&g_netif, &netif_ipaddr, &netif_netmask, &netif_gw,
+                         &enet_config, ethernetif1_init, tcpip_input);
   if (err != ERR_OK) {
     return false;
   }

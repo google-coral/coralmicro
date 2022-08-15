@@ -34,8 +34,8 @@ void AdcInit() {
   LPADC_Init(LPADC1, &adc_config);
 }
 
-void AdcCreateConfig(AdcConfig& config, int channel,
-                     AdcSide primary_side, bool differential) {
+void AdcCreateConfig(AdcConfig& config, int channel, AdcSide primary_side,
+                     bool differential) {
   GetDefaultConfig(config);
   config.device = LPADC1;
 

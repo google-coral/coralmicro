@@ -84,7 +84,7 @@ bool PmicTask::SetPage(uint16_t reg) {
   return Transfer(&transfer);
 }
 
-bool PmicTask::Transfer(lpi2c_master_transfer_t *transfer) {
+bool PmicTask::Transfer(lpi2c_master_transfer_t* transfer) {
   status_t res = kStatus_Success;
   uint32_t attempts = 0;
 
@@ -100,7 +100,8 @@ bool PmicTask::Transfer(lpi2c_master_transfer_t *transfer) {
       }
     }
     res = LPI2C_RTOS_Transfer(i2c_handle_, transfer);
-  } while((res == kStatus_LPI2C_Busy) || (res == kStatus_LPI2C_ArbitrationLost));
+  } while ((res == kStatus_LPI2C_Busy) ||
+           (res == kStatus_LPI2C_ArbitrationLost));
 
   return res == kStatus_Success;
 }

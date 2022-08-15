@@ -94,7 +94,6 @@ bool I2cInitTarget(I2cConfig& config, uint8_t address, TargetCallback callback);
 bool I2cControllerRead(I2cConfig& config, uint8_t address, uint8_t* buffer,
                        size_t count);
 
-
 // Writes data on the configured bus, in `controller` mode.
 //
 // @param config `I2cConfig` for the configured bus.
