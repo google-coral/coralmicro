@@ -22,7 +22,7 @@ coral_micro.elfloader.file={runtime.platform.path}/bootloaders/coral_micro/elflo
 coral_micro.flashloader.file={runtime.platform.path}/bootloaders/coral_micro/flashloader.srec
 coral_micro.upload.tool=flashtool
 coral_micro.upload.protocol=
-coral_micro.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
+coral_micro.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
 coral_micro.vid.0=0x18d1
 coral_micro.pid.0=0x9307
 coral_micro.vid.1=0x18d1
@@ -68,7 +68,7 @@ coral_micro_wifi.flashloader.file={runtime.platform.path}/bootloaders/coral_micr
 coral_micro_wifi.data.dir={runtime.platform.path}/variants/coral_micro_wifi/data
 coral_micro_wifi.upload.tool=flashtool
 coral_micro_wifi.upload.protocol=
-coral_micro_wifi.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --strip --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data --data_dir={data.dir} {upload.extra_flags}
+coral_micro_wifi.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data --data_dir={data.dir} {upload.extra_flags}
 coral_micro_wifi.vid.0=0x18d1
 coral_micro_wifi.pid.0=0x9307
 coral_micro_wifi.vid.1=0x18d1

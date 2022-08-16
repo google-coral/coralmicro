@@ -248,7 +248,14 @@ def FindElfloader(build_dir, cached_files):
                         return os.path.join(root, file)
     return None
 
-
+def StripElf(unstripped_elf_path, toolchain_path):
+    stripped_elf = tempfile.NamedTemporaryFile()
+    strip_args = [
+        os.path.join(toolchain_path, 'arm-none-eabi-strip' + exe_extension),
+        '-s', unstripped_elf_path,
+        '-o', stripped_elf.name]
+    subprocess.check_call(strip_args)
+    return stripped_elf
 
 """
 Gets the full set of libraries that comprise a target executable.
@@ -797,11 +804,6 @@ def main():
         %(choices)s. Requires the Coral PoE Add-on Board (or similar).')
 
     debug_group = parser.add_argument_group('Debugging options')
-    debug_group.add_argument(
-        '--strip', dest='strip', action='store_true',
-        help='If you specify an unstripped binary with --elf_path to use for \
-        debugging, this argument adds the stripped file to the default.elf \
-        package that gets flashed.')
     parser.add_argument(
         '--toolchain', type=str, required=False,
         help=argparse.SUPPRESS)
@@ -900,7 +902,6 @@ def main():
         data_dirs.append(os.path.abspath(dir))
 
     elf_path = args.elf_path if args.elf_path else None
-    unstripped_elf_path = args.elf_path if args.elf_path else None
     if args.build_dir:
         app_dir = None
         elf_name = None
@@ -915,27 +916,22 @@ def main():
             elf_name = 'usb_drive'
             app_dir = os.path.join(build_dir, 'apps', 'usb_drive')
         elf_path = os.path.join(app_dir, (
-            args.subapp if args.subapp else elf_name) + '.stripped') if elf_path is None else elf_path
-        unstripped_elf_path = os.path.join(app_dir, (
-            args.subapp if args.subapp else elf_name)) if unstripped_elf_path is None else unstripped_elf_path
+            args.subapp if args.subapp else elf_name)) if elf_path is None else elf_path
 
     print('Finding all necessary files')
     paths_to_check = [
         elf_path,
-        unstripped_elf_path,
         elfloader_path,
         elfloader_elf_path,
         blhost_path,
         flashloader_path,
         elftosb_path,
+        toolchain_path,
     ]
 
     if not elfloader_path:
         print('No elfloader found or provided!')
         return
-
-    if args.strip or args.debug:
-        paths_to_check.append(toolchain_path)
 
     if not args.elfloader_path or not args.elf_path:
         paths_to_check.append(build_dir)
@@ -949,10 +945,9 @@ def main():
             all_paths_exist = False
     if not all_paths_exist:
         return
-
-    if args.strip:
-        subprocess.check_call([os.path.join(toolchain_path, 'arm-none-eabi-strip'), '-s', elf_path, '-o', elf_path + '.stripped'])
-        elf_path = elf_path + '.stripped'
+    stripped_elf = StripElf(elf_path, toolchain_path)
+    unstripped_elf_path = elf_path
+    elf_path = stripped_elf.name
 
     data = not args.nodata
     program = not args.noprogram
@@ -1000,7 +995,7 @@ def main():
         data_files = None
         if not args.ram:
             print('Creating Filesystem')
-            data_files = CreateFilesystem(workdir, root_dir, build_dir, elf_path, cached_files, args.arduino, data_dirs, data)
+            data_files = CreateFilesystem(workdir, root_dir, build_dir, unstripped_elf_path, cached_files, args.arduino, data_dirs, data)
             if data_files is None:
                 print('Creating filesystem failed, exit')
                 return
