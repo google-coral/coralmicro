@@ -59,6 +59,13 @@ void BOARD_ConfigMPU(void)
     uint32_t size          = (uint32_t)__NCACHE_REGION_SIZE;
     uint32_t i = 0;
 
+#if defined(__USE_SHMEM)
+    extern uint32_t __RPMSG_SH_MEM_START[];
+    extern uint32_t __RPMSG_SH_MEM_SIZE[];
+    uint32_t rpmsgShmenStart = (uint32_t)__RPMSG_SH_MEM_START;
+    uint32_t rpmsgShmenSize  = (uint32_t)__RPMSG_SH_MEM_SIZE;
+#endif
+
 #if defined(__ICACHE_PRESENT) && __ICACHE_PRESENT
     /* Disable I cache and D cache */
     if (SCB_CCR_IC_Msk == (SCB_CCR_IC_Msk & SCB->CCR))
@@ -192,9 +199,31 @@ void BOARD_ConfigMPU(void)
     MPU->RBAR = ARM_MPU_RBAR(14, 0x41800000);
     MPU->RASR = ARM_MPU_RASR(0, ARM_MPU_AP_FULL, 2, 0, 0, 0, 0, ARM_MPU_REGION_SIZE_1MB);
 
+#if defined(__USE_SHMEM)
+    i = 0;
+
+    while ((rpmsgShmenSize >> i) > 0x1U)
+    {
+        i++;
+    }
+
+    if (i != 0)
+    {
+        /* The MPU region size should be 2^N, 5<=N<=32, region base should be multiples of size. */
+        assert(!(rpmsgShmenStart % rpmsgShmenSize));
+        assert(rpmsgShmenSize == (uint32_t)(1 << i));
+        assert(i >= 5);
+
+        /* Region 15 setting: Memory with device type, not shareable, non-cacheable */
+        MPU->RBAR = ARM_MPU_RBAR(15, rpmsgShmenStart);
+        MPU->RASR = ARM_MPU_RASR(0, ARM_MPU_AP_FULL, 2, 0, 0, 0, 0, i - 1);
+    }
+#else
+    /* Table 3-7: AIPS M7 */
     /* Region 15 setting: Memory with Device type, not shareable, non-cacheable */
     MPU->RBAR = ARM_MPU_RBAR(15, 0x42000000);
     MPU->RASR = ARM_MPU_RASR(0, ARM_MPU_AP_FULL, 2, 0, 0, 0, 0, ARM_MPU_REGION_SIZE_1MB);
+#endif
 
     /* Enable MPU */
     ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk);

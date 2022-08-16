@@ -22,11 +22,13 @@
 
 namespace coralmicro {
 
+extern "C" uint32_t __RPMSG_SH_MEM_START[];
+
 void Ipc::FreeRtosMessageEventHandler(uint16_t eventData) {
   BaseType_t higher_priority_woken = pdFALSE;
-  // TODO(atv): Get the base address of the shmem from a linker sym
   xStreamBufferSendCompletedFromISR(
-      reinterpret_cast<StreamBufferHandle_t>(0x202C0000U | eventData),
+      reinterpret_cast<StreamBufferHandle_t>(
+          reinterpret_cast<uint32_t>(__RPMSG_SH_MEM_START) | eventData),
       &higher_priority_woken);
   portYIELD_FROM_ISR(higher_priority_woken);
 }
@@ -35,6 +37,7 @@ void Ipc::SendMessage(const IpcMessage& message) {
   if (!tx_task_ || !tx_semaphore_) {
     return;
   }
+  // TODO(ljonas): Check usage of eSetValueWithOverwrite.
   xTaskNotifyIndexed(tx_task_, kSendMessageNotification,
                      reinterpret_cast<uint32_t>(&message),
                      eSetValueWithOverwrite);

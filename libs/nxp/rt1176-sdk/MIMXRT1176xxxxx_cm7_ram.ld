@@ -30,6 +30,7 @@ ENTRY(Reset_Handler)
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x01000000;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
 RPMSG_SHMEM_SIZE = DEFINED(__use_shmem__) ? 0x2000 : 0;
+NCACHE_SIZE = 0x8000;
 
 /*
  * Valid memory regions:
@@ -44,8 +45,8 @@ MEMORY
 {
   m_interrupts          (RX)  : ORIGIN = 0x00000800, LENGTH = 0x00000400
   m_text                (RX)  : ORIGIN = 0x00000c00, LENGTH = 0x0003F400
-  m_stack               (RX)  : ORIGIN = 0x20000000, LENGTH = STACK_SIZE
-  m_data                (RW)  : ORIGIN = 0x20000000 + STACK_SIZE, LENGTH = 0x00040000 - STACK_SIZE
+  m_ncache              (RW)  : ORIGIN = 0x20000000, LENGTH = NCACHE_SIZE
+  m_data                (RW)  : ORIGIN = 0x20000000 + NCACHE_SIZE, LENGTH = 0x00040000 - NCACHE_SIZE
   m_ocram               (RX)  : ORIGIN = 0x20240000, LENGTH = 0x00080000
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x202C0000, LENGTH = RPMSG_SHMEM_SIZE
   m_heap                (RW)  : ORIGIN = 0x80000000, LENGTH = HEAP_SIZE
@@ -55,8 +56,11 @@ MEMORY
 /* Define output sections */
 SECTIONS
 {
-  __NCACHE_REGION_START = ORIGIN(rpmsg_sh_mem);
-  __NCACHE_REGION_SIZE  = LENGTH(rpmsg_sh_mem);
+  __NCACHE_REGION_START = ORIGIN(m_ncache);
+  __NCACHE_REGION_SIZE  = LENGTH(m_ncache);
+
+  __RPMSG_SH_MEM_START = ORIGIN(rpmsg_sh_mem);
+  __RPMSG_SH_MEM_SIZE  = LENGTH(rpmsg_sh_mem);
 
   /* NOINIT section for rpmsg_sh_mem */
   .noinit_rpmsg_sh_mem (NOLOAD) : ALIGN(4)
@@ -364,14 +368,14 @@ SECTIONS
     *(NonCacheable.init)
     . = ALIGN(4);
     __noncachedata_init_end__ = .;   /* create a global symbol at initialized ncache data end */
-  } > m_data
+  } > m_ncache
   . = __noncachedata_init_end__;
   .ncache :
   {
     *(NonCacheable)
     . = ALIGN(4);
     __noncachedata_end__ = .;     /* define a global symbol at ncache data end */
-  } > m_data
+  } > m_ncache
   __SDRAM_ROM = __NDATA_ROM + (__noncachedata_init_end__ - __noncachedata_start__);
   .sdram_data : AT(__SDRAM_ROM)
   {
@@ -432,10 +436,10 @@ SECTIONS
   {
     . = ALIGN(8);
     . += STACK_SIZE;
-  } > m_stack
+  } > m_data
 
   /* Initializes stack on the end of block */
-  __StackTop   = ORIGIN(m_stack) + LENGTH(m_stack);
+  __StackTop   = ORIGIN(m_data) + LENGTH(m_data);
   __StackLimit = __StackTop - STACK_SIZE;
   PROVIDE(__stack = __StackTop);
 
