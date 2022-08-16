@@ -37,25 +37,25 @@ inline const char* const KeypointTypes[] = {
     "RIGHT_ANKLE",
 };
 
-// Represents a keypoint of a pose object.
+// The location and score of a pose keypoint.
 struct Keypoint {
-  // The keypoint's x position relative to the model size.
+  // The keypoint's x position, relative to the image size (0 to 1.0).
   float x;
-  // The keypoint's y position relative to the model size.
+  // The keypoint's y position, relative to the image size (0 to 1.0).
   float y;
-  // The keypoint's score.
+  // The keypoint's prediction score (0 to 1.0).
   float score;
 };
 
-// Represents a pose in the output object.
+// Represents an individual pose.
 struct Pose {
-  // The pose's score.
+  // The pose's overall prediction score.
   float score;
   // An array of keypoints in this pose.
   Keypoint keypoints[kKeypoints];
 };
 
-// Format the PoseNet outputs into a string.
+// Formats all the PoseNet output into a string.
 //
 // @param poses A vector contains all the poses in a posenet output.
 // @return A string showing the posenet's output.
@@ -63,9 +63,13 @@ std::string FormatPosenetOutput(const std::vector<Pose>& poses);
 
 // Gets the results from a PoseNet model in the form of a vector of poses.
 //
+// After you invoke the interpreter, pass it to this function to get structured
+// pose results.
+//
 // @param interpreter The already-invoked interpreter for your PoseNet model.
-// @param threshold The score threshold for results. All returned
-// pose results have a score greater-than-or-equal-to this value.
+// @param threshold The overall pose score threshold for results.
+// @return All detected poses with an overall score greater-than-or-equal-to
+// the threshold.
 std::vector<Pose> GetPosenetOutput(
     tflite::MicroInterpreter* interpreter,
     float threshold = -std::numeric_limits<float>::infinity());
