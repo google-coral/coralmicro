@@ -23,18 +23,21 @@ coral_micro.flashloader.file={runtime.platform.path}/bootloaders/coral_micro/fla
 coral_micro.upload.tool=flashtool
 coral_micro.upload.protocol=
 coral_micro.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
+# VID/PID for ELFLoader
 coral_micro.vid.0=0x18d1
 coral_micro.pid.0=0x9307
+# VID/PID for App mode
 coral_micro.vid.1=0x18d1
 coral_micro.pid.1=0x9308
-coral_micro.vid.2=0x0d28
-coral_micro.pid.2=0x0204
-coral_micro.vid.3=0x1fc9
-coral_micro.pid.3=0x0094
+# VID/PID for flashloader
+coral_micro.vid.2=0x1fc9
+coral_micro.pid.2=0x013d
+# VID/PID for Old ELFLoader
+coral_micro.vid.3=0x18d1
+coral_micro.pid.3=0x93fe
+# VID/PID for Old App mode
 coral_micro.vid.4=0x18d1
-coral_micro.pid.4=0x93fe
-coral_micro.vid.5=0x18d1
-coral_micro.pid.5=0x93ff
+coral_micro.pid.4=0x93ff
 menu.upload=Upload sketch
 coral_micro.menu.upload.both=Sketch + Data
 coral_micro.menu.upload.program=Sketch only
@@ -69,18 +72,21 @@ coral_micro_wifi.data.dir={runtime.platform.path}/variants/coral_micro_wifi/data
 coral_micro_wifi.upload.tool=flashtool
 coral_micro_wifi.upload.protocol=
 coral_micro_wifi.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data --data_dir={data.dir} {upload.extra_flags}
+# VID/PID for ELFLoader
 coral_micro_wifi.vid.0=0x18d1
 coral_micro_wifi.pid.0=0x9307
+# VID/PID for App mode
 coral_micro_wifi.vid.1=0x18d1
 coral_micro_wifi.pid.1=0x9308
-coral_micro_wifi.vid.2=0x0d28
-coral_micro_wifi.pid.2=0x0204
-coral_micro_wifi.vid.3=0x1fc9
-coral_micro_wifi.pid.3=0x0094
+# VID/PID for flashloader
+coral_micro_wifi.vid.2=0x1fc9
+coral_micro_wifi.pid.2=0x013d
+# VID/PID for Old ELFLoader
+coral_micro_wifi.vid.3=0x18d1
+coral_micro_wifi.pid.3=0x93fe
+# VID/PID for Old App mode
 coral_micro_wifi.vid.4=0x18d1
-coral_micro_wifi.pid.4=0x93fe
-coral_micro_wifi.vid.5=0x18d1
-coral_micro_wifi.pid.5=0x93ff
+coral_micro_wifi.pid.4=0x93ff
 menu.upload_wifi=Upload sketch
 coral_micro_wifi.menu.upload.both=Sketch + Data
 coral_micro_wifi.menu.upload.program=Sketch only
