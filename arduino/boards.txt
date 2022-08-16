@@ -94,3 +94,51 @@ coral_micro_wifi.menu.upload.data=Data only
 coral_micro_wifi.menu.upload.both.upload.extra_flags=
 coral_micro_wifi.menu.upload.program.upload.extra_flags=--nodata
 coral_micro_wifi.menu.upload.data.upload.extra_flags=--noprogram
+
+coral_micro_poe.name=Dev Board Micro + PoE Add-on
+coral_micro_poe.build.core=arduino
+coral_micro_poe.build.crossprefix=arm-none-eabi-
+coral_micro_poe.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+coral_micro_poe.build.variant=coral_micro_poe
+coral_micro_poe.build.mcu=cortex-m7
+coral_micro_poe.build.fpu=fpv5-d16
+coral_micro_poe.build.float-abi=hard
+coral_micro_poe.build.extra_flags=
+coral_micro_poe.build.architecture=cortex-m7
+coral_micro_poe.build.board=coral_micro_FREERTOS_POE
+coral_micro_poe.build.ldscript=linker_script.ld
+coral_micro_poe.lib.freertos="{build.variant.path}/libs/liblibs_arduino_coral_micro_poe_bundled.a"
+coral_micro_poe.lib.freertos.arch.define=
+coral_micro_poe.lib.freertos.defines={build.variant.path}/defines.txt
+coral_micro_poe.lib.freertos.ldflags={build.variant.path}/ldflags.txt
+coral_micro_poe.lib.freertos.cflags={build.variant.path}/cflags.txt
+coral_micro_poe.lib.freertos.cxxflags={build.variant.path}/cxxflags.txt
+coral_micro_poe.lib.freertos.includes={build.variant.path}/includes.txt
+coral_micro_poe.lib.freertos.extra_ldflags=
+coral_micro_poe.elfloader.file={runtime.platform.path}/bootloaders/coral_micro/elfloader.srec
+coral_micro_poe.flashloader.file={runtime.platform.path}/bootloaders/coral_micro/flashloader.srec
+coral_micro_poe.upload.tool=flashtool
+coral_micro_poe.upload.protocol=
+coral_micro_poe.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
+# VID/PID for ELFLoader
+coral_micro_poe.vid.0=0x18d1
+coral_micro_poe.pid.0=0x9307
+# VID/PID for App mode
+coral_micro_poe.vid.1=0x18d1
+coral_micro_poe.pid.1=0x9308
+# VID/PID for flashloader
+coral_micro_poe.vid.2=0x1fc9
+coral_micro_poe.pid.2=0x013d
+# VID/PID for Old ELFLoader
+coral_micro_poe.vid.3=0x18d1
+coral_micro_poe.pid.3=0x93fe
+# VID/PID for Old App mode
+coral_micro_poe.vid.4=0x18d1
+coral_micro_poe.pid.4=0x93ff
+menu.upload_wifi=Upload sketch
+coral_micro_poe.menu.upload.both=Sketch + Data
+coral_micro_poe.menu.upload.program=Sketch only
+coral_micro_poe.menu.upload.data=Data only
+coral_micro_poe.menu.upload.both.upload.extra_flags=
+coral_micro_poe.menu.upload.program.upload.extra_flags=--nodata
+coral_micro_poe.menu.upload.data.upload.extra_flags=--noprogram

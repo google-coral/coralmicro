@@ -342,6 +342,7 @@ def core_main(args, **kwargs):
                                '-G', 'Ninja'], cwd=build_dir)
         subprocess.check_call(['ninja', '-C', build_dir,
                                'bundling_target_libs_arduino_coral_micro',
+                               'bundling_target_libs_arduino_coral_micro_poe',
                                'bundling_target_libs_arduino_coral_micro_wifi',
                                'ELFLoader',
                                'flashloader'])
@@ -356,7 +357,7 @@ def core_main(args, **kwargs):
         ar_path = os.path.join(root_dir, 'third_party', toolchain_dir,
                                'gcc-arm-none-eabi-9-2020-q2-update', 'bin',
                                'arm-none-eabi-ar' + exe_extension)
-        for variant in ['coral_micro', 'coral_micro_wifi']:
+        for variant in ['coral_micro', 'coral_micro_poe', 'coral_micro_wifi']:
             libs_dir = os.path.join(core_out_dir, 'variants', variant, 'libs')
             os.makedirs(libs_dir, exist_ok=True)
             bundled_lib_path = os.path.join(libs_dir, f'liblibs_arduino_{variant}_bundled.a')

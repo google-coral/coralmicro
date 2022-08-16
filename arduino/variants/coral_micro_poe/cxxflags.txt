@@ -1,0 +1,17 @@
+-Wall
+-Wno-psabi
+-mthumb
+-fno-common
+-ffunction-sections
+-fdata-sections
+-ffreestanding
+-fno-builtin
+-mapcs-frame
+--specs=nano.specs
+--specs=nosys.specs
+-u _printf_float
+-g
+-Os
+-fno-rtti
+-fno-exceptions
+-std=gnu++17

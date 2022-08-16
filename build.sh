@@ -156,11 +156,21 @@ EOF
 
         if [[ ! -z ${build_sketches} ]]; then
             for sketch in ${SCRIPT_DIR}/sketches/*; do
-                for variant in coral_micro coral_micro_wifi; do
+                for variant in coral_micro coral_micro_wifi coral_micro_poe; do
                     if [[ ${sketch} =~ WiFi ]]; then
                         if [[ ! ${variant} =~ wifi ]]; then
                             continue
                         fi
+                    fi
+                    if [[ ${sketch} =~ PoE ]]; then
+                      if [[ ! ${variant} =~ poe ]]; then
+                        continue
+                      fi
+                    fi
+                    if [[ ${sketch} =~ Ethernet ]]; then
+                      if [[ ! ${variant} =~ poe ]]; then
+                        continue
+                      fi
                     fi
                     "${ARDUINO_CLI}" compile -b coral:coral_micro:${variant} ${sketch};
                 done
