@@ -83,7 +83,7 @@ bool DetectPerson(tflite::MicroInterpreter* interpreter) {
 [[noreturn]] void Main() {
   // This handler resume this m4 task, as soon as signal from m7 is received.
   IpcM4::GetSingleton()->RegisterAppMessageHandler(
-      [handle = xTaskGetCurrentTaskHandle()](const uint8_t data[]) {
+      [handle = xTaskGetCurrentTaskHandle()](const uint8_t[]) {
         vTaskResume(handle);
       });
   CameraTask::GetSingleton()->Init(I2C5Handle());

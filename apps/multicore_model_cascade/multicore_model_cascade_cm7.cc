@@ -202,7 +202,8 @@ class PosenetTask : private Task<PosenetTask> {
       : Task("cascade_posenet_task", kAppTaskPriority),
         network_task_(network_task_),
         queue_(xQueueCreate(1, sizeof(char))),
-        interpreter_(std::move(interpreter)) {
+        interpreter_(std::move(interpreter)),
+        tpu_state_mutex_(xSemaphoreCreateMutex()) {
     CHECK(queue_);
     printf("Posenet task started\r\n");
   }
@@ -223,14 +224,34 @@ class PosenetTask : private Task<PosenetTask> {
     while (true) {
       char cmd;
       CHECK(xQueuePeek(queue_, &cmd, portMAX_DELAY) == pdTRUE);
-      CHECK(interpreter_->Invoke() == kTfLiteOk);
-      auto poses = tensorflow::GetPosenetOutput(interpreter_.get(), kThreshold);
-      if (!poses.empty()) {
-        printf("%s\r\n", tensorflow::FormatPosenetOutput(poses).c_str());
-        CreatePoseJson(poses, kThreshold, &json);
-        network_task_->Send(kMessageTypePoseData, json.data(), json.size());
+      if (tpu_ctx_) {
+        {
+          coralmicro::MutexLock lock(tpu_state_mutex_);
+          CHECK(interpreter_->Invoke() == kTfLiteOk);
+        }
+        auto poses =
+            tensorflow::GetPosenetOutput(interpreter_.get(), kThreshold);
+        if (!poses.empty()) {
+          printf("%s\r\n", tensorflow::FormatPosenetOutput(poses).c_str());
+          CreatePoseJson(poses, kThreshold, &json);
+          network_task_->Send(kMessageTypePoseData, json.data(), json.size());
+        }
       }
       CHECK(xQueueReceive(queue_, &cmd, portMAX_DELAY) == pdTRUE);
+    }
+  }
+
+  void SetTpuPower(bool on) {
+    coralmicro::MutexLock lock(tpu_state_mutex_);
+    if (on) {
+      tpu_ctx_ =
+          EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
+      if (!tpu_ctx_) {
+        printf("Failed to turn on the tpu.\r\n");
+        vTaskSuspend(nullptr);
+      }
+    } else {
+      tpu_ctx_ = nullptr;
     }
   }
 
@@ -238,6 +259,8 @@ class PosenetTask : private Task<PosenetTask> {
   NetworkTask* network_task_;
   QueueHandle_t queue_;
   std::shared_ptr<tflite::MicroInterpreter> interpreter_;
+  SemaphoreHandle_t tpu_state_mutex_;
+  std::shared_ptr<EdgeTpuContext> tpu_ctx_;
 };
 
 class MainTask : private Task<MainTask> {
@@ -269,13 +292,15 @@ class MainTask : private Task<MainTask> {
           configASSERT(!started);
           started = true;
           CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
+          posenet_task_->SetTpuPower(/*on=*/true);
           printf("M7 Main Task: started\r\n");
           QueueProcess();
           break;
         case kCmdStop:
           configASSERT(started);
-          CameraTask::GetSingleton()->Disable();
           started = false;
+          CameraTask::GetSingleton()->Disable();
+          posenet_task_->SetTpuPower(/*on=*/false);
           printf("M7 Main Task: stopped\r\n");
           break;
         case kCmdProcess: {
@@ -353,12 +378,6 @@ void reset_count_rpc(struct jsonrpc_request* r) {
   };
   WatchdogStart(wdt_config);
 
-  auto tpu_context =
-      EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
-  if (!tpu_context) {
-    printf("Failed to get tpu context.\r\n");
-    vTaskSuspend(nullptr);
-  }
   std::vector<uint8_t> posenet_tflite;
   if (!LfsReadFile(kModelPath, &posenet_tflite)) {
     printf("ERROR: Failed to read model: %s\r\n", kModelPath);
@@ -408,7 +427,7 @@ void reset_count_rpc(struct jsonrpc_request* r) {
 
   // This handler resume this m7 task, as soon as signal from m4 is received.
   IpcM7::GetSingleton()->RegisterAppMessageHandler(
-      [handle = xTaskGetCurrentTaskHandle()](const uint8_t data[]) {
+      [handle = xTaskGetCurrentTaskHandle()](const uint8_t[]) {
         vTaskResume(handle);
       });
 
