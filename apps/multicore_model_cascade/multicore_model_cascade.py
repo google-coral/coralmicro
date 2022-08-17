@@ -226,6 +226,7 @@ class PoseCanvas(tk.Frame):
         self._canvas.place(x=0, y=0, width=width, height=height)
         self._canvas.bind('<Configure>', self._canvas_configure)
         self.bind('<Configure>', self._configure)
+        self._low_power_timer = None
 
     def update_image(self, image):
         self._image = image
