@@ -32,7 +32,7 @@ void Main() {
   auto config = I2cGetDefaultConfig(coralmicro::I2c::kI2c1);
   I2cInitController(config);
 
-  std::string serial = utils::GetSerialNumber();
+  std::string serial = GetSerialNumber();
   constexpr int kTargetAddress = 0x42;
   int kTransferSize = serial.length();
 

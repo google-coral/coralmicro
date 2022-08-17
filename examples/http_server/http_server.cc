@@ -53,7 +53,7 @@ void Main() {
   UseHttpServer(&http_server);
 
   std::string ip;
-  if (utils::GetUsbIpAddress(&ip)) {
+  if (GetUsbIpAddress(&ip)) {
     printf("GO TO:   http://%s/%s\r\n", ip.c_str(), "hello.html");
   }
   vTaskSuspend(nullptr);

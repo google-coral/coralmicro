@@ -52,7 +52,7 @@ void CdcEem::Init(uint8_t bulk_in_ep, uint8_t bulk_out_ep, uint8_t data_iface) {
                     nullptr) == pdPASS);
 
   std::string usb_ip;
-  if (!utils::GetUsbIpAddress(&usb_ip) ||
+  if (!GetUsbIpAddress(&usb_ip) ||
       !ipaddr_aton(usb_ip.c_str(), &netif_ipaddr_)) {
     IP4_ADDR(&netif_ipaddr_, 10, 10, 10, 1);
   }

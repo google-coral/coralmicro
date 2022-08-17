@@ -23,7 +23,7 @@
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/ip_addr.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wiced/43xxx_Wi-Fi/WICED/WWD/include/wwd_constants.h"
 
-namespace coralmicro::utils {
+namespace coralmicro {
 
 uint64_t GetUniqueId() {
   uint32_t fuse_val_hi, fuse_val_lo;
@@ -62,4 +62,4 @@ extern "C" wiced_country_code_t coral_micro_get_wiced_country_code(void) {
       wifi_country_code_out[0], wifi_country_code_out[1], wifi_revision));
 }
 
-}  // namespace coralmicro::utils
+}  // namespace coralmicro

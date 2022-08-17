@@ -42,7 +42,7 @@ namespace coralmicro {
 namespace {
 
 void SerialNumber(struct jsonrpc_request* r) {
-  auto serial = utils::GetSerialNumber();
+  auto serial = GetSerialNumber();
   jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", serial.size(),
                          serial.c_str());
 }

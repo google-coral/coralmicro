@@ -28,7 +28,6 @@
 #define MAC1_ADDR_HI (0xA90)
 
 namespace coralmicro {
-namespace utils {
 
 // Gets the 64-bit unique identifiers of the RT1176.
 // @returns 64-bit value that is unique to the device.
@@ -45,7 +44,6 @@ std::string GetSerialNumber();
 // @returns True if the address was successfully retrieved; false otherwise.
 bool GetUsbIpAddress(std::string* usb_ip_out);
 
-}  // namespace utils
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_UTILS_H_

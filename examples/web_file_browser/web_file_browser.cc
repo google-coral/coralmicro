@@ -195,7 +195,7 @@ void Main() {
   UseHttpServer(&http_server);
 
   std::string ip;
-  if (utils::GetUsbIpAddress(&ip)) {
+  if (GetUsbIpAddress(&ip)) {
     printf("BROWSE:   http://%s%s\r\n", ip.c_str(), kUrlPrefix);
     printf("UPLOAD:   curl -X POST http://%s%sfile --data-binary @file\r\n",
            ip.c_str(), kUrlPrefix);

@@ -70,7 +70,7 @@ void Main() {
   UseHttpServer(&http_server);
 
   std::string usb_ip;
-  if (utils::GetUsbIpAddress(&usb_ip)) {
+  if (GetUsbIpAddress(&usb_ip)) {
     printf("Serving on: http://%s\r\n", usb_ip.c_str());
   }
   vTaskSuspend(nullptr);

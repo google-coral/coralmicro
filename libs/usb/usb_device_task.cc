@@ -178,7 +178,7 @@ bool UsbDeviceTask::Init() {
 }
 
 UsbDeviceTask::UsbDeviceTask() {
-  serial_number_ = coralmicro::utils::GetSerialNumber();
+  serial_number_ = coralmicro::GetSerialNumber();
 
   constexpr uint32_t usb_clock_freq = 24000000;
   usb_phy_config_struct_t phy_config = {

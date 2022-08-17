@@ -176,7 +176,7 @@ void Main() {
   }
 #else
   std::string usb_ip;
-  if (!utils::GetUsbIpAddress(&usb_ip)) {
+  if (!GetUsbIpAddress(&usb_ip)) {
     printf("Failed to get USB's Ip Address\r\n");
     vTaskSuspend(nullptr);
   }

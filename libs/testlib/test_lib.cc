@@ -104,7 +104,7 @@ auto WiFiSafeConnect = [](void* wifi_network_params, uint32_t retries) {
 // Returns JSON results with the key "serial_number" and the serial, as a
 // string.
 void GetSerialNumber(struct jsonrpc_request* request) {
-  std::string serial = coralmicro::utils::GetSerialNumber();
+  std::string serial = coralmicro::GetSerialNumber();
   jsonrpc_return_success(request, "{%Q:%.*Q}", "serial_number", serial.size(),
                          serial.c_str());
 }
