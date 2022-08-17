@@ -24,6 +24,7 @@
 #define HAVE_STDBOOL_H 1
 #define HAVE_BOOL_T 1
 #define HAVE_STRUCT_TIMEVAL 1
+#define HAVE_GETTIMEOFDAY 1
 #define SIZEOF_CURL_OFF_T 4
 
 #define HAVE_RECV 1

@@ -16,6 +16,7 @@ set(CURL_SRC curl.cc)
 set(CURL_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_curl
+    libs_a71ch
 )
 
 add_executable_m7(curl_ethernet

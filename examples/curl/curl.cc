@@ -21,6 +21,7 @@
 #include "libs/base/wifi.h"
 #endif
 
+#include "libs/a71ch/a71ch.h"
 #include "libs/base/check.h"
 #include "libs/base/gpio.h"
 #include "libs/base/led.h"
@@ -140,6 +141,24 @@ void Main() {
     return;
   }
 
+  // Wait for the clock to be set via NTP.
+  struct timeval tv;
+  int gettimeofday_retries = 10;
+  do {
+    if (gettimeofday(&tv, nullptr) == 0) {
+      break;
+    }
+    gettimeofday_retries--;
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  } while (gettimeofday_retries);
+  if (!gettimeofday_retries) {
+    printf("Clock was never set via NTP.\r\n");
+    return;
+  }
+
+  // Initialize A71CH to provide entropy for SSL.
+  CHECK(A71ChInit());
+
   const char* hostname = "www.example.com";
   ip_addr_t dns_ip_addr;
   ip4_addr_set_any(&dns_ip_addr);
@@ -152,9 +171,12 @@ void Main() {
   }
 
   curl_global_init(CURL_GLOBAL_ALL);
-  std::string uri;
-  StrAppend(&uri, "http://%s:80/", hostname);
-  CurlRequest(uri.c_str());
+  constexpr const char* protocols[] = {"http", "https"};
+  for (auto proto : protocols) {
+    std::string uri;
+    StrAppend(&uri, "%s://%s/", proto, hostname);
+    CurlRequest(uri.c_str());
+  }
   curl_global_cleanup();
   printf("Done.\r\n");
 }

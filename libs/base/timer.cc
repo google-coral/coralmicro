@@ -30,6 +30,7 @@ namespace coralmicro {
 namespace {
 // Number of times the microseconds counter has rolled over.
 uint64_t g_micros_rollover = 0;
+bool g_rtc_set = false;
 }  // namespace
 
 void TimerInit() {
@@ -90,6 +91,8 @@ void TimerSetRtcTime(uint32_t sec) {
   SNVS_LP_SRTC_StartTimer(SNVS);
   SNVS_HP_RTC_TimeSynchronize(SNVS);
   SNVS_HP_RTC_StartTimer(SNVS);
+
+  coralmicro::g_rtc_set = true;
 }
 
 }  // namespace coralmicro
@@ -106,6 +109,9 @@ extern "C" uint32_t vPortGetRunTimeCounterValue() {
 }
 
 extern "C" int _gettimeofday(struct timeval *__p, void *__tz) {
+  if (!coralmicro::g_rtc_set)
+    return -1;
+
   struct tm now;
   coralmicro::TimerGetRtcTime(&now);
   __p->tv_sec = mktime(&now);
