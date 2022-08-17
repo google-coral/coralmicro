@@ -166,7 +166,7 @@ int CameraClass::setTestPattern(bool enable,
 
 int CameraClass::setStandby(bool enable) {
   if (enable) {
-    camera_->Enable(coralmicro::CameraMode::kStandBy);
+    camera_->Disable();
   } else {
     camera_->Enable(coralmicro::CameraMode::kStreaming);
   }

@@ -474,8 +474,8 @@ int CameraFormatBpp(CameraFormat fmt) {
 }
 
 bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
-  if (mode_ == CameraMode::kStandBy) {
-    printf("Camera is in standby mode, cannot capture frame.\r\n");
+  if (!enabled_) {
+    printf("Camera is not enabled, cannot capture frame.\r\n");
     return false;
   }
   if (mode_ == CameraMode::kTrigger && !GpioGet(Gpio::kCameraTrigger)) {
@@ -585,7 +585,7 @@ bool CameraTask::Write(uint16_t reg, uint8_t val) {
 void CameraTask::Init(lpi2c_rtos_handle_t* i2c_handle) {
   QueueTask::Init();
   i2c_handle_ = i2c_handle;
-  mode_ = CameraMode::kStandBy;
+  enabled_ = false;
   GetMotionDetectionConfigDefault(md_config_);
   md_config_.enable = false;
   GpioConfigureInterrupt(
@@ -616,15 +616,12 @@ void CameraTask::ReturnFrame(int index) {
 }
 
 bool CameraTask::Enable(CameraMode mode) {
-  if (mode == CameraMode::kStandBy) {
-    printf("kStandBy is an invalid mode for CameraTask::Enable\r\n");
-    return false;
-  }
   camera::Request req;
   req.type = camera::RequestType::kEnable;
   req.request.mode = mode;
-  SendRequest(req);
-  return true;
+  auto resp = SendRequest(req);
+  enabled_ = resp.response.enable.success;
+  return enabled_;
 }
 
 void CameraTask::Disable() {
@@ -787,7 +784,8 @@ camera::EnableResponse CameraTask::HandleEnableRequest(const CameraMode& mode) {
 }
 
 void CameraTask::HandleDisableRequest() {
-  SetMode(CameraMode::kStandBy);
+  enabled_ = false;
+  Write(CameraRegisters::kModeSelect, 0);
   CSI_TransferStop(CSI, &csi_handle_);
 }
 

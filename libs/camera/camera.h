@@ -30,9 +30,6 @@ namespace coralmicro {
 
 // The camera operating mode for `CameraTask::Enable()`.
 enum class CameraMode : uint8_t {
-  // Do not use this. If you want to conserve power when not using the camera,
-  // then use `CameraTask::Disable()`.
-  kStandBy = 0,
   // Streaming mode. The camera continuously captures and pushes raw images to
   // an internal image buffer. You can then fetch images one at a time in your
   // preferred format with `CameraTask::GetFrame()`.
@@ -297,6 +294,7 @@ class CameraTask
   CameraMode mode_;
   CameraTestPattern test_pattern_;
   CameraMotionDetectionConfig md_config_;
+  bool enabled_{false};
 };
 
 }  // namespace coralmicro
