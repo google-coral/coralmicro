@@ -48,6 +48,11 @@ EdgeTpuManager::EdgeTpuManager() : mutex_(xSemaphoreCreateMutex()) {
 void EdgeTpuManager::NotifyConnected(
     usb_host_edgetpu_instance_t* usb_instance) {
   usb_instance_ = usb_instance;
+
+  // The EdgeTPU has left the USB bus -- clean up state.
+  if (!usb_instance_) {
+    current_parameter_caching_token_ = 0;
+  }
 }
 
 std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice(
