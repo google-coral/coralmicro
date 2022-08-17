@@ -18,6 +18,8 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// This program runs on the M4. It must be started by the M7 program.
+
 extern "C" [[noreturn]] void app_main(void *param) {
   (void)param;
   printf("M4 started.\r\n");

@@ -20,6 +20,10 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 // Toggles the User LED in response to button presses.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e button_led
 
 namespace coralmicro {
 namespace {
@@ -29,7 +33,7 @@ namespace {
   // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
-  printf("Press the user button.\r\n");
+  printf("Press the User button.\r\n");
 
   // Register callback for the user button.
   GpioConfigureInterrupt(

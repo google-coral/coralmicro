@@ -25,9 +25,9 @@ running on a connected Dev Board Micro.
 
 First load classify_camera example onto the Dev Board Micro:
 
-    python3 scripts/flashtool.py -b build -e classify_camera
+    python3 scripts/flashtool.py -e classify_camera
 
-Then start this client on your computer:
+Then start this client on your Linux computer that's connected via USB:
 
     python3 examples/classify_camera/classify_camera_client.py
 

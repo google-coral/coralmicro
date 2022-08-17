@@ -19,8 +19,12 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-// Simple example to execute a SPI transaction on LPSPI6 (header).
+// Executes an SPI transaction on LPSPI6 (header pins).
 // Connect the SDI and SDO pins to each other to execute this successfully.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e spi
 
 namespace coralmicro {
 namespace {

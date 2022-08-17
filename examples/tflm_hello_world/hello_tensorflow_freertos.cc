@@ -27,6 +27,10 @@
 //
 // For more information about this model, see:
 // https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e tflm_hello_world
 
 extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask,
                                               char* pcTaskName) {

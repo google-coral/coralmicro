@@ -27,10 +27,11 @@ running on a connected Dev Board Micro.
 
 First load segment_camera example onto the Dev Board Micro:
 
-    python3 scripts/flashtool.py -b build -e segment_camera
+    python3 scripts/flashtool.py -e segment_camera
 
-Then start this client on your computer:
+Then start this client on your connected Linux computer:
 
+    python3 -m pip install examples/segment_camera/requirements.txt
     python3 examples/segment_camera/segment_camera_client.py
 
 You should see the image result appear in a new window.

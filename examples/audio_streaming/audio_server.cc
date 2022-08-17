@@ -25,6 +25,14 @@
 // Captures audio from the Dev Board Micro on-board microphone
 // and makes the audio stream available from a local server.
 // To receive the audio stream, run audio_client.py on your connected computer.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e audio_server
+//
+// Then receive the audio stream over USB from a Linux computer:
+//    python3 -m pip install -r examples/audio_server/requirements.txt
+//    python3 examples/audio_server/audio_client.py
 
 namespace coralmicro {
 namespace {

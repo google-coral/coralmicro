@@ -19,6 +19,12 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
+// Opens a TCP socket on port 31337 and sends a string.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e socket_hello_world
+
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
   printf("Socket Hello World Example!\r\n");

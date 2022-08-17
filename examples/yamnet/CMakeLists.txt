@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# set(YAMNET_CPU true) # If CPU YAMNet is desired, uncomment.
+# set(YAMNET_CPU true) # To run YamNet on the CPU, uncomment.
 if(YAMNET_CPU)
     add_compile_definitions(YAMNET_CPU)
     set(model_name yamnet.tflite)

@@ -22,6 +22,13 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Runs various example tasks using the A71CH secure element.
+// See the local README for details.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e security
+
 namespace coralmicro {
 namespace {
 void Main() {

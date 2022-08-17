@@ -30,6 +30,10 @@
 //
 // For more information about this model, see:
 // https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e tflm_micro_speech
 
 void RespondToCommand(tflite::ErrorReporter* error_reporter,
                       int32_t current_time, const char* found_command,

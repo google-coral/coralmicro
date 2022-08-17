@@ -20,6 +20,15 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Runs separate programs on the M7 and M4 core, each
+// printing "Hello" messages to the serial console.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e multi_core_hello
+//
+// This flashes both the M7 and M4 programs.
+
 extern "C" [[noreturn]] void app_main(void *param) {
   (void)param;
 

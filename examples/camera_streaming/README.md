@@ -11,6 +11,7 @@ There are 2 main app in this example: camera_streaming and camera_streaming_http
   - auto while balancing
 
 The board host this image over a 'get_image_from_camera' rpc endpoint that takes the following parameters:
+
 ```json
 [
   {
@@ -27,27 +28,39 @@ The board host this image over a 'get_image_from_camera' rpc endpoint that takes
 This example also demonstrates how the image can be served over usb, ethernet, or wifi network.
 
 ### Flashing
+
 - USB
+
 ```
-$ python3 scripts/flashtool.py --build_dir build --example camera_streaming --subapp camera_streaming_usb
+python3 scripts/flashtool.py --build_dir build --example camera_streaming --subapp camera_streaming_usb
 ```
+
 - Ethernet
+
 ```
-$ python3 scripts/flashtool.py --build_dir build --example camera_streaming --subapp camera_streaming_ethernet
+python3 scripts/flashtool.py --build_dir build --example camera_streaming --subapp camera_streaming_ethernet
 ```
+
 - WiFi
+
 ```
-$ python3 scripts/flashtool.py --build_dir build --example camera_streaming --subapp camera_streaming_wifi --wifi_ssid your-wifi-sid --wifi_psk your-wifi-password
+python3 scripts/flashtool.py --build_dir build \
+  --example camera_streaming --subapp camera_streaming_wifi \
+  --wifi_ssid your-wifi-sid --wifi_psk your-wifi-password
 ```
 
 ### Running the app
+
 Observes that the board starts up differently over different network mode, however it'll always output it's ip address:
+
 ```
 Starting Image RPC Server on: 10.10.10.1
 ```
+
 Use that ip address to run the app:
+
 ```
-$ python3 examples/camera_streaming/camera_streaming_app.py --host_ip 10.10.10.1
+python3 examples/camera_streaming/camera_streaming_app.py --host_ip 10.10.10.1
 ```
 
 ## camera_streaming_http
@@ -60,13 +73,18 @@ There are 2 endpoints:
 - `/camera_stream` which serves the image.
 
 ### Flashing
+
 ```
-$ python3 scripts/flashtool.py --build_dir build --example camera_streaming --subapp camera_streaming_http
+python3 scripts/flashtool.py --build_dir build \
+  --example camera_streaming --subapp camera_streaming_http
 ```
 
 ### Running the app
+
 After flashing the board, observe that it'll show the url:
+
 ```
 http://10.10.10.1/coral_micro_camera.html
 ```
+
 Click on that link and the app should show on your browser.

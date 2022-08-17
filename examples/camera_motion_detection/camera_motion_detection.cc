@@ -21,6 +21,13 @@
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/freertos_kernel/include/timers.h"
 
+// Uses the camera hardware's motion interrupt to turn on the User LED
+// when motion is detected.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e camera_motion_detection
+
 namespace coralmicro {
 namespace {
 void Main() {
@@ -41,6 +48,7 @@ void Main() {
   config.cb = [](void* param) {
     auto timer = reinterpret_cast<TimerHandle_t>(param);
     CHECK(timer);
+    printf("Motion detected\r\n");
     LedSet(Led::kUser, true);
     if (xTimerIsTimerActive(timer) == pdTRUE) {
       xTimerReset(timer, portMAX_DELAY);

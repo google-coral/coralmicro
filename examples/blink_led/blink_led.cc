@@ -18,7 +18,12 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-// Blinks the user LED (green) and status LED (orange)
+// Blinks the green User LED.
+// As a best practice, the Status LED also turns on to indicate board power.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e blink_led
 
 namespace coralmicro {
 namespace {

@@ -25,6 +25,14 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+// Recognizes various sounds heard with the on-board mic, using YamNet,
+// running on the Edge TPU (though it can be modified to run on the CPU).
+// See model details here: https://tfhub.dev/google/yamnet/1
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e yamnet
+
 namespace coralmicro {
 namespace {
 
@@ -50,6 +58,7 @@ constexpr int kTopK = 5;
 std::array<int16_t, tensorflow::kYamnetAudioSize> audio_input;
 
 #ifdef YAMNET_CPU
+// To run YamNet on the CPU, see the CMakeLists file to enable this.
 constexpr char kModelName[] = "/models/yamnet.tflite";
 constexpr bool kUseTpu = false;
 #else

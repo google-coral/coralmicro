@@ -24,7 +24,7 @@ running on the Dev Board Micro.
 
 First, load the rpc_server example onto the Dev Board Micro:
 
-    python3 scripts/flashtool.py -b build -e rpc_server
+    python3 scripts/flashtool.py -e rpc_server
 
 Then start this client on your computer:
 

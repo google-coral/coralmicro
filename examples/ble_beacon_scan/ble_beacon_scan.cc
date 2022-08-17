@@ -21,6 +21,14 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Scans for nearby Bluetooth devices.
+//
+// Requires the Coral Wireless Add-on.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e ble_beacon_scan
+
 namespace {
 void scan_cb(const bt_addr_le_t* addr, int8_t rssi, uint8_t adv_type,
              struct net_buf_simple* buf) {

@@ -43,9 +43,10 @@
 // the flashtool, which you can see in the local CMakeLists.txt file.
 // For example, here's how to flash the Wi-Fi version of this example:
 /*
-python3 scripts/flashtool.py -b build -e curl --subapp curl_wifi \
+python3 scripts/flashtool.py -e curl --subapp curl_wifi \
         --wifi_ssid network-name --wifi_psk network-password
 */
+
 namespace coralmicro {
 namespace {
 struct DnsCallbackArg {

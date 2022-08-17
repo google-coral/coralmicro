@@ -18,6 +18,12 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Prints "hello world" in the serial console.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e hello_world
+
 extern "C" [[noreturn]] void app_main(void *param) {
   (void)param;
   // Turn on Status LED to show the board is on.

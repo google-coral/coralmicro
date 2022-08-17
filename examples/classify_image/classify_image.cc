@@ -29,6 +29,10 @@
 // Performs image classification with MobileNet, running on the Edge TPU,
 // using a local bitmap image as input.
 // The top 3 class predictions are printed to the serial console.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e classify_image
 
 // [start-sphinx-snippet:classify-image]
 namespace coralmicro {

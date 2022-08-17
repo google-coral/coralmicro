@@ -18,6 +18,15 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Toggles each available GPIO on the two 12-pin headers.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e gpio
+//
+// These GPIOs are not powerful enough to drive an LED,
+// but you can observe the changes with a multimeter.
+
 namespace coralmicro {
 namespace {
 

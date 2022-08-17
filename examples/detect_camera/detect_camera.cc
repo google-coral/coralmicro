@@ -32,7 +32,8 @@
 
 // Runs a local server with an endpoint called 'detect_from_camera', which
 // will capture an image from the board's camera, run the image through an
-// object detection model and return the results in a JSON response.
+// object detection model on the Edge TPU and return the results in a JSON
+// response.
 //
 // The response includes only the top result with a JSON file like this:
 //
@@ -54,6 +55,14 @@
 //         }
 //     }
 // }
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e detect_camera
+//
+// Then trigger an inference over USB from a Linux computer:
+//    python3 -m pip install -r examples/detect_camera/requirements.txt
+//    python3 examples/detect_camera/detect_camera_client.py
 
 namespace coralmicro {
 namespace {

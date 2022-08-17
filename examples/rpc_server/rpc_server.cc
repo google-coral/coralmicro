@@ -22,6 +22,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
+
 // Runs a local server with two RPC endpoints: 'serial_number', which
 // returns the board's SN, and 'take_picture', which captures an image with
 // the board's camera and return it via JSON.
@@ -37,6 +38,14 @@
 //     'base64_data': image_bytes
 //     }
 // }
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e rpc_server
+//
+// Then trigger an RPC request over USB from a Linux computer:
+//    python3 -m pip install -r examples/rpc_server/requirements.txt
+//    python3 examples/rpc_server/rpc_client.py
 
 namespace coralmicro {
 namespace {

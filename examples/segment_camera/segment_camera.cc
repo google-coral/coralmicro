@@ -28,7 +28,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-// Runs a local server with an endpoint called 'segment_from_camera',
+// Runs a local HTTP server with an endpoint called 'segment_from_camera',
 // which will capture an image from the board's camera, run the image through a
 // segmentation model and return the results in a JSON response.
 //
@@ -44,6 +44,7 @@
 //     'output_mask': output_mask,
 //      }
 // }
+//
 // This can theoretically run any supported segmentation model but has only
 // been tested with keras_post_training_unet_mv2_128_quant_edgetpu.tflite
 // which comes from the tutorial at
@@ -52,6 +53,14 @@
 // Class 1: Pixel belonging to the pet.
 // Class 2: Pixel bordering the pet.
 // Class 3: None of the above/a surrounding pixel.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e segment_camera
+//
+// Then trigger an inference over USB from a Linux computer:
+//    python3 -m pip install -r examples/segment_camera/requirements.txt
+//    python3 examples/segment_camera/segment_camera_client.py
 
 namespace coralmicro {
 namespace {

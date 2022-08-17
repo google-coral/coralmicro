@@ -19,6 +19,7 @@
 
 // This runs on the M4 core and receives IPC messages from the M7
 // and toggles the user LED based on the messages received.
+// This must be started by the M7 program.
 
 namespace coralmicro {
 namespace {

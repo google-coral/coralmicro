@@ -18,6 +18,12 @@
 #include "libs/base/mutex.h"
 
 // Does nothing except start the M4, which runs blink_led_m4
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e multi_core_blink_led
+//
+// This flashes both the M7 and M4 programs.
 
 extern "C" void app_main(void* param) {
   (void)param;

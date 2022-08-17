@@ -21,6 +21,10 @@
 // Runs simple PWM cycles with pins PWM_A (pin 10 on the left-side header)
 // and PWM_B (pin 9 on the left-side header).
 // Note: These pins output a max of 1.8V
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e pwm
 
 namespace coralmicro {
 namespace {

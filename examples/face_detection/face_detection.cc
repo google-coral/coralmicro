@@ -27,6 +27,14 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+// Runs face detection on the Edge TPU, using the on-board camera, printing
+// results to the serial console and turning on the User LED when a face
+// is detected.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e face_detection
+
 namespace coralmicro {
 namespace {
 constexpr char kModelPath[] =

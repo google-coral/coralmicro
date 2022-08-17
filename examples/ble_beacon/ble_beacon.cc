@@ -21,6 +21,14 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Broadcasts device details to allow discovery with Bluetooth.
+//
+// Requires the Coral Wireless Add-on.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e ble_beacon
+
 #define DEVICE_NAME "Coral Dev Board Micro"
 #define DEVICE_NAME_LEN (sizeof(DEVICE_NAME) - 1)
 

@@ -32,7 +32,8 @@
 
 // Runs a local server with an endpoint called 'classification_from_camera',
 // which will capture an image from the board's camera, run the image through a
-// classification model and return the results in a JSON response.
+// classification model on the Edge TPU and return the results in a JSON
+// response.
 //
 // The response includes only the top result with a JSON file like this:
 //
@@ -47,6 +48,14 @@
 //     'id': id,
 //     'score': score,
 // }
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e classify_camera
+//
+// Then trigger an inference over USB from a Linux computer:
+//    python3 -m pip install -r examples/classify_camera/requirements.txt
+//    python3 examples/classify_camera/classify_camera_client.py
 
 namespace coralmicro {
 namespace {

@@ -22,6 +22,9 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Runs the board as an I2C controller device.
+// See the local README.
+
 namespace coralmicro {
 namespace {
 void Main() {

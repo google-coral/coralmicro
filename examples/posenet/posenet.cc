@@ -26,6 +26,10 @@
 
 // Runs pose estimation using PoseNet, running on the Edge TPU.
 // Scores and keypoint data is printed to the serial console.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e posenet
 
 // [start-sphinx-snippet:posenet]
 namespace coralmicro {

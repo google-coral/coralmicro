@@ -29,6 +29,10 @@
 // Performs object detection with SSD MobileNet, running on the Edge TPU,
 // using a local bitmap image as input.
 // Results (up to 3 detected objects) are printed to serial console.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e detect_image
 
 // [start-sphinx-snippet:detect-image]
 namespace coralmicro {

@@ -19,6 +19,10 @@
 #include "libs/base/tasks.h"
 
 // Reads character input from the serial console and writes it back.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e console_read_write
 
 extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;

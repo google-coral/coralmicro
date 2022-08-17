@@ -21,8 +21,12 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 // Reads analog input from ADC1 channel B (pin 4 on the left-side header)
-// and writes it to the DAC (pin 9 on the right-side header)
-// Note: The DAC outputs a max of 1.8V
+// and writes it to the DAC (pin 9 on the right-side header).
+// Note: The DAC outputs a max of 1.8V.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e analog
 
 namespace coralmicro {
 // [start-sphinx-snippet:dac-adc]

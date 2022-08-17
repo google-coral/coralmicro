@@ -20,6 +20,12 @@
 
 // This runs on the M7 core and sends IPC messages to the M4 with
 // instructions to toggle the user LED.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e multi_core_ipc
+//
+// This also flashes the M4 program; the M7 program starts the M4.
 
 namespace coralmicro {
 namespace {

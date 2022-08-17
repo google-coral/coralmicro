@@ -24,9 +24,9 @@ running on a connected Dev Board Micro.
 
 First load detect_camera example onto the Dev Board Micro:
 
-    python3 scripts/flashtool.py -b build -e detect_camera
+    python3 scripts/flashtool.py -e detect_camera
 
-Then start this client on your computer:
+Then start this client on your Linux computer that's connected via USB:
 
     python3 examples/detect_camera/detect_camera_client.py
 

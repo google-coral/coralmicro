@@ -24,8 +24,12 @@
 
 // Hosts a simple HTTP server on the Dev Board Micro.
 //
-// Run it and open a web browser on your computer to the URL
-// shown in the serial terminal, such as http://10.10.10.1/hello.html
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e http_server
+//
+// Then open a web browser on your Linux computer connected via USB to the
+// URL shown in the serial console, such as http://10.10.10.1/hello.html
 
 namespace coralmicro {
 namespace {

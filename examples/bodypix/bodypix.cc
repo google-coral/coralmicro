@@ -26,6 +26,21 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+// Runs body segmentation using BodyPix on the Edge TPU, returning one result
+// at a time. Inferencing starts only when an RPC client requests the
+// `run_bodypix` endpoint. The model receives continuous input from the camera
+// until the model returns a good result. At which point, the result is sent to
+// the RPC client and inferencing stops.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e bodypix
+//
+// Then trigger an inference over USB from a Linux computer:
+//    python3 -m pip install -r examples/bodypix/requirements.txt
+//    python3 examples/bodypix/bodypix_client.py
+
+
 namespace coralmicro {
 namespace {
 constexpr int kTensorArenaSize = 2 * 1024 * 1024;
@@ -44,12 +59,6 @@ void RunBodypix(struct jsonrpc_request* r) {
   // Starts the camera for live poses.
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
-
-  // Loop until a result is found
-  printf(
-      "Running Bodypix until a result with greater than %f confidence is "
-      "found\r\n",
-      kConfidenceThreshold);
   std::vector<uint8_t> image(model_width * model_height *
                              CameraFormatBpp(CameraFormat::kRgb));
   std::vector<tensorflow::Pose> results;
@@ -65,6 +74,11 @@ void RunBodypix(struct jsonrpc_request* r) {
   // Discard the first frame to ensure no power-on artifacts exist.
   CameraTask::GetSingleton()->GetFrame({fmt});
 
+  // Loop until a result is found
+  printf(
+      "Running Bodypix until a result with greater than %f confidence is "
+      "found\r\n",
+      kConfidenceThreshold);
   for (;;) {
     if (!CameraTask::GetSingleton()->GetFrame({fmt})) {
       jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);

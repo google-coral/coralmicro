@@ -19,7 +19,11 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-// Starts a second task to blink one LED in each task.
+// Starts a second FreeRTOS task to blink one LED in each task.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e freertos_task
 
 namespace coralmicro {
 namespace {

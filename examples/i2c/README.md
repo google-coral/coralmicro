@@ -1,6 +1,7 @@
 # I2C example
 
 This pair of applications demonstate the Dev Board Micro's I2C hardware.
+
 NOTE: Executing this example successfully requires two devices, and the devices
 need headers soldered to facilitate connecting the devices. You will also need
 breadboarding wires connect the board headers to each other.
@@ -23,16 +24,19 @@ Using a wire, connect I2C1_SDA (SDA1) of one device to I2C6_SDA (SDA6) on the ot
 Using a wire, connect I2C1_SCL (SCL1) of one device to I2C6_SCL (SCL6) on the other.
 
 On the device that you have used the I2C6 pins, flash i2c_target:
+
 ```
-$ python3 scripts/flashtool.py --example i2c --subapp i2c_target
+python3 scripts/flashtool.py -e i2c --subapp i2c_target
 ```
 
 On the device that you have used the I2C1 pins, flash i2c_controller:
+
 ```
-$ python3 scripts/flashtool.py --example i2c --subapp i2c_controller
+python3 scripts/flashtool.py -e i2c --subapp i2c_controller
 ```
 
 ## Running the example
+
 Power the device with i2c_target first -- it needs to be listening or the i2c_controller will fail.
 Power up the device with i2c_controller, and observe the console. You should be presented with output like:
 ```

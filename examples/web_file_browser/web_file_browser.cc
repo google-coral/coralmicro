@@ -30,6 +30,10 @@
 // Hosts an HTTP server on the Dev Board Micro, allowing connected clients
 // to browse files with a web browser, and push/pull files to the board with
 // curl commands.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e web_file_browser
 
 namespace coralmicro {
 namespace {

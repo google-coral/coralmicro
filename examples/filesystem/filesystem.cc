@@ -21,6 +21,12 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Creates, edits, reads, and removes files from the filesystem.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e filesystem
+
 namespace coralmicro {
 namespace {
 void PrintDirectory(lfs_dir_t* dir, const char* path, int num_tabs) {
