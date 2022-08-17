@@ -17,6 +17,7 @@ Generate package for Coral Dev Board Micro Arduino core.
 """
 
 import argparse
+import git
 import hashlib
 import json
 import os
@@ -30,7 +31,6 @@ import tarfile
 import urllib.request
 import zipfile
 import PyInstaller.__main__
-from git import Repo
 
 platform_dir = ''
 toolchain_dir = ''
@@ -38,13 +38,13 @@ exe_extension = ''
 pyinstaller_separator = ':'
 platform_name = ''
 system_name = platform.system()
-if (system_name == 'Windows'):
+if system_name == 'Windows':
      platform_dir = 'win'
      toolchain_dir = 'toolchain-win'
      exe_extension = '.exe'
      platform_name = 'windows'
      pyinstaller_separator = ';'
-elif (system_name == 'Darwin'):
+elif system_name == 'Darwin':
      platform_dir = 'mac'
      toolchain_dir = 'toolchain-mac'
      platform_name = 'osx'
@@ -55,11 +55,11 @@ else:
 
 def CreateFlashtoolExe(core_out_dir, root_dir):
     platform_flags = []
-    if (system_name == 'Windows'):
+    if system_name == 'Windows':
         try:
             libusb_1_0_25_7z = 'https://github.com/libusb/libusb/releases/download/v1.0.25/libusb-1.0.25.7z'
             libusb_1_0_25_7z_sha256 = '3d1c98416f454026034b2b5d67f8a294053898cb70a8b489874e75b136c6674d'
-            (filename, _) = urllib.request.urlretrieve(libusb_1_0_25_7z)
+            filename, _ = urllib.request.urlretrieve(libusb_1_0_25_7z)
             sha256sum = hashlib.sha256()
             with open(filename, 'rb') as f:
                 sha256sum.update(f.read())
@@ -128,7 +128,7 @@ def main():
 
     arduino_dir = os.path.abspath(os.path.dirname(__file__))
     root_dir = os.path.abspath(os.path.join(arduino_dir, '..'))
-    repo = Repo(root_dir)
+    repo = git.Repo(root_dir)
     git_revision = str(repo.head.commit)
     common_kwargs = {
         'arduino_dir': arduino_dir,
@@ -138,8 +138,8 @@ def main():
 
     arduino_cli_path = os.path.join(root_dir, 'third_party/arduino-cli')
     if args.arduino_cli_url and not os.path.exists(os.path.join(arduino_cli_path, 'arduino-cli')):
-        (filename, _) = urllib.request.urlretrieve(args.arduino_cli_url)
-        if (system_name == 'Windows'):
+        filename, _ = urllib.request.urlretrieve(args.arduino_cli_url)
+        if system_name == 'Windows':
             with zipfile.ZipFile(filename, 'r') as arduino_zip:
                 arduino_zip.extractall(arduino_cli_path)
         else:
@@ -169,13 +169,13 @@ def flashtool_main(args, **kwargs):
             flashtool_sha256sum.update(f.read())
 
 def GetDownloadMetadata(url):
-    (filename, _) = urllib.request.urlretrieve(url)
+    filename, _ = urllib.request.urlretrieve(url)
     sha256sum = hashlib.sha256()
     with open(filename, 'rb') as f:
         sha256sum.update(f.read())
     size = os.path.getsize(filename)
     urllib.request.urlcleanup()
-    return (sha256sum.hexdigest(), size)
+    return sha256sum.hexdigest(), size
 
 
 def manifest_main(args, **kwargs):
@@ -198,7 +198,7 @@ def manifest_main(args, **kwargs):
 
     systems_json = []
     if linux_flashtool_url and linux_flashtool_sha256:
-        (sha256sum, size) = GetDownloadMetadata(linux_flashtool_url)
+        sha256sum, size = GetDownloadMetadata(linux_flashtool_url)
         if sha256sum != linux_flashtool_sha256:
             print('Provided Linux flashtool checksum does not match downloaded!')
             return
@@ -211,7 +211,7 @@ def manifest_main(args, **kwargs):
             'size': str(size)
         })
     if mac_flashtool_url and mac_flashtool_sha256:
-        (sha256sum, size) = GetDownloadMetadata(mac_flashtool_url)
+        sha256sum, size = GetDownloadMetadata(mac_flashtool_url)
         if sha256sum != mac_flashtool_sha256:
             print('Provided Mac flashtool checksum does not match downloaded!')
             return
@@ -224,7 +224,7 @@ def manifest_main(args, **kwargs):
             'size': str(size)
         })
     if win_flashtool_url and win_flashtool_sha256:
-        (sha256sum, size) = GetDownloadMetadata(win_flashtool_url)
+        sha256sum, size = GetDownloadMetadata(win_flashtool_url)
         if sha256sum != win_flashtool_sha256:
             print('Provided Windows flashtool checksum does not match downloaded!')
             return
@@ -237,7 +237,7 @@ def manifest_main(args, **kwargs):
             'size': str(size)
         })
     if core_url and core_sha256:
-        (sha256sum, size) = GetDownloadMetadata(core_url)
+        sha256sum, size = GetDownloadMetadata(core_url)
         if sha256sum != core_sha256:
             print('Provided core checksum does not match downloaded!')
             return
@@ -317,68 +317,73 @@ def manifest_main(args, **kwargs):
     with open(os.path.join(args.output_dir, 'package_coral_index.json'), 'w') as f:
         json.dump(json_obj, f, indent=2)
 
+def read_lines(filename):
+    with open(filename) as f:
+        for line in f:
+            yield line.rstrip()
+
+def check_output_lines(args):
+    return subprocess.check_output(args).decode("utf-8").strip().split('\n')
+
 def core_main(args, **kwargs):
-    root_dir = kwargs.get('root_dir')
-    arduino_dir = kwargs.get('arduino_dir')
-    git_revision = kwargs.get('git_revision')
+    root_dir = kwargs['root_dir']
+    arduino_dir = kwargs['arduino_dir']
+    git_revision = kwargs['git_revision']
+
     # Remove previous coral package.
     coral_package_dir = os.path.join(root_dir, '.arduino15', 'packages', 'coral')
-    if os.path.exists(coral_package_dir):
-        shutil.rmtree(coral_package_dir)
+    shutil.rmtree(coral_package_dir, ignore_errors=True)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Copy out arduino core to temp directory
-        core_out_dir = os.path.join(tmpdir, 'coral-micro-%s' % git_revision)
-        flashtool_out_dir = os.path.join(tmpdir, 'coral-flashtool-%s-%s' % (platform_name, git_revision))
-        os.makedirs(flashtool_out_dir, exist_ok=True)
-        shutil.copytree(arduino_dir, core_out_dir)
-
-        # Create a CMake build directory in the temp directory,
-        # and build the arduino library bundle.
-        build_dir = os.path.join(tmpdir, 'build')
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        # Build Arduino artifacts.
+        build_dir = os.path.join(tmp_dir, 'build')
         os.makedirs(build_dir)
-        subprocess.check_call(['cmake', root_dir, '-DCORAL_MICRO_ARDUINO=1', '-G', 'Ninja'], cwd=build_dir)
-        subprocess.check_call(['ninja', '-C', build_dir, 'bundling_target_libs_arduino_coral_micro', 'bundling_target_libs_arduino_coral_micro_wifi', 'ELFLoader', 'flashloader'])
+        subprocess.check_call(['cmake', root_dir, '-DCORAL_MICRO_ARDUINO=1',
+                               '-G', 'Ninja'], cwd=build_dir)
+        subprocess.check_call(['ninja', '-C', build_dir,
+                               'bundling_target_libs_arduino_coral_micro',
+                               'bundling_target_libs_arduino_coral_micro_wifi',
+                               'ELFLoader',
+                               'flashloader'])
+
+        # Copy main files.
+        core_name = f'coral-micro-{git_revision}'
+        core_out_dir = os.path.join(tmp_dir, core_name)
+        shutil.copytree(arduino_dir, core_out_dir,
+                        ignore=shutil.ignore_patterns('*.py', 'requirements.txt'))
+
+        # Copy variant libraries.
+        ar_path = os.path.join(root_dir, 'third_party', toolchain_dir,
+                               'gcc-arm-none-eabi-9-2020-q2-update', 'bin',
+                               'arm-none-eabi-ar' + exe_extension)
         for variant in ['coral_micro', 'coral_micro_wifi']:
             libs_dir = os.path.join(core_out_dir, 'variants', variant, 'libs')
             os.makedirs(libs_dir, exist_ok=True)
+            bundled_lib_path = os.path.join(libs_dir, f'liblibs_arduino_{variant}_bundled.a')
 
-            ar_path = os.path.join(root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin', 'arm-none-eabi-ar' + exe_extension)
+            obj_paths = set()
+            for path in read_lines(os.path.join(build_dir, f'libs_arduino_{variant}_bundled.txt')):
+                obj_paths.update(check_output_lines([ar_path, 't', path]))
 
-            # Copy the arduino library bundle into the core.
-            with tempfile.TemporaryDirectory() as rebundle_dir:
-                arduino_rebundled_path = os.path.join(libs_dir, f'liblibs_arduino_{variant}_bundled.a')
+            for obj_path in obj_paths:
+                subprocess.check_call([ar_path, 'q', bundled_lib_path,
+                                       os.path.join(build_dir, obj_path)],
+                                      cwd=build_dir)
 
-                # Merge static libraries into a bundle
-                static_libs_path = os.path.join(build_dir, f'libs_arduino_{variant}_bundled.txt')
-                with open(static_libs_path) as static_libs_file:
-                    unique_objects = set()
-                    for path in static_libs_file.readlines():
-                        path = path.strip('\n')
-                        obj_paths = subprocess.check_output([ar_path, 't', path]).decode("utf-8").split('\n')
-                        root_obj_dir = os.path.dirname(path)
-                        for obj_path in obj_paths:
-                            unique_path = obj_path.split('CMakeFiles')[-1]
-                            obj_full_path = os.path.join(build_dir, obj_path)
-                            if unique_path not in unique_objects and obj_path != '':
-                                subprocess.check_call([ar_path, 'q', arduino_rebundled_path, obj_full_path], cwd=build_dir)
-                                unique_objects.add(unique_path)
-
+        # Copy bootloaders.
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'coral_micro')
         os.makedirs(bootloader_dir)
-        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'), os.path.join(bootloader_dir, 'elfloader.srec'))
-        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'), os.path.join(bootloader_dir, 'ELFLoader'))
-        shutil.copyfile(os.path.join(build_dir, 'libs', 'nxp', 'flashloader', 'image.srec'), os.path.join(bootloader_dir, 'flashloader.srec'))
+        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'),
+                        os.path.join(bootloader_dir, 'elfloader.srec'))
+        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'),
+                        os.path.join(bootloader_dir, 'ELFLoader'))
+        shutil.copyfile(os.path.join(build_dir, 'libs', 'nxp', 'flashloader', 'image.srec'),
+                        os.path.join(bootloader_dir, 'flashloader.srec'))
 
-        # tbz2 everything
-        tar_path = os.path.join(args.output_dir, 'coral-micro-%s.tar.bz2' % git_revision)
-        with tarfile.open(name=tar_path, mode='w:bz2') as arduino_tar:
-            arduino_tar.add(core_out_dir, arcname='coral-micro-%s' % git_revision)
-
-        tar_sha256sum = hashlib.sha256()
-        with open(tar_path, 'rb') as f:
-            tar_sha256sum.update(f.read())
-
+        # Archive core.
+        tar_path = os.path.join(args.output_dir, f'{core_name}.tar.bz2')
+        with tarfile.open(name=tar_path, mode='w:bz2') as tar:
+            tar.add(core_out_dir, arcname=core_name)
 
 if __name__ == "__main__":
     main()
