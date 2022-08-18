@@ -144,7 +144,7 @@ void Main() {
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
-  printf("Initializing segmentation server...%p\r\n", &interpreter);
+  printf("Initializing segmentation server...\r\n");
   jsonrpc_init(nullptr, &interpreter);
   jsonrpc_export("segment_from_camera", SegmentFromCamera);
   UseHttpServer(new JsonRpcHttpServer);

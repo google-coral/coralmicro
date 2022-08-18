@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import base64
 import requests
+import sys
 
 from PIL import Image, ImageDraw
 
@@ -42,19 +44,22 @@ def get_field_or_die(data, field_name):
     return data[field_name]
 
 def main():
-    url = "http://10.10.10.1:80/jsonrpc"
+    parser = argparse.ArgumentParser(
+        description='Detect Camera Example',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--host', type=str, default='10.10.10.1',
+                        help='Hostname or IP Address of Coral Dev Board Micro')
+    args = parser.parse_args()
 
-    payload = {
-        "method": "detect_from_camera",
-        "jsonrpc": "2.0",
-        "id": 0,
-    }
-
-    # Unpack the JSON result
-    response = requests.post(url, json=payload).json()
-    result = get_field_or_die(response, 'result')
+    # Send RPC request
+    response = requests.post(f'http://{args.host}:80/jsonrpc', json={
+        'method': 'detect_from_camera',
+        'jsonrpc': '2.0',
+        'id': 0,
+    }, timeout=10).json()
 
     # Get the image size
+    result = get_field_or_die(response, 'result')
     width = get_field_or_die(result, 'width')
     height = get_field_or_die(result, 'height')
 
@@ -80,4 +85,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except requests.exceptions.ConnectionError:
+        msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
+              ' the correct IP address with --host.'
+        if sys.platform == 'darwin':
+            msg += ' Network over USB is not supported on macOS.'
+        print(msg, file=sys.stderr)

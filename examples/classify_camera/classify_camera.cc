@@ -154,7 +154,7 @@ void Main() {
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
-  printf("Initializing classification server...%p\r\n", &interpreter);
+  printf("Initializing classification server...\r\n");
   jsonrpc_init(nullptr, &interpreter);
   jsonrpc_export("classify_from_camera", ClassifyFromCamera);
   UseHttpServer(new JsonRpcHttpServer);

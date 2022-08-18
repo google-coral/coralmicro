@@ -15,44 +15,9 @@
 
 import argparse
 import base64
-import inspect
-import itertools
-import json
 import requests
 import sys
 from PIL import Image
-
-rpc_id = itertools.count()
-
-def rpc(func):
-  def rpc_impl(*args, **kwargs):
-    params = inspect.getcallargs(func, *args, **kwargs)
-    url = f"http://{params.pop('ip')}:80/jsonrpc"
-    payload = {
-      'id': next(rpc_id),
-      'jsonrpc': '2.0',
-      'method': func.__name__,
-      'params': [params or {}],
-    }
-    print(f'url: {url}')
-    print(f'payload:\n{json.dumps(payload, indent=2)}')
-    return requests.post(url, json=payload, timeout=5).json()
-
-  return rpc_impl
-
-
-@rpc
-def get_captured_image(ip, width, height):
-  """Get image from camera.
-  Args:
-    width: Width of the output image, in pixels.
-    height: Height of the output image, in pixels.
-  Returns:
-    A JSON-RPC result packet with image data, or JSON-RPC error.
-    Example:
-      {'id': 1, 'result': {'width': 324, 'height': 324, base64_data: '<snip>'}}
-  """
-
 
 def display_image(response, width, height):
   result = get_field_or_die(response, 'result')
@@ -69,16 +34,28 @@ def get_field_or_die(data, field_name):
 
 
 def main():
-  parser = argparse.ArgumentParser(description='Image server client')
+  parser = argparse.ArgumentParser(
+      description='Camera Triggered Example',
+      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--host', type=str, default='10.10.10.1',
                       help='Hostname or IP Address of Coral Dev Board Micro')
-  parser.add_argument('--image_width', type=int, default=700, help='Image width')
-  parser.add_argument('--image_height', type=int, default=700, help='Image height')
+  parser.add_argument('--image_width', type=int, default=700,
+                      help='Image width')
+  parser.add_argument('--image_height', type=int, default=700,
+                      help='Image height')
 
   args = parser.parse_args()
   width = args.image_width
   height = args.image_height
-  display_image(get_captured_image(args.host, width, height), width, height)
+
+  response = requests.post(f'http://{args.host}:80/jsonrpc', json={
+      'method': 'get_captured_image',
+      'jsonrpc': '2.0',
+      'id': 0,
+      'params': [{'width': width, 'height': height}]
+  }, timeout=10).json()
+
+  display_image(response, width, height)
 
 if __name__ == '__main__':
   try:

@@ -74,7 +74,7 @@ STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void DetectFromCamera(struct jsonrpc_request* r) {
   auto* interpreter =
-      reinterpret_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
+      static_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
 
   auto* input_tensor = interpreter->input_tensor(0);
   int model_height = input_tensor->dims->data[1];
@@ -130,13 +130,13 @@ void Main() {
   std::vector<uint8_t> model;
   if (!LfsReadFile(kModelPath, &model)) {
     printf("ERROR: Failed to load %s\r\n", kModelPath);
-    vTaskSuspend(nullptr);
+    return;
   }
 
   auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
 
   tflite::MicroErrorReporter error_reporter;
@@ -150,19 +150,19 @@ void Main() {
                                        &error_reporter);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("ERROR: AllocateTensors() failed\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
 
   if (interpreter.inputs().size() != 1) {
     printf("ERROR: Model must have only one input tensor\r\n");
-    vTaskSuspend(nullptr);
+    return;
   }
 
   // Starting Camera.
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
-  printf("Initializing detection server...%p\r\n", &interpreter);
+  printf("Initializing detection server...\r\n");
   jsonrpc_init(nullptr, &interpreter);
   jsonrpc_export("detect_from_camera", DetectFromCamera);
   UseHttpServer(new JsonRpcHttpServer);

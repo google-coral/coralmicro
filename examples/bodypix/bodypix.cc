@@ -51,7 +51,7 @@ constexpr char kModelPath[] =
 
 void RunBodypix(struct jsonrpc_request* r) {
   auto* interpreter =
-      reinterpret_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
+      static_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
   auto* bodypix_input = interpreter->input(0);
   auto model_height = bodypix_input->dims->data[1];
   auto model_width = bodypix_input->dims->data[2];
@@ -153,7 +153,7 @@ void Main() {
     vTaskSuspend(nullptr);
   }
 
-  printf("Initializing Bodypix server...%p\r\n", &interpreter);
+  printf("Initializing Bodypix server...\r\n");
   jsonrpc_init(nullptr, &interpreter);
   jsonrpc_export("run_bodypix", RunBodypix);
   UseHttpServer(new JsonRpcHttpServer);
