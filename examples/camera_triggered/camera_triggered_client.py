@@ -22,11 +22,6 @@ import requests
 import sys
 from PIL import Image
 
-parser = argparse.ArgumentParser(description='Image server client')
-parser.add_argument('--usb_ip', type=str, default='10.10.10.1', help='Dev Board Micro USB IP address.')
-parser.add_argument('--image_width', type=int, default=700, help='Specify image width.')
-parser.add_argument('--image_height', type=int, default=700, help='Specify image height.')
-
 rpc_id = itertools.count()
 
 def rpc(func):
@@ -41,7 +36,7 @@ def rpc(func):
     }
     print(f'url: {url}')
     print(f'payload:\n{json.dumps(payload, indent=2)}')
-    return requests.post(url, json=payload).json()
+    return requests.post(url, json=payload, timeout=5).json()
 
   return rpc_impl
 
@@ -58,12 +53,12 @@ def get_captured_image(ip, width, height):
       {'id': 1, 'result': {'width': 324, 'height': 324, base64_data: '<snip>'}}
   """
 
+
 def display_image(response, width, height):
   result = get_field_or_die(response, 'result')
   image_data_base64 = get_field_or_die(result, 'base64_data')
   image_data = base64.b64decode(image_data_base64)
-  im = Image.frombytes('RGB', (width, height), image_data)
-  im.show()
+  Image.frombytes('RGB', (width, height), image_data).show()
 
 
 def get_field_or_die(data, field_name):
@@ -74,10 +69,23 @@ def get_field_or_die(data, field_name):
 
 
 def main():
+  parser = argparse.ArgumentParser(description='Image server client')
+  parser.add_argument('--host', type=str, default='10.10.10.1',
+                      help='Hostname or IP Address of Coral Dev Board Micro')
+  parser.add_argument('--image_width', type=int, default=700, help='Image width')
+  parser.add_argument('--image_height', type=int, default=700, help='Image height')
+
   args = parser.parse_args()
   width = args.image_width
   height = args.image_height
-  display_image(get_captured_image(args.usb_ip, width, height), width, height)
+  display_image(get_captured_image(args.host, width, height), width, height)
 
 if __name__ == '__main__':
-  main()
+  try:
+    main()
+  except requests.exceptions.ConnectionError:
+    msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
+          ' the correct IP address with --host.'
+    if sys.platform == 'darwin':
+      msg += ' Network over USB is not supported on macOS.'
+    print(msg, file=sys.stderr)
