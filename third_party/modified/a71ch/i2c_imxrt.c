@@ -74,13 +74,11 @@
 #       include "fsl_lpi2c_freertos.h"
 #   endif
 
-status_t LPI2C_CheckForBusyBus(LPI2C_Type *base); // extern
 static status_t LPI2C_MasterTransferBlocking_Send_MODIFIED(LPI2C_Type *base, uint16_t slaveAddress, void *data, size_t dataSize);
 static status_t LPI2C_MasterTransferBlocking_Receive_MODIFIED(LPI2C_Type *base, uint16_t slaveAddress, void *data);
 static status_t LPI2C_MasterReceive_MODIFIED(LPI2C_Type *base, void *rxBuff);
 
 static status_t LPI2C_MasterWaitForTxReady(LPI2C_Type *base);
-status_t LPI2C_MasterCheckAndClearError(LPI2C_Type *base, uint32_t status);
 #else /* FSL_FEATURE_SOC_LPI2C_COUNT */
 #   include "fsl_i2c.h"
 #   if defined(SDK_OS_FREE_RTOS) && SDK_OS_FREE_RTOS == 1
@@ -173,12 +171,15 @@ static i2c_error_t kinetisI2cStatusToAxStatus(
     {                                                                           \
         /* LPI2C_LOG_PRINTF("I2C Status = %d\r\n", kinetis_i2c_status);*/         \
         i2c_error_t ax_status = kinetisI2cStatusToAxStatus(kinetis_i2c_status); \
-        if ( ax_status != I2C_OK )                                              \
+        if ( ax_status != I2C_OK ) {                                            \
+            LPI2C_RTOS_Unlock(I2C5Handle());                                    \
             return ax_status;                                                   \
+        }                                                                       \
     }
 
 i2c_error_t axI2CInit(void **conn_ctx, const char *pDevName)
 {
+#if 0
     lpi2c_master_config_t masterConfig;
     LPI2C_MasterGetDefaultConfig(&masterConfig);
 /*    masterConfig.enableDoze = false;
@@ -194,6 +195,7 @@ i2c_error_t axI2CInit(void **conn_ctx, const char *pDevName)
     LPI2C_MasterInit(AX_I2CM, &masterConfig, sourceClock);
 
     LPI2C_MasterCheckAndClearError(AX_I2CM, LPI2C_MasterGetStatusFlags(AX_I2CM));
+#endif
 #endif
     return I2C_OK;
 }
@@ -227,6 +229,8 @@ unsigned int axI2CWrite(
         return I2C_FAILED;
     }
 
+    LPI2C_RTOS_Lock(I2C5Handle());
+
 #ifdef LPI2C_DEBUG
     LPI2C_LOG_PRINTF("I2C Write \r\n");
 #endif
@@ -258,6 +262,8 @@ unsigned int axI2CWrite(
     DEBUG_PRINT_KINETIS_I2C("WR",result);
     RETURN_ON_BAD_kinetisI2cStatus(result);
 
+    LPI2C_RTOS_Unlock(I2C5Handle());
+
     return I2C_OK;
 }
 
@@ -282,6 +288,8 @@ unsigned int axI2CWriteRead(
         return I2C_FAILED;
     }
 
+    LPI2C_RTOS_Lock(I2C5Handle());
+
     *pRxLen = 0;
     memset(pRx, 0, 2);
 
@@ -298,6 +306,8 @@ unsigned int axI2CWriteRead(
     DEBUG_PRINT_KINETIS_I2C("RD",result);
     RETURN_ON_BAD_kinetisI2cStatus(result);
 
+
+    LPI2C_RTOS_Unlock(I2C5Handle());
 
     return I2C_OK;
 }
@@ -320,6 +330,8 @@ unsigned int axI2CRead(void* conn_ctx, unsigned char bus, unsigned char addr, un
     I2C_LOG_PRINTF("\r\n I2C Read \r\n");
 #endif
 
+    LPI2C_RTOS_Lock(I2C5Handle());
+
     masterXfer.slaveAddress = addr >> 1; // the address of the A70CM
     //masterXfer.slaveAddress = addr;
     masterXfer.direction = kLPI2C_Read;
@@ -341,6 +353,8 @@ unsigned int axI2CRead(void* conn_ctx, unsigned char bus, unsigned char addr, un
 
     DEBUG_PRINT_KINETIS_I2C("RD",result);
     RETURN_ON_BAD_kinetisI2cStatus(result);
+
+    LPI2C_RTOS_Unlock(I2C5Handle());
 
     return I2C_OK;
 }
