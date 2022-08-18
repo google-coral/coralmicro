@@ -17,6 +17,7 @@ add_library(libs_arduino_coral_micro STATIC
 target_link_libraries(libs_arduino_coral_micro
     libs_base-m7_freertos
     libs_flatbuffers
+    libs_jpeg_m7
     libs_yamnet
 )
 bundle_static_library(libs_arduino_coral_micro libs_arduino_coral_micro_bundled)
@@ -26,6 +27,7 @@ add_library(libs_arduino_coral_micro_wifi STATIC
 target_link_libraries(libs_arduino_coral_micro_wifi
     libs_base-m7_freertos
     libs_base-m7_wifi
+    libs_jpeg_m7
     libs_yamnet
 )
 bundle_static_library(libs_arduino_coral_micro_wifi libs_arduino_coral_micro_wifi_bundled)
