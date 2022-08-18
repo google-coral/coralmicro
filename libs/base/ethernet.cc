@@ -81,6 +81,23 @@ status_t EthernetPHYEnableSSC(bool auto_neg) {
   status |= EthernetPhyWrite(kBasicModeControlReg, reset);
   return status;
 }
+
+bool EthernetWaitForDhcp(uint64_t timeout_ms) {
+  auto start_time = TimerMillis();
+  while (true) {
+    auto* dhcp = netif_dhcp_data(g_eth_netif);
+    if (dhcp->state == DHCP_STATE_BOUND) {
+      break;
+    }
+    auto now = TimerMillis();
+    if ((now - start_time) >= timeout_ms) {
+      return false;
+    }
+    taskYIELD();
+  }
+  return true;
+}
+
 }  // namespace
 
 struct netif* EthernetGetInterface() { return g_eth_netif; }
@@ -170,6 +187,7 @@ bool EthernetInit(bool default_iface) {
   return true;
 }
 
+
 std::optional<std::string> EthernetGetIp() {
   return EthernetGetIp(/*timeout_ms=*/30 * 1000);
 }
@@ -178,21 +196,38 @@ std::optional<std::string> EthernetGetIp(uint64_t timeout_ms) {
   if (!g_eth_netif) {
     return std::nullopt;
   }
-
-  auto start_time = TimerMillis();
-  while (true) {
-    auto* dhcp = netif_dhcp_data(g_eth_netif);
-    if (dhcp->state == DHCP_STATE_BOUND) {
-      break;
-    }
-    auto now = TimerMillis();
-    if ((now - start_time) >= timeout_ms) {
-      return std::nullopt;
-    }
-    taskYIELD();
+  if (!EthernetWaitForDhcp(timeout_ms)) {
+    return std::nullopt;
   }
-
   return ip4addr_ntoa(netif_ip4_addr(g_eth_netif));
+}
+
+std::optional<std::string> EthernetGetSubnetMask() {
+  return EthernetGetSubnetMask(/*timeout_ms=*/30 * 1000);
+}
+
+std::optional<std::string> EthernetGetSubnetMask(uint64_t timeout_ms) {
+  if (!g_eth_netif) {
+    return std::nullopt;
+  }
+  if (!EthernetWaitForDhcp(timeout_ms)) {
+    return std::nullopt;
+  }
+  return ip4addr_ntoa(netif_ip4_netmask(g_eth_netif));
+}
+
+std::optional<std::string> EthernetGetGateway() {
+  return EthernetGetGateway(/*timeout_ms=*/30 * 1000);
+}
+
+std::optional<std::string> EthernetGetGateway(uint64_t timeout_ms) {
+  if (!g_eth_netif) {
+    return std::nullopt;
+  }
+  if (!EthernetWaitForDhcp(timeout_ms)) {
+    return std::nullopt;
+  }
+  return ip4addr_ntoa(netif_ip4_gw(g_eth_netif));
 }
 
 std::array<uint8_t, 6> EthernetGetMacAddress() {

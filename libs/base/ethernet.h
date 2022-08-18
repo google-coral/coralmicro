@@ -69,6 +69,11 @@ std::optional<std::string> EthernetGetIp(uint64_t timeout_ms);
 // @returns The MAC address assigned to the device.
 std::array<uint8_t, 6> EthernetGetMacAddress();
 
+std::optional<std::string> EthernetGetSubnetMask();
+std::optional<std::string> EthernetGetSubnetMask(uint64_t timeout_ms);
+std::optional<std::string> EthernetGetGateway();
+std::optional<std::string> EthernetGetGateway(uint64_t timeout_ms);
+
 // Retrieves the ethernet speed that is stored in flash memory.
 // @returns The ethernet speed in Mbps.
 //   The default return value is 100, if no value is stored in flash.
