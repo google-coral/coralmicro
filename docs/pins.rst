@@ -62,6 +62,29 @@ For example::
 
 
 
+PWM
+-------------------------
+
+There are two pins pre-configured for pulse-width modulation (PWM)
+on the left header (pins 9 and 10).
+
+To use a PWM pin, you must first call
+:cpp:any:`coralmicro::PwmInit`. Then specify the PWM settings in an instance of
+:cpp:any:`coralmicro::PwmPinConfig` and pass it to
+:cpp:any:`coralmicro::PwmEnable`.
+
+**Example** (from `examples/pwm/`):
+
+.. literalinclude:: ../examples/pwm/pwm.cc
+   :start-after: [start-sphinx-snippet:pwm]
+   :end-before: [end-sphinx-snippet:pwm]
+
+`[pwm.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/base/pwm.h>`_
+
+.. doxygenfile:: base/pwm.h
+
+
+
 ADC / DAC
 -------------------------
 
@@ -90,26 +113,29 @@ For DAC, first call :cpp:any:`coralmicro::DacInit()` and
 
 
 
-PWM
+I2C
 -------------------------
 
-There are two pins pre-configured for pulse-width modulation (PWM)
-on the left header (pins 9 and 10).
+You can use the board as either the device controller or target, using
+either of two I2C lines on the 12-pin headers:
 
-To use a PWM pin, you must first call
-:cpp:any:`coralmicro::PwmInit`. Then specify the PWM settings in an instance of
-:cpp:any:`coralmicro::PwmPinConfig` and pass it to
-:cpp:any:`coralmicro::PwmEnable`.
++ I2C1 (`I2c::kI2c1`)
+   + SDA is pin 10 on the right side
+   + SCL is pin 11 on the left side
++ I2C6 (`I2c::kI2c6`)
+   + SDA is pin 12 on the right side
+   + SCL is pin 11 on the right side
 
-**Example** (from `examples/pwm/`):
 
-.. literalinclude:: ../examples/pwm/pwm.cc
-   :start-after: [start-sphinx-snippet:pwm]
-   :end-before: [end-sphinx-snippet:pwm]
+**Example** (from `examples/i2c/controller.cc`):
 
-`[pwm.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/base/pwm.h>`_
+.. literalinclude:: ../examples/i2c/controller.cc
+   :start-after: [start-sphinx-snippet:i2c-controller]
+   :end-before: [end-sphinx-snippet:i2c-controller]
 
-.. doxygenfile:: base/pwm.h
+`[i2c.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/base/i2c.h>`_
+
+.. doxygenfile:: base/i2c.h
 
 
 
@@ -153,13 +179,15 @@ alone is not strong enough to drive an LED.
    </figure>
 
 .. note::
-   The camera LED is not available with this API in order to provide consistent
-   LED behavior when the camera is in operation.
+   The camera LED is not available with this API because it's intended to give
+   people awareness that images are being captured by an image sensor for
+   storage, processing, and/or transmission. We strongly recommend this LED
+   behavior remain unchanged and always be visible to users.
 
 
 **Example** (from `examples/blink_led/`):
 
-.. literalinclude:: ../examples/blink_led/main_app.cc
+.. literalinclude:: ../examples/blink_led/blink_led.cc
    :start-after: [start-sphinx-snippet:blink-led]
    :end-before: [end-sphinx-snippet:blink-led]
 

@@ -36,7 +36,7 @@ makeSphinxWeb() {
   find ${WEB_DIR} -mindepth 1 \
     \( -not -name "*.md" -a -not -name "images" \) -delete
   rm ${WEB_DIR}/index.md ${WEB_DIR}/search.md
-  mv ${WEB_DIR}/genindex.md ${WEB_DIR}/index.md
+  mv ${WEB_DIR}/index_web.md ${WEB_DIR}/index.md
   # Some custom tweaks to the output:
   python3 postprocess.py -f ${WEB_DIR}/
   echo "All done. Web pages are in ${WEB_DIR}."

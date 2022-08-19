@@ -60,9 +60,11 @@ struct I2cConfig {
 using TargetCallback =
     std::function<void(I2cConfig*, lpi2c_target_transfer_t*)>;
 
-// Enumeration of I2C buses available on the header pins.
+// I2C buses available on the header pins.
 enum class I2c {
+  // I2C1_SCL (J10, pin 11) and I2C1_SDA (J10, pin 12)
   kI2c1 = 1,
+  // I2C6_SCL (J9, pin 11) and I2C6_SDA (J10, pin 10)
   kI2c6 = 6,
 };
 

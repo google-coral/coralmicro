@@ -1,6 +1,17 @@
 System APIs
 =============================
 
+
+Filesystem
+-------------------------
+
+APIs to read and write files, based on littlefs.
+
+`[filesystem.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/base/filesystem.h>`_
+
+.. doxygenfile:: base/filesystem.h
+
+
 Inter-process communication (IPC)
 ---------------------------------
 
@@ -42,11 +53,3 @@ Reset
 `[reset.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/base/reset.h>`_
 
 .. doxygenfile:: base/reset.h
-
-
-Filesystem
--------------------------
-
-`[filesystem.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/base/filesystem.h>`_
-
-.. doxygenfile:: base/filesystem.h

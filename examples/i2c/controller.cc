@@ -27,6 +27,7 @@
 
 namespace coralmicro {
 namespace {
+// [start-sphinx-snippet:i2c-controller]
 void Main() {
   printf("i2c Controller Example!\r\n");
   // Turn on Status LED to show the board is on.
@@ -51,6 +52,7 @@ void Main() {
   CHECK(memcmp(buffer.data(), serial.data(), kTransferSize) == 0);
   printf("Readback of data from target device matches written data!\r\n");
 }
+// [end-sphinx-snippet:i2c-controller]
 }  // namespace
 }  // namespace coralmicro
 

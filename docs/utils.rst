@@ -45,7 +45,7 @@ Security
 
 .. doxygenfile:: a71ch/a71ch.h
 
-jpeg
+JPEG
 -------------------------
 
 `[jpeg.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/jpeg/jpeg.h>`_
