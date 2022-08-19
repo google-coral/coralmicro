@@ -24,6 +24,14 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+#if defined(CAMERA_STREAMING_HTTP_ETHERNET)
+#include "libs/base/ethernet.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
+#elif defined (CAMERA_STREAMING_HTTP_WIFI)
+#include "libs/base/wifi.h"
+#endif  // defined(CAMERA_STREAMING_HTTP_ETHERNET)
+
+
 // Hosts an HTTP server on the Dev Board Micro that serves a camera streaming
 // webpage.
 
@@ -65,14 +73,45 @@ void Main() {
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
 
-  HttpServer http_server;
-  http_server.AddUriHandler(UriHandler);
-  UseHttpServer(&http_server);
-
+#if defined(CAMERA_STREAMING_HTTP_ETHERNET)
+  EthernetInit(/*default_iface=*/false);
+  auto* ethernet = EthernetGetInterface();
+  if (!ethernet) {
+    printf("Unable to bring up ethernet...\r\n");
+    vTaskSuspend(nullptr);
+  }
+  auto ethernet_ip = EthernetGetIp();
+  if (!ethernet_ip.has_value()) {
+    printf("Unable to get Ethernet IP\r\n");
+    vTaskSuspend(nullptr);
+  }
+  printf("Serving on: %s\r\n", ethernet_ip->c_str());
+#elif defined(CAMERA_STREAMING_HTTP_WIFI)
+  if (!WiFiTurnOn(/*default_iface=*/false)) {
+    printf("Unable to bring up WiFi...\r\n");
+    vTaskSuspend(nullptr);
+  }
+  if (!WiFiConnect(10)) {
+    printf("Unable to connect to WiFi...\r\n");
+    vTaskSuspend(nullptr);
+  }
+  if (auto wifi_ip = WiFiGetIp()) {
+    printf("Serving on: %s\r\n", wifi_ip->c_str());
+  } else {
+    printf("Failed to get Wifi Ip\r\n");
+    vTaskSuspend(nullptr);
+  }
+#else   // USB
   std::string usb_ip;
   if (GetUsbIpAddress(&usb_ip)) {
     printf("Serving on: http://%s\r\n", usb_ip.c_str());
   }
+#endif  // defined(CAMERA_STREAMING_HTTP_ETHERNET)
+
+  HttpServer http_server;
+  http_server.AddUriHandler(UriHandler);
+  UseHttpServer(&http_server);
+
   vTaskSuspend(nullptr);
 }
 }  // namespace

@@ -23,52 +23,39 @@ set(CAMERA_STREAMING_LINK_LIBRARIES
 )
 
 # USB
-add_executable_m7(camera_streaming_usb
+add_executable_m7(camera_streaming_rpc_usb
     ${CAMERA_STREAMING_SRC}
 )
 
-target_link_libraries(camera_streaming_usb
+target_link_libraries(camera_streaming_rpc_usb
     ${CAMERA_STREAMING_LINK_LIBRARIES}
 )
 
 # POE
-add_executable_m7(camera_streaming_ethernet
+add_executable_m7(camera_streaming_rpc_ethernet
     ${CAMERA_STREAMING_SRC}
 )
 
-target_compile_definitions(camera_streaming_ethernet PUBLIC
+target_compile_definitions(camera_streaming_rpc_ethernet PUBLIC
     CAMERA_STREAMING_ETHERNET
 )
 
-target_link_libraries(camera_streaming_ethernet
+target_link_libraries(camera_streaming_rpc_ethernet
     ${CAMERA_STREAMING_LINK_LIBRARIES}
     libs_base-m7_ethernet
 )
 
 # WIFI
-add_executable_m7(camera_streaming_wifi
+add_executable_m7(camera_streaming_rpc_wifi
     ${CAMERA_STREAMING_SRC}
 )
 
-target_compile_definitions(camera_streaming_wifi PUBLIC
+target_compile_definitions(camera_streaming_rpc_wifi PUBLIC
     CAMERA_STREAMING_WIFI
 )
 
-target_link_libraries(camera_streaming_wifi
+target_link_libraries(camera_streaming_rpc_wifi
     ${CAMERA_STREAMING_LINK_LIBRARIES}
     libs_nxp_rt1176-sdk_wiced
     libs_base-m7_wifi
-)
-
-add_executable_m7(camera_streaming_http
-    camera_streaming_http.cc
-    DATA
-    ${CMAKE_CURRENT_SOURCE_DIR}/web/coral_micro_camera.html>/coral_micro_camera.html
-)
-
-target_link_libraries(camera_streaming_http
-    libs_base-m7_freertos
-    libs_base-m7_http_server
-    libs_camera_freertos
-    libs_jpeg_m7
 )
