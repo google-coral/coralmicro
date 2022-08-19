@@ -39,10 +39,12 @@ constexpr int kFilesystemBaseBlock = 12;
 constexpr size_t kPageSize = 2048;
 }  // namespace
 
-USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
+// TODO(ljonas): Cache management.
+
+//USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 uint32_t g_mscReadRequestBuffer[(USB_DEVICE_MSC_READ_BUFF_SIZE * 2) >> 2];
 
-USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
+// USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 uint32_t g_mscWriteRequestBuffer[(USB_DEVICE_MSC_WRITE_BUFF_SIZE * 2) >> 2];
 usb_device_inquiry_data_fromat_struct_t g_InquiryInfo = {
     (USB_DEVICE_MSC_UFI_PERIPHERAL_QUALIFIER
