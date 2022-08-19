@@ -14,6 +14,6 @@
 
 add_subdirectory(ELFLoader)
 add_subdirectory(MFGTest)
-add_subdirectory(RackTest)
 add_subdirectory(multicore_model_cascade)
+add_subdirectory(RackTest)
 add_subdirectory(usb_drive)
