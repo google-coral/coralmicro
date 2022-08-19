@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "libs/base/filesystem.h"
+#include "libs/base/gpio.h"
 #include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
@@ -60,7 +61,9 @@
 //    bash build.sh
 //    python3 scripts/flashtool.py -e detect_camera
 //
-// Then trigger an inference over USB from a Linux computer:
+// Then trigger an inference by clicking the user button.
+// On a Linux computer, you can also trigger the detection and get the result
+// back in json format over USB:
 //    python3 -m pip install -r examples/detect_camera/requirements.txt
 //    python3 examples/detect_camera/detect_camera_client.py
 
@@ -72,57 +75,76 @@ constexpr char kModelPath[] =
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
-void DetectFromCamera(struct jsonrpc_request* r) {
+bool DetectFromCamera(tflite::MicroInterpreter* interpreter, int model_width,
+                      int model_height,
+                      std::vector<tensorflow::Object>* results,
+                      std::vector<uint8>* image) {
+  CHECK(results != nullptr);
+  CHECK(image != nullptr);
+  auto* input_tensor = interpreter->input_tensor(0);
+  CameraFrameFormat fmt{CameraFormat::kRgb,   CameraFilterMethod::kBilinear,
+                        CameraRotation::k270, model_width,
+                        model_height,         false,
+                        image->data()};
+
+  CameraTask::GetSingleton()->Trigger();
+  if (!CameraTask::GetSingleton()->GetFrame({fmt})) return false;
+
+  std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image->data(),
+              image->size());
+  if (interpreter->Invoke() != kTfLiteOk) return false;
+
+  *results = tensorflow::GetDetectionResults(interpreter, 0.5, 1);
+  return true;
+}
+
+void DetectRpc(struct jsonrpc_request* r) {
   auto* interpreter =
       static_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
-
   auto* input_tensor = interpreter->input_tensor(0);
   int model_height = input_tensor->dims->data[1];
   int model_width = input_tensor->dims->data[2];
-
-  printf("width=%d; height=%d\r\n", model_width, model_height);
-
-  std::vector<uint8_t> image(model_width * model_height * /*channels=*/3);
-  CameraFrameFormat fmt{CameraFormat::kRgb, CameraFilterMethod::kBilinear,
-                        CameraRotation::k0, model_width,
-                        model_height,       false,
-                        image.data()};
-
-  CameraTask::GetSingleton()->Trigger();
-  bool ret = CameraTask::GetSingleton()->GetFrame({fmt});
-
-  if (!ret) {
-    jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
+  std::vector<uint8> image(model_height * model_width *
+                           CameraFormatBpp(CameraFormat::kRgb));
+  std::vector<tensorflow::Object> results;
+  if (DetectFromCamera(interpreter, model_width, model_height, &results,
+                       &image)) {
+    if (!results.empty()) {
+      const auto& result = results[0];
+      jsonrpc_return_success(
+          r,
+          "{%Q: %d, %Q: %d, %Q: %V, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, "
+          "%Q: %g, %Q: %g}}",
+          "width", model_width, "height", model_height, "base64_data",
+          image.size(), image.data(), "detection", "id", result.id, "score",
+          result.score, "xmin", result.bbox.xmin, "xmax", result.bbox.xmax,
+          "ymin", result.bbox.ymin, "ymax", result.bbox.ymax);
+      return;
+    }
+    jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: None}", "width",
+                           model_width, "height", model_height, "base64_data",
+                           image.size(), image.data(), "detection");
     return;
   }
-
-  std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
-              image.size());
-
-  if (interpreter->Invoke() != kTfLiteOk) {
-    jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
-    return;
-  }
-
-  auto results = tensorflow::GetDetectionResults(interpreter, 0.5, 1);
-  if (!results.empty()) {
-    const auto& result = results[0];
-    jsonrpc_return_success(
-        r,
-        "{%Q: %d, %Q: %d, %Q: %V, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, "
-        "%Q: %g, %Q: %g}}",
-        "width", model_width, "height", model_height, "base64_data",
-        image.size(), image.data(), "detection", "id", result.id, "score",
-        result.score, "xmin", result.bbox.xmin, "xmax", result.bbox.xmax,
-        "ymin", result.bbox.ymin, "ymax", result.bbox.ymax);
-    return;
-  }
-  jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: None}", "width",
-                         model_width, "height", model_height, "base64_data",
-                         image.size(), image.data(), "detection");
+  jsonrpc_return_error(r, -1, "Failed to detect image from camera.", nullptr);
 }
 
-void Main() {
+void DetectConsole(tflite::MicroInterpreter* interpreter) {
+  auto* input_tensor = interpreter->input_tensor(0);
+  int model_height = input_tensor->dims->data[1];
+  int model_width = input_tensor->dims->data[2];
+  std::vector<uint8> image(model_height * model_width *
+                           CameraFormatBpp(CameraFormat::kRgb));
+  std::vector<tensorflow::Object> results;
+  if (DetectFromCamera(interpreter, model_width, model_height, &results,
+                       &image)) {
+    printf("%s\r\n", tensorflow::FormatDetectionOutput(results).c_str());
+  } else {
+    printf("Failed to detect image from camera.\r\n");
+  }
+}
+
+[[noreturn]] void Main() {
   printf("Detection Camera Example!\r\n");
   // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
@@ -130,13 +152,13 @@ void Main() {
   std::vector<uint8_t> model;
   if (!LfsReadFile(kModelPath, &model)) {
     printf("ERROR: Failed to load %s\r\n", kModelPath);
-    return;
+    vTaskSuspend(nullptr);
   }
 
   auto tpu_context = EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!tpu_context) {
     printf("ERROR: Failed to get EdgeTpu context\r\n");
-    return;
+    vTaskSuspend(nullptr);
   }
 
   tflite::MicroErrorReporter error_reporter;
@@ -150,12 +172,12 @@ void Main() {
                                        &error_reporter);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("ERROR: AllocateTensors() failed\r\n");
-    return;
+    vTaskSuspend(nullptr);
   }
 
   if (interpreter.inputs().size() != 1) {
     printf("ERROR: Model must have only one input tensor\r\n");
-    return;
+    vTaskSuspend(nullptr);
   }
 
   // Starting Camera.
@@ -164,10 +186,17 @@ void Main() {
 
   printf("Initializing detection server...\r\n");
   jsonrpc_init(nullptr, &interpreter);
-  jsonrpc_export("detect_from_camera", DetectFromCamera);
+  jsonrpc_export("detect_from_camera", DetectRpc);
   UseHttpServer(new JsonRpcHttpServer);
   printf("Detection server ready!\r\n");
-  vTaskSuspend(nullptr);
+  GpioConfigureInterrupt(
+      Gpio::kUserButton, GpioInterruptMode::kIntModeFalling,
+      [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); },
+      /*debounce_interval_us=*/50 * 1e3);
+  while (true) {
+    vTaskSuspend(nullptr);
+    DetectConsole(&interpreter);
+  }
 }
 
 }  // namespace
@@ -176,5 +205,4 @@ void Main() {
 extern "C" void app_main(void* param) {
   (void)param;
   coralmicro::Main();
-  vTaskSuspend(nullptr);
 }
