@@ -317,7 +317,16 @@ def main():
         return
 
     sock = socket.socket()
-    sock.connect((args.host, args.port))
+    sock.settimeout(10)
+    try:
+        sock.connect((args.host, args.port))
+    except (TimeoutError, ConnectionError) as e:
+        msg = 'Cannot connect to Coral Dev Board Micro, make sure you specify' \
+              ' the correct IP address with --host.'
+        if sys.platform == 'darwin':
+            msg += ' Network over USB is not supported on macOS.'
+        raise RuntimeError(msg) from e
+    sock.settimeout(None)
     sock.send(struct.pack('<iiiii', args.sample_rate_hz,
                           args.sample_format.id,
                           args.dma_buffer_size_ms,
