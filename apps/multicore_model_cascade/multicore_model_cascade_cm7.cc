@@ -70,6 +70,8 @@ constexpr int kModelWidth = 324;
 constexpr int kModelHeight = 324;
 constexpr int kModelSize = kModelWidth * kModelHeight * /*depth*/ 3;
 
+constexpr int kLogInterval = 15;
+
 template <typename T>
 constexpr uint8_t byte(T value, int i) {
   return static_cast<uint8_t>(value >> 8 * i);
@@ -218,12 +220,13 @@ class PosenetTask : private Task<PosenetTask> {
     }
   }
 
-  [[noreturn]] void Run() const {
+  [[noreturn]] void Run() {
     std::vector<uint8_t> json;
     json.reserve(2048);  // Assume JSON size around 2K.
     while (true) {
       char cmd;
       CHECK(xQueuePeek(queue_, &cmd, portMAX_DELAY) == pdTRUE);
+      counter_++;
       if (tpu_ctx_) {
         {
           coralmicro::MutexLock lock(tpu_state_mutex_);
@@ -232,10 +235,13 @@ class PosenetTask : private Task<PosenetTask> {
         auto poses =
             tensorflow::GetPosenetOutput(interpreter_.get(), kThreshold);
         if (!poses.empty()) {
-          printf("%s\r\n", tensorflow::FormatPosenetOutput(poses).c_str());
           CreatePoseJson(poses, kThreshold, &json);
           network_task_->Send(kMessageTypePoseData, json.data(), json.size());
         }
+        if (poses.size() != num_poses_ || counter_ % kLogInterval == 0) {
+          printf("Poses: %u\r\n", poses.size());
+        }
+        num_poses_ = poses.size();
       }
       CHECK(xQueueReceive(queue_, &cmd, portMAX_DELAY) == pdTRUE);
     }
@@ -261,6 +267,8 @@ class PosenetTask : private Task<PosenetTask> {
   std::shared_ptr<tflite::MicroInterpreter> interpreter_;
   SemaphoreHandle_t tpu_state_mutex_;
   std::shared_ptr<EdgeTpuContext> tpu_ctx_;
+  size_t counter_;
+  size_t num_poses_;
 };
 
 class MainTask : private Task<MainTask> {
