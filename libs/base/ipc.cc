@@ -37,10 +37,11 @@ void Ipc::SendMessage(const IpcMessage& message) {
   if (!tx_task_ || !tx_semaphore_) {
     return;
   }
-  // TODO(ljonas): Check usage of eSetValueWithOverwrite.
-  xTaskNotifyIndexed(tx_task_, kSendMessageNotification,
-                     reinterpret_cast<uint32_t>(&message),
-                     eSetValueWithOverwrite);
+  while (xTaskNotifyIndexed(tx_task_, kSendMessageNotification,
+                            reinterpret_cast<uint32_t>(&message),
+                            eSetValueWithoutOverwrite) == pdFALSE) {
+    taskYIELD();
+  }
   CHECK(xSemaphoreTake(tx_semaphore_, portMAX_DELAY) == pdTRUE);
 }
 
