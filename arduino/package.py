@@ -29,7 +29,6 @@ import shutil
 import subprocess
 import tarfile
 import urllib.request
-import zipfile
 import PyInstaller.__main__
 
 platform_dir = ''
@@ -122,7 +121,6 @@ def main():
     parser.add_argument('--mac_flashtool_sha256', type=str, default=None)
     parser.add_argument('--linux_flashtool_url', type=str, default=None)
     parser.add_argument('--linux_flashtool_sha256', type=str, default=None)
-    parser.add_argument('--arduino_cli_url', type=str, default=None)
     parser.add_argument('--manifest_revision', type=str, default=None)
     args = parser.parse_args()
 
@@ -135,16 +133,6 @@ def main():
         'root_dir': root_dir,
         'git_revision': git_revision,
     }
-
-    arduino_cli_path = os.path.join(root_dir, 'third_party/arduino-cli')
-    if args.arduino_cli_url and not os.path.exists(os.path.join(arduino_cli_path, 'arduino-cli')):
-        filename, _ = urllib.request.urlretrieve(args.arduino_cli_url)
-        if system_name == 'Windows':
-            with zipfile.ZipFile(filename, 'r') as arduino_zip:
-                arduino_zip.extractall(arduino_cli_path)
-        else:
-            with tarfile.open(name=filename, mode='r:gz') as arduino_tar:
-                arduino_tar.extractall(arduino_cli_path)
 
     if args.core:
         return core_main(args, **common_kwargs)
@@ -329,10 +317,6 @@ def core_main(args, **kwargs):
     root_dir = kwargs['root_dir']
     arduino_dir = kwargs['arduino_dir']
     git_revision = kwargs['git_revision']
-
-    # Remove previous coral package.
-    coral_package_dir = os.path.join(root_dir, '.arduino15', 'packages', 'coral')
-    shutil.rmtree(coral_package_dir, ignore_errors=True)
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         # Build Arduino artifacts.

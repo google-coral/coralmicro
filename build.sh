@@ -14,8 +14,7 @@
 # limitations under the License.
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly ARDUINO_CLI=${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli
-readonly PACKAGE_PY=${SCRIPT_DIR}/arduino/package.py
+readonly PACKAGE_PY="${SCRIPT_DIR}/arduino/package.py"
 
 function die {
     echo "$@" >/dev/stderr
@@ -119,20 +118,15 @@ sketch:
 EOF
         local platform_name
         local flashtool_name
-        local cli_name
-        local cli_version="0.25.1"
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
             platform_name="linux64"
             flashtool_name="linux"
-            cli_name="Linux_64bit.tar.gz"
         elif [[ "$OSTYPE" == "darwin"* ]]; then
             platform_name="osx"
             flashtool_name="mac"
-            cli_name="macOS_64bit.tar.gz"
         elif [[ "$OSTYPE" == "win32" ]]; then
             platform_name="windows"
             flashtool_name="win"
-            cli_name="Windows_64bit.zip"
         else
             die "Unknown platform name : $OSTYPE"
         fi
@@ -149,10 +143,22 @@ EOF
           --core_url=http://localhost:8000/${core_archive_name} \
           --core_sha256=$(sha256sum ${build_dir}/${core_archive_name} | cut -d ' ' -f 1) \
           --${flashtool_name}_flashtool_url=http://localhost:8000/${flashtool_archive_name} \
-          --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/${flashtool_archive_name} | cut -d ' ' -f 1) \
-          --arduino_cli_url=https://github.com/arduino/arduino-cli/releases/download/${cli_version}/arduino-cli_${cli_version}_${cli_name}
-        "${ARDUINO_CLI}" core update-index
-        "${ARDUINO_CLI}" core install coral:coral_micro
+          --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/${flashtool_archive_name} | cut -d ' ' -f 1)
+
+        if [[ ! -d "${SCRIPT_DIR}/third_party/arduino-cli" ]]; then
+            python3 "${SCRIPT_DIR}/arduino/get_arduino_cli.py" \
+              --version 0.26.0 \
+              --output_dir "${SCRIPT_DIR}/third_party/arduino-cli"
+        fi
+
+        readonly arduino_cli="${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli"
+
+        # Remove old Coral packages.
+        rm -rf "${SCRIPT_DIR}/.arduino15/packages/coral"
+
+        # Install updated Coral packages.
+        "${arduino_cli}" core update-index
+        "${arduino_cli}" core install coral:coral_micro
 
         if [[ ! -z ${build_sketches} ]]; then
             for sketch in ${SCRIPT_DIR}/sketches/*; do
@@ -172,7 +178,7 @@ EOF
                         continue
                       fi
                     fi
-                    "${ARDUINO_CLI}" compile -b coral:coral_micro:${variant} ${sketch};
+                    "${arduino_cli}" compile -b coral:coral_micro:${variant} ${sketch};
                 done
             done
         fi

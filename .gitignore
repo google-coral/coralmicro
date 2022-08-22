@@ -5,10 +5,11 @@
 /build
 /build-*
 /docs/_build
-/third_party/arduino-cli/*
+/third_party/arduino-cli
+/third_party/toolchain-*
 .DS_Store
 .gdb_history
 __pycache__
 *.spec
 *.swp
-third_party/toolchain-*
+
