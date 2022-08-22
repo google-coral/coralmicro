@@ -52,8 +52,8 @@ class QueueTask {
       resp = cb_resp;
       CHECK(xSemaphoreGive(sem) == pdTRUE);
     };
-    CHECK(xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200)) == pdTRUE);
-    CHECK(xSemaphoreTake(sem, pdMS_TO_TICKS(200)) == pdTRUE);
+    CHECK(xQueueSend(request_queue_, &req, portMAX_DELAY) == pdTRUE);
+    CHECK(xSemaphoreTake(sem, portMAX_DELAY) == pdTRUE);
     vSemaphoreDelete(sem);
     return resp;
   }
@@ -65,7 +65,7 @@ class QueueTask {
       CHECK(xQueueSendFromISR(request_queue_, &req, &reschedule) == pdTRUE);
       portYIELD_FROM_ISR(reschedule);
     } else {
-      CHECK(xQueueSend(request_queue_, &req, pdMS_TO_TICKS(200)) == pdTRUE);
+      CHECK(xQueueSend(request_queue_, &req, portMAX_DELAY) == pdTRUE);
     }
   }
 
