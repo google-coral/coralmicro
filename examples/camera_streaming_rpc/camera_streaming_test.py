@@ -22,20 +22,34 @@ from PIL import Image
 import rpc_helper
 
 parser = argparse.ArgumentParser(description='Image server client')
-parser.add_argument('--usb_ip', type=str, required=True, help='Dev Board Micro USB IP address.')
-parser.add_argument('--ethernet', action='store_true', help='Get image from ethernet ip.')
-parser.add_argument('--ethernet_ip', type=str, required=False, help='Dev Board Micro Ethernet IP address.')
-parser.add_argument('--image_width', type=int, default=700, help='Specify image width.')
-parser.add_argument('--image_height', type=int, default=700, help='Specify image height.')
-parser.add_argument('--image_rotation', type=int, default=270, choices=[0, 90, 180, 270], help='Image rotation (degrees)')
-parser.add_argument('--image_format', type=str, default='RGB', choices=['RGB', 'GRAY', 'RAW'], help='Pixel format')
-parser.add_argument('--image_filter', type=str, default='BILINEAR', choices=['BILINEAR', 'NEAREST_NEIGHBOR'], help='Demosaic interpolation method')
-parser.add_argument('--auto_white_balance', action='store_true', help='Enable white balancing')
-parser.add_argument('--noauto_white_balance', action='store_false', dest='auto_white_balance')
+parser.add_argument('--usb_ip', type=str, required=True,
+                    help='Dev Board Micro USB IP address.')
+parser.add_argument('--ethernet', action='store_true',
+                    help='Get image from ethernet ip.')
+parser.add_argument('--ethernet_ip', type=str, required=False,
+                    help='Dev Board Micro Ethernet IP address.')
+parser.add_argument('--image_width', type=int, default=700,
+                    help='Specify image width.')
+parser.add_argument('--image_height', type=int,
+                    default=700, help='Specify image height.')
+parser.add_argument('--image_rotation', type=int, default=270,
+                    choices=[0, 90, 180, 270], help='Image rotation (degrees)')
+parser.add_argument('--image_format', type=str, default='RGB',
+                    choices=['RGB', 'GRAY', 'RAW'], help='Pixel format')
+parser.add_argument('--image_filter', type=str, default='BILINEAR',
+                    choices=['BILINEAR', 'NEAREST_NEIGHBOR'], help='Demosaic interpolation method')
+parser.add_argument('--auto_white_balance',
+                    action='store_true', help='Enable white balancing')
+parser.add_argument('--noauto_white_balance',
+                    action='store_false', dest='auto_white_balance')
 parser.set_defaults(auto_white_balance=True)
-parser.add_argument('--wifi', action='store_true', help='Get image from wifi ip.')
-parser.add_argument('--wifi_ssid', type=str, required=False, help='wifi network name')
-parser.add_argument('--wifi_psk', type=str, required=False, help='wifi network password')
+parser.add_argument('--wifi', action='store_true',
+                    help='Get image from wifi ip.')
+parser.add_argument('--wifi_ssid', type=str,
+                    required=False, help='wifi network name')
+parser.add_argument('--wifi_psk', type=str, required=False,
+                    help='wifi network password')
+
 
 def display_image(response, width, height, format):
   result = get_field_or_die(response, 'result')
@@ -67,10 +81,12 @@ def parse_ethernet_ip(response):
   result = get_field_or_die(response, 'result')
   return get_field_or_die(result, 'ethernet_ip')
 
+
 def parse_wifi_ip(response):
   print(f'response:\n{json.dumps(response, indent=2)}')
   result = get_field_or_die(response, 'result')
   return get_field_or_die(result, 'wifi_ip')
+
 
 def get_field_or_die(data, field_name):
   if field_name not in data:
@@ -98,13 +114,16 @@ def main():
     if ethernet_ip is None:
       ethernet_ip = parse_ethernet_ip(rpc_helper.get_ethernet_ip(args.usb_ip))
     print(f'Ethernet ip: {ethernet_ip}')
-    display_image(rpc_helper.get_image_from_camera(ethernet_ip, width, height, format, filter, rotation, auto_white_balance), width, height, format)
+    display_image(rpc_helper.get_image_from_camera(ethernet_ip, width, height,
+                  format, filter, rotation, auto_white_balance), width, height, format)
   elif args.wifi:
     wifi_ip = parse_wifi_ip(rpc_helper.wifi_get_ip(args.usb_ip))
     print(f'Wifi ip: {wifi_ip}')
-    display_image(rpc_helper.get_image_from_camera(wifi_ip, width, height, format, filter, rotation, auto_white_balance), width, height, format)
+    display_image(rpc_helper.get_image_from_camera(wifi_ip, width, height,
+                  format, filter, rotation, auto_white_balance), width, height, format)
   else:  # USB
-    display_image(rpc_helper.get_image_from_camera(args.usb_ip, width, height, format, filter, rotation, auto_white_balance), width, height, format)
+    display_image(rpc_helper.get_image_from_camera(args.usb_ip, width, height,
+                  format, filter, rotation, auto_white_balance), width, height, format)
 
 
 if __name__ == '__main__':

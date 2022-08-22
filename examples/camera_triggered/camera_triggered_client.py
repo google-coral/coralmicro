@@ -19,6 +19,7 @@ import requests
 import sys
 from PIL import Image
 
+
 def display_image(response, width, height):
   result = get_field_or_die(response, 'result')
   image_data_base64 = get_field_or_die(result, 'base64_data')
@@ -56,6 +57,7 @@ def main():
   }, timeout=10).json()
 
   display_image(response, width, height)
+
 
 if __name__ == '__main__':
   try:

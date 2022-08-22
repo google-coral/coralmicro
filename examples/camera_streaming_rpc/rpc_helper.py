@@ -20,15 +20,16 @@ import json
 
 rpc_id = itertools.count()
 
+
 def rpc(func):
   def rpc_impl(*args, **kwargs):
     params = inspect.getcallargs(func, *args, **kwargs)
     url = f"http://{params.pop('ip')}:80/jsonrpc"
     payload = {
-      'id': next(rpc_id),
-      'jsonrpc': '2.0',
-      'method': func.__name__,
-      'params': [params or {}],
+        'id': next(rpc_id),
+        'jsonrpc': '2.0',
+        'method': func.__name__,
+        'params': [params or {}],
     }
     print(f'url: {url}')
     print(f'payload:\n{json.dumps(payload, indent=2)}')
@@ -48,6 +49,7 @@ def get_ethernet_ip(ip):
        {'id': 24, 'result': {'ethernet_ip': '192.168.1.117'}}
   """
 
+
 @rpc
 def wifi_connect(ip, ssid, password='', retries=5):
   """Connect to wifi
@@ -62,6 +64,7 @@ def wifi_connect(ip, ssid, password='', retries=5):
       {'id': 1, 'result': {}}
   """
 
+
 @rpc
 def wifi_get_ip(ip):
   """Get wifi ip
@@ -73,6 +76,7 @@ def wifi_get_ip(ip):
        {'id': 24, 'result': {'ip': '192.168.1.117'}}
   """
 
+
 @rpc
 def wifi_get_status(ip):
   """Ge wifi status
@@ -83,6 +87,7 @@ def wifi_get_status(ip):
     Example:
       {'id': 24, 'result': {'status': true}}
   """
+
 
 @rpc
 def get_image_from_camera(ip, width, height, format, filter, rotation, auto_white_balance):

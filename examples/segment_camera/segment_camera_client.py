@@ -47,103 +47,103 @@ Class 3 (Red): None of the above/a surrounding pixel.
 
 
 def create_pascal_label_colormap():
-    """Creates a label colormap used in PASCAL VOC segmentation benchmark.
-    Returns:
-      A Colormap for visualizing segmentation results.
-    """
-    colormap = np.zeros((256, 3), dtype=int)
-    indices = np.arange(256, dtype=int)
+  """Creates a label colormap used in PASCAL VOC segmentation benchmark.
+  Returns:
+    A Colormap for visualizing segmentation results.
+  """
+  colormap = np.zeros((256, 3), dtype=int)
+  indices = np.arange(256, dtype=int)
 
-    for shift in reversed(range(8)):
-        for channel in range(3):
-            colormap[:, channel] |= ((indices >> channel) & 1) << shift
-        indices >>= 3
+  for shift in reversed(range(8)):
+    for channel in range(3):
+      colormap[:, channel] |= ((indices >> channel) & 1) << shift
+    indices >>= 3
 
-    return colormap
+  return colormap
 
 
 def label_to_color_image(label):
-    """Adds color defined by the dataset colormap to the label.
-    Args:
-      label: A 2D array with integer type, storing the segmentation label.
-    Returns:
-      result: A 2D array with floating type. The element of the array
-        is the color indexed by the corresponding element in the input label
-        to the PASCAL color map.
-    Raises:
-      ValueError: If label is not of rank 2 or its value is larger than color
-        map maximum entry.
-    """
-    if label.ndim != 2:
-        raise ValueError('Expect 2-D input label')
+  """Adds color defined by the dataset colormap to the label.
+  Args:
+    label: A 2D array with integer type, storing the segmentation label.
+  Returns:
+    result: A 2D array with floating type. The element of the array
+      is the color indexed by the corresponding element in the input label
+      to the PASCAL color map.
+  Raises:
+    ValueError: If label is not of rank 2 or its value is larger than color
+      map maximum entry.
+  """
+  if label.ndim != 2:
+    raise ValueError('Expect 2-D input label')
 
-    colormap = create_pascal_label_colormap()
+  colormap = create_pascal_label_colormap()
 
-    if np.max(label) >= len(colormap):
-        raise ValueError('label value too large.')
+  if np.max(label) >= len(colormap):
+    raise ValueError('label value too large.')
 
-    return colormap[label]
+  return colormap[label]
 
 
 def get_field_or_die(data, field_name):
-    if field_name not in data:
-        print(f'Unable to parse {field_name} from data: {data}\r\n')
-        exit(1)
-    return data[field_name]
+  if field_name not in data:
+    print(f'Unable to parse {field_name} from data: {data}\r\n')
+    exit(1)
+  return data[field_name]
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Segment Camera Example',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--host', type=str, default='10.10.10.1',
-                        help='Hostname or IP Address of Coral Dev Board Micro')
-    args = parser.parse_args()
+  parser = argparse.ArgumentParser(
+      description='Segment Camera Example',
+      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('--host', type=str, default='10.10.10.1',
+                      help='Hostname or IP Address of Coral Dev Board Micro')
+  args = parser.parse_args()
 
-    # Send RPC request
-    response = requests.post(f'http://{args.host}:80/jsonrpc', json={
-        'method': 'segment_from_camera',
-        'jsonrpc': '2.0',
-        'id': 0,
-    }, timeout=10).json()
+  # Send RPC request
+  response = requests.post(f'http://{args.host}:80/jsonrpc', json={
+      'method': 'segment_from_camera',
+      'jsonrpc': '2.0',
+      'id': 0,
+  }, timeout=10).json()
 
-    # Get the image size
-    result = get_field_or_die(response, 'result')
-    width = get_field_or_die(result, 'width')
-    height = get_field_or_die(result, 'height')
+  # Get the image size
+  result = get_field_or_die(response, 'result')
+  width = get_field_or_die(result, 'width')
+  height = get_field_or_die(result, 'height')
 
-    # Decode the image and mask data
-    image_data_base64 = get_field_or_die(result, 'base64_data')
-    image_data = base64.b64decode(image_data_base64)
-    im = Image.frombytes('RGB', (width, height), image_data, 'raw')
+  # Decode the image and mask data
+  image_data_base64 = get_field_or_die(result, 'base64_data')
+  image_data = base64.b64decode(image_data_base64)
+  im = Image.frombytes('RGB', (width, height), image_data, 'raw')
 
-    mask_data_base64 = get_field_or_die(result, 'output_mask')
-    mask_data = base64.b64decode(mask_data_base64)
+  mask_data_base64 = get_field_or_die(result, 'output_mask')
+  mask_data = base64.b64decode(mask_data_base64)
 
-    num_classes = len(mask_data) / (width * height)
+  num_classes = len(mask_data) / (width * height)
 
-    predicted_mask = np.frombuffer(
-        mask_data, dtype=np.uint8, count=-1).reshape(width,
-                                                     height,
-                                                     int(num_classes))
-    np.set_printoptions(threshold=sys.maxsize)
-    predicted_mask = np.argmax(predicted_mask, axis=-1)
-    mask_img = Image.fromarray(
-        label_to_color_image(predicted_mask).astype(np.uint8))
+  predicted_mask = np.frombuffer(
+      mask_data, dtype=np.uint8, count=-1).reshape(width,
+                                                   height,
+                                                   int(num_classes))
+  np.set_printoptions(threshold=sys.maxsize)
+  predicted_mask = np.argmax(predicted_mask, axis=-1)
+  mask_img = Image.fromarray(
+      label_to_color_image(predicted_mask).astype(np.uint8))
 
-    # Display the input image and segmentation results.
-    output_img = Image.new('RGB', (2 * width, height))
-    output_img.paste(im, (0, 0))
-    output_img.paste(mask_img, (width, 0))
-    output_img.show()
+  # Display the input image and segmentation results.
+  output_img = Image.new('RGB', (2 * width, height))
+  output_img.paste(im, (0, 0))
+  output_img.paste(mask_img, (width, 0))
+  output_img.show()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except requests.exceptions.ConnectionError:
-        msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
-              ' the correct IP address with --host.'
-        if sys.platform == 'darwin':
-            msg += ' Network over USB is not supported on macOS.'
-        print(msg, file=sys.stderr)
+  try:
+    main()
+  except requests.exceptions.ConnectionError:
+    msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
+          ' the correct IP address with --host.'
+    if sys.platform == 'darwin':
+      msg += ' Network over USB is not supported on macOS.'
+    print(msg, file=sys.stderr)

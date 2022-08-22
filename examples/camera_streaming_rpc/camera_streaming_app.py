@@ -34,67 +34,68 @@ parser.add_argument('--host_ip', type=str, default='10.10.10.1',
                     help='Dev Board Micro USB IP address.')
 args = parser.parse_args()
 
+
 @eel.expose
 def video_feed():
-    """ The main program loop that updates the UI's video-feed. Internally it does 3 things on every loop:
-      1) Calls 'getImageConfig()' from javascripts to obtain user input
-      2) Make a rpc request to the valiant's camera stream server to obtain the image using the configs from step 1
-      3) Save the image as a new source to allow javascript to display the new image.
-      :return: None
-    """
-    host_ip = args.host_ip
-    while True:
-        # Get user inputs.
-        image_config = eel.getImageConfig()()
-        eel.updateLog(str(image_config))()
+  """ The main program loop that updates the UI's video-feed. Internally it does 3 things on every loop:
+    1) Calls 'getImageConfig()' from javascripts to obtain user input
+    2) Make a rpc request to the valiant's camera stream server to obtain the image using the configs from step 1
+    3) Save the image as a new source to allow javascript to display the new image.
+    :return: None
+  """
+  host_ip = args.host_ip
+  while True:
+    # Get user inputs.
+    image_config = eel.getImageConfig()()
+    eel.updateLog(str(image_config))()
 
-        width = int(image_config['width'])
-        height = int(image_config['height'])
-        format = image_config['format']
-        filter = image_config['filter']
-        rotation = int(image_config['rotation'])
-        auto_white_balance = image_config['awb']
+    width = int(image_config['width'])
+    height = int(image_config['height'])
+    format = image_config['format']
+    filter = image_config['filter']
+    rotation = int(image_config['rotation'])
+    auto_white_balance = image_config['awb']
 
-        # Get the image.
-        resp = rpc_helper.get_image_from_camera(
-            host_ip, width, height, format, filter, rotation, auto_white_balance)
-        frame = base64.b64decode(resp['result']['base64_data'])
+    # Get the image.
+    resp = rpc_helper.get_image_from_camera(
+        host_ip, width, height, format, filter, rotation, auto_white_balance)
+    frame = base64.b64decode(resp['result']['base64_data'])
 
-        # Save image source for javascript to render.
-        if format == 'RGB':
-            im = Image.frombytes('RGB', (width, height), frame)
-        elif format == 'GRAY':
-            im = Image.frombytes('L', (width, height), frame)
-        else:  # format == 'RAW'
-            np_data = np.frombuffer(frame, dtype=np.uint8)
-            np_data = np_data.reshape(width, height)
-            debayered = cv2.cvtColor(np_data, cv2.COLOR_BAYER_BG2BGR)
-            im = Image.fromarray(debayered)
-        # img_path has to be relative to the web directory.
-        img_path = os.path.join(
-            os.path.dirname(
-                os.path.abspath(__file__)),
-            'web',
-            'img_data.jpg')
-        im.save(img_path)
-        eel.updateImageSrc(os.path.basename(img_path), width, height)()
+    # Save image source for javascript to render.
+    if format == 'RGB':
+      im = Image.frombytes('RGB', (width, height), frame)
+    elif format == 'GRAY':
+      im = Image.frombytes('L', (width, height), frame)
+    else:  # format == 'RAW'
+      np_data = np.frombuffer(frame, dtype=np.uint8)
+      np_data = np_data.reshape(width, height)
+      debayered = cv2.cvtColor(np_data, cv2.COLOR_BAYER_BG2BGR)
+      im = Image.fromarray(debayered)
+    # img_path has to be relative to the web directory.
+    img_path = os.path.join(
+        os.path.dirname(
+            os.path.abspath(__file__)),
+        'web',
+        'img_data.jpg')
+    im.save(img_path)
+    eel.updateImageSrc(os.path.basename(img_path), width, height)()
 
 
 def main():
-    curr_path = os.path.dirname(os.path.abspath(__file__))
-    eel.init(os.path.join(curr_path, 'web'))
-    host = '0.0.0.0'
-    port = args.port
-    print(f'Hosting on {host}:{port}')
-    eel.start(
-        'index.html',
-        size=(
-            1005,
-            900),
-        host=host,
-        port=port,
-        mode='chrome')
+  curr_path = os.path.dirname(os.path.abspath(__file__))
+  eel.init(os.path.join(curr_path, 'web'))
+  host = '0.0.0.0'
+  port = args.port
+  print(f'Hosting on {host}:{port}')
+  eel.start(
+      'index.html',
+      size=(
+          1005,
+          900),
+      host=host,
+      port=port,
+      mode='chrome')
 
 
 if __name__ == "__main__":
-    main()
+  main()

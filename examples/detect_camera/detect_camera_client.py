@@ -37,59 +37,61 @@ You should see the image result appear in a new window.
 Note that this example shows only the top detection result.
 """
 
+
 def get_field_or_die(data, field_name):
-    if field_name not in data:
-        print(f'Unable to parse {field_name} from data: {data}\r\n')
-        exit(1)
-    return data[field_name]
+  if field_name not in data:
+    print(f'Unable to parse {field_name} from data: {data}\r\n')
+    exit(1)
+  return data[field_name]
+
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Detect Camera Example',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--host', type=str, default='10.10.10.1',
-                        help='Hostname or IP Address of Coral Dev Board Micro')
-    args = parser.parse_args()
+  parser = argparse.ArgumentParser(
+      description='Detect Camera Example',
+      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('--host', type=str, default='10.10.10.1',
+                      help='Hostname or IP Address of Coral Dev Board Micro')
+  args = parser.parse_args()
 
-    # Send RPC request
-    response = requests.post(f'http://{args.host}:80/jsonrpc', json={
-        'method': 'detect_from_camera',
-        'jsonrpc': '2.0',
-        'id': 0,
-    }, timeout=10).json()
+  # Send RPC request
+  response = requests.post(f'http://{args.host}:80/jsonrpc', json={
+      'method': 'detect_from_camera',
+      'jsonrpc': '2.0',
+      'id': 0,
+  }, timeout=10).json()
 
-    # Get the image size
-    result = get_field_or_die(response, 'result')
-    width = get_field_or_die(result, 'width')
-    height = get_field_or_die(result, 'height')
+  # Get the image size
+  result = get_field_or_die(response, 'result')
+  width = get_field_or_die(result, 'width')
+  height = get_field_or_die(result, 'height')
 
-    # Decode the image data
-    image_data_base64 = get_field_or_die(result, 'base64_data')
-    image_data = base64.b64decode(image_data_base64)
-    im = Image.frombytes('RGB', (width, height), image_data, 'raw')
+  # Decode the image data
+  image_data_base64 = get_field_or_die(result, 'base64_data')
+  image_data = base64.b64decode(image_data_base64)
+  im = Image.frombytes('RGB', (width, height), image_data, 'raw')
 
-    # Get the top detection coordinates
-    detection = get_field_or_die(result, 'detection')
-    left = get_field_or_die(detection, 'xmin') * width
-    top = get_field_or_die(detection, 'ymin') * height
-    right = get_field_or_die(detection, 'xmax') * width
-    bottom = get_field_or_die(detection, 'ymax') * height
+  # Get the top detection coordinates
+  detection = get_field_or_die(result, 'detection')
+  left = get_field_or_die(detection, 'xmin') * width
+  top = get_field_or_die(detection, 'ymin') * height
+  right = get_field_or_die(detection, 'xmax') * width
+  bottom = get_field_or_die(detection, 'ymax') * height
 
-    # Draw a bounding-box with the object id and score
-    draw = ImageDraw.Draw(im)
-    draw.rectangle([left, top, right, bottom])
-    text = f'ID: {detection["id"]} Score: {detection["score"]}'
-    draw.text((left, bottom), text)
+  # Draw a bounding-box with the object id and score
+  draw = ImageDraw.Draw(im)
+  draw.rectangle([left, top, right, bottom])
+  text = f'ID: {detection["id"]} Score: {detection["score"]}'
+  draw.text((left, bottom), text)
 
-    im.show()
+  im.show()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except requests.exceptions.ConnectionError:
-        msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
-              ' the correct IP address with --host.'
-        if sys.platform == 'darwin':
-            msg += ' Network over USB is not supported on macOS.'
-        print(msg, file=sys.stderr)
+  try:
+    main()
+  except requests.exceptions.ConnectionError:
+    msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
+          ' the correct IP address with --host.'
+    if sys.platform == 'darwin':
+      msg += ' Network over USB is not supported on macOS.'
+    print(msg, file=sys.stderr)
