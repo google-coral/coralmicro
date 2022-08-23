@@ -6,7 +6,7 @@ void setup() {
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arduino I2C Client Writer!");
+  Serial.println("Arduino I2C Target Writer!");
 
   Wire.begin(0x42);
   Wire.onRequest(requestEvent);

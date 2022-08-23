@@ -7,7 +7,7 @@ void setup() {
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arduino I2C Host Writer!");
+  Serial.println("Arduino I2C Controller Writer!");
 
   Wire.begin();
   Wire.setClock(400000);
