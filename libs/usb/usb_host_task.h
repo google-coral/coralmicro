@@ -36,7 +36,9 @@ class UsbHostTask {
     static UsbHostTask task;
     return &task;
   }
+  // @cond Do not generate docs
   void Init();
+  // @endcond
 
   using UsbHostEventCallback =
       std::function<usb_status_t(usb_host_handle, usb_device_handle,

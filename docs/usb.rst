@@ -1,6 +1,9 @@
 USB APIs
 ========
 
+.. note::
+   USB is not available within M4 programs.
+
 USB device
 ----------------
 

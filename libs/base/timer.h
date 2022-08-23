@@ -22,6 +22,19 @@
 
 namespace coralmicro {
 
+// Initializes the timer.
+//
+// Programs on the M7 do not need to call this because it is automatically
+// called internally. M7 programs can immediately call functions such as
+// `TimerMicros()`.
+//
+// Programs on the M4 must call this to intialize the timer before they can
+// use timers. For example:
+//
+// ```
+// TimerInit();
+// auto current_time = TimerMillis();
+// ```
 void TimerInit();
 
 // Microseconds since boot.

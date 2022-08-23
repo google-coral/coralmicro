@@ -22,6 +22,13 @@
 namespace coralmicro {
 
 // Initializes hardware random number generator.
+//
+// Programs on the M7 do not need to call this because it is automatically
+// called internally. M7 programs can immediately call
+// `RandomGenerate()`.
+//
+// Programs on the M4 must call this to intialize the generator before
+// calling `RandomGenerate()`.
 void RandomInit();
 
 // Generates random byte sequence.

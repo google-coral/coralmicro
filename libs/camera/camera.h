@@ -189,9 +189,22 @@ class CameraTask
                        configMINIMAL_STACK_SIZE * 10, kCameraTaskPriority,
                        /*QueueLength=*/4> {
  public:
-  // @cond Do not generate docs
+  // Initializes the camera.
+  //
+  // Programs on the M7 do not need to call this because it is automatically
+  // called internally. M7 programs can immediately turn on the camera with
+  // `SetPower()`.
+  //
+  // Programs on the M4 must call this to intialize the camera before they can
+  // turn on the camera. For example:
+  //
+  // ```
+  // CameraTask::GetSingleton()->Init(I2C5Handle());
+  // CameraTask::GetSingleton()->SetPower(true);
+  // ```
+  //
+  // @param i2c_handle The camera I2C handle: `I2C5Handle()`.
   void Init(lpi2c_rtos_handle_t* i2c_handle);
-  // @endcond
 
   // Gets the `CameraTask` singleton.
   //

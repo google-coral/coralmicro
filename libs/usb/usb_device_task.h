@@ -46,7 +46,9 @@ class UsbDeviceTask {
   void AddDevice(const usb_device_class_config_struct_t& config,
                  UsbSetHandleCallback sh_cb, UsbHandleEventCallback he_cb,
                  const void* descriptor_data, size_t descriptor_data_size);
+  // @cond Do not generate docs
   bool Init();
+  // @endcond
   static UsbDeviceTask* GetSingleton() {
     static UsbDeviceTask task;
     return &task;

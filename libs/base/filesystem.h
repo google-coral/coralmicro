@@ -30,11 +30,9 @@ namespace coralmicro {
 // @returns Pointer to littlefs instance.
 lfs_t* Lfs();
 
-// Initializes and mounts littlefs.
-//
-// @param force_format True to format filesystem on mount, false otherwise.
-// @returns True upon success, false otherwise.
+// @cond Do not generate docs
 bool LfsInit(bool force_format = false);
+// @endcond
 
 // Creates directory, similar to `mkdir -p <path>`.
 //

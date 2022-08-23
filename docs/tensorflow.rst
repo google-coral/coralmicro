@@ -183,6 +183,9 @@ For usage examples, see the following sections, such as for
 Edge TPU runtime
 ------------------
 
+.. note::
+   The Edge TPU is not available within M4 programs.
+
 These APIs provide access to the Edge TPU on the Dev Board Micro.
 Anytime you want to use the Edge TPU for acceleration with
 :cpp:any:`~tflite::MicroInterpreter`, you need to do two things:

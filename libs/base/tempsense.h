@@ -29,14 +29,16 @@ enum class TempSensor {
 
 // Initializes the temperature sensors.
 //
-// You must call this before `TempSensorRead()` to ensure that the temperature
-// sensors are in a known good state.
+// Programs on the M7 do not need to call this because it is automatically
+// called internally. M7 programs can immediately call
+// `TempSensorRead()`.
+//
+// Programs on the M4 must call this to intialize the sensors before
+// calling `TempSensorRead()`.
 void TempSensorInit();
 
 // Reads the temperature of a sensor.
 //
-// You must first call `TempSensorInit()` regardless of which sensor you're
-// using.
 // @param sensor The sensor to get the temperature.
 // @return The actual temperature in Celcius or 0.0 on failure.
 float TempSensorRead(TempSensor sensor);
