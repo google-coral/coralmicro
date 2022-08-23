@@ -235,9 +235,9 @@ need to specify the pin names.
 To learn more about using SPI with Arduino, read the `Arduino & SPI
 documentation <https://docs.arduino.cc/learn/communication/spi>`_.
 
-**Example** (from ``sketches/SPITransaction/``):
+**Example** (from ``sketches/SPI/``):
 
-.. literalinclude:: ../sketches/SPITransaction/SPITransaction.ino
+.. literalinclude:: ../sketches/SPI/SPI.ino
    :start-after: [start-snippet:ardu-spi]
    :end-before: [end-snippet:ardu-spi]
 

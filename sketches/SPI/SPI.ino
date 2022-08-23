@@ -1,56 +1,49 @@
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// [start-snippet:ardu-spi]
 #include "Arduino.h"
 #include "SPI.h"
 
-static uint8_t count8 = 0x1;
-static uint16_t count16 = 0x101;
-static const size_t transferSize = 256U;
-uint8_t masterRxData[transferSize];
-uint8_t masterTxData[transferSize];
+// Executes an SPI transaction on LPSPI6 (header pins).
+// Connect the SDI and SDO pins to each other to execute this successfully.
+//
+
+static uint8_t count = 0;
 
 void setup() {
   Serial.begin(115200);
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arduino SPI!");
+  Serial.println("Arduino SPI Example!");
 
   SPI.begin();
-
-  // Initialize send buffer
-  for (int i = 0; i < transferSize; i++) {
-    masterTxData[i] = i;
-    masterRxData[i] = i;
-  }
 }
 
 void loop() {
-  // Testing that the output is the same as the input by connecting SDO to SDI
 
-  Serial.print("1 byte transfer: ");
-  Serial.println(SPI.transfer(count8));
-  count8++;
-  count8 %= 255;
-
-  Serial.print("2 byte transfer: ");
-  Serial.println(SPI.transfer16(count16));
-  count16 += 0x100;
-  if (count16 == 0xFFFF) {
-    count16 = 0;
+  Serial.println("Executing a SPI transaction.");
+  if (SPI.transfer(count) == count) {
+    Serial.println("Transaction success!");
   }
-
-  SPI.transfer(&masterTxData, transferSize);
-
-  bool bufferMatch = true;
-  for (int i = 0; i < transferSize; i++) {
-    if (masterTxData[i] != masterRxData[i]) {
-      Serial.println("256 byte transfer failed");
-      bufferMatch = false;
-      break;
-    }
+  else {
+    Serial.println("Transaction failed!");
   }
-  if (bufferMatch) {
-    Serial.println("256 byte transfer matches");
-  }
+  count++;
+  count %= 255;
 
   delay(1000);
 }
+// [end-snippet:ardu-spi]
