@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(MFGTest
+add_executable_m7(mfg_test
     mfg_test.cc
     mfg_test_iperf.cc
 )
 
-target_link_libraries(MFGTest
+target_link_libraries(mfg_test
     libs_base-m7_freertos
     libs_base-m7_ethernet
     libs_a71ch
@@ -26,13 +26,13 @@ target_link_libraries(MFGTest
     libs_testlib
 )
 
-add_executable_m7(MFGTestWiFi
+add_executable_m7(mfg_test_wifi
     mfg_test_wifi.cc
     mfg_test_iperf.cc
     ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/wiced_bt_cfg.c
 )
 
-target_link_libraries(MFGTestWiFi
+target_link_libraries(mfg_test_wifi
     libs_base-m7_freertos
     libs_rpc_http_server
     libs_rpc_utils
@@ -43,12 +43,12 @@ target_link_libraries(MFGTestWiFi
     libs_base-m7_wifi
 )
 
-add_executable_m7(MFGTestPOE
+add_executable_m7(mfg_test_poe
     mfg_test_poe.cc
     mfg_test_iperf.cc
 )
 
-target_link_libraries(MFGTestPOE
+target_link_libraries(mfg_test_poe
     libs_base-m7_freertos
     libs_base-m7_ethernet
     libs_rpc_http_server

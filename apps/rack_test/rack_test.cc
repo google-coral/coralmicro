@@ -14,7 +14,7 @@
 
 #include <array>
 
-#include "apps/RackTest/rack_test_ipc.h"
+#include "apps/rack_test/rack_test_ipc.h"
 #include "libs/base/ipc_m7.h"
 #include "libs/base/utils.h"
 #include "libs/camera/camera.h"

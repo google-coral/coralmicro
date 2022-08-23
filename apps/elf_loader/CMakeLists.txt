@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(ELFLoader
+add_executable_m7(elf_loader
     LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/libs/nxp/rt1176-sdk/MIMXRT1176xxxxx_cm7_elfloader.ld
     elf_loader.cc
     usb_data.cc
@@ -22,15 +22,15 @@ add_executable_m7(ELFLoader
     ${PROJECT_SOURCE_DIR}/libs/usb/usb_device_task.cc
 )
 
-target_compile_definitions(ELFLoader PUBLIC
+target_compile_definitions(elf_loader PUBLIC
     ELFLOADER
 )
 
-target_link_libraries(ELFLoader
+target_link_libraries(elf_loader
     libs_nxp_rt1176-sdk_freertos
     libs_FreeRTOS
     libs_littlefs
     libs_nxp_rt1176-sdk_lwip
 )
-target_sources(ELFLoader PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)
-target_sources(ELFLoader PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)
+target_sources(elf_loader PUBLIC $<TARGET_OBJECTS:libs_nxp_rt1176-sdk_freertos>)
+target_sources(elf_loader PUBLIC $<TARGET_OBJECTS:libs_FreeRTOS>)

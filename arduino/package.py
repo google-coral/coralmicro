@@ -328,7 +328,7 @@ def core_main(args, **kwargs):
                                'bundling_target_libs_arduino_coral_micro',
                                'bundling_target_libs_arduino_coral_micro_poe',
                                'bundling_target_libs_arduino_coral_micro_wifi',
-                               'ELFLoader',
+                               'elf_loader',
                                'flashloader'])
 
         # Copy main files.
@@ -358,10 +358,10 @@ def core_main(args, **kwargs):
         # Copy bootloaders.
         bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'coral_micro')
         os.makedirs(bootloader_dir)
-        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec'),
+        shutil.copyfile(os.path.join(build_dir, 'apps', 'elf_loader', 'image.srec'),
                         os.path.join(bootloader_dir, 'elfloader.srec'))
-        shutil.copyfile(os.path.join(build_dir, 'apps', 'ELFLoader', 'ELFLoader'),
-                        os.path.join(bootloader_dir, 'ELFLoader'))
+        shutil.copyfile(os.path.join(build_dir, 'apps', 'elf_loader', 'elf_loader'),
+                        os.path.join(bootloader_dir, 'elf_loader'))
         shutil.copyfile(os.path.join(build_dir, 'libs', 'nxp', 'flashloader', 'image.srec'),
                         os.path.join(bootloader_dir, 'flashloader.srec'))
 

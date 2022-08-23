@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "apps/MFGTest/mfg_test_iperf.h"
+#include "apps/mfg_test/mfg_test_iperf.h"
 #include "libs/a71ch/a71ch.h"
 #include "libs/base/analog.h"
 #include "libs/base/ethernet.h"

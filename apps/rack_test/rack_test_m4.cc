@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "apps/RackTest/rack_test_ipc.h"
+#include "apps/rack_test/rack_test_ipc.h"
 #include "libs/base/ipc_m4.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"

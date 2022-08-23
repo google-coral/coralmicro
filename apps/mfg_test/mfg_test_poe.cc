@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "apps/MFGTest/mfg_test_iperf.h"
+#include "apps/mfg_test/mfg_test_iperf.h"
 #include "libs/base/ethernet.h"
 #include "libs/base/main_freertos_m7.h"
 #include "libs/rpc/rpc_http_server.h"

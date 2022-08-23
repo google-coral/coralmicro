@@ -23,7 +23,7 @@ coral_micro.flashloader.file={runtime.platform.path}/bootloaders/coral_micro/fla
 coral_micro.upload.tool=flashtool
 coral_micro.upload.protocol=
 coral_micro.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
-# VID/PID for ELFLoader
+# VID/PID for elf_loader
 coral_micro.vid.0=0x18d1
 coral_micro.pid.0=0x9307
 # VID/PID for App mode
@@ -32,7 +32,7 @@ coral_micro.pid.1=0x9308
 # VID/PID for flashloader
 coral_micro.vid.2=0x1fc9
 coral_micro.pid.2=0x013d
-# VID/PID for Old ELFLoader
+# VID/PID for Old elf_loader
 coral_micro.vid.3=0x18d1
 coral_micro.pid.3=0x93fe
 # VID/PID for Old App mode
@@ -72,7 +72,7 @@ coral_micro_wifi.data.dir={runtime.platform.path}/variants/coral_micro_wifi/data
 coral_micro_wifi.upload.tool=flashtool
 coral_micro_wifi.upload.protocol=
 coral_micro_wifi.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data --data_dir={data.dir} {upload.extra_flags}
-# VID/PID for ELFLoader
+# VID/PID for elf_loader
 coral_micro_wifi.vid.0=0x18d1
 coral_micro_wifi.pid.0=0x9307
 # VID/PID for App mode
@@ -81,7 +81,7 @@ coral_micro_wifi.pid.1=0x9308
 # VID/PID for flashloader
 coral_micro_wifi.vid.2=0x1fc9
 coral_micro_wifi.pid.2=0x013d
-# VID/PID for Old ELFLoader
+# VID/PID for Old elf_loader
 coral_micro_wifi.vid.3=0x18d1
 coral_micro_wifi.pid.3=0x93fe
 # VID/PID for Old App mode
@@ -120,7 +120,7 @@ coral_micro_poe.flashloader.file={runtime.platform.path}/bootloaders/coral_micro
 coral_micro_poe.upload.tool=flashtool
 coral_micro_poe.upload.protocol=
 coral_micro_poe.upload.pattern={cmd.path} --elfloader_path {elfloader.file} --flashloader_path {flashloader.file} --build_dir . --elf_path {build.path}/{build.project_name}.elf --toolchain {build.compiler_path} --arduino --data_dir={build.path}/data {upload.extra_flags}
-# VID/PID for ELFLoader
+# VID/PID for elf_loader
 coral_micro_poe.vid.0=0x18d1
 coral_micro_poe.pid.0=0x9307
 # VID/PID for App mode
@@ -129,7 +129,7 @@ coral_micro_poe.pid.1=0x9308
 # VID/PID for flashloader
 coral_micro_poe.vid.2=0x1fc9
 coral_micro_poe.pid.2=0x013d
-# VID/PID for Old ELFLoader
+# VID/PID for Old elf_loader
 coral_micro_poe.vid.3=0x18d1
 coral_micro_poe.pid.3=0x93fe
 # VID/PID for Old App mode

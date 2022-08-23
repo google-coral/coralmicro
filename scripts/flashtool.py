@@ -263,16 +263,16 @@ section (0) {
 
 
 def FindElfloader(build_dir, cached_files):
-  default_path = os.path.join(build_dir, 'apps', 'ELFLoader', 'image.srec')
+  default_path = os.path.join(build_dir, 'apps', 'elf_loader', 'image.srec')
   if os.path.exists(default_path):
     return default_path
   if cached_files:
     for f in cached_files:
-      if 'ELFLoader/image.srec' in f:
+      if 'elf_loader/image.srec' in f:
         return f
   else:
     for root, dirs, files in os.walk(build_dir):
-      if os.path.split(root)[1] == "ELFLoader":
+      if os.path.split(root)[1] == "elf_loader":
         for file in files:
           if file == "image.srec":
             return os.path.join(root, file)
@@ -487,7 +487,7 @@ def StateCheckForElfloader(serial_number=None):
     if is_elfloader_connected(serial_number):
       return StateResetElfloader
     time.sleep(1)
-  return FlashtoolError('Unable to find device in ELFLoader mode.')
+  return FlashtoolError('Unable to find device in elf_loader mode.')
 
 
 def FindSerialPortForDevice(serial_number=None):
@@ -926,7 +926,7 @@ def main():
   elftosb_path = os.path.join(
       root_dir, 'third_party', 'nxp', 'elftosb', platform_dir, 'elftosb' + exe_extension)
   if not os.path.exists(elftosb_path):
-    print('%s does not exist' % path)
+    print('%s does not exist' % elftosb_path)
     return
 
   blhost_path = os.path.join(root_dir, 'third_party', 'nxp',
@@ -934,7 +934,7 @@ def main():
   elfloader_path = args.elfloader_path if args.elfloader_path else FindElfloader(
       build_dir, cached_files)
   elfloader_elf_path = os.path.join(
-      os.path.dirname(elfloader_path), 'ELFLoader')
+      os.path.dirname(elfloader_path), 'elf_loader')
   toolchain_path = args.toolchain if args.toolchain else os.path.join(
       root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
   (flashloader_workdir, flashloader_path) = MakeFlashloaderFromSrec(args.flashloader_path,

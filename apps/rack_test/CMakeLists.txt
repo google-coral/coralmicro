@@ -20,48 +20,48 @@ set(RACK_TEST_LINK_LIBRARIES
     libs_testlib
 )
 
-add_executable_m7(RackTest
+add_executable_m7(rack_test
     rack_test.cc
     M4_EXECUTABLE
-    RackTestM4
+    rack_test_m4
 )
 
-target_link_libraries(RackTest
+target_link_libraries(rack_test
     ${RACK_TEST_LINK_LIBRARIES}
 )
 
-add_executable_m4(RackTestM4
+add_executable_m4(rack_test_m4
     rack_test_m4.cc
 )
 
-target_link_libraries(RackTestM4
+target_link_libraries(rack_test_m4
     libs_base-m4_freertos
     libs_coremark-m4
 )
 
 
 # For wifi tests.
-add_executable_m7(RackTestWifi
+add_executable_m7(rack_test_wifi
     rack_test.cc
     M4_EXECUTABLE
-    RackTestM4
+    rack_test_m4
 )
 
 # For bluetooth tests.
-add_executable_m7(RackTestBle
+add_executable_m7(rack_test_ble
      rack_test.cc
      M4_EXECUTABLE
-     RackTestM4
+     rack_test_m4
 )
 
-target_compile_definitions(RackTestWifi PUBLIC TEST_WIFI)
-target_compile_definitions(RackTestBle PUBLIC TEST_BLE)
+target_compile_definitions(rack_test_wifi PUBLIC TEST_WIFI)
+target_compile_definitions(rack_test_ble PUBLIC TEST_BLE)
 
-target_link_libraries(RackTestWifi
+target_link_libraries(rack_test_wifi
     ${RACK_TEST_LINK_LIBRARIES}
     libs_base-m7_wifi
 )
 
-target_link_libraries(RackTestBle
+target_link_libraries(rack_test_ble
     ${RACK_TEST_LINK_LIBRARIES}
 )

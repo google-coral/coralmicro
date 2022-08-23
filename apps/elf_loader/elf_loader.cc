@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "apps/ELFLoader/elf_loader.h"
+#include "apps/elf_loader/elf_loader.h"
 
 #include <elf.h>
 
