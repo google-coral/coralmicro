@@ -26,29 +26,30 @@
 
 namespace coralmicro {
 
+// Do not instantiate this class.
+// It provides shared IPC functions for `IpcM7` and `IpcM4`.
 class Ipc {
  public:
-  // Defines the function type that processes
-  // IPC messages which is used as input for RegisterAppMessageHandler().
+  // The function type to handle incoming IPC messages,
+  // which must be given to `RegisterAppMessageHandler()` via `IpcM7` or
+  // `IpcM4`, respective of which core is receiving the messages.
   //
-  // @param data The message received. Must be a byte array of size
-  // kIpcMessageBufferDataSize.
+  // The function receives the IPC message as a byte array of size
+  // `kIpcMessageBufferDataSize` (127).
   using AppMessageHandler =
       std::function<void(const uint8_t data[kIpcMessageBufferDataSize])>;
   // @cond Do not generate docs
   virtual void Init();
   // @endcond
 
-  // Writes a message.
+  // Sends an IPC message to the other core.
   //
   // @param message The message to send.
   void SendMessage(const IpcMessage& message);
 
-  // Callback method to the function, AppMessageHandler, that defines how to
-  // process message.
+  // Sets a callback function to process incoming IPC messages.
   //
-  // @param AppMessageHandler Function that defines how to interpret the
-  // message.
+  // @param handler The function to receive incoming messages.
   void RegisterAppMessageHandler(AppMessageHandler handler) {
     app_handler_ = handler;
   }

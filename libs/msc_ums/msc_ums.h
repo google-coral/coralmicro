@@ -19,13 +19,13 @@
 
 #include <map>
 
-// clang-format off
+/* clang-format off */
 #include "libs/usb/descriptors.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/device/usb_device.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/include/usb.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/output/source/device/class/usb_device_class.h"  // Must be above other class headers.
 #include "third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/usb_examples/usb_device_msc_disk/freertos/cm7/usb_device_msc.h"
-// clang-format on
+/* clang-format on */
 
 namespace coralmicro {
 

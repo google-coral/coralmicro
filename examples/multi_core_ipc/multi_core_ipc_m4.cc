@@ -21,6 +21,7 @@
 // and toggles the user LED based on the messages received.
 // This must be started by the M7 program.
 
+// [start-sphinx-snippet:ipc-m4]
 namespace coralmicro {
 namespace {
 
@@ -49,3 +50,4 @@ extern "C" void app_main(void* param) {
       coralmicro::HandleM7Message);
   vTaskSuspend(nullptr);
 }
+// [end-sphinx-snippet:ipc-m4]

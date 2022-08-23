@@ -22,44 +22,55 @@
 #include "third_party/freertos_kernel/include/stream_buffer.h"
 
 namespace coralmicro {
-// Identifier for the type of message being sent in a IpcSystemMessage.
+// @cond Do not generate docs
+// The type of message that may be sent in an `IpcSystemMessage`.
 enum class IpcSystemMessageType : uint8_t {
-  // kConsoleBufferPtr refers to a pointer to a console buffer.
+  // A message with a pointer to a console buffer.
   kConsoleBufferPtr,
 };
 
-// System Message to be sent from M4 or M7.
-//
-// @param type Identifier for the type of message, which will be a
-// `kConsoleBufferPtr` which is a byte.
-// @param message Pointer to console buffer.
+// System message to be sent from `IpcM4` or `IpcM7`.
 struct IpcSystemMessage {
+  // Identifier for the type of message, which will be a `kConsoleBufferPtr`,
+  // which is a byte.
   IpcSystemMessageType type;
+  // Pointer to console buffer.
   union {
     void* console_buffer_ptr;
   } message;
 } __attribute__((packed));
+// @endcond
 
-// Identifier for the type of message being sent in a IpcMessage.
+// The types of message that may be sent in an `IpcMessage`.
 enum class IpcMessageType : uint8_t {
-  // kSystem refers to a IpcSystemMessage
+  // Internal use only.
   kSystem,
-  // kApp refers to a byte array of size kIpcMessageBufferDataSize
+  // A custom app message with a byte array of size
+  // `kIpcMessageBufferDataSize` (127).
   kApp,
 };
 
 // Size of the byte array containing a message.
 inline constexpr size_t kIpcMessageBufferDataSize = 127;
 
-// Message to be sent from an M4 or M7.
+// A message to be sent with `Ipc::SendMessage()` (using either `IpcM4` or
+// `IpcM7`).
 //
-// @param type Identifier for the type of message.
-// @param message The message to be sent, which must correspond to the given
-// type.
+// The `message` union is designed to support two types of message, but you
+// should always use an "app" message. So you should set `type` to
+// `IpcMessageType::kApp` and then populate `data` with a custom data format
+// that both processes know how to read/write.
+//
+// For an example, see `examples/multi_core_ipc/`.
 struct IpcMessage {
+  // Identifier for the type of message (apps should always use `kApp`).
   IpcMessageType type;
+  // The message to be sent (`system` or `data`).
   union {
+    // Internal use only.
     IpcSystemMessage system;
+    // A byte array, which should be a structured data format that's defined
+    // by the app, but limited to size `kIpcMessageBufferDataSize` (127 bytes).
     uint8_t data[kIpcMessageBufferDataSize];
   } message;
 } __attribute__((packed));

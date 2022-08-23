@@ -6,10 +6,11 @@ coralmicro API
    camera.rst
    audio.rst
    pins.rst
-   system.rst
+   filesystem.rst
    network.rst
-   usb.rst
    bluetooth.rst
+   usb.rst
+   system.rst
    utils.rst
    arduino.rst
 =======

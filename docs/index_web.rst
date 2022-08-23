@@ -33,7 +33,7 @@ see how to
 
 
 API summary
-+++++++++++++
+-------------
 
 
 + :doc:`tensorflow`
@@ -56,6 +56,10 @@ API summary
    headers (GPIO, ADC, DAC, PWM, I2C, SPI), plus APIs to toggle the on-board
    LEDs.
 
++ :doc:`filesystem`
+
+   APIs to read and write files on the flash memory.
+
 + :doc:`network`
 
    APIs for everything network related, including Wi-Fi, Ethernet,
@@ -73,8 +77,8 @@ API summary
 
 + :doc:`system`
 
-   Various system-level APIs, such as to read/write files, pass messages
-   between MCU cores, and reset the board.
+   Various system-level APIs, such as to perform inter-process communication
+   between MCU cores, establish mutex locks, watchdogs, and reset the board.
 
 + :doc:`utils`
 
@@ -93,7 +97,7 @@ only, not for traditional C++ apps):
 
 
 API index
-++++++++++
+-----------
 
 .. raw:: html
 

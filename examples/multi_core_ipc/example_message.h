@@ -17,6 +17,7 @@
 
 #include "libs/base/ipc_message_buffer.h"
 
+// [start-sphinx-snippet:ipc-message]
 enum class ExampleMessageType : uint8_t {
   kLedStatus,
   kAck,
@@ -26,6 +27,7 @@ struct ExampleAppMessage {
   ExampleMessageType type;
   bool led_status;
 } __attribute__((packed));
+// [end-sphinx-snippet:ipc-message]
 
 static_assert(sizeof(ExampleAppMessage) <=
               coralmicro::kIpcMessageBufferDataSize);

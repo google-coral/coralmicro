@@ -20,8 +20,9 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
-namespace coralmicro {
 
+// [start-sphinx-snippet:file-rw]
+namespace coralmicro {
 namespace {
 void PrintDirectory(lfs_dir_t* dir, const char* path, int num_tabs) {
   constexpr int kMaxDepth = 3;
@@ -104,3 +105,4 @@ extern "C" void app_main(void* param) {
   coralmicro::Main();
   vTaskSuspend(nullptr);
 }
+// [end-sphinx-snippet:file-rw]

@@ -27,6 +27,7 @@
 //
 // This also flashes the M4 program; the M7 program starts the M4.
 
+// [start-sphinx-snippet:ipc-m7]
 namespace coralmicro {
 namespace {
 
@@ -71,3 +72,4 @@ extern "C" [[noreturn]] void app_main(void* param) {
   (void)param;
   coralmicro::Main();
 }
+// [end-sphinx-snippet:ipc-m7]
