@@ -16,6 +16,7 @@
 
 #include "libs/msc_ums/msc_ums.h"
 
+#include "fsl_cache.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/components/flash/nand/fsl_nand_flash.h"
@@ -39,12 +40,8 @@ constexpr int kFilesystemBaseBlock = 12;
 constexpr size_t kPageSize = 2048;
 }  // namespace
 
-// TODO(ljonas): Cache management.
-
-//USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 uint32_t g_mscReadRequestBuffer[(USB_DEVICE_MSC_READ_BUFF_SIZE * 2) >> 2];
 
-// USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 uint32_t g_mscWriteRequestBuffer[(USB_DEVICE_MSC_WRITE_BUFF_SIZE * 2) >> 2];
 usb_device_inquiry_data_fromat_struct_t g_InquiryInfo = {
     (USB_DEVICE_MSC_UFI_PERIPHERAL_QUALIFIER
@@ -165,6 +162,7 @@ usb_status_t MscUms::Handler(uint32_t event, void *param) {
           uint32_t page_index = lba->offset;
           while (size != 0) {
             auto write_size = std::min(kPageSize, size);
+            DCACHE_CleanInvalidateByRange(reinterpret_cast<uint32_t>(buf), write_size);
             status_t errorCode = Nand_Flash_Page_Program(
                 nand, kFilesystemBaseBlock * kPagesPerBlock + page_index, buf,
                 write_size);
@@ -220,6 +218,7 @@ usb_status_t MscUms::Handler(uint32_t event, void *param) {
             buf += read_size;
             size -= read_size;
           }
+          DCACHE_InvalidateByRange(reinterpret_cast<uint32_t>(lba->buffer), lba->size);
         } else {
           errorCode = kStatus_Fail;
         }
