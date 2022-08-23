@@ -21,9 +21,4 @@ add_executable_m7(posenet
 
 target_link_libraries(posenet
     libs_base-m7_freertos
-    libs_tpu_dfu_task_freertos
-    libs_tpu_task_freertos
-    libs_usb_host_task_freertos
-    libs_tensorflow-m7
-    libs_tpu_freertos
 )

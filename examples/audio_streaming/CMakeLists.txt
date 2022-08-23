@@ -19,5 +19,4 @@ add_executable_m7(audio_streaming
 target_link_libraries(audio_streaming
     libs_base-m7_freertos
     libs_base-m7_network
-    libs_audio_freertos
 )

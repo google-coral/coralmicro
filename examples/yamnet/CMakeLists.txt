@@ -29,5 +29,4 @@ add_executable_m7(yamnet
 
 target_link_libraries(yamnet
     libs_base-m7_freertos
-    libs_audio_freertos
 )

@@ -16,8 +16,6 @@ set(CAMERA_STREAMING_SRC camera_streaming.cc)
 
 set(CAMERA_STREAMING_LINK_LIBRARIES
     libs_base-m7_freertos
-    libs_camera_freertos
-    libs_mjson
     libs_rpc_http_server
     libs_rpc_utils
 )

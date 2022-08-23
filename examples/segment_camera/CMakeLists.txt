@@ -21,7 +21,4 @@ add_executable_m7(segment_camera
 target_link_libraries(segment_camera
     libs_base-m7_freertos
     libs_rpc_http_server
-    libs_mjson
-    libs_tensorflow-m7
-    libs_tpu_freertos
 )

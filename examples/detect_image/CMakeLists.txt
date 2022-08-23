@@ -21,6 +21,4 @@ add_executable_m7(detect_image
 
 target_link_libraries(detect_image
     libs_base-m7_freertos
-    libs_tensorflow-m7
-    libs_tpu_freertos
 )

@@ -21,6 +21,4 @@ add_executable_m7(bodypix
 target_link_libraries(bodypix
     libs_base-m7_freertos
     libs_rpc_http_server
-    libs_tensorflow-m7
-    libs_tpu_freertos
 )

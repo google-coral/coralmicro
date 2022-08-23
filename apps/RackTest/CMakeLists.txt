@@ -15,15 +15,9 @@
 set(RACK_TEST_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_coremark-m7
-    libs_mjson
     libs_rpc_http_server
     libs_rpc_utils
-    libs_tpu_dfu_task_freertos
-    libs_tpu_task_freertos
-    libs_usb_host_task_freertos
-    libs_tensorflow-m7
     libs_testlib
-    libs_tpu_freertos
 )
 
 add_executable_m7(RackTest

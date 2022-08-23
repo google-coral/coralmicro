@@ -20,5 +20,4 @@ target_link_libraries(camera_triggered
     libs_base-m7_freertos
     libs_rpc_http_server
     libs_rpc_utils
-    libs_mjson
 )

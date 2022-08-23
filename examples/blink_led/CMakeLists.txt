@@ -13,7 +13,7 @@
 # limitations under the License.
 
 add_executable_m7(blink_led
-        blink_led.cc
+   blink_led.cc
 )
 
 target_link_libraries(blink_led

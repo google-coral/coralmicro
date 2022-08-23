@@ -23,9 +23,7 @@ target_link_libraries(MFGTest
     libs_a71ch
     libs_rpc_http_server
     libs_rpc_utils
-    libs_mjson
     libs_testlib
-    libs_tpu_freertos
 )
 
 add_executable_m7(MFGTestWiFi
@@ -55,6 +53,5 @@ target_link_libraries(MFGTestPOE
     libs_base-m7_ethernet
     libs_rpc_http_server
     libs_rpc_utils
-    libs_mjson
     libs_testlib
 )
