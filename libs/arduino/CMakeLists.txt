@@ -12,32 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(libs_arduino_LINK_LIBRARIES
+    libs_base-m7_freertos
+    libs_base-m7_network
+    libs_jpeg_m7
+    libs_yamnet
+)
+
 add_library(libs_arduino_coral_micro STATIC
     CMakeLists.txt)
 target_link_libraries(libs_arduino_coral_micro
-    libs_base-m7_freertos
-    libs_flatbuffers
-    libs_jpeg_m7
-    libs_yamnet
+    ${libs_arduino_LINK_LIBRARIES}
 )
 bundle_static_library(libs_arduino_coral_micro libs_arduino_coral_micro_bundled)
 
 add_library(libs_arduino_coral_micro_wifi STATIC
     CMakeLists.txt)
 target_link_libraries(libs_arduino_coral_micro_wifi
-    libs_base-m7_freertos
+    ${libs_arduino_LINK_LIBRARIES}
     libs_base-m7_wifi
-    libs_jpeg_m7
-    libs_yamnet
 )
 bundle_static_library(libs_arduino_coral_micro_wifi libs_arduino_coral_micro_wifi_bundled)
 
 add_library(libs_arduino_coral_micro_poe STATIC
     CMakeLists.txt)
 target_link_libraries(libs_arduino_coral_micro_poe
-    libs_base-m7_freertos
+    ${libs_arduino_LINK_LIBRARIES}
     libs_base-m7_ethernet
-    libs_jpeg_m7
-    libs_yamnet
 )
 bundle_static_library(libs_arduino_coral_micro_poe libs_arduino_coral_micro_poe_bundled)

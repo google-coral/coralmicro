@@ -51,6 +51,7 @@ extern "C" {
  * SO_RCVTIMEO processing.
  */
 #define LWIP_SO_RCVTIMEO 1
+#define LWIP_SO_RCVBUF 1
 
 /* ---------- Core locking ---------- */
 

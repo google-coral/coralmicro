@@ -35,10 +35,10 @@ void setup() {
   Serial.begin(115200);
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arudino Ethernet something!");
+  Serial.println("Arduino Ethernet initialization example!");
 
   if (!Ethernet.begin()) {
-    Serial.println("DHCP faileld to get an IP.");
+    Serial.println("DHCP failed to get an IP.");
     return;
   }
   Serial.print("Our IP address is: ");

@@ -20,7 +20,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/api.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
 namespace coralmicro {
@@ -99,8 +101,40 @@ int SocketServer(int port, int backlog) {
   return sockfd;
 }
 
+int SocketClient(ip_addr_t ip, int port) {
+  const int sockfd = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if (sockfd == -1) return -1;
+
+  struct sockaddr_in connect_addr = {};
+  connect_addr.sin_len = sizeof(connect_addr);
+  connect_addr.sin_family = AF_INET;
+  connect_addr.sin_port = PP_HTONS(port);
+  std::memcpy(&connect_addr.sin_addr, &ip.addr, sizeof(uint32_t));
+  auto ret =
+      lwip_connect(sockfd, reinterpret_cast<struct sockaddr*>(&connect_addr),
+                   sizeof(connect_addr));
+  if (ret == -1) return -1;
+
+  return sockfd;
+}
+
+int SocketClient(const char* host, int port) {
+  ip_addr_t lwip_addr;
+  err_t err = netconn_gethostbyname(host, &lwip_addr);
+  if (err != ERR_OK) {
+    return -1;
+  }
+  return SocketClient(lwip_addr, port);
+}
+
 int SocketAccept(int sockfd) { return lwip_accept(sockfd, nullptr, nullptr); }
 
 void SocketClose(int sockfd) { lwip_close(sockfd); }
+
+int SocketAvailable(int sockfd) {
+  int i;
+  lwip_ioctl(sockfd, FIONREAD, &i);
+  return i;
+}
 
 }  // namespace coralmicro

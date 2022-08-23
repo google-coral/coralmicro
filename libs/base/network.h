@@ -20,6 +20,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/ip_addr.h"
+
 namespace coralmicro {
 
 enum class IOStatus { kOk, kEof, kError };
@@ -49,6 +51,12 @@ int SocketServer(int port, int backlog);
 int SocketAccept(int sockfd);
 
 void SocketClose(int sockfd);
+
+int SocketClient(ip_addr_t ip, int port);
+
+int SocketClient(const char* host, int port);
+
+int SocketAvailable(int sockfd);
 
 }  // namespace coralmicro
 
