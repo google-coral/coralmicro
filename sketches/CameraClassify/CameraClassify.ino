@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// [start-snippet:ardu-detection]
+// [start-snippet:ardu-classification]
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>
 
@@ -23,11 +23,12 @@
 
 #include "Arduino.h"
 #include "coral_micro.h"
-#include "libs/tensorflow/detection.h"
+#include "libs/tensorflow/classification.h"
 
 using namespace coralmicro::arduino;
 
 namespace {
+
 bool setup_success{false};
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
@@ -36,8 +37,7 @@ std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 TfLiteTensor* input_tensor = nullptr;
 
-constexpr char kModelPath[] =
-    "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
+constexpr char kModelPath[] = "/models/mnv2_324_quant_bayered_edgetpu.tflite";
 
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
@@ -48,7 +48,7 @@ void setup() {
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arduino Camera Detection!");
+  Serial.println("Arduino Camera Classification!");
 
   SD.begin();
 
@@ -107,9 +107,9 @@ void setup() {
   Serial.print(model_width);
   Serial.print("; height=");
   Serial.println(model_height);
-  if (Camera.begin(model_width, model_height, coralmicro::CameraFormat::kRgb,
+  if (Camera.begin(model_width, model_height, coralmicro::CameraFormat::kRaw,
                    coralmicro::CameraFilterMethod::kBilinear,
-                   coralmicro::CameraRotation::k270,
+                   coralmicro::CameraRotation::k0,
                    true) != CameraStatus::SUCCESS) {
     Serial.println("Failed to start camera");
     return;
@@ -135,24 +135,16 @@ void loop() {
     return;
   }
 
-  auto results =
-      coralmicro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
+  auto results = coralmicro::tensorflow::GetClassificationResults(
+      interpreter.get(), 0.0, 3);
   Serial.print("Results count: ");
   Serial.println(results.size());
-  for (auto result : results) {
-    Serial.print("id: ");
+  for (const auto& result : results) {
+    Serial.print("Label ID: ");
     Serial.print(result.id);
-    Serial.print(" score: ");
-    Serial.print(result.score);
-    Serial.print(" xmin: ");
-    Serial.print(result.bbox.xmin);
-    Serial.print(" ymin: ");
-    Serial.print(result.bbox.ymin);
-    Serial.print(" xmax: ");
-    Serial.print(result.bbox.xmax);
-    Serial.print(" ymax: ");
-    Serial.println(result.bbox.ymax);
+    Serial.print(" Score: ");
+    Serial.println(result.score);
   }
   delay(1000);
 }
-// [end-snippet:ardu-detection]
+// [end-snippet:ardu-classification]
