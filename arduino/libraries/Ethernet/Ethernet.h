@@ -18,6 +18,8 @@
 #define Ethernet_h
 
 #include <Arduino.h>
+#include "SocketClient.h"
+#include "SocketServer.h"
 
 // Status of the Ethernet link.
 enum EthernetLinkStatus { Unknown, LinkON, LinkOFF };
@@ -25,6 +27,8 @@ enum EthernetLinkStatus { Unknown, LinkON, LinkOFF };
 namespace coralmicro {
 namespace arduino {
 
+using EthernetClient = SocketClient;
+using EthernetServer = SocketServer;
 // Allows for connection of the device to a network via Ethernet.
 // At the moment, this interface only supports networks with DHCP.
 // After a connection is established, information about the connection

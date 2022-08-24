@@ -18,6 +18,8 @@
 #define WiFi_h
 
 #include <Arduino.h>
+#include "SocketClient.h"
+#include "SocketServer.h"
 
 #include <cstdint>
 #include <memory>
@@ -50,6 +52,8 @@ enum wl_status_t {
 namespace coralmicro {
 namespace arduino {
 
+using WiFiClient = SocketClient;
+using WiFiServer = SocketServer;
 // Allows for scanning for and associating with a Wi-Fi network.
 // Connection is initiated with the `begin` functions,
 // which connect to a specified access point.

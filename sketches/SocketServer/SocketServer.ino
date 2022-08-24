@@ -30,7 +30,7 @@ void setup() {
 }
 
 void loop() {
-  if (client.available()) {
+  if (client && client.available()) {
     Serial.write(client.read());
     Serial.flush();
   }
