@@ -14,6 +14,7 @@
 
 set(libs_arduino_LINK_LIBRARIES
     libs_base-m7_freertos
+    libs_base-m7_http_server
     libs_base-m7_network
     libs_jpeg_m7
     libs_yamnet
