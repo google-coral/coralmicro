@@ -2,5 +2,5 @@
 -DSDK_OS_FREE_RTOS
 -DCORAL_MICRO_ARDUINO=1
 -DARDUINOSTL_M_H=1
-
 -DSERIAL_PORT_TYPE_UART=1
+-DMBEDTLS_CONFIG_FILE="third_party/modified/nxp/rt1176-sdk/ksdk_mbedtls_config.h"

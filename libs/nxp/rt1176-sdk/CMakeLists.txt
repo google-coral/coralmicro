@@ -553,7 +553,6 @@ add_library_m7(libs_nxp_rt1176-sdk-mbedtls
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/library/x509_crt.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk/ecp_alt.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk/ecp_curves_alt.c
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/mbedtls/port/ksdk/ksdk_mbedtls.c
 )
 
 target_link_libraries(libs_nxp_rt1176-sdk-mbedtls

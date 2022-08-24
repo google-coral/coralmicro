@@ -12,6 +12,9 @@
 -iwithprefixbefore/include/third_party/flatbuffers/include/
 -iwithprefixbefore/include/third_party/modified/nxp/rt1176-sdk
 -iwithprefixbefore/include/third_party/tflite-micro/
+-iwithprefixbefore/include/third_party/a71ch/hostlib/hostLib/inc/
+-iwithprefixbefore/include/third_party/a71ch/sss/ex/inc/
+-iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/mbedtls/include/mbedtls/
 
 -iwithprefixbefore/include/third_party/modified/nxp/rt1176-sdk
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/components/serial_manager

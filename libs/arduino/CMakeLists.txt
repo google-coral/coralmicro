@@ -17,27 +17,34 @@ set(libs_arduino_LINK_LIBRARIES
     libs_base-m7_network
     libs_jpeg_m7
     libs_yamnet
+    libs_a71ch
 )
 
 add_library(libs_arduino_coral_micro STATIC
     CMakeLists.txt)
+
 target_link_libraries(libs_arduino_coral_micro
     ${libs_arduino_LINK_LIBRARIES}
 )
+
 bundle_static_library(libs_arduino_coral_micro libs_arduino_coral_micro_bundled)
 
 add_library(libs_arduino_coral_micro_wifi STATIC
     CMakeLists.txt)
+
 target_link_libraries(libs_arduino_coral_micro_wifi
     ${libs_arduino_LINK_LIBRARIES}
     libs_base-m7_wifi
 )
+
 bundle_static_library(libs_arduino_coral_micro_wifi libs_arduino_coral_micro_wifi_bundled)
 
 add_library(libs_arduino_coral_micro_poe STATIC
     CMakeLists.txt)
+
 target_link_libraries(libs_arduino_coral_micro_poe
     ${libs_arduino_LINK_LIBRARIES}
     libs_base-m7_ethernet
 )
+
 bundle_static_library(libs_arduino_coral_micro_poe libs_arduino_coral_micro_poe_bundled)
