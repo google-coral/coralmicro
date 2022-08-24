@@ -46,8 +46,7 @@ direction, and pull-up or pull-down with
 For example::
 
    extern "C" void app_main(void* param) {
-     coralmicro::GpioSetMode(coralmicro::Gpio::kAA, false,
-                             coralmicro::GpioPullDirection::kPullDown);
+     coralmicro::GpioSetMode(coralmicro::Gpio::kAA, coralmicro::GpioMode::kOutput);
      bool on = true;
      while (true) {
        on = !on;

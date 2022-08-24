@@ -41,7 +41,7 @@ namespace {
   };
 
   for (auto gpio : kGpiosToTest) {
-    GpioSetMode(gpio, false, GpioPullDirection::kNone);
+    GpioSetMode(gpio, GpioMode::kOutput);
   }
 
   printf("Periodically toggling header GPIOs...\r\n");

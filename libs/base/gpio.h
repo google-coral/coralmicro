@@ -115,8 +115,8 @@ enum GpioInterruptMode {
   kIntModeCount
 };
 
-// GPIO pull directions for `GpioSetMode()`.
-enum GpioPullDirection { kPullUp, kPullDown, kNone };
+// GPIO modes for `GpioSetMode()`.
+enum GpioMode { kInput, kOutput, kInputPullUp, kInputPullDown };
 
 // The function type required by `GpioConfigureInterrupt()`.
 using GpioCallback = std::function<void()>;
@@ -140,9 +140,8 @@ bool GpioGet(Gpio gpio);
 
 // Sets the mode of a GPIO.
 // @param gpio Pin to configure.
-// @param input True sets the pin as an input; false sets it as an output.
-// @param pull_direction Either `kPullUp`, `kPullDown`, or `kNone`.
-void GpioSetMode(Gpio gpio, bool input, GpioPullDirection pull_direction);
+// @param mode Mode to configure the gpio as.
+void GpioSetMode(Gpio gpio, GpioMode mode);
 
 // Sets the interrupt mode and callback for a GPIO.
 //
