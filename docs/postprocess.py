@@ -21,6 +21,7 @@ import re
 from bs4 import BeautifulSoup
 
 from postprocess_wtd import lazy_tflm_cleanup
+from postprocess_wtd import lazy_escape_entities
 
 
 def remove_title(soup):
@@ -53,13 +54,6 @@ def clean_pre(soup):
     if parent_p:
       parent_p.replace_with(pre)
   return soup
-
-
-def lazy_escape_percent(string):
-  """Escapes percent signs that break Jinja build"""
-  # Doing this with BS4 proved impossible because it fights hard to
-  # enforce unicode entities whenever possible.
-  return string.replace('%Q', '&percnt;Q')
 
 
 def remove_coral(soup):
@@ -131,7 +125,7 @@ def process(file):
   if os.path.split(file)[1] == 'index.md':
     soup = fix_relative_links(soup)
   with open(file, 'w') as output:
-    output.write(lazy_escape_percent(str(soup)))
+    output.write(lazy_escape_entities(str(soup)))
 
   # Remove the Jinja title because genindex is an include-file
   if os.path.split(file)[1] == 'genindex.md':

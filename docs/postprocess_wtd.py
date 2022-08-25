@@ -28,6 +28,15 @@ def lazy_tflm_cleanup(soup):
   return soup
 
 
+def lazy_escape_entities(string):
+  """Escapes HTML entities that mess up code blocks or break Jinja build"""
+  # Doing this with BS4 proved impossible because it fights hard to
+  # enforce unicode entities whenever possible.
+  string = string.replace('&amp;zwj;', '')
+  string = string.replace('%Q', '&percnt;Q')
+  return string
+
+
 def process(file):
   """Runs all the cleanup functions."""
   print('Post-processing ' + file)
@@ -35,7 +44,7 @@ def process(file):
   if os.path.split(file)[1] == 'tensorflow.html':
     soup = lazy_tflm_cleanup(soup)
   with open(file, 'w') as output:
-    output.write(str(soup))
+    output.write(lazy_escape_entities(str(soup)))
 
 
 def main():

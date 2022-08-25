@@ -45,6 +45,7 @@ release = ''
 # ones.
 extensions = [
     'breathe',  # Converts Doxygen XML to Sphinx stuff
+    'sphinx.ext.autosectionlabel', # Allows sensible anchor linking in RST
 ]
 
 # Breathe config

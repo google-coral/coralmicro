@@ -53,6 +53,8 @@ inline int MsToSamples(AudioSampleRate sample_rate, int ms) {
 }
 
 // Audio driver configuration parameters.
+//
+// This is required to instantiate `AudioReader` and `AudioService`.
 struct AudioDriverConfig {
   // Sample rate to be used.
   AudioSampleRate sample_rate;
@@ -71,18 +73,18 @@ struct AudioDriverConfig {
   }
 };
 
-// Tracks the total space allocated for AudioDriver.
+// Tracks the total space allocated for `AudioDriver`.
 template <size_t NumDmaBuffers, size_t CombinedDmaBufferSize>
 struct AudioDriverBuffers {
   // Total number of DMA buffers allocated.
   static constexpr size_t kNumDmaBuffers = NumDmaBuffers;
   // Total space of all for DMA buffers allocated.
   static constexpr size_t kCombinedDmaBufferSize = CombinedDmaBufferSize;
-  // Checks if the allocated space can handle a specific AudioDriverConfig
+  // Checks if the allocated space can handle a specific `AudioDriverConfig`.
   //
-  // @param config The AudioDriver config we are checking.
-  // @return bool True if we have enough space to allocate the config of the
-  // AudioDriver, false otherwise.
+  // @param config The config to verify.
+  // @return bool True if we have enough space to allocate the config,
+  // false otherwise.
   static bool CanHandle(const AudioDriverConfig& config) {
     return config.num_dma_buffers <= kNumDmaBuffers &&
            config.num_dma_buffers * config.dma_buffer_size_samples() <=
@@ -95,23 +97,32 @@ struct AudioDriverBuffers {
   // @endcond
 };
 
-// AudioDriver provides low-level access to the board's microphone via custom
-// callback function. Callback is called from ISR context and receives audio
-// samples directly from DMA.
+// Provides low-level access to the board's microphone with audio provided by a
+// callback function. The callback is called from an interrupt service routine
+// (ISR) context and receives audio samples using direct memory access (DMA).
+//
+// An instance of this class is required for `AudioReader` and `AudioService`,
+// but you do not need to call `Enable()` and `Disable()` when using those APIs.
+//
+// So unless you're building a custom audio service to manage the `AudioDriver`
+// lifecycle, you only need to instantiate the `AudioDriver`
+// and then pass it to either `AudioReader` or `AudioService`.
+//
+// For example usage, see `AudioService`.
 class AudioDriver {
  public:
   // Callback function type to receive audio samples.
   // Called directly by the ISR.
   //
   // @param ctx Extra parameters for the callback function.
-  // @param dma_buffer Pointer to the audio buffer.
-  // @param dma_buffer_size Size of the audio buffer in samples.
+  // @param dma_buffer A pointer to the buffer.
+  // @param dma_buffer_size The number of audio samples in the buffer.
   using Callback = void (*)(void* ctx, const int32_t* dma_buffer,
                             size_t dma_buffer_size);
-  // Constructs an AudioDriver using provided amount and size of DMA buffers.
+
+  // Constructor.
   //
-  // @param AudioDriverBuffers defines the space capacity available to the
-  // AudioDriver.
+  // @param buffers Defines the buffer's total memory capacity.
   template <size_t NumDmaBuffers, size_t CombinedDmaBufferSize>
   explicit AudioDriver(
       AudioDriverBuffers<NumDmaBuffers, CombinedDmaBufferSize>& buffers)
@@ -122,15 +133,15 @@ class AudioDriver {
         pdm_transfers_(buffers.pdm_transfers) {}
 
   // Enables the microphone and specifies a callback to receive audio samples.
-  // Must be explicitly called to turn on microphone
-  // and receive audio.
   //
-  // @param config Configuration for the AudioDriver.
-  // Used to check if there is space for the specific AudioDriver.
-  // @param ctx Extra parameters for callback.
-  // @param fn Callback that defines how to process the audio sample.
-  // @return True if successfully manages to turn on the microphone,
-  // False otherwise.
+  // This turns on the microphone and starts audio sampling, but it is called
+  // for you when using `AudioReader` or `AudioService`.
+  //
+  // @param config Driver configuration such as the sample rate and sample size.
+  // Used to check if there is space for the specific `AudioDriver`.
+  // @param ctx Extra parameters to pass into the callback.
+  // @param fn Callback that receives the audio samples.
+  // @return True if the microphone successfully starts, false otherwise.
   bool Enable(const AudioDriverConfig& config, void* ctx, Callback fn);
   // Stops processing of new audio data and turns off microphone.
   void Disable();
