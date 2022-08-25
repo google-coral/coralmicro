@@ -255,7 +255,13 @@ def manifest_main(args, **kwargs):
         'boards': [
             {
                 'name': 'Dev Board Micro',
-            }
+            },
+            {
+                'name': 'Dev Board Micro + Wireless Add-on',
+            },
+            {
+                'name': 'Dev Board Micro + PoE Add-on',
+            },
         ],
         'toolsDependencies': [
             {
