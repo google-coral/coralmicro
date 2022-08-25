@@ -141,9 +141,7 @@ EOF
         python3 "${PACKAGE_PY}" --output_dir=${build_dir} --manifest \
           --manifest_revision=9.9.9 \
           --core_url=http://localhost:8000/${core_archive_name} \
-          --core_sha256=$(sha256sum ${build_dir}/${core_archive_name} | cut -d ' ' -f 1) \
-          --${flashtool_name}_flashtool_url=http://localhost:8000/${flashtool_archive_name} \
-          --${flashtool_name}_flashtool_sha256=$(sha256sum ${build_dir}/${flashtool_archive_name} | cut -d ' ' -f 1)
+          --${flashtool_name}_flashtool_url=http://localhost:8000/${flashtool_archive_name}
 
         if [[ ! -d "${SCRIPT_DIR}/third_party/arduino-cli" ]]; then
             python3 "${SCRIPT_DIR}/arduino/get_arduino_cli.py" \

@@ -53,6 +53,13 @@ else:
   platform_name = 'linux64'
 
 
+def file_sha256(filename):
+  h = hashlib.sha256()
+  with open(filename, 'rb') as f:
+    for block in iter(lambda: f.read(32 * 1024), b''):
+      h.update(block)
+    return h.hexdigest()
+
 def CreateFlashtoolExe(core_out_dir, root_dir):
   platform_flags = []
   if system_name == 'Windows':
@@ -60,13 +67,9 @@ def CreateFlashtoolExe(core_out_dir, root_dir):
       libusb_1_0_25_7z = 'https://github.com/libusb/libusb/releases/download/v1.0.25/libusb-1.0.25.7z'
       libusb_1_0_25_7z_sha256 = '3d1c98416f454026034b2b5d67f8a294053898cb70a8b489874e75b136c6674d'
       filename, _ = urllib.request.urlretrieve(libusb_1_0_25_7z)
-      sha256sum = hashlib.sha256()
-      with open(filename, 'rb') as f:
-        sha256sum.update(f.read())
-        downloaded_sha256 = sha256sum.hexdigest()
-      if downloaded_sha256 != libusb_1_0_25_7z_sha256:
-        print('libusb checksum mismatch!')
-        raise
+      if file_sha256(filename) != libusb_1_0_25_7z_sha256:
+        raise RuntimeError('libusb checksum mismatch!')
+
       with py7zr.SevenZipFile(filename, 'r') as archive:
         print(archive.extract(path=core_out_dir, targets=[
               'VS2019/MS64/Release/dll/libusb-1.0.dll']))
@@ -124,13 +127,9 @@ def main():
   main_group.add_argument('--manifest', action='store_true')
 
   parser.add_argument('--core_url', type=str, default=None)
-  parser.add_argument('--core_sha256', type=str, default=None)
   parser.add_argument('--win_flashtool_url', type=str, default=None)
-  parser.add_argument('--win_flashtool_sha256', type=str, default=None)
   parser.add_argument('--mac_flashtool_url', type=str, default=None)
-  parser.add_argument('--mac_flashtool_sha256', type=str, default=None)
   parser.add_argument('--linux_flashtool_url', type=str, default=None)
-  parser.add_argument('--linux_flashtool_sha256', type=str, default=None)
   parser.add_argument('--manifest_revision', type=str, default=None)
   args = parser.parse_args()
 
@@ -172,14 +171,11 @@ def flashtool_main(args, **kwargs):
 
 
 def GetDownloadMetadata(url):
-  filename, _ = urllib.request.urlretrieve(url)
-  sha256sum = hashlib.sha256()
-  with open(filename, 'rb') as f:
-    sha256sum.update(f.read())
-  size = os.path.getsize(filename)
-  urllib.request.urlcleanup()
-  return sha256sum.hexdigest(), size
-
+  try:
+    filename, _ = urllib.request.urlretrieve(url)
+    return file_sha256(filename), os.path.getsize(filename)
+  finally:
+    urllib.request.urlcleanup()
 
 def manifest_main(args, **kwargs):
   manifest_revision = args.manifest_revision
@@ -191,21 +187,13 @@ def manifest_main(args, **kwargs):
   git_revision = kwargs.get('git_revision')
 
   core_url = args.core_url
-  core_sha256 = args.core_sha256
   win_flashtool_url = args.win_flashtool_url
-  win_flashtool_sha256 = args.win_flashtool_sha256
   mac_flashtool_url = args.mac_flashtool_url
-  mac_flashtool_sha256 = args.mac_flashtool_sha256
   linux_flashtool_url = args.linux_flashtool_url
-  linux_flashtool_sha256 = args.linux_flashtool_sha256
 
   systems_json = []
-  if linux_flashtool_url and linux_flashtool_sha256:
+  if linux_flashtool_url:
     sha256sum, size = GetDownloadMetadata(linux_flashtool_url)
-    if sha256sum != linux_flashtool_sha256:
-      print('Provided Linux flashtool checksum does not match downloaded!')
-      return
-
     systems_json.append({
         'host': 'x86_64-pc-linux-gnu',
         'url': linux_flashtool_url,
@@ -213,12 +201,9 @@ def manifest_main(args, **kwargs):
         'checksum': 'SHA-256:%s' % sha256sum,
         'size': str(size)
     })
-  if mac_flashtool_url and mac_flashtool_sha256:
-    sha256sum, size = GetDownloadMetadata(mac_flashtool_url)
-    if sha256sum != mac_flashtool_sha256:
-      print('Provided Mac flashtool checksum does not match downloaded!')
-      return
 
+  if mac_flashtool_url:
+    sha256sum, size = GetDownloadMetadata(mac_flashtool_url)
     systems_json.append({
         'host': 'x86_64-apple-darwin',
         'url': mac_flashtool_url,
@@ -226,12 +211,9 @@ def manifest_main(args, **kwargs):
         'checksum': 'SHA-256:%s' % sha256sum,
         'size': str(size)
     })
-  if win_flashtool_url and win_flashtool_sha256:
-    sha256sum, size = GetDownloadMetadata(win_flashtool_url)
-    if sha256sum != win_flashtool_sha256:
-      print('Provided Windows flashtool checksum does not match downloaded!')
-      return
 
+  if win_flashtool_url:
+    sha256sum, size = GetDownloadMetadata(win_flashtool_url)
     systems_json.append({
         'host': 'i686-mingw32',
         'url': win_flashtool_url,
@@ -239,11 +221,9 @@ def manifest_main(args, **kwargs):
         'checksum': 'SHA-256:%s' % sha256sum,
         'size': str(size)
     })
-  if core_url and core_sha256:
+
+  if core_url:
     sha256sum, size = GetDownloadMetadata(core_url)
-    if sha256sum != core_sha256:
-      print('Provided core checksum does not match downloaded!')
-      return
     core_json = {
         'name': 'Coral',
         'architecture': 'coral_micro',
