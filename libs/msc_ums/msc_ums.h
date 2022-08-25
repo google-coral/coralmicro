@@ -40,7 +40,6 @@ class MscUms {
   size_t descriptor_data_size() { return sizeof(descriptor_); }
   void SetClassHandle(class_handle_t class_handle);
   bool HandleEvent(uint32_t event, void *param);
-  bool Initialized() { return initialized_; }
 
  private:
   static usb_status_t Handler(class_handle_t class_handle, uint32_t event,
@@ -110,7 +109,6 @@ class MscUms {
        0x05 | (USB_OUT << USB_DESCRIPTOR_ENDPOINT_ADDRESS_DIRECTION_SHIFT),
        0x02, 512, 0},  // EndpointDescriptor
   };                   // MscUmsClassDescriptor
-  bool initialized_ = false;
   uint8_t bulk_in_ep_, bulk_out_ep_;
   class_handle_t class_handle_;
 
