@@ -17,25 +17,37 @@
 #include "Arduino.h"
 #include "Wire.h"
 
+#include <cstdint>
+#include <vector>
+
+namespace {
+constexpr int kTargetAddress = 0x42;
+constexpr int kTransferSize = 16;
+std::vector<uint8_t> buffer(kTransferSize, 0);
+}
+
+void requestEvent() {
+  Wire.write(buffer.data(), kTransferSize);
+}
+
+void receiveEvent(int count) {
+  for (int i = 0; i < count && i < kTransferSize; ++i) {
+    buffer[i] = Wire.read();
+    Serial.print(buffer[i]);
+  }
+  Serial.println();
+}
+
 void setup() {
   Serial.begin(115200);
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arduino I2C Target Reader!");
+  Serial.println("Arduino I2C Target Example!");
 
-  Wire.begin(0x42);
+  Wire.begin(kTargetAddress);
   Wire.onReceive(receiveEvent);
-  Serial.begin(115200);
+  Wire.onRequest(requestEvent);
 }
 
-void loop() { delay(100); }
-
-void receiveEvent(int n) {
-  while (Wire.available() > 1) {
-    char c = Wire.read();
-    Serial.print(c);
-  }
-  int x = Wire.read();
-  Serial.println(x);
-}
+void loop() {}
