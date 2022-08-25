@@ -27,7 +27,7 @@
 namespace {
 coralmicro::arduino::EthernetClient client;
 coralmicro::arduino::EthernetServer server(31337);
-}
+}  // namespace
 
 void setup() {
   Serial.begin(115200);

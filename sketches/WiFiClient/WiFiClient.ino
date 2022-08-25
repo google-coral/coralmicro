@@ -21,7 +21,7 @@ namespace {
 const char kSsid[] = "great-access-point";
 const char kPsk[] = "letmein";
 coralmicro::arduino::WiFiClient client;
-}
+}  // namespace
 
 void setup() {
   Serial.begin(115200);

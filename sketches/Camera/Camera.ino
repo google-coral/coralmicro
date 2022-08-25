@@ -1,6 +1,22 @@
+/*
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // [start-snippet:ardu-camera]
-#include <coralmicro_camera.h>
 #include <coralmicro_SD.h>
+#include <coralmicro_camera.h>
 #include <libs/libjpeg/jpeg.h>
 
 #include <cstdint>
@@ -22,8 +38,7 @@ void setup() {
   int width = 324;
   int height = 324;
 
-  if (Camera.begin(width, height) !=
-      CameraStatus::SUCCESS) {
+  if (Camera.begin(width, height) != CameraStatus::SUCCESS) {
     Serial.println("Failed to start camera");
     return;
   }
@@ -34,7 +49,8 @@ void setup() {
 
   Serial.println("Saving image as \"image.jpeg\"");
   std::vector<uint8_t> jpeg;
-  coralmicro::JpegCompressRgb(frame_buffer.getBuffer(), width, height, /*quality=*/75, &jpeg);
+  coralmicro::JpegCompressRgb(frame_buffer.getBuffer(), width, height,
+                              /*quality=*/75, &jpeg);
 
   SDFile imageFile = SD.open("image.jpeg", FILE_WRITE);
   imageFile.write(jpeg.data(), jpeg.size());

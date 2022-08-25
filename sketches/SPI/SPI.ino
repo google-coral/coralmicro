@@ -33,12 +33,10 @@ void setup() {
 }
 
 void loop() {
-
   Serial.println("Executing a SPI transaction.");
   if (SPI.transfer(count) == count) {
     Serial.println("Transaction success!");
-  }
-  else {
+  } else {
     Serial.println("Transaction failed!");
   }
   count++;
