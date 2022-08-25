@@ -40,7 +40,6 @@
 //    python3 -m pip install -r examples/bodypix/requirements.txt
 //    python3 examples/bodypix/bodypix_client.py
 
-
 namespace coralmicro {
 namespace {
 constexpr int kTensorArenaSize = 2 * 1024 * 1024;
@@ -56,9 +55,6 @@ void RunBodypix(struct jsonrpc_request* r) {
   auto model_height = bodypix_input->dims->data[1];
   auto model_width = bodypix_input->dims->data[2];
 
-  // Starts the camera for live poses.
-  CameraTask::GetSingleton()->SetPower(true);
-  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
   std::vector<uint8_t> image(model_width * model_height *
                              CameraFormatBpp(CameraFormat::kRgb));
   std::vector<tensorflow::Pose> results;
@@ -70,9 +66,6 @@ void RunBodypix(struct jsonrpc_request* r) {
                         /*height=*/model_height,
                         /*preserve_ratio=*/false,
                         /*buffer=*/image.data()};
-
-  // Discard the first frame to ensure no power-on artifacts exist.
-  CameraTask::GetSingleton()->GetFrame({fmt});
 
   // Loop until a result is found
   printf(
@@ -94,13 +87,10 @@ void RunBodypix(struct jsonrpc_request* r) {
     }
 
     results = tensorflow::GetPosenetOutput(interpreter, kConfidenceThreshold);
-    if (results.size() > 0) {
+    if (!results.empty()) {
       break;
     }
   }
-
-  CameraTask::GetSingleton()->Disable();
-  CameraTask::GetSingleton()->SetPower(false);
 
   const auto& float_segments_tensor = interpreter->output_tensor(5);
   const auto& float_segments =
@@ -152,6 +142,10 @@ void Main() {
     TF_LITE_REPORT_ERROR(&error_reporter, "AllocateTensors failed.");
     vTaskSuspend(nullptr);
   }
+
+  // Starts the camera.
+  CameraTask::GetSingleton()->SetPower(true);
+  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
 
   printf("Initializing Bodypix server...\r\n");
   jsonrpc_init(nullptr, &interpreter);

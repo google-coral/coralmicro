@@ -101,7 +101,6 @@ int CameraClass::grab(FrameBuffer& buffer) {
       return CameraStatus::FAILURE;
     }
   } else {  // Allocate new buffer.
-    printf("allocating new buffer\r\n");
     auto* buf = new uint8_t[frame_size];
     buffer.setBuffer(buf, frame_size);
   }

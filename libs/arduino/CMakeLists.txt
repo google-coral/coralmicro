@@ -19,6 +19,8 @@ set(libs_arduino_LINK_LIBRARIES
     libs_jpeg_m7
     libs_yamnet
     libs_a71ch
+    libs_rpc_http_server
+    libs_rpc_utils
 )
 
 add_library(libs_arduino_coral_micro STATIC
