@@ -19,16 +19,29 @@
 
 namespace coralmicro {
 
+// Represents a watchdog config, this config needs to be passed into
+// `WatchdogStart()`.
 struct WatchdogConfig {
+  // Number of seconds before the watchdog resets the CPU (unless pet).
   int timeout_s;
+  // The rate to refresh the watchdog timer in seconds.
   int pet_rate_s;
+  // Set to true to enable the watchdog interrupt. If watchdog interrupt is
+  // enabled, be sure to implement and extern WDOG1_IRQHandler. Otherwise, you
+  // will call DefaultISR.
   bool enable_irq;
+  // When enable_irq is set, time remaining before watchdog expiration that will
+  // trigger an interrupt (e.g. timeout_s = 10, irq_s_before_timeout=2 means the
+  // interrupt will fire at 8 seconds).
   int irq_s_before_timeout;
 };
 
-// If enabling the interrupt, be sure to extern WDOG1_IRQHandler. Otherwise
-// you will call DefaultISR.
+// Enables watchdog and starts SW timer to refresh at a given rate.
+//
+// @param config The watchdog config to enable watchdog.
 void WatchdogStart(const WatchdogConfig& config);
+
+// Stops SW refresh timer, disables watchdog.
 void WatchdogStop();
 
 }  // namespace coralmicro
