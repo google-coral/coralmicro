@@ -36,45 +36,46 @@ You should see an image from the camera appear in a new window, and the
 serial console prints the board serial number.
 """
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        description='RPC Client Example',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--host', type=str, default='10.10.10.1',
-                        help='Hostname or IP Address of Coral Dev Board Micro')
-    args = parser.parse_args()
+  parser = argparse.ArgumentParser(
+      description='RPC Client Example',
+      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('--host', type=str, default='10.10.10.1',
+                      help='Hostname or IP Address of Coral Dev Board Micro')
+  args = parser.parse_args()
 
+  response = requests.post(f'http://{args.host}:80/jsonrpc', json={
+      'method': 'serial_number',
+      'jsonrpc': '2.0',
+      'params': [],
+      'id': 0,
+  }, timeout=10).json()
+  print(response)
 
-    response = requests.post(f'http://{args.host}:80/jsonrpc', json={
-        'method': 'serial_number',
-        'jsonrpc': '2.0',
-        'params': [],
-        'id': 0,
-    }, timeout=10).json()
-    print(response)
+  response = requests.post(f'http://{args.host}:80/jsonrpc', json={
+      'method': 'take_picture',
+      'jsonrpc': '2.0',
+      'params': [],
+      'id': 0,
+  }, timeout=10).json()
 
-    response = requests.post(f'http://{args.host}:80/jsonrpc', json={
-        'method': 'take_picture',
-        'jsonrpc': '2.0',
-        'params': [],
-        'id': 0,
-    }, timeout=10).json()
+  assert(response['result']['base64_data'])
+  image_data_base64 = response['result']['base64_data']
+  width = response['result']['width']
+  height = response['result']['height']
+  image_data = base64.b64decode(image_data_base64)
+  im = Image.frombytes('RGB', (width, height), image_data, 'raw')
+  print(im)
+  im.show()
 
-    assert(response['result']['base64_data'])
-    image_data_base64 = response['result']['base64_data']
-    width = response['result']['width']
-    height = response['result']['height']
-    image_data = base64.b64decode(image_data_base64)
-    im = Image.frombytes('RGB', (width, height), image_data, 'raw')
-    print(im)
-    im.show()
 
 if __name__ == '__main__':
-    try:
-        main()
-    except requests.exceptions.ConnectionError:
-        msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
-              ' the correct IP address with --host.'
-        if sys.platform == 'darwin':
-            msg += ' Network over USB is not supported on macOS.'
-        print(msg, file=sys.stderr)
+  try:
+    main()
+  except requests.exceptions.ConnectionError:
+    msg = 'ERROR: Cannot connect to Coral Dev Board Micro, make sure you specify' \
+          ' the correct IP address with --host.'
+    if sys.platform == 'darwin':
+      msg += ' Network over USB is not supported on macOS.'
+    print(msg, file=sys.stderr)
