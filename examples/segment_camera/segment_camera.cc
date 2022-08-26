@@ -28,7 +28,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-// Runs a local HTTP server with an endpoint called 'segment_from_camera',
+// Runs a local RPC server with an endpoint called 'segment_from_camera',
 // which will capture an image from the board's camera, run the image through a
 // segmentation model and return the results in a JSON response.
 //
@@ -67,7 +67,7 @@ namespace {
 
 constexpr char kModelPath[] =
     "/models/keras_post_training_unet_mv2_128_quant_edgetpu.tflite";
-constexpr int kTensorArenaSize = 8 * 1024 * 1024;
+constexpr int kTensorArenaSize = 2 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
 void SegmentFromCamera(struct jsonrpc_request* r) {

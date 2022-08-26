@@ -21,19 +21,14 @@
 
 #include "libs/base/utils.h"
 #include "libs/rpc/rpc_http_server.h"
-#include "libs/tensorflow/posenet.h"
-#include "libs/tensorflow/posenet_decoder_op.h"
+#include "libs/rpc/rpc_utils.h"
 
-// Runs body segmentation using BodyPix on the Edge TPU, returning one result
-// at a time. Inferencing starts only when an RPC client requests the
-// `run_bodypix` endpoint. The model receives continuous input from the camera
-// until the model returns a good result. At which point, the result is sent to
-// the RPC client and inferencing stops.
+
+// This is the equivalent arduino sketch for examples/segment_camera. Upload
+// this sketch and then trigger an inference over USB from a Linux computer:
 //
-// Then trigger an inference over USB from a Linux computer using the same
-// client that we used for the equivalent FreeRTOS version (examples/bodypix):
-//    python3 -m pip install -r examples/bodypix/requirements.txt
-//    python3 examples/bodypix/bodypix_client.py
+//    python3 -m pip install -r examples/segment_camera/requirements.txt
+//    python3 examples/segment_camera/segment_camera_client.py
 
 namespace {
 using namespace coralmicro;
@@ -41,7 +36,7 @@ using namespace coralmicro::arduino;
 
 bool setup_success{false};
 
-tflite::MicroMutableOpResolver<2> resolver;
+tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
 std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
@@ -51,53 +46,39 @@ int model_height;
 int model_width;
 
 constexpr int kTensorArenaSize = 2 * 1024 * 1024;
-constexpr float kConfidenceThreshold = 0.5f;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr char kModelPath[] =
-    "/models/bodypix_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
+    "/models/keras_post_training_unet_mv2_128_quant_edgetpu.tflite";
 
 FrameBuffer frame_buffer;
 
-void RunBodypix(struct jsonrpc_request* r) {
+void SegmentFromCamera(struct jsonrpc_request* r) {
   if (!setup_success) {
     jsonrpc_return_error(
         r, -1, "Inference failed because setup was not successful", nullptr);
     return;
   }
-
-  auto* bodypix_input = interpreter->input(0);
-
-  // Loop until a result is found.
-  Serial.println("Running Bodypix until a result found");
-  std::vector<tensorflow::Pose> results;
-  for (;;) {
-    if (Camera.grab(frame_buffer) != CameraStatus::SUCCESS) {
-      Serial.println("cannot invoke because camera failed to grab frame");
-      jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
-      return;
-    }
-    std::memcpy(tflite::GetTensorData<uint8_t>(bodypix_input),
-                frame_buffer.getBuffer(), frame_buffer.getBufferSize());
-    if (interpreter->Invoke() != kTfLiteOk) {
-      jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
-      return;
-    }
-    results =
-        tensorflow::GetPosenetOutput(interpreter.get(), kConfidenceThreshold);
-    if (!results.empty()) {
-      break;
-    }
+  if (Camera.grab(frame_buffer) != CameraStatus::SUCCESS) {
+    Serial.println("cannot invoke because camera failed to grab frame");
+    jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
+    return;
+  }
+  std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor),
+              frame_buffer.getBuffer(), frame_buffer.getBufferSize());
+  if (interpreter->Invoke() != kTfLiteOk) {
+    jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
+    return;
   }
 
-  const auto& float_segments_tensor = interpreter->output_tensor(5);
-  const auto& float_segments =
-      tflite::GetTensorData<uint8_t>(float_segments_tensor);
-  const auto segment_size = tensorflow::TensorSize(float_segments_tensor);
+  const auto& output_tensor = interpreter->output_tensor(0);
+  const auto& output_mask = tflite::GetTensorData<uint8_t>(output_tensor);
+  const auto mask_size = tensorflow::TensorSize(output_tensor);
   jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: %V}", "width",
                          model_width, "height", model_height, "base64_data",
                          frame_buffer.getBufferSize(), frame_buffer.getBuffer(),
-                         "output_mask1", segment_size, float_segments);
+                         "output_mask", mask_size, output_mask);
 }
+
 }  // namespace
 
 void setup() {
@@ -105,7 +86,7 @@ void setup() {
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arduino Bodypix!");
+  Serial.println("Arduino Camera Segmentation!");
 
   SD.begin();
 
@@ -131,8 +112,8 @@ void setup() {
   Serial.println("model and context created");
 
   tflite::MicroErrorReporter error_reporter;
-  resolver.AddCustom(coralmicro::kPosenetDecoderOp,
-                     coralmicro::RegisterPosenetDecoderOp());
+  resolver.AddResizeBilinear();
+  resolver.AddArgMax();
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
 
   interpreter = std::make_unique<tflite::MicroInterpreter>(
@@ -159,12 +140,12 @@ void setup() {
     return;
   }
 
-  Serial.println("Initializing Bodypix server...");
+  Serial.println("Initializing segmentation server...");
   jsonrpc_init(nullptr, nullptr);
-  jsonrpc_export("run_bodypix", RunBodypix);
+  jsonrpc_export("segment_from_camera", SegmentFromCamera);
   coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
 
-  Serial.println("Bodypix Server Ready!");
+  Serial.println("Segmentation Server Ready!");
   setup_success = true;
 }
 
