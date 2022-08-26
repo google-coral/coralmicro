@@ -280,13 +280,14 @@ def FindElfloader(build_dir, cached_files):
 
 
 def StripElf(unstripped_elf_path, toolchain_path):
-  stripped_elf = tempfile.NamedTemporaryFile()
+  workdir = tempfile.TemporaryDirectory()
+  stripped_elf = os.path.join(workdir.name, os.path.basename(unstripped_elf_path) + '.stripped')
   strip_args = [
       os.path.join(toolchain_path, 'arm-none-eabi-strip' + exe_extension),
       '-s', unstripped_elf_path,
-      '-o', stripped_elf.name]
+      '-o', stripped_elf]
   subprocess.check_call(strip_args)
-  return stripped_elf
+  return (workdir, stripped_elf)
 
 
 """
@@ -1027,9 +1028,9 @@ def main():
       all_paths_exist = False
   if not all_paths_exist:
     return
-  stripped_elf = StripElf(elf_path, toolchain_path)
+  (strip_workdir, stripped_elf) = StripElf(elf_path, toolchain_path)
   unstripped_elf_path = elf_path
-  elf_path = stripped_elf.name
+  elf_path = stripped_elf
 
   data = not args.nodata
   program = not args.noprogram
