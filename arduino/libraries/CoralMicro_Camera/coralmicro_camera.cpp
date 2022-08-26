@@ -74,7 +74,6 @@ int CameraClass::begin(CameraResolution resolution) {
 int CameraClass::begin(int32_t width, int32_t height, CameraFormat fmt,
                        CameraFilterMethod filter, CameraRotation rotation,
                        bool preserve_ratio, bool auto_white_balance) {
-  initialized_ = true;
   width_ = width;
   height_ = height;
   format_ = fmt;
@@ -82,8 +81,11 @@ int CameraClass::begin(int32_t width, int32_t height, CameraFormat fmt,
   rotation_ = rotation;
   preserve_ratio_ = preserve_ratio;
   auto_white_balance_ = auto_white_balance;
-  camera_->SetPower(true);
-  camera_->Enable(coralmicro::CameraMode::kStreaming);
+  if (!initialized_) {
+    camera_->SetPower(true);
+    camera_->Enable(coralmicro::CameraMode::kStreaming);
+  }
+  initialized_ = true;
   return CameraStatus::SUCCESS;
 }
 
