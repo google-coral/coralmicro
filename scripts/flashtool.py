@@ -542,7 +542,7 @@ def StateLoadFlashloader(blhost_path, flashloader_path):
 
 def StateLoadElfloader(toolchain_path, elfloader_path, elfloader_elf_path, blhost_path, ram, target_elfloader=False):
   symbols = subprocess.check_output('{} -t {}'.format(os.path.join(
-      toolchain_path, 'arm-none-eabi-objdump') + exe_extension, elfloader_elf_path), shell=True, text=True)
+      toolchain_path, 'arm-none-eabi-objdump') + exe_extension, elfloader_elf_path), shell=True, universal_newlines=True)
   disable_usb_timeout_address = 0
   for symbol in symbols.splitlines():
     if not 'disable_usb_timeout' in symbol:
@@ -557,7 +557,7 @@ def StateLoadElfloader(toolchain_path, elfloader_path, elfloader_elf_path, blhos
   subprocess.check_call([blhost_path, '-u', flashloader_vidpid(), 'flash-image',
                         elfloader_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
   subprocess.check_output('{} -u {} write-memory {} {{{{ffffffff}}}}'.format(
-      blhost_path, flashloader_vidpid(), hex(disable_usb_timeout_address)), shell=True, text=True)
+      blhost_path, flashloader_vidpid(), hex(disable_usb_timeout_address)), shell=True, universal_newlines=True)
   subprocess.call([blhost_path, '-u', flashloader_vidpid(), 'call',
                   hex(start_address), '0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
   if target_elfloader:
