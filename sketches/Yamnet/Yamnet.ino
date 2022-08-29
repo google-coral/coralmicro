@@ -24,13 +24,14 @@
 #include "third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.h"
 
 namespace {
-std::vector<int32_t> currentSamples;
+bool setup_success{false};
+
+std::vector<int32_t> current_samples;
 tflite::MicroMutableOpResolver</*tOpsCount=*/3> resolver;
 const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
 std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
-TfLiteTensor* input_tensor = nullptr;
 std::array<int16_t, coralmicro::tensorflow::kYamnetAudioSize> audio_input;
 
 constexpr int kTensorArenaSize = 1 * 1024 * 1024;
@@ -68,6 +69,7 @@ void setup() {
   model_data.resize(model_size);
   if (model_file.read(model_data.data(), model_size) != model_size) {
     Serial.print("Error loading model");
+    return;
   }
 
   model = tflite::GetModel(model_data.data());
@@ -80,8 +82,8 @@ void setup() {
   interpreter = std::make_unique<tflite::MicroInterpreter>(
       model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
   if (interpreter->AllocateTensors() != kTfLiteOk) {
-    printf("AllocateTensors failed.\r\n");
-    vTaskSuspend(nullptr);
+    Serial.println("AllocateTensors failed.");
+    return;
   }
 
   if (!coralmicro::tensorflow::PrepareAudioFrontEnd(
@@ -90,29 +92,32 @@ void setup() {
     return;
   }
 
+  setup_success = true;
   Serial.println("YAMNet Setup Complete\r\n\n");
 }
 
 void loop() {
-  if (!interpreter) {
+  if (!setup_success) {
     Serial.println("Cannot invoke because of a problem during setup!");
     return;
   }
 
-  int samplesRead = Mic.available();
-  Mic.read(currentSamples, samplesRead);
+  if (Mic.available() < coralmicro::tensorflow::kYamnetAudioSize) {
+    return;  // Wait until we have enough data.
+  }
+  Mic.read(current_samples, coralmicro::tensorflow::kYamnetAudioSize);
 
-  for (int i = 0; i < currentSamples.size(); ++i) {
-    audio_input[i] = currentSamples[i] >> 16;
+  for (int i = 0; i < coralmicro::tensorflow::kYamnetAudioSize; ++i) {
+    audio_input[i] = current_samples[i] >> 16;
   }
 
-  coralmicro::tensorflow::YamNetPreprocessInput(audio_input.data(),
-                                                input_tensor, &frontend_state);
+  coralmicro::tensorflow::YamNetPreprocessInput(
+      audio_input.data(), interpreter->input_tensor(0), &frontend_state);
   // Reset frontend state.
   FrontendReset(&frontend_state);
   if (interpreter->Invoke() != kTfLiteOk) {
-    printf("Failed to invoke on test input\r\n");
-    vTaskSuspend(nullptr);
+    Serial.println("Failed to invoke");
+    return;
   }
 
   auto results = coralmicro::tensorflow::GetClassificationResults(
@@ -127,6 +132,4 @@ void loop() {
       Serial.println(c.score);
     }
   }
-
-  delay(coralmicro::tensorflow::kYamnetDurationMs);
 }

@@ -24,29 +24,15 @@
 #include "libs/audio/audio_driver.h"
 #include "libs/audio/audio_service.h"
 
-namespace {
-// from micro_model_settings.h
-
-// Only 16kHz and 48kHz are supported
-constexpr int kAudioSampleFrequency = 16000;
-
-constexpr int kSamplesPerMs = kAudioSampleFrequency / 1000;
-
-constexpr int kNumDmaBuffers = 10;
-constexpr int kDmaBufferSizeMs = 100;
-constexpr int kDmaBufferSize = kDmaBufferSizeMs * kSamplesPerMs;
-coralmicro::AudioDriverBuffers<kNumDmaBuffers, kNumDmaBuffers * kDmaBufferSize>
-    g_audio_buffers;
-
-constexpr int kAudioBufferSizeMs = 1000;
-constexpr int kAudioBufferSize = kAudioBufferSizeMs * kSamplesPerMs;
-int16_t g_audio_buffer[kAudioBufferSize] __attribute__((aligned(16)));
-
-constexpr int kDropFirstSamplesMs = 150;
-}  // namespace
-
 namespace coralmicro {
 namespace arduino {
+
+namespace {
+inline constexpr int kNumDmaBuffers = 16;
+inline constexpr int kDmaBufferSizeMs = 50;
+inline constexpr int kAudioServiceTaskPriority = 5;
+inline constexpr int kDropFirstSamplesMs = 150;
+}  // namespace
 
 // Exposes the Coral Micro device's native PDM microphone.
 //
@@ -60,7 +46,9 @@ class PDMClass {
   // @endcond
 
   // Start recording data with the PDM microphone.
-  int begin();
+  //
+  // @param sample_rate The sample rate to start, only supports 16000 or 48000.
+  int begin(int sample_rate = 16000);
 
   // Sets the current audio callback function. The microphone starts as soon
   // as `begin()` is called, however this function adds an extra callback that
@@ -101,13 +89,15 @@ class PDMClass {
  private:
   void Append(const int32_t* samples, size_t num_samples);
 
-  AudioDriver driver_;
-  AudioDriverConfig config_;
-  AudioService audio_service_;
-  LatestSamples latest_samples_;
+  coralmicro::AudioDriverBuffers</*NumDmaBuffers=*/kNumDmaBuffers,
+                                 /*CombinedDmaBufferSize=*/16 * 1024>
+      audio_buffers_;
+  AudioDriver driver_{audio_buffers_};
+  std::unique_ptr<AudioDriverConfig> config_{nullptr};
+  std::unique_ptr<AudioService> audio_service_{nullptr};
+  std::unique_ptr<LatestSamples> latest_samples_{nullptr};
   std::optional<int> current_audio_cb_id_;
-
-  void (*onReceive_)(void);
+  void (*onReceive_)(void) = nullptr;
 };
 
 }  // namespace arduino

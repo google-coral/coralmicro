@@ -16,6 +16,8 @@
 
 #include "SocketClient.h"
 
+#include <errno.h>
+
 #include <cstring>
 
 #include "libs/base/network.h"
@@ -38,7 +40,7 @@ int SocketClient::connect(IPAddress ip, uint16_t port) {
   }
 
   return 1;
-};
+}
 
 int SocketClient::connect(const char *host, uint16_t port) {
   // Socket already exists.
@@ -52,9 +54,9 @@ int SocketClient::connect(const char *host, uint16_t port) {
   }
 
   return 1;
-};
+}
 
-size_t SocketClient::write(uint8_t c) { return this->write(&c, 1); };
+size_t SocketClient::write(uint8_t c) { return this->write(&c, 1); }
 
 size_t SocketClient::write(const uint8_t *buf, size_t size) {
   if (sock_ < 0) {
@@ -62,17 +64,20 @@ size_t SocketClient::write(const uint8_t *buf, size_t size) {
   }
   auto ret = coralmicro::WriteArray(sock_, buf, size);
   if (ret != IOStatus::kOk) {
+    if (errno == EIO || errno == ENOTCONN) {
+      sock_ = -1;
+    }
     return -1;
   }
   return size;
-};
+}
 
 int SocketClient::available() {
   if (sock_ < 0) {
     return 0;
   }
   return coralmicro::SocketAvailable(sock_);
-};
+}
 
 int SocketClient::read() {
   uint8_t buf;
@@ -81,7 +86,7 @@ int SocketClient::read() {
     return -1;
   }
   return buf;
-};
+}
 
 int SocketClient::read(uint8_t *buf, size_t size) {
   if (sock_ < 0) {
@@ -90,14 +95,15 @@ int SocketClient::read(uint8_t *buf, size_t size) {
 
   auto ret = coralmicro::ReadArray(sock_, buf, size);
   if (ret != IOStatus::kOk) {
+    if (errno == EIO || errno == ENOTCONN) {
+      sock_ = -1;
+    }
     return -1;
   }
   return size;
-};
+}
 
-int SocketClient::peek(){
-    return -1;
-};
+int SocketClient::peek() { return -1; }
 
 void SocketClient::flush(){};
 
@@ -106,11 +112,11 @@ void SocketClient::stop() {
     coralmicro::SocketClose(sock_);
     sock_ = -1;
   }
-};
+}
 
-uint8_t SocketClient::connected() { return sock_ >= 0; };
+uint8_t SocketClient::connected() { return sock_ >= 0; }
 
-SocketClient::operator bool() { return connected(); };
+SocketClient::operator bool() { return connected(); }
 
 }  // namespace arduino
 }  // namespace coralmicro

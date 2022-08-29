@@ -56,6 +56,18 @@ inline int MsToSamples(AudioSampleRate sample_rate, int ms) {
 //
 // This is required to instantiate `AudioReader` and `AudioService`.
 struct AudioDriverConfig {
+  // Constructs an AudioDriverConfig.
+  //
+  // @param sample_rate The sample rate.
+  // @param dma_buffer The number of dma buffers to use.
+  // @param dma_buffer_ms length in milliseconds of audio data to store in each
+  // buffer.
+  AudioDriverConfig(AudioSampleRate sample_rate, size_t dma_buffers,
+                    size_t dma_buffer_ms)
+      : sample_rate{sample_rate},
+        num_dma_buffers{dma_buffers},
+        dma_buffer_size_ms{dma_buffer_ms} {}
+
   // Sample rate to be used.
   AudioSampleRate sample_rate;
   // Number of DMA buffers to use.

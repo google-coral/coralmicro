@@ -16,6 +16,8 @@
 
 #include "SocketServer.h"
 
+#include <errno.h>
+
 #include <utility>
 
 #include "SocketClient.h"
@@ -46,6 +48,9 @@ size_t SocketServer::write(const uint8_t* buf, size_t size) {
   }
   auto ret = coralmicro::WriteArray(sock_, buf, size);
   if (ret != IOStatus::kOk) {
+    if (errno == EIO || errno == ENOTCONN) {
+      sock_ = -1;
+    }
     return -1;
   }
   return size;
