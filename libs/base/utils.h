@@ -44,6 +44,14 @@ std::string GetSerialNumber();
 // @returns True if the address was successfully retrieved; false otherwise.
 bool GetUsbIpAddress(std::string* usb_ip_out);
 
+// Attempts to open a given file at `path`, and if the contents are an
+// IP address, return them in `addr`.
+//
+// @param path File path to read an address from.
+// @param addr Pointer to an `ip4_addr_t` that the address will be stored in.
+// @returns True if successful; false otherwise.
+bool GetIpFromFile(const char* path, ip4_addr_t* addr);
+
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_UTILS_H_

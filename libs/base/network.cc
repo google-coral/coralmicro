@@ -22,10 +22,17 @@
 #include <cassert>
 #include <cstring>
 
+#include "libs/base/filesystem.h"
+#include "libs/base/utils.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/api.h"
+#include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/dns.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/sockets.h"
 
 namespace coralmicro {
+
+namespace {
+inline constexpr const char kDnsServerPath[] = "/dns_server";
+}
 
 IOStatus ReadBytes(int fd, void* bytes, size_t size) {
   assert(fd >= 0);
@@ -135,6 +142,29 @@ int SocketAvailable(int sockfd) {
   int i;
   lwip_ioctl(sockfd, FIONREAD, &i);
   return i;
+}
+
+void DnsInit() {
+  ip4_addr_t addr;
+  if (!GetIpFromFile(kDnsServerPath, &addr)) return;
+  dns_setserver(0, &addr);
+}
+
+ip4_addr_t DnsGetServer() {
+  ip4_addr_t addr;
+  memcpy(&addr, dns_getserver(0), sizeof(addr));
+  return addr;
+}
+
+void DnsSetServer(ip4_addr_t addr, bool persist) {
+  dns_setserver(0, &addr);
+  if (persist) {
+    std::string str;
+    str.resize(IP4ADDR_STRLEN_MAX);
+    if (ipaddr_ntoa_r(&addr, str.data(), IP4ADDR_STRLEN_MAX)) {
+      LfsWriteFile(kDnsServerPath, str);
+    }
+  }
 }
 
 }  // namespace coralmicro

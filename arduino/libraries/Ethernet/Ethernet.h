@@ -18,6 +18,7 @@
 #define Ethernet_h
 
 #include <Arduino.h>
+
 #include "SocketClient.h"
 #include "SocketServer.h"
 
@@ -41,6 +42,46 @@ class EthernetClass {
   //
   // @returns 1 if DHCP was successful; 0 otherwise.
   int begin();
+
+  // Initializes an Ethernet connection, using the specified IP address.
+  // The DNS server will be the IP address with the final octet as 1.
+  // The gateway will be the IP address with the final octet as 1.
+  // The subnet mask will be 255.255.255.0.
+  //
+  // @param ip The desired IP address.
+  // @returns 1 if Ethernet is brought up successfully.
+  int begin(IPAddress ip);
+
+  // Initializes an Ethernet connection, using the specified IP address
+  // and DNS server.
+  // The gateway will be the IP address with the final octet as 1.
+  // The subnet mask will be 255.255.255.0.
+  //
+  // @param ip The desired IP address.
+  // @param dns_server The IP address of a DNS server.
+  // @returns 1 if Ethernet is brought up successfully.
+  int begin(IPAddress ip, IPAddress dns_server);
+
+  // Initializes an Ethernet connection, using the specified IP address,
+  // DNS server, and gateway.
+  // The subnet mask will be 255.255.255.0.
+  //
+  // @param ip The desired IP address.
+  // @param dns_server The IP address of a DNS server.
+  // @param gateway The IP address of the network gateway.
+  // @returns 1 if Ethernet is brought up successfully.
+  int begin(IPAddress ip, IPAddress dns_server, IPAddress gateway);
+
+  // Initializes an Ethernet connection, using the specified IP address,
+  // DNS server, gateway, and subnet mask.
+  //
+  // @param ip The desired IP address.
+  // @param dns_server The IP address of a DNS server.
+  // @param gateway The IP address of the network gateway.
+  // @param subnet_mask The subnet mask for the network.
+  // @returns 1 if Ethernet is brought up successfully.
+  int begin(IPAddress ip, IPAddress dns_server, IPAddress gateway,
+            IPAddress subnet_mask);
 
   // Returns the IP address of the device.
   //

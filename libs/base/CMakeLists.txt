@@ -38,6 +38,7 @@ add_library_m7(libs_base-m7_freertos STATIC
     ipc_m7.cc
     led.cc
     main_freertos_m7.cc
+    network.cc
     ntp.cc
     pwm.cc
     random.cc
@@ -70,13 +71,6 @@ target_link_libraries(libs_base-m7_freertos
     libs_usb_device_task_freertos
     libs_usb_host_task_freertos
     ${libs_base-m7_freertos_LINK_LIBRARIES_REVISION}
-)
-
-add_library_m7(libs_base-m7_network STATIC
-    network.cc
-)
-target_link_libraries(libs_base-m7_network
-    libs_base-m7_freertos
 )
 
 add_library_m7(libs_base-m7_wifi STATIC

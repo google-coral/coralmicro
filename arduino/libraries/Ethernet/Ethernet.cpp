@@ -20,6 +20,7 @@
 
 #include "libs/base/check.h"
 #include "libs/base/ethernet.h"
+#include "libs/base/network.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/dns.h"
 
 namespace coralmicro {
@@ -43,6 +44,38 @@ int EthernetClass::begin() {
     return 1;
   }
   return 0;
+}
+
+int EthernetClass::begin(IPAddress ip) {
+  IPAddress dns_server(ip);
+  dns_server[3] = 1;
+  return begin(ip, dns_server);
+}
+
+int EthernetClass::begin(IPAddress ip, IPAddress dns_server) {
+  IPAddress gateway(ip);
+  gateway[3] = 1;
+  return begin(ip, dns_server, gateway);
+}
+
+int EthernetClass::begin(IPAddress ip, IPAddress dns_server,
+                         IPAddress gateway) {
+  IPAddress subnet_mask(255, 255, 255, 0);
+  return begin(ip, dns_server, gateway, subnet_mask);
+}
+
+int EthernetClass::begin(IPAddress ip, IPAddress dns_server, IPAddress gateway,
+                         IPAddress subnet_mask) {
+  ip4_addr_t addr;
+  std::memcpy(&addr.addr, &ip[0], sizeof(uint32_t));
+  EthernetSetStaticIp(addr);
+  std::memcpy(&addr.addr, &dns_server[0], sizeof(uint32_t));
+  DnsSetServer(addr, true);
+  std::memcpy(&addr.addr, &gateway[0], sizeof(uint32_t));
+  EthernetSetStaticGateway(addr);
+  std::memcpy(&addr.addr, &subnet_mask[0], sizeof(uint32_t));
+  EthernetSetStaticSubnetMask(addr);
+  return begin();
 }
 
 IPAddress EthernetClass::localIP() { return ip_address_; }

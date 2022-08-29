@@ -23,6 +23,7 @@
 #include "libs/base/filesystem.h"
 #include "libs/base/gpio.h"
 #include "libs/base/ipc_m7.h"
+#include "libs/base/network.h"
 #include "libs/base/random.h"
 #include "libs/base/reset.h"
 #include "libs/base/tasks.h"
@@ -83,6 +84,7 @@ extern "C" int real_main(int argc, char** argv, bool init_console_tx,
   CHECK(coralmicro::LfsInit());
   // Make sure this happens before EEM or WICED are initialized.
   tcpip_init(nullptr, nullptr);
+  coralmicro::DnsInit();
   InitializeCDCEEM();
   coralmicro::UsbDeviceTask::GetSingleton()->Init();
   coralmicro::UsbHostTask::GetSingleton()->Init();

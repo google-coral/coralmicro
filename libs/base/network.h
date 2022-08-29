@@ -58,6 +58,22 @@ int SocketClient(const char* host, int port);
 
 int SocketAvailable(int sockfd);
 
+// @cond Do not generate docs
+void DnsInit();
+// @endcond
+
+// Retrieves the configured DNS server for the network.
+//
+// @returns `ip4_addr_t` containing the IP address where DNS requests are sent.
+ip4_addr_t DnsGetServer();
+
+// Sets the DNS server for the network, and optionally persists it to flash
+// memory.
+//
+// @param addr The address for the DNS server.
+// @param persist True to persist the address to flash; false otherwise.
+void DnsSetServer(ip4_addr_t addr, bool persist);
+
 }  // namespace coralmicro
 
 #endif  // LIBS_BASE_NETWORK_H_

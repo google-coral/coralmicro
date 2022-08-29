@@ -75,9 +75,29 @@ std::optional<std::string> EthernetGetGateway();
 std::optional<std::string> EthernetGetGateway(uint64_t timeout_ms);
 
 // Retrieves the ethernet speed that is stored in flash memory.
+//
 // @returns The ethernet speed in Mbps.
 //   The default return value is 100, if no value is stored in flash.
 int EthernetGetSpeed();
+
+// Stores an IP address in flash memory, to be used as the Ethernet IP.
+//
+// @param addr IP address to store.
+// @returns True if the address was stored successfully; false otherwise.
+bool EthernetSetStaticIp(ip4_addr_t addr);
+
+// Stores an IP address in flash memory, to be used as the Ethernet subnet mask.
+//
+// @param addr IP address to store.
+// @returns True if the address was stored successfully; false otherwise.
+bool EthernetSetStaticSubnetMask(ip4_addr_t addr);
+
+// Stores an IP address in flash memory, to be used as the Ethernet gateway
+// address.
+//
+// @param addr IP address to store.
+// @returns True if the address was stored successfully; false otherwise.
+bool EthernetSetStaticGateway(ip4_addr_t addr);
 
 }  // namespace coralmicro
 

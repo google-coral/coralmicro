@@ -82,7 +82,22 @@ status_t EthernetPHYEnableSSC(bool auto_neg) {
   return status;
 }
 
+constexpr char kEthernetStaticIpPath[] = "/ethernet_ip";
+constexpr char kEthernetStaticSubnetMaskPath[] = "/ethernet_subnet_mask";
+constexpr char kEthernetStaticGatewayPath[] = "/ethernet_gateway";
+
+bool EthernetHasStaticConfig() {
+  if (!LfsFileExists(kEthernetStaticIpPath)) return false;
+  if (!LfsFileExists(kEthernetStaticSubnetMaskPath)) return false;
+  if (!LfsFileExists(kEthernetStaticGatewayPath)) return false;
+  return true;
+}
+
 bool EthernetWaitForDhcp(uint64_t timeout_ms) {
+  if (EthernetHasStaticConfig()) {
+    return true;
+  }
+
   auto start_time = TimerMillis();
   while (true) {
     auto* dhcp = netif_dhcp_data(g_eth_netif);
@@ -98,7 +113,40 @@ bool EthernetWaitForDhcp(uint64_t timeout_ms) {
   return true;
 }
 
+bool EthernetGetStaticIp(ip4_addr_t* ipaddr) {
+  return GetIpFromFile(kEthernetStaticIpPath, ipaddr);
+}
+
+bool EthernetGetStaticSubnetMask(ip4_addr_t* netmask) {
+  return GetIpFromFile(kEthernetStaticSubnetMaskPath, netmask);
+}
+
+bool EthernetGetStaticGateway(ip4_addr_t* gateway) {
+  return GetIpFromFile(kEthernetStaticGatewayPath, gateway);
+}
+
 }  // namespace
+
+bool EthernetSetStaticIp(ip4_addr_t addr) {
+  std::string str;
+  str.resize(IP4ADDR_STRLEN_MAX);
+  if (!ipaddr_ntoa_r(&addr, str.data(), IP4ADDR_STRLEN_MAX)) return false;
+  return LfsWriteFile(kEthernetStaticIpPath, str);
+}
+
+bool EthernetSetStaticSubnetMask(ip4_addr_t addr) {
+  std::string str;
+  str.resize(IP4ADDR_STRLEN_MAX);
+  if (!ipaddr_ntoa_r(&addr, str.data(), IP4ADDR_STRLEN_MAX)) return false;
+  return LfsWriteFile(kEthernetStaticSubnetMaskPath, str);
+}
+
+bool EthernetSetStaticGateway(ip4_addr_t addr) {
+  std::string str;
+  str.resize(IP4ADDR_STRLEN_MAX);
+  if (!ipaddr_ntoa_r(&addr, str.data(), IP4ADDR_STRLEN_MAX)) return false;
+  return LfsWriteFile(kEthernetStaticGatewayPath, str);
+}
 
 struct netif* EthernetGetInterface() { return g_eth_netif; }
 
@@ -166,6 +214,13 @@ bool EthernetInit(bool default_iface) {
   IP4_ADDR(&netif_netmask, 0, 0, 0, 0);
   IP4_ADDR(&netif_gw, 0, 0, 0, 0);
 
+  // If a static configuration is in storage, use it.
+  if (EthernetHasStaticConfig()) {
+    EthernetGetStaticIp(&netif_ipaddr) &&
+        EthernetGetStaticSubnetMask(&netif_netmask) &&
+        EthernetGetStaticGateway(&netif_gw);
+  }
+
   if (EthernetPHYEnableSSC(phy_config.autoNeg)) {
     printf("Failed enabling PHY SSC, proceeding.\r\n");
   }
@@ -181,12 +236,13 @@ bool EthernetInit(bool default_iface) {
   }
 
   netifapi_netif_set_up(&g_netif);
-  netifapi_dhcp_start(&g_netif);
+  if (!EthernetHasStaticConfig()) {
+    netifapi_dhcp_start(&g_netif);
+  }
   g_eth_netif = &g_netif;
   NtpInit();
   return true;
 }
-
 
 std::optional<std::string> EthernetGetIp() {
   return EthernetGetIp(/*timeout_ms=*/30 * 1000);

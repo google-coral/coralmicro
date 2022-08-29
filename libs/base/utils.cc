@@ -40,6 +40,16 @@ std::string GetSerialNumber() {
   return serial;
 }
 
+bool GetIpFromFile(const char* path, ip4_addr_t* addr) {
+  std::string ip_str;
+  if (LfsReadFile(path, &ip_str)) {
+    if (ipaddr_aton(ip_str.c_str(), addr)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool GetUsbIpAddress(std::string* usb_ip_out) {
   return coralmicro::LfsReadFile("/usb_ip_address", usb_ip_out);
 }

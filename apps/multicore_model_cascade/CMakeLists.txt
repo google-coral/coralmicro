@@ -18,7 +18,6 @@ set(multicore_model_cascade_SOURCES
 
 set(multicore_model_cascade_LINK_LIBRARIES
     libs_base-m7_freertos
-    libs_base-m7_network
     libs_jpeg_m7
     libs_rpc_http_server
 )

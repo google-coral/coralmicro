@@ -97,11 +97,15 @@ BLOCK_SIZE = 2048 * 64
 BLOCK_COUNT = 64
 
 USB_IP_ADDRESS_FILE = '/usb_ip_address'
+DNS_SERVER_FILE = '/dns_server'
 WIFI_SSID_FILE = '/wifi_ssid'
 WIFI_PSK_FILE = '/wifi_psk'
 WIFI_COUNTRY_FILE = '/wifi_country'
 WIFI_REVISION_FILE = '/wifi_revision'
 ETHERNET_SPEED_FILE = '/ethernet_speed'
+ETHERNET_IP_FILE = '/ethernet_ip'
+ETHERNET_SUBNET_MASK_FILE = '/ethernet_subnet_mask'
+ETHERNET_GATEWAY_FILE = '/ethernet_gateway'
 
 ELFLOADER_SETSIZE = 0
 ELFLOADER_BYTES = 1
@@ -665,7 +669,7 @@ def StateProgramElfloader(elf_path, arduino, debug=False, serial_number=None):
 
 
 def StateProgramDataFiles(
-        elf_path, data_files, usb_ip_address, arduino, wifi_config=None, wifi_ssid=None, wifi_psk=None,
+        elf_path, data_files, usb_ip_address, arduino, dns_server=None, ethernet_config=None, wifi_config=None, wifi_ssid=None, wifi_psk=None,
         wifi_country=None, wifi_revision=None, serial_number=None, ethernet_speed=None, program=True, data=True):
   with OpenHidDevice(ELFLOADER_VID, ELFLOADER_PID, serial_number) as h:
     if program and data:
@@ -673,6 +677,33 @@ def StateProgramDataFiles(
     if program:
       data_files[elf_path] = '/default.elf'
     data_files[str(usb_ip_address).encode()] = USB_IP_ADDRESS_FILE
+    if dns_server is not None:
+      data_files[str(dns_server).encode()] = DNS_SERVER_FILE
+    if ethernet_config is not None:
+      if not os.path.exists(ethernet_config):
+        raise RuntimeError(
+            f'ethernet_config: {ethernet_config} does not exist')
+      with open(ethernet_config) as ec_file:
+        found_ip = False
+        found_subnet_mask = False
+        found_gateway = False
+        for line in ec_file:
+          if 'ip' in line:
+            found_ip = True
+            ip = line.split('=')[1].strip().rstrip(os.linesep)
+            data_files[ip.encode()] = ETHERNET_IP_FILE
+          if 'subnet_mask' in line:
+            found_subnet_mask = True
+            subnet_mask = line.split('=')[1].strip().rstrip(os.linesep)
+            data_files[subnet_mask.encode()] = ETHERNET_SUBNET_MASK_FILE
+          if 'gateway' in line:
+            found_gateway = True
+            gateway = line.split('=')[1].strip().rstrip(os.linesep)
+            data_files[gateway.encode()] = ETHERNET_GATEWAY_FILE
+        if not all([found_ip, found_subnet_mask, found_gateway]):
+          print([found_ip, found_subnet_mask, found_gateway])
+          raise RuntimeError(
+              f'ethernet_config: {ethernet_config} was missing a key.')
     if wifi_config is not None:
       if not os.path.exists(wifi_config):
         raise RuntimeError(f'wifi_config: {wifi_config} does not exist')
@@ -853,6 +884,17 @@ def main():
   network_group.add_argument(
       '--usb_ip_address', type=str, required=False, default='10.10.10.1',
       help='The board IP address for Ethernet-over-USB connections.')
+  network_group.add_argument(
+      '--dns_server', type=str, required=False, default=None,
+      help='The DNS server to use for address resolution.')
+  network_group.add_argument(
+      '--ethernet_config', type=str, required=False, default=None,
+      help='Path to the ethernet config file, must be in text format: \
+            ip=192.0.2.100 \
+            subnet_mask=255.255.255.0 \
+            gateway=192.0.2.1 \
+            All keys are required.'
+  )
   network_group.add_argument(
       "--wifi_config", type=str, required=False, default=None,
       help="Path to the wifi config file, must be in text format:  \
@@ -1035,6 +1077,8 @@ def main():
   data = not args.nodata
   program = not args.noprogram
   usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
+  dns_server = ipaddress.ip_address(
+      args.dns_server) if args.dns_server is not None else None
   state_machine_args = {
       'blhost_path': blhost_path,
       'flashloader_path': flashloader_path,
@@ -1047,6 +1091,8 @@ def main():
       'unstripped_elf_path': unstripped_elf_path,
       'root_dir': root_dir,
       'usb_ip_address': usb_ip_address,
+      'dns_server': dns_server,
+      'ethernet_config': args.ethernet_config,
       'wifi_config': args.wifi_config,
       'wifi_ssid': args.wifi_ssid,
       'wifi_psk': args.wifi_psk,
