@@ -116,7 +116,7 @@ enum GpioInterruptMode {
 };
 
 // GPIO modes for `GpioSetMode()`.
-enum GpioMode { kInput, kOutput, kInputPullUp, kInputPullDown };
+enum class GpioMode { kInput, kOutput, kInputPullUp, kInputPullDown };
 
 // The function type required by `GpioConfigureInterrupt()`.
 using GpioCallback = std::function<void()>;
