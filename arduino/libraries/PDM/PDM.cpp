@@ -46,7 +46,7 @@ int PDMClass::begin(int sample_rate_hz) {
       this, +[](void* ctx, const int32_t* samples, size_t num_samples) -> bool {
         auto pdm = static_cast<PDMClass*>(ctx);
         pdm->Append(samples, num_samples);
-        if (pdm->onReceive_ != nullptr) pdm->onReceive_();
+        if (pdm->on_receive_ != nullptr) pdm->on_receive_();
         return true;
       });
   return 1;
@@ -68,7 +68,7 @@ int PDMClass::read(std::vector<int32_t>& buffer, size_t size) {
   return buffer.size();
 }
 
-void PDMClass::onReceive(void (*function)(void)) { onReceive_ = function; }
+void PDMClass::onReceive(void (*function)(void)) { on_receive_ = function; }
 
 void PDMClass::setGain(int gain) {
   // Not Implemented

@@ -38,7 +38,7 @@ using namespace coralmicro;
 using namespace coralmicro::arduino;
 
 bool setup_success{false};
-int buttonPin = PIN_BTN;
+int button_pin = PIN_BTN;
 
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
@@ -106,7 +106,7 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Camera Classification!");
 
-  pinMode(buttonPin, INPUT);
+  pinMode(button_pin, INPUT);
 
   SD.begin();
   Serial.println("Loading Model");
@@ -178,7 +178,7 @@ void setup() {
 }
 
 void loop() {
-  pulseIn(buttonPin, HIGH);  // Hold until the user button is triggered.
+  pulseIn(button_pin, HIGH);  // Hold until the user button is triggered.
   if (!setup_success) {
     Serial.println("Cannot run because of a problem during setup!");
     return;

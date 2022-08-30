@@ -31,7 +31,7 @@ namespace {
 coralmicro::arduino::SocketClient client;
 coralmicro::arduino::SocketServer server(33000);
 
-std::vector<int32_t> currentSamples;
+std::vector<int32_t> current_samples;
 }  // namespace
 
 void setup() {
@@ -68,23 +68,23 @@ void loop() {
 
     uint32_t totalBytes{0};
     while (client.available()) {
-      currentSamples.clear();
+      current_samples.clear();
       auto available = Mic.available();
-      Mic.read(currentSamples, available);
+      Mic.read(current_samples, available);
       if (sample_format == 1) {  // S32_LE
         auto bytes = available * sizeof(int32_t);
-        if (client.write(reinterpret_cast<uint8_t*>(currentSamples.data()),
+        if (client.write(reinterpret_cast<uint8_t*>(current_samples.data()),
                          bytes) < 0) {
           Serial.println("Error while sending audio data");
           break;
         }
         totalBytes += bytes;
       } else {  // S16_LE
-        std::vector<int16_t> currentSamples16(available);
+        std::vector<int16_t> current_samples16(available);
         for (size_t i = 0; i < available; ++i)
-          currentSamples16[i] = currentSamples[i] >> 16;
+          current_samples16[i] = current_samples[i] >> 16;
         auto bytes = available * sizeof(int16_t);
-        if (client.write(reinterpret_cast<uint8_t*>(currentSamples16.data()),
+        if (client.write(reinterpret_cast<uint8_t*>(current_samples16.data()),
                          bytes) < 0) {
           Serial.println("Error while sending audio data");
           break;

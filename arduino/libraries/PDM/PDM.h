@@ -97,7 +97,7 @@ class PDMClass {
   std::unique_ptr<AudioService> audio_service_{nullptr};
   std::unique_ptr<LatestSamples> latest_samples_{nullptr};
   std::optional<int> current_audio_cb_id_;
-  void (*onReceive_)(void) = nullptr;
+  void (*on_receive_)(void) = nullptr;
 };
 
 }  // namespace arduino

@@ -23,7 +23,6 @@
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/rpc/rpc_utils.h"
 
-
 // This is the equivalent arduino sketch for examples/segment_camera. Upload
 // this sketch and then trigger an inference over USB from a Linux computer:
 //

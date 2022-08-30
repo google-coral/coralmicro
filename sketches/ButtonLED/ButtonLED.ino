@@ -22,8 +22,8 @@
 // [start-snippet:ardu-led]
 #include "Arduino.h"
 
-int ledPin = PIN_LED_USER;
-int buttonPin = PIN_BTN;
+int led_pin = PIN_LED_USER;
+int button_pin = PIN_BTN;
 PinStatus val = LOW;
 
 void setup() {
@@ -33,12 +33,12 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Button LED!");
 
-  pinMode(ledPin, OUTPUT);
-  pinMode(buttonPin, INPUT);
+  pinMode(led_pin, OUTPUT);
+  pinMode(button_pin, INPUT);
 }
 
 void loop() {
-  val = digitalRead(buttonPin);
-  digitalWrite(ledPin, val == LOW ? HIGH : LOW);
+  val = digitalRead(button_pin);
+  digitalWrite(led_pin, val == LOW ? HIGH : LOW);
 }
 // [end-snippet:ardu-led]

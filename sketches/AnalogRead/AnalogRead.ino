@@ -16,7 +16,7 @@
 
 #include "Arduino.h"
 
-int analogPin = A0;
+int analog_pin = A0;
 int val = 0;
 
 void setup() {
@@ -30,6 +30,6 @@ void setup() {
 }
 
 void loop() {
-  val = analogRead(analogPin);
+  val = analogRead(analog_pin);
   Serial.println(val);
 }

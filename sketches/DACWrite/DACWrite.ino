@@ -16,8 +16,8 @@
 
 #include "Arduino.h"
 
-int dacPin = DAC0;
-int analogPin = A0;
+int dac_pin = DAC0;
+int analog_pin = A0;
 int val = 0;
 
 void setup() {
@@ -29,6 +29,6 @@ void setup() {
 }
 
 void loop() {
-  val = analogRead(analogPin);
-  analogWrite(dacPin, val / 4);
+  val = analogRead(analog_pin);
+  analogWrite(dac_pin, val / 4);
 }

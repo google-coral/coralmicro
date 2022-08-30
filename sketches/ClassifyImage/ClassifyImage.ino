@@ -30,8 +30,6 @@ std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 
 const int kTensorArenaSize = 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
-
-int tpuPin = PIN_LED_TPU;
 }  // namespace
 
 void setup() {
@@ -103,7 +101,6 @@ void loop() {
     return;
   }
 
-  analogWrite(tpuPin, 255);
   auto* input_tensor = interpreter->input_tensor(0);
   if (input_tensor->type != kTfLiteUInt8) {
     Serial.println("Bad input type");
@@ -132,5 +129,4 @@ void loop() {
     Serial.print(" Score: ");
     Serial.println(result.score);
   }
-  analogWrite(tpuPin, 0);
 }

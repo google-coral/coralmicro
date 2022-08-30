@@ -17,7 +17,7 @@
 #include <Arduino.h>
 
 // User button on the main board.
-constexpr int Button = PIN_BTN;
+constexpr int button_pin = PIN_BTN;
 unsigned long duration;
 
 void setup() {
@@ -29,14 +29,14 @@ void setup() {
 
   delay(1000);
   Serial.println("Starting");
-  pinMode(Button, INPUT);
+  pinMode(button_pin, INPUT);
 }
 
 void loop() {
-  duration = pulseIn(Button, HIGH);
+  duration = pulseIn(button_pin, HIGH);
   Serial.print("pulseIn duration: ");
   Serial.println(duration);
-  duration = pulseInLong(Button, HIGH);
+  duration = pulseInLong(button_pin, HIGH);
   Serial.print("pulseInLong duration: ");
   Serial.println(duration);
 }

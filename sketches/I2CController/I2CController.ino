@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#include "Arduino.h"
-#include "Wire.h"
-
-#include "libs/base/utils.h"
-
 #include <cstdint>
 #include <vector>
+
+#include "Arduino.h"
+#include "Wire.h"
+#include "libs/base/utils.h"
 
 void setup() {
   Serial.begin(115200);
@@ -47,7 +46,8 @@ void setup() {
   if (memcmp(buffer.data(), serial.data(), kTransferSize) == 0) {
     Serial.println("Readback of data from target device matches written data!");
   } else {
-    Serial.println("Readback of data from target device does not match written data...");
+    Serial.println(
+        "Readback of data from target device does not match written data...");
   }
 }
 

@@ -16,8 +16,8 @@
 
 #include "Arduino.h"
 
-int ledPin = A3;
-int analogPin = A0;
+int led_pin = A3;
+int analog_pin = A0;
 int val = 0;
 
 void setup() {
@@ -29,6 +29,6 @@ void setup() {
 }
 
 void loop() {
-  val = analogRead(analogPin);
-  analogWrite(ledPin, val / 4);
+  val = analogRead(analog_pin);
+  analogWrite(led_pin, val / 4);
 }

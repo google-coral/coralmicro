@@ -40,8 +40,8 @@ using namespace coralmicro::arduino;
 int img_counter = 0;
 int width = 324;
 int height = 324;
-int buttonPin = PIN_BTN;
-PinStatus val = LOW;
+int button_pin = PIN_BTN;
+
 FrameBuffer frame_buffer;
 
 void GetCapturedImage(struct jsonrpc_request* r) {
@@ -60,7 +60,7 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Camera Triggered!");
 
-  pinMode(buttonPin, INPUT);
+  pinMode(button_pin, INPUT);
 
   if (Camera.begin(width, height) != CameraStatus::SUCCESS) {
     Serial.println("Failed to start camera");
@@ -73,7 +73,7 @@ void setup() {
 }
 
 void loop() {
-  pulseIn(buttonPin, HIGH);
+  pulseIn(button_pin, HIGH);
   Serial.println("Button triggered, taking image");
 
   if (!Camera.grab(frame_buffer) == CameraStatus::SUCCESS) {

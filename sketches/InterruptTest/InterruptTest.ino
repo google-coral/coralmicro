@@ -23,16 +23,16 @@
 
 */
 // Board pin
-const int buttonPin0 = D0;  // SCL6
-const int buttonPin1 = D1;  // RTS
-const int buttonPin2 = D2;  // CTS
-const int buttonPin3 = D3;  // SDA6
-const int buttonPin4 = D4;  // User button
-volatile int counter0 = 0;
-volatile int counter1 = 0;
-volatile int counter2 = 0;
-volatile int counter3 = 0;
-volatile int counter4 = 0;
+const int button_pin_0 = D0;  // SCL6
+const int button_pin_1 = D1;  // RTS
+const int button_pin_2 = D2;  // CTS
+const int button_pin_3 = D3;  // SDA6
+const int button_pin_4 = D4;  // User button
+volatile int counter_0 = 0;
+volatile int counter_1 = 0;
+volatile int counter_2 = 0;
+volatile int counter_3 = 0;
+volatile int counter_4 = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -41,40 +41,40 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Interrupt Test!");
 
-  pinMode(buttonPin0, INPUT);
-  pinMode(buttonPin1, INPUT_PULLDOWN);
-  pinMode(buttonPin2, INPUT_PULLUP);
-  pinMode(buttonPin3, INPUT);
-  pinMode(buttonPin4, INPUT);
-  attachInterrupt(digitalPinToInterrupt(buttonPin0), pin0_ISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(buttonPin1), pin1_ISR, HIGH);
-  attachInterrupt(digitalPinToInterrupt(buttonPin2), pin2_ISR, LOW);
-  attachInterrupt(digitalPinToInterrupt(buttonPin3), pin3_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(buttonPin4), pin4_ISR, RISING);
+  pinMode(button_pin_0, INPUT);
+  pinMode(button_pin_1, INPUT_PULLDOWN);
+  pinMode(button_pin_2, INPUT_PULLUP);
+  pinMode(button_pin_3, INPUT);
+  pinMode(button_pin_4, INPUT);
+  attachInterrupt(digitalPinToInterrupt(button_pin_0), pin0_ISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(button_pin_1), pin1_ISR, HIGH);
+  attachInterrupt(digitalPinToInterrupt(button_pin_2), pin2_ISR, LOW);
+  attachInterrupt(digitalPinToInterrupt(button_pin_3), pin3_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(button_pin_4), pin4_ISR, RISING);
 }
 
 // the loop function runs over and over again forever
 void loop() {
   Serial.print("isr0 counter: ");
-  Serial.println(counter0);
+  Serial.println(counter_0);
   Serial.print("isr1 counter: ");
-  Serial.println(counter1);
+  Serial.println(counter_1);
   Serial.print("isr2 counter: ");
-  Serial.println(counter2);
+  Serial.println(counter_2);
   Serial.print("isr3 counter: ");
-  Serial.println(counter3);
-  Serial.print("isr counter4: ");
-  Serial.println(counter4);
+  Serial.println(counter_3);
+  Serial.print("isr counter_4: ");
+  Serial.println(counter_4);
   Serial.println("=================");
   delay(500);
 }
 
-void pin0_ISR() { counter0++; }
+void pin0_ISR() { counter_0++; }
 
-void pin1_ISR() { counter1++; }
+void pin1_ISR() { counter_1++; }
 
-void pin2_ISR() { counter2++; }
+void pin2_ISR() { counter_2++; }
 
-void pin3_ISR() { counter3++; }
+void pin3_ISR() { counter_3++; }
 
-void pin4_ISR() { counter4++; }
+void pin4_ISR() { counter_4++; }

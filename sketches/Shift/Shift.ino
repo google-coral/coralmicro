@@ -17,9 +17,9 @@
 #include "Arduino.h"
 
 // GPIO Pin 7 on the left-side header.
-constexpr uint8_t dataPin = D2;
+constexpr uint8_t data_pin = D2;
 // GPIO Pin 8 on the left-side header.
-constexpr uint8_t clockPin = D1;
+constexpr uint8_t clock_pin = D1;
 
 void setup() {
   Serial.begin(115200);
@@ -28,13 +28,13 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Shift!");
 
-  pinMode(dataPin, OUTPUT);
-  pinMode(clockPin, OUTPUT);
+  pinMode(data_pin, OUTPUT);
+  pinMode(clock_pin, OUTPUT);
 }
 
 void loop() {
   for (uint8_t val = 0; val < 256; val++) {
-    shiftOut(dataPin, clockPin, LSBFIRST, val);
+    shiftOut(data_pin, clock_pin, LSBFIRST, val);
     delay(1000);
   }
 }

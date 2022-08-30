@@ -18,8 +18,8 @@
 #include "Arduino.h"
 #include "PDM.h"
 
-volatile int samplesRead = 0;
-std::vector<int32_t> currentSamples;
+volatile int samples_read = 0;
+std::vector<int32_t> current_samples;
 
 void setup() {
   Serial.begin(115200);
@@ -33,18 +33,18 @@ void setup() {
 }
 
 void loop() {
-  if (samplesRead) {
-    samplesRead = 0;
-    Serial.println(currentSamples[0]);
+  if (samples_read) {
+    samples_read = 0;
+    Serial.println(current_samples[0]);
   }
 }
 
 void onPDMData() {
-  samplesRead = Mic.available();
+  samples_read = Mic.available();
 
-  if (samplesRead) {
-    currentSamples.clear();
-    Mic.read(currentSamples, samplesRead);
+  if (samples_read) {
+    current_samples.clear();
+    Mic.read(current_samples, samples_read);
   }
 }
 // [end-snippet:ardu-pdm]

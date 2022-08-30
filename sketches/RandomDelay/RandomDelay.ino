@@ -16,7 +16,7 @@
 
 #include "Arduino.h"
 
-int ledPin = PIN_LED_USER;
+int led_pin = PIN_LED_USER;
 
 void setup() {
   Serial.begin(115200);
@@ -25,14 +25,14 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Random Delay!");
 
-  pinMode(ledPin, OUTPUT);
+  pinMode(led_pin, OUTPUT);
 }
 
 void loop() {
   for (int s = 0; s < 5; s++) {
     randomSeed(s);
     for (int i = 0; i < 5; i++) {
-      digitalWrite(ledPin, HIGH);
+      digitalWrite(led_pin, HIGH);
       long value = random(250, 750);
       Serial.print("random seed: ");
       Serial.print(s);
@@ -40,7 +40,7 @@ void loop() {
       Serial.println(value);
 
       delay(value);
-      digitalWrite(ledPin, LOW);
+      digitalWrite(led_pin, LOW);
       delay(1000);
     }
   }

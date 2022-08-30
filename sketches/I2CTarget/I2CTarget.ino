@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-#include "Arduino.h"
-#include "Wire.h"
-
 #include <cstdint>
 #include <vector>
+
+#include "Arduino.h"
+#include "Wire.h"
 
 namespace {
 constexpr int kTargetAddress = 0x42;
 constexpr int kTransferSize = 16;
 std::vector<uint8_t> buffer(kTransferSize, 0);
-}
+}  // namespace
 
-void requestEvent() {
-  Wire.write(buffer.data(), kTransferSize);
-}
+void requestEvent() { Wire.write(buffer.data(), kTransferSize); }
 
 void receiveEvent(int count) {
   for (int i = 0; i < count && i < kTransferSize; ++i) {
