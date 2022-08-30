@@ -1,59 +1,74 @@
-# Coral Dev Board Micro source code repository
+# Coral Dev Board Micro source code (coralmicro)
 
-- Dev Board Micro is a device based on RT1176.
-- This repository contains a CMake-based build system for the device.
+This repository contains all the code required to build apps for the [Coral Dev
+Board Micro](https://coral.ai/products/dev-board-micro). The Dev Board Micro is
+based on the NXP RT1176 microcontroller (dual-core MCU with Cortex M7 and M4)
+and includes an on-board camera (324x324 px), a microphone, and a Coral Edge TPU
+to accelerate TensorFlow Lite models.
 
-## Initialize submodules
-Before you try and build anything, be sure to initialize the submodules!
+The software platform for Dev Board Micro is called `coralmicro` and is based
+on [FreeRTOS](https://www.freertos.org/). It also includes libraries for
+compatibility with the Arduino programming language.
 
-```
-git submodule update --init --recursive
-```
+The `coralmicro` build system is based on CMake and includes support for Make
+and Ninja builds. After you build the included projects, you can flash
+them to your board with the included flashtool (`scripts/flashtool.py`).
 
-## Building the code
-```
+If you want to see how to build and flash an out-of-tree project, see the
+[out-of-tree sample project](https://github.com/google-coral/coralmicro-out-of-tree-sample).
+
+If you're just getting started with the board, see the [Dev Board Micro setup
+guide at coral.ai](https://coral.ai/docs/dev-board-micro/get-started/).
+
+Also check out the [coralmicro API
+reference](http://coral.ai/docs/reference/micro/).
+
+
+## Get the code
+
+1. Clone `coralmicro` and all submodules:
+
+    ```bash
+    git clone --recurse-submodules -j8 https://github.com/google-coral/coralmicro
+    ```
+
+2. Install the required tools:
+
+    ```bash
+    cd valiant && bash setup_linux.sh
+    ```
+
+
+## Build the code
+
+This builds everything in a folder called `build` (or you can specify a
+different path with `-b`, but if you do then you must also specify that path
+everytime you call `flashtool.py`):
+
+```bash
 bash build.sh
 ```
 
-By default, this will build in a folder called `build`. If you wish to build into a different directory, please pass it with the `-b` flag.
+## Flash the board
 
-## Loading code to the device (uses HelloWorldFreeRTOS as example)
-### Install prerequisites
-Before running the script for the first time, be sure to install the required Python modules:
-```
-python3 -m pip install -r scripts/requirements.txt
-sudo apt-get update
-sudo apt-get install -y \
-         cmake \
-         git-core \
-         libusb-1.0-0-dev \
-         libudev-dev \
-         libhidapi-hidraw0 \
-         ninja-build \
-         python3-dev \
-         python3-pip \
-         vim
+This example blinks the board's green LED:
+
+```bash
+python3 scripts/flashtool.py -e blink_led
 ```
 
-Also, be sure to setup udev rules, or the scripts will have permission and path issues:
-```
-sudo cp scripts/99-coral-micro.rules /etc/udev/rules.d
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
+You can see the code at [examples/blink_led/](examples/blink_led/).
 
-### Loading code to RAM
-This is not persistent, and will be lost on a power cycle.
-```
-python3 scripts/flashtool.py --build_dir build --app HelloWorldFreeRTOS --ram
-```
 
-### Loading code AND filesystem to NAND
-This is persistent. To boot from NAND, the switch on the underside of the board must be set in the position that is nearer to the center of the board.
-This will load both the code and the filesystem to the NAND. As it loads the filesystem, you should always do this step once on a fresh board (or if you change the filesystem contents).
-```
-python3 scripts/flashtool.py --build_dir build --app HelloWorldFreeRTOS
-```
+### Reset the board to Serial Downloader
 
-## Recovering EVT+ from a bad state
-To reset the EVT+ boards to a known good state, hold the button in the center of the board (near TPU), press and release the reset button (side of the device), and release the center button. It will boot in serial download mode, and the above flash instructions can be used to put working code on the device.
+Flashing the Dev Board Micro might fail sometimes and you can usually solve
+it by starting Serial Downloader mode in one of two ways:
+
++ Hold the User button while you press the Reset button.
++ Or, hold the User button while you plug in the USB cable.
+
+Then try flashing the board again.
+
+For more details, see the [troubleshooting info on
+coral.ai](https://coral.ai/docs/dev-board-micro/get-started/#serial-downloader).

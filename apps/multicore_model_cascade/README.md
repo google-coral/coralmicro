@@ -1,61 +1,100 @@
-# Multicore Model Cascade
+# Multi-core model cascade sample
 
-The `multicore_model_cascade` application demonstrates running a cascade of machine learning models across the multiple cores of the Dev Board Micro.
-The first step in the cascade is a person detection model, running on the M4 core.
-If the person detection model indicates that it has detected someone in the camera frame, it stops running and wakes the M7 core.
-When awoken, the M7 core will run a TPU-based pose detection model. If this does not successfully detect a pose for 5 seconds, it will stop and transition back to the M4.
+This application shows how to run a cascade of
+machine learning models across the two cores of the Dev Board Micro MCU.
 
-## Running the application
+The first step in the cascade is a person detection model (built with
+[TensorFlow Lite for Microcontrollers]
+(https://www.tensorflow.org/lite/microcontrollers)), running on the M4 core.
+When the model detects a person in the camera frame, it suspends the M4 task
+and wakes the M7 task. The M7 task runs a pose detection model that's
+accelerated on the Coral Edge TPU (and makes results available over RPC). If
+this does not successfully detect a pose for 5 seconds, it stops and
+transitions back to the M4 person detection model.
 
-There are three variants of the application, differentiated by the network interface that is used: USB, Wi-Fi, or Ethernet; as well as a client for the host machine.
+When the M4 detects a person, it turns on the board's green LED. When the M7
+starts the pose detection model, the white LED turns on to indicate the
+Edge TPU is active.
 
-To connect to the RPC client over USB (Linux only), flash the USB variant:
+
+## Flash the app
+
+There are three variants of the application, differentiated by the network
+interface used to send pose detection results to your computer (via the [Python
+host client](#host-client)): USB, Wi-Fi, or Ethernet.
+
+Flash the USB variant (works with Linux and Windows only):
+
+```bash
+python3 scripts/flashtool.py --app multicore_model_cascade
 ```
-python3 scripts/flashtool.py --build_dir build --app multicore_model_cascade
+
+Also use the USB variant if you want to see results in the
+[serial console](/docs/dev-board-micro/serial-console/).
+
+Flash the Wi-Fi variant (requires the Coral Wireless Add-on):
+
+```bash
+python3 scripts/flashtool.py --app multicore_model_cascade \
+    --subapp multicore_model_cascade_wifi
 ```
 
-To connect to the RPC client over Wi-Fi, flash the Wi-Fi variant:
-```
-python3 scripts/flashtool.py --build_dir build --app multicore_model_cascade --subapp multicore_model_cascade_wifi
+Flash the Ethernet variant (requires the Coral PoE Add-on):
+
+```bash
+python3 scripts/flashtool.py --app multicore_model_cascade \
+    --subapp multicore_model_cascade_ethernet
 ```
 
-To connect to the RPC client over Ethernet, flash the Ethernet variant:
-```
-python3 scripts/flashtool.py --build_dir build --app multicore_model_cascade --subapp multicore_model_cascade_ethernet
-```
 
-While the application is running, the orange status LED in the corner of the device will flash on and off, and the camera LED will illuminate.
-If the M4 detects a person and hands over control to the M7, the green LED in the center of the board will illuminate.
+<a name="host-client"></a>
+## See results with the host client
 
-## Running the host client
-To be able to see what the device is seeing, there is a Python application that will retrieve camera frames and pose keypoints, and render them.
+The Python host client allows you to see camera frames and pose keypoints
+on your computer.
 
-To run with default settings, over USB:
-```
+If using the USB variant, run it with the default settings:
+
+```bash
 python3 apps/multicore_model_cascade/multicore_model_cascade.py
 ```
 
+If using the Wi-Fi or Ethernet variant, specify the board's IP address
+with the `--device_ip_address` flag.
+
+The window that appears will be black until the app detects a person and
+starts the pose detection model.
+
 To see more options:
-```
+
+```bash
 python3 apps/multicore_model_cascade/multicore_model_cascade.py --help
 ```
 
-For use on Wi-Fi or Ethernet, the `--device_ip_address` flag can be used to provide the address of the device on the network.
 
-## Demo version
-In addition to the standard version of the application, there is a "demo" version that uses timers to transition through the cascade instead of the model output.
+## Flash the demo mode
 
-To flash the USB only variant:
-```
-python3 scripts/flashtool.py --build_dir build --app multicore_model_cascade --subapp multicore_model_cascade_demo
+There is a "demo" mode that uses timers to transition through the cascade
+instead of doing so based on inference results. It's available for
+each variant above with another "demo" build target.
+
+Flash the USB demo:
+
+```bash
+python3 scripts/flashtool.py --app multicore_model_cascade \
+    --subapp multicore_model_cascade_demo
 ```
 
-To flash the Wi-Fi variant:
-```
-python3 scripts/flashtool.py --build_dir build --app multicore_model_cascade --subapp multicore_model_cascade_demo_wifi
+Flash the Wi-Fi demo:
+
+```bash
+python3 scripts/flashtool.py --app multicore_model_cascade \
+    --subapp multicore_model_cascade_demo_wifi
 ```
 
-To flash the Ethernet variant:
-```
-python3 scripts/flashtool.py --build_dir build --app multicore_model_cascade --subapp multicore_model_cascade_demo_ethernet
+Flash the Ethernet demo:
+
+```bash
+python3 scripts/flashtool.py --app multicore_model_cascade \
+    --subapp multicore_model_cascade_demo_ethernet
 ```
