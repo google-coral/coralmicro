@@ -124,7 +124,7 @@ class CameraClass {
   int begin(int32_t width = 320, int32_t height = 320,
             CameraFormat fmt = CameraFormat::kRgb,
             CameraFilterMethod filter = CameraFilterMethod::kBilinear,
-            CameraRotation rotation = CameraRotation::k0,
+            CameraRotation rotation = CameraRotation::k270,
             bool preserve_ratio = false, bool auto_white_balance = true);
 
   // Grabs a camera frame.

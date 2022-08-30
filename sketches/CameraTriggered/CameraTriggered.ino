@@ -17,6 +17,7 @@
 // Takes an image and save it in the filesystem when you press the user button
 // on the Coral Dev Board Micro.
 
+#include <Arduino.h>
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>
 #include <libs/libjpeg/jpeg.h>
@@ -24,7 +25,15 @@
 #include <cstdint>
 #include <memory>
 
-#include "Arduino.h"
+#include "libs/base/utils.h"
+#include "libs/rpc/rpc_http_server.h"
+
+// This is the equivalent arduino sketch for examples/camera_triggered. Upload
+// this sketch and then press the User button to capture an image, and
+// fetch the imagee over USB from a Linux computer:
+//
+//    python3 -m pip install -r examples/camera_triggered/requirements.txt
+//    python3 examples/camera_triggered/camera_triggered_client.py
 
 using namespace coralmicro::arduino;
 
@@ -34,6 +43,15 @@ int height = 324;
 int buttonPin = PIN_BTN;
 PinStatus val = LOW;
 FrameBuffer frame_buffer;
+
+void GetCapturedImage(struct jsonrpc_request* r) {
+  if (!frame_buffer.isAllocated()) {
+    jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
+  }
+  jsonrpc_return_success(
+      r, "{%Q: %d, %Q: %d, %Q: %V}", "width", width, "height", height,
+      "base64_data", frame_buffer.getBufferSize(), frame_buffer.getBuffer());
+}
 
 void setup() {
   Serial.begin(115200);
@@ -48,6 +66,10 @@ void setup() {
     Serial.println("Failed to start camera");
     return;
   }
+
+  // Set up an RPC server that serves the latest image.
+  jsonrpc_export("get_captured_image", GetCapturedImage);
+  coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
 }
 
 void loop() {

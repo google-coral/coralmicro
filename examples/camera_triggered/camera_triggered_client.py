@@ -20,10 +20,12 @@ import sys
 from PIL import Image
 
 
-def display_image(response, width, height):
+def display_image(response):
   result = get_field_or_die(response, 'result')
   image_data_base64 = get_field_or_die(result, 'base64_data')
   image_data = base64.b64decode(image_data_base64)
+  width = get_field_or_die(result, 'width')
+  height = get_field_or_die(result, 'height')
   Image.frombytes('RGB', (width, height), image_data).show()
 
 
@@ -56,7 +58,7 @@ def main():
       'params': [{'width': width, 'height': height}]
   }, timeout=10).json()
 
-  display_image(response, width, height)
+  display_image(response)
 
 
 if __name__ == '__main__':
