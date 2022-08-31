@@ -523,10 +523,13 @@ void BOARD_InitPins(void) {
 
 #endif
 
+    // Start JTAG pins
+    // To enable JTAG debugging, comment-out the following 4 lines
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_09_GPIO_MUX6_IO09, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_10_GPIO_MUX6_IO10, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_11_GPIO_MUX6_IO11, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_12_GPIO_MUX6_IO12, 0U);
+    // End JTAG pins
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_06_GPIO_MUX6_IO06, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_32_GPIO_MUX3_IO31, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_33_GPIO_MUX4_IO00, 0U);
