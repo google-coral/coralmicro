@@ -23,24 +23,76 @@
 
 #include "Arduino.h"
 #include "coral_micro.h"
+#include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/detection.h"
 
+using namespace coralmicro;
 using namespace coralmicro::arduino;
 
 namespace {
 bool setup_success{false};
+int button_pin = PIN_BTN;
+
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
 std::shared_ptr<coralmicro::EdgeTpuContext> context = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 TfLiteTensor* input_tensor = nullptr;
+int model_height;
+int model_width;
 
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
+std::vector<tensorflow::Object> results;
 
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
+
+FrameBuffer frame_buffer;
+
+bool DetectFromCamera() {
+  if (Camera.grab(frame_buffer) != CameraStatus::SUCCESS) {
+    return false;
+  }
+  std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor),
+              frame_buffer.getBuffer(), frame_buffer.getBufferSize());
+  if (interpreter->Invoke() != kTfLiteOk) {
+    return false;
+  }
+  results = tensorflow::GetDetectionResults(interpreter.get(), 0.6f, 3);
+  return true;
+}
+
+void DetectRpc(struct jsonrpc_request* r) {
+  if (!setup_success) {
+    jsonrpc_return_error(
+        r, -1, "Inference failed because setup was not successful", nullptr);
+    return;
+  }
+  if (!DetectFromCamera()) {
+    jsonrpc_return_error(r, -1, "Failed to run classification from camera.",
+                         nullptr);
+    return;
+  }
+  if (!results.empty()) {
+    const auto& result = results[0];
+    jsonrpc_return_success(
+        r,
+        "{%Q: %d, %Q: %d, %Q: %V, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, "
+        "%Q: %g, %Q: %g}}",
+        "width", model_width, "height", model_height, "base64_data",
+        frame_buffer.getBufferSize(), frame_buffer.getBuffer(), "detection",
+        "id", result.id, "score", result.score, "xmin", result.bbox.xmin,
+        "xmax", result.bbox.xmax, "ymin", result.bbox.ymin, "ymax",
+        result.bbox.ymax);
+    return;
+  }
+  jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: None}", "width",
+                         model_width, "height", model_height, "base64_data",
+                         frame_buffer.getBufferSize(), frame_buffer.getBuffer(),
+                         "detection");
+}
 }  // namespace
 
 void setup() {
@@ -50,8 +102,9 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Camera Detection!");
 
-  SD.begin();
+  pinMode(button_pin, INPUT);
 
+  SD.begin();
   Serial.println("Loading Model");
 
   if (!SD.exists(kModelPath)) {
@@ -99,14 +152,9 @@ void setup() {
   }
 
   input_tensor = interpreter->input_tensor(0);
-  int model_height = input_tensor->dims->data[1];
-  int model_width = input_tensor->dims->data[2];
-  int model_channels = input_tensor->dims->data[3];
+  model_height = input_tensor->dims->data[1];
+  model_width = input_tensor->dims->data[2];
 
-  Serial.print("width=");
-  Serial.print(model_width);
-  Serial.print("; height=");
-  Serial.println(model_height);
   if (Camera.begin(model_width, model_height, coralmicro::CameraFormat::kRgb,
                    coralmicro::CameraFilterMethod::kBilinear,
                    coralmicro::CameraRotation::k270,
@@ -115,28 +163,26 @@ void setup() {
     return;
   }
 
+  Serial.println("Initializing detection server...");
+  jsonrpc_init(nullptr, nullptr);
+  jsonrpc_export("detect_from_camera", DetectRpc);
+  UseHttpServer(new JsonRpcHttpServer);
+  Serial.println("Detection server ready!");
+
   setup_success = true;
   Serial.println("Initialized");
 }
 void loop() {
+  pulseIn(button_pin, HIGH);  // Hold until the user button is triggered.
   if (!setup_success) {
     Serial.println("Cannot run because of a problem during setup!");
   }
 
-  input_tensor = interpreter->input_tensor(0);
-  if (Camera.grab(tflite::GetTensorData<uint8_t>(input_tensor)) !=
-      CameraStatus::SUCCESS) {
-    Serial.println("cannot invoke because camera failed to grab frame");
+  if (!DetectFromCamera()) {
+    Serial.println("Failed to run detection");
     return;
   }
 
-  if (interpreter->Invoke() != kTfLiteOk) {
-    Serial.println("ERROR: Invoke() failed");
-    return;
-  }
-
-  auto results =
-      coralmicro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
   Serial.print("Results count: ");
   Serial.println(results.size());
   for (auto result : results) {
@@ -153,6 +199,5 @@ void loop() {
     Serial.print(" ymax: ");
     Serial.println(result.bbox.ymax);
   }
-  delay(1000);
 }
 // [end-snippet:ardu-detection]

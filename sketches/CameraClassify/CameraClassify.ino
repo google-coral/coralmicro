@@ -23,8 +23,8 @@
 
 #include "Arduino.h"
 #include "coral_micro.h"
-#include "libs/tensorflow/classification.h"
 #include "libs/rpc/rpc_http_server.h"
+#include "libs/tensorflow/classification.h"
 
 // This is the equivalent arduino sketch for examples/classify_camera. Upload
 // this sketch and then trigger an inference by clicking the user button.
@@ -188,6 +188,7 @@ void loop() {
     Serial.println("Failed to run classification");
     return;
   }
+
   Serial.print("Results count: ");
   Serial.println(results.size());
   for (const auto& result : results) {
@@ -196,6 +197,5 @@ void loop() {
     Serial.print(" Score: ");
     Serial.println(result.score);
   }
-  delay(1000);
 }
 // [end-snippet:ardu-classification]
