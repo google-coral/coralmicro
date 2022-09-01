@@ -15,9 +15,9 @@
 # set(YAMNET_CPU true) # To run YamNet on the CPU, uncomment.
 if(YAMNET_CPU)
     add_compile_definitions(YAMNET_CPU)
-    set(model_name yamnet.tflite)
+    set(model_name yamnet_spectra_in.tflite)
 else()
-    set(model_name yamnet_edgetpu.tflite)
+    set(model_name yamnet_spectra_in_edgetpu.tflite)
 endif()
 
 add_executable_m7(yamnet

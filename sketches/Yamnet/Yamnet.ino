@@ -45,7 +45,7 @@ FrontendState frontend_state{};
 constexpr float kThreshold = 0.3;
 constexpr int kTopK = 5;
 
-constexpr char kModelName[] = "/models/yamnet_edgetpu.tflite";
+constexpr char kModelName[] = "/models/yamnet_spectra_in_edgetpu.tflite";
 }  // namespace
 
 void setup() {

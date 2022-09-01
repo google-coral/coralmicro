@@ -58,10 +58,10 @@ std::array<int16_t, tensorflow::kYamnetAudioSize> audio_input;
 
 #ifdef YAMNET_CPU
 // To run YamNet on the CPU, see the CMakeLists file to enable this.
-constexpr char kModelName[] = "/models/yamnet.tflite";
+constexpr char kModelName[] = "/models/yamnet_spectra_in.tflite";
 constexpr bool kUseTpu = false;
 #else
-constexpr char kModelName[] = "/models/yamnet_edgetpu.tflite";
+constexpr char kModelName[] = "/models/yamnet_spectra_in_edgetpu.tflite";
 constexpr bool kUseTpu = true;
 #endif
 
