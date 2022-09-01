@@ -523,13 +523,8 @@ void BOARD_InitPins(void) {
 
 #endif
 
-    // Start JTAG pins
-    // To enable JTAG debugging, comment-out the following 4 lines
+    // GPIO Mode for J9/J10 Header
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_09_GPIO_MUX6_IO09, 0U);
-    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_10_GPIO_MUX6_IO10, 0U);
-    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_11_GPIO_MUX6_IO11, 0U);
-    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_12_GPIO_MUX6_IO12, 0U);
-    // End JTAG pins
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_06_GPIO_MUX6_IO06, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_32_GPIO_MUX3_IO31, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_33_GPIO_MUX4_IO00, 0U);
@@ -540,6 +535,16 @@ void BOARD_InitPins(void) {
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_GPIO_MUX3_IO00, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_AD_00_GPIO_MUX2_IO31, 0U);
     IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_07_GPIO_MUX6_IO07, 0U);
+
+    // Start JTAG pins
+    // These pins are set to GPIO for the J10 header.
+    // To enable JTAG debugging, comment-out the following 3 lines.
+    // If LPSR_13, LPSR_14, and LPSR_15 are muxed elsewhere, they
+    // must also be left as default or expliclty set to JTAG_MUX.
+    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_10_GPIO_MUX6_IO10, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_11_GPIO_MUX6_IO11, 0U);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_LPSR_12_GPIO_MUX6_IO12, 0U);
+    // End JTAG pins
 
 
 #if defined(CORAL_MICRO_ARDUINO) && (CORAL_MICRO_ARDUINO == 1)
