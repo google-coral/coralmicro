@@ -40,14 +40,14 @@ When you're done, call
 
 **Example** (from ``sketches/Camera/``):
 
-.. literalinclude:: ../sketches/Camera/Camera.ino
+.. literalinclude:: ../arduino/libraries/examples/examples/Camera/Camera.ino
    :start-after: [start-snippet:ardu-camera]
    :end-before: [end-snippet:ardu-camera]
 
 `[coralmicro_camera.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_Camera/coralmicro_camera.h>`_
 
 .. doxygenfile:: CoralMicro_Camera/coralmicro_camera.h
-   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib enum
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
 Microphone
@@ -83,14 +83,14 @@ When you're done with the microphone, call
 This code listens to input from the microphone and saves data into a
 ``currentSamples`` buffer.
 
-.. literalinclude:: ../sketches/PDM/PDM.ino
+.. literalinclude:: ../arduino/libraries/examples/examples/PDM/PDM.ino
    :start-after: [start-snippet:ardu-pdm]
    :end-before: [end-snippet:ardu-pdm]
 
 `[PDM.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/PDM/PDM.h>`_
 
 .. doxygenfile:: PDM/PDM.h
-   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib enum
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
 Filesystem
@@ -107,7 +107,7 @@ the on-board flash memory (not an SD card).
 `[coralmicro_SD.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_SD/coralmicro_SD.h>`_
 
 .. doxygenfile:: CoralMicro_SD/coralmicro_SD.h
-   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib enum
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
 I/O pins & LEDs
@@ -179,7 +179,7 @@ before reading or writing values.
 
 This code toggles the on-board User LED when you press the on-board User button.
 
-.. literalinclude:: ../sketches/ButtonLED/ButtonLED.ino
+.. literalinclude:: ../arduino/libraries/examples/examples/ButtonLED/ButtonLED.ino
    :start-after: [start-snippet:ardu-led]
    :end-before: [end-snippet:ardu-led]
 
@@ -203,7 +203,7 @@ connected to ``D0`` and ``D3`` (shown in figure 1).
 
 This code sends messages to an I2C device that's connected to ``D0`` and ``D3``.
 
-.. literalinclude:: ../sketches/I2CM-Writer/I2CM-Writer.ino
+.. literalinclude:: ../arduino/libraries/examples/examples/I2CM-Writer/I2CM-Writer.ino
    :start-after: [start-snippet:ardu-i2c]
    :end-before: [end-snippet:ardu-i2c]
 
@@ -237,7 +237,7 @@ documentation <https://docs.arduino.cc/learn/communication/spi>`_.
 
 **Example** (from ``sketches/SPI/``):
 
-.. literalinclude:: ../sketches/SPI/SPI.ino
+.. literalinclude:: ../arduino/libraries/examples/examples/SPI/SPI.ino
    :start-after: [start-snippet:ardu-spi]
    :end-before: [end-snippet:ardu-spi]
 
@@ -245,7 +245,7 @@ documentation <https://docs.arduino.cc/learn/communication/spi>`_.
 `[SPI.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/SPI/SPI.h>`_
 
 .. doxygenfile:: SPI/SPI.h
-   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib enum
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
 
@@ -254,8 +254,8 @@ Wi-Fi
 
 **Requires the Coral Wireless Add-on.**
 
-This APIs allow you to perform basic Wi-Fi tasks with the Dev Board Micro
-(when connected to the Coral Wireless Add-on), such as scan for Wi-Fi networks,
+These APIs allow you to get online and perform basic Wi-Fi tasks (when the board
+is attached to the Coral Wireless Add-on), such as scan for Wi-Fi networks,
 connect to a Wi-Fi network, and read network details.
 
 This API is designed to be code-compatible with projects that use the ``WiFi``
@@ -268,14 +268,40 @@ should use the `coralmicro Network APIs </docs/reference/micro/network/>`_.
 
 This code connects to a Wi-Fi network and prints network details.
 
-.. literalinclude:: ../sketches/WiFiConnect/WiFiConnect.ino
+.. literalinclude:: ../arduino/libraries/WiFiExamples/examples/WiFiConnect/WiFiConnect.ino
    :start-after: [start-snippet:ardu-wifi]
    :end-before: [end-snippet:ardu-wifi]
 
 `[WiFi.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/WiFi/WiFi.h>`_
 
 .. doxygenfile:: WiFi/WiFi.h
-   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib enum
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
+
+
+
+Ethernet
+-----------------
+
+**Requires the Coral PoE Add-on.**
+
+These APIs allow you to get online via Ethernet and get network
+details (when the board is attached to the Coral PoE Add-on).
+
+For networking features such as hosting local servers on the Dev Board Micro,
+you should use the `coralmicro Network APIs </docs/reference/micro/network/>`_.
+
+**Example** (from ``sketches/EthernetClient/``):
+
+This code enables the Ethernet connection and .
+
+.. literalinclude:: ../arduino/libraries/PoEExamples/examples/EthernetClient/EthernetClient.ino
+   :start-after: [start-snippet:ardu-ethernet-client]
+   :end-before: [end-snippet:ardu-ethernet-client]
+
+`[WiFi.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/Ethernet/Ethernet.h>`_
+
+.. doxygenfile:: Ethernet/Ethernet.h
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
 TensorFlow Lite
@@ -292,6 +318,6 @@ other Arduino-style APIs such as `Camera <#camera>`_.
 This code performs object detection with TensorFlow Lite using images from
 the camera.
 
-.. literalinclude:: ../sketches/CameraDetection/CameraDetection.ino
+.. literalinclude:: ../arduino/libraries/examples/examples/CameraDetection/CameraDetection.ino
    :start-after: [start-snippet:ardu-detection]
    :end-before: [end-snippet:ardu-detection]

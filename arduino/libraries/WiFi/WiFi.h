@@ -149,6 +149,8 @@ class WiFiClass {
 }  // namespace arduino
 }  // namespace coralmicro
 
+// This is the global `WiFiClass` instance you should use instead of
+// creating your own instance.
 extern coralmicro::arduino::WiFiClass WiFi;
 
 #endif  // WiFi_h

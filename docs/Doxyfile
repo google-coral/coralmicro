@@ -15,4 +15,4 @@ EXCLUDE                = ../libs/tpu/edgetpu_driver.h
 FILE_PATTERNS          = *.h
 RECURSIVE              = YES
 EXAMPLE_PATH           = ../examples/ \
-                         ../sketches/
+                         ../arduino/libraries/

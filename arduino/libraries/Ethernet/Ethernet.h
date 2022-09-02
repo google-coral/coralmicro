@@ -124,6 +124,8 @@ class EthernetClass {
 }  // namespace arduino
 }  // namespace coralmicro
 
+// This is the global `EthernetClass` instance you should use instead of
+// creating your own instance.
 extern coralmicro::arduino::EthernetClass Ethernet;
 
 #endif  // Ethernet_h

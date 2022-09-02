@@ -32,6 +32,7 @@ namespace arduino {
 
 namespace SDLib {
 
+// Represents a file in the flash memory filesystem (represented by `SDClass`).
 class File : public Stream {
  private:
   char name_[LFS_NAME_MAX + 1];
@@ -230,12 +231,12 @@ class SDClass {
 }  // namespace SDLib
 }  // namespace arduino
 }  // namespace coralmicro
-// using namespace coralmicro::arduino::SDLib;
+/* using namespace coralmicro::arduino::SDLib; */
 
 typedef coralmicro::arduino::SDLib::File SDFile;
 
 // This is the global `SDClass` instance you should use instead of
-// creating your own instance of `SDClass`.
+// creating your own instance.
 extern coralmicro::arduino::SDLib::SDClass SD;
 
 #endif  // SD_h

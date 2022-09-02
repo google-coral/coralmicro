@@ -236,7 +236,7 @@ class CameraClass {
 }  // namespace coralmicro
 
 // This is the global `CameraClass` instance you should use instead of
-// creating your own instance of `CameraClass`.
+// creating your own instance.
 extern coralmicro::arduino::CameraClass Camera;
 
 #endif  // CORAL_MICRO_CAMERACLASS_H

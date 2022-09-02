@@ -106,7 +106,7 @@ class HardwareSPI : public ::arduino::HardwareSPI {
 }  // namespace coralmicro
 
 // This is the global `HardwareSPI` instance you should use instead of
-// creating your own instance of `HardwareSPI`.
+// creating your own instance.
 extern coralmicro::arduino::HardwareSPI SPI;
 
 #endif  // SPI_H_

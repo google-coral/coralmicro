@@ -104,7 +104,7 @@ class PDMClass {
 }  // namespace coralmicro
 
 // This is the global `PDMClass` instance you should use instead of
-// creating your own instance of `PDMClass`.
+// creating your own instance.
 extern coralmicro::arduino::PDMClass Mic;
 
 #endif  // PDM_H_

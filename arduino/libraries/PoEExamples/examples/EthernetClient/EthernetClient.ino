@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// [start-snippet:ardu-ethernet-client]
 #include "Arduino.h"
 #include "Ethernet.h"
 
@@ -47,3 +48,4 @@ void loop() {
     Serial.write(client.read());
   }
 }
+// [end-snippet:ardu-ethernet-client]
