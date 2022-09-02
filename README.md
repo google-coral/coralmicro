@@ -35,7 +35,7 @@ reference](http://coral.ai/docs/reference/micro/).
 2. Install the required tools:
 
     ```bash
-    cd valiant && bash setup_linux.sh
+    cd valiant && bash setup.sh
     ```
 
 

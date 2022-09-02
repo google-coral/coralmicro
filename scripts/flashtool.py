@@ -1149,7 +1149,7 @@ if __name__ == '__main__':
     main()
   except usb.core.NoBackendError:
     print('Python interpreter cannot find libusb, please install it.')
-    print('You can run either setup_mac.sh or setup_linux.sh script for that.')
+    print('You can run setup.sh script for that.')
     if sys.platform == 'darwin' and is_apple_python():
       print('If you are using Homebrew, try to run two commands:')
       print('  brew install libusb')
