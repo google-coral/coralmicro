@@ -88,10 +88,10 @@ def fix_image_paths(soup):
 
 
 def fix_relative_links(soup):
-  """Changes links to use current directory not parent directory."""
+  """Changes relative links to use absolute path for website."""
   for a in soup.select('a[href^="../"]'):
     href = a['href']
-    a['href'] = href[1:]
+    a['href'] = '/docs/reference/micro/' + href[3:]
   return soup
 
 
