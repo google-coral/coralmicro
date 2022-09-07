@@ -28,10 +28,14 @@ namespace coralmicro {
 namespace arduino {
 
 namespace {
-inline constexpr int kNumDmaBuffers = 16;
-inline constexpr int kDmaBufferSizeMs = 50;
+inline constexpr int kNumDmaBuffers = 2;
+inline constexpr int kDmaBufferSizeMs = 30;
 inline constexpr int kAudioServiceTaskPriority = 5;
-inline constexpr int kDropFirstSamplesMs = 150;
+// For our AudioDriverConfig with 2 dma buffers, buffer size of 30ms, we
+// need a max of 2 * 30 * 4 bytes * 48 (48k sample rate) = 11520 ~= 12k (less
+// than that for 16k sample rate). This number is optimized for space, but could
+// be adjusted for better quality.
+inline constexpr int kCombinedDmaBufferSize = 12 * 1024;
 }  // namespace
 
 // Exposes the Coral Micro device's native PDM microphone.
@@ -48,7 +52,13 @@ class PDMClass {
   // Start recording data with the PDM microphone.
   //
   // @param sample_rate The sample rate to start, only supports 16000 or 48000.
-  int begin(int sample_rate = 16000);
+  // @param sample_size_ms Number of ms of data that is stored in the internal
+  // buffer.
+  // @param drop_first_samples_ms Number of ms to drop during begin to avoid
+  // distortions.
+  // @return 0 on failure, 1 on success.
+  int begin(int sample_rate = 16000, size_t sample_size_ms = 1000,
+            size_t drop_first_samples_ms = 150);
 
   // Sets the current audio callback function. The microphone starts as soon
   // as `begin()` is called, however this function adds an extra callback that
@@ -77,7 +87,7 @@ class PDMClass {
   //
   // @param buffer The buffer that will receive the copied audio data.
   // @param size The amount of audio data values to copy.
-  // @returns The amount of audio data values that were copied.
+  // @return The amount of audio data values that were copied.
   int read(std::vector<int32_t>& buffer, size_t size);
 
   // @cond Do not generate docs.
@@ -89,15 +99,19 @@ class PDMClass {
  private:
   void Append(const int32_t* samples, size_t num_samples);
 
-  coralmicro::AudioDriverBuffers</*NumDmaBuffers=*/kNumDmaBuffers,
-                                 /*CombinedDmaBufferSize=*/16 * 1024>
+  coralmicro::AudioDriverBuffers<
+      /*NumDmaBuffers=*/kNumDmaBuffers,
+      /*CombinedDmaBufferSize=*/kCombinedDmaBufferSize>
       audio_buffers_;
   AudioDriver driver_{audio_buffers_};
   std::unique_ptr<AudioDriverConfig> config_{nullptr};
   std::unique_ptr<AudioService> audio_service_{nullptr};
-  std::unique_ptr<LatestSamples> latest_samples_{nullptr};
   std::optional<int> current_audio_cb_id_;
-  void (*on_receive_)(void) = nullptr;
+  void (*on_receive_)(void);
+  SemaphoreHandle_t mutex_;
+  std::vector<int32_t> samples_;  // Protected by mutex_.
+  size_t read_pos_;               // Protected by mutex_.
+  size_t available_;              // Protected by mutex_.
 };
 
 }  // namespace arduino

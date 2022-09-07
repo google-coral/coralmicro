@@ -31,7 +31,11 @@ namespace {
 coralmicro::arduino::SocketClient client;
 coralmicro::arduino::SocketServer server(33000);
 
+uint32_t total_bytes;
+int sample_rate_hz;
+int sample_format;
 std::vector<int32_t> current_samples;
+
 }  // namespace
 
 void setup() {
@@ -52,8 +56,8 @@ void loop() {
     Serial.println("Client connected");
     int32_t params[2];
     client.read(reinterpret_cast<uint8_t*>(params), 2 * sizeof(int32_t));
-    const int sample_rate_hz = params[0];
-    const int sample_format = params[1];
+    sample_rate_hz = params[0];
+    sample_format = params[1];
     Serial.println("Format:");
     Serial.print("  Sample rate: ");
     Serial.println(sample_rate_hz);
@@ -61,39 +65,39 @@ void loop() {
     Serial.println(sample_format == 0 ? "S16_LE" : "S32_LE");
     Serial.println("Sending audio samples...");
     Serial.flush();
-
     if (!Mic.begin(sample_rate_hz)) {
       Serial.println("Failed to initialize PDM.");
     }
-
-    uint32_t totalBytes{0};
     while (client.available()) {
-      current_samples.clear();
-      auto available = Mic.available();
-      Mic.read(current_samples, available);
-      if (sample_format == 1) {  // S32_LE
-        auto bytes = available * sizeof(int32_t);
-        if (client.write(reinterpret_cast<uint8_t*>(current_samples.data()),
-                         bytes) < 0) {
-          Serial.println("Error while sending audio data");
-          break;
+      auto samples_available = Mic.available();
+      if (samples_available) {
+        Mic.read(current_samples, samples_available);
+        if (sample_format == 1) {  // S32_LE
+          auto bytes = samples_available * sizeof(int32_t);
+          if (!client.write(reinterpret_cast<uint8_t*>(current_samples.data()),
+                            bytes)) {
+            Serial.println("Error while sending audio data");
+            break;
+          }
+          total_bytes += bytes;
+        } else {  // S16_LE
+          std::vector<int16_t> current_samples16(samples_available);
+          for (size_t i = 0; i < samples_available; ++i)
+            current_samples16[i] = current_samples[i] >> 16;
+          auto bytes = samples_available * sizeof(int16_t);
+          if (!client.write(
+                  reinterpret_cast<uint8_t*>(current_samples16.data()),
+                  bytes)) {
+            Serial.println("Error while sending audio data");
+            break;
+          }
+          total_bytes += bytes;
         }
-        totalBytes += bytes;
-      } else {  // S16_LE
-        std::vector<int16_t> current_samples16(available);
-        for (size_t i = 0; i < available; ++i)
-          current_samples16[i] = current_samples[i] >> 16;
-        auto bytes = available * sizeof(int16_t);
-        if (client.write(reinterpret_cast<uint8_t*>(current_samples16.data()),
-                         bytes) < 0) {
-          Serial.println("Error while sending audio data");
-          break;
-        }
-        totalBytes += bytes;
       }
     }
     Serial.print("Bytes sent: ");
-    Serial.println(totalBytes);
+    Serial.println(total_bytes);
     Serial.println("Done.");
   }
+  client = server.available();  // Get new client.
 }

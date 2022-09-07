@@ -52,7 +52,8 @@ void setup() {
   Serial.println("Arduino YamNet!");
 
   SD.begin();
-  Mic.begin();
+  Mic.begin(coralmicro::tensorflow::kYamnetSampleRate,
+            coralmicro::tensorflow::kYamnetDurationMs);
 
   tflite::MicroErrorReporter error_reporter;
   resolver = coralmicro::tensorflow::SetupYamNetResolver</*tForTpu=*/true>();
