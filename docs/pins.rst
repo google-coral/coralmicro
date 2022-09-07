@@ -119,9 +119,12 @@ You can use the board as either the device controller or target, using
 either of two I2C lines on the 12-pin headers:
 
 + I2C1 (`I2c::kI2c1`)
+
    + SDA is pin 10 on the right side
    + SCL is pin 11 on the left side
+
 + I2C6 (`I2c::kI2c6`)
+
    + SDA is pin 12 on the right side
    + SCL is pin 11 on the right side
 
