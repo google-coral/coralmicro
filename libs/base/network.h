@@ -24,49 +24,60 @@
 
 namespace coralmicro {
 
-// IO statuses.
-enum class IOStatus { kOk, kEof, kError };
+// Socket I/O status response codes.
+enum class IOStatus {
+  // Operation succeeded.
+  kOk,
+  // Reached end-of-file during read operation.
+  kEof,
+  // An error occurred during operation.
+  kError
+};
 
-// Reads data from a file descriptor to a buffer.
+// Reads data from a socket file descriptor to a buffer.
 //
 // @param fd The file descriptor to read from.
 // @param bytes The buffer to output the data.
 // @param size The number of bytes to read.
+// @return The status result of the operation.
 IOStatus ReadBytes(int fd, void* bytes, size_t size);
 
-// Read an array of data from a file descriptor.
+// Read an array of data from a socket file descriptor.
 //
 // @param fd The file descriptor to read from.
 // @param array The array to output the data to.
 // @param array_size The size of the array.
 // @tparam T The data type of the array.
+// @return The status result of the operation.
 template <typename T>
 IOStatus ReadArray(int fd, T* array, size_t array_size) {
   return ReadBytes(fd, array, array_size * sizeof(T));
 }
 
-// Writes data from a buffer into a file descriptor.
+// Writes data from a buffer into a socket file descriptor.
 //
 // @param fd The file descriptor to write to.
 // @param bytes The buffer of data to write.
 // @param size The size of the buffer.
 // @param chunk_size The size of the chunk to write.
+// @return The status result of the operation.
 IOStatus WriteBytes(int fd, const void* bytes, size_t size,
                     size_t chunk_size = 1024);
 
-// Writes data from an array into a file descriptor.
+// Writes data from an array into a socket file descriptor.
 //
 // @param fd The file descriptor to write to.
 // @param array The array of data to write.
 // @param size The size of the array.
 // @param chunk_size The size of the chunk to write.
 // @tparam T The data type of the array.
+// @return The status result of the operation.
 template <typename T>
 IOStatus WriteArray(int fd, const T* array, size_t array_size) {
   return WriteBytes(fd, array, array_size * sizeof(T));
 }
 
-// Writes a `message` with custom type from a buffer into a file descriptor.
+// Writes a `message` with custom type from a buffer into a socket file descriptor.
 //
 // The `message` is going to have a 40 bits prefix that contains 32 bits for the
 // size and 8 bits for the custom message type, following by the bytes.
@@ -76,26 +87,28 @@ IOStatus WriteArray(int fd, const T* array, size_t array_size) {
 // @param bytes The buffer of data to write.
 // @param size The size of the buffer.
 // @param chunk_size The size of the chunk to write.
+// @return The status result of the operation.
 IOStatus WriteMessage(int fd, uint8_t type, const void* bytes, size_t size,
                       size_t chunk_size = 1024);
 
 // Checks whether a socket file descriptor still has some bytes to read.
 //
 // @param sockfd The socket file descriptor to check.
+// @return True if there are bytes remaining to read; false otherwise.
 bool SocketHasPendingInput(int sockfd);
 
-// Starts a new tcp socket server.
+// Starts a new TCP socket server.
 //
 // @param port The port to listen on.
 // @param backlog The maximum length to which the queue of pending connections
 // for sockfd may grow
-// @return The socket file descriptor.
+// @return The server's socket file descriptor.
 int SocketServer(int port, int backlog);
 
 // Accepts a connection request from a listening socket.
 //
 // @param sockfd The listening socket file descriptor.
-// @return The client's file descriptor.
+// @return The client's socket file descriptor.
 int SocketAccept(int sockfd);
 
 // Close a socket.

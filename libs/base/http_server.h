@@ -33,10 +33,6 @@ namespace coralmicro {
 // This is a light wrapper around the lwIP stack. For more detail,
 // see https://www.nongnu.org/lwip/2_1_x/index.html.
 //
-// To start a server, simply declare an instance of `HttpServer` and give
-// it your implementation of `UriHandler()`, which responds to paths of interest
-// and returns results, and then call `UseHttpServer()`.
-//
 // For an example, see examples/http_server/http_server.cc.
 class HttpServer {
  public:

@@ -27,6 +27,7 @@
 // Then open a web browser on your Linux computer connected via USB to the
 // URL shown in the serial console, such as http://10.10.10.1/hello.html
 
+// [start-snippet:http-server]
 namespace coralmicro {
 namespace {
 
@@ -67,3 +68,4 @@ extern "C" void app_main(void* param) {
   coralmicro::Main();
   vTaskSuspend(nullptr);
 }
+// [end-snippet:http-server]

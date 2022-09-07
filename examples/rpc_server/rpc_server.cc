@@ -44,6 +44,7 @@
 //    python3 -m pip install -r examples/rpc_server/requirements.txt
 //    python3 examples/rpc_server/rpc_client.py
 
+// [start-snippet:rpc-server]
 namespace coralmicro {
 namespace {
 
@@ -72,3 +73,4 @@ extern "C" void app_main(void* param) {
   coralmicro::Main();
   vTaskSuspend(nullptr);
 }
+// [end-snippet:rpc-server]
