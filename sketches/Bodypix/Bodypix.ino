@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-#include <Arduino.h>
-#include <coral_micro.h>
-#include <coralmicro_SD.h>
-#include <coralmicro_camera.h>
-
-#include "libs/base/utils.h"
-#include "libs/rpc/rpc_http_server.h"
-#include "libs/tensorflow/posenet.h"
-#include "libs/tensorflow/posenet_decoder_op.h"
-
 // Runs body segmentation using BodyPix on the Edge TPU, returning one result
 // at a time. Inferencing starts only when an RPC client requests the
 // `run_bodypix` endpoint. The model receives continuous input from the camera
@@ -34,6 +24,16 @@
 // client that we used for the equivalent FreeRTOS version (examples/bodypix):
 //    python3 -m pip install -r examples/bodypix/requirements.txt
 //    python3 examples/bodypix/bodypix_client.py
+
+#include <Arduino.h>
+#include <coral_micro.h>
+#include <coralmicro_SD.h>
+#include <coralmicro_camera.h>
+
+#include "libs/base/utils.h"
+#include "libs/rpc/rpc_http_server.h"
+#include "libs/tensorflow/posenet.h"
+#include "libs/tensorflow/posenet_decoder_op.h"
 
 namespace {
 using namespace coralmicro;

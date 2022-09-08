@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Runs various cryptographic tasks using the A71CH secure element.
+
 #include "Arduino.h"
 #include "libs/a71ch/a71ch.h"
 #include "libs/base/filesystem.h"

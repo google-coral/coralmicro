@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Detects User button presses and prints the press duration as pulses.
+
 #include <Arduino.h>
 
 // User button on the main board.

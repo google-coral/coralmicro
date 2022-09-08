@@ -20,11 +20,14 @@
 
 // Hosts a simple HTTP server on the Dev Board Micro.
 //
+// NOTE: This HTTP server is accessible via USB only, which works from
+// Windows and Linux only.
+//
 // To build and flash from coralmicro root:
 //    bash build.sh
 //    python3 scripts/flashtool.py -e http_server
 //
-// Then open a web browser on your Linux computer connected via USB to the
+// Then open a web browser on your computer connected via USB to the
 // URL shown in the serial console, such as http://10.10.10.1/hello.html
 
 // [start-snippet:http-server]

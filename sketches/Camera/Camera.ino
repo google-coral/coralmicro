@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Captures an image with the on-board camera and saves it as a JPEG.
+
 // [start-snippet:ardu-camera]
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>

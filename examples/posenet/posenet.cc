@@ -24,8 +24,9 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
-// Runs pose estimation using PoseNet, running on the Edge TPU.
-// Scores and keypoint data is printed to the serial console.
+// Performs pose estimation with camera images (using the PoseNet model),
+// running on the Edge TPU. Scores and keypoint data is printed to the serial
+// console.
 //
 // To build and flash from coralmicro root:
 //    bash build.sh

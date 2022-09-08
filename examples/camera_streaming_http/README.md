@@ -9,9 +9,25 @@ There are 2 endpoints:
 
 ### Flashing
 
+This example also demonstrates how the image can be served over USB, Ethernet, or Wi-Fi network.
+
+- USB (Linux and Windows clients only)
+
 ```
-python3 scripts/flashtool.py --build_dir build \
-  --example camera_streaming --subapp camera_streaming_http
+python3 scripts/flashtool.py -e camera_streaming_http --subapp camera_streaming_http_usb
+```
+
+- Ethernet
+
+```
+python3 scripts/flashtool.py -e camera_streaming_http --subapp camera_streaming_http_ethernet
+```
+
+- Wi-Fi
+
+```
+python3 scripts/flashtool.py -e camera_streaming_http --subapp camera_streaming_http_wifi \
+  --wifi_ssid your-wifi-sid --wifi_psk your-wifi-password
 ```
 
 ### Running the app

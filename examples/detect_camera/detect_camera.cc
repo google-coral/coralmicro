@@ -31,10 +31,22 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
+
 // Runs a local server with an endpoint called 'detect_from_camera', which
 // will capture an image from the board's camera, run the image through an
-// object detection model on the Edge TPU and return the results in a JSON
-// response.
+// object detection model on the Edge TPU and return the results to a connected
+// Python client app through an RPC server.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e detect_camera
+//
+// NOTE: The Python client app works on Windows and Linux only.
+//
+// After flashing the example, run this Python client to trigger an inference
+// with a photo and receive the results over USB:
+//    python3 -m pip install -r examples/detect_camera/requirements.txt
+//    python3 examples/detect_camera/detect_camera_client.py
 //
 // The response includes only the top result with a JSON file like this:
 //
@@ -56,16 +68,6 @@
 //         }
 //     }
 // }
-//
-// To build and flash from coralmicro root:
-//    bash build.sh
-//    python3 scripts/flashtool.py -e detect_camera
-//
-// Then trigger an inference by clicking the user button.
-// On a Linux computer, you can also trigger the detection and get the result
-// back in json format over USB:
-//    python3 -m pip install -r examples/detect_camera/requirements.txt
-//    python3 examples/detect_camera/detect_camera_client.py
 
 namespace coralmicro {
 namespace {

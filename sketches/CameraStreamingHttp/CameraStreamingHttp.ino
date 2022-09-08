@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+// Hosts a web page on the Dev Board Micro that streams camera images.
+//
+// After you upload the sketch, you should be able to see the camera stream
+// at http://10.10.10.1/coral_micro_camera.html when connected to the board
+// via USB. (This is not compatible with Mac clients.)
+//
+// For more details, see the examples/camera_streaming_http/README.
+
 #include <coralmicro_camera.h>
 
 #include "Arduino.h"

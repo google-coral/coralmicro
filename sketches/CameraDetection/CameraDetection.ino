@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+// Runs a local server with an endpoint called 'detect_from_camera', which
+// will capture an image from the board's camera, run the image through an
+// object detection model on the Edge TPU and return the results to a connected
+// Python client app through an RPC server.
+//
+// NOTE: The Python client app works on Windows and Linux only.
+// The Python client is available in github.com/google-coral/coralmicro/examples
+//
+// After uploading the sketch, run this Python client to trigger an inference
+// with a photo and receive the results over USB:
+//    python3 -m pip install -r examples/detect_camera/requirements.txt
+//    python3 examples/detect_camera/detect_camera_client.py
+
 // [start-snippet:ardu-detection]
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>

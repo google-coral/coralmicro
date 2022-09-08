@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Prints microphone audio samples to the serial console.
+
 // [start-snippet:ardu-pdm]
 #include "Arduino.h"
 #include "PDM.h"

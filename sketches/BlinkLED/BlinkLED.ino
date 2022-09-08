@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-/*
-  Blinks the user LED (green).
-*/
+// Blinks the user LED (green).
 
 #include "Arduino.h"
 

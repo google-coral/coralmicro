@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Shifts bytes, using a GPIO pin as the bit output and another GPIO as clock.
+
 #include "Arduino.h"
 
 // GPIO Pin 7 on the left-side header.

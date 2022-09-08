@@ -3,8 +3,7 @@
 This pair of applications demonstate the Dev Board Micro's I2C hardware.
 
 NOTE: Executing this example successfully requires two devices, and the devices
-need headers soldered to facilitate connecting the devices. You will also need
-breadboarding wires connect the board headers to each other.
+need headers soldered to facilitate connecting the board I2C lines to each other.
 
 ## i2c_target
 

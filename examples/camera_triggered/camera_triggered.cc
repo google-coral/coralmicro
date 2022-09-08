@@ -23,15 +23,17 @@
 #include "third_party/freertos_kernel/include/task.h"
 
 // Captures an image when the User button is pressed, and serves it over the
-// 'get_captured_image' RPC call. Note: the RPC
+// 'get_captured_image' RPC call to a connected Python client. Note: the RPC
 // call will fail if the image was never captured.
 //
 // To build and flash from coralmicro root:
 //    bash build.sh
 //    python3 scripts/flashtool.py -e camera_triggered
 //
-// Then press the User button to capture an image, and
-// fetch the imagee over USB from a Linux computer:
+// NOTE: The Python client app works with Windows and Linux only.
+//
+// Then press the User button to capture an image, and run this Python client to
+// fetch the image over USB:
 //    python3 -m pip install -r examples/camera_triggered/requirements.txt
 //    python3 examples/camera_triggered/camera_triggered_client.py
 

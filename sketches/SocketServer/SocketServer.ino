@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
+// Opens a network socket on the board and repeats any data received from
+// a connected client to the serial console.
+//
+// After you upload the sketch, you should be able to connect to the socket
+// server on port 31337 when connected to the board via USB.
+// (This is not compatible with Mac clients.)
+//
+// For example, you should be able to connect from a Linux terminal with this:
+//   nc 10.10.10.1 31337
+
 #include "Arduino.h"
 #include "SocketClient.h"
 #include "SocketServer.h"
-
-// Simple example showing the usage of `SocketServer`.
-// After flashing this to the board, you can connect to the
-// server on port 31337 via the USB connection, and your input
-// will be echoed on the server console.
-//
-// Ex: `nc 10.10.10.1 31337`
 
 namespace {
 
@@ -35,9 +38,8 @@ coralmicro::arduino::SocketServer server(31337);
 void setup() {
   Serial.begin(115200);
   Serial.println("Arduino SocketServer!");
-  pinMode(PIN_LED_USER, OUTPUT);
-  pinMode(PIN_LED_STATUS, OUTPUT);
   // Turn on Status LED to show the board is on.
+  pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
 
   server.begin();

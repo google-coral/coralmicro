@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Runs face detection on the Edge TPU, using the on-board camera, printing
+// results to the serial console and turning on the User LED when a face
+// is detected.
+
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>
 

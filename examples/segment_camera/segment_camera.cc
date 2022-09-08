@@ -30,7 +30,19 @@
 
 // Runs a local RPC server with an endpoint called 'segment_from_camera',
 // which will capture an image from the board's camera, run the image through a
-// segmentation model and return the results in a JSON response.
+// segmentation model and return the results to a connected
+// Python client app through an RPC server.
+//
+// To build and flash from coralmicro root:
+//    bash build.sh
+//    python3 scripts/flashtool.py -e segment_camera
+//
+// NOTE: The Python client app works on Windows and Linux only.
+//
+// After flashing the example, run this Python client to trigger an inference
+// with a photo and receive the results over USB:
+//    python3 -m pip install -r examples/segment_camera/requirements.txt
+//    python3 examples/segment_camera/segment_camera_client.py
 //
 // The response includes only the top result with a JSON file like this:
 //
@@ -53,14 +65,6 @@
 // Class 1: Pixel belonging to the pet.
 // Class 2: Pixel bordering the pet.
 // Class 3: None of the above/a surrounding pixel.
-//
-// To build and flash from coralmicro root:
-//    bash build.sh
-//    python3 scripts/flashtool.py -e segment_camera
-//
-// Then trigger an inference over USB from a Linux computer:
-//    python3 -m pip install -r examples/segment_camera/requirements.txt
-//    python3 examples/segment_camera/segment_camera_client.py
 
 namespace coralmicro {
 namespace {

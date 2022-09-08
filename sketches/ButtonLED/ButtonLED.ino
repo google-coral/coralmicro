@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-/*
-  Turns the user LED (green) on when you press the user button
-  on the Coral Dev Board Micro.
-*/
+// Turns on the user LED (green) when you press the user button on the board.
 
 // [start-snippet:ardu-led]
 #include "Arduino.h"

@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-// Takes an image and save it in the filesystem when you press the user button
-// on the Coral Dev Board Micro.
+// Captures an image when the User button is pressed, and serves it over the
+// 'get_captured_image' RPC call to a connected Python client. Note: the RPC
+// call will fail if the image was never captured.
+//
+// NOTE: The Python client app works with Windows and Linux only.
+// The Python client is available in github.com/google-coral/coralmicro/examples
+//
+// After uploading the sketch, press the User button to capture an image, and
+// run this Python client to fetch the image over USB:
+//    python3 -m pip install -r examples/camera_triggered/requirements.txt
+//    python3 examples/camera_triggered/camera_triggered_client.py
 
 #include <Arduino.h>
 #include <coralmicro_SD.h>
@@ -27,13 +36,6 @@
 
 #include "libs/base/utils.h"
 #include "libs/rpc/rpc_http_server.h"
-
-// This is the equivalent arduino sketch for examples/camera_triggered. Upload
-// this sketch and then press the User button to capture an image, and
-// fetch the imagee over USB from a Linux computer:
-//
-//    python3 -m pip install -r examples/camera_triggered/requirements.txt
-//    python3 examples/camera_triggered/camera_triggered_client.py
 
 using namespace coralmicro::arduino;
 

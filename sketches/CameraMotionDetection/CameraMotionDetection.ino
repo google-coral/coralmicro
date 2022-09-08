@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// Uses the camera hardware's motion interrupt to turn on the User LED
+// when motion is detected.
+
 #include <coralmicro_camera.h>
 
 #include <cstdint>

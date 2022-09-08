@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Shows how to generate a random number and delay execution.
+
 #include "Arduino.h"
 
 int led_pin = PIN_LED_USER;

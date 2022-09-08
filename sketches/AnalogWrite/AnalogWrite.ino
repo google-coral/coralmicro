@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+// Reads analog input from ADC1 channel B (A0; pin 4 on the left-side header)
+// and writes it to the PWM_A pin (A3; pin 10 on the left-side header).
+
 #include "Arduino.h"
 
-int led_pin = A3;
+int pwm_pin = A3;
 int analog_pin = A0;
 int val = 0;
 
@@ -30,5 +33,5 @@ void setup() {
 
 void loop() {
   val = analogRead(analog_pin);
-  analogWrite(led_pin, val / 4);
+  analogWrite(pwm_pin, val / 4);
 }

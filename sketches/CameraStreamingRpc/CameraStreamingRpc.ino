@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+// Hosts an RPC server on the Dev Board Micro that streams camera images
+// to a connected Python client app through an RPC server.
+//
+// NOTE: The Python client app works on Windows and Linux only.
+// The Python client is available in github.com/google-coral/coralmicro/examples
+//
+// After uploading the sketch, run this Python client to see the camera stream:
+// python3 examples/camera_streaming_rpc/camera_streaming_app.py --host_ip 10.10.10.1
+//
+// For more details, see the examples/camera_streaming_rpc/README.
+
 #include <Arduino.h>
 #include <coral_micro.h>
 #include <coralmicro_camera.h>
@@ -25,10 +36,6 @@
 #include "libs/base/utils.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/rpc/rpc_utils.h"
-
-// This is the arduino's equivalent sketch for examples/camera_streaming_rpc
-// Upload this sketch and try the client app:
-// python3 examples/camera_streaming_rpc/camera_streaming_app.py --host_ip ip
 
 namespace {
 using namespace coralmicro;

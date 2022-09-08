@@ -33,6 +33,8 @@
 #include "libs/base/wifi.h"
 #endif  // defined(CAMERA_STREAMING_WIFI)
 
+// Hosts a web page on the Dev Board Micro that streams camera images.
+
 namespace coralmicro {
 namespace {
 

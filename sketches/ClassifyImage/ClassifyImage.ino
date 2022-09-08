@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Performs image classification with MobileNet, running on the Edge TPU,
+// using a local bitmap image as input.
+// The top 3 class predictions are printed to the serial console.
+
 #include <coralmicro_SD.h>
 
 #include "Arduino.h"

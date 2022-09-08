@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
+// Captures audio from the Dev Board Micro on-board microphone
+// and makes the audio stream available from a local RPC server that you can
+// connect to with a Python client.
+//
+// NOTE: The Python client app works with Windows and Linux only.
+// The Python client is available in github.com/google-coral/coralmicro/examples
+//
+// Upload this sketch and then start an audio client over USB:
+//    python3 -m pip install -r examples/audio_server/requirements.txt
+//    python3 examples/audio_server/audio_client.py
+
 #include <Arduino.h>
 #include <PDM.h>
 #include <SocketClient.h>
 #include <SocketServer.h>
-
-// This is the arduino sketch equivalent for example/audio_server. Upload
-// this sketch and then start an audio client over USB from a linux computer:
-//
-// Then receive the audio stream over USB from a Linux computer:
-//    python3 -m pip install -r examples/audio_server/requirements.txt
-//    python3 examples/audio_server/audio_client.py
 
 namespace {
 

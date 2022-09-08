@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+// Runs a local server with an endpoint called 'classification_from_camera',
+// which will capture an image from the board's camera, run the image through an
+// image classification model on the Edge TPU and return the results to a
+// connected Python client app through an RPC server.
+//
+// NOTE: The Python client app works on Windows and Linux only.
+// The Python client is available in github.com/google-coral/coralmicro/examples
+//
+// After uploading the sketch, run this Python client to trigger an inference
+// with a photo and receive the results over USB:
+//    python3 -m pip install -r examples/classify_camera/requirements.txt
+//    python3 examples/classify_camera/classify_camera_client.py
+
 // [start-snippet:ardu-classification]
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>
@@ -25,13 +38,6 @@
 #include "coral_micro.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/classification.h"
-
-// This is the equivalent arduino sketch for examples/classify_camera. Upload
-// this sketch and then trigger an inference by clicking the user button.
-// On a Linux computer, you can also trigger the classification and get the
-// result back in json format over USB:
-//    python3 -m pip install -r examples/classify_camera/requirements.txt
-//    python3 examples/classify_camera/classify_camera_client.py
 
 namespace {
 using namespace coralmicro;

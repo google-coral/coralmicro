@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Recognizes various sounds heard with the on-board mic, using YamNet,
+// running on the Edge TPU (though it can be modified to run on the CPU).
+// See model details here: https://tfhub.dev/google/yamnet/1
+
 #include <PDM.h>
 #include <coralmicro_SD.h>
 

@@ -31,9 +31,8 @@
 #include "libs/base/wifi.h"
 #endif  // defined(CAMERA_STREAMING_HTTP_ETHERNET)
 
-
-// Hosts an HTTP server on the Dev Board Micro that serves a camera streaming
-// webpage.
+// Hosts an RPC server on the Dev Board Micro that streams camera images
+// to a connected client app.
 
 namespace coralmicro {
 namespace {

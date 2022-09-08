@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Reads and writes files to the filesystem on flash storage.
+
 #include <coralmicro_SD.h>
 
 void setup() {

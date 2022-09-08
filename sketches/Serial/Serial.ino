@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Prints text to the serial console (the Arduino Serial Monitor)
+
 #include "Arduino.h"
 
 void setup() {

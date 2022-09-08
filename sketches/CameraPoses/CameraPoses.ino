@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Performs pose estimation with camera images (using the PoseNet model),
+// running on the Edge TPU. Scores and keypoint data is printed to the serial
+// console.
+
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>
 

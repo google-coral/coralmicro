@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// Reads analog input from ADC1 channel B (A0; pin 4 on the left-side header)
+// and prints it to the serial console.
+
 #include "Arduino.h"
 
 int analog_pin = A0;

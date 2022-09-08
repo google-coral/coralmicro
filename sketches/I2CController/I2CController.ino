@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+// Runs the board as an I2C controller device.
+//
+// NOTE: Executing this example successfully requires two devices, and the
+// devices need headers soldered to facilitate connecting the board I2C lines to
+// each other. For usage details, see github.com/google-coral/examples/i2c/
+
 #include <cstdint>
 #include <vector>
 

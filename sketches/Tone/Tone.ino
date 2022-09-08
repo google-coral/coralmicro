@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+// Runs simple tone cycles with the PWM pins on the board header.
+
 #include <Arduino.h>
 
-// Runs simple tone cycles with the exposed pwm pins.
-// Pin 10 on the left-side header
+// PWM_A on the left-side header
 constexpr int pin_10 = A3;
-// pin 9 on the left-side header
+// PWM_B on the left-side header
 constexpr int pin_9 = A4;
 // Note: These pins output a max of 1.8V
 

@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+// Hosts a simple HTTP server on the Dev Board Micro.
+//
+// NOTE: This HTTP server is accessible via USB only, which works from
+// Windows and Linux only.
+//
+// After you upload the sketch, open a web browser on your computer connected
+// via USB to the URL shown in the serial console, such as
+// http://10.10.10.1/hello.html
+
 #include "Arduino.h"
 #include "libs/base/http_server.h"
 #include "libs/base/strings.h"

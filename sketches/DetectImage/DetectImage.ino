@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Performs object detection with SSD MobileNet, running on the Edge TPU,
+// using a local bitmap image as input.
+// Results (up to 3 detected objects) are printed to serial console.
+
 #include <coralmicro_SD.h>
 
 #include "Arduino.h"

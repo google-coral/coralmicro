@@ -20,6 +20,7 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 
+// Reads and writes files to the filesystem on flash storage.
 
 // [start-sphinx-snippet:file-rw]
 namespace coralmicro {
