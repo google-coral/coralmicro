@@ -14,11 +14,8 @@
 # limitations under the License.
 
 import argparse
-import base64
 import requests
 import sys
-
-from PIL import Image
 
 """
 Fetches the serial number and photo from the rpc_server
@@ -52,22 +49,6 @@ def main():
       'id': 0,
   }, timeout=10).json()
   print(response)
-
-  response = requests.post(f'http://{args.host}:80/jsonrpc', json={
-      'method': 'take_picture',
-      'jsonrpc': '2.0',
-      'params': [],
-      'id': 0,
-  }, timeout=10).json()
-
-  assert(response['result']['base64_data'])
-  image_data_base64 = response['result']['base64_data']
-  width = response['result']['width']
-  height = response['result']['height']
-  image_data = base64.b64decode(image_data_base64)
-  im = Image.frombytes('RGB', (width, height), image_data, 'raw')
-  print(im)
-  im.show()
 
 
 if __name__ == '__main__':

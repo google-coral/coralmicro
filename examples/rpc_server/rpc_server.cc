@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <cstdio>
-#include <memory>
 #include <vector>
 
 #include "libs/base/led.h"
 #include "libs/base/utils.h"
-#include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/mjson/src/mjson.h"
 
 // Runs a local server with two RPC endpoints: 'serial_number', which
 // returns the board's SN, and 'take_picture', which captures an image with
@@ -55,31 +52,6 @@ void SerialNumber(struct jsonrpc_request* r) {
   jsonrpc_return_success(r, "{%Q:%.*Q}", "serial_number", serial.size(),
                          serial.c_str());
 }
-void TakePicture(struct jsonrpc_request* r) {
-  CameraTask::GetSingleton()->SetPower(true);
-  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
-  CameraTask::GetSingleton()->DiscardFrames(1);
-  std::vector<uint8_t> image_buffer(CameraTask::kWidth * CameraTask::kHeight *
-                                    3);
-  CameraFrameFormat fmt;
-  fmt.fmt = CameraFormat::kRgb;
-  fmt.filter = CameraFilterMethod::kBilinear;
-  fmt.width = CameraTask::kWidth;
-  fmt.height = CameraTask::kHeight;
-  fmt.preserve_ratio = false;
-  fmt.buffer = image_buffer.data();
-  bool ret = CameraTask::GetSingleton()->GetFrame({fmt});
-  CameraTask::GetSingleton()->Disable();
-  CameraTask::GetSingleton()->SetPower(false);
-  if (ret) {
-    jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V}", "width",
-                           CameraTask::kWidth, "height", CameraTask::kHeight,
-                           "base64_data", image_buffer.size(),
-                           image_buffer.data());
-  } else {
-    jsonrpc_return_error(r, -1, "failure", nullptr);
-  }
-}
 
 void Main() {
   printf("RPC Server Example!\r\n");
@@ -88,7 +60,6 @@ void Main() {
 
   jsonrpc_init(nullptr, nullptr);
   jsonrpc_export("serial_number", SerialNumber);
-  jsonrpc_export("take_picture", TakePicture);
   UseHttpServer(new JsonRpcHttpServer);
   printf("RPC server ready\r\n");
 }
