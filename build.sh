@@ -21,6 +21,12 @@ function die {
     exit 1
 }
 
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    function nproc {
+        sysctl -n hw.logicalcpu
+    }
+fi
+
 function main {
     local usage=$(cat <<EOF
 Usage: docker_build.sh [-b <build_dir>]

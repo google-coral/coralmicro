@@ -16,10 +16,14 @@
 # This script installs the packages required for a Linux Debian host
 # to build apps for and flash the Coral Dev Board Micro
 
-set -ex
+set -e
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly OS="$(uname -s)"
+
+function error {
+  echo -e "\033[0;31m${1}\033[0m"  # red
+}
 
 if [[ "${OS}" == "Linux" ]]; then
   sudo apt-get update && sudo apt-get -y install \
@@ -37,12 +41,21 @@ if [[ "${OS}" == "Linux" ]]; then
     sudo udevadm trigger
   fi
 elif [[ "${OS}" == "Darwin" ]]; then
-  brew install \
-    make \
-    cmake \
-    libusb \
-    lsusb \
-    coreutils
+  # Preinstalled on macOS: git, make
+  if [[ -x "$(command -v brew)" ]]; then
+    brew install \
+      cmake \
+      libusb \
+      lsusb
+  elif [[ -x "$(command -v port)" ]]; then
+    sudo $(command -v port) install \
+      cmake \
+      libusb \
+      usbutils
+  else
+    error "Please install MacPorts or Homebrew to get required dependencies."
+    exit 1
+  fi
 else
   error "Your operating system is not supported."
   exit 1
