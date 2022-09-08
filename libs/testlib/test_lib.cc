@@ -988,21 +988,23 @@ void CryptoEccVerify(struct jsonrpc_request* request) {
 void BleScan(struct jsonrpc_request* request) {
   constexpr int kMaxNumResults = 10;
   constexpr unsigned int kScanPeriodMs = 10000;
-  std::vector<std::string> x_scan_results;
-  BluetoothScan(&x_scan_results, kMaxNumResults, kScanPeriodMs);
+  while (!BluetoothReady()) vTaskDelay(pdMS_TO_TICKS(500));
+
+  auto scan_results = BluetoothScan(kMaxNumResults, kScanPeriodMs);
+  if (!scan_results.has_value())
+    jsonrpc_return_error(request, -1,
+                         "Bluetooth scan failed, possibly not yet initialized.",
+                         nullptr);
 
   std::vector<uint8_t> json;
   json.reserve(2048);
 
   coralmicro::StrAppend(&json, "[");
   int count{0};
-  for (const auto& x_scan_result : x_scan_results) {
-    if (!x_scan_result.empty()) {
-      coralmicro::StrAppend(
-          &json, "\"%s\",",
-          reinterpret_cast<const char*>(x_scan_result.data()));
-      count++;
-    }
+  for (const auto& scan_result : *scan_results) {
+    coralmicro::StrAppend(&json, "\"%s\",",
+                          reinterpret_cast<const char*>(scan_result.data()));
+    count++;
   }
   if (count > 0) {
     json.pop_back();  // Remove the last comma.

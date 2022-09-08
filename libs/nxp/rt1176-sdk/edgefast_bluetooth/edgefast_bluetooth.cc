@@ -24,6 +24,35 @@
 #include "third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/bluetooth/export/include/BT_hci_api.h"
 #include "third_party/nxp/rt1176-sdk/middleware/wireless/ethermind/port/pal/mcux/bluetooth/controller.h"
 
+namespace {
+constexpr char kDeviceName[] = "Coral Dev Board Micro";
+constexpr size_t kDeviceNameLen = 21;
+
+// Set Advertisement data. Based on the Eddystone specification:
+// https://github.com/google/eddystone/blob/master/protocol-specification.md
+// https://github.com/google/eddystone/tree/master/eddystone-url
+const struct bt_data kAdvertiseData[] = {
+    BT_DATA_BYTES(BT_DATA_FLAGS, BT_LE_AD_NO_BREDR),
+    BT_DATA_BYTES(BT_DATA_UUID16_ALL, 0xaa, 0xfe),
+    BT_DATA_BYTES(BT_DATA_SVC_DATA16, 0xaa, 0xfe, /* Eddystone UUID */
+                  0x10,                           /* Eddystone-URL frame type */
+                  0x00, /* Calibrated Tx power at 0m */
+                  0x03, /* URL Scheme Prefix https:// */
+                  'c', 'o', 'r', 'a', 'l', '.', 'a', 'i')};
+
+// Set Scan Response data.
+const struct bt_data kScanResponseData[] = {
+    BT_DATA(BT_DATA_NAME_COMPLETE, kDeviceName, kDeviceNameLen),
+};
+
+bt_ready_cb_t g_init_cb = nullptr;
+
+SemaphoreHandle_t g_ble_scan_mtx;
+bool g_bt_initialized = false;            // Protected by g_ble_scan_mtx.
+int g_max_num_results;                    // Protected by g_ble_scan_mtx.
+std::vector<std::string> g_scan_results;  // Protected by g_ble_scan_mtx.
+}  // namespace
+
 extern unsigned char brcm_patchram_buf[];
 extern unsigned int brcm_patch_ram_length;
 extern "C" wiced_result_t wiced_wlan_connectivity_init(void);
@@ -45,11 +74,6 @@ extern "C" int controller_hci_uart_get_configuration(
   return 0;
 }
 
-static bt_ready_cb_t g_cb = nullptr;
-static bool bt_initialized = false;
-static int kMaxNumResults;
-static SemaphoreHandle_t ble_scan_mtx;
-std::vector<std::string>* p_scan_results;
 static void bt_ready_internal(int err_param) {
   if (err_param) {
     printf("Bluetooth initialization failed: %d\r\n", err_param);
@@ -75,7 +99,7 @@ static void bt_ready_internal(int err_param) {
     uint8_t len = brcm_patchram_buf[offset + sizeof(uint16_t)];
     offset += sizeof(uint16_t) + sizeof(uint8_t);
     struct net_buf* buf = bt_hci_cmd_create(opcode, len);
-    uint8_t* dat = reinterpret_cast<uint8_t*>(net_buf_add(buf, len));
+    auto* dat = reinterpret_cast<uint8_t*>(net_buf_add(buf, len));
     memcpy(dat, &brcm_patchram_buf[offset], len);
     offset += len;
 
@@ -93,17 +117,17 @@ static void bt_ready_internal(int err_param) {
     settings_load();
   }
 
-  if (g_cb) {
-    g_cb(err);
+  if (g_init_cb) {
+    g_init_cb(err);
   }
 
-  coralmicro::MutexLock lock(ble_scan_mtx);
-  bt_initialized = true;
+  coralmicro::MutexLock lock(g_ble_scan_mtx);
+  g_bt_initialized = true;
 }
 
 void InitEdgefastBluetooth(bt_ready_cb_t cb) {
-  ble_scan_mtx = xSemaphoreCreateMutex();
-  CHECK(ble_scan_mtx);
+  g_ble_scan_mtx = xSemaphoreCreateMutex();
+  CHECK(g_ble_scan_mtx);
   if (coralmicro::LfsReadFile(
           "/third_party/cyw-bt-patch/BCM4345C0_003.001.025.0144.0266.1MW.hcd",
           brcm_patchram_buf, brcm_patch_ram_length) != brcm_patch_ram_length) {
@@ -113,7 +137,7 @@ void InitEdgefastBluetooth(bt_ready_cb_t cb) {
   wiced_wlan_connectivity_init();
   coralmicro::GpioSet(coralmicro::Gpio::kBtDevWake, false);
   ble_pwr_on();
-  g_cb = cb;
+  g_init_cb = cb;
   int err = bt_enable(bt_ready_internal);
   if (err) {
     printf("bt_enable failed(%d)\r\n", err);
@@ -125,22 +149,51 @@ void scan_cb(const bt_addr_le_t* addr, int8_t rssi, uint8_t adv_type,
   char addr_s[BT_ADDR_LE_STR_LEN];
   bt_addr_le_to_str(addr, addr_s, sizeof(addr_s));
 
-  coralmicro::MutexLock lock(ble_scan_mtx);
-  if (p_scan_results && p_scan_results->size() < kMaxNumResults) {
-    p_scan_results->emplace_back(std::move(addr_s));
+  coralmicro::MutexLock lock(g_ble_scan_mtx);
+  if (g_scan_results.size() < g_max_num_results && strlen(addr_s) > 0) {
+    g_scan_results.emplace_back(addr_s);
   }
 }
 
-void BluetoothScan(std::vector<std::string>* scan_results,
-                   int max_num_of_results, unsigned int scan_period_ms) {
+bool BluetoothReady() { return g_bt_initialized; }
+
+bool BluetoothAdvertise() {
   {
-    coralmicro::MutexLock lock(ble_scan_mtx);
-    if (!bt_initialized) {
+    coralmicro::MutexLock lock(g_ble_scan_mtx);
+    if (!g_bt_initialized) {
       printf("Bluetooth is being initialized.\r\n");
-      return;
+      return false;
     }
-    p_scan_results = scan_results;
-    kMaxNumResults = max_num_of_results;
+  }
+  char addr_s[BT_ADDR_LE_STR_LEN];
+  bt_addr_le_t addr = {0};
+  size_t count = 1;
+  const auto& params = BT_LE_ADV_NCONN_IDENTITY;
+  if (auto err =
+          bt_le_adv_start(params, kAdvertiseData, ARRAY_SIZE(kAdvertiseData),
+                          kScanResponseData, ARRAY_SIZE(kScanResponseData));
+      err) {
+    printf("failed to start advertising\r\n");
+    return false;
+  }
+
+  bt_id_get(&addr, &count);
+  bt_addr_le_to_str(&addr, addr_s, sizeof(addr_s));
+
+  printf("Beacon started, advertising as %s\r\n", addr_s);
+  return true;
+}
+
+std::optional<std::vector<std::string>> BluetoothScan(
+    int max_num_of_results, unsigned int scan_period_ms) {
+  {
+    coralmicro::MutexLock lock(g_ble_scan_mtx);
+    if (!g_bt_initialized) {
+      printf("Bluetooth is being initialized.\r\n");
+      return std::nullopt;
+    }
+    g_scan_results.clear();
+    g_max_num_results = max_num_of_results;
   }
   const struct bt_le_scan_param scan_param = {
       .type = BT_HCI_LE_SCAN_ACTIVE,
@@ -148,11 +201,11 @@ void BluetoothScan(std::vector<std::string>* scan_results,
       .interval = 0x0100,
       .window = 0x0010,
   };
-  int err = bt_le_scan_start(&scan_param, scan_cb);
-  if (err) {
+  if (auto err = bt_le_scan_start(&scan_param, scan_cb); err) {
     printf("Starting scanning failed (err %d)\r\n", err);
-    return;
+    return std::nullopt;
   }
   vTaskDelay(pdMS_TO_TICKS(scan_period_ms));
   bt_le_scan_stop();
+  return g_scan_results;
 }

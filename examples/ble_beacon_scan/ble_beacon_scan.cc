@@ -29,32 +29,6 @@
 //    bash build.sh
 //    python3 scripts/flashtool.py -e ble_beacon_scan
 
-namespace {
-void scan_cb(const bt_addr_le_t* addr, int8_t rssi, uint8_t adv_type,
-             struct net_buf_simple* buf) {
-  static char addr_s[BT_ADDR_LE_STR_LEN];
-  bt_addr_le_to_str(addr, addr_s, sizeof(addr_s));
-
-  printf("Scan: find device %s\r\n", addr_s);
-}
-
-void bt_ready(int err) {
-  struct bt_le_scan_param scan_param = {
-      .type = BT_HCI_LE_SCAN_ACTIVE,
-      .options = BT_LE_SCAN_OPT_NONE,
-      .interval = 0x0800,
-      .window = 0x0010,
-  };
-
-  err = bt_le_scan_start(&scan_param, scan_cb);
-  if (err) {
-    printf("Starting scanning failed (err %d)\n", err);
-    return;
-  }
-}
-
-}  // namespace
-
 extern "C" void app_main(void* param) {
   (void)param;
 
@@ -62,6 +36,23 @@ extern "C" void app_main(void* param) {
   // Turn on Status LED to show the board is on.
   LedSet(coralmicro::Led::kStatus, true);
 
-  InitEdgefastBluetooth(bt_ready);
+  constexpr int kMaxNumResults = 10;
+  constexpr unsigned int kScanPeriodMs = 10000;
+  InitEdgefastBluetooth(nullptr);
+
+  while (!BluetoothReady()) {
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+
+  printf("Starting BluetoothScan for %d ms\r\n", kScanPeriodMs);
+  if (auto results = BluetoothScan(kMaxNumResults, kScanPeriodMs);
+      results.has_value()) {
+    for (const auto& result : *results) {
+      printf("%s\r\n", result.c_str());
+    }
+  } else {
+    printf("Bluetooth Scan failed\r\n");
+  }
+
   vTaskSuspend(nullptr);
 }
