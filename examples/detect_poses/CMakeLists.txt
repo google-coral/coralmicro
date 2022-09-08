@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(face_detection
-    face_detection.cc
+add_executable_m7(detect_poses
+    detect_poses.cc
     DATA
-    ${PROJECT_SOURCE_DIR}/models/ssd_mobilenet_v2_face_quant_postprocess_edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/posenet_test_input_324.bin
 )
 
-target_link_libraries(face_detection
+target_link_libraries(detect_poses
     libs_base-m7_freertos
 )

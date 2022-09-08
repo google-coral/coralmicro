@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(detect_image
-    detect_image.cc
+add_executable_m7(classify_speech
+    classify_speech.cc
     DATA
-    cat_300x300.rgb
-    ${PROJECT_SOURCE_DIR}/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
+    ${CMAKE_SOURCE_DIR}/models/voice_commands_v0.7_edgetpu.tflite
+    ${CMAKE_SOURCE_DIR}/models/labels_gc2.raw.txt
 )
 
-target_link_libraries(detect_image
+target_link_libraries(classify_speech
     libs_base-m7_freertos
+    libs_audio_freertos
 )

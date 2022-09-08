@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(detect_camera
-    detect_camera.cc
+add_executable_m7(detect_faces
+    detect_faces.cc
     DATA
-    ${PROJECT_SOURCE_DIR}/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/ssd_mobilenet_v2_face_quant_postprocess_edgetpu.tflite
 )
 
-target_link_libraries(detect_camera
+target_link_libraries(detect_faces
     libs_base-m7_freertos
-    libs_rpc_http_server
 )

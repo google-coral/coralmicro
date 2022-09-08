@@ -12,21 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# set(YAMNET_CPU true) # To run YamNet on the CPU, uncomment.
-if(YAMNET_CPU)
-    add_compile_definitions(YAMNET_CPU)
-    set(model_name yamnet_spectra_in.tflite)
-else()
-    set(model_name yamnet_spectra_in_edgetpu.tflite)
-endif()
-
-add_executable_m7(yamnet
-    yamnet.cc
+add_executable_m7(detect_objects_file
+    detect_objects_file.cc
     DATA
-    ${CMAKE_SOURCE_DIR}/models/yamnet_test_audio.bin
-    ${CMAKE_SOURCE_DIR}/models/${model_name}
+    cat_300x300.rgb
+    ${PROJECT_SOURCE_DIR}/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
 )
 
-target_link_libraries(yamnet
+target_link_libraries(detect_objects_file
     libs_base-m7_freertos
 )

@@ -22,17 +22,17 @@ import sys
 from PIL import Image
 
 """
-Displays classification results received from the segment_camera server
+Displays object segmentation results received from the segment_objects server
 running on a connected Dev Board Micro.
 
-First load segment_camera example onto the Dev Board Micro:
+First load segment_objects example onto the Dev Board Micro:
 
-    python3 scripts/flashtool.py -e segment_camera
+    python3 scripts/flashtool.py -e segment_objects
 
 Then start this client on your connected Linux computer:
 
-    python3 -m pip install examples/segment_camera/requirements.txt
-    python3 examples/segment_camera/segment_camera_client.py
+    python3 -m pip install examples/segment_objects/requirements.txt
+    python3 examples/segment_objects/segment_objects_client.py
 
 You should see the image result appear in a new window.
 

@@ -34,11 +34,11 @@
 //
 // To build and flash from coralmicro root:
 //    bash build.sh
-//    python3 scripts/flashtool.py -e bodypix
+//    python3 scripts/flashtool.py -e segment_poses
 //
 // Then trigger an inference over USB from a Linux computer:
-//    python3 -m pip install -r examples/bodypix/requirements.txt
-//    python3 examples/bodypix/bodypix_client.py
+//    python3 -m pip install -r examples/segment_poses/requirements.txt
+//    python3 examples/segment_poses/segment_poses_client.py
 
 namespace coralmicro {
 namespace {

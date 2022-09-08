@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(classify_camera
-    classify_camera.cc
+# set(YAMNET_CPU true) # To run YamNet on the CPU, uncomment.
+if(YAMNET_CPU)
+    add_compile_definitions(YAMNET_CPU)
+    set(model_name yamnet_spectra_in.tflite)
+else()
+    set(model_name yamnet_spectra_in_edgetpu.tflite)
+endif()
+
+add_executable_m7(classify_audio
+    classify_audio.cc
     DATA
-    ${PROJECT_SOURCE_DIR}/models/mnv2_324_quant_bayered_edgetpu.tflite
+    ${CMAKE_SOURCE_DIR}/models/yamnet_test_audio.bin
+    ${CMAKE_SOURCE_DIR}/models/${model_name}
 )
 
-target_link_libraries(classify_camera
+target_link_libraries(classify_audio
     libs_base-m7_freertos
-    libs_rpc_http_server
 )

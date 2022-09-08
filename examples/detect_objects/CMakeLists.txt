@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(segment_camera
-    segment_camera.cc
+add_executable_m7(detect_objects
+    detect_objects.cc
     DATA
-    ${PROJECT_SOURCE_DIR}/models/keras_post_training_unet_mv2_128_quant_edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
 )
 
-target_link_libraries(segment_camera
+target_link_libraries(detect_objects
     libs_base-m7_freertos
     libs_rpc_http_server
 )

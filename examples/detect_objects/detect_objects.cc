@@ -20,7 +20,7 @@
 #include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "libs/rpc/rpc_http_server.h"
-#include "libs/tensorflow/classification.h"
+#include "libs/tensorflow/detection.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
@@ -31,21 +31,22 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-// Runs a local server with an endpoint called 'classification_from_camera',
-// which will capture an image from the board's camera, run the image through an
-// image classification model on the Edge TPU and return the results to a
-// connected Python client app through an RPC server.
+
+// Runs a local server with an endpoint called 'detect_from_camera', which
+// will capture an image from the board's camera, run the image through an
+// object detection model on the Edge TPU and return the results to a connected
+// Python client app through an RPC server.
 //
 // To build and flash from coralmicro root:
 //    bash build.sh
-//    python3 scripts/flashtool.py -e classify_camera
+//    python3 scripts/flashtool.py -e detect_objects
 //
 // NOTE: The Python client app works on Windows and Linux only.
 //
 // After flashing the example, run this Python client to trigger an inference
 // with a photo and receive the results over USB:
-//    python3 -m pip install -r examples/classify_camera/requirements.txt
-//    python3 examples/classify_camera/classify_camera_client.py
+//    python3 -m pip install -r examples/detect_objects/requirements.txt
+//    python3 examples/detect_objects/detect_objects_client.py
 //
 // The response includes only the top result with a JSON file like this:
 //
@@ -56,32 +57,36 @@
 //     'width': int,
 //     'height': int,
 //     'base64_data': image_bytes,
-//     'bayered': bayered,
-//     'id': id,
-//     'score': score,
+//     'detection':
+//         {
+//         'id': int,
+//         'score': float,
+//         'xmin': float,
+//         'xmax': float,
+//         'ymin': float,
+//         'ymax': float
+//         }
+//     }
 // }
 
 namespace coralmicro {
 namespace {
-const std::string kModelPath = "/models/mnv2_324_quant_bayered_edgetpu.tflite";
+constexpr char kModelPath[] =
+    "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
+// An area of memory to use for input, output, and intermediate arrays.
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
-bool ClassifyFromCamera(tflite::MicroInterpreter* interpreter, int model_width,
-                        int model_height, bool bayered,
-                        std::vector<tensorflow::Class>* results,
-                        std::vector<uint8>* image) {
+bool DetectFromCamera(tflite::MicroInterpreter* interpreter, int model_width,
+                      int model_height,
+                      std::vector<tensorflow::Object>* results,
+                      std::vector<uint8>* image) {
   CHECK(results != nullptr);
   CHECK(image != nullptr);
   auto* input_tensor = interpreter->input_tensor(0);
-
-  auto format = bayered ? CameraFormat::kRaw : CameraFormat::kRgb;
-  CameraFrameFormat fmt{format,
-                        CameraFilterMethod::kBilinear,
-                        CameraRotation::k270,
-                        model_width,
-                        model_height,
-                        false,
+  CameraFrameFormat fmt{CameraFormat::kRgb,   CameraFilterMethod::kBilinear,
+                        CameraRotation::k270, model_width,
+                        model_height,         false,
                         image->data()};
 
   CameraTask::GetSingleton()->Trigger();
@@ -91,69 +96,64 @@ bool ClassifyFromCamera(tflite::MicroInterpreter* interpreter, int model_width,
               image->size());
   if (interpreter->Invoke() != kTfLiteOk) return false;
 
-  *results = tensorflow::GetClassificationResults(interpreter, 0.0f, 1);
+  *results = tensorflow::GetDetectionResults(interpreter, 0.5, 1);
   return true;
 }
 
-void ClassifyRpc(struct jsonrpc_request* r) {
+void DetectRpc(struct jsonrpc_request* r) {
   auto* interpreter =
-      reinterpret_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
+      static_cast<tflite::MicroInterpreter*>(r->ctx->response_cb_data);
   auto* input_tensor = interpreter->input_tensor(0);
   int model_height = input_tensor->dims->data[1];
   int model_width = input_tensor->dims->data[2];
-  // If the model name includes "bayered", provide the raw datastream from the
-  // camera.
-  auto bayered = kModelPath.find("bayered") != std::string::npos;
-  std::vector<uint8_t> image(
-      model_width * model_height *
-      /*channels=*/(bayered ? 1 : CameraFormatBpp(CameraFormat::kRgb)));
-  std::vector<tensorflow::Class> results;
-  if (ClassifyFromCamera(interpreter, model_width, model_height, bayered,
-                         &results, &image)) {
+  std::vector<uint8> image(model_height * model_width *
+                           CameraFormatBpp(CameraFormat::kRgb));
+  std::vector<tensorflow::Object> results;
+  if (DetectFromCamera(interpreter, model_width, model_height, &results,
+                       &image)) {
     if (!results.empty()) {
       const auto& result = results[0];
       jsonrpc_return_success(
-          r, "{%Q: %d, %Q: %d, %Q: %V, %Q: %d, %Q: %d, %Q: %g}", "width",
-          model_width, "height", model_height, "base64_data", image.size(),
-          image.data(), "bayered", bayered, "id", result.id, "score",
-          result.score);
+          r,
+          "{%Q: %d, %Q: %d, %Q: %V, %Q: {%Q: %d, %Q: %g, %Q: %g, %Q: %g, "
+          "%Q: %g, %Q: %g}}",
+          "width", model_width, "height", model_height, "base64_data",
+          image.size(), image.data(), "detection", "id", result.id, "score",
+          result.score, "xmin", result.bbox.xmin, "xmax", result.bbox.xmax,
+          "ymin", result.bbox.ymin, "ymax", result.bbox.ymax);
       return;
     }
-    jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: %d}", "width",
+    jsonrpc_return_success(r, "{%Q: %d, %Q: %d, %Q: %V, %Q: None}", "width",
                            model_width, "height", model_height, "base64_data",
-                           image.size(), image.data(), "bayered", bayered);
+                           image.size(), image.data(), "detection");
     return;
   }
-  jsonrpc_return_error(r, -1, "Failed to classify image from camera.", nullptr);
+  jsonrpc_return_error(r, -1, "Failed to detect image from camera.", nullptr);
 }
 
-void ClassifyConsole(tflite::MicroInterpreter* interpreter) {
+void DetectConsole(tflite::MicroInterpreter* interpreter) {
   auto* input_tensor = interpreter->input_tensor(0);
   int model_height = input_tensor->dims->data[1];
   int model_width = input_tensor->dims->data[2];
-  // If the model name includes "bayered", provide the raw datastream from the
-  // camera.
-  auto bayered = kModelPath.find("bayered") != std::string::npos;
-  std::vector<uint8_t> image(
-      model_width * model_height *
-      /*channels=*/(bayered ? 1 : CameraFormatBpp(CameraFormat::kRgb)));
-  std::vector<tensorflow::Class> results;
-  if (ClassifyFromCamera(interpreter, model_width, model_height, bayered,
-                         &results, &image)) {
-    printf("%s\r\n", tensorflow::FormatClassificationOutput(results).c_str());
+  std::vector<uint8> image(model_height * model_width *
+                           CameraFormatBpp(CameraFormat::kRgb));
+  std::vector<tensorflow::Object> results;
+  if (DetectFromCamera(interpreter, model_width, model_height, &results,
+                       &image)) {
+    printf("%s\r\n", tensorflow::FormatDetectionOutput(results).c_str());
   } else {
-    printf("Failed to classify image from camera.\r\n");
+    printf("Failed to detect image from camera.\r\n");
   }
 }
 
 [[noreturn]] void Main() {
-  printf("Classify Camera Example!\r\n");
+  printf("Detection Camera Example!\r\n");
   // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
   std::vector<uint8_t> model;
-  if (!LfsReadFile(kModelPath.c_str(), &model)) {
-    printf("ERROR: Failed to load %s\r\n", kModelPath.c_str());
+  if (!LfsReadFile(kModelPath, &model)) {
+    printf("ERROR: Failed to load %s\r\n", kModelPath);
     vTaskSuspend(nullptr);
   }
 
@@ -164,7 +164,9 @@ void ClassifyConsole(tflite::MicroInterpreter* interpreter) {
   }
 
   tflite::MicroErrorReporter error_reporter;
-  tflite::MicroMutableOpResolver<1> resolver;
+  tflite::MicroMutableOpResolver<3> resolver;
+  resolver.AddDequantize();
+  resolver.AddDetectionPostprocess();
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
   tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()), resolver,
@@ -184,20 +186,21 @@ void ClassifyConsole(tflite::MicroInterpreter* interpreter) {
   CameraTask::GetSingleton()->SetPower(true);
   CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
-  printf("Initializing classification server...\r\n");
+  printf("Initializing detection server...\r\n");
   jsonrpc_init(nullptr, &interpreter);
-  jsonrpc_export("classify_from_camera", ClassifyRpc);
+  jsonrpc_export("detect_from_camera", DetectRpc);
   UseHttpServer(new JsonRpcHttpServer);
-  printf("Classification server ready!\r\n");
+  printf("Detection server ready!\r\n");
   GpioConfigureInterrupt(
       Gpio::kUserButton, GpioInterruptMode::kIntModeFalling,
       [handle = xTaskGetCurrentTaskHandle()]() { xTaskResumeFromISR(handle); },
       /*debounce_interval_us=*/50 * 1e3);
   while (true) {
     vTaskSuspend(nullptr);
-    ClassifyConsole(&interpreter);
+    DetectConsole(&interpreter);
   }
 }
+
 }  // namespace
 }  // namespace coralmicro
 

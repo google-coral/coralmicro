@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(keyphrase_detector
-    keyphrase_detector.cc
+add_executable_m7(segment_objects
+    segment_objects.cc
     DATA
-    ${CMAKE_SOURCE_DIR}/models/voice_commands_v0.7_edgetpu.tflite
-    ${CMAKE_SOURCE_DIR}/models/labels_gc2.raw.txt
+    ${PROJECT_SOURCE_DIR}/models/keras_post_training_unet_mv2_128_quant_edgetpu.tflite
 )
 
-target_link_libraries(keyphrase_detector
+target_link_libraries(segment_objects
     libs_base-m7_freertos
-    libs_audio_freertos
+    libs_rpc_http_server
 )

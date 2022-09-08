@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(classify_image
-    classify_image.cc
+add_executable_m7(classify_images
+    classify_images.cc
     DATA
-    cat_224x224.rgb
-    ${PROJECT_SOURCE_DIR}/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/mnv2_324_quant_bayered_edgetpu.tflite
 )
 
-target_link_libraries(classify_image
+target_link_libraries(classify_images
     libs_base-m7_freertos
+    libs_rpc_http_server
 )

@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(posenet
-    posenet.cc
+add_executable_m7(segment_poses
+    segment_poses.cc
     DATA
-    ${PROJECT_SOURCE_DIR}/models/posenet_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite
-    ${PROJECT_SOURCE_DIR}/models/posenet_test_input_324.bin
+    ${PROJECT_SOURCE_DIR}/models/bodypix_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite
 )
 
-target_link_libraries(posenet
+target_link_libraries(segment_poses
     libs_base-m7_freertos
+    libs_rpc_http_server
 )

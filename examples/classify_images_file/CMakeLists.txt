@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(bodypix
-    bodypix.cc
+add_executable_m7(classify_images_file
+    classify_images_file.cc
     DATA
-    ${PROJECT_SOURCE_DIR}/models/bodypix_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite
+    cat_224x224.rgb
+    ${PROJECT_SOURCE_DIR}/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite
 )
 
-target_link_libraries(bodypix
+target_link_libraries(classify_images_file
     libs_base-m7_freertos
-    libs_rpc_http_server
 )

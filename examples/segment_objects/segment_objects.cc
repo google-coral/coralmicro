@@ -35,14 +35,14 @@
 //
 // To build and flash from coralmicro root:
 //    bash build.sh
-//    python3 scripts/flashtool.py -e segment_camera
+//    python3 scripts/flashtool.py -e segment_objects
 //
 // NOTE: The Python client app works on Windows and Linux only.
 //
 // After flashing the example, run this Python client to trigger an inference
 // with a photo and receive the results over USB:
-//    python3 -m pip install -r examples/segment_camera/requirements.txt
-//    python3 examples/segment_camera/segment_camera_client.py
+//    python3 -m pip install -r examples/segment_objects/requirements.txt
+//    python3 examples/segment_objects/segment_objects_client.py
 //
 // The response includes only the top result with a JSON file like this:
 //

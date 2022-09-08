@@ -32,14 +32,14 @@
 //
 // To build and flash from coralmicro root:
 //    bash build.sh
-//    python3 scripts/flashtool.py -e classify_image
+//    python3 scripts/flashtool.py -e classify_images_file
 
 // [start-sphinx-snippet:classify-image]
 namespace coralmicro {
 namespace {
 constexpr char kModelPath[] =
     "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
-constexpr char kImagePath[] = "/examples/classify_image/cat_224x224.rgb";
+constexpr char kImagePath[] = "/examples/classify_images_file/cat_224x224.rgb";
 constexpr int kTensorArenaSize = 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 

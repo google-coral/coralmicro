@@ -27,7 +27,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
 // Performs object detection with SSD MobileNet, running on the Edge TPU,
-// using a local bitmap image as input.
+// using a local bitmap file as input.
 // Results (up to 3 detected objects) are printed to serial console.
 //
 // To build and flash from coralmicro root:
