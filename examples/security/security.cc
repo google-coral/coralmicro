@@ -29,6 +29,7 @@
 //    bash build.sh
 //    python3 scripts/flashtool.py -e security
 
+// [start-snippet:crypto]
 namespace coralmicro {
 namespace {
 void Main() {
@@ -128,3 +129,4 @@ extern "C" void app_main(void* param) {
   coralmicro::Main();
   vTaskSuspend(nullptr);
 }
+// [end-snippet:crypto]

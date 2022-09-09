@@ -38,7 +38,7 @@ and pass it a buffer where the image should be stored.
 When you're done, call
 :cpp:any:`~coralmicro::arduino::CameraClass::end()` to turn the camera off.
 
-**Example** (from ``sketches/Camera/``):
+**Example**:
 
 .. literalinclude:: ../arduino/libraries/examples/examples/Camera/Camera.ino
    :start-after: [start-snippet:ardu-camera]
@@ -78,7 +78,7 @@ When you're done with the microphone, call
 :cpp:any:`~coralmicro::arduino::PDMClass::end()` to disable the micrphone.
 
 
-**Example** (from ``sketches/PDM/``):
+**Example**:
 
 This code listens to input from the microphone and saves data into a
 ``currentSamples`` buffer.
@@ -175,7 +175,7 @@ before reading or writing values.
      </tbody>
   </table>
 
-**Example** (from ``sketches/ButtonLED/``):
+**Example**:
 
 This code toggles the on-board User LED when you press the on-board User button.
 
@@ -199,11 +199,11 @@ Only one pair of I2C lines on the 12-pin headers is available in Arduino,
 so you do not need to specify the pin names. It is assumed that you are
 connected to ``D0`` and ``D3`` (shown in figure 1).
 
-**Example** (from ``sketches/I2CM-Writer/``):
+**Example**:
 
 This code sends messages to an I2C device that's connected to ``D0`` and ``D3``.
 
-.. literalinclude:: ../arduino/libraries/examples/examples/I2CM-Writer/I2CM-Writer.ino
+.. literalinclude:: ../arduino/libraries/examples/examples/I2CTarget/I2CTarget.ino
    :start-after: [start-snippet:ardu-i2c]
    :end-before: [end-snippet:ardu-i2c]
 
@@ -264,7 +264,7 @@ library <https://www.arduino.cc/reference/en/libraries/wifi/>`_. For other
 networking features such as hosting local servers on the Dev Board Micro, you
 should use the `coralmicro Network APIs </docs/reference/micro/network/>`_.
 
-**Example** (from ``sketches/WiFiConnect/``):
+**Example**:
 
 This code connects to a Wi-Fi network and prints network details.
 
@@ -290,9 +290,10 @@ details (when the board is attached to the Coral PoE Add-on).
 For networking features such as hosting local servers on the Dev Board Micro,
 you should use the `coralmicro Network APIs </docs/reference/micro/network/>`_.
 
-**Example** (from ``sketches/EthernetClient/``):
+**Example**:
 
-This code enables the Ethernet connection and .
+This code enables the Ethernet connection, sends a GET request, and prints the
+response to the serial console.
 
 .. literalinclude:: ../arduino/libraries/PoEExamples/examples/EthernetClient/EthernetClient.ino
    :start-after: [start-snippet:ardu-ethernet-client]
@@ -313,7 +314,7 @@ Of course, the rest of your code can continue using the Arduino language and
 other Arduino-style APIs such as `Camera <#camera>`_.
 
 
-**Example** (from ``sketches/CameraDetection/``):
+**Example**:
 
 This code performs object detection with TensorFlow Lite using images from
 the camera.

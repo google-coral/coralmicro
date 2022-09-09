@@ -110,7 +110,6 @@ serial number (from ``examples/rpc_server/``):
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
 
 
-
 RPC utils
 -------------------------
 
@@ -118,3 +117,11 @@ RPC utils
 
 .. doxygenfile:: rpc/rpc_utils.h
    :sections: briefdescription detaileddescription innernamespace innerclass define func public-attrib public-func public-slot public-static-attrib public-static-func public-type
+
+
+Device information
+-------------------------
+
+`[utils.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/base/utils.h>`_
+
+.. doxygenfile:: base/utils.h

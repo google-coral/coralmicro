@@ -40,6 +40,7 @@ namespace {
 constexpr char kIndexFileName[] = "/coral_micro_camera.html";
 constexpr char kCameraStreamUrlPrefix[] = "/camera_stream";
 
+// [start-snippet:jpeg]
 HttpServer::Content UriHandler(const char* uri) {
   if (StrEndsWith(uri, "index.shtml")) {
     return std::string(kIndexFileName);
@@ -63,6 +64,7 @@ HttpServer::Content UriHandler(const char* uri) {
   }
   return {};
 }
+// [end-snippet:jpeg]
 
 void Main() {
   printf("Camera HTTP Example!\r\n");

@@ -22,21 +22,21 @@
 
 namespace coralmicro {
 
-// Converts an RGB image to Jpeg format.
+// Converts an RGB image to JPEG format.
 //
 // @param rgb The image in RGB format.
 // @param width The image's width.
 // @param height The image's height.
 // @param quality The quality of the image after compression (must be within
 // [0-100]).
-// @param buf The buffer to return the jpeg image data to.
+// @param buf The buffer to return the JPEG image data to.
 // @param size The size allocated for buf.
-// @return The size of the resulting jpeg buffer.
+// @return The size of the resulting JPEG buffer.
 unsigned long JpegCompressRgb(unsigned char* rgb, int width, int height,
                               int quality, unsigned char* buf,
                               unsigned long size);
 
-// Represents a Jpeg image buffer.
+// Represents a JPEG image buffer.
 struct JpegBuffer {
   // The Jpeg image data.
   unsigned char* data;
@@ -44,26 +44,26 @@ struct JpegBuffer {
   unsigned long size;
 };
 
-// Converts an RGB image to Jpeg format.
+// Converts an RGB image to JPEG format.
 //
 // @param rgb The image in RGB format.
 // @param width The image's width.
 // @param height The image's height.
 // @param quality The quality of the image after compression (must be within
 // [0-100]).
-// @return A jpeg image buffer.
+// @return A JPEG image buffer.
 // Note: You have to deallocate data from JpegBuffer with `free()`.
 JpegBuffer JpegCompressRgb(unsigned char* rgb, int width, int height,
                            int quality);
 
-// Converts an RGB image to Jpeg format.
+// Converts an RGB image to JPEG format.
 //
 // @param rgb The image in RGB format.
 // @param width The image's width.
 // @param height The image's height.
 // @param quality The quality of the image after compression (must be within
 // [0-100]).
-// @param out the output vector to return the resulting jpeg image to.
+// @param out the output vector to return the resulting JPEG image to.
 void JpegCompressRgb(unsigned char* rgb, int width, int height, int quality,
                      std::vector<uint8_t>* out);
 

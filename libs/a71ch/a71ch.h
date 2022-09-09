@@ -23,13 +23,6 @@
 
 namespace coralmicro {
 
-// The following functions are convenience helpers for basic usage of the a71ch
-// chip with a more modern c++ style. For the full a71ch's API, please check out
-// the reference manual: https://www.nxp.com/a71ch
-//
-// Note: Both APIs can be used together, however `coral::micro::a71ch::Init()`
-// must always be called first.
-
 // Initializes the a71ch module.
 //
 // This function must be called before using any of our a71ch helper functions

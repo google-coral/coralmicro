@@ -20,6 +20,8 @@
 // devices need headers soldered to facilitate connecting the board I2C lines to
 // each other. For usage details, see github.com/google-coral/examples/i2c/
 
+
+// [start-snippet:ardu-i2c]
 #include <cstdint>
 #include <vector>
 
@@ -55,3 +57,4 @@ void setup() {
 }
 
 void loop() {}
+// [end-snippet:ardu-i2c]
