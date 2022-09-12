@@ -60,6 +60,7 @@ def file_sha256(filename):
       h.update(block)
     return h.hexdigest()
 
+
 def CreateFlashtoolExe(core_out_dir, root_dir):
   platform_flags = []
   if system_name == 'Windows':
@@ -177,6 +178,7 @@ def GetDownloadMetadata(url):
   finally:
     urllib.request.urlcleanup()
 
+
 def manifest_main(args, **kwargs):
   manifest_revision = args.manifest_revision
   if not manifest_revision:
@@ -222,6 +224,7 @@ def manifest_main(args, **kwargs):
         'size': str(size)
     })
 
+  core_json = None
   if core_url:
     sha256sum, size = GetDownloadMetadata(core_url)
     core_json = {
@@ -353,13 +356,22 @@ def core_main(args, **kwargs):
 
       obj_paths = set()
       for path in read_lines(os.path.join(build_dir, f'libs_arduino_{variant}_bundled.txt')):
-        obj_paths.update(check_output_lines([ar_path, 't', path]))
+        if 'prebuilt:' in path:
+          prebuilt_path = path.strip('prebuilt:')
+          # For prebuilt static libs, we need to first extracts the objs.
+          subprocess.check_call([ar_path, 'x', prebuilt_path],
+                                cwd=build_dir, stderr=subprocess.STDOUT)
+          for obj in check_output_lines([ar_path, 't', prebuilt_path]):
+            # For some reason, there is multiple definitions for _sbrk.
+            if obj != 'fsl_sbrk.c.obj':
+              obj_paths.add(os.path.join(build_dir, obj))
+        else:
+          obj_paths.update(check_output_lines([ar_path, 't', path]))
 
       for obj_path in obj_paths:
         subprocess.check_call([ar_path, 'q', bundled_lib_path,
                                os.path.join(build_dir, obj_path)],
-                              cwd=build_dir)
-
+                              cwd=build_dir, stderr=subprocess.STDOUT)
     # Copy bootloaders.
     bootloader_dir = os.path.join(core_out_dir, 'bootloaders', 'coral_micro')
     os.makedirs(bootloader_dir)

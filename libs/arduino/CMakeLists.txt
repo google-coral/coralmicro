@@ -37,6 +37,7 @@ add_library(libs_arduino_coral_micro_wifi STATIC
 target_link_libraries(libs_arduino_coral_micro_wifi
     ${libs_arduino_LINK_LIBRARIES}
     libs_base-m7_wifi
+    edgefast_bluetooth
 )
 
 bundle_static_library(libs_arduino_coral_micro_wifi libs_arduino_coral_micro_wifi_bundled)

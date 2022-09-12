@@ -172,6 +172,11 @@ EOF
                             continue
                         fi
                     fi
+                    if [[ ${sketch} =~ Ble ]]; then
+                        if [[ ! ${variant} =~ wifi ]]; then
+                            continue
+                        fi
+                    fi
                     if [[ ${sketch} =~ PoE ]]; then
                       if [[ ! ${variant} =~ poe ]]; then
                         continue

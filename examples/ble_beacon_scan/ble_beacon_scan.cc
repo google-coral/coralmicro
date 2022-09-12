@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Port of Zephyr's beacon sample.
-// Original sample at:
-// https://github.com/zephyrproject-rtos/zephyr/blob/main/samples/bluetooth/scan_adv/src/main.c
-
 #include "libs/base/led.h"
 #include "libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"

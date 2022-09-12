@@ -34,6 +34,10 @@ function(bundle_static_library tgt_name bundled_tgt_name)
     endif()
     get_target_property(public_dependencies ${input_target} ${_input_link_libraries})
     foreach(dependency IN LISTS public_dependencies)
+      string(FIND ${dependency} ".a" precompiled_static_lib)
+      if(${precompiled_static_lib} GREATER 0)
+        list(APPEND precompiled_static_libs ${dependency})
+      endif()
       if(TARGET ${dependency})
         get_target_property(alias ${dependency} ALIASED_TARGET)
         if (TARGET ${alias})
@@ -53,11 +57,13 @@ function(bundle_static_library tgt_name bundled_tgt_name)
       endif()
     endforeach()
     set(static_libs ${static_libs} PARENT_SCOPE)
+    set(precompiled_static_libs ${precompiled_static_libs} PARENT_SCOPE)
   endfunction()
 
   _recursively_collect_dependencies(${tgt_name})
 
   list(REMOVE_DUPLICATES static_libs)
+  list(REMOVE_DUPLICATES precompiled_static_libs)
 
   set(bundled_tgt_full_name 
     ${CMAKE_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${bundled_tgt_name}${CMAKE_STATIC_LIBRARY_SUFFIX})
@@ -67,6 +73,9 @@ function(bundle_static_library tgt_name bundled_tgt_name)
   foreach(tgt IN LISTS static_libs)
     file(APPEND ${CMAKE_BINARY_DIR}/${bundled_tgt_name}.txt.in
       "$<TARGET_FILE:${tgt}>\n")
+  endforeach()
+  foreach(tgt IN LISTS precompiled_static_libs)
+    file(APPEND ${CMAKE_BINARY_DIR}/${bundled_tgt_name}.txt.in "prebuilt:${tgt}\n")
   endforeach()
 
   file(GENERATE

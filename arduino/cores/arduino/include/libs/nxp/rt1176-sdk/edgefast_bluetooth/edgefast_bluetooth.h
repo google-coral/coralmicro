@@ -1,0 +1,1 @@
+../../../../../../../../libs/nxp/rt1176-sdk/edgefast_bluetooth/edgefast_bluetooth.h

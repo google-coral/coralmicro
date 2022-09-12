@@ -20,6 +20,8 @@
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/components/serial_manager
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/components/uart
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/devices/MIMXRT1176/utilities/debug_console
+-iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/include
+-iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/edgefast_bluetooth/source/porting
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/lwip/port
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/middleware/lwip/src/include
 -iwithprefixbefore/include/third_party/nxp/rt1176-sdk/rtos/freertos/libraries/c_sdk/standard/common/include
