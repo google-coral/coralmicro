@@ -30,6 +30,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import textwrap
 import time
 import usb.core
 
@@ -820,6 +821,27 @@ def RunFlashtool(state, print_states=True, **kwargs):
     (prev_state, state) = (state, state(**state_kwargs))
 
 
+class CustomArgumentFormatter(argparse.ArgumentDefaultsHelpFormatter):
+    """
+    Formats argument help text to honor newlines and tabs.
+    Inherits the behavior to also display argument default values.
+    """
+
+    # Match multiples of regular spaces only.
+    _SPACE_MATCHER = re.compile(r' +', re.ASCII)
+
+    def _split_lines(self, text, width):
+        new_text = []
+        # Process each distinct line in the help message
+        for line in text.splitlines():
+          # For each newline in the help message, replace any multiples of
+          # whitespaces (due to indentation in source code line wraps) with
+          # a single space (the SPACE_MATCHER leaves tabs alone).
+          line = self._SPACE_MATCHER.sub(' ', line).rstrip()
+          # Now fit the line length to the console width for nice line wrapping
+          new_text.extend(textwrap.wrap(line, width))
+        return new_text
+
 def main():
   # Check if we're running from inside a pyinstaller binary.
   # The true branch is pyinstaller, false branch is executing directly.
@@ -829,7 +851,7 @@ def main():
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
   parser = argparse.ArgumentParser(description='Coral Dev Board Micro flashtool',
-                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                   formatter_class=CustomArgumentFormatter)
   basic_group = parser.add_argument_group('Flashing options')
   basic_group.add_argument(
       '--build_dir', '-b', type=str, default=BUILD_DIR,
@@ -838,28 +860,22 @@ def main():
   app_elf_group = basic_group.add_mutually_exclusive_group(required=True)
   app_elf_group.add_argument(
       '--elf_path', type=str,
-      help='Path to your project\'s .stripped binary (ELF file). This must \
-        be the full path and filename.')
+      help='Path to the .stripped binary (ELF file) to flash. This must be the \
+        full path and filename. Usually used for out-of-tree projects only.')
   app_elf_group.add_argument(
       '--app', '-a', type=str,
-      help='Name of the coralmicro "app" to flash. Must be used with \
-        --build_dir.')
+      help='Name of the coralmicro in-tree "app" to flash. This must be a \
+      project directory name available in build/apps/.')
   app_elf_group.add_argument(
       '--example', '-e', type=str,
-      help='Name of the coralmicro "example" to flash. Must be used with \
-        --build_dir.')
-  app_elf_group.add_argument(
-      '--list', dest='list', action='store_true',
-      help='Prints all detected Coral Dev Board Micro devices.')
-  app_elf_group.add_argument(
-      '--ums', dest='ums', action='store_true',
-      help='Puts the device in a state where it acts as an LFS mountable USB drive.')
+      help='Name of the coralmicro in-tree "example" to flash. This must be a \
+      project directory name available in build/examples/.')
 
   basic_group.add_argument(
       '--subapp', type=str, required=False,
       help='The target name you want to flash. This is needed only when \
         using --app or --example and the target name is different than the \
-        name given to those arguments.')
+        project directory name given to those arguments.')
   basic_group.add_argument(
       '--ram', dest='ram', action='store_true',
       help='Flashes the app to the RAM only, instead of to flash memory. \
@@ -872,6 +888,15 @@ def main():
       '--serial', type=str, required=False,
       help='The board serial number you want to flash. This is necessary \
         only if you have multiple Coral Dev Board Micro devices connected.')
+
+  app_elf_group.add_argument(
+      '--list', dest='list', action='store_true',
+      help='Prints all detected Coral Dev Board Micro devices. \
+      \n(Does not flash the board.)')
+  app_elf_group.add_argument(
+      '--ums', dest='ums', action='store_true',
+      help='Puts the device in a state where it acts as an LFS mountable USB \
+        drive. \n(Does not flash the board.)')
 
   parser.add_argument(
       '--elfloader_path', type=str, required=False,
@@ -886,36 +911,51 @@ def main():
       help='The board IP address for Ethernet-over-USB connections.')
   network_group.add_argument(
       '--dns_server', type=str, required=False, default=None,
-      help='The DNS server to use for address resolution.')
+      help='The DNS server to use for network address resolution. By default, \
+        the board uses the DNS specified by the DHCP server, so this should \
+        be specified if using a static IP with --ethernet_config.')
   network_group.add_argument(
       '--ethernet_config', type=str, required=False, default=None,
-      help='Path to the ethernet config file, must be in text format: \
-            ip=192.0.2.100 \
-            subnet_mask=255.255.255.0 \
-            gateway=192.0.2.1 \
-            All keys are required.'
-  )
-  network_group.add_argument(
-      "--wifi_config", type=str, required=False, default=None,
-      help="Path to the wifi config file, must be in text format:  \
-             ssid=your-wifi-ssid \
-             psk=your-wifi-password \
-             country=wifi-country-code \
-             revision=wifi-revision \
-             If specified, ssid is required.")
+      help='Path to a text file that specifies Ethernet network IP settings \
+        to use on the board (if you are not using a DHCP server for IP \
+        assignment). The config file must specify the board IP address, subnet \
+        mask, and gateway, each on a separate line. For example: \
+        \n\tip=192.0.2.100 \
+        \n\tsubnet_mask=255.255.255.0 \
+        \n\tgateway=192.0.2.1 \
+        \nYou should also specify the DNS server with --dns_server.')
   network_group.add_argument(
       '--wifi_ssid', type=str, required=False, default=None,
-      help='The default Wi-Fi SSID for the board to use. \
+      help='The Wi-Fi network that the board should log into. \
         Requires the Coral Wireless Add-on Board (or similar).')
   network_group.add_argument(
       '--wifi_psk', type=str, required=False, default=None,
       help='The Wi-Fi password to use with --wifi_ssid.')
   network_group.add_argument(
+      '--wifi_config', type=str, required=False, default=None,
+      help='Path to a text file that specifies the Wi-Fi network and password. \
+        This is an alternative to using the --wifi_ssid and --wifi_psk \
+        arguments. The config file must specify the ssid and psk on a separate \
+        line (but only ssid is required). For example:  \
+        \n\tssid=your-wifi-ssid \
+        \n\tpsk=your-wifi-password \n')
+  # The Wi-Fi country code to use with --wifi_ssid. This must be a
+  # valid 2-letter ISO country code as per
+  # https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes.
+  # This specifies the radio frequencies to use with Wi-Fi, based on
+  # regional Wi-Fi frequency regulations. Generally, you should leave
+  # this alone to just use the default "world wide" frequency band
+  # because specifying the wrong code could make Wi-Fi unusable.
+  network_group.add_argument(
       '--wifi_country', type=str, required=False, default=None,
-      help='The Wi-Fi country code to use with --wifi_ssid.')
+      help=argparse.SUPPRESS)
+  # The Wi-Fi revision to use with --wifi_ssid. This is a revision
+  # number that should correspond to the ISO country code used with
+  # --wifi_country. You should avoid specifying this and use the default
+  # value because specifying the wrong version could make Wi-Fi unusable.
   network_group.add_argument(
       '--wifi_revision', type=int, required=False, default=None,
-      help='The Wi-Fi revision to use with --wifi_ssid.')
+      help=argparse.SUPPRESS)
   network_group.add_argument(
       '--ethernet_speed', type=int, choices=[10, 100],
       required=False, default=None,
@@ -928,8 +968,11 @@ def main():
       help=argparse.SUPPRESS)
   debug_group.add_argument(
       '--debug', dest='debug', action='store_true',
-      help='Loads the app into RAM, starts the JLink debug server, and \
-        attaches GDB.')
+      help='Loads the app with debug symbols intact, starts the JLink debug \
+        server, and attaches GDB. You must have a JTAG debugger attached to \
+        the board, which requires an add-on board with the JTAG pins exposed, \
+        such as the Coral Wireless Add-on. For details, see \
+        www.coral.ai/docs/dev-board-micro/wireless-addon/#jtag.')
   debug_group.add_argument(
       '--jlink_path', type=str, default='/opt/SEGGER/JLink',
       help='Path to JLink if --debug is enabled.')
