@@ -19,10 +19,10 @@
 #include <coralmicro_SD.h>
 #include <coralmicro_camera.h>
 
-#include "detection_responder.h"
-#include "image_provider.h"
-#include "main_functions.h"
-#include "model_settings.h"
+#include "tensorflow/lite/micro/examples/person_detection/detection_responder.h"
+#include "tensorflow/lite/micro/examples/person_detection/image_provider.h"
+#include "tensorflow/lite/micro/examples/person_detection/main_functions.h"
+#include "tensorflow/lite/micro/examples/person_detection/model_settings.h"
 
 // Runs a 300 kB TFLM model that recognizes people with the camera on the
 // Dev Board Micro, printing scores for "person" and "no person" in the serial
@@ -50,29 +50,12 @@ constexpr int kTensorArenaSize = 96 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 }  // namespace
 
-TfLiteStatus GetImage(tflite::ErrorReporter*, int, int, int,
-                      int8_t* image_data) {
-  FrameBuffer fb;
-  if (Camera.grab(fb) != CameraStatus::SUCCESS) return kTfLiteError;
-  for (int i = 0; i < fb.getBufferSize(); ++i) {
-    image_data[i] = fb.getBuffer()[i] - 128;
-  }
-  return kTfLiteOk;
-}
-
-void RespondToDetection(tflite::ErrorReporter*, int8_t person_score,
-                        int8_t no_person_score) {
-  TF_LITE_REPORT_ERROR(error_reporter, "person_score: %d no_person_score: %d",
-                       person_score, no_person_score);
-  digitalWrite(PIN_LED_USER, person_score > no_person_score ? HIGH : LOW);
-}
-
 void setup() {
   Serial.begin(115200);
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Person Detection Arduino!");
+  Serial.println("TFLM Person Detection Arduino!");
 
   pinMode(PIN_LED_USER, OUTPUT);
 
