@@ -13,10 +13,7 @@
 // limitations under the License.
 
 #include <cstdio>
-#include <cstring>
-#include <memory>
 
-#include "libs/base/filesystem.h"
 #include "libs/base/led.h"
 #include "libs/camera/camera.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
