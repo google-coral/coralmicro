@@ -309,7 +309,7 @@ class MainTask : private Task<MainTask> {
           posenet_task_->SetTpuPower(/*on=*/true);
           printf("M7 Main Task: started\r\n");
           if (our_ip_addr.has_value()) {
-            printf("Our IP address ip %s.\r\n", our_ip_addr.value().c_str());
+            printf("My IP address is %s\r\n", our_ip_addr.value().c_str());
           }
           QueueProcess();
           break;
