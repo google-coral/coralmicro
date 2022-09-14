@@ -292,6 +292,12 @@ class MainTask : private Task<MainTask> {
     std::vector<unsigned char> jpeg(1024 * 70);
 
     TaskMessage message{};
+    std::optional<std::string> our_ip_addr;
+#if defined(MULTICORE_MODEL_CASCADE_ETHERNET)
+    our_ip_addr = EthernetGetIp();
+#elif defined(MULTICORE_MODEL_CASCADE_WIFI)
+    our_ip_addr = WiFiGetIp();
+#endif
     while (true) {
       CHECK(xQueueReceive(queue_, &message, portMAX_DELAY) == pdTRUE);
 
@@ -302,6 +308,9 @@ class MainTask : private Task<MainTask> {
           CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
           posenet_task_->SetTpuPower(/*on=*/true);
           printf("M7 Main Task: started\r\n");
+          if (our_ip_addr.has_value()) {
+            printf("Our IP address ip %s.\r\n", our_ip_addr.value().c_str());
+          }
           QueueProcess();
           break;
         case kCmdStop:
