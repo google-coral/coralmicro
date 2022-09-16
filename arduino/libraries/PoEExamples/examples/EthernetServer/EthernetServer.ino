@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-#include "Arduino.h"
-#include "Ethernet.h"
-
 // Simple example showing the usage of `EthernetServer`.
 // After flashing this to the board, you can connect to the
 // server on port 31337 via the Ethernet connection, and your input
 // will be echoed on the server console.
 //
-// Ex: `nc 172.16.243.80 31337`
+// For example, you can connect to the server socket from a new terminal on
+// your computer with a utility such as netcat, passing the ip address and port:
+//   nc 192.168.247.119 31337
+// Then type into the terminal and it will be repeated in the board's serial
+// console (also in the Arduino IDE Serial Monitor)
+
+//! [ardu-ethernet-server] Start doxygen snippet
+#include "Arduino.h"
+#include "Ethernet.h"
 
 namespace {
 coralmicro::arduino::EthernetClient client;
@@ -51,11 +56,16 @@ void setup() {
   Serial.print("Our IP address is ");
   Serial.println(ip);
   Serial.println("Server ready on port 31337");
+  // Blocks until a client is connected.
   client = server.available();
 }
 
 void loop() {
+  // If a client is connected and has data available to read,
+  // write the data to the serial console.
   if (client && client.available()) {
     Serial.write(client.read());
+    Serial.flush();
   }
 }
+//! [ardu-ethernet-server] End snippet

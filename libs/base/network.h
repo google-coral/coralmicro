@@ -116,18 +116,18 @@ int SocketAccept(int sockfd);
 // @param sockfd The socket file descriptor to close.
 void SocketClose(int sockfd);
 
-// Starts a socket connection with a client.
+// Starts a client-side connection with a server.
 //
-// @param ip The client's ip.
-// @param port The port to start the connection on.
-// @return The client's socket file descriptor.
+// @param ip The server's ip address.
+// @param port The server's port number.
+// @return The server's socket file descriptor.
 int SocketClient(ip_addr_t ip, int port);
 
-// Starts a socket connection with a client.
+// Starts a client-side connection with a server.
 //
-// @param host The client's ip.
-// @param port The port to start the connection on.
-// @return The client's socket file descriptor.
+// @param host The server's hostname.
+// @param port The server's port number.
+// @return The server's socket file descriptor.
 int SocketClient(const char* host, int port);
 
 // Checks if a socket has available bytes to read.

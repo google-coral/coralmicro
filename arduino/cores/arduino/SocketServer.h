@@ -23,14 +23,43 @@ namespace coralmicro {
 namespace arduino {
 
 class SocketClient;
+
+// This is not meant to be instantiated directly. Instead use
+// `arduino::WiFiServer` or `arduino::EthernetServer`.
 class SocketServer : public ::arduino::Server {
  public:
+
+  // Initializes a new server socket.
+  //
+  // Each server socket can accept just one client connection.
+  // @param The port number to use.
   SocketServer(int port) : port_(port) {}
   virtual ~SocketServer();
 
+  // Starts the socket.
   void begin() override;
+
+  // Writes some data to the socket.
+  // @param c The data to write.
+  // @return 1 if successful; -1 otherwise.
   size_t write(uint8_t c) override;
+
+  // Writes an array of data to the socket.
+  // @param array The array of data to write.
+  // @param size The size of the array.
+  // @return The size of the array written if successful; -1 otherwise.
   size_t write(const uint8_t* buf, size_t size) override;
+
+  // Waits for and accepts a socket connection from a client.
+  // This is a blocking call and returns only when a client has connected
+  // to this server socket's port.
+  //
+  // Note: Only one client can connect at a time.
+  //
+  // @return The client object to read and write with the connected client.
+  // Before using the returned client, check if the client is connected (check
+  // if the object evaluates true or call `arduino::SocketClient::connected()`)
+  // and check if it has data to read with `arduino::SocketClient::available()`.
   SocketClient available();
 
   using Print::write;

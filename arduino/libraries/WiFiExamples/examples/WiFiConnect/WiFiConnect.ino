@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// [start-snippet:ardu-wifi]
+//! [ardu-wifi-connect] Start doxygen snippet
 #include "Arduino.h"
 #include "WiFi.h"
 
@@ -79,4 +79,4 @@ void setup() {
 }
 
 void loop() {}
-// [end-snippet:ardu-wifi]
+//! [ardu-wifi-connect] End snippet

@@ -249,28 +249,47 @@ documentation <https://docs.arduino.cc/learn/communication/spi>`_.
 
 
 
-Wi-Fi
+Network
 -----------------
 
-**Requires the Coral Wireless Add-on.**
+Sockets
+++++++++++
 
-These APIs allow you to get online and perform basic Wi-Fi tasks (when the board
-is attached to the Coral Wireless Add-on), such as scan for Wi-Fi networks,
-connect to a Wi-Fi network, and read network details.
+These APIs define the basic interface for socket connections, whether using
+Wi-Fi or Ethernet.
 
-This API is designed to be code-compatible with projects that use the ``WiFi``
-class from the `Arduino WiFi
-library <https://www.arduino.cc/reference/en/libraries/wifi/>`_. For other
-networking features such as hosting local servers on the Dev Board Micro, you
-should use the `coralmicro Network APIs </docs/reference/micro/network/>`_.
+To open a socket as a client or server, you should use
+the corresponding typedef aliases, corresponding to the type of network
+connection you're using:
+:cpp:any:`~coralmicro::arduino::WiFiClient`/:cpp:any:`~coralmicro::arduino::WiFiServer`
+or
+:cpp:any:`~coralmicro::arduino::EthernetClient`/:cpp:any:`~coralmicro::arduino::EthernetServer`.
 
-**Example**:
 
-This code connects to a Wi-Fi network and prints network details.
+.. doxygenfile:: SocketClient.h
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
-.. literalinclude:: ../arduino/libraries/WiFiExamples/examples/WiFiConnect/WiFiConnect.ino
-   :start-after: [start-snippet:ardu-wifi]
-   :end-before: [end-snippet:ardu-wifi]
+.. doxygenfile:: SocketServer.h
+   :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
+
+
+
+Wi-Fi
++++++++
+
+.. note::
+   Requires the Coral Wireless Add-on board.
+
+To use Wi-Fi on the Dev Board Micro:
+
+1. `Connect the Wireless Add-on board </docs/dev-board-micro/wireless-addon/>`_.
+
+2. Use :cpp:any:`~coralmicro::arduino::WiFiClass` to connect to a Wi-Fi network.
+
+3. Use :cpp:any:`~coralmicro::arduino::WiFiClient` to connect to a server,
+   or use :cpp:any:`~coralmicro::arduino::WiFiServer` to host a server on the
+   board.
+
 
 `[WiFi.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/WiFi/WiFi.h>`_
 
@@ -280,29 +299,29 @@ This code connects to a Wi-Fi network and prints network details.
 
 
 Ethernet
------------------
++++++++++
 
-**Requires the Coral PoE Add-on.**
+.. note::
+   Requires the Coral PoE Add-on board.
 
-These APIs allow you to get online via Ethernet and get network
-details (when the board is attached to the Coral PoE Add-on).
+To use Ethernet on the Dev Board Micro:
 
-For networking features such as hosting local servers on the Dev Board Micro,
-you should use the `coralmicro Network APIs </docs/reference/micro/network/>`_.
+1. `Connect the PoE Add-on board </docs/dev-board-micro/poe-addon/>`_.
 
-**Example**:
+2. Call :cpp:any:`coralmicro::arduino::EthernetClass::begin()` to enable the
+   Ethernet connection.
 
-This code enables the Ethernet connection, sends a GET request, and prints the
-response to the serial console.
+3. Use :cpp:any:`~coralmicro::arduino::EthernetClient` to connect to a server,
+   or use :cpp:any:`~coralmicro::arduino::EthernetServer` to host a server on
+   the board.
 
-.. literalinclude:: ../arduino/libraries/PoEExamples/examples/EthernetClient/EthernetClient.ino
-   :start-after: [start-snippet:ardu-ethernet-client]
-   :end-before: [end-snippet:ardu-ethernet-client]
 
 `[WiFi.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/Ethernet/Ethernet.h>`_
 
 .. doxygenfile:: Ethernet/Ethernet.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
+
+
 
 
 TensorFlow Lite

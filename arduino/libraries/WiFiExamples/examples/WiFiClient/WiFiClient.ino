@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+//! [ardu-wifi-client] Start doxygen snippet
 #include "Arduino.h"
 #include "WiFi.h"
 
@@ -59,3 +60,4 @@ void loop() {
     Serial.write(client.read());
   }
 }
+//! [ardu-wifi-client] End snippet

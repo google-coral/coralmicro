@@ -28,8 +28,32 @@ enum EthernetLinkStatus { Unknown, LinkON, LinkOFF };
 namespace coralmicro {
 namespace arduino {
 
+// Defines a client-side connection to a server using Ethernet.
+//
+// This is an alias for the ``arduino::SocketClient`` class, where all the
+// available functions are defined.
+//
+// **Example**:
+//
+// This code enables the Ethernet connection, connects to a server via hostname
+// and port, then sends an HTTP GET request and prints the response.
+//
+// \snippet PoEExamples/examples/EthernetClient/EthernetClient.ino ardu-ethernet-client
 using EthernetClient = SocketClient;
+
+// Defines a server using Ethernet.
+//
+// This is an alias for the ``arduino::SocketServer`` class, where all the
+// available functions are defined.
+//
+// **Example**:
+//
+// This code starts a server on the board and, when a client connects to it,
+// it prints all data read from the client to the board serial console.
+//
+// \snippet PoEExamples/examples/EthernetServer/EthernetServer.ino ardu-ethernet-server
 using EthernetServer = SocketServer;
+
 // Allows for connection of the device to a network via Ethernet.
 // At the moment, this interface only supports networks with DHCP.
 // After a connection is established, information about the connection

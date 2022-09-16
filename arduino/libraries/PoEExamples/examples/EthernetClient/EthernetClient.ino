@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// [start-snippet:ardu-ethernet-client]
+//! [ardu-ethernet-client] Start doxygen snippet
 #include "Arduino.h"
 #include "Ethernet.h"
 
@@ -48,4 +48,4 @@ void loop() {
     Serial.write(client.read());
   }
 }
-// [end-snippet:ardu-ethernet-client]
+//! [ardu-ethernet-client] End snippet

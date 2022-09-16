@@ -52,16 +52,51 @@ enum wl_status_t {
 namespace coralmicro {
 namespace arduino {
 
+// Defines a client-side connection to a server using Wi-Fi.
+//
+// This is an alias for the ``arduino::SocketClient`` class, where all the
+// available functions are defined.
+//
+// **Example**:
+//
+// This code connects to a Wi-Fi network, connects to a server via hostname
+// and port, then sends an HTTP GET request and prints the response.
+//
+// \snippet WiFiExamples/examples/WiFiClient/WiFiClient.ino ardu-wifi-client
 using WiFiClient = SocketClient;
+
+// Defines a server using Wi-Fi.
+//
+// This is an alias for the ``arduino::SocketServer`` class, where all the
+// available functions are defined.
+//
+// **Example**:
+//
+// This code starts a server on the board and, when a client connects to it,
+// it prints all data read from the client to the board serial console.
+//
+// \snippet WiFiExamples/examples/WiFiServer/WiFiServer.ino ardu-wifi-server
 using WiFiServer = SocketServer;
-// Allows for scanning for and associating with a Wi-Fi network.
-// Connection is initiated with the `begin` functions,
+
+// Allows for scanning for and connecting to Wi-Fi networks.
+//
+// Connection is initiated with the `WiFiClass::begin()` functions,
 // which connect to a specified access point.
-// Scanning can be executed via `scanNetworks` and the results
+// Scanning can be executed via ``WiFiClass::scanNetworks()` and the results
 // can be retrieved with the SSID/RSSI/encryptionType methods that
 // accept `networkItem`.
+//
 // You should not initialize this object yourself, instead include `WiFi.h` and
-// use the global `WiFi` instance.
+// use the global `arduino::WiFi` instance.
+//
+// This API is designed to be code-compatible with projects that use the
+// ``WiFi`` class from the [Arduino WiFi
+// library](https://www.arduino.cc/reference/en/libraries/wifi/).
+//
+// **Example**:
+// This code connects to a Wi-Fi network and prints network details.
+//
+// \snippet WiFiExamples/examples/WiFiConnect/WiFiConnect.ino ardu-wifi-connect
 class WiFiClass {
  public:
   // Connects to an open Wi-Fi network.

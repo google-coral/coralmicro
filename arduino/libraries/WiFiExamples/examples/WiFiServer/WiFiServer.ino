@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-#include "Arduino.h"
-#include "WiFi.h"
-
 // Simple example showing the usage of `WiFiServer`.
 // After flashing this to the board, you can connect to the
 // server on port 31337 via the Wi-Fi connection, and your input
 // will be echoed on the server console.
 //
-// Ex: `nc 192.168.247.119 31337`
+// For example, you can connect to the server socket from a new terminal on
+// your computer with a utility such as netcat, passing the ip address and port:
+//   nc 192.168.247.119 31337
+// Then type into the terminal and it will be repeated in the board's serial
+// console (also in the Arduino IDE Serial Monitor)
+
+//! [ardu-wifi-server] Start doxygen snippet
+#include "Arduino.h"
+#include "WiFi.h"
 
 namespace {
 const char kSsid[] = "great-access-point";
@@ -63,12 +68,16 @@ void setup() {
   Serial.print("Our IP address is ");
   Serial.println(ip);
   Serial.println("Server ready on port 31337");
+  // Blocks until a client is connected.
   client = server.available();
 }
 
 void loop() {
+  // If a client is connected and has data available to read,
+  // write the data to the serial console.
   if (client && client.available()) {
     Serial.write(client.read());
     Serial.flush();
   }
 }
+//! [ardu-wifi-server] End snippet
