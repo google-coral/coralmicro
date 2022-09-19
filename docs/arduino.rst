@@ -40,13 +40,13 @@ When you're done, call
 
 **Example**:
 
-.. literalinclude:: ../arduino/libraries/examples/examples/Camera/Camera.ino
+.. literalinclude:: ../arduino/libraries/Sensors/examples/Camera/Camera.ino
    :start-after: [start-snippet:ardu-camera]
    :end-before: [end-snippet:ardu-camera]
 
-`[coralmicro_camera.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_Camera/coralmicro_camera.h>`_
+`[coralmicro_camera.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_Camera/src/coralmicro_camera.h>`_
 
-.. doxygenfile:: CoralMicro_Camera/coralmicro_camera.h
+.. doxygenfile:: CoralMicro_Camera/src/coralmicro_camera.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
@@ -83,13 +83,13 @@ When you're done with the microphone, call
 This code listens to input from the microphone and saves data into a
 ``currentSamples`` buffer.
 
-.. literalinclude:: ../arduino/libraries/examples/examples/PDM/PDM.ino
+.. literalinclude:: ../arduino/libraries/Sensors/examples/PDM/PDM.ino
    :start-after: [start-snippet:ardu-pdm]
    :end-before: [end-snippet:ardu-pdm]
 
-`[PDM.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/PDM/PDM.h>`_
+`[PDM.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/PDM/src/PDM.h>`_
 
-.. doxygenfile:: PDM/PDM.h
+.. doxygenfile:: PDM/src/PDM.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
@@ -104,9 +104,9 @@ This API is designed to be code-compatible with projects that use the
 However, on the Dev Board Micro, these APIs enable reading and writing files on
 the on-board flash memory (not an SD card).
 
-`[coralmicro_SD.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_SD/coralmicro_SD.h>`_
+`[coralmicro_SD.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/CoralMicro_SD/src/coralmicro_SD.h>`_
 
-.. doxygenfile:: CoralMicro_SD/coralmicro_SD.h
+.. doxygenfile:: CoralMicro_SD/src/coralmicro_SD.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
@@ -179,7 +179,7 @@ before reading or writing values.
 
 This code toggles the on-board User LED when you press the on-board User button.
 
-.. literalinclude:: ../arduino/libraries/examples/examples/ButtonLED/ButtonLED.ino
+.. literalinclude:: ../arduino/libraries/Basics/examples/ButtonLED/ButtonLED.ino
    :start-after: [start-snippet:ardu-led]
    :end-before: [end-snippet:ardu-led]
 
@@ -203,7 +203,7 @@ connected to ``D0`` and ``D3`` (shown in figure 1).
 
 This code sends messages to an I2C device that's connected to ``D0`` and ``D3``.
 
-.. literalinclude:: ../arduino/libraries/examples/examples/I2CTarget/I2CTarget.ino
+.. literalinclude:: ../arduino/libraries/Basics/examples/I2CTarget/I2CTarget.ino
    :start-after: [start-snippet:ardu-i2c]
    :end-before: [end-snippet:ardu-i2c]
 
@@ -237,12 +237,12 @@ documentation <https://docs.arduino.cc/learn/communication/spi>`_.
 
 **Example** (from ``sketches/SPI/``):
 
-.. literalinclude:: ../arduino/libraries/examples/examples/SPI/SPI.ino
+.. literalinclude:: ../arduino/libraries/Basics/examples/SPI/SPI.ino
    :start-after: [start-snippet:ardu-spi]
    :end-before: [end-snippet:ardu-spi]
 
 
-`[SPI.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/SPI/SPI.h>`_
+`[SPI.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/SPI/src/SPI.h>`_
 
 .. doxygenfile:: SPI/SPI.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
@@ -291,9 +291,9 @@ To use Wi-Fi on the Dev Board Micro:
    board.
 
 
-`[WiFi.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/WiFi/WiFi.h>`_
+`[WiFi.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/WiFi/src/WiFi.h>`_
 
-.. doxygenfile:: WiFi/WiFi.h
+.. doxygenfile:: WiFi/src/WiFi.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
@@ -316,9 +316,9 @@ To use Ethernet on the Dev Board Micro:
    the board.
 
 
-`[WiFi.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/Ethernet/Ethernet.h>`_
+`[Ethernet.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/Ethernet/src/Ethernet.h>`_
 
-.. doxygenfile:: Ethernet/Ethernet.h
+.. doxygenfile:: Ethernet/src/Ethernet.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
@@ -338,6 +338,6 @@ other Arduino-style APIs such as `Camera <#camera>`_.
 This code performs object detection with TensorFlow Lite using images from
 the camera.
 
-.. literalinclude:: ../arduino/libraries/examples/examples/CameraDetection/CameraDetection.ino
+.. literalinclude:: ../arduino/libraries/TensorFlow/examples/CameraDetection/CameraDetection.ino
    :start-after: [start-snippet:ardu-detection]
    :end-before: [end-snippet:ardu-detection]
