@@ -83,7 +83,7 @@ When you're done with the microphone, call
 This code listens to input from the microphone and saves data into a
 ``currentSamples`` buffer.
 
-.. literalinclude:: ../arduino/libraries/Sensors/examples/PDM/PDM.ino
+.. literalinclude:: ../arduino/libraries/Sensors/examples/Microphone/Microphone.ino
    :start-after: [start-snippet:ardu-pdm]
    :end-before: [end-snippet:ardu-pdm]
 
@@ -338,6 +338,6 @@ other Arduino-style APIs such as `Camera <#camera>`_.
 This code performs object detection with TensorFlow Lite using images from
 the camera.
 
-.. literalinclude:: ../arduino/libraries/TensorFlow/examples/CameraDetection/CameraDetection.ino
+.. literalinclude:: ../arduino/libraries/TensorFlow/examples/DetectObjects/DetectObjects.ino
    :start-after: [start-snippet:ardu-detection]
    :end-before: [end-snippet:ardu-detection]
