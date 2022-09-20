@@ -39,7 +39,7 @@ namespace coralmicro {
 namespace {
 constexpr char kModelPath[] =
     "/models/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite";
-constexpr char kImagePath[] = "/examples/detect_image/cat_300x300.rgb";
+constexpr char kImagePath[] = "/examples/detect_objects_file/cat_300x300.rgb";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
