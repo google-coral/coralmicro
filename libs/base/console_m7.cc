@@ -59,10 +59,12 @@ uint8_t ConsoleM7::m4_console_buffer_storage_[kM4ConsoleBufferSize]
 void ConsoleM7::EmergencyWrite(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  int len = vsnprintf(emergency_buffer_.data(), emergency_buffer_.size(), fmt, ap);
+  int len =
+      vsnprintf(emergency_buffer_.data(), emergency_buffer_.size(), fmt, ap);
   va_end(ap);
 
-  DbgConsole_SendDataReliable(reinterpret_cast<uint8_t*>(emergency_buffer_.data()), len);
+  DbgConsole_SendDataReliable(
+      reinterpret_cast<uint8_t*>(emergency_buffer_.data()), len);
   DbgConsole_Flush();
   cdc_acm_.Transmit(reinterpret_cast<uint8_t*>(emergency_buffer_.data()), len);
 }

@@ -109,8 +109,7 @@ extern "C" uint32_t vPortGetRunTimeCounterValue() {
 }
 
 extern "C" int _gettimeofday(struct timeval *__p, void *__tz) {
-  if (!coralmicro::g_rtc_set)
-    return -1;
+  if (!coralmicro::g_rtc_set) return -1;
 
   struct tm now;
   coralmicro::TimerGetRtcTime(&now);

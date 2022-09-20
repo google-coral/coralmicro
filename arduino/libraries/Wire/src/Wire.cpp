@@ -25,14 +25,14 @@ namespace coralmicro {
 namespace arduino {
 
 void HardwareI2C::StaticTargetCallback(LPI2C_Type *base,
-                                         lpi2c_target_transfer_t *transfer,
-                                         void *userData) {
+                                       lpi2c_target_transfer_t *transfer,
+                                       void *userData) {
   assert(userData);
   reinterpret_cast<HardwareI2C *>(userData)->TargetCallback(base, transfer);
 }
 
 void HardwareI2C::TargetCallback(LPI2C_Type *base,
-                                   lpi2c_target_transfer_t *transfer) {
+                                 lpi2c_target_transfer_t *transfer) {
   assert(base == base_);
   switch (transfer->event) {
     case kLPI2C_SlaveAddressMatchEvent:

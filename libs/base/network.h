@@ -77,7 +77,8 @@ IOStatus WriteArray(int fd, const T* array, size_t array_size) {
   return WriteBytes(fd, array, array_size * sizeof(T));
 }
 
-// Writes a `message` with custom type from a buffer into a socket file descriptor.
+// Writes a `message` with custom type from a buffer into a socket file
+// descriptor.
 //
 // The `message` is going to have a 40 bits prefix that contains 32 bits for the
 // size and 8 bits for the custom message type, following by the bytes.

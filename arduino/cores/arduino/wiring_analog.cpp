@@ -39,10 +39,8 @@ void wiringAnalogInit() {
   coralmicro::PwmInit();
   coralmicro::AdcInit();
   coralmicro::DacInit();
-  coralmicro::AdcCreateConfig(Config_A0, 0, AdcSide::kB,
-                              false);
-  coralmicro::AdcCreateConfig(Config_A1, 0, AdcSide::kA,
-                              false);
+  coralmicro::AdcCreateConfig(Config_A0, 0, AdcSide::kB, false);
+  coralmicro::AdcCreateConfig(Config_A1, 0, AdcSide::kA, false);
 }
 
 const AdcConfig& pinToADCConfig(pin_size_t pinNumber) {

@@ -49,4 +49,4 @@ void setup() {
   coralmicro::UseHttpServer(new coralmicro::JsonRpcHttpServer);
 }
 
-void loop() { }
+void loop() {}

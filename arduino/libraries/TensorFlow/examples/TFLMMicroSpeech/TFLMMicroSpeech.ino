@@ -21,7 +21,6 @@
 
 #include "libs/audio/audio_driver.h"
 #include "model.h"
-
 #include "tensorflow/lite/experimental/microfrontend/lib/frontend.h"
 #include "tensorflow/lite/experimental/microfrontend/lib/frontend_util.h"
 #include "tensorflow/lite/micro/examples/micro_speech/audio_provider.h"
@@ -133,7 +132,6 @@ int32_t LatestAudioTimestamp() {
 }
 
 void setup() {
-
   Serial.begin(115200);
   pinMode(PIN_LED_USER, OUTPUT);
   pinMode(PIN_LED_STATUS, OUTPUT);
