@@ -31,7 +31,6 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
-
 // Runs a local server with an endpoint called 'detect_from_camera', which
 // will capture an image from the board's camera, run the image through an
 // object detection model on the Edge TPU and return the results to a connected

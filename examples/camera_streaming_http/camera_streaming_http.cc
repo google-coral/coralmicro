@@ -27,7 +27,7 @@
 #if defined(CAMERA_STREAMING_HTTP_ETHERNET)
 #include "libs/base/ethernet.h"
 #include "third_party/nxp/rt1176-sdk/middleware/lwip/src/include/lwip/prot/dhcp.h"
-#elif defined (CAMERA_STREAMING_HTTP_WIFI)
+#elif defined(CAMERA_STREAMING_HTTP_WIFI)
 #include "libs/base/wifi.h"
 #endif  // defined(CAMERA_STREAMING_HTTP_ETHERNET)
 

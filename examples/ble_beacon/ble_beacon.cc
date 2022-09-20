@@ -25,7 +25,6 @@
 //    bash build.sh
 //    python3 scripts/flashtool.py -e ble_beacon
 
-
 extern "C" void app_main(void* param) {
   (void)param;
   printf("BLE Beacon Example!\r\n");

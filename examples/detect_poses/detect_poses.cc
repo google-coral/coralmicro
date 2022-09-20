@@ -13,11 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "libs/tensorflow/posenet.h"
-
 #include "libs/base/filesystem.h"
 #include "libs/base/led.h"
 #include "libs/camera/camera.h"
+#include "libs/tensorflow/posenet.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tpu/edgetpu_manager.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"

@@ -57,11 +57,6 @@ void setup() {
     return;
   }
 
-  if (!client.connect("www.example.com", 80)) {
-    Serial.println("Connection failed.");
-    return;
-  }
-  Serial.println("Connection successful!");
   IPAddress ip = WiFi.localIP();
 
   server.begin();
