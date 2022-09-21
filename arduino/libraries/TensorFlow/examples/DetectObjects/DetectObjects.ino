@@ -45,6 +45,10 @@ using namespace coralmicro::arduino;
 namespace {
 bool setup_success{false};
 int button_pin = PIN_BTN;
+int last_button_state = LOW;
+int current_button_state = HIGH;
+unsigned long last_debounce_time = 0;
+constexpr unsigned long kDebounceDelay = 50;
 
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
@@ -186,34 +190,44 @@ void setup() {
   Serial.println("Initialized");
 }
 void loop() {
-  if (pulseIn(button_pin, HIGH)) {
-    Serial.println("Button triggered, running detection...");
-    if (!setup_success) {
-      Serial.println("Cannot run because of a problem during setup!");
-      return;
-    }
+  int reading = digitalRead(button_pin);
+  if (reading != last_button_state) {
+    last_debounce_time = millis();
+  }
+  if ((millis() - last_debounce_time) > kDebounceDelay) {
+    if (reading != current_button_state) {
+      current_button_state = reading;
+      if (current_button_state == HIGH) {
+        Serial.println("Button triggered, running detection...");
+        if (!setup_success) {
+          Serial.println("Cannot run because of a problem during setup!");
+          return;
+        }
 
-    if (!DetectFromCamera()) {
-      Serial.println("Failed to run detection");
-      return;
-    }
+        if (!DetectFromCamera()) {
+          Serial.println("Failed to run detection");
+          return;
+        }
 
-    Serial.print("Results count: ");
-    Serial.println(results.size());
-    for (auto result : results) {
-      Serial.print("id: ");
-      Serial.print(result.id);
-      Serial.print(" score: ");
-      Serial.print(result.score);
-      Serial.print(" xmin: ");
-      Serial.print(result.bbox.xmin);
-      Serial.print(" ymin: ");
-      Serial.print(result.bbox.ymin);
-      Serial.print(" xmax: ");
-      Serial.print(result.bbox.xmax);
-      Serial.print(" ymax: ");
-      Serial.println(result.bbox.ymax);
+        Serial.print("Results count: ");
+        Serial.println(results.size());
+        for (auto result : results) {
+          Serial.print("id: ");
+          Serial.print(result.id);
+          Serial.print(" score: ");
+          Serial.print(result.score);
+          Serial.print(" xmin: ");
+          Serial.print(result.bbox.xmin);
+          Serial.print(" ymin: ");
+          Serial.print(result.bbox.ymin);
+          Serial.print(" xmax: ");
+          Serial.print(result.bbox.xmax);
+          Serial.print(" ymax: ");
+          Serial.println(result.bbox.ymax);
+        }
+      }
     }
   }
+  last_button_state = reading;
 }
 // [end-snippet:ardu-detection]

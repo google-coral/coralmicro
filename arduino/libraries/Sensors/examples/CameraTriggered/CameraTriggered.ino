@@ -43,6 +43,10 @@ int img_counter = 0;
 int width = 324;
 int height = 324;
 int button_pin = PIN_BTN;
+int last_button_state = LOW;
+int current_button_state = HIGH;
+unsigned long last_debounce_time = 0;
+constexpr unsigned long kDebounceDelay = 50;
 
 FrameBuffer frame_buffer;
 
@@ -75,25 +79,35 @@ void setup() {
 }
 
 void loop() {
-  if (pulseIn(button_pin, HIGH)) {
-    Serial.println("Button triggered, taking image");
-
-    if (!Camera.grab(frame_buffer) == CameraStatus::SUCCESS) {
-      return;
-    }
-
-    std::vector<uint8_t> jpeg;
-    coralmicro::JpegCompressRgb(frame_buffer.getBuffer(), width, height,
-                                /*quality=*/75, &jpeg);
-
-    char image_name[64];
-    sprintf(image_name, "image_%d.jpeg", img_counter);
-    Serial.print("Saving image as: ");
-    Serial.println(image_name);
-
-    SDFile imageFile = SD.open(image_name, FILE_WRITE);
-    imageFile.write(jpeg.data(), jpeg.size());
-    imageFile.close();
-    img_counter++;
+  int reading = digitalRead(button_pin);
+  if (reading != last_button_state) {
+    last_debounce_time = millis();
   }
+  if ((millis() - last_debounce_time) > kDebounceDelay) {
+    if (reading != current_button_state) {
+      current_button_state = reading;
+      if (current_button_state == HIGH) {
+        Serial.println("Button triggered, taking image");
+
+        if (!Camera.grab(frame_buffer) == CameraStatus::SUCCESS) {
+          return;
+        }
+
+        std::vector<uint8_t> jpeg;
+        coralmicro::JpegCompressRgb(frame_buffer.getBuffer(), width, height,
+                                    /*quality=*/75, &jpeg);
+
+        char image_name[64];
+        sprintf(image_name, "image_%d.jpeg", img_counter);
+        Serial.print("Saving image as: ");
+        Serial.println(image_name);
+
+        SDFile image_file = SD.open(image_name, FILE_WRITE);
+        image_file.write(jpeg.data(), jpeg.size());
+        image_file.close();
+        img_counter++;
+      }
+    }
+  }
+  last_button_state = reading;
 }

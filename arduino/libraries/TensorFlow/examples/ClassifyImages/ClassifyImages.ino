@@ -45,6 +45,10 @@ using namespace coralmicro::arduino;
 
 bool setup_success{false};
 int button_pin = PIN_BTN;
+int last_button_state = LOW;
+int current_button_state = HIGH;
+unsigned long last_debounce_time = 0;
+constexpr unsigned long kDebounceDelay = 50;
 
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
@@ -184,26 +188,36 @@ void setup() {
 }
 
 void loop() {
-  if (pulseIn(button_pin, HIGH)) {
-    Serial.println("Button triggered, running classification...");
-    if (!setup_success) {
-      Serial.println("Cannot run because of a problem during setup!");
-      return;
-    }
+  int reading = digitalRead(button_pin);
+  if (reading != last_button_state) {
+    last_debounce_time = millis();
+  }
+  if ((millis() - last_debounce_time) > kDebounceDelay) {
+    if (reading != current_button_state) {
+      current_button_state = reading;
+      if (current_button_state == HIGH) {
+        Serial.println("Button triggered, running classification...");
+        if (!setup_success) {
+          Serial.println("Cannot run because of a problem during setup!");
+          return;
+        }
 
-    if (!ClassifyFromCamera()) {
-      Serial.println("Failed to run classification");
-      return;
-    }
+        if (!ClassifyFromCamera()) {
+          Serial.println("Failed to run classification");
+          return;
+        }
 
-    Serial.print("Results count: ");
-    Serial.println(results.size());
-    for (const auto& result : results) {
-      Serial.print("Label ID: ");
-      Serial.print(result.id);
-      Serial.print(" Score: ");
-      Serial.println(result.score);
+        Serial.print("Results count: ");
+        Serial.println(results.size());
+        for (const auto& result : results) {
+          Serial.print("Label ID: ");
+          Serial.print(result.id);
+          Serial.print(" Score: ");
+          Serial.println(result.score);
+        }
+      }
     }
   }
+  last_button_state = reading;
 }
 // [end-snippet:ardu-classification]
