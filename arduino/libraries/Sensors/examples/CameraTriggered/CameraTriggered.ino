@@ -75,24 +75,25 @@ void setup() {
 }
 
 void loop() {
-  pulseIn(button_pin, HIGH);
-  Serial.println("Button triggered, taking image");
+  if (pulseIn(button_pin, HIGH)) {
+    Serial.println("Button triggered, taking image");
 
-  if (!Camera.grab(frame_buffer) == CameraStatus::SUCCESS) {
-    return;
+    if (!Camera.grab(frame_buffer) == CameraStatus::SUCCESS) {
+      return;
+    }
+
+    std::vector<uint8_t> jpeg;
+    coralmicro::JpegCompressRgb(frame_buffer.getBuffer(), width, height,
+                                /*quality=*/75, &jpeg);
+
+    char image_name[64];
+    sprintf(image_name, "image_%d.jpeg", img_counter);
+    Serial.print("Saving image as: ");
+    Serial.println(image_name);
+
+    SDFile imageFile = SD.open(image_name, FILE_WRITE);
+    imageFile.write(jpeg.data(), jpeg.size());
+    imageFile.close();
+    img_counter++;
   }
-
-  std::vector<uint8_t> jpeg;
-  coralmicro::JpegCompressRgb(frame_buffer.getBuffer(), width, height,
-                              /*quality=*/75, &jpeg);
-
-  char image_name[64];
-  sprintf(image_name, "image_%d.jpeg", img_counter);
-  Serial.print("Saving image as: ");
-  Serial.println(image_name);
-
-  SDFile imageFile = SD.open(image_name, FILE_WRITE);
-  imageFile.write(jpeg.data(), jpeg.size());
-  imageFile.close();
-  img_counter++;
 }

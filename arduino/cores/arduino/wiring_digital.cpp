@@ -111,14 +111,22 @@ unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
     case D1:
     case D2:
     case D3: {
-      delayMicroseconds(timeout);
-      auto stop_state = state == LOW ? HIGH : LOW;
-      while (digitalRead(pin) != state) {
-      }
       auto start_time = coralmicro::TimerMicros();
-      while (digitalRead(pin) != stop_state) {
+      while (digitalRead(pin) != state) {
+        auto duration = coralmicro::TimerMicros() - start_time;
+        if (duration >= timeout) {
+          return 0;  // Timeout is reached, pulse did not start.
+        }
       }
-      return coralmicro::TimerMicros() - start_time;
+      auto stop_state = state == LOW ? HIGH : LOW;
+      auto start_pulse_time = coralmicro::TimerMicros();
+      while (digitalRead(pin) != stop_state) {
+        auto duration = coralmicro::TimerMicros() - start_time;
+        if (duration >= timeout) {
+          return 0;  // Timeout is reached, pulse not complete.
+        }
+      }
+      return coralmicro::TimerMicros() - start_pulse_time;
     }
     default:
       assert(false);

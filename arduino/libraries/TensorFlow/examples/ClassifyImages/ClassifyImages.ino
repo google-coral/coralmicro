@@ -184,24 +184,26 @@ void setup() {
 }
 
 void loop() {
-  pulseIn(button_pin, HIGH);  // Hold until the user button is triggered.
-  if (!setup_success) {
-    Serial.println("Cannot run because of a problem during setup!");
-    return;
-  }
+  if (pulseIn(button_pin, HIGH)) {
+    Serial.println("Button triggered, running classification...");
+    if (!setup_success) {
+      Serial.println("Cannot run because of a problem during setup!");
+      return;
+    }
 
-  if (!ClassifyFromCamera()) {
-    Serial.println("Failed to run classification");
-    return;
-  }
+    if (!ClassifyFromCamera()) {
+      Serial.println("Failed to run classification");
+      return;
+    }
 
-  Serial.print("Results count: ");
-  Serial.println(results.size());
-  for (const auto& result : results) {
-    Serial.print("Label ID: ");
-    Serial.print(result.id);
-    Serial.print(" Score: ");
-    Serial.println(result.score);
+    Serial.print("Results count: ");
+    Serial.println(results.size());
+    for (const auto& result : results) {
+      Serial.print("Label ID: ");
+      Serial.print(result.id);
+      Serial.print(" Score: ");
+      Serial.println(result.score);
+    }
   }
 }
 // [end-snippet:ardu-classification]

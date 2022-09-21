@@ -27,9 +27,8 @@ void setup() {
   // Turn on Status LED to show the board is on.
   pinMode(PIN_LED_STATUS, OUTPUT);
   digitalWrite(PIN_LED_STATUS, HIGH);
-  Serial.println("Arduino Pulse In!");
+  Serial.println("Arduino pulseIn!");
 
-  delay(1000);
   Serial.println("Starting");
   pinMode(button_pin, INPUT);
 }
