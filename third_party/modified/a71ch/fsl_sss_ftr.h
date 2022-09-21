@@ -30,6 +30,7 @@
 
 /** A71CH (ECC) */
 #define SSS_HAVE_APPLET_A71CH 1
+#define SSS_HAVE_A71CH 1
 
 /** A71CL (RSA) */
 #define SSS_HAVE_APPLET_A71CL 0
@@ -136,6 +137,7 @@
 
 /** Use mbedTLS as host crypto */
 #define SSS_HAVE_HOSTCRYPTO_MBEDTLS 1
+#define SSS_HAVE_MBEDTLS 1
 
 /** Use mbed-crypto as host crypto
  * Required for ARM-PSA / TF-M */
