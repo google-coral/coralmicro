@@ -51,6 +51,8 @@ void setup() {
   digitalWrite(PIN_LED_STATUS, HIGH);
   Serial.println("Arduino Face Detection!");
 
+  pinMode(PIN_LED_USER, OUTPUT);
+
   SD.begin();
 
   Serial.println("Loading Model");
@@ -112,7 +114,6 @@ void setup() {
 }
 void loop() {
   input_tensor = interpreter->input_tensor(0);
-  delay(1000);
   if (Camera.grab(tflite::GetTensorData<uint8_t>(input_tensor)) !=
       CameraStatus::SUCCESS) {
     Serial.println("cannot invoke because camera failed to grab frame");
@@ -130,18 +131,24 @@ void loop() {
 
   auto results =
       coralmicro::tensorflow::GetDetectionResults(interpreter.get(), 0.6, 3);
-  Serial.print("Face count: ");
-  Serial.println(results.size());
-  for (auto result : results) {
-    Serial.print(" score: ");
-    Serial.print(result.score);
-    Serial.print(" xmin: ");
-    Serial.print(result.bbox.xmin);
-    Serial.print(" ymin: ");
-    Serial.print(result.bbox.ymin);
-    Serial.print(" xmax: ");
-    Serial.print(result.bbox.xmax);
-    Serial.print(" ymax: ");
-    Serial.println(result.bbox.ymax);
+  if (!results.empty()) {
+    digitalWrite(PIN_LED_USER, HIGH);
+    Serial.print("Face count: ");
+    Serial.println(results.size());
+    for (auto result : results) {
+      Serial.print(" score: ");
+      Serial.print(result.score);
+      Serial.print(" xmin: ");
+      Serial.print(result.bbox.xmin);
+      Serial.print(" ymin: ");
+      Serial.print(result.bbox.ymin);
+      Serial.print(" xmax: ");
+      Serial.print(result.bbox.xmax);
+      Serial.print(" ymax: ");
+      Serial.println(result.bbox.ymax);
+    }
+  } else {
+    digitalWrite(PIN_LED_USER, LOW);
+    Serial.println("No faces found");
   }
 }
