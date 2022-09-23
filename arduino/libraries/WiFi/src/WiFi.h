@@ -17,6 +17,10 @@
 #ifndef WiFi_h
 #define WiFi_h
 
+#ifndef CORAL_MICRO_WIFI
+#error Missing Coral Wireless Add-on libraries. Your board must be set to "Dev Board Micro + Wireless Add-on"
+#endif
+
 #include <Arduino.h>
 #include "SocketClient.h"
 #include "SocketServer.h"

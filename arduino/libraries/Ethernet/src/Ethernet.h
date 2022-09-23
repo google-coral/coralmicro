@@ -17,6 +17,10 @@
 #ifndef Ethernet_h
 #define Ethernet_h
 
+#ifndef CORAL_MICRO_POE
+#error Missing Coral PoE Add-on libraries. Your board must be set to "Dev Board Micro + PoE Add-on"
+#endif
+
 #include <Arduino.h>
 
 #include "SocketClient.h"
