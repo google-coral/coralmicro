@@ -413,10 +413,6 @@ void reset_count_rpc(struct jsonrpc_request* r) {
     printf("Failed to allocate tensor\r\n");
     vTaskSuspend(nullptr);
   }
-  // Starts all tasks.
-  NetworkTask network_task;
-  PosenetTask posenet_task(&network_task, interpreter);
-  MainTask main_task(&network_task, &posenet_task);
 
 #if defined(MULTICORE_MODEL_CASCADE_ETHERNET)
   if (!EthernetInit(/*default_iface=*/false)) {
@@ -434,6 +430,11 @@ void reset_count_rpc(struct jsonrpc_request* r) {
     vTaskSuspend(nullptr);
   }
 #endif  // defined(MULTICORE_MODEL_CASCADE_ETHERNET)
+
+  // Starts all tasks.
+  NetworkTask network_task;
+  PosenetTask posenet_task(&network_task, interpreter);
+  MainTask main_task(&network_task, &posenet_task);
 
   JsonRpcHttpServer http_server;
   jsonrpc_init(nullptr, nullptr);
