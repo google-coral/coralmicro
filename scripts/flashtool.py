@@ -968,7 +968,7 @@ def main():
       help=argparse.SUPPRESS)
   debug_group.add_argument(
       '--debug', dest='debug', action='store_true',
-      help='Loads the app with debug symbols intact, starts the JLink debug \
+      help='Loads the app into RAM, starts the JLink debug \
         server, and attaches GDB. You must have a JTAG debugger attached to \
         the board, which requires an add-on board with the JTAG pins exposed, \
         such as the Coral Wireless Add-on. For details, see \
@@ -1122,10 +1122,11 @@ def main():
   usb_ip_address = ipaddress.ip_address(args.usb_ip_address)
   dns_server = ipaddress.ip_address(
       args.dns_server) if args.dns_server is not None else None
+  ram = True if args.debug else args.ram
   state_machine_args = {
       'blhost_path': blhost_path,
       'flashloader_path': flashloader_path,
-      'ram': args.ram,
+      'ram': ram,
       'reset': not args.noreset,
       'ums': args.ums,
       'elfloader_path': elfloader_path,
@@ -1165,7 +1166,7 @@ def main():
   with tempfile.TemporaryDirectory() as workdir:
     sbfile_path = None
     data_files = None
-    if not args.ram:
+    if not ram:
       print('Creating Filesystem')
       data_files = CreateFilesystem(
           workdir, root_dir, build_dir, unstripped_elf_path, cached_files, args.arduino, data_dirs, data)
