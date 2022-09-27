@@ -72,3 +72,17 @@ Then try flashing the board again.
 
 For more details, see the [troubleshooting info on
 coral.ai](https://coral.ai/docs/dev-board-micro/get-started/#serial-downloader).
+
+
+## Update the repo
+
+Use the following commands to keep all coralmicro submodules in sync (rebasing your current branch):
+
+```bash
+git fetch origin
+
+git rebase origin/main
+
+git submodule update --init --recursive
+```
+
