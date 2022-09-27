@@ -52,6 +52,7 @@ bool LedSetBrightness(Led led, int brightness) {
       pin_a_config.frequency = 1000;
       pin_a_config.pin_setting =
           coralmicro::PwmPinSettingFor(coralmicro::PwmPin::k10);
+      pin_a_config.pin_setting.sub_module = kPWM_Module_1;
       if (enable) {
         PwmEnable({pin_a_config});
       } else {
