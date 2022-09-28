@@ -180,4 +180,6 @@ class HardwareI2C : public ::arduino::HardwareI2C {
 // creating your own instance of `HardwareI2C`.
 extern coralmicro::arduino::HardwareI2C Wire;
 
+typedef coralmicro::arduino::HardwareI2C TwoWire;
+
 #endif  // Wire_h
