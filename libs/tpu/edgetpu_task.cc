@@ -24,8 +24,6 @@
 #include "libs/tpu/usb_host_edgetpu.h"
 #include "libs/usb/usb_host_task.h"
 
-using namespace std::placeholders;
-
 namespace coralmicro {
 using namespace edgetpu;
 
@@ -40,6 +38,7 @@ usb_status_t EdgeTpuTask::USBHostEvent(
     usb_host_handle host_handle, usb_device_handle device_handle,
     usb_host_configuration_handle config_handle, uint32_t event_code) {
   usb_host_configuration_t *configuration_ptr;
+  uint8_t usb_status = event_code >> 16;
   switch (event_code & 0xFFFF) {
     case kUSB_HostEventAttach:
       configuration_ptr =
@@ -66,18 +65,34 @@ usb_status_t EdgeTpuTask::USBHostEvent(
       return kStatus_USB_Success;
     case kUSB_HostEventDetach:
 #if 0
-            printf("EdgeTPU went away...\r\n");
+      printf("EdgeTPU went away...\r\n");
 #endif
       SetNextState(EdgeTpuState::kUnattached);
-      USB_HostEdgeTpuDeinit(this->device_handle(), this->class_handle());
-      return USB_HostRemoveDevice(host_handle, this->device_handle());
-    default:
+      if (auto status = USB_HostEdgeTpuDeinit(this->device_handle(),
+                                              this->class_handle());
+          status != kStatus_USB_Success) {
+        printf("USB_HostEdgeTpuDeinit error: %u\r\n", status);
+      }
+      if (auto status =
+              USB_HostRemoveDevice(host_handle, this->device_handle()) !=
+              kStatus_USB_Success) {
+        printf("USB_HostRemoveDevice error: %u\r\n", status);
+      }
       return kStatus_USB_Success;
+    case kUSB_HostEventEnumerationFail:
+      printf("%s enumeration failed: %u\r\n", __func__, usb_status);
+      SetNextState(EdgeTpuState::kEnumerationFailed);
+      return static_cast<usb_status_t>(usb_status);
+    default:
+      if (usb_status != kStatus_USB_Success) {
+        printf("%s failed: %u\r\n", __func__, usb_status);
+        SetNextState(EdgeTpuState::kError);
+      }
+      return static_cast<usb_status_t>(usb_status);
   }
 }
 
-void EdgeTpuTask::SetInterfaceCallback(void *param, uint8_t *data,
-                                       uint32_t data_length,
+void EdgeTpuTask::SetInterfaceCallback(void *param, uint8_t *, uint32_t,
                                        usb_status_t status) {
   auto *task = static_cast<EdgeTpuTask *>(param);
   if (status != kStatus_USB_Success) {
@@ -88,8 +103,8 @@ void EdgeTpuTask::SetInterfaceCallback(void *param, uint8_t *data,
   task->SetNextState(EdgeTpuState::kGetStatus);
 }
 
-void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data,
-                                    uint32_t data_length, usb_status_t status) {
+void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *, uint32_t,
+                                    usb_status_t status) {
   auto *task = static_cast<EdgeTpuTask *>(param);
   if (status != kStatus_USB_Success) {
     printf("Error in EdgeTpuGetStatus\r\n");
@@ -102,10 +117,15 @@ void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *data,
 void EdgeTpuTask::TaskInit() {
   coralmicro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(
       kEdgeTpuVid, kEdgeTpuPid,
-      std::bind(&EdgeTpuTask::USBHostEvent, this, _1, _2, _3, _4));
+      [this](usb_host_handle host_handle, usb_device_handle device_handle,
+             usb_host_configuration_handle config_handle,
+             uint32_t event_code) -> _usb_status {
+        return EdgeTpuTask::USBHostEvent(host_handle, device_handle,
+                                         config_handle, event_code);
+      });
 }
 
-bool EdgeTpuTask::HandleGetPowerRequest() { return (enabled_count_ > 0); }
+bool EdgeTpuTask::HandleGetPowerRequest() const { return (enabled_count_ > 0); }
 
 void EdgeTpuTask::HandleSetPowerRequest(SetPowerRequest &req) {
   if (req.enable) {
@@ -124,11 +144,11 @@ void EdgeTpuTask::HandleSetPowerRequest(SetPowerRequest &req) {
 
   GpioSet(Gpio::kEdgeTpuPmic, req.enable);
   if (req.enable) {
-    bool pgood;
-    do {
-      pgood = GpioGet(Gpio::kEdgeTpuPgood);
+    bool power_good{false};
+    while (!power_good) {
+      power_good = GpioGet(Gpio::kEdgeTpuPgood);
       taskYIELD();
-    } while (!pgood);
+    }
     vTaskDelay(pdMS_TO_TICKS(10));
   }
   GpioSet(Gpio::kEdgeTpuReset, req.enable);
@@ -168,20 +188,12 @@ void EdgeTpuTask::HandleNextState(NextStateRequest &req) {
         SetNextState(EdgeTpuState::kError);
       }
       break;
-    // case EdgeTpuState::kConnected:
-    //     EdgeTpuManager::GetSingleton()->NotifyConnected(reinterpret_cast<usb_host_edgetpu_instance_t*>(class_handle()));
-    //     break;
-    case EdgeTpuState::kError:
-      printf("EdgeTPU error\r\n");
-      while (true) {
-        taskYIELD();
-      }
+    case EdgeTpuState::kConnected:
       break;
+    case EdgeTpuState::kEnumerationFailed:
+    case EdgeTpuState::kError:
     default:
-      printf("Unhandled EdgeTPU state: %d\r\n", static_cast<int>(next_state));
-      while (true) {
-        taskYIELD();
-      }
+      EdgeTpuManager::GetSingleton()->NotifyError();
       break;
   }
 }

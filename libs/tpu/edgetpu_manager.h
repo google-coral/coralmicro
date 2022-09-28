@@ -115,6 +115,7 @@ class EdgeTpuManager {
       PerformanceMode mode = PerformanceMode::kHigh);
 
   // @cond Do not generate docs
+  void NotifyError();
   void NotifyConnected(usb_host_edgetpu_instance_t* usb_instance);
   // @endcond
 
@@ -131,6 +132,7 @@ class EdgeTpuManager {
   usb_host_edgetpu_instance_t* usb_instance_ = nullptr;
   std::weak_ptr<EdgeTpuContext> context_;
   SemaphoreHandle_t mutex_;
+  bool usb_error_{false};
 };
 
 }  // namespace coralmicro

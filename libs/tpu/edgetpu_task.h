@@ -40,6 +40,7 @@ enum class EdgeTpuState : uint8_t {
   kSetInterface,
   kGetStatus,
   kConnected,
+  kEnumerationFailed,
   kError,
 };
 
@@ -110,7 +111,7 @@ class EdgeTpuTask
   void TaskInit() override;
   void RequestHandler(edgetpu::Request *req) override;
   void HandleNextState(edgetpu::NextStateRequest &req);
-  bool HandleGetPowerRequest();
+  bool HandleGetPowerRequest() const;
   void HandleSetPowerRequest(edgetpu::SetPowerRequest &req);
   void SetNextState(edgetpu::EdgeTpuState next_state);
   static void SetInterfaceCallback(void *param, uint8_t *data,

@@ -54,8 +54,9 @@ bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance,
   // Check chip id and test write
   uint32_t omc0_00_reg;
   CHECK(Read32(chip_config_.GetApexCsrOffsets().omc0_00, &omc0_00_reg));
+
   registers::Omc000 omc0_00(omc0_00_reg);
-  assert(0x89A == omc0_00.chip_id());
+  CHECK(0x89A == omc0_00.chip_id());
 
   omc0_00.set_test_reg0(0xAA);
   CHECK(Write32(chip_config_.GetApexCsrOffsets().omc0_00, omc0_00.raw()));
@@ -63,7 +64,7 @@ bool TpuDriver::Initialize(usb_host_edgetpu_instance_t *usb_instance,
   omc0_00_reg = 0;
   CHECK(Read32(chip_config_.GetApexCsrOffsets().omc0_00, &omc0_00_reg));
   omc0_00.set_raw(omc0_00_reg);
-  assert(0xAA == omc0_00.test_reg0());
+  CHECK(0xAA == omc0_00.test_reg0());
 
   // Disable inactive mode
   uint32_t scu_ctrl_0_reg;

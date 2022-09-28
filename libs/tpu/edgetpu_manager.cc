@@ -39,6 +39,8 @@ EdgeTpuContext::EdgeTpuContext() {
 
 EdgeTpuContext::~EdgeTpuContext() {
   EdgeTpuTask::GetSingleton()->SetPower(false);
+  // Small delay ensuring usb instance is released.
+  vTaskDelay(pdMS_TO_TICKS(30));
 }
 
 EdgeTpuManager::EdgeTpuManager() : mutex_(xSemaphoreCreateMutex()) {
@@ -55,6 +57,8 @@ void EdgeTpuManager::NotifyConnected(
   }
 }
 
+void EdgeTpuManager::NotifyError() { usb_error_ = true; }
+
 std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice(
     PerformanceMode mode) {
   MutexLock lock(mutex_);
@@ -65,8 +69,16 @@ std::shared_ptr<EdgeTpuContext> EdgeTpuManager::OpenDevice(
   context = std::make_shared<EdgeTpuContext>();
 
   while (!usb_instance_) {
-    vTaskDelay(pdMS_TO_TICKS(200));
+    if (usb_error_) {
+      printf("%s: Error encountered while bringing up the tpu\r\n", __func__);
+      usb_error_ = false;  // Reset error.
+      return nullptr;
+    }
+    taskYIELD();
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
+
+  // Got tpu usb instance, init the tpu driver.
   if (!tpu_driver_.Initialize(usb_instance_, mode)) {
     return nullptr;
   }

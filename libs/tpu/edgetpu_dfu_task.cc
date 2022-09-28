@@ -16,11 +16,10 @@
 
 #include "libs/tpu/edgetpu_dfu_task.h"
 
-#include <algorithm>
 #include <cstdio>
 #include <functional>
 
-#include "libs/tpu/edgetpu_task.h"
+#include "libs/tpu/edgetpu_manager.h"
 #include "libs/usb/usb_host_task.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/class/usb_host_dfu.h"
 #include "third_party/nxp/rt1176-sdk/middleware/usb/host/usb_host_devices.h"
@@ -72,6 +71,12 @@ usb_status_t EdgeTpuDfuTask::USB_DFUHostEvent(
       SetNextState(DfuState::kUnattached);
       return kStatus_USB_Success;
     default:
+      if (uint8_t usb_status = event_code >> 16;
+          usb_status == kStatus_USB_TransferFailed) {
+        printf("%s failed: %u\r\n", __func__, usb_status);
+        SetNextState(DfuState::kError);
+        return static_cast<usb_status_t>(usb_status);
+      }
       return kStatus_USB_Success;
   }
 }
@@ -310,11 +315,14 @@ void EdgeTpuDfuTask::HandleNextState(NextStateRequest &req) {
       USB_HostEhciResetBus(static_cast<usb_host_ehci_instance_t *>(
           host_instance()->controllerHandle));
       ret = USB_HostDfuDeinit(device_handle(), class_handle());
+      if (ret != kStatus_USB_Success) {
+        SetNextState(DfuState::kError);
+      }
       SetClassHandle(nullptr);
       USB_HostTriggerReEnumeration(device_handle());
       break;
     case DfuState::kError:
-      printf("DFU error\r\n");
+      EdgeTpuManager::GetSingleton()->NotifyError();
       break;
     default:
       printf("Unhandled DFU state %d\r\n", static_cast<int>(next_state));

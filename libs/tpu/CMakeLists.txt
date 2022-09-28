@@ -31,8 +31,7 @@ add_library_m7(libs_tpu_dfu_task_freertos STATIC
     edgetpu_dfu_task.cc
 )
 target_link_libraries(libs_tpu_dfu_task_freertos
-    libs_FreeRTOS
-    libs_nxp_rt1176-sdk_freertos
+    libs_base-m7_freertos
 )
 
 add_library_m7(libs_tpu_task_freertos STATIC
