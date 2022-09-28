@@ -165,7 +165,7 @@ EOF
         "${arduino_cli}" core install coral:coral_micro
 
         if [[ ! -z ${build_sketches} ]]; then
-            for sketch in $(find -type f -path "*/arduino/libraries/*" -name "*.ino"); do
+            for sketch in $(find . -type f -path "*/arduino/libraries/*" -name "*.ino"); do
                 for variant in coral_micro coral_micro_wifi coral_micro_poe; do
                     if [[ ${sketch} =~ WiFi ]]; then
                         if [[ ! ${variant} =~ wifi ]]; then
