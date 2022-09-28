@@ -28,6 +28,7 @@
 //    bash build.sh
 //    python3 scripts/flashtool.py -e camera_motion_detection
 
+// [start-snippet:motion-detection]
 namespace coralmicro {
 namespace {
 void Main() {
@@ -36,7 +37,7 @@ void Main() {
   LedSet(Led::kStatus, true);
 
   TimerHandle_t motion_detection_timer = xTimerCreate(
-      "motion_detection_timer", pdMS_TO_TICKS(1000), pdFALSE, nullptr,
+      "motion_detection_timer", pdMS_TO_TICKS(200), pdFALSE, nullptr,
       [](TimerHandle_t timer) { LedSet(Led::kUser, false); });
   CHECK(motion_detection_timer);
 
@@ -71,3 +72,4 @@ extern "C" void app_main(void* param) {
   coralmicro::Main();
   vTaskSuspend(nullptr);
 }
+// [end-snippet:motion-detection]

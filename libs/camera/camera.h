@@ -47,15 +47,42 @@ enum class CameraTestPattern : uint8_t {
   kWalkingOnes = 0x11,
 };
 
+// The function type required by `CameraMotionDetectionConfig`.
 using CameraMotionDetectionCallback = void (*)(void* param);
 
+// Specifies the configuration for motion detection (performed in camera).
+//
+// You can pre-fill this configuration with defaults by passing an instance to
+// `CameraTask::GetMotionDetectionConfigDefault()`. Then specify
+// your callback function (the `cb` variable) and pass this config to
+// `CameraTask::SetMotionDetectionConfig()`.
+// You must also enable camera streaming mode
+// with `CameraTask::Enable()`.
+//
+// The default configuration detects any movement in the image frame, but you
+// can specify a smaller detection region by defining a bounding box with the
+// `x0`, `y0`, `x1`, and `y1` variables.
 struct CameraMotionDetectionConfig {
+  // The callback function to call when the camera detects motion.
+  // The default config is `nullptr`.
   CameraMotionDetectionCallback cb;
+  // Optional parameters to pass to the callback function.
+  // The default config is `nullptr`.
   void* cb_param;
+  // Set true to enable motion detection; false to disable it.
+  // The default config is true.
   bool enable;
+  // The detection zone's left-most pixel (index position).
+  // The default config is `0`.
   size_t x0;
+  // The detection zone's top-most pixel (index position).
+  // The default config is `0`.
   size_t y0;
+  // The detection zone's right-most pixel (index position).
+  // The default config is `CameraTask::kWidth - 1` (`323`).
   size_t x1;
+  // The detection zone's left-most pixel (index position).
+  // The default config is `CameraTask::kHeight - 1` (`323`).
   size_t y1;
 };
 
@@ -152,9 +179,15 @@ enum class CameraFilterMethod {
 
 // Clockwise image rotations.
 enum class CameraRotation {
+  // The natural orientation for the camera module
   k0,
+  // Rotated 90-degrees clockwise.
+  // Upside down, relative to the board's "Coral" label.
   k90,
+  // Rotated 180-degrees clockwise.
   k180,
+  // Rotated 270-degrees clockwise.
+  // Right-side up, relative to the board's "Coral" label.
   k270,
 };
 
@@ -216,7 +249,7 @@ class CameraTask
 
   // Enables the camera to begin capture. You must call `SetPower()` before
   // this.
-  // @param mode The operating mode.
+  // @param mode The operating mode (either `kStreaming` or `kTrigger`).
   // @return True if camera is enabled, false otherwise.
   bool Enable(CameraMode mode);
 
@@ -264,16 +297,17 @@ class CameraTask
   // begin using images with `GetFrame()`.
   void DiscardFrames(int count);
 
-  // Populates the `config` parameter with a default configuration for motion
-  // detection.
+  // Gets the default configuration for motion detection.
   //
-  // @param config The `MotionDetectionConfig` struct to fill with default
+  // @param config The `CameraMotionDetectionConfig` struct to fill with default
   // values.
   void GetMotionDetectionConfigDefault(CameraMotionDetectionConfig& config);
 
   // Sets the configuration for hardware motion detection.
   //
-  // @param config `MotionDetectionConfig` to apply to the camera.
+  // Note: You must enable camera streaming mode with `CameraTask::Enable()`.
+  //
+  // @param config `CameraMotionDetectionConfig` to apply to the camera.
   void SetMotionDetectionConfig(const CameraMotionDetectionConfig& config);
 
   // Native image pixel width.

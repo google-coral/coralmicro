@@ -3,7 +3,9 @@ Camera APIs
 
 The Dev Board Micro includes an on-board camera module with
 324 x 324 px resolution. All camera control is handled through the
-:cpp:any:`~coralmicro::CameraTask` singleton.
+:cpp:any:`~coralmicro::CameraTask` singleton. You can capture images
+one-at-a-time or receive a stream of images. The camera also offers
+hardware-based motion detection.
 
 To get started, you must acquire the ``CameraTask`` object with
 :cpp:any:`~coralmicro::CameraTask::GetSingleton`.
@@ -32,7 +34,10 @@ as input for your ML model and another format to use for display.
    than the camera, it will be blocked by
    :cpp:any:`~coralmicro::CameraTask::GetFrame` until a new frame is available.
 
-For example, the following code enables the camera with trigger mode so it
+
+**Photo capture example:**
+
+The following code enables the camera with trigger mode so it
 will capture an image when you press the User button on the Dev Board Micro.
 The image is saved internally in raw format until the app fetches it with
 :cpp:any:`~coralmicro::CameraTask::GetFrame`, which is called by the
@@ -44,6 +49,16 @@ also provides a Python client to fetch images over RPC.
 .. literalinclude:: ../examples/camera_triggered/camera_triggered.cc
    :start-after: [start-snippet:camera-trigger]
    :end-before: [end-snippet:camera-trigger]
+
+
+**Motion detection example:**
+
+This example turns on the User LED whenever motion is detected, passing the
+callback function a timer that turns the LED back off after a 200ms delay.
+
+.. literalinclude:: ../examples/camera_motion_detection/camera_motion_detection.cc
+   :start-after: [start-snippet:motion-detection]
+   :end-before: [end-snippet:motion-detection]
 
 
 `[camera.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/camera/camera.h>`_
