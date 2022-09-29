@@ -17,8 +17,8 @@
 #include "libs/a71ch/a71ch.h"
 
 #include "libs/base/gpio.h"
-#include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
-#include "third_party/a71ch/sss/ex/inc/ex_sss_boot.h"
+#include "third_party/a71ch-crypto-support/hostlib/hostLib/inc/a71ch_api.h"
+#include "third_party/a71ch-crypto-support/sss/ex/inc/ex_sss_boot.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 

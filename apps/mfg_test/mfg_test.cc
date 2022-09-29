@@ -31,7 +31,7 @@
 #include "libs/rpc/rpc_utils.h"
 #include "libs/testlib/test_lib.h"
 #include "libs/tpu/edgetpu_task.h"
-#include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
+#include "third_party/a71ch-crypto-support/hostlib/hostLib/inc/a71ch_api.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/fsl_iomuxc.h"

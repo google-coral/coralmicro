@@ -43,9 +43,6 @@
 [submodule "third_party/tflite-micro"]
 	path = third_party/tflite-micro
 	url = https://github.com/tensorflow/tflite-micro.git
-[submodule "third_party/a71ch"]
-	path = third_party/a71ch
-	url = https://github.com/google-coral/coralmicro-a71ch
 [submodule "third_party/a71ch-crypto-support"]
 	path = third_party/a71ch-crypto-support
 	url = https://coral.googlesource.com/a71ch-crypto-support

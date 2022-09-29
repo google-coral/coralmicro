@@ -18,7 +18,7 @@
 
 #include <stddef.h>
 
-#include "third_party/a71ch/hostlib/hostLib/inc/a71ch_api.h"
+#include "third_party/a71ch-crypto-support/hostlib/hostLib/inc/a71ch_api.h"
 
 // data is allowed to be NULL
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len,
