@@ -14,9 +14,9 @@ the coralmicro APIs available for these pins, plus APIs for the on-board LEDs.
 
 .. raw:: html
 
-   <figure>
-      <img src="images/micro-gpio-header.png" alt="" />
-      <figcaption><b>Figure 1.</b> Primary functions for the 12-pin headers</figcaption>
+   <figure id="figure1">
+      <img src="images/micro-pinout.png" alt="" />
+      <figcaption><b>Figure 1.</b> Pinout for the 12-pin headers, LEDs and User button</figcaption>
    </figure>
 
 
@@ -168,17 +168,12 @@ right header:
 LEDs
 -------------------------
 
-These APIs allow you to control the LEDs built into the Dev Board Micro.
-To control other LEDs attached to GPIOs, you
+These APIs allow you to control the LEDs built into the Dev Board Micro,
+indicated in `figure 1 <#figure1>`_.
+
+To control other LEDs attached to GPIO pins, you
 must instead use the `GPIO APIs <#gpio>`_, but beware that a GPIO pin
 alone is not strong enough to drive an LED.
-
-.. raw:: html
-
-   <figure>
-      <img src="images/micro-leds.png" alt="" style="max-width:280px" />
-      <figcaption><b>Figure 2.</b> On-board LEDs available for control</figcaption>
-   </figure>
 
 .. note::
    The camera LED is not available with this API because it's intended to give

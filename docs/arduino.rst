@@ -123,15 +123,17 @@ other Arduino boards, using Arduino APIs such as
 To address these GPIO pins, use the
 Arduino pin names shown in figure 1.
 
-The Dev Board Micro also includes a few built-in LEDs that you can control with
-`digitalWrite() <https://www.arduino.cc/reference/en/language/functions/digital-io/digitalwrite/>`_. To address these LEDs and the
-User button, use the pin names in table 2.
+Likewise, you can use
+`digitalWrite() <https://www.arduino.cc/reference/en/language/functions/digital-io/digitalwrite/>`_
+to toggle the on-board LEDs and
+`digitalRead() <https://www.arduino.cc/reference/en/language/functions/digital-io/digitalread/>`_
+to listen for User button presses.
 
 .. raw:: html
 
-   <figure>
-      <img src="images/micro-gpio-header.png" alt="" />
-      <figcaption><b>Figure 1.</b> Primary functions and pin names for the 12-pin headers</figcaption>
+   <figure id="figure1">
+      <img src="images/micro-pinout.png" alt="" />
+      <figcaption><b>Figure 1.</b> Pinout for the 12-pin headers, LEDs and User button</figcaption>
    </figure>
 
 Once booting is complete, all digital/analog pins are set to a high-Z (floating)
@@ -143,37 +145,6 @@ before reading or writing values.
 .. note::
    All GPIO pins are powered by the 1.8 V power rail, and provide a max current
    of approximately 6 mA on most pins.
-
-.. raw:: html
-
-   <table class="style0" style="font-size:85%">
-   <caption><strong>Table 2. </strong>Button and LED pin names </caption>
-     <thead>
-       <tr>
-         <th class="style1"><strong>Arduino name</strong></th>
-         <th class="style1"><strong>Function</strong></th>
-       </tr>
-    </thead>
-     <tbody>
-       <tr>
-         <td class="style99">PIN_BTN</td>
-         <td class="">User button (input)</td>
-       </tr>
-       <tr>
-         <td class="style99">PIN_LED_USER</td>
-         <td class="">User LED (output)</td>
-       </tr>
-       <tr>
-         <td class="style99">PIN_LED_STATUS</td>
-         <td class="">Status LED (output)</td>
-       </tr>
-       <tr>
-         <td class="style99">PIN_LED_TPU</td>
-         <td class="">Edge TPU LED (output); available only when the
-            Edge TPU is enabled</td>
-       </tr>
-     </tbody>
-  </table>
 
 **Example**:
 
@@ -244,7 +215,7 @@ documentation <https://docs.arduino.cc/learn/communication/spi>`_.
 
 `[SPI.h source] <https://github.com/google-coral/coralmicro/blob/main/arduino/libraries/SPI/src/SPI.h>`_
 
-.. doxygenfile:: SPI/SPI.h
+.. doxygenfile:: SPI/src/SPI.h
    :sections: briefdescription detaileddescription innernamespace innerclass public-func public-slot public-attrib public-static-func public-static-attrib public-type enum typedef property var
 
 
