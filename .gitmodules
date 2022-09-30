@@ -46,3 +46,6 @@
 [submodule "third_party/a71ch-crypto-support"]
 	path = third_party/a71ch-crypto-support
 	url = https://coral.googlesource.com/a71ch-crypto-support
+[submodule "third_party/littlefs-fuse"]
+	path = third_party/littlefs-fuse
+	url = https://github.com/google-coral/coralmicro-littlefs-fuse
