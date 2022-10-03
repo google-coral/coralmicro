@@ -34,7 +34,7 @@ makeSphinxWeb() {
   sphinx-build -b html . ${WEB_DIR}
   # Delete intermediary/unused files:
   find ${WEB_DIR} -mindepth 1 \
-    \( -not -name "*.md" -a -not -name "images" \) -delete
+    \( -not -name "*.md" -a -not -name "images" -a -not -path "${WEB_DIR}/images/*" \) -delete
   rm ${WEB_DIR}/index.md ${WEB_DIR}/search.md
   mv ${WEB_DIR}/index_web.md ${WEB_DIR}/index.md
   # Some custom tweaks to the output:
