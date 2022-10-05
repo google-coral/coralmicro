@@ -30,6 +30,9 @@ configurations (such as audio sample rate), which you can specify with
 :cpp:any:`~coralmicro::AudioDriverConfig`. Then you're ready to start
 reading audio samples. See below for more details.
 
+.. note::
+   These audio APIs are currently not compatible with M4 programs.
+
 
 Audio reader
 ------------

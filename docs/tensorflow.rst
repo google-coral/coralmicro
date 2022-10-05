@@ -93,10 +93,14 @@ First, you need to perform some setup:
 
 Now you're ready to run each inference as follows:
 
-1. Get a pointer to the allocated input tensor with
-   :cpp:any:`~tflite::micro::GetTensorData` (passing it
-   :cpp:any:`~tflite::MicroInterpreter::input_tensor`) and insert your input
-   data with :cpp:any:`std::memcpy`::
+1. Get the allocated input tensor with
+:cpp:any:`~tflite::MicroInterpreter::input_tensor` and fill it with your
+input data. For example, if you're
+using the Dev Board Micro camera, you can simply set the input tensor as the
+``buffer`` for your :cpp:any:`~coralmicro::CameraFrameFormat` (see
+``examples/detect_faces/``). Or you can copy
+your input data using :cpp:any:`~tflite::micro::GetTensorData` and
+:cpp:any:`std::memcpy` like this::
 
        auto* input_tensor = interpreter.input_tensor(0);
        std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
@@ -133,15 +137,21 @@ Also check out the `TensorFlow Lite for Microcontrollers documentation
 <https://www.tensorflow.org/lite/microcontrollers>`_.
 
 
-Micro Interpreter
+TFLM interpreter
 --------------------
 
-This is just a small set of APIs from TFLM that represent the core
-APIs you need to run inference on the Dev Board Micro.
-You can find many more TFLM APIs in ``coralmicro/third_party/tflite-micro/``.
+This is just a small set of APIs from TensorFlow Lite for Microcontrollers
+(TFLM) that represent the core APIs you need to run inference on the Dev Board
+Micro. You can see the rest of the TFLM APIs in
+``coralmicro/third_party/tflite-micro/``.
+
+.. note::
+   The version of TFLM that's included in coralmicro is not continuously updated
+   so some APIs might be different from the latest version of `TFLM on GitHub
+   <https://github.com/tensorflow/tflite-micro>`_.
 
 For usage examples, see the following sections, such as for
-`image classification <#image-classification>`_.
+:ref:`image classification<Image classification>`.
 
 
 `[micro_interpreter.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h>`_
@@ -229,9 +239,9 @@ Image classification
 
 These APIs simplify the pre- and post-processing for image classification models.
 
-**Example** (from `examples/classify_image/`):
+**Example** (from `examples/classify_images_file/`):
 
-.. literalinclude:: ../examples/classify_image/classify_image.cc
+.. literalinclude:: ../examples/classify_images_file/classify_images_file.cc
    :start-after: [start-sphinx-snippet:classify-image]
    :end-before: [end-sphinx-snippet:classify-image]
 
@@ -246,9 +256,9 @@ Object detection
 
 These APIs simplify the post-processing for object detection models.
 
-**Example** (from `examples/detect_image/`):
+**Example** (from `examples/detect_objects_file/`):
 
-.. literalinclude:: ../examples/detect_image/detect_image.cc
+.. literalinclude:: ../examples/detect_objects_file/detect_objects_file.cc
    :start-after: [start-sphinx-snippet:detect-image]
    :end-before: [end-sphinx-snippet:detect-image]
 
@@ -271,9 +281,9 @@ So when running PoseNet, in addition to specifying the
 Edge TPU, you should also register the :cpp:any:`~coralmicro::kPosenetDecoderOp`
 provided here.
 
-**Example** (from `examples/posenet/`):
+**Example** (from `examples/detect_poses/`):
 
-.. literalinclude:: ../examples/posenet/posenet.cc
+.. literalinclude:: ../examples/detect_poses/detect_poses.cc
    :start-after: [start-sphinx-snippet:posenet]
    :end-before: [end-sphinx-snippet:posenet]
 
@@ -292,6 +302,8 @@ Audio Classification
 
 The following APIs assist when running audio classification using audio models
 on a microcontroller with support for both CPU and Edge TPU.
+
+For an example, see ``examples/classify_speech/``.
 
 `[audio_models.h source] <https://github.com/google-coral/coralmicro/blob/main/libs/tensorflow/audio_models.h>`_
 
