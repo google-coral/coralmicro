@@ -104,7 +104,7 @@ add_executable_m7(flashloader
 )
 
 target_include_directories(flashloader PUBLIC
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/CMSIS/Core/Include
+    ${PROJECT_SOURCE_DIR}/third_party/CMSIS/CMSIS/Core/Include
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/boards/evkmimxrt1170/bootloader_examples/flashloader/cm7
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/lists
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/components/osa
