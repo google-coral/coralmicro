@@ -11,6 +11,7 @@ coralmicro API
    bluetooth.rst
    usb.rst
    system.rst
+   crypto.rst
    utils.rst
    arduino.rst
 =======

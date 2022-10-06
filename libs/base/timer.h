@@ -35,6 +35,7 @@ namespace coralmicro {
 // TimerInit();
 // auto current_time = TimerMillis();
 // ```
+// Beware that this resets the timer's clock each time you call it.
 void TimerInit();
 
 // Microseconds since boot.

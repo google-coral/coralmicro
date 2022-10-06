@@ -1,6 +1,13 @@
 Network APIs
 =============
 
+APIs to perform various networking tasks, such as open server sockets on the
+Dev Board Micro, connect to other sockets as a client, create HTTP servers,
+connect to Wi-Fi networks, and more.
+
+.. note::
+   If using SSL (with Curl or Mbed TLS), you must first call
+   :cpp:any:`~coralmicro::A71ChInit()` to initialize the a71ch crypto chip.
 
 TCP/IP sockets
 -------------------------

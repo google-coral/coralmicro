@@ -80,11 +80,14 @@ API summary
    Various system-level APIs, such as to perform inter-process communication
    between MCU cores, establish mutex locks, watchdogs, and reset the board.
 
++ :doc:`crypto`
+
+   APIs to perform various cryptography tasks with the a71ch chip.
+
 + :doc:`utils`
 
    Various utility APIs, such as to manipulate strings, generate random numbers,
-   create timers, read temperature sensors, generate secure credentials,
-   and create JPEG files.
+   create timers, read temperature sensors, and create JPEG files.
 
 
 And if you want to build apps for the Dev Board Micro with Arduino, this page

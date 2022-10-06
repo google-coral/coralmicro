@@ -25,8 +25,11 @@ namespace coralmicro {
 
 // Initializes the a71ch module.
 //
-// This function must be called before using any of our a71ch helper functions
-// or the direct a71ch api.
+// You must call this before using any of the following a71ch helper functions
+// or the direct a71ch APIs (from `third_party/a71ch/`). You must also call this
+// before using SSL features in Mbed TLS
+// (from `third_party/nxp/rt1176-sdk/middleware/mbedtls/`) or before requesting
+// an HTTPS URL with Curl (from `libs/curl/curl.h`).
 bool A71ChInit();
 
 // Gets the uid of the a71ch module.

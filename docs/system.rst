@@ -4,8 +4,8 @@ System APIs
 APIs to manage system processes.
 
 
-Inter-process communication (IPC)
----------------------------------
+Inter-processor communication (IPC)
+-----------------------------------
 
 APIs to initiate multicore processing and pass messages between the M7 and M4
 cores.

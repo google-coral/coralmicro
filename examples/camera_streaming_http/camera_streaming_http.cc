@@ -40,11 +40,11 @@ namespace {
 constexpr char kIndexFileName[] = "/coral_micro_camera.html";
 constexpr char kCameraStreamUrlPrefix[] = "/camera_stream";
 
-// [start-snippet:jpeg]
 HttpServer::Content UriHandler(const char* uri) {
   if (StrEndsWith(uri, "index.shtml")) {
     return std::string(kIndexFileName);
   } else if (StrEndsWith(uri, kCameraStreamUrlPrefix)) {
+    // [start-snippet:jpeg]
     std::vector<uint8_t> buf(CameraTask::kWidth * CameraTask::kHeight *
                              CameraFormatBpp(CameraFormat::kRgb));
     auto fmt = CameraFrameFormat{
@@ -60,11 +60,11 @@ HttpServer::Content UriHandler(const char* uri) {
 
     std::vector<uint8_t> jpeg;
     JpegCompressRgb(buf.data(), fmt.width, fmt.height, /*quality=*/75, &jpeg);
+    // [end-snippet:jpeg]
     return jpeg;
   }
   return {};
 }
-// [end-snippet:jpeg]
 
 void Main() {
   printf("Camera HTTP Example!\r\n");
