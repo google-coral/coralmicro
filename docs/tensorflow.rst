@@ -146,7 +146,7 @@ Micro. You can see the rest of the TFLM APIs in
 ``coralmicro/third_party/tflite-micro/``.
 
 .. note::
-   The version of TFLM that's included in coralmicro is not continuously updated
+   The version of TFLM included in coralmicro is not continuously updated,
    so some APIs might be different from the latest version of `TFLM on GitHub
    <https://github.com/tensorflow/tflite-micro>`_.
 
@@ -156,11 +156,11 @@ For usage examples, see the following sections, such as for
 
 `[micro_interpreter.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h>`_
 
-.. doxygenfile:: micro_interpreter.h
-   :sections: briefdescription detaileddescription innernamespace innerclass func public-attrib public-func public-slot public-static-attrib public-static-func public-type enum
+.. doxygenclass:: tflite::MicroInterpreter
+   :members:
 
 
-`[schema_generated.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/schema/schema_generated.h>`_
+`[schema_generated.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h>`_
 
 .. doxygenfunction:: tflite::GetModel
 
@@ -171,7 +171,7 @@ For usage examples, see the following sections, such as for
    :members: AddCustom
 
 .. note::
-   The :cpp:any:`tflite::MicroMutableOpResolver` has a long list of ``Add*``
+   The :cpp:any:`tflite::MicroMutableOpResolver` has a long list of ``Add...``
    functions to specify the ops that you need for your model. To see them
    all, refer to the `micro_mutable_op_resolver.h source code
    <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h>`_.

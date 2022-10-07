@@ -8,6 +8,7 @@ EXTRACT_ALL            = YES
 INPUT_FILTER           = ./doxygenate.sh
 INPUT                  = ../libs/ \
                          ../third_party/tflite-micro/tensorflow/lite/micro/ \
+                         ../third_party/tflite-micro/tensorflow/lite/schema/ \
                          ../arduino/cores/arduino/SocketClient.h \
                          ../arduino/cores/arduino/SocketServer.h \
                          ../arduino/libraries/ \

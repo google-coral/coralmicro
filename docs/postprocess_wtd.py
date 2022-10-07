@@ -20,13 +20,6 @@ import re
 
 from bs4 import BeautifulSoup
 
-def lazy_tflm_cleanup(soup):
-  """Brute-force removal of stuff we don't want from tflite-micro headers."""
-  newsoup = soup.select('section[id="micro-interpreter"] > dl > dd > p')
-  for p in newsoup:
-    p.extract()
-  return soup
-
 
 def lazy_escape_entities(string):
   """Escapes HTML entities that mess up code blocks or break Jinja build"""
@@ -41,8 +34,6 @@ def process(file):
   """Runs all the cleanup functions."""
   print('Post-processing ' + file)
   soup = BeautifulSoup(open(file), 'html.parser')
-  if os.path.split(file)[1] == 'tensorflow.html':
-    soup = lazy_tflm_cleanup(soup)
   with open(file, 'w') as output:
     output.write(lazy_escape_entities(str(soup)))
 
