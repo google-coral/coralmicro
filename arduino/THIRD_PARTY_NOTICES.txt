@@ -1,0 +1,5 @@
+In addition to the top level Apache license (see LICENSE), many third party libraries
+are used to enable this package. The top level summary of these repos, including pointers
+to the appropriate dependency licenses can be found at:
+
+https://www.github.com/google-coral/coralmicro/third_party/THIRD_PARTY_NOTICES.txt
