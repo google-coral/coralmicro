@@ -94,13 +94,13 @@ First, you need to perform some setup:
 Now you're ready to run each inference as follows:
 
 1. Get the allocated input tensor with
-:cpp:any:`~tflite::MicroInterpreter::input_tensor` and fill it with your
-input data. For example, if you're
-using the Dev Board Micro camera, you can simply set the input tensor as the
-``buffer`` for your :cpp:any:`~coralmicro::CameraFrameFormat` (see
-``examples/detect_faces/``). Or you can copy
-your input data using :cpp:any:`~tflite::micro::GetTensorData` and
-:cpp:any:`std::memcpy` like this::
+   :cpp:any:`~tflite::MicroInterpreter::input_tensor` and fill it with your
+   input data. For example, if you're
+   using the Dev Board Micro camera, you can simply set the input tensor as the
+   ``buffer`` for your :cpp:any:`~coralmicro::CameraFrameFormat` (see
+   ``examples/detect_faces/``). Or you can copy
+   your input data using :cpp:any:`~tflite::micro::GetTensorData` and
+   :cpp:any:`std::memcpy` like this::
 
        auto* input_tensor = interpreter.input_tensor(0);
        std::memcpy(tflite::GetTensorData<uint8_t>(input_tensor), image.data(),
