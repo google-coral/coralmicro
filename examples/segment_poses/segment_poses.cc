@@ -44,6 +44,7 @@ namespace coralmicro {
 namespace {
 constexpr int kTensorArenaSize = 2 * 1024 * 1024;
 constexpr float kConfidenceThreshold = 0.5f;
+constexpr int kLowConfidenceResult = -2;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr char kModelPath[] =
     "/models/bodypix_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
@@ -67,29 +68,24 @@ void RunBodypix(struct jsonrpc_request* r) {
                         /*preserve_ratio=*/false,
                         /*buffer=*/image.data()};
 
-  // Loop until a result is found
-  printf(
-      "Running Bodypix until a result with greater than %f confidence is "
-      "found\r\n",
-      kConfidenceThreshold);
-  for (;;) {
-    if (!CameraTask::GetSingleton()->GetFrame({fmt})) {
-      jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
-      return;
-    }
+  CameraTask::GetSingleton()->Trigger();
+  if (!CameraTask::GetSingleton()->GetFrame({fmt})) {
+    jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
+    return;
+  }
 
-    std::memcpy(tflite::GetTensorData<uint8_t>(bodypix_input), image.data(),
-                image.size());
+  std::memcpy(tflite::GetTensorData<uint8_t>(bodypix_input), image.data(),
+              image.size());
 
-    if (interpreter->Invoke() != kTfLiteOk) {
-      jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
-      return;
-    }
+  if (interpreter->Invoke() != kTfLiteOk) {
+    jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
+    return;
+  }
 
-    results = tensorflow::GetPosenetOutput(interpreter, kConfidenceThreshold);
-    if (!results.empty()) {
-      break;
-    }
+  results = tensorflow::GetPosenetOutput(interpreter, kConfidenceThreshold);
+  if (results.empty()) {
+    jsonrpc_return_error(r, kLowConfidenceResult, "below confidence threshold", nullptr);
+    return;
   }
 
   const auto& float_segments_tensor = interpreter->output_tensor(5);
@@ -145,7 +141,7 @@ void Main() {
 
   // Starts the camera.
   CameraTask::GetSingleton()->SetPower(true);
-  CameraTask::GetSingleton()->Enable(CameraMode::kStreaming);
+  CameraTask::GetSingleton()->Enable(CameraMode::kTrigger);
 
   printf("Initializing Bodypix server...\r\n");
   jsonrpc_init(nullptr, &interpreter);

@@ -52,6 +52,7 @@ int model_width;
 
 constexpr int kTensorArenaSize = 2 * 1024 * 1024;
 constexpr float kConfidenceThreshold = 0.5f;
+constexpr int kLowConfidenceResult = -2;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 constexpr char kModelPath[] =
     "/models/bodypix_mobilenet_v1_075_324_324_16_quant_decoder_edgetpu.tflite";
@@ -67,26 +68,23 @@ void RunBodypix(struct jsonrpc_request* r) {
 
   auto* bodypix_input = interpreter->input(0);
 
-  // Loop until a result is found.
-  Serial.println("Running Bodypix until a result found");
   std::vector<tensorflow::Pose> results;
-  for (;;) {
-    if (Camera.grab(frame_buffer) != CameraStatus::SUCCESS) {
-      Serial.println("cannot invoke because camera failed to grab frame");
-      jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
-      return;
-    }
-    std::memcpy(tflite::GetTensorData<uint8_t>(bodypix_input),
-                frame_buffer.getBuffer(), frame_buffer.getBufferSize());
-    if (interpreter->Invoke() != kTfLiteOk) {
-      jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
-      return;
-    }
-    results =
-        tensorflow::GetPosenetOutput(interpreter.get(), kConfidenceThreshold);
-    if (!results.empty()) {
-      break;
-    }
+  if (Camera.grab(frame_buffer) != CameraStatus::SUCCESS) {
+    Serial.println("cannot invoke because camera failed to grab frame");
+    jsonrpc_return_error(r, -1, "Failed to get image from camera.", nullptr);
+    return;
+  }
+  std::memcpy(tflite::GetTensorData<uint8_t>(bodypix_input),
+              frame_buffer.getBuffer(), frame_buffer.getBufferSize());
+  if (interpreter->Invoke() != kTfLiteOk) {
+    jsonrpc_return_error(r, -1, "Invoke failed", nullptr);
+    return;
+  }
+  results =
+      tensorflow::GetPosenetOutput(interpreter.get(), kConfidenceThreshold);
+  if (results.empty()) {
+    jsonrpc_return_error(r, kLowConfidenceResult, "below confidence threshold", nullptr);
+    return;
   }
 
   const auto& float_segments_tensor = interpreter->output_tensor(5);

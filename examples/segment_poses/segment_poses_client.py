@@ -42,11 +42,21 @@ def main():
   args = parser.parse_args()
 
   # Send RPC request
-  response = requests.post(f'http://{args.host}:80/jsonrpc', json={
-      'method': 'run_bodypix',
-      'jsonrpc': '2.0',
-      'id': 0,
-  }, timeout=(10, 120)).json()
+  print('Asking the device to run BodyPix until we get a high-confidence result.')
+  BELOW_CONFIDENCE_THRESHOLD = -2
+  while True:
+    response = requests.post(f'http://{args.host}:80/jsonrpc', json={
+        'method': 'run_bodypix',
+        'jsonrpc': '2.0',
+        'id': 0,
+    }, timeout=(10, 120)).json()
+    if 'error' in response:
+      error_code = response['error']['code']
+      if error_code != BELOW_CONFIDENCE_THRESHOLD:
+        print('Tensorflow failed to invoke.')
+        return
+    else:
+      break
 
   # Get the image size
   result = get_field_or_die(response, 'result')
