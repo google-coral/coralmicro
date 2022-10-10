@@ -42,6 +42,7 @@
 
 #define configUSE_PREEMPTION                    1
 
+/* To use JTAG, comment-out the following line to disable CPU sleep */
 #define configUSE_TICKLESS_IDLE                 2
 /* configEXPECTED_IDLE_TIME_BEFORE_SLEEP is a number of ticks. */
 #define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   10
