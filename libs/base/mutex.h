@@ -24,16 +24,23 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/fsl_device_registers.h"
 
 namespace coralmicro {
-// Defines a mutex lock over a given semaphore.
-// Any code in the code block following the mutex lock will only be processed
-// after the semaphore is acquired.
-// Thus, code-blocks that use a mutex lock to acquire the same semaphore will
-// result in thread-safe variables between said code-blocks. After leaving the
-// code-block the mutex lock releases the semaphore and the mutex-lock is
-// deleted.
+// Defines a mutex lock for the active MCU core, ensuring safe handling of
+// any resources that are shared between tasks.
 class MutexLock {
  public:
-  // @param sema SemaphoreHandle to be acquired.
+  // Acquires a mutex lock using a semaphore.
+  //
+  // Any code following this request for the mutex lock is blocked until the
+  // lock is successfully acquired, and each unique mutex lock can be held by
+  // only one task at a time (on the same MCU core).
+  // Thus, code-blocks that use the same semaphore to get a `MutexLock` (on the
+  // same MCU core) will have thread-safe variables between said code-blocks.
+  //
+  // After execution leaves the code block where the lock is acquired, the mutex
+  // lock is automatically released.
+  //
+  // @param sema The [SemaphoreHandle](https://www.freertos.org/xSemaphoreCreateBinary.html)
+  //   to define a unique mutex lock.
   explicit MutexLock(SemaphoreHandle_t sema) : sema_(sema) {
     CHECK(xSemaphoreTake(sema_, portMAX_DELAY) == pdTRUE);
   }
@@ -48,16 +55,22 @@ class MutexLock {
   SemaphoreHandle_t sema_;
 };
 
-// Defines a core specific mutex lock over a given semaphore gate.
-// Because each core has its own copy of semaphore gates,
-// two mutex locks operating on separate cores can acquire the same gate
-// simultaneously. This results in being able to use a multicore mutex lock to
-// represent hardware resources specific to each core. Thus, you can use
-// multicore locks to partition hardware resources to concurrently run processes
-// on different cores.
+// Defines a mutex lock that is unique across MCU cores, ensuring safe handling
+// of any resources that are shared between the M7 and M4 cores.
 class MulticoreMutexLock {
  public:
-  // @param gate Unsigned int representing the semaphore gate.
+  // Acquires a multi-core mutex lock using a semaphore gate number.
+  //
+  // Any code following this request for the mutex lock is blocked until the
+  // lock is successfully acquired, and each unique mutex lock can be held by
+  // only one task at a time, regardless of which MCU core the task is on.
+  // Thus, code-blocks that use the same gate to get a `MulticoreMutexLock`
+  // will have thread-safe variables, even across cores.
+  //
+  // After execution leaves the code block where the lock is acquired, the mutex
+  // lock is automatically released.
+  //
+  // @param gate An integer representing a unique semaphore gate.
   // Must be within range of the maximum number of gates available on the
   // hardware (16).
   explicit MulticoreMutexLock(uint8_t gate) : gate_(gate) {
