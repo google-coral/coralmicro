@@ -28,6 +28,9 @@
 #define interrupts() portENABLE_INTERRUPTS()
 #define noInterrupts() portDISABLE_INTERRUPTS()
 
+using namespace arduino;
+using namespace coralmicro::arduino;
+
 void analogReadResolution(int bits);
 void analogWriteResolution(int bits);
 
