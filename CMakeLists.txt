@@ -53,7 +53,7 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
     add_subdirectory(apps)
     add_subdirectory(examples)
 else()
-    add_subdirectory(apps/ELFLoader)
+    add_subdirectory(apps/elf_loader)
 endif()
 
 add_subdirectory(libs)
