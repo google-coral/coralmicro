@@ -28,8 +28,11 @@
 
 namespace coralmicro::tensorflow {
 
+// Supported models.
 enum AudioModel {
+  // YamNet without the frontend.
   kYAMNet,
+  // Keyword detector (or "Keyword Spotter").
   kKeywordDetector,
 };
 

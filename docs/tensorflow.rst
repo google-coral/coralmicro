@@ -207,9 +207,9 @@ Anytime you want to use the Edge TPU for acceleration with
    :cpp:any:`~coralmicro::RegisterCustomOp`
    to :cpp:any:`tflite::MicroMutableOpResolver::AddCustom`.
 
-**Example** (from `examples/classify_image/`):
+**Example** (from `examples/classify_images_file/`):
 
-.. literalinclude:: ../examples/classify_image/classify_image.cc
+.. literalinclude:: ../examples/classify_images_file/classify_images_file.cc
    :start-after: [start-sphinx-snippet:edgetpu]
    :end-before: [end-sphinx-snippet:edgetpu]
 
@@ -300,8 +300,9 @@ provided here.
 Audio Classification
 ----------------------
 
-The following APIs assist when running audio classification using audio models
-on a microcontroller with support for both CPU and Edge TPU.
+The following APIs assist with running audio classification models on the
+Dev Board Micro, either on CPU or Edge TPU. For supported models, see the
+`audio classification models </models/audio-classification/>`_.
 
 For an example, see ``examples/classify_speech/``.
 
