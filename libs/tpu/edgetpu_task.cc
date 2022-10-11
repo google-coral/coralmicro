@@ -24,6 +24,8 @@
 #include "libs/tpu/usb_host_edgetpu.h"
 #include "libs/usb/usb_host_task.h"
 
+using namespace std::placeholders;
+
 namespace coralmicro {
 using namespace edgetpu;
 
@@ -117,12 +119,7 @@ void EdgeTpuTask::GetStatusCallback(void *param, uint8_t *, uint32_t,
 void EdgeTpuTask::TaskInit() {
   coralmicro::UsbHostTask::GetSingleton()->RegisterUsbHostEventCallback(
       kEdgeTpuVid, kEdgeTpuPid,
-      [this](usb_host_handle host_handle, usb_device_handle device_handle,
-             usb_host_configuration_handle config_handle,
-             uint32_t event_code) -> _usb_status {
-        return EdgeTpuTask::USBHostEvent(host_handle, device_handle,
-                                         config_handle, event_code);
-      });
+      std::bind(&EdgeTpuTask::USBHostEvent, this, _1, _2, _3, _4));
 }
 
 bool EdgeTpuTask::HandleGetPowerRequest() const { return (enabled_count_ > 0); }
