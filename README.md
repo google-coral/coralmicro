@@ -14,14 +14,19 @@ The `coralmicro` build system is based on CMake and includes support for Make
 and Ninja builds. After you build the included projects, you can flash
 them to your board with the included flashtool (`scripts/flashtool.py`).
 
-If you want to see how to build and flash an out-of-tree project, see the
-[out-of-tree sample project](https://github.com/google-coral/coralmicro-out-of-tree-sample).
 
-If you're just getting started with the board, see the [Dev Board Micro setup
-guide at coral.ai](https://coral.ai/docs/dev-board-micro/get-started/).
+## Documentation
 
-Also check out the [coralmicro API
-reference](http://coral.ai/docs/reference/micro/).
++ [Get Started with the Dev Board Micro](https://coral.ai/docs/dev-board-micro/get-started/)
+
++ [Get Started with Arduino](https://coral.ai/docs/dev-board-micro/arduino/)
+
++ [Build an out-of-tree project](https://github.com/google-coral/coralmicro-out-of-tree-sample/blob/main/README.md)
+
++ [coralmicro API reference](http://coral.ai/docs/reference/micro/)
+
++ [coralmicro examples](/examples/)
+
 
 
 ## Get the code
@@ -35,7 +40,7 @@ reference](http://coral.ai/docs/reference/micro/).
 2. Install the required tools:
 
     ```bash
-    cd valiant && bash setup.sh
+    cd coralmicro && bash setup.sh
     ```
 
 
