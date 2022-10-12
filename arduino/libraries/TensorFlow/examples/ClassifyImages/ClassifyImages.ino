@@ -60,7 +60,9 @@ int model_height;
 int model_width;
 bool bayered;
 
-const std::string kModelPath = "/models/mnv2_324_quant_bayered_edgetpu.tflite";
+const std::string kModelPath = "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
+// Switch to this model to use raw camera data, decreasing latency.
+// const std::string kModelPath = "/models/mobilenet_v2_324_quant_bayered_grayscale_edgetpu.tflite";
 std::vector<tensorflow::Class> results;
 
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
@@ -168,14 +170,19 @@ void setup() {
   input_tensor = interpreter->input_tensor(0);
   model_height = input_tensor->dims->data[1];
   model_width = input_tensor->dims->data[2];
-  if (Camera.begin(model_width, model_height, coralmicro::CameraFormat::kRaw,
+
+  // If the model name includes "bayered", provide the raw datastream
+  // from the camera. Note this will not be rotated (despite the setting).
+  bayered = kModelPath.find("bayered") != std::string::npos;
+  auto format = bayered ? CameraFormat::kRaw : CameraFormat::kRgb;
+
+  if (Camera.begin(model_width, model_height, format,
                    coralmicro::CameraFilterMethod::kBilinear,
-                   coralmicro::CameraRotation::k0,
+                   coralmicro::CameraRotation::k270,
                    true) != CameraStatus::SUCCESS) {
     Serial.println("Failed to start camera");
     return;
   }
-  bayered = kModelPath.find("bayered") != std::string::npos;
 
   Serial.println("Initializing classification server...");
   jsonrpc_init(nullptr, nullptr);

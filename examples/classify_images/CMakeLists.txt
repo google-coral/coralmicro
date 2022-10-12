@@ -15,7 +15,7 @@
 add_executable_m7(classify_images
     classify_images.cc
     DATA
-    ${PROJECT_SOURCE_DIR}/models/mnv2_324_quant_bayered_edgetpu.tflite
+    ${PROJECT_SOURCE_DIR}/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite
 )
 
 target_link_libraries(classify_images

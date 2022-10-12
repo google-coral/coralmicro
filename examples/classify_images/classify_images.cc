@@ -63,7 +63,7 @@
 
 namespace coralmicro {
 namespace {
-const std::string kModelPath = "/models/mnv2_324_quant_bayered_edgetpu.tflite";
+const std::string kModelPath = "/models/mobilenet_v1_1.0_224_quant_edgetpu.tflite";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 
@@ -75,6 +75,7 @@ bool ClassifyFromCamera(tflite::MicroInterpreter* interpreter, int model_width,
   CHECK(image != nullptr);
   auto* input_tensor = interpreter->input_tensor(0);
 
+  // Note if the model is bayered, the raw data will not be rotated.
   auto format = bayered ? CameraFormat::kRaw : CameraFormat::kRgb;
   CameraFrameFormat fmt{format,
                         CameraFilterMethod::kBilinear,
