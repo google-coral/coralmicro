@@ -569,6 +569,7 @@ void GpioSetMode(Gpio gpio, GpioMode mode) {
   } else {
     pin_config |= PinNameToNoPull[gpio];
   }
+  IOMUXC_SetPinMux(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4], 1U);
   IOMUXC_SetPinConfig(iomuxc[0], iomuxc[1], iomuxc[2], iomuxc[3], iomuxc[4],
                       pin_config);
 }
