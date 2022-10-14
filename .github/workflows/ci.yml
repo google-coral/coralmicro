@@ -1,0 +1,93 @@
+name: CoralMicro CI Runner
+
+on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+
+  build-linux:
+    strategy:
+      matrix:
+        include:
+          - name: "Ubuntu 22.04"
+            runner: ubuntu-22.04
+          - name: "Ubuntu 20.04"
+            runner: ubuntu-20.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          submodules: recursive
+
+      - name: Setup Environment
+        run: bash setup.sh
+
+      - name: Build
+        run: bash build.sh -a -s
+
+  buid-macos:
+    strategy:
+      matrix:
+        include:
+          - name: "macOS Monterey"
+            runner: macos-12
+          - name: "macOS Big Sur"
+            runner: macos-11
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          submodules: recursive
+
+      - name: Setup Environment
+        run: bash setup.sh
+
+      - name: Build
+        run: bash build.sh -a -s
+
+  build-windows:
+    strategy:
+      matrix:
+        include:
+          - name: "Windows Server 2022"
+            runner: windows-2022
+          - name: "Windows Server 2019"
+            runner: windows-2019
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+
+      - name: Update Submodules
+        run: |
+          git config --system core.longpaths true # Circumvent msys path length limits.
+          git submodule update --init --recursive
+
+      - name: Setup Environment
+        run: |
+          choco upgrade cmake
+          choco upgrade protoc -y --version 3.17.3 --allow-downgrade
+          choco upgrade ninja -y
+          python.exe -m pip install protobuf==3.17.3 -U
+
+      - name: Build
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja .
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+          python.exe -m pip install -r ${{github.workspace}}/arduino/requirements.txt
+          python.exe ${{github.workspace}}/arduino/package.py --output_dir ${{github.workspace}}/build --core
+          python.exe ${{github.workspace}}/arduino/package.py --output_dir ${{github.workspace}}/build --flashtool
