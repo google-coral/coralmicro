@@ -94,6 +94,10 @@ enum Gpio {
   kArduinoD1 = kUartRts,
   kArduinoD2 = kUartCts,
   kArduinoD3 = kSda6,
+  kArduinoA0 = kAB,
+  kArduinoA1 = kAA,
+  kArduinoA3 = kPwm0,
+  kArduinoA4 = kPwm1,
   // @endcond
 };
 
