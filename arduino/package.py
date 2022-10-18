@@ -144,6 +144,8 @@ def main():
       'git_revision': git_revision,
   }
 
+  # Ensure the `output_dir` exists.
+  os.makedirs(args.output_dir, exist_ok=True)
   if args.core:
     return core_main(args, **common_kwargs)
   elif args.flashtool:
