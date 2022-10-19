@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+  workflow_dispatch:
 
 env:
   BUILD_TYPE: Release
@@ -148,9 +149,11 @@ jobs:
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
 
       - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
 
       - name: Start Webserver
-        run: python -m http.server &
+        run: python -m http.server --directory artifacts &
 
       - name: Setup Environment
         run: |
@@ -160,10 +163,10 @@ jobs:
         run: |
           python ${{ github.workspace }}/arduino/package.py --output_dir ${{ github.workspace }}/build --manifest \
             --manifest_revision=9.9.9 \
-            --core_url=http://localhost:8000/coral-micro-${{ github.sha }}.tar.bz2 \
-            --linux_flashtool_url=http://localhost:8000/coral-flashtool-linux64-${{ github.sha }}.tar.bz2 \
-            --mac_flashtool_url=http://localhost:8000/coral-flashtool-osx-${{ github.sha }}.tar.bz2 \
-            --win_flashtool_url=http://localhost:8000/coral-flashtool-windows-${{ github.sha }}.tar.bz2
+            --core_url=http://localhost:8000/coral-micro-${{ github.sha }}.tar.bz2/coral-micro-${{ github.sha }}.tar.bz2 \
+            --linux_flashtool_url=http://localhost:8000/coral-flashtool-linux64-${{ github.sha }}.tar.bz2/coral-flashtool-linux64-${{ github.sha }}.tar.bz2 \
+            --mac_flashtool_url=http://localhost:8000/coral-flashtool-osx-${{ github.sha }}.tar.bz2/coral-flashtool-osx-${{ github.sha }}.tar.bz2 \
+            --win_flashtool_url=http://localhost:8000/coral-flashtool-windows-${{ github.sha }}.tar.bz2/coral-flashtool-windows-${{ github.sha }}.tar.bz2
 
       - uses: actions/upload-artifact@v3
         with:
@@ -176,3 +179,40 @@ jobs:
           name: 99-coral-micro.rules
           path: ${{ github.workspace }}/scripts/99-coral-micro.rules
           if-no-files-found: error
+
+  release:
+    needs: [create-manifest]
+    strategy:
+      matrix:
+        include:
+          - name: "Ubuntu 20.04"
+            runner: ubuntu-20.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    if: startsWith(github.ref, 'refs/tags/arduino-')
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Modify Manifest
+        run: |
+          sed -i -e 's#http://localhost:8000#https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}#g' artifacts/package_coral_index.json/package_coral_index.json
+          sed -i -e 's#"version": "9.9.9"#"version": "${{ github.ref_name }}"#g' artifacts/package_coral_index.json/package_coral_index.json
+          sed -i -e 's#"version": "arduino-#"version": "#g' artifacts/package_coral_index.json/package_coral_index.json
+          sed -i -e 's#/coral-micro-${{ github.sha }}.tar.bz2/#/#g' artifacts/package_coral_index.json/package_coral_index.json
+          sed -i -e 's#/coral-flashtool-linux64-${{ github.sha }}.tar.bz2/#/#g' artifacts/package_coral_index.json/package_coral_index.json
+          sed -i -e 's#/coral-flashtool-osx-${{ github.sha }}.tar.bz2/#/#g' artifacts/package_coral_index.json/package_coral_index.json
+          sed -i -e 's#/coral-flashtool-windows-${{ github.sha }}.tar.bz2/#/#g' artifacts/package_coral_index.json/package_coral_index.json
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          prerelease: ${{ contains(github.ref_name, '-pre') }}
+          fail_on_unmatched_files: true
+          files: |
+            artifacts/99-coral-micro.rules/99-coral-micro.rules
+            artifacts/package_coral_index.json/package_coral_index.json
+            artifacts/coral-micro-${{ github.sha }}.tar.bz2/coral-micro-${{ github.sha }}.tar.bz2
+            artifacts/coral-flashtool-linux64-${{ github.sha }}.tar.bz2/coral-flashtool-linux64-${{ github.sha }}.tar.bz2
+            artifacts/coral-flashtool-osx-${{ github.sha }}.tar.bz2/coral-flashtool-osx-${{ github.sha }}.tar.bz2
+            artifacts/coral-flashtool-windows-${{ github.sha }}.tar.bz2/coral-flashtool-windows-${{ github.sha }}.tar.bz2
