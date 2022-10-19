@@ -14,6 +14,9 @@ The `coralmicro` build system is based on CMake and includes support for Make
 and Ninja builds. After you build the included projects, you can flash
 them to your board with the included flashtool (`scripts/flashtool.py`).
 
+![main](https://github.com/google-coral/coralmicro/actions/workflows/ci.yml/badge.svg?event=push)
+![arduino](https://github.com/google-coral/coralmicro/actions/workflows/arduino.yml/badge.svg?event=push)
+
 
 ## Documentation
 
