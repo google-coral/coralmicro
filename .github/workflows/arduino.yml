@@ -61,7 +61,7 @@ jobs:
         run: bash setup.sh
 
       - name: Build
-        run: bash build.sh -c -a -g
+        run: bash build.sh -c -a -g -i
 
       - uses: actions/upload-artifact@v3
         with:
@@ -89,7 +89,7 @@ jobs:
         run: bash setup.sh
 
       - name: Build
-        run: bash build.sh -c -a -g
+        run: bash build.sh -c -a -g -i
 
       - uses: actions/upload-artifact@v3
         with:
