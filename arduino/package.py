@@ -385,10 +385,10 @@ def core_main(args, **kwargs):
                     os.path.join(bootloader_dir, 'flashloader.srec'))
 
     # Copy license files
-    shutil.copyfile(os.path.join(arduino_dir,'LICENSE'),
-                    os.path.join(core_out_dir,'LICENSE'))
-    shutil.copyfile(os.path.join(arduino_dir,'THIRD_PARTY_NOTICES.txt'),
-                    os.path.join(core_out_dir,'THIRD_PARTY_NOTICES.txt'))
+    shutil.copyfile(os.path.join(arduino_dir, 'LICENSE'),
+                    os.path.join(core_out_dir, 'LICENSE'))
+    shutil.copyfile(os.path.join(arduino_dir, 'THIRD_PARTY_NOTICES.txt'),
+                    os.path.join(core_out_dir, 'THIRD_PARTY_NOTICES.txt'))
     # Archive core.
     tar_path = os.path.join(args.output_dir, f'{core_name}.tar.bz2')
     with tarfile.open(name=tar_path, mode='w:bz2') as tar:

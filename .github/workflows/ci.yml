@@ -1,20 +1,44 @@
-name: CoralMicro CI Runner
+name: CoralMicro Build
 
 on: [push, pull_request]
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
 
-  build-linux:
+  build-arduino-core:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          submodules: recursive
+
+      - name: Setup Environment
+        run: |
+          bash setup.sh
+          python3 -m pip install ninja
+
+      - name: Build
+        run: bash build.sh -n -c -a -f -i
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coral-micro-${{ github.sha }}.tar.bz2
+          path: ${{ github.workspace }}/build/coral-micro-${{ github.sha }}.tar.bz2
+          if-no-files-found: error
+
+  build-all-linux:
+    needs: build-arduino-core
+
     strategy:
       matrix:
         include:
-          - name: "Ubuntu 22.04"
-            runner: ubuntu-22.04
           - name: "Ubuntu 20.04"
             runner: ubuntu-20.04
+          - name: "Ubuntu 22.04"
+            runner: ubuntu-22.04
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
 
@@ -25,22 +49,35 @@ jobs:
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           submodules: recursive
 
+      - uses: actions/download-artifact@v3
+        with:
+          path: ${{ github.workspace }}/artifacts
+
+      - name: Prepare Arduino Core
+        run: |
+          mkdir ${{ github.workspace }}/build
+          mv ${{ github.workspace }}/artifacts/coral-micro-${{ github.sha }}.tar.bz2/coral-micro-${{ github.sha }}.tar.bz2 ${{ github.workspace }}/build 
+
       - name: Setup Environment
-        run: bash setup.sh
+        run: |
+          bash setup.sh
+          python3 -m pip install ninja
 
       - name: Build
-        run: bash build.sh -a -s
+        run: bash build.sh -n -a -g -s
 
-  buid-macos:
+  build-all-macos:
+    needs: build-arduino-core
+
     strategy:
       matrix:
         include:
-          - name: "macOS Monterey"
-            runner: macos-12
           - name: "macOS Big Sur"
             runner: macos-11
+          - name: "macOS Monterey"
+            runner: macos-12
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 120
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v3
@@ -49,20 +86,34 @@ jobs:
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           submodules: recursive
 
+      - uses: actions/download-artifact@v3
+        with:
+          path: ${{ github.workspace }}/artifacts
+
+      - name: Prepare Arduino Core
+        run: |
+          mkdir ${{ github.workspace }}/build
+          mv ${{ github.workspace }}/artifacts/coral-micro-${{ github.sha }}.tar.bz2/coral-micro-${{ github.sha }}.tar.bz2 ${{ github.workspace }}/build 
+
       - name: Setup Environment
-        run: bash setup.sh
+        run: |
+          bash setup.sh
+          python3 -m pip install ninja       
 
       - name: Build
-        run: bash build.sh -a -s
+        run: bash build.sh -n -a -g -s
 
-  build-windows:
+
+  build-all-windows:
+    needs: build-arduino-core
+
     strategy:
       matrix:
         include:
-          - name: "Windows Server 2022"
-            runner: windows-2022
           - name: "Windows Server 2019"
             runner: windows-2019
+          - name: "Windows Server 2022"
+            runner: windows-2022
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
 
@@ -77,17 +128,22 @@ jobs:
           git config --system core.longpaths true # Circumvent msys path length limits.
           git submodule update --init --recursive
 
+      - uses: actions/download-artifact@v3
+        with:
+          path: ${{ github.workspace }}/artifacts
+
+      - name: Prepare Arduino Core
+        run: |
+          mkdir ${{ github.workspace }}/build
+          mv ${{ github.workspace }}/artifacts/coral-micro-${{ github.sha }}.tar.bz2/coral-micro-${{ github.sha }}.tar.bz2 ${{ github.workspace }}/build 
+
       - name: Setup Environment
         run: |
           choco upgrade cmake
-          choco upgrade protoc -y --version 3.17.3 --allow-downgrade
           choco upgrade ninja -y
-          python.exe -m pip install protobuf==3.17.3 -U
+          python3.exe -m pip install -r ${{ github.workspace }}/arduino/requirements.txt
 
       - name: Build
-        run: |
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja .
-          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-          python.exe -m pip install -r ${{github.workspace}}/arduino/requirements.txt
-          python.exe ${{github.workspace}}/arduino/package.py --output_dir ${{github.workspace}}/build --core
-          python.exe ${{github.workspace}}/arduino/package.py --output_dir ${{github.workspace}}/build --flashtool
+        shell: bash
+        run: bash build.sh -n -a -g -s
+
