@@ -65,7 +65,7 @@ function install_arduino {
     cat <<EOF >${SCRIPT_DIR}/arduino-cli.yaml
 board_manager:
   additional_urls:
-    - file://${build_dir}/package_coral_index.json
+    - http://localhost:8000/package_coral_index.json
 daemon:
   port: "50051"
 directories:
@@ -92,7 +92,7 @@ EOF
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         platform_name="osx"
         flashtool_name="mac"
-    elif [[ "$OSTYPE" == "win32" ]]; then
+    elif [[ "$OSTYPE" == "win32" || "$OSTYPE" == "msys" ]]; then
         platform_name="windows"
         flashtool_name="win"
     else
@@ -209,31 +209,31 @@ EOF
       if [[ ! -z "${ninja}" ]]; then
           ninja -C ${build_dir}
       else
-          make -C ${build_dir} -j $(nproc)
+          make -C ${build_dir} -j "$(nproc)"
       fi
     fi
 
     if [[ ! -z ${build_arduino} ]]; then
-        python3 -m pip install -r ${SCRIPT_DIR}/arduino/requirements.txt
-        if [[ -z ${skip_arduino_flashtool} ]]; then
-            python3 ${PACKAGE_PY} --output_dir=${build_dir} --flashtool
-        fi
-        if [[ -z ${skip_arduino_core} ]]; then
-            python3 ${PACKAGE_PY} --output_dir=${build_dir} --core
-            if [[ -z ${skip_install_arduino} ]]; then
-                if [[ ! -d "${SCRIPT_DIR}/third_party/arduino-cli" ]]; then
-                    python3 "${SCRIPT_DIR}/arduino/get_arduino_cli.py" \
-                      --version 0.26.0 \
-                      --output_dir "${SCRIPT_DIR}/third_party/arduino-cli"
-                fi
+      python3 -m pip install -r ${SCRIPT_DIR}/arduino/requirements.txt
+      if [[ -z ${skip_arduino_flashtool} ]]; then
+          python3 ${PACKAGE_PY} --output_dir=${build_dir} --flashtool
+      fi
+      if [[ -z ${skip_arduino_core} ]]; then
+          python3 ${PACKAGE_PY} --output_dir=${build_dir} --core
+      fi
+      if [[ -z ${skip_install_arduino} ]]; then
+          if [[ ! -d "${SCRIPT_DIR}/third_party/arduino-cli" ]]; then
+              python3 "${SCRIPT_DIR}/arduino/get_arduino_cli.py" \
+                --version 0.28.0 \
+                --output_dir "${SCRIPT_DIR}/third_party/arduino-cli"
 
-                local readonly arduino_cli="${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli"
-                install_arduino "${build_dir}" "${arduino_cli}"
-                if [[ ! -z ${build_sketches} ]]; then
-                    build_sketches "${arduino_cli}"
-                fi
-            fi
+          local readonly arduino_cli="${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli"
+          install_arduino "${build_dir}" "${arduino_cli}"
+          if [[ ! -z ${build_sketches} ]]; then
+              build_sketches "${arduino_cli}"
+          fi
         fi
+      fi
     fi
 }
 
