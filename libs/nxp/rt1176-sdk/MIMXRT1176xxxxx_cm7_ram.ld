@@ -363,6 +363,10 @@ SECTIONS
     *(m_usb_dma_init_data)
     *(.data)                 /* .data sections */
     *(.data*)                /* .data* sections */
+    *(.got)
+    *(.got*)
+    *(.got.plt)
+    *(.got.plt*)
     KEEP(*(.jcr*))
     . = ALIGN(4);
     _net_buf_pool_list = .;
