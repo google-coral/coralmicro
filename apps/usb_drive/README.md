@@ -54,7 +54,7 @@ mkdir -p /path/to/mount/point
 Then mount the file system using the built `lfs` binary, assigned block device name (`/dev/sdc` in this example) and `/path/to/mount/point`.
 
 ```bash
-sudo third_party/littlefs-fuse -o allow_other --read_size=2048 \
+sudo third_party/littlefs-fuse/lfs -o allow_other --read_size=2048 \
      --cache_size=2048 --lookahead_size=2048 --prog_size=2048 \
      --block_cycles=250 --block_count=512 --block_size=131072 \
      /dev/sdc /path/to/mount/point
