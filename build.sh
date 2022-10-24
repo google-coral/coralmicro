@@ -206,34 +206,33 @@ EOF
     # are available.
     cmake -B ${build_dir} -G "${generator}" -S "${SCRIPT_DIR}"
     if [[ -z ${skip_build_cmake} ]]; then
-      if [[ ! -z "${ninja}" ]]; then
-          ninja -C ${build_dir}
-      else
-          make -C ${build_dir} -j "$(nproc)"
-      fi
+        if [[ ! -z "${ninja}" ]]; then
+            ninja -C ${build_dir}
+        else
+            make -C ${build_dir} -j "$(nproc)"
+        fi
     fi
 
     if [[ ! -z ${build_arduino} ]]; then
-      python3 -m pip install -r ${SCRIPT_DIR}/arduino/requirements.txt
-      if [[ -z ${skip_arduino_flashtool} ]]; then
-          python3 ${PACKAGE_PY} --output_dir=${build_dir} --flashtool
-      fi
-      if [[ -z ${skip_arduino_core} ]]; then
-          python3 ${PACKAGE_PY} --output_dir=${build_dir} --core
-      fi
-      if [[ -z ${skip_install_arduino} ]]; then
-          if [[ ! -d "${SCRIPT_DIR}/third_party/arduino-cli" ]]; then
-              python3 "${SCRIPT_DIR}/arduino/get_arduino_cli.py" \
-                --version 0.28.0 \
-                --output_dir "${SCRIPT_DIR}/third_party/arduino-cli"
-
-          local readonly arduino_cli="${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli"
-          install_arduino "${build_dir}" "${arduino_cli}"
-          if [[ ! -z ${build_sketches} ]]; then
-              build_sketches "${arduino_cli}"
-          fi
+        python3 -m pip install -r ${SCRIPT_DIR}/arduino/requirements.txt
+        if [[ -z ${skip_arduino_flashtool} ]]; then
+            python3 ${PACKAGE_PY} --output_dir=${build_dir} --flashtool
         fi
-      fi
+        if [[ -z ${skip_arduino_core} ]]; then
+            python3 ${PACKAGE_PY} --output_dir=${build_dir} --core
+        fi
+        if [[ -z ${skip_install_arduino} ]]; then
+            if [[ ! -d "${SCRIPT_DIR}/third_party/arduino-cli" ]]; then
+                python3 "${SCRIPT_DIR}/arduino/get_arduino_cli.py" \
+                  --version 0.28.0 \
+                  --output_dir "${SCRIPT_DIR}/third_party/arduino-cli"
+            fi
+            local readonly arduino_cli="${SCRIPT_DIR}/third_party/arduino-cli/arduino-cli"
+            install_arduino "${build_dir}" "${arduino_cli}"
+            if [[ ! -z ${build_sketches} ]]; then
+                build_sketches "${arduino_cli}"
+            fi
+        fi
     fi
 }
 
