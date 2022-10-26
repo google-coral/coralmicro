@@ -108,6 +108,9 @@ class EdgeTpuManager {
   // @param mode The `PerformanceMode` to use for the Edge TPU. Options are:
   // `kMax` (500Mhz), `kHigh` (250Mhz), `kMedium` (125Mhz), or `kLow` (63Mhz).
   // If omitted, the default is `kHigh`.
+  // **Caution**: If you set the performance mode to `kMax`, it can increase
+  // the Edge TPU inferencing speed, but it can also make the Edge TPU
+  // module hotter, which might cause burns if touched.
   //
   // @return A shared pointer to Edge TPU device. The shared_ptr can point to
   // nullptr in case of error.
