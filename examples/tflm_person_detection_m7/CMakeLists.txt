@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable_m7(tflm_person_detection
+add_executable_m7(tflm_person_detection_m7
     image_provider.cc
     main_functions.cc
     person_detection.cc
@@ -20,6 +20,6 @@ add_executable_m7(tflm_person_detection
     ${PROJECT_SOURCE_DIR}/models/person_detect_model.tflite
 )
 
-target_link_libraries(tflm_person_detection
+target_link_libraries(tflm_person_detection_m7
     libs_base-m7_freertos
 )

@@ -21,9 +21,10 @@ jobs:
           submodules: recursive
 
       - name: Setup Environment
-        run: |
-          bash setup.sh
-          python3 -m pip install ninja
+        run: bash setup.sh
+
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
 
       - name: Build
         run: bash build.sh -n -c -a -f -i
@@ -58,15 +59,16 @@ jobs:
         with:
           path: ${{ github.workspace }}/artifacts
 
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
+
       - name: Prepare Arduino Core
         run: |
           mkdir ${{ github.workspace }}/build
           mv ${{ github.workspace }}/artifacts/coral-micro-${{ github.sha }}.tar.bz2/coral-micro-${{ github.sha }}.tar.bz2 ${{ github.workspace }}/build 
 
       - name: Setup Environment
-        run: |
-          bash setup.sh
-          python3 -m pip install ninja
+        run: bash setup.sh
 
       - name: Build
         run: bash build.sh -n -a -g -s
@@ -95,15 +97,16 @@ jobs:
         with:
           path: ${{ github.workspace }}/artifacts
 
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
+
       - name: Prepare Arduino Core
         run: |
           mkdir ${{ github.workspace }}/build
           mv ${{ github.workspace }}/artifacts/coral-micro-${{ github.sha }}.tar.bz2/coral-micro-${{ github.sha }}.tar.bz2 ${{ github.workspace }}/build 
 
       - name: Setup Environment
-        run: |
-          bash setup.sh
-          python3 -m pip install ninja       
+        run: bash setup.sh
 
       - name: Build
         run: bash build.sh -n -a -g -s
