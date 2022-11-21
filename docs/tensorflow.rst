@@ -154,18 +154,18 @@ For usage examples, see the following sections, such as for
 :ref:`image classification<Image classification>`.
 
 
-`[micro_interpreter.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h>`_
+`[micro_interpreter.h source] <https://github.com/tensorflow/tflite-micro/tree/24c08505dfd2a97b343220bd1c4006f881061ea6/tensorflow/lite/micro/micro_interpreter.h>`_
 
 .. doxygenclass:: tflite::MicroInterpreter
    :members:
 
 
-`[schema_generated.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h>`_
+`[schema_generated.h source] <https://github.com/tensorflow/tflite-micro/tree/24c08505dfd2a97b343220bd1c4006f881061ea6/tensorflow/lite/schema/schema_generated.h>`_
 
 .. doxygenfunction:: tflite::GetModel
 
 
-`[micro_mutable_op_resolver.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h>`_
+`[micro_mutable_op_resolver.h source] <https://github.com/tensorflow/tflite-micro/tree/24c08505dfd2a97b343220bd1c4006f881061ea6/tensorflow/lite/micro/micro_mutable_op_resolver.h>`_
 
 .. doxygenclass:: tflite::MicroMutableOpResolver
    :members: AddCustom
@@ -177,14 +177,14 @@ For usage examples, see the following sections, such as for
    <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h>`_.
 
 
-`[micro_error_reporter.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h>`_
+`[micro_error_reporter.h source] <https://github.com/tensorflow/tflite-micro/tree/24c08505dfd2a97b343220bd1c4006f881061ea6/tensorflow/lite/micro/micro_error_reporter.h>`_
 
 .. doxygenclass:: tflite::MicroErrorReporter
    :members:
    :undoc-members:
 
 
-`[kernel_util.h source] <https://github.com/google-coral/coralmicro/blob/main/third_party/tflite-micro/tensorflow/lite/micro/kernels/kernel_util.h>`_
+`[kernel_util.h source] <https://github.com/tensorflow/tflite-micro/tree/24c08505dfd2a97b343220bd1c4006f881061ea6/tensorflow/lite/micro/kernels/kernel_util.h>`_
 
 .. doxygenfunction:: tflite::micro::GetTensorData(TfLiteEvalTensor *tensor)
 
