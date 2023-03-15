@@ -41,7 +41,7 @@ constexpr char kIndexFileName[] = "/coral_micro_camera.html";
 constexpr char kCameraStreamUrlPrefix[] = "/camera_stream";
 
 HttpServer::Content UriHandler(const char* uri) {
-  if (StrEndsWith(uri, "index.shtml")) {
+  if (StrEndsWith(uri, "coral_micro_camera.html")) {
     return std::string(kIndexFileName);
   } else if (StrEndsWith(uri, kCameraStreamUrlPrefix)) {
     // [start-snippet:jpeg]
