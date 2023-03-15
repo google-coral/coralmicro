@@ -25,7 +25,7 @@
 //
 // To build and flash from coralmicro root:
 //    bash build.sh
-//    python3 scripts/flashtool.py -e wifi_server
+//    python3 scripts/flashtool.py -e wifi_client
 
 namespace coralmicro {
 void Main() {
