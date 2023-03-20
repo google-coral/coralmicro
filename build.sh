@@ -214,6 +214,7 @@ EOF
     fi
 
     if [[ ! -z ${build_arduino} ]]; then
+        python3 -m pip install -r ${SCRIPT_DIR}/scripts/requirements.txt
         python3 -m pip install -r ${SCRIPT_DIR}/arduino/requirements.txt
         if [[ -z ${skip_arduino_flashtool} ]]; then
             python3 ${PACKAGE_PY} --output_dir=${build_dir} --flashtool
