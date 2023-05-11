@@ -696,8 +696,8 @@ void CameraTask::SetMotionDetectionRegisters() {
 void CameraTask::SetDefaultRegisters() {
   // Taken from Tensorflow's configuration in the person detection sample
   /* Analog settings */
-  Write(CameraRegisters::kBlcTgt, 0x08);
-  Write(CameraRegisters::kBlc2Tgt, 0x08);
+  Write(CameraRegisters::kBlcTgt, 0x00);
+  Write(CameraRegisters::kBlc2Tgt, 0x00);
   /* These registers are RESERVED in the datasheet,
    * but without them the picture is bad. */
   Write(0x3044, 0x0A);
@@ -713,6 +713,7 @@ void CameraTask::SetDefaultRegisters() {
   Write(0x3057, 0x29);
   Write(0x3058, 0x1F);
   Write(CameraRegisters::kBitControl, 0x1E);
+
   /* Digital settings */
   Write(CameraRegisters::kBlcCfg, 0x43);
   Write(CameraRegisters::kBlcDither, 0x40);
@@ -727,19 +728,20 @@ void CameraTask::SetDefaultRegisters() {
   /* AE settings */
   Write(CameraRegisters::kStatisticCtrl, 0x07);
   Write(CameraRegisters::kAeCtrl, 0x01);
-  Write(CameraRegisters::kAeTargetMean, 0x5F);
-  Write(CameraRegisters::kAeMinMean, 0x0A);
+  Write(CameraRegisters::kAeTargetMean, 0x15);
+  Write(CameraRegisters::kAeMinMean, 0x01);
   Write(CameraRegisters::kConvergeInTh, 0x03);
   Write(CameraRegisters::kConvergeOutTh, 0x05);
-  Write(CameraRegisters::kMaxIntgH, 0x02);
-  Write(CameraRegisters::kMaxIntgL, 0x14);
+  Write(CameraRegisters::kMaxIntgH, 0x00);
+  Write(CameraRegisters::kMaxIntgL, 0xA0);
   Write(CameraRegisters::kMinIntg, 0x02);
   Write(CameraRegisters::kMaxAgainFull, 0x03);
   Write(CameraRegisters::kMaxAgainBin2, 0x03);
-  Write(CameraRegisters::kMinAgain, 0x00);
-  Write(CameraRegisters::kMaxDgain, 0x80);
-  Write(CameraRegisters::kMinDgain, 0x40);
+  Write(CameraRegisters::kMinAgain, 0x02);
+  Write(CameraRegisters::kMaxDgain, 0x10);
+  Write(CameraRegisters::kMinDgain, 0x10);
   Write(CameraRegisters::kDampingFactor, 0x20);
+
   /* 60Hz flicker */
   Write(CameraRegisters::kFsCtrl, 0x03);
   Write(CameraRegisters::kFs60HzH, 0x00);
