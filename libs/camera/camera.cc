@@ -696,8 +696,8 @@ void CameraTask::SetMotionDetectionRegisters() {
 void CameraTask::SetDefaultRegisters() {
   // Taken from Tensorflow's configuration in the person detection sample
   /* Analog settings */
-  Write(CameraRegisters::kBlcTgt, 0x08);
-  Write(CameraRegisters::kBlc2Tgt, 0x08);
+  Write(CameraRegisters::kBlcTgt, 0x00);
+  Write(CameraRegisters::kBlc2Tgt, 0x00);
   /* These registers are RESERVED in the datasheet,
    * but without them the picture is bad. */
   Write(0x3044, 0x0A);
@@ -727,18 +727,18 @@ void CameraTask::SetDefaultRegisters() {
   /* AE settings */
   Write(CameraRegisters::kStatisticCtrl, 0x07);
   Write(CameraRegisters::kAeCtrl, 0x01);
-  Write(CameraRegisters::kAeTargetMean, 0x5F);
-  Write(CameraRegisters::kAeMinMean, 0x0A);
+  Write(CameraRegisters::kAeTargetMean, 0x15);
+  Write(CameraRegisters::kAeMinMean, 0x01);
   Write(CameraRegisters::kConvergeInTh, 0x03);
   Write(CameraRegisters::kConvergeOutTh, 0x05);
-  Write(CameraRegisters::kMaxIntgH, 0x02);
-  Write(CameraRegisters::kMaxIntgL, 0x14);
+  Write(CameraRegisters::kMaxIntgH, 0x00);
+  Write(CameraRegisters::kMaxIntgL, 0xA0);
   Write(CameraRegisters::kMinIntg, 0x02);
   Write(CameraRegisters::kMaxAgainFull, 0x03);
   Write(CameraRegisters::kMaxAgainBin2, 0x03);
-  Write(CameraRegisters::kMinAgain, 0x00);
-  Write(CameraRegisters::kMaxDgain, 0x80);
-  Write(CameraRegisters::kMinDgain, 0x40);
+  Write(CameraRegisters::kMinAgain, 0x02);
+  Write(CameraRegisters::kMaxDgain, 0x10);
+  Write(CameraRegisters::kMinDgain, 0x10);
   Write(CameraRegisters::kDampingFactor, 0x20);
   /* 60Hz flicker */
   Write(CameraRegisters::kFsCtrl, 0x03);
@@ -765,7 +765,11 @@ camera::EnableResponse CameraTask::HandleEnableRequest(const CameraMode& mode) {
   // Shifting
   Write(CameraRegisters::kVsyncHsyncPixelShiftEn, 0x0);
 
-  status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
+  if (transfer_callback_ == nullptr) {
+    status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
+  } else {
+    status = CSI_TransferCreateHandle(CSI, &csi_handle_, transfer_callback_, transfer_callback_data_);
+  }
 
   int framebuffer_count = kFramebufferCount;
   if (mode == CameraMode::kTrigger) {
@@ -936,6 +940,11 @@ void CameraTask::RequestHandler(camera::Request* req) {
       break;
   }
   if (req->callback) req->callback(resp);
+}
+
+void CameraTask::RegisterCSITransferCallback(csi_transfer_callback_t callback, void* callback_data) {
+  transfer_callback_ = callback;
+  transfer_callback_data_ = callback_data;
 }
 
 }  // namespace coralmicro
