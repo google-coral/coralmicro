@@ -316,6 +316,12 @@ class CameraTask
   // Native image pixel height.
   static constexpr size_t kHeight = 324;
 
+  // Registers a callback for when a camera csi transfer is done.
+  //
+  // @param callback The `csi_transfer_callback_t` to be called by the csi driver.
+  // @param callback_data The user data pointer to pass into the callback.
+  void RegisterCSITransferCallback(csi_transfer_callback_t callback, void* callback_data);
+
  private:
   int GetFrame(uint8_t** buffer, bool block);
   void ReturnFrame(int index);
@@ -342,6 +348,9 @@ class CameraTask
   CameraTestPattern test_pattern_;
   CameraMotionDetectionConfig md_config_;
   bool enabled_{false};
+
+  csi_transfer_callback_t transfer_callback_{nullptr};
+  void* transfer_callback_data_{nullptr};
 };
 
 }  // namespace coralmicro

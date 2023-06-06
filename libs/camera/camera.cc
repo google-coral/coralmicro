@@ -767,7 +767,11 @@ camera::EnableResponse CameraTask::HandleEnableRequest(const CameraMode& mode) {
   // Shifting
   Write(CameraRegisters::kVsyncHsyncPixelShiftEn, 0x0);
 
-  status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
+  if (transfer_callback_ == nullptr) {
+    status = CSI_TransferCreateHandle(CSI, &csi_handle_, nullptr, 0);
+  } else {
+    status = CSI_TransferCreateHandle(CSI, &csi_handle_, transfer_callback_, transfer_callback_data_);
+  }
 
   int framebuffer_count = kFramebufferCount;
   if (mode == CameraMode::kTrigger) {
@@ -938,6 +942,11 @@ void CameraTask::RequestHandler(camera::Request* req) {
       break;
   }
   if (req->callback) req->callback(resp);
+}
+
+void CameraTask::RegisterCSITransferCallback(csi_transfer_callback_t callback, void* callback_data) {
+  transfer_callback_ = callback;
+  transfer_callback_data_ = callback_data;
 }
 
 }  // namespace coralmicro
