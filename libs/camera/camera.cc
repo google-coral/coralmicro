@@ -728,7 +728,7 @@ void CameraTask::SetDefaultRegisters() {
   /* AE settings */
   Write(CameraRegisters::kStatisticCtrl, 0x07);
   Write(CameraRegisters::kAeCtrl, 0x01);
-  Write(CameraRegisters::kAeTargetMean, 0x15);
+  Write(CameraRegisters::kAeTargetMean, 0x30);
   Write(CameraRegisters::kAeMinMean, 0x01);
   Write(CameraRegisters::kConvergeInTh, 0x03);
   Write(CameraRegisters::kConvergeOutTh, 0x05);
