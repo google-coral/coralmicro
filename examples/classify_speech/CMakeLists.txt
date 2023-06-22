@@ -22,4 +22,5 @@ add_executable_m7(classify_speech
 target_link_libraries(classify_speech
     libs_base-m7_freertos
     libs_audio_freertos
+    libs_tpu_freertos
 )

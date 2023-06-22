@@ -75,7 +75,7 @@ bool ResizeImage(const ImageDims& in_dims, const uint8_t* uin,
                                               false /* half_pixel_centers */};
 
   tflite::micro::KernelRunner runner(
-      tflite::ops::micro::Register_RESIZE_NEAREST_NEIGHBOR(), tensors,
+      tflite::Register_RESIZE_NEAREST_NEIGHBOR(), tensors,
       tensors_size, inputs, outputs, &params);
 
   if (runner.InitAndPrepare() != kTfLiteOk) {

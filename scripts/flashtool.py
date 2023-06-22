@@ -1022,7 +1022,7 @@ def main():
   elfloader_elf_path = os.path.join(
       os.path.dirname(elfloader_path), 'elf_loader')
   toolchain_path = args.toolchain if args.toolchain else os.path.join(
-      root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-9-2020-q2-update', 'bin')
+      root_dir, 'third_party', toolchain_dir, 'gcc-arm-none-eabi-10.3-2021.10', 'bin')
   (flashloader_workdir, flashloader_path) = MakeFlashloaderFromSrec(args.flashloader_path,
                                                                     elftosb_path) if args.flashloader_path else MakeFlashloader(build_dir, cached_files, elftosb_path)
   state_machine_args = {

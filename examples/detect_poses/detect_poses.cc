@@ -19,8 +19,8 @@
 #include "libs/tensorflow/posenet.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "libs/tpu/edgetpu_op.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 // Performs pose estimation with camera images (using the PoseNet model),
@@ -48,8 +48,7 @@ void Main() {
   // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
-  tflite::MicroErrorReporter error_reporter;
-  TF_LITE_REPORT_ERROR(&error_reporter, "Posenet!");
+  printf("Posenet!\r\n");
   // Turn on the TPU and get it's context.
   auto tpu_context =
       EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
@@ -60,13 +59,12 @@ void Main() {
   // Reads the model and checks version.
   std::vector<uint8_t> posenet_tflite;
   if (!LfsReadFile(kModelPath, &posenet_tflite)) {
-    TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load model!");
+    printf("Failed to load model!\rn");
     vTaskSuspend(nullptr);
   }
   auto* model = tflite::GetModel(posenet_tflite.data());
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(&error_reporter,
-                         "Model schema version is %d, supported is %d",
+    printf("Model schema version is %d, supported is %d\r\n",
                          model->version(), TFLITE_SCHEMA_VERSION);
     vTaskSuspend(nullptr);
   }
@@ -75,9 +73,9 @@ void Main() {
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
   resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
   auto interpreter = tflite::MicroInterpreter{
-      model, resolver, tensor_arena, kTensorArenaSize, &error_reporter};
+      model, resolver, tensor_arena, kTensorArenaSize};
   if (interpreter.AllocateTensors() != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(&error_reporter, "AllocateTensors failed.");
+    printf("AllocateTensors failed.");
     vTaskSuspend(nullptr);
   }
   auto* posenet_input = interpreter.input(0);
@@ -85,18 +83,17 @@ void Main() {
   printf("Getting outputs for posenet test input\r\n");
   std::vector<uint8_t> posenet_test_input_bin;
   if (!LfsReadFile(kTestInputPath, &posenet_test_input_bin)) {
-    TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load test input!");
+    printf("Failed to load test input!");
     vTaskSuspend(nullptr);
   }
   if (posenet_input->bytes != posenet_test_input_bin.size()) {
-    TF_LITE_REPORT_ERROR(&error_reporter,
-                         "Input tensor length doesn't match canned input\r\n");
+    printf("Input tensor length doesn't match canned input\r\n");
     vTaskSuspend(nullptr);
   }
   memcpy(tflite::GetTensorData<uint8_t>(posenet_input),
          posenet_test_input_bin.data(), posenet_test_input_bin.size());
   if (interpreter.Invoke() != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(&error_reporter, "Invoke failed.");
+    printf("Invoke failed.");
     vTaskSuspend(nullptr);
   }
   auto test_image_output =
@@ -118,11 +115,11 @@ void Main() {
         /*preserve_ratio=*/false,
         /*buffer=*/tflite::GetTensorData<uint8_t>(posenet_input)};
     if (!CameraTask::GetSingleton()->GetFrame({fmt})) {
-      TF_LITE_REPORT_ERROR(&error_reporter, "Failed to get image from camera.");
+      printf("Failed to get image from camera.");
       break;
     }
     if (interpreter.Invoke() != kTfLiteOk) {
-      TF_LITE_REPORT_ERROR(&error_reporter, "Invoke failed.");
+      printf("Invoke failed.");
       break;
     }
     auto output = tensorflow::GetPosenetOutput(&interpreter,

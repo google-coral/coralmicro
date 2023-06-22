@@ -49,3 +49,6 @@
 [submodule "third_party/littlefs-fuse"]
 	path = third_party/littlefs-fuse
 	url = https://github.com/google-coral/coralmicro-littlefs-fuse
+[submodule "third_party/CMSIS-NN"]
+	path = third_party/CMSIS-NN
+	url = https://github.com/ARM-software/CMSIS-NN.git

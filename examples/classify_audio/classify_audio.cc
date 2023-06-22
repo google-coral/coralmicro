@@ -18,8 +18,12 @@
 #include "libs/base/timer.h"
 #include "libs/tensorflow/audio_models.h"
 #include "libs/tensorflow/utils.h"
+
+#ifndef YAMNET_CPU
 #include "libs/tpu/edgetpu_manager.h"
 #include "libs/tpu/edgetpu_op.h"
+#endif
+
 #include "third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
@@ -117,11 +121,10 @@ void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
   }
 #endif
 
-  tflite::MicroErrorReporter error_reporter;
   auto yamnet_resolver = tensorflow::SetupYamNetResolver</*tForTpu=*/kUseTpu>();
 
   tflite::MicroInterpreter interpreter{model, yamnet_resolver, tensor_arena,
-                                       kTensorArenaSize, &error_reporter};
+                                       kTensorArenaSize};
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("AllocateTensors failed.\r\n");
     vTaskSuspend(nullptr);

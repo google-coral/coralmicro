@@ -44,7 +44,7 @@ else() # Linux
     set(TOOLCHAIN_PREFIX "")
     set(TOOLCHAIN_ARCHIVE ${TOOLCHAIN_DIR}/toolchain-linux.tar.bz2)
     set(TOOLCHAIN_EXE_EXTENSION "")
-    set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2")
+    set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2")
 endif()
 
 if (NOT EXISTS ${TOOLCHAIN_DIR})
@@ -52,11 +52,11 @@ if (NOT EXISTS ${TOOLCHAIN_DIR})
     file(DOWNLOAD ${TOOLCHAIN_URL} ${TOOLCHAIN_ARCHIVE})
     file(ARCHIVE_EXTRACT INPUT ${TOOLCHAIN_ARCHIVE} DESTINATION ${TOOLCHAIN_DIR}/${TOOLCHAIN_PREFIX})
 endif()
-get_filename_component(CMAKE_AR ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-ar${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
-get_filename_component(CMAKE_C_COMPILER ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
-get_filename_component(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-g++${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
-get_filename_component(CMAKE_OBJCOPY ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-objcopy${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
-get_filename_component(CMAKE_STRIP ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-strip${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_AR ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-ar${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_C_COMPILER ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-gcc${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-g++${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_OBJCOPY ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-objcopy${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
+get_filename_component(CMAKE_STRIP ${TOOLCHAIN_DIR}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-strip${TOOLCHAIN_EXE_EXTENSION} REALPATH CACHE)
 
 execute_process(
     COMMAND ${CMAKE_C_COMPILER} -print-libgcc-file-name

@@ -29,4 +29,5 @@ add_executable_m7(classify_audio
 
 target_link_libraries(classify_audio
     libs_base-m7_freertos
+    libs_tpu_freertos
 )

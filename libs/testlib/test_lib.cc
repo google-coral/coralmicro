@@ -35,9 +35,9 @@
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tensorflow/utils.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "libs/tpu/edgetpu_op.h"
 #include "libs/tpu/edgetpu_task.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
@@ -225,9 +225,8 @@ void RunTestConv1(struct jsonrpc_request* request) {
   }
   tflite::MicroMutableOpResolver<1> resolver;
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
-  tflite::MicroErrorReporter error_reporter;
   tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
-                                       kTensorArenaSize, &error_reporter);
+                                       kTensorArenaSize);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
     return;
@@ -286,7 +285,6 @@ void RunDetectionModel(struct jsonrpc_request* request) {
     return;
   }
 
-  tflite::MicroErrorReporter error_reporter;
   std::shared_ptr<EdgeTpuContext> context =
       EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!context) {
@@ -300,7 +298,7 @@ void RunDetectionModel(struct jsonrpc_request* request) {
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
   tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
-                                       kTensorArenaSize, &error_reporter);
+                                       kTensorArenaSize);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
     return;
@@ -385,7 +383,6 @@ void RunClassificationModel(struct jsonrpc_request* request) {
     return;
   }
 
-  tflite::MicroErrorReporter error_reporter;
   std::shared_ptr<EdgeTpuContext> context =
       EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!context) {
@@ -396,7 +393,7 @@ void RunClassificationModel(struct jsonrpc_request* request) {
   tflite::MicroMutableOpResolver<1> resolver;
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
   tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
-                                       kTensorArenaSize, &error_reporter);
+                                       kTensorArenaSize);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
     return;
@@ -489,7 +486,6 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
     return;
   }
 
-  tflite::MicroErrorReporter error_reporter;
   std::shared_ptr<EdgeTpuContext> context =
       EdgeTpuManager::GetSingleton()->OpenDevice();
   if (!context) {
@@ -500,7 +496,7 @@ void RunSegmentationModel(struct jsonrpc_request* request) {
   tflite::MicroMutableOpResolver<1> resolver;
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
   tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
-                                       kTensorArenaSize, &error_reporter);
+                                       kTensorArenaSize);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "failed to allocate tensors", nullptr);
     return;
@@ -573,9 +569,8 @@ void PosenetStressRun(struct jsonrpc_request* request) {
   tflite::MicroMutableOpResolver<2> resolver;
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
   resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
-  tflite::MicroErrorReporter error_reporter;
   auto interpreter = tflite::MicroInterpreter{
-      model, resolver, tensor_arena, kTensorArenaSize, &error_reporter};
+      model, resolver, tensor_arena, kTensorArenaSize};
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     jsonrpc_return_error(request, -1, "Failed to allocates tensor", nullptr);
     return;

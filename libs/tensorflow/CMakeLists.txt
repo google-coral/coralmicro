@@ -16,11 +16,11 @@
 set(libs_tensorflow_SOURCES
     debug_log.c
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/test_helpers.cc  # IntArrayFromInts()
-    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/c/common.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/core/api/error_reporter.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/core/api/flatbuffer_conversions.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/core/api/op_resolver.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/core/api/tensor_utils.cc
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/core/c/common.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft_io.c
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc
@@ -42,10 +42,13 @@ set(libs_tensorflow_SOURCES
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window.c
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window_io.c
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window_util.c
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/common.cc
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/portable_tensor_utils.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/quantization_util.cc
-    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/reference/portable_tensor_utils.cc
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/tensor_ctypes.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/kernel_util.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.cc
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_op_resolver.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/arena_allocator/non_persistent_arena_buffer_allocator.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/arena_allocator/persistent_arena_buffer_allocator.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/arena_allocator/recording_single_arena_buffer_allocator.cc
@@ -66,6 +69,10 @@ set(libs_tensorflow_SOURCES
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/ceil.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/circular_buffer.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/circular_buffer_common.cc
+    # Uncomment the following lines and comment the cmsis_nn lines to use generic kernels.
+    # ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/add.cc
+    # ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/conv.cc
+    # ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/depthwise_conv.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/cmsis_nn/add.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/cmsis_nn/conv.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/cmsis_nn/depthwise_conv.cc
@@ -158,9 +165,9 @@ set(libs_tensorflow_SOURCES
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_allocation_info.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_allocator.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_context.cc
-    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_graph.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.cc
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_log.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_profiler.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_resource_variable.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/micro_string.cc
@@ -169,6 +176,8 @@ set(libs_tensorflow_SOURCES
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/mock_micro_graph.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/recording_micro_allocator.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/system_setup.cc
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.cc
+    ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.cc
     ${PROJECT_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/schema/schema_utils.cc
 )
 
@@ -198,7 +207,6 @@ target_link_libraries(libs_tensorflow-m7
     libs_gemmlowp
     libs_kissfft-m7
     libs_ruy
-    libs_tpu_freertos
 )
 
 add_library_m4(libs_tensorflow-m4 STATIC

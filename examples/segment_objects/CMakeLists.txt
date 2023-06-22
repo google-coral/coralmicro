@@ -21,4 +21,5 @@ add_executable_m7(segment_objects
 target_link_libraries(segment_objects
     libs_base-m7_freertos
     libs_rpc_http_server
+    libs_tpu_freertos
 )

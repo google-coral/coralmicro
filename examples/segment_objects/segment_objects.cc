@@ -24,7 +24,6 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
@@ -127,14 +126,12 @@ void Main() {
     return;
   }
 
-  tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<3> resolver;
   resolver.AddResizeBilinear();
   resolver.AddArgMax();
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
   tflite::MicroInterpreter interpreter(tflite::GetModel(model.data()), resolver,
-                                       tensor_arena, kTensorArenaSize,
-                                       &error_reporter);
+                                       tensor_arena, kTensorArenaSize);
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("ERROR: AllocateTensors() failed\r\n");
     return;

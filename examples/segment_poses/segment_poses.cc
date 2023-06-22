@@ -19,10 +19,10 @@
 #include "libs/tensorflow/posenet.h"
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "libs/tpu/edgetpu_op.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/mjson/src/mjson.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 
@@ -104,26 +104,23 @@ void Main() {
   // Turn on Status LED to show the board is on.
   LedSet(Led::kStatus, true);
 
-  tflite::MicroErrorReporter error_reporter;
   // Turn on the TPU and get it's context.
   auto tpu_context =
       EdgeTpuManager::GetSingleton()->OpenDevice(PerformanceMode::kMax);
   if (!tpu_context) {
-    TF_LITE_REPORT_ERROR(&error_reporter,
-                         "ERROR: Failed to get EdgeTpu context!");
+    printf("ERROR: Failed to get EdgeTpu context!\r\n");
     vTaskSuspend(nullptr);
   }
 
   // Reads the model and checks version.
   std::vector<uint8_t> bodypix_tflite;
   if (!LfsReadFile(kModelPath, &bodypix_tflite)) {
-    TF_LITE_REPORT_ERROR(&error_reporter, "Failed to load model!");
+    printf( "Failed to load model!");
     vTaskSuspend(nullptr);
   }
   auto* model = tflite::GetModel(bodypix_tflite.data());
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(&error_reporter,
-                         "Model schema version is %d, supported is %d",
+    printf("Model schema version is %d, supported is %d\r\n",
                          model->version(), TFLITE_SCHEMA_VERSION);
     vTaskSuspend(nullptr);
   }
@@ -133,9 +130,9 @@ void Main() {
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
   resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
   tflite::MicroInterpreter interpreter = tflite::MicroInterpreter{
-      model, resolver, tensor_arena, kTensorArenaSize, &error_reporter};
+      model, resolver, tensor_arena, kTensorArenaSize};
   if (interpreter.AllocateTensors() != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(&error_reporter, "AllocateTensors failed.");
+    printf("AllocateTensors failed.\r\n");
     vTaskSuspend(nullptr);
   }
 

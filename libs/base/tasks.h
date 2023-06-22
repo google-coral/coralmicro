@@ -17,7 +17,7 @@
 #ifndef LIBS_BASE_TASKS_H_
 #define LIBS_BASE_TASKS_H_
 
-#include "FreeRTOSConfig.h"
+#include "third_party/modified/FreeRTOS/FreeRTOSConfig.h"
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/fsl_device_registers.h"
 
 namespace coralmicro {

@@ -17,6 +17,7 @@
 #include "libs/base/led.h"
 
 #include <algorithm>
+#include <cstdio>
 
 #include "libs/base/gpio.h"
 #include "libs/base/pwm.h"

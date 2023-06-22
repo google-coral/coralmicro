@@ -111,13 +111,11 @@ void run(tflite::MicroInterpreter* interpreter, FrontendState* frontend_state) {
     vTaskSuspend(nullptr);
   }
 
-  tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<1> resolver;
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
 
   tflite::MicroInterpreter interpreter(tflite::GetModel(keyword_tflite.data()),
-                                       resolver, tensor_arena, kTensorArenaSize,
-                                       &error_reporter);
+                                       resolver, tensor_arena, kTensorArenaSize);
 
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     printf("AllocateTensors failed.\r\n");
