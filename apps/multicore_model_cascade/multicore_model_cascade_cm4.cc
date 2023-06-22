@@ -23,7 +23,6 @@
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
 #include "third_party/freertos_kernel/include/timers.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "third_party/tflite-micro/tensorflow/lite/schema/schema_generated.h"
@@ -120,9 +119,8 @@ bool DetectPerson(tflite::MicroInterpreter* interpreter) {
   micro_op_resolver.AddReshape();
   micro_op_resolver.AddSoftmax();
 
-  tflite::MicroErrorReporter error_reporter;
   tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
-                                       kTensorArenaSize, &error_reporter);
+                                       kTensorArenaSize);
 
   // Allocate memory from the tensor_arena for the model's tensors.
   if (interpreter.AllocateTensors() != kTfLiteOk) {

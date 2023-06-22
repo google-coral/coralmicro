@@ -308,12 +308,12 @@ target_link_libraries(libs_nxp_rt1176-sdk_sdmmc
 )
 
 add_library_m7(libs_nxp_rt1176-sdk_lwip
+    ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/middleware/lwip/port/sys_arch.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/sntp/sntp.c
     ${PROJECT_SOURCE_DIR}/third_party/modified/nxp/rt1176-sdk/dhcp_server.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/apps/lwiperf/lwiperf.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/enet_ethernetif_kinetis.c
-    ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/port/sys_arch.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_lib.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/api_msg.c
     ${PROJECT_SOURCE_DIR}/third_party/nxp/rt1176-sdk/middleware/lwip/src/api/err.c

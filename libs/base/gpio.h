@@ -17,6 +17,7 @@
 #ifndef LIBS_BASE_GPIO_H_
 #define LIBS_BASE_GPIO_H_
 
+#include <cstdint>
 #include <functional>
 
 namespace coralmicro {

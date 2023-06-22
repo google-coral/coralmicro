@@ -28,7 +28,7 @@ inline constexpr char kPosenetDecoderOp[] = "PosenetDecoderOp";
 // Returns pointer to an instance of `tflite::TfLiteRegistration` to handle the
 // custom op for post-processing PoseNet output tensors on the MCU. Pass this to
 // `tflite::MicroMutableOpResolver::AddCustom()`.
-TfLiteRegistration* RegisterPosenetDecoderOp();
+TfLiteRegistration_V1* RegisterPosenetDecoderOp();
 
 }  // namespace coralmicro
 

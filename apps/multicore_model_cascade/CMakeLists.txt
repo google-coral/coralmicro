@@ -20,6 +20,7 @@ set(multicore_model_cascade_LINK_LIBRARIES
     libs_base-m7_freertos
     libs_jpeg_m7
     libs_rpc_http_server
+    libs_tpu_freertos
 )
 
 add_executable_m7(multicore_model_cascade

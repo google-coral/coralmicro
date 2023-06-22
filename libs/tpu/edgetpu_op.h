@@ -28,7 +28,7 @@ inline constexpr char kCustomOp[] = "edgetpu-custom-op";
 // Returns pointer to an instance of `tflite::TfLiteRegistration` to handle
 // Edge TPU custom ops. Pass this to
 // `tflite::MicroMutableOpResolver::AddCustom()`.
-TfLiteRegistration* RegisterCustomOp();
+TfLiteRegistration_V1* RegisterCustomOp();
 
 }  // namespace coralmicro
 

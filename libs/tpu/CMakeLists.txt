@@ -32,6 +32,8 @@ add_library_m7(libs_tpu_dfu_task_freertos STATIC
 )
 target_link_libraries(libs_tpu_dfu_task_freertos
     libs_base-m7_freertos
+    libs_flatbuffers
+    libs_tensorflow-m7
 )
 
 add_library_m7(libs_tpu_task_freertos STATIC

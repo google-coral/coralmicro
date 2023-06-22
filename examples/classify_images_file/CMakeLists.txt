@@ -21,4 +21,5 @@ add_executable_m7(classify_images_file
 
 target_link_libraries(classify_images_file
     libs_base-m7_freertos
+    libs_tpu_freertos
 )

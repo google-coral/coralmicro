@@ -26,6 +26,7 @@
 #include "libs/rpc/rpc_http_server.h"
 #include "libs/tensorflow/posenet.h"
 #include "libs/tpu/edgetpu_manager.h"
+#include "libs/tpu/edgetpu_op.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/semphr.h"
 #include "third_party/freertos_kernel/include/task.h"
@@ -383,13 +384,12 @@ void reset_count_rpc(struct jsonrpc_request* r) {
   }
 
   // Starts the posenet engine.
-  tflite::MicroErrorReporter error_reporter;
   tflite::MicroMutableOpResolver<2> resolver;
   resolver.AddCustom(kCustomOp, RegisterCustomOp());
   resolver.AddCustom(kPosenetDecoderOp, RegisterPosenetDecoderOp());
   auto interpreter = std::make_shared<tflite::MicroInterpreter>(
       tflite::GetModel(posenet_tflite.data()), resolver, tensor_arena,
-      kTensorArenaSize, &error_reporter);
+      kTensorArenaSize);
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     printf("Failed to allocate tensor\r\n");
     vTaskSuspend(nullptr);

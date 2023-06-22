@@ -35,11 +35,10 @@
 //    bash build.sh
 //    python3 scripts/flashtool.py -e tflm_micro_speech
 
-void RespondToCommand(tflite::ErrorReporter* error_reporter,
-                      int32_t current_time, const char* found_command,
+void RespondToCommand(int32_t current_time, const char* found_command,
                       uint8_t score, bool is_new_command) {
   if (is_new_command) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Heard %s (%d) @%dms", found_command,
+    printf( "Heard %s (%d) @%dms", found_command,
                          score, current_time);
     if (strcmp(found_command, "yes") == 0) {
       LedSet(coralmicro::Led::kUser, true);
@@ -104,8 +103,7 @@ int32_t LatestAudioTimestamp() {
 }
 
 // From audio_provider.h
-TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
-                             int start_ms, int duration_ms,
+TfLiteStatus GetAudioSamples(int start_ms, int duration_ms,
                              int* audio_samples_size, int16_t** audio_samples) {
   int32_t audio_buffer_end_index = coralmicro::g_audio_buffer_end_index;
 
@@ -113,15 +111,13 @@ TfLiteStatus GetAudioSamples(tflite::ErrorReporter* error_reporter,
   auto buffer_start_ms = buffer_end_ms - coralmicro::kAudioBufferSizeMs;
 
   if (start_ms < buffer_start_ms) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "start_ms < buffer_start_ms (%d vs %d)", start_ms,
+    printf("start_ms < buffer_start_ms (%d vs %d)\r\n", start_ms,
                          buffer_start_ms);
     return kTfLiteError;
   }
 
   if (start_ms + duration_ms >= buffer_end_ms) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "start_ms + duration_ms > buffer_end_ms");
+    printf("start_ms + duration_ms > buffer_end_ms\r\n");
     return kTfLiteError;
   }
 

@@ -21,4 +21,5 @@ add_executable_m7(classify_images
 target_link_libraries(classify_images
     libs_base-m7_freertos
     libs_rpc_http_server
+    libs_tpu_freertos
 )

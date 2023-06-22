@@ -33,9 +33,8 @@
 //    bash build.sh
 //    python3 scripts/flashtool.py -e tflm_person_detection_m7
 
-void RespondToDetection(tflite::ErrorReporter* error_reporter,
-                        int8_t person_score, int8_t no_person_score) {
-  TF_LITE_REPORT_ERROR(error_reporter, "person_score: %d no_person_score: %d",
+void RespondToDetection(int8_t person_score, int8_t no_person_score) {
+  printf("person_score: %d no_person_score: %d\r\n",
                        person_score, no_person_score);
 
   bool person_detected = person_score > no_person_score;

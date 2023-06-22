@@ -38,8 +38,8 @@ TfLiteStatus CustomOpInvoke(TfLiteContext* context, TfLiteNode* node) {
 }
 }  // namespace
 
-TfLiteRegistration* RegisterCustomOp() {
-  static TfLiteRegistration registration = {
+TfLiteRegistration_V1* RegisterCustomOp() {
+  static TfLiteRegistration_V1 registration = {
       CustomOpInit,
       CustomOpFree,
       CustomOpPrepare,

@@ -17,11 +17,11 @@
 #ifndef LIBS_TENSORFLOW_UTILS_H_
 #define LIBS_TENSORFLOW_UTILS_H_
 
-#include "libs/tpu/edgetpu_manager.h"
-#include "libs/tpu/edgetpu_op.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+// #include "libs/tpu/edgetpu_manager.h"
+// #include "libs/tpu/edgetpu_op.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 
 // Allocates a uint8_t tensor arena statically in the Dev Board Micro SDRAM
 // (max of 64 MB). This is slightly slower than OCRAM due to off-chip I/O

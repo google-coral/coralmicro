@@ -279,8 +279,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
 }  // namespace posenet_decoder_op
 
-TfLiteRegistration* RegisterPosenetDecoderOp() {
-  static TfLiteRegistration r = {
+TfLiteRegistration_V1* RegisterPosenetDecoderOp() {
+  static TfLiteRegistration_V1 r = {
       posenet_decoder_op::Init, posenet_decoder_op::Free,
       posenet_decoder_op::Prepare, posenet_decoder_op::Eval};
   return &r;

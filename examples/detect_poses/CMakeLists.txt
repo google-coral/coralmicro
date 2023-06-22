@@ -21,4 +21,5 @@ add_executable_m7(detect_poses
 
 target_link_libraries(detect_poses
     libs_base-m7_freertos
+    libs_tpu_freertos
 )

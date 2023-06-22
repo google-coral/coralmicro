@@ -20,8 +20,8 @@
 #include "libs/tensorflow/posenet_decoder_op.h"
 #include "libs/tensorflow/utils.h"
 #include "third_party/tflite-micro/tensorflow/lite/c/common.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 
 namespace coralmicro::tensorflow {
 

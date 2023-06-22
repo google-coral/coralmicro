@@ -66,10 +66,10 @@ target_link_libraries(libs_base-m7_freertos
     libs_nxp_rt1176-sdk-mcmgr_m7
     libs_cdc_acm_freertos
     libs_cdc_eem_freertos
-    libs_tpu_dfu_task_freertos
-    libs_tpu_task_freertos
     libs_usb_device_task_freertos
     libs_usb_host_task_freertos
+    libs_tpu_dfu_task_freertos
+    libs_tpu_task_freertos
     ${libs_base-m7_freertos_LINK_LIBRARIES_REVISION}
 )
 

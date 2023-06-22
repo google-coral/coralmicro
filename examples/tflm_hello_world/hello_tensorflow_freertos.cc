@@ -18,8 +18,8 @@
 #include "libs/base/led.h"
 #include "third_party/freertos_kernel/include/FreeRTOS.h"
 #include "third_party/freertos_kernel/include/task.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/all_ops_resolver.h"
-#include "third_party/tflite-micro/tensorflow/lite/micro/micro_error_reporter.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "third_party/tflite-micro/tensorflow/lite/micro/micro_log.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/micro_interpreter.h"
 
 // Runs a tiny TFLM model on the M7 core, NOT on the Edge TPU, which simply
@@ -38,7 +38,6 @@ extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask,
 }
 
 namespace {
-tflite::ErrorReporter* error_reporter = nullptr;
 const tflite::Model* model = nullptr;
 tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input = nullptr;
@@ -62,14 +61,14 @@ static void loop() {
 
   TfLiteStatus invoke_status = interpreter->Invoke();
   if (invoke_status != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed on x_val: %f",
+    printf("Invoke failed on x_val: %f\r\n",
                          static_cast<double>(x_val));
     return;
   }
 
   float y_val = output->data.f[0];
 
-  TF_LITE_REPORT_ERROR(error_reporter, "x_val: %f y_val: %f",
+  printf("x_val: %f y_val: %f\r\n",
                        static_cast<double>(x_val), static_cast<double>(y_val));
 
   ++inference_count;
@@ -94,29 +93,26 @@ extern "C" [[noreturn]] void app_main(void* param) {
   // Turn on Status LED to show the board is on.
   LedSet(coralmicro::Led::kStatus, true);
 
-  static tflite::MicroErrorReporter micro_error_reporter;
-  error_reporter = &micro_error_reporter;
-  TF_LITE_REPORT_ERROR(error_reporter, "HelloTensorflowFreeRTOS!");
+  printf("HelloTensorflowFreeRTOS!r\\n");
 
   model = tflite::GetModel(g_model);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Model schema version is %d, supported is %d",
+    printf("Model schema version is %d, supported is %d\r\n",
                          model->version(), TFLITE_SCHEMA_VERSION);
     vTaskSuspend(nullptr);
   }
 
-  static tflite::MicroMutableOpResolver<3> resolver(error_reporter);
+  static tflite::MicroMutableOpResolver<3> resolver;
   resolver.AddQuantize();
   resolver.AddDequantize();
   resolver.AddFullyConnected();
   static tflite::MicroInterpreter static_interpreter(
-      model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
+      model, resolver, tensor_arena, kTensorArenaSize);
   interpreter = &static_interpreter;
 
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
   if (allocate_status != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors failed.");
+    printf("AllocateTensors failed.\r\n");
     vTaskSuspend(nullptr);
   }
 
