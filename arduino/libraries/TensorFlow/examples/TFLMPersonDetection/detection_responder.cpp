@@ -19,9 +19,10 @@
 #include <Arduino.h>
 #include <coral_micro.h>
 
-void RespondToDetection(tflite::ErrorReporter* error_reporter,
-                        int8_t person_score, int8_t no_person_score) {
-  TF_LITE_REPORT_ERROR(error_reporter, "person_score: %d no_person_score: %d",
+#include "tensorflow/lite/micro/micro_log.h"
+
+void RespondToDetection(int8_t person_score, int8_t no_person_score) {
+  MicroPrintf("person_score: %d no_person_score: %d",
                        person_score, no_person_score);
   digitalWrite(PIN_LED_USER, person_score > no_person_score ? HIGH : LOW);
 }

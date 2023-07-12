@@ -57,7 +57,6 @@ void setup() {
   Mic.begin(coralmicro::tensorflow::kKeywordDetectorSampleRate,
             coralmicro::tensorflow::kKeywordDetectorDurationMs);
 
-  tflite::MicroErrorReporter error_reporter;
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
 
   Serial.println("Loading Model");
@@ -99,7 +98,7 @@ void setup() {
   }
 
   interpreter = std::make_unique<tflite::MicroInterpreter>(
-      model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
+      model, resolver, tensor_arena, kTensorArenaSize);
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     Serial.println("AllocateTensors failed.");
     return;

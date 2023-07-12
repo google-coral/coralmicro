@@ -42,8 +42,6 @@
 namespace {
 bool setup_success{false};
 
-tflite::MicroErrorReporter micro_error_reporter;
-tflite::ErrorReporter* error_reporter = &micro_error_reporter;
 const tflite::Model* model = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter = nullptr;
 tflite::MicroMutableOpResolver<4> micro_op_resolver;
@@ -76,12 +74,17 @@ constexpr int kTensorArenaSize = 10 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 }  // namespace
 
-void RespondToCommand(tflite::ErrorReporter*, int32_t current_time,
+void RespondToCommand(int32_t current_time,
                       const char* found_command, uint8_t score,
                       bool is_new_command) {
   if (is_new_command) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Heard %s (%d) @%dms", found_command,
-                         score, current_time);
+    Serial.print("Heard ");
+    Serial.print(found_command);
+    Serial.print(" (");
+    Serial.print(score);
+    Serial.print(") @");
+    Serial.print(current_time);
+    Serial.println("ms");
     if (strcmp(found_command, "yes") == 0) {
       digitalWrite(PIN_LED_USER, HIGH);
       digitalWrite(PIN_LED_STATUS, LOW);
@@ -95,7 +98,7 @@ void RespondToCommand(tflite::ErrorReporter*, int32_t current_time,
   }
 }
 
-TfLiteStatus GetAudioSamples(tflite::ErrorReporter*, int start_ms,
+TfLiteStatus GetAudioSamples(int start_ms,
                              int duration_ms, int* audio_samples_size,
                              int16_t** audio_samples) {
   int32_t audio_buffer_end_index = g_audio_buffer_end_index;
@@ -104,15 +107,16 @@ TfLiteStatus GetAudioSamples(tflite::ErrorReporter*, int start_ms,
   auto buffer_start_ms = buffer_end_ms - kAudioBufferSizeMs;
 
   if (start_ms < buffer_start_ms) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "start_ms < buffer_start_ms (%d vs %d)", start_ms,
-                         buffer_start_ms);
+    Serial.print("start_ms < buffer_start_ms (");
+    Serial.print(start_ms);
+    Serial.print(" vs ");
+    Serial.print(buffer_start_ms);
+    Serial.println(")");
     return kTfLiteError;
   }
 
   if (start_ms + duration_ms >= buffer_end_ms) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "start_ms + duration_ms > buffer_end_ms");
+    Serial.println("start_ms + duration_ms > buffer_end_ms");
     return kTfLiteError;
   }
 
@@ -161,7 +165,7 @@ void setup() {
   micro_op_resolver.AddReshape();
 
   interpreter = std::make_unique<tflite::MicroInterpreter>(
-      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
+      model, micro_op_resolver, tensor_arena, kTensorArenaSize);
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     Serial.println("AllocateTensors() failed");
@@ -174,8 +178,7 @@ void setup() {
       (model_input->dims->data[1] !=
        (kFeatureSliceCount * kFeatureSliceSize)) ||
       (model_input->type != kTfLiteInt8)) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Bad input tensor parameters in model");
+    Serial.println("Bad input tensor parameters in model");
     return;
   }
   model_input_buffer = model_input->data.int8;
@@ -187,7 +190,7 @@ void setup() {
                                                  feature_buffer);
   feature_provider = &static_feature_provider;
 
-  static RecognizeCommands static_recognizer(error_reporter);
+  static RecognizeCommands static_recognizer{};
   recognizer = &static_recognizer;
 
   previous_time = 0;
@@ -214,9 +217,9 @@ void loop() {
   const int32_t current_time = LatestAudioTimestamp();
   int how_many_new_slices = 0;
   TfLiteStatus feature_status = feature_provider->PopulateFeatureData(
-      error_reporter, previous_time, current_time, &how_many_new_slices);
+      previous_time, current_time, &how_many_new_slices);
   if (feature_status != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Feature generation failed");
+    Serial.println( "Feature generation failed");
     return;
   }
   previous_time = current_time;
@@ -234,7 +237,7 @@ void loop() {
   // Run the model on the spectrogram input and make sure it succeeds.
   TfLiteStatus invoke_status = interpreter->Invoke();
   if (invoke_status != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed");
+    Serial.println("Invoke failed");
     return;
   }
 
@@ -247,13 +250,12 @@ void loop() {
   TfLiteStatus process_status = recognizer->ProcessLatestResults(
       output, current_time, &found_command, &score, &is_new_command);
   if (process_status != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "RecognizeCommands::ProcessLatestResults() failed");
+    Serial.println("RecognizeCommands::ProcessLatestResults() failed");
     return;
   }
   // Do something based on the recognized command. The default implementation
   // just prints to the error console, but you should replace this with your
   // own function for a real application.
-  RespondToCommand(error_reporter, current_time, found_command, score,
+  RespondToCommand(current_time, found_command, score,
                    is_new_command);
 }

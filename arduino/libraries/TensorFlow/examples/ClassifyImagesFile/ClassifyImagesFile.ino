@@ -81,9 +81,8 @@ void setup() {
   }
 
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
-  tflite::MicroErrorReporter error_reporter;
   interpreter = std::make_unique<tflite::MicroInterpreter>(
-      model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
+      model, resolver, tensor_arena, kTensorArenaSize);
   interpreter->AllocateTensors();
 
   if (!interpreter) {

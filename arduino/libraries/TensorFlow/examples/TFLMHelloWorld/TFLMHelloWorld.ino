@@ -29,8 +29,6 @@
 namespace {
 bool setup_success{false};
 
-tflite::MicroErrorReporter micro_error_reporter;
-tflite::ErrorReporter* error_reporter = &micro_error_reporter;
 tflite::MicroMutableOpResolver<3> resolver;
 const tflite::Model* model = nullptr;
 std::unique_ptr<tflite::MicroInterpreter> interpreter;
@@ -56,9 +54,10 @@ void setup() {
 
   model = tflite::GetModel(g_model);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Model schema version is %d, supported is %d",
-                         model->version(), TFLITE_SCHEMA_VERSION);
+    Serial.print("Model schema version is ");
+    Serial.print(model->version());
+    Serial.print(" supported is");
+    Serial.println(TFLITE_SCHEMA_VERSION);
     return;
   }
   resolver.AddQuantize();
@@ -66,10 +65,10 @@ void setup() {
   resolver.AddFullyConnected();
 
   interpreter = std::make_unique<tflite::MicroInterpreter>(
-      model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
+      model, resolver, tensor_arena, kTensorArenaSize);
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors failed.");
+    Serial.println("AllocateTensors failed.");
     return;
   }
 
@@ -91,14 +90,16 @@ void loop() {
 
   input->data.f[0] = x_val;
   if (interpreter->Invoke() != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed on x_val: %f",
-                         static_cast<double>(x_val));
+    Serial.print("Invoke failed on x_val: ");
+    Serial.println(x_val);
     return;
   }
 
   float y_val = output->data.f[0];
-  TF_LITE_REPORT_ERROR(error_reporter, "x_val: %f y_val: %f",
-                       static_cast<double>(x_val), static_cast<double>(y_val));
+  Serial.print("x_val: ");
+  Serial.print(x_val);
+  Serial.print(" y_val: ");
+  Serial.println(y_val);
 
   ++inference_count;
   if (inference_count >= kInferencesPerCycle) {

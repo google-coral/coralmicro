@@ -87,10 +87,9 @@ void setup() {
   resolver.AddDequantize();
   resolver.AddDetectionPostprocess();
   resolver.AddCustom(coralmicro::kCustomOp, coralmicro::RegisterCustomOp());
-  tflite::MicroErrorReporter error_reporter;
 
   interpreter = std::make_unique<tflite::MicroInterpreter>(
-      model, resolver, tensor_arena, kTensorArenaSize, &error_reporter);
+      model, resolver, tensor_arena, kTensorArenaSize);
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     Serial.println("allocate tensors failed");

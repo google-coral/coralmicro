@@ -21,8 +21,7 @@
 
 using namespace coralmicro::arduino;
 
-TfLiteStatus GetImage(tflite::ErrorReporter*, int, int, int,
-                      int8_t* image_data) {
+TfLiteStatus GetImage(int, int, int, int8_t* image_data) {
   FrameBuffer fb;
   if (Camera.grab(fb) != CameraStatus::SUCCESS) return kTfLiteError;
   for (int i = 0; i < fb.getBufferSize(); ++i) {
