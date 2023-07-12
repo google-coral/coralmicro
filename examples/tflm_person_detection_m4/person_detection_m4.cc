@@ -21,8 +21,7 @@
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/detection_responder.h"
 #include "third_party/tflite-micro/tensorflow/lite/micro/examples/person_detection/main_functions.h"
 
-void RespondToDetection(tflite::ErrorReporter*, int8_t person_score,
-                        int8_t no_person_score) {
+void RespondToDetection(int8_t person_score, int8_t no_person_score) {
   printf("person_score: %d no_person_score: %d\r\n", person_score,
          no_person_score);
 

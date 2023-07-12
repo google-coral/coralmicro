@@ -37,8 +37,6 @@ using namespace coralmicro::arduino;
 namespace {
 bool setup_success{false};
 
-tflite::MicroErrorReporter micro_error_reporter;
-tflite::ErrorReporter* error_reporter = &micro_error_reporter;
 const tflite::Model* model = nullptr;
 std::vector<uint8_t> model_data;
 constexpr char kModelPath[] = "/models/person_detect_model.tflite";
@@ -60,10 +58,10 @@ void setup() {
   pinMode(PIN_LED_USER, OUTPUT);
 
   SD.begin();
-  TF_LITE_REPORT_ERROR(error_reporter, "Loading model");
+  Serial.println("Loading model");
 
   if (!SD.exists(kModelPath)) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Failed to read model");
+    Serial.println("Failed to read model");
     return;
   }
 
@@ -71,15 +69,15 @@ void setup() {
   uint32_t model_size = model_file.size();
   model_data.resize(model_size);
   if (model_file.read(model_data.data(), model_size) != model_size) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Failed to read model");
+    Serial.println("Failed to read model");
     return;
   }
   model = tflite::GetModel(model_data.data());
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Model provided is schema version %d not equal "
-                         "to supported version %d.",
-                         model->version(), TFLITE_SCHEMA_VERSION);
+    Serial.print("Model schema version is ");
+    Serial.print(model->version());
+    Serial.print(" supported is");
+    Serial.println(TFLITE_SCHEMA_VERSION);
     return;
   }
 
@@ -90,9 +88,9 @@ void setup() {
   micro_op_resolver.AddSoftmax();
 
   interpreter = std::make_unique<tflite::MicroInterpreter>(
-      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
+      model, micro_op_resolver, tensor_arena, kTensorArenaSize);
   if (interpreter->AllocateTensors() != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors() failed");
+    Serial.println("AllocateTensors() failed");
     return;
   }
 
@@ -102,7 +100,7 @@ void setup() {
                    coralmicro::CameraFilterMethod::kBilinear,
                    coralmicro::CameraRotation::k270,
                    true) != CameraStatus::SUCCESS) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Failed to start camera.");
+    Serial.println("Failed to start camera.");
     return;
   }
 
@@ -114,19 +112,19 @@ void loop() {
     Serial.println(
         "Failed to run inference because there was an error during setup.");
   }
-  if (GetImage(error_reporter, kNumRows, kNumCols, kNumChannels,
+  if (GetImage(kNumRows, kNumCols, kNumChannels,
                input_tensor->data.int8) != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
+    Serial.println("Image capture failed.");
   }
 
   // Run the model on this input and make sure it succeeds.
   if (interpreter->Invoke() != kTfLiteOk) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
+    Serial.println("Invoke failed.");
   }
 
   // Process the inference results.
   auto* output = interpreter->output(0);
   auto person_score = output->data.uint8[kPersonIndex];
   auto no_person_score = output->data.uint8[kNotAPersonIndex];
-  RespondToDetection(error_reporter, person_score, no_person_score);
+  RespondToDetection(person_score, no_person_score);
 }

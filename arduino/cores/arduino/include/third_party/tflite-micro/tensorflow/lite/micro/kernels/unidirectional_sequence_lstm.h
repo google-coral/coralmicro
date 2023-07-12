@@ -1,0 +1,1 @@
+../../../../../../../../../../third_party/tflite-micro/tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.h
