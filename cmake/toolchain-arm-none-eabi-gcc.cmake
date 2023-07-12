@@ -29,7 +29,7 @@ set(CMAKE_CXX_ARCHIVE_FINISH "")
 
 if (${CMAKE_HOST_WIN32})
     set(TOOLCHAIN_DIR ${CORAL_MICRO_SOURCE_DIR}/third_party/toolchain-win)
-    set(TOOLCHAIN_PREFIX "gcc-arm-none-eabi-10.3-2021.10")
+    set(TOOLCHAIN_PREFIX "")
     set(TOOLCHAIN_ARCHIVE ${TOOLCHAIN_DIR}/toolchain-win.zip)
     set(TOOLCHAIN_EXE_EXTENSION ".exe")
     set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip")
