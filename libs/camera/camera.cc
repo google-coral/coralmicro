@@ -696,8 +696,8 @@ void CameraTask::SetMotionDetectionRegisters() {
 void CameraTask::SetDefaultRegisters() {
   // Taken from Tensorflow's configuration in the person detection sample
   /* Analog settings */
-  Write(CameraRegisters::kBlcTgt, 0x00);
-  Write(CameraRegisters::kBlc2Tgt, 0x00);
+  Write(CameraRegisters::kBlcTgt, 0x06);
+  Write(CameraRegisters::kBlc2Tgt, 0x06);
   /* These registers are RESERVED in the datasheet,
    * but without them the picture is bad. */
   Write(0x3044, 0x0A);
@@ -712,10 +712,10 @@ void CameraTask::SetDefaultRegisters() {
   Write(0x3056, 0xF8);
   Write(0x3057, 0x29);
   Write(0x3058, 0x1F);
+/* bit control was 1E default is 02? */
   Write(CameraRegisters::kBitControl, 0x1E);
-
   /* Digital settings */
-  Write(CameraRegisters::kBlcCfg, 0x43);
+  Write(CameraRegisters::kBlcCfg, 0x01);
   Write(CameraRegisters::kBlcDither, 0x40);
   Write(CameraRegisters::kBlcDarkpixel, 0x32);
   Write(CameraRegisters::kDgainControl, 0x7F);
@@ -725,28 +725,29 @@ void CameraTask::SetDefaultRegisters() {
   Write(CameraRegisters::kClusterThrCold, 0x60);
   Write(CameraRegisters::kSingleThrHot, 0x90);
   Write(CameraRegisters::kSingleThrCold, 0x40);
-  /* AE settings */
-  Write(CameraRegisters::kStatisticCtrl, 0x07);
+  /* AE settings v17  + blk lvl 0x06 */
+  /* stat was 0x07 */
+  Write(CameraRegisters::kStatisticCtrl, 0x05);
   Write(CameraRegisters::kAeCtrl, 0x01);
-  Write(CameraRegisters::kAeTargetMean, 0x30);
-  Write(CameraRegisters::kAeMinMean, 0x01);
+  Write(CameraRegisters::kAeTargetMean, 0x20);
+  Write(CameraRegisters::kAeMinMean, 0x05);
   Write(CameraRegisters::kConvergeInTh, 0x03);
   Write(CameraRegisters::kConvergeOutTh, 0x05);
   Write(CameraRegisters::kMaxIntgH, 0x00);
-  Write(CameraRegisters::kMaxIntgL, 0xA0);
-  Write(CameraRegisters::kMinIntg, 0x02);
+  Write(CameraRegisters::kMaxIntgL, 0xC0);
+  Write(CameraRegisters::kMinIntg, 0x01);
   Write(CameraRegisters::kMaxAgainFull, 0x03);
   Write(CameraRegisters::kMaxAgainBin2, 0x03);
   Write(CameraRegisters::kMinAgain, 0x02);
   Write(CameraRegisters::kMaxDgain, 0x10);
-  Write(CameraRegisters::kMinDgain, 0x10);
+  Write(CameraRegisters::kMinDgain, 0x08);
   Write(CameraRegisters::kDampingFactor, 0x20);
-
   /* 60Hz flicker */
-  Write(CameraRegisters::kFsCtrl, 0x03);
+  Write(CameraRegisters::kFsCtrl, 0x00);
   Write(CameraRegisters::kFs60HzH, 0x00);
   Write(CameraRegisters::kFs60HzL, 0x85);
   Write(CameraRegisters::kFs50HzH, 0x00);
+  /*  KFs50HzL was 0xA0 revert to default no change*/
   Write(CameraRegisters::kFs50HzL, 0xA0);
 
   SetMotionDetectionRegisters();
