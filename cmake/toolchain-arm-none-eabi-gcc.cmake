@@ -44,7 +44,11 @@ else() # Linux
     set(TOOLCHAIN_PREFIX "")
     set(TOOLCHAIN_ARCHIVE ${TOOLCHAIN_DIR}/toolchain-linux.tar.bz2)
     set(TOOLCHAIN_EXE_EXTENSION "")
-    set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2")
+    elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
+        set(TOOLCHAIN_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-aarch64-linux.tar.bz2")
+    endif() 
 endif()
 
 if (NOT EXISTS ${TOOLCHAIN_DIR})
