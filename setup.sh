@@ -26,14 +26,30 @@ function error {
 }
 
 if [[ "${OS}" == "Linux" ]]; then
-  sudo apt-get update && sudo apt-get -y install \
-    make \
-    cmake \
-    libhidapi-hidraw0 \
-    libusb-1.0-0-dev \
-    libudev-dev \
-    python3-dev \
-    python3-pip
+  # 
+  if [[ -x "$(command -v apt-get)" ]]; then
+    sudo apt-get update && sudo apt-get -y install \
+      make \
+      cmake \
+      libhidapi-hidraw0 \
+      libusb-1.0-0-dev \
+      libudev-dev \
+      python3-dev \
+      python3-pip
+      
+  elif [[ -x "$(command -v yum)" ]]; then
+    sudo yum install \
+      make \
+      cmake \
+      python3-hidapi \
+      libusb1-devel \
+      systemd-devel \
+      python3-devel \
+      python3-pip
+   else
+     echo "Error: No supported package manager found"
+     exit 1
+   fi
 
   if [[ -x "$(command -v udevadm)" ]]; then
     sudo cp "${SCRIPT_DIR}/scripts/99-coral-micro.rules" /etc/udev/rules.d/

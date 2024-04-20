@@ -1,5 +1,5 @@
 hexformat==0.2
-hidapi==0.10.1
+hidapi==0.14.0
 progress==1.5
 pyserial==3.5
 pyusb==1.2.0
