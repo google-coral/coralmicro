@@ -55,7 +55,7 @@ jobs:
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           submodules: recursive
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           path: ${{ github.workspace }}/artifacts
 
@@ -93,7 +93,7 @@ jobs:
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           submodules: recursive
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           path: ${{ github.workspace }}/artifacts
 
@@ -136,7 +136,7 @@ jobs:
           git config --system core.longpaths true # Circumvent msys path length limits.
           git submodule update --init --recursive
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           path: ${{ github.workspace }}/artifacts
 
