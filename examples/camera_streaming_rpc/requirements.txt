@@ -1,5 +1,5 @@
 eel==0.14.0
-requests==2.27.1
+requests==2.33.0
 opencv-python
 Pillow==9.1.1
 numpy==1.21.5
