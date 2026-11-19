@@ -132,6 +132,15 @@ void GetFrame(struct jsonrpc_request* request) {
 
   int width = rpc_width_valid ? rpc_width : coralmicro::CameraTask::kWidth;
   int height = rpc_height_valid ? rpc_height : coralmicro::CameraTask::kHeight;
+  constexpr int kMaxImageDimension = 1000;
+  if (width <= 0 || width > kMaxImageDimension) {
+    coralmicro::JsonRpcReturnBadParam(request, "width out of range", "width");
+    return;
+  }
+  if (height <= 0 || height > kMaxImageDimension) {
+    coralmicro::JsonRpcReturnBadParam(request, "height out of range", "height");
+    return;
+  }
   auto format = coralmicro::CameraFormat::kRgb;
 
   if (rpc_format_valid) {
@@ -147,7 +156,8 @@ void GetFrame(struct jsonrpc_request* request) {
     }
   }
 
-  camera_rgb.resize(width * height * coralmicro::CameraFormatBpp(format));
+  camera_rgb.resize(static_cast<size_t>(width) * height *
+                    coralmicro::CameraFormatBpp(format));
 
   coralmicro::CameraTask::GetSingleton()->SetPower(true);
   auto pattern = coralmicro::CameraTestPattern::kColorBar;
