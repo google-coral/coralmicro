@@ -29,6 +29,7 @@
 #include "third_party/nxp/rt1176-sdk/devices/MIMXRT1176/drivers/cm4/fsl_cache.h"
 #endif
 
+#include <climits>
 #include <cstring>
 #include <memory>
 
@@ -482,6 +483,14 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
     printf("Camera is in trigger mode but was never triggered\r\n");
     return false;
   }
+  for (const CameraFrameFormat& fmt : fmts) {
+    if (fmt.width <= 0 || fmt.height <= 0 || fmt.buffer == nullptr ||
+        static_cast<uint64_t>(fmt.width) * fmt.height *
+                CameraFormatBpp(CameraFormat::kRgb) >
+            INT_MAX) {
+      return false;
+    }
+  }
 
   bool ret = true;
   uint8_t* raw = nullptr;
@@ -526,7 +535,8 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
             auto buffer_rgb = std::make_unique<uint8_t[]>(
                 CameraFormatBpp(CameraFormat::kRgb) * kWidth * kHeight);
             auto buffer_rgb_scaled = std::make_unique<uint8_t[]>(
-                CameraFormatBpp(CameraFormat::kRgb) * fmt.width * fmt.height);
+                static_cast<size_t>(CameraFormatBpp(CameraFormat::kRgb)) *
+                fmt.width * fmt.height);
             BayerToRgb(raw, buffer_rgb.get(), kWidth, kHeight, fmt.filter,
                        fmt.rotation);
             ResizeNearestNeighbor(
