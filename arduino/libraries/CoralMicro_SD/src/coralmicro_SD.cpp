@@ -16,6 +16,8 @@
 
 #include "coralmicro_SD.h"
 
+#include <cstring>
+
 namespace coralmicro {
 namespace arduino {
 namespace SDLib {
@@ -27,6 +29,9 @@ bool SDClass::begin(uint8_t csPin) {
 }
 
 File SDClass::open(const char *filename, uint8_t mode) {
+  if (filename == nullptr || std::strlen(filename) > LFS_NAME_MAX) {
+    return SDLib::File();
+  }
   std::shared_ptr<lfs_file_t> file_handle = std::make_shared<lfs_file_t>();
   std::shared_ptr<lfs_dir_t> dir_handle = std::make_shared<lfs_dir_t>();
 

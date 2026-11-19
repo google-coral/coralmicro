@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <cstring>
+
 #include "coralmicro_SD.h"
 
 namespace coralmicro {
@@ -21,16 +24,29 @@ namespace arduino {
 namespace SDLib {
 using coralmicro::Lfs;
 
+namespace {
+void CopyName(char* dst, size_t dst_size, const char* src) {
+  if (dst_size == 0) {
+    return;
+  }
+  if (src == nullptr) {
+    dst[0] = '\0';
+    return;
+  }
+  const size_t len = std::min(std::strlen(src), dst_size - 1);
+  std::memcpy(dst, src, len);
+  dst[len] = '\0';
+}
+}  // namespace
+
 File::File(std::shared_ptr<lfs_file_t> handle, const char *name, bool writable)
     : file_handle_(handle), open_(true), is_writable_(writable) {
-  strncpy(name_, name, strlen(name));
-  name_[strlen(name)] = 0;
+  CopyName(name_, sizeof(name_), name);
 }
 
 File::File(std::shared_ptr<lfs_dir_t> handle, const char *name)
     : dir_handle_(handle), open_(true), is_dir_(true) {
-  strncpy(name_, name, strlen(name));
-  name_[strlen(name)] = 0;
+  CopyName(name_, sizeof(name_), name);
 }
 
 File::File() { name_[0] = 0; }
