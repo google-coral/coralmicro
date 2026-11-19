@@ -40,16 +40,27 @@
 // [start-snippet:camera-trigger]
 namespace coralmicro {
 namespace {
+constexpr int kMaxImageDimension = 1000;
+
 void GetCapturedImage(struct jsonrpc_request* request) {
   int width;
   int height;
 
   // The width and height are specified by the RPC client.
   if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
+  if (width <= 0 || width > kMaxImageDimension) {
+    JsonRpcReturnBadParam(request, "width out of range", "width");
+    return;
+  }
   if (!JsonRpcGetIntegerParam(request, "height", &height)) return;
+  if (height <= 0 || height > kMaxImageDimension) {
+    JsonRpcReturnBadParam(request, "height out of range", "height");
+    return;
+  }
 
   auto format = CameraFormat::kRgb;
-  std::vector<uint8_t> image(width * height * CameraFormatBpp(format));
+  std::vector<uint8_t> image(static_cast<size_t>(width) * height *
+                             CameraFormatBpp(format));
   CameraFrameFormat fmt{format,
                         CameraFilterMethod::kBilinear,
                         CameraRotation::k270,

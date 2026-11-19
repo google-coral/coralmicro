@@ -132,6 +132,12 @@ int FramebufferPtrToIndex(const uint8_t* framebuffer_ptr) {
 void ResizeNearestNeighbor(const uint8_t* src, int src_w, int src_h,
                            uint8_t* dst, int dst_w, int dst_h, int comps,
                            bool preserve_aspect) {
+  if (src == nullptr || dst == nullptr || src_w <= 0 || src_h <= 0 ||
+      dst_w <= 0 || dst_h <= 0 || comps <= 0 || src_w > INT_MAX / comps ||
+      src_h > INT_MAX / (src_w * comps) || dst_w > INT_MAX / comps ||
+      dst_h > INT_MAX / (dst_w * comps)) {
+    return;
+  }
   int src_p = src_w * comps;
   int dst_p = dst_w * comps;
   float ratio_src = (float)src_w / src_h;
@@ -483,11 +489,11 @@ bool CameraTask::GetFrame(const std::vector<CameraFrameFormat>& fmts) {
     printf("Camera is in trigger mode but was never triggered\r\n");
     return false;
   }
+  const int max_bpp = CameraFormatBpp(CameraFormat::kRgb);
   for (const CameraFrameFormat& fmt : fmts) {
     if (fmt.width <= 0 || fmt.height <= 0 || fmt.buffer == nullptr ||
-        static_cast<uint64_t>(fmt.width) * fmt.height *
-                CameraFormatBpp(CameraFormat::kRgb) >
-            INT_MAX) {
+        fmt.width > INT_MAX / max_bpp ||
+        fmt.height > INT_MAX / (fmt.width * max_bpp)) {
       return false;
     }
   }
