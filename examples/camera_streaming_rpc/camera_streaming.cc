@@ -38,6 +38,8 @@
 namespace coralmicro {
 namespace {
 
+constexpr int kMaxImageDimension = 1000;
+
 std::optional<CameraFormat> CheckCameraFormat(const std::string& format) {
   if (format == "RGB") return CameraFormat::kRgb;
 
@@ -75,9 +77,17 @@ std::optional<CameraRotation> CheckCameraRotation(int rotation) {
 void GetImageFromCamera(struct jsonrpc_request* request) {
   int width;
   if (!JsonRpcGetIntegerParam(request, "width", &width)) return;
+  if (width <= 0 || width > kMaxImageDimension) {
+    JsonRpcReturnBadParam(request, "width out of range", "width");
+    return;
+  }
 
   int height;
   if (!JsonRpcGetIntegerParam(request, "height", &height)) return;
+  if (height <= 0 || height > kMaxImageDimension) {
+    JsonRpcReturnBadParam(request, "height out of range", "height");
+    return;
+  }
 
   std::string format_rpc;
   if (!JsonRpcGetStringParam(request, "format", &format_rpc)) return;
@@ -110,7 +120,8 @@ void GetImageFromCamera(struct jsonrpc_request* request) {
   if (!JsonRpcGetBooleanParam(request, "auto_white_balance", &awb)) return;
 
   //! [camera-stream] Doxygen snippet for camera.h
-  std::vector<uint8_t> image(width * height * CameraFormatBpp(*format));
+  std::vector<uint8_t> image(static_cast<size_t>(width) * height *
+                             CameraFormatBpp(*format));
   CameraFrameFormat fmt{*format, *filter, *rotation,    width,
                         height,  false,   image.data(), awb};
   auto ret = CameraTask::GetSingleton()->GetFrame({fmt});
